@@ -1,9 +1,12 @@
-import TasacionForm from "@/ui/components/TasacionForm";
+import Hero from "@/ui/sections/Hero";
+import Features from "@/ui/sections/Features";
 
-export default function Page() {
-  return (
-    <main className="min-h-screen bg-white flex items-center justify-center p-6">
-      <TasacionForm />
-    </main>
-  );
+
+export default function LandingPage() {
+return (
+<main className="bg-white min-h-screen flex flex-col gap-20">
+<Hero />
+<Features />
+</main>
+);
 }
