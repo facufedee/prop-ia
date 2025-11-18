@@ -1,4 +1,4 @@
-import { Calculator, PlusCircle, Building2 } from "lucide-react";
+import { Calculator, PlusCircle, Building2, ChartBarBigIcon } from "lucide-react";
 import Link from "next/link";
 
 
@@ -7,6 +7,7 @@ const actions = [
 { icon: <Calculator className="w-5 h-5" />, label: "Nueva Tasación", href: "/dashboard/tasacion" },
 { icon: <PlusCircle className="w-5 h-5" />, label: "Cargar Propiedad", href: "#" },
 { icon: <Building2 className="w-5 h-5" />, label: "Ver Propiedades", href: "/dashboard/propiedades" },
+{ icon: <ChartBarBigIcon className="w-5 h-5" />, label: "Chat PropIA", href: "/dashboard/chat" },
 ];
 
 

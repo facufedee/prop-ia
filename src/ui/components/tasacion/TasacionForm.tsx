@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { PropiedadData } from "@/domain/entities/PropiedadData";
-import { CalcularTasacionUseCase } from "@/application/usecases/CalcularTasacionUseCase";
+import { CalcularTasacionUseCase } from "@/app/usecases/CalcularTasacionUseCase";
 import { TasacionRepositoryMock } from "@/infrastructure/repositories/TasacionRepositoryMock";
 
 import { Home, Ruler, Building2, Clock } from "lucide-react";

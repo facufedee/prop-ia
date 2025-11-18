@@ -1,15 +1,14 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
+import { Inter } from "next/font/google";
 import "./globals.css";
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
-  subsets: ["latin"],
-});
+import Navbar from "@/ui/components/layout/navbar/Navbar";
+import { AuthProvider } from "@/ui/context/AuthContext";
 
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
+const inter = Inter({
   subsets: ["latin"],
+  variable: "--font-inter",
+  display: "swap",
 });
 
 export const metadata: Metadata = {
@@ -25,9 +24,17 @@ export default function RootLayout({
   return (
     <html lang="es">
       <body
-        className={`min-h-screen bg-gray-50 text-gray-900 antialiased ${geistSans.variable} ${geistMono.variable}`}
+        className={`
+          min-h-screen 
+          bg-white text-black
+          antialiased 
+          ${inter.variable}
+        `}
       >
-        {children}
+        <AuthProvider>
+          <Navbar />
+          <main className="pt-24">{children}</main>
+        </AuthProvider>
       </body>
     </html>
   );
