@@ -9,6 +9,7 @@
     "lint": "eslint"
   },
   "dependencies": {
+    "@tensorflow/tfjs": "^4.22.0",
     "firebase": "^12.6.0",
     "js-cookie": "^3.0.5",
     "lucide-react": "^0.554.0",
