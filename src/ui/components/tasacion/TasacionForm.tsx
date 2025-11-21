@@ -215,6 +215,7 @@ export default function TasacionForm() {
     const [result, setResult] = useState<number | null>(null);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
+    const [useMLModel, setUseMLModel] = useState(false);
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
         const { name, value } = e.target;
@@ -300,15 +301,18 @@ export default function TasacionForm() {
                 bathrooms: form.bathrooms ? Number(form.bathrooms) : null,
                 surface_total: form.area_total ? Number(form.area_total) : null,
                 surface_covered: form.area_covered ? Number(form.area_covered) : null,
+                floor: form.floor ? Number(form.floor) : null,
                 lat: null,
                 lon: null,
                 property_type: form.property_type,
                 location: form.barrio || `${form.ciudad}, ${form.provincia}`,
                 description: selectedFeatures.join(', '),
-                expenses: form.expenses ? Number(form.expenses) : null
+                expenses: form.expenses ? Number(form.expenses) : null,
+                construction_year: form.construction_year ? Number(form.construction_year) : null
             };
 
-            const response = await fetch('/api/predict', {
+            const url = useMLModel ? '/api/predict?useML=true' : '/api/predict';
+            const response = await fetch(url, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(apiData)
@@ -387,13 +391,24 @@ export default function TasacionForm() {
                     <Home className="w-7 h-7 text-black" />
                     Tasador de Inmuebles
                 </h2>
-                <button
-                    type="button"
-                    onClick={handleFillExample}
-                    className="text-sm bg-gray-100 text-gray-800 px-3 py-1 rounded-lg hover:bg-gray-200 transition"
-                >
-                    Usar Ejemplo
-                </button>
+                <div className="flex items-center gap-4">
+                    <label className="flex items-center space-x-2 text-sm">
+                        <input
+                            type="checkbox"
+                            checked={useMLModel}
+                            onChange={(e) => setUseMLModel(e.target.checked)}
+                            className="rounded border-gray-300 text-black focus:ring-black"
+                        />
+                        <span className="text-gray-700">Usar Modelo IA</span>
+                    </label>
+                    <button
+                        type="button"
+                        onClick={handleFillExample}
+                        className="text-sm bg-gray-100 text-gray-800 px-3 py-1 rounded-lg hover:bg-gray-200 transition"
+                    >
+                        Usar Ejemplo
+                    </button>
+                </div>
             </div>
 
             <form onSubmit={handleSubmit}>
@@ -436,7 +451,7 @@ export default function TasacionForm() {
                     disabled={loading || !isFormValid()}
                     className="w-full mt-8 bg-black text-white py-3 rounded-xl hover:bg-gray-800 transition font-medium disabled:bg-gray-400 disabled:cursor-not-allowed"
                 >
-                    {loading ? 'Calculando...' : !isFormValid() ? 'Complete todos los campos requeridos' : 'Calcular Tasación'}
+                    {loading ? 'Calculando...' : !isFormValid() ? 'Complete todos los campos requeridos' : `Calcular Tasación${useMLModel ? ' (IA)' : ' (Rápido)'}`}
                 </button>
             </form>
 

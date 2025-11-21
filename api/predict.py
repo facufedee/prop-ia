@@ -24,8 +24,10 @@ def handler(event, context):
         data = {
             'rooms': body.get('rooms'),
             'bathrooms': body.get('bathrooms'),
+            'bedrooms': body.get('bedrooms'),
             'surface_total': body.get('surface_total'),
             'surface_covered': body.get('surface_covered'),
+            'floor': body.get('floor'),
             'lat': body.get('lat'),
             'lon': body.get('lon'),
             'property_type': body.get('property_type'),
@@ -42,7 +44,7 @@ def handler(event, context):
         df = pd.DataFrame([data])
 
         # Separate features
-        numerical = df[['rooms', 'bathrooms', 'surface_total', 'surface_covered', 'lat', 'lon']]
+        numerical = df[['rooms', 'bathrooms', 'bedrooms', 'surface_total', 'surface_covered', 'floor', 'lat', 'lon']]
         categorical = df[['property_type', 'location']]
         text = df['description']
 
