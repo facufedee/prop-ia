@@ -39,7 +39,7 @@ export default function TasacionForm() {
     <div className="w-full max-w-xl bg-white p-8 rounded-2xl shadow-lg border border-gray-200">
       <h2 className="text-3xl font-semibold mb-8 text-gray-900 flex items-center gap-3">
         <Home className="w-7 h-7 text-black" />
-        Tasador de Inmuebles
+        Tasador de Inmuebles Nahu
       </h2>
 
       <div className="grid gap-5">
