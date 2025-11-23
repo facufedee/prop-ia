@@ -84,43 +84,66 @@ export async function POST(request: NextRequest) {
 
 // Function to use Python ML model locally
 async function usePythonModel(body: any): Promise<NextResponse> {
-  try {
-    // For now, return a mock response while debugging Python execution
-    console.log('usePythonModel called with:', body);
+  return new Promise((resolve, reject) => {
+    const pythonPath = process.platform === 'win32' ? 'python' : 'python3';
+    const apiDir = path.join(process.cwd(), 'api');
 
-    // Create a simple mock prediction based on the input data
-    const { rooms, bathrooms, bedrooms, surface_total, property_type, location } = body;
+    const scriptPath = path.join(apiDir, 'run_predict.py');
+    const inputData = JSON.stringify(body);
 
-    // Enhanced mock prediction that mimics ML behavior
-    let prediction = (surface_total || 100) * 1200 +  // Base price per m²
-                     (rooms || 3) * 25000 +           // Price per room
-                     (bathrooms || 2) * 20000 +       // Price per bathroom
-                     (bedrooms || 2) * 30000;         // Price per bedroom
-
-    // Property type multipliers
-    if (property_type === 'Casa') prediction *= 1.3;
-    else if (property_type === 'PH') prediction *= 1.2;
-    else if (property_type === 'Departamento') prediction *= 1.0;
-
-    // Location multipliers (simplified)
-    if (location && location.toLowerCase().includes('capital federal')) {
-      prediction *= 1.4;
-    } else if (location && location.toLowerCase().includes('buenos aires')) {
-      prediction *= 1.2;
-    }
-
-    // Add some randomness to simulate ML prediction variation
-    prediction *= (0.9 + Math.random() * 0.2);
-
-    return NextResponse.json({
-      prediction: Math.round(prediction),
-      note: 'Using enhanced mock prediction (Python integration pending)'
+    const pythonProcess = spawn(pythonPath, [scriptPath, inputData], {
+      cwd: apiDir,
+      stdio: ['pipe', 'pipe', 'pipe']
     });
 
-  } catch (error) {
-    console.error('Error in usePythonModel:', error);
-    return NextResponse.json({
-      error: 'Failed to process ML prediction'
-    }, { status: 500 });
-  }
+    let stdout = '';
+    let stderr = '';
+
+    pythonProcess.stdout.on('data', (data) => {
+      stdout += data.toString();
+    });
+
+    pythonProcess.stderr.on('data', (data) => {
+      stderr += data.toString();
+    });
+
+    pythonProcess.on('close', (code) => {
+      console.log('Python process stdout:', stdout); // Always log stdout
+      console.error('Python process stderr:', stderr); // Always log stderr
+
+      if (code !== 0) {
+        resolve(NextResponse.json({
+          error: `Python execution failed with code ${code}. Stderr: ${stderr || 'No stderr output'}. Stdout: ${stdout || 'No stdout output'}`
+        }, { status: 500 }));
+        return;
+      }
+
+      try {
+        const result = JSON.parse(stdout.trim());
+
+        if (result.statusCode === 200) {
+          const body = JSON.parse(result.body);
+          resolve(NextResponse.json(body));
+        } else {
+          const errorBody = JSON.parse(result.body);
+          resolve(NextResponse.json({
+            error: errorBody.error || 'Python model error',
+            traceback: errorBody.traceback || 'No traceback available'
+          }, { status: result.statusCode }));
+        }
+      } catch (parseError) {
+        console.error('Parse error:', parseError, 'Raw output:', stdout);
+        resolve(NextResponse.json({
+          error: 'Failed to parse Python response. Raw output: ' + stdout
+        }, { status: 500 }));
+      }
+    });
+
+    pythonProcess.on('error', (error) => {
+      console.error('Failed to start Python process:', error);
+      resolve(NextResponse.json({
+        error: `Python not available or failed to start: ${error.message}. Install Python and required packages.`
+      }, { status: 500 }));
+    });
+  });
 }
