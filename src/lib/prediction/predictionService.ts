@@ -37,7 +37,7 @@ class PredictionService {
         }
     }
 
-    async predict(data: PropertyData): Promise<number> {
+    async predict(data: PropertyData, options: { skipConfig?: boolean } = {}): Promise<number> {
         if (!this.model) {
             await this.loadModel();
         }
@@ -46,48 +46,73 @@ class PredictionService {
             throw new Error('Model could not be loaded');
         }
 
-        return tf.tidy(() => {
+        // Fetch configuration first (async) unless skipped
+        let config: any = {};
+        if (!options.skipConfig) {
+            try {
+                const response = await fetch('/api/config/tasacion');
+                if (response.ok) {
+                    config = await response.json();
+                }
+            } catch (e) {
+                console.error("Error loading tasacion adjustments:", e);
+            }
+        }
+
+        // Run model inference (synchronous inside tidy)
+        let price = tf.tidy(() => {
             try {
                 const inputTensor = this.preprocessor.preprocess(data);
-
-                // For GraphModel, we use execute() or predict() but sometimes execute() is safer if signature is complex.
-                // However, predict() usually works for single input/output.
-                // The model signature shows input name 'dense_input' and output 'Identity'.
-                // tf.GraphModel.predict() can take a Tensor.
-
                 const predictionTensor = this.model!.predict(inputTensor) as tf.Tensor;
                 const predictionValue = predictionTensor.dataSync()[0];
                 console.log('Raw model output (log scale):', predictionValue);
 
-                // Inverse transform of target (log1p -> expm1)
-                // The model predicts log(price_in_thousands).
-                // We multiply by 1000 to get USD.
                 const priceInThousands = Math.expm1(predictionValue);
-                let price = priceInThousands * 1000;
-
-                // Manual Logic Adjustment:
-                // The model has a negative correlation for bathrooms, so we neutralized it in the preprocessor (fixed at 2 baths).
-                // Now we apply a manual correction to restore the expected logic (More Baths = Higher Price).
-                // Baseline is 2 bathrooms.
-                // Each additional bathroom adds ~3% value.
-                // Each missing bathroom removes ~5% value.
-                if (data.bathrooms !== null) {
-                    const diff = data.bathrooms - 2;
-                    let adjustment = 0;
-                    if (diff > 0) {
-                        adjustment = diff * 0.03; // +3% per extra bath
-                    } else {
-                        adjustment = diff * 0.05; // -5% per missing bath
-                    }
-                    price = price * (1 + adjustment);
-                }
-
-                return price;
+                return Math.max(0, priceInThousands * 1000);
             } catch (error) {
                 console.error('Prediction error:', error);
                 throw error;
             }
         });
+
+        // Apply Manual Logic Adjustment (Bathrooms)
+        if (data.bathrooms !== null) {
+            const diff = data.bathrooms - 2;
+            let adjustment = 0;
+            if (diff > 0) {
+                adjustment = diff * 0.03; // +3% per extra bath
+            } else {
+                adjustment = diff * 0.05; // -5% per missing bath
+            }
+            price = price * (1 + adjustment);
+        }
+
+        // Apply User Configuration Adjustments (from Server API)
+        if (!options.skipConfig && config && Object.keys(config).length > 0) {
+            let totalAdjustment = 0;
+
+            // Apply adjustments for boolean features if they are present
+            const booleanFeatures = ["pileta", "sum", "seguridad", "cochera", "balcon", "terraza", "jardin", "gimnasio", "laundry", "calefaccion"];
+            const featureList = data.all_features.toLowerCase().split(',').map(f => f.trim());
+
+            booleanFeatures.forEach(feature => {
+                if (featureList.includes(feature) && config[feature]) {
+                    totalAdjustment += config[feature];
+                }
+            });
+
+            // Apply adjustments for numeric fields (Always apply if configured)
+            const numericFeatures = ["area_total", "area_covered", "rooms", "bedrooms", "bathrooms", "floor", "construction_year", "expenses"];
+            numericFeatures.forEach(field => {
+                if (config[field]) {
+                    totalAdjustment += config[field];
+                }
+            });
+
+            price = price * (1 + (totalAdjustment / 100));
+        }
+
+        return price;
     }
 }
 

@@ -292,17 +292,24 @@ export default function TasacionForm() {
         setResult(null); // Reset result when loading example
     };
 
+    const [config, setConfig] = useState<any>(null);
+
+    useEffect(() => {
+        // Fetch config to apply adjustments
+        fetch('/api/config/tasacion')
+            .then(res => res.json())
+            .then(data => setConfig(data))
+            .catch(err => console.error("Error loading config:", err));
+    }, []);
+
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
-
         setLoading(true);
-        setResult(null);
         setError(null);
 
         try {
             if (useMLModel) {
                 // Client-side prediction using TensorFlow.js
-                // Dynamically import to avoid server-side issues with TF.js if any
                 const { predictionService } = await import('@/lib/prediction/predictionService');
 
                 const predictionData = {
@@ -310,6 +317,10 @@ export default function TasacionForm() {
                     all_features: selectedFeatures.join(', ')
                 };
 
+                // Predict using the service (which handles config fetching internally if not skipped, 
+                // but we already fetched it to be safe, though predictionService fetches it again. 
+                // To be efficient we could pass it, but the service interface doesn't support passing config object yet.
+                // It's fine, it will fetch again or we can rely on its internal fetch.)
                 const price = await predictionService.predict(predictionData);
                 setResult(price);
             } else {
@@ -450,9 +461,9 @@ export default function TasacionForm() {
                     <label className="block text-sm font-medium text-gray-700 mb-3">
                         Características Adicionales
                     </label>
-                    <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+                    <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
                         {commonFeatures.map(feature => (
-                            <label key={feature} className="flex items-center space-x-2">
+                            <label key={feature} className="flex items-center space-x-2 p-2 border rounded-lg cursor-pointer hover:bg-gray-50 transition">
                                 <input
                                     type="checkbox"
                                     checked={selectedFeatures.includes(feature)}
