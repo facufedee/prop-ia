@@ -35,9 +35,9 @@ export default function Navbar() {
 
         {/* Desktop menu */}
         <div className="hidden md:flex items-center gap-8 text-sm text-black">
-          <Link href="#como-funciona" className="hover:text-gray-700">Cómo funciona</Link>
-          <Link href="#pricing" className="hover:text-gray-700">Precios</Link>
-          <Link href="#faq" className="hover:text-gray-700">Preguntas</Link>
+          <Link href="/#como-funciona" className="hover:text-gray-700">Cómo funciona</Link>
+          <Link href="/#pricing" className="hover:text-gray-700">Precios</Link>
+          <Link href="/#faq" className="hover:text-gray-700">Preguntas</Link>
 
           {/* Mega menu */}
           <div className="relative">
@@ -110,9 +110,9 @@ export default function Navbar() {
         <div className="md:hidden mt-3 flex flex-col gap-4 
         bg-white/95 backdrop-blur-xl border-t border-white/20 py-4 px-2 text-sm">
 
-          <Link href="#como-funciona" className="px-2 py-1 hover:text-black">Cómo funciona</Link>
-          <Link href="#pricing" className="px-2 py-1 hover:text-black">Precios</Link>
-          <Link href="#faq" className="px-2 py-1 hover:text-black">Preguntas</Link>
+          <Link href="/#como-funciona" className="px-2 py-1 hover:text-black">Cómo funciona</Link>
+          <Link href="/#pricing" className="px-2 py-1 hover:text-black">Precios</Link>
+          <Link href="/#faq" className="px-2 py-1 hover:text-black">Preguntas</Link>
 
           <div className="border-t pt-3">
             {!user ? (

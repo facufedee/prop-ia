@@ -62,13 +62,34 @@ class PredictionService {
         // Run model inference (synchronous inside tidy)
         let price = tf.tidy(() => {
             try {
-                const inputTensor = this.preprocessor.preprocess(data);
+                // CLONE data to avoid mutating original
+                const inputData = { ...data };
+
+                // FIX: Map broken property types to 'Departamento' which usually has better data
+                // and apply a correction factor to approximate real market value relative to Apartment.
+                // PH and Casa weights in the model seem to be broken/outliers (e.g. PH predicting $30M).
+                let typeAdjustment = 1.0;
+
+                if (inputData.property_type === 'PH') {
+                    inputData.property_type = 'Departamento';
+                    typeAdjustment = 0.95; // PHs slightly less than Apts (no amenities usually)
+                } else if (inputData.property_type === 'Casa') {
+                    inputData.property_type = 'Departamento';
+                    typeAdjustment = 1.15; // Houses slightly more expensive/exclusive
+                }
+
+                const inputTensor = this.preprocessor.preprocess(inputData);
                 const predictionTensor = this.model!.predict(inputTensor) as tf.Tensor;
                 const predictionValue = predictionTensor.dataSync()[0];
                 console.log('Raw model output (log scale):', predictionValue);
 
                 const priceInThousands = Math.expm1(predictionValue);
-                return Math.max(0, priceInThousands * 1000);
+                let calculatedPrice = Math.max(0, priceInThousands * 1000);
+
+                // Apply the type adjustment
+                calculatedPrice = calculatedPrice * typeAdjustment;
+
+                return calculatedPrice;
             } catch (error) {
                 console.error('Prediction error:', error);
                 throw error;
