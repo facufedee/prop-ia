@@ -86,35 +86,13 @@ export async function POST(request: NextRequest) {
 async function usePythonModel(body: any): Promise<NextResponse> {
   return new Promise((resolve, reject) => {
     const pythonPath = process.platform === 'win32' ? 'python' : 'python3';
-    const scriptPath = path.join(process.cwd(), 'api', 'predict.py');
+    const apiDir = path.join(process.cwd(), 'api');
 
-    // Create a temporary Python script that calls the handler
-    const tempScript = `
-import json
-import sys
-import os
-sys.path.append(os.path.dirname('${scriptPath}'))
+    const scriptPath = path.join(apiDir, 'run_predict.py');
+    const inputData = JSON.stringify(body);
 
-# Import the handler function
-from predict import handler
-
-# Mock event for local execution
-event = {
-    'body': json.dumps(${JSON.stringify(body)})
-}
-
-# Mock context
-context = {}
-
-# Call handler
-result = handler(event, context)
-
-# Print result as JSON
-print(json.dumps(result))
-`;
-
-    const pythonProcess = spawn(pythonPath, ['-c', tempScript], {
-      cwd: path.join(process.cwd(), 'api'),
+    const pythonProcess = spawn(pythonPath, [scriptPath, inputData], {
+      cwd: apiDir,
       stdio: ['pipe', 'pipe', 'pipe']
     });
 
@@ -130,10 +108,12 @@ print(json.dumps(result))
     });
 
     pythonProcess.on('close', (code) => {
+      console.log('Python process stdout:', stdout); // Always log stdout
+      console.error('Python process stderr:', stderr); // Always log stderr
+
       if (code !== 0) {
-        console.error('Python process error:', stderr);
         resolve(NextResponse.json({
-          error: `Python execution failed: ${stderr}`
+          error: `Python execution failed with code ${code}. Stderr: ${stderr || 'No stderr output'}. Stdout: ${stdout || 'No stdout output'}`
         }, { status: 500 }));
         return;
       }
@@ -147,13 +127,14 @@ print(json.dumps(result))
         } else {
           const errorBody = JSON.parse(result.body);
           resolve(NextResponse.json({
-            error: errorBody.error || 'Python model error'
+            error: errorBody.error || 'Python model error',
+            traceback: errorBody.traceback || 'No traceback available'
           }, { status: result.statusCode }));
         }
       } catch (parseError) {
         console.error('Parse error:', parseError, 'Raw output:', stdout);
         resolve(NextResponse.json({
-          error: 'Failed to parse Python response'
+          error: 'Failed to parse Python response. Raw output: ' + stdout
         }, { status: 500 }));
       }
     });
@@ -161,7 +142,7 @@ print(json.dumps(result))
     pythonProcess.on('error', (error) => {
       console.error('Failed to start Python process:', error);
       resolve(NextResponse.json({
-        error: 'Python not available. Install Python and required packages.'
+        error: `Python not available or failed to start: ${error.message}. Install Python and required packages.`
       }, { status: 500 }));
     });
   });

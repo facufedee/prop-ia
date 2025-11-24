@@ -219,6 +219,10 @@ export default function TasacionForm() {
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
         const { name, value } = e.target;
+        // Prevent negative values for numeric inputs
+        if (e.target.type === 'number' && value !== '' && Number(value) < 0) {
+            return;
+        }
         setForm((prev: PropertyData) => ({ ...prev, [name]: value }));
     };
 
@@ -288,46 +292,71 @@ export default function TasacionForm() {
         setResult(null); // Reset result when loading example
     };
 
+    const [config, setConfig] = useState<any>(null);
+
+    useEffect(() => {
+        // Fetch config to apply adjustments
+        fetch('/api/config/tasacion')
+            .then(res => res.json())
+            .then(data => setConfig(data))
+            .catch(err => console.error("Error loading config:", err));
+    }, []);
+
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
-
         setLoading(true);
-        setResult(null);
         setError(null);
 
         try {
-            const apiData = {
-                rooms: form.rooms ? Number(form.rooms) : null,
-                bathrooms: form.bathrooms ? Number(form.bathrooms) : null,
-                surface_total: form.area_total ? Number(form.area_total) : null,
-                surface_covered: form.area_covered ? Number(form.area_covered) : null,
-                floor: form.floor ? Number(form.floor) : null,
-                lat: null,
-                lon: null,
-                property_type: form.property_type,
-                location: form.barrio || `${form.ciudad}, ${form.provincia}`,
-                description: selectedFeatures.join(', '),
-                expenses: form.expenses ? Number(form.expenses) : null,
-                construction_year: form.construction_year ? Number(form.construction_year) : null
-            };
+            if (useMLModel) {
+                // Client-side prediction using TensorFlow.js
+                const { predictionService } = await import('@/lib/prediction/predictionService');
 
-            const url = useMLModel ? '/api/predict?useML=true' : '/api/predict';
-            const response = await fetch(url, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(apiData)
-            });
+                const predictionData = {
+                    ...form,
+                    all_features: selectedFeatures.join(', ')
+                };
 
-            if (!response.ok) {
-                throw new Error(`Error en la API: ${response.status}`);
+                // Predict using the service (which handles config fetching internally if not skipped, 
+                // but we already fetched it to be safe, though predictionService fetches it again. 
+                // To be efficient we could pass it, but the service interface doesn't support passing config object yet.
+                // It's fine, it will fetch again or we can rely on its internal fetch.)
+                const price = await predictionService.predict(predictionData);
+                setResult(price);
+            } else {
+                // Legacy/Simple API prediction
+                const apiData = {
+                    rooms: form.rooms ? Number(form.rooms) : null,
+                    bathrooms: form.bathrooms ? Number(form.bathrooms) : null,
+                    surface_total: form.area_total ? Number(form.area_total) : null,
+                    surface_covered: form.area_covered ? Number(form.area_covered) : null,
+                    floor: form.floor ? Number(form.floor) : null,
+                    lat: null,
+                    lon: null,
+                    property_type: form.property_type,
+                    location: form.barrio || `${form.ciudad}, ${form.provincia}`,
+                    description: selectedFeatures.join(', '),
+                    expenses: form.expenses ? Number(form.expenses) : null,
+                    construction_year: form.construction_year ? Number(form.construction_year) : null
+                };
+
+                const response = await fetch('/api/predict', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(apiData)
+                });
+
+                if (!response.ok) {
+                    throw new Error(`Error en la API: ${response.status}`);
+                }
+
+                const data = await response.json();
+                if (data.error) {
+                    throw new Error(data.error);
+                }
+
+                setResult(data.prediction);
             }
-
-            const data = await response.json();
-            if (data.error) {
-                throw new Error(data.error);
-            }
-
-            setResult(data.prediction);
 
         } catch (err: any) {
             setError(`Error en la predicción: ${err.message}`);
@@ -336,15 +365,16 @@ export default function TasacionForm() {
             setLoading(false);
         }
     };
-    
+
     const renderInputField = (name: keyof PropertyData, label: string, icon: React.ReactNode, type = "text", placeholder = " ") => (
         <div className="relative">
-              <span className="absolute inset-y-0 left-0 flex items-center pl-3 text-gray-500 pointer-events-none">
+            <span className="absolute inset-y-0 left-0 flex items-center pl-3 text-gray-500 pointer-events-none">
                 {icon}
             </span>
             <input
                 name={name as string}
                 type={type}
+                min={type === 'number' ? "0" : undefined}
                 placeholder={label}
                 value={(form as any)[name] || ''}
                 onChange={handleChange}
@@ -417,23 +447,23 @@ export default function TasacionForm() {
                     {renderSelectField("provincia", "Provincia", <MapPin />, provinciaOptions, false, handleProvinciaChange)}
                     {renderSelectField("ciudad", "Ciudad", <MapPin />, ciudadOptions, !selectedProvincia, handleCiudadChange)}
                     {renderSelectField("barrio", "Barrio", <MapPin />, barrioOptions, !selectedCiudad)}
-                   {renderInputField("area_total", "Área Total (m²)", <Ruler />, "number")}
-                   {renderInputField("area_covered", "Área Cubierta (m²)", <Ruler />, "number")}
-                   {renderInputField("rooms", "Ambientes", <Building2 />, "number")}
-                   {renderInputField("bedrooms", "Dormitorios", <BedDouble />, "number")}
-                   {renderInputField("bathrooms", "Baños", <Bath />, "number")}
-                   {renderInputField("floor", "Piso", <Hash />, "number")}
-                   {renderInputField("construction_year", "Año de Construcción", <Clock />, "number")}
-                   {renderInputField("expenses", "Expensas (ARS)", <CircleDollarSign />, "number")}
+                    {renderInputField("area_total", "Área Total (m²)", <Ruler />, "number")}
+                    {renderInputField("area_covered", "Área Cubierta (m²)", <Ruler />, "number")}
+                    {renderInputField("rooms", "Ambientes", <Building2 />, "number")}
+                    {renderInputField("bedrooms", "Dormitorios", <BedDouble />, "number")}
+                    {renderInputField("bathrooms", "Baños", <Bath />, "number")}
+                    {renderInputField("floor", "Piso", <Hash />, "number")}
+                    {renderInputField("construction_year", "Año de Construcción", <Clock />, "number")}
+                    {renderInputField("expenses", "Expensas (ARS)", <CircleDollarSign />, "number")}
                 </div>
-                
+
                 <div className="mt-5">
                     <label className="block text-sm font-medium text-gray-700 mb-3">
                         Características Adicionales
                     </label>
-                    <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+                    <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
                         {commonFeatures.map(feature => (
-                            <label key={feature} className="flex items-center space-x-2">
+                            <label key={feature} className="flex items-center space-x-2 p-2 border rounded-lg cursor-pointer hover:bg-gray-50 transition">
                                 <input
                                     type="checkbox"
                                     checked={selectedFeatures.includes(feature)}
