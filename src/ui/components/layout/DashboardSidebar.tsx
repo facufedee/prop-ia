@@ -28,6 +28,8 @@ export default function DashboardSidebar() {
           <Calculator className="w-5 h-5" /> Tasación Inteligente
         </Link>
 
+
+
         <Link href="/dashboard/propiedades" className="flex items-center gap-2 hover:text-black">
           <Building2 className="w-5 h-5" /> Propiedades
         </Link>
@@ -64,6 +66,11 @@ export default function DashboardSidebar() {
           <Settings className="w-5 h-5" /> Configuración
         </Link>
 
+        <div className="mt-auto pt-6 border-t">
+          <Link href="/" className="flex items-center gap-2 text-gray-500 hover:text-black transition-colors">
+            <Home className="w-5 h-5" /> Volver al Inicio
+          </Link>
+        </div>
       </nav>
     </aside>
   );

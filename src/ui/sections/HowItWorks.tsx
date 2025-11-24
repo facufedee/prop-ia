@@ -1,4 +1,5 @@
 import { Brain, Database, Zap, ArrowRight, TrendingUp, ShieldCheck } from "lucide-react";
+import Link from "next/link";
 
 export function HowItWorks() {
     const steps = [
@@ -63,9 +64,9 @@ export function HowItWorks() {
                             </h3>
                             <p className="text-gray-300 text-lg mb-8 leading-relaxed">
                                 A diferencia de las tasaciones tradicionales, nuestro modelo aprende constantemente del mercado inmobiliario argentino.
-                                Analiza miles de variables simultáneamente para entregarte un valor justo y competitivo.
+                                Entrenado con <strong>+450,000 propiedades históricas</strong> (desde 2015) y actualizado con <strong>+25,000 publicaciones recientes</strong> (menos de 30 días).
                             </p>
-                            <div className="flex flex-col sm:flex-row gap-4">
+                            <div className="flex flex-col sm:flex-row gap-4 mb-8">
                                 <div className="flex items-center gap-3 bg-white/5 p-4 rounded-xl border border-white/10">
                                     <TrendingUp className="w-5 h-5 text-green-400" />
                                     <span className="font-medium">Datos en Tiempo Real</span>
@@ -75,6 +76,13 @@ export function HowItWorks() {
                                     <span className="font-medium">Máxima Precisión</span>
                                 </div>
                             </div>
+
+                            <Link
+                                href="/modelo"
+                                className="inline-flex items-center gap-2 bg-white text-black px-6 py-3 rounded-xl font-semibold hover:bg-gray-100 transition-colors"
+                            >
+                                Conocer nuestra tecnología <ArrowRight className="w-4 h-4" />
+                            </Link>
                         </div>
 
                         {/* Visual Representation - Marketing Style */}

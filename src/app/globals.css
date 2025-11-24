@@ -27,7 +27,16 @@ body {
 /* Deshabilito el modo oscuro automático */
 @media (prefers-color-scheme: dark) {
   :root {
-    --background: #ffffff;  /* mismo color que light */
+    --background: #ffffff;
+    /* mismo color que light */
     --foreground: #111111;
   }
+}
+
+/* Posicionar barra de carga debajo del header fijo */
+#nprogress .bar {
+  top: 65px !important;
+  height: 2px !important;
+  background: #000000 !important;
+  z-index: 1031 !important;
 }
