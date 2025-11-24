@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import Link from "next/link";
 import { PropertyData } from "@/lib/prediction/preprocessor";
 import { Home, Ruler, Building2, Clock, Bath, BedDouble, Landmark, MapPin, Hash, CircleDollarSign } from "lucide-react";
 
@@ -215,7 +216,6 @@ export default function TasacionForm() {
     const [result, setResult] = useState<number | null>(null);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
-    const [useMLModel, setUseMLModel] = useState(false);
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
         const { name, value } = e.target;
@@ -308,55 +308,16 @@ export default function TasacionForm() {
         setError(null);
 
         try {
-            if (useMLModel) {
-                // Client-side prediction using TensorFlow.js
-                const { predictionService } = await import('@/lib/prediction/predictionService');
+            // Client-side prediction using TensorFlow.js
+            const { predictionService } = await import('@/lib/prediction/predictionService');
 
-                const predictionData = {
-                    ...form,
-                    all_features: selectedFeatures.join(', ')
-                };
+            const predictionData = {
+                ...form,
+                all_features: selectedFeatures.join(', ')
+            };
 
-                // Predict using the service (which handles config fetching internally if not skipped, 
-                // but we already fetched it to be safe, though predictionService fetches it again. 
-                // To be efficient we could pass it, but the service interface doesn't support passing config object yet.
-                // It's fine, it will fetch again or we can rely on its internal fetch.)
-                const price = await predictionService.predict(predictionData);
-                setResult(price);
-            } else {
-                // Legacy/Simple API prediction
-                const apiData = {
-                    rooms: form.rooms ? Number(form.rooms) : null,
-                    bathrooms: form.bathrooms ? Number(form.bathrooms) : null,
-                    surface_total: form.area_total ? Number(form.area_total) : null,
-                    surface_covered: form.area_covered ? Number(form.area_covered) : null,
-                    floor: form.floor ? Number(form.floor) : null,
-                    lat: null,
-                    lon: null,
-                    property_type: form.property_type,
-                    location: form.barrio || `${form.ciudad}, ${form.provincia}`,
-                    description: selectedFeatures.join(', '),
-                    expenses: form.expenses ? Number(form.expenses) : null,
-                    construction_year: form.construction_year ? Number(form.construction_year) : null
-                };
-
-                const response = await fetch('/api/predict', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(apiData)
-                });
-
-                if (!response.ok) {
-                    throw new Error(`Error en la API: ${response.status}`);
-                }
-
-                const data = await response.json();
-                if (data.error) {
-                    throw new Error(data.error);
-                }
-
-                setResult(data.prediction);
-            }
+            const price = await predictionService.predict(predictionData);
+            setResult(price);
 
         } catch (err: any) {
             setError(`Error en la predicción: ${err.message}`);
@@ -422,15 +383,10 @@ export default function TasacionForm() {
                     Tasador de Inmuebles
                 </h2>
                 <div className="flex items-center gap-4">
-                    <label className="flex items-center space-x-2 text-sm">
-                        <input
-                            type="checkbox"
-                            checked={useMLModel}
-                            onChange={(e) => setUseMLModel(e.target.checked)}
-                            className="rounded border-gray-300 text-black focus:ring-black"
-                        />
-                        <span className="text-gray-700">Usar Modelo IA</span>
-                    </label>
+
+                    <Link href="/modelo" className="text-sm text-blue-600 hover:text-blue-800 hover:underline">
+                        ¿Cómo funciona?
+                    </Link>
                     <button
                         type="button"
                         onClick={handleFillExample}
@@ -481,7 +437,7 @@ export default function TasacionForm() {
                     disabled={loading || !isFormValid()}
                     className="w-full mt-8 bg-black text-white py-3 rounded-xl hover:bg-gray-800 transition font-medium disabled:bg-gray-400 disabled:cursor-not-allowed"
                 >
-                    {loading ? 'Calculando...' : !isFormValid() ? 'Complete todos los campos requeridos' : `Calcular Tasación${useMLModel ? ' (IA)' : ' (Rápido)'}`}
+                    {loading ? 'Calculando...' : !isFormValid() ? 'Complete todos los campos requeridos' : 'Calcular Tasación (IA)'}
                 </button>
             </form>
 

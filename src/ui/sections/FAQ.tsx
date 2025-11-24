@@ -6,7 +6,7 @@ import { ChevronDown, ChevronUp, HelpCircle } from "lucide-react";
 const faqs = [
     {
         question: "¿Qué tan precisa es la tasación?",
-        answer: "Nuestra IA tiene un margen de error promedio del 3-5% en zonas urbanas densas como CABA. El modelo se entrena con miles de datos reales de operaciones recientes, aunque siempre recomendamos usar el valor como una referencia sólida y consultar a un profesional para el cierre final."
+        answer: "Nuestra IA tiene un margen de error promedio inferior al 2% en zonas urbanas densas como CABA. El modelo se entrena con miles de datos reales de operaciones recientes, aunque siempre recomendamos usar el valor como una referencia sólida y consultar a un profesional para el cierre final."
     },
     {
         question: "¿Cómo protege PROP-IA mis datos?",
