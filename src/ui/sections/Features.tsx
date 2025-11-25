@@ -45,16 +45,16 @@ export default function Features() {
   ];
 
   return (
-    <section className="py-20 bg-gray-50 px-6">
-      <div className="max-w-5xl mx-auto grid md:grid-cols-3 gap-12">
+    <section className="py-12 md:py-20 bg-gray-50 px-4 md:px-6">
+      <div className="max-w-5xl mx-auto grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6 md:gap-12">
         {items.map((f, i) => (
           <div
             key={i}
-            className="bg-white p-8 rounded-2xl border shadow-sm text-center"
+            className="bg-white p-6 md:p-8 rounded-2xl border shadow-sm text-center"
           >
             <div className="flex justify-center mb-4">{f.icon}</div>
-            <h3 className="text-xl font-semibold text-gray-900">{f.title}</h3>
-            <p className="text-gray-600 mt-2">{f.desc}</p>
+            <h3 className="text-lg md:text-xl font-semibold text-gray-900">{f.title}</h3>
+            <p className="text-sm md:text-base text-gray-600 mt-2">{f.desc}</p>
           </div>
         ))}
       </div>

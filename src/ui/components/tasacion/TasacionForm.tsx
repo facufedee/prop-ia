@@ -391,10 +391,11 @@ export default function TasacionForm() {
                 onChange={handleChange}
                 className="w-full border bg-gray-50 pl-10 p-3 rounded-xl text-black
                 focus:ring-2 focus:ring-black focus:bg-white transition-all
-                placeholder-transparent peer text-sm"
+                placeholder-transparent peer text-base
+                min-h-[44px]"
             />
             <label className="absolute left-9 -top-2.5 text-gray-500 text-xs bg-white px-1 transition-all
-                peer-placeholder-shown:top-3 peer-placeholder-shown:text-sm
+                peer-placeholder-shown:top-3 peer-placeholder-shown:text-base
                 peer-focus:-top-2.5 peer-focus:text-xs peer-focus:text-black">
                 {label}
             </label>
@@ -412,7 +413,8 @@ export default function TasacionForm() {
                 onChange={(e) => onChange ? onChange(e.target.value) : handleChange(e)}
                 disabled={disabled}
                 className="w-full border bg-gray-50 pl-10 p-3 rounded-xl text-black
-                focus:ring-2 focus:ring-black focus:bg-white transition-all appearance-none disabled:bg-gray-100 disabled:text-gray-400 text-sm"
+                focus:ring-2 focus:ring-black focus:bg-white transition-all appearance-none disabled:bg-gray-100 disabled:text-gray-400 text-base
+                min-h-[44px]"
             >
                 <option value="">{disabled ? `Selecciona ${label.toLowerCase()} primero` : label}</option>
                 {options.map(option => (
