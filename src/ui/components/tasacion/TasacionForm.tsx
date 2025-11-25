@@ -302,12 +302,59 @@ export default function TasacionForm() {
             .catch(err => console.error("Error loading config:", err));
     }, []);
 
+    const [loadingMessage, setLoadingMessage] = useState<string>("");
+    const [progress, setProgress] = useState<number>(0);
+    const [comparisons, setComparisons] = useState<number>(0);
+
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         setLoading(true);
         setError(null);
+        setResult(null);
+        setProgress(0);
+        setComparisons(0);
 
         try {
+            // Simulation of "extra work" steps
+            const steps = [
+                { msg: "Conectando con base de datos inmobiliaria...", progress: 10 },
+                { msg: "Analizando precios de mercado en la zona...", progress: 30 },
+                { msg: "Comparando con propiedades similares...", progress: 60 },
+                { msg: "Aplicando algoritmos de Deep Learning...", progress: 80 },
+                { msg: "Calculando valoración final...", progress: 95 }
+            ];
+
+            // Randomize comparisons to simulate different searches (between 120k and 420k)
+            const totalComparisons = Math.floor(Math.random() * (420000 - 120000 + 1)) + 120000;
+            const stepDuration = 800;
+
+            for (let i = 0; i < steps.length; i++) {
+                setLoadingMessage(steps[i].msg);
+                setProgress(steps[i].progress);
+
+                // Animate comparisons counter
+                if (i === 2) { // During comparison step
+                    const start = 0;
+                    const end = totalComparisons;
+                    const duration = stepDuration * 2;
+                    const startTime = Date.now();
+
+                    while (Date.now() - startTime < duration) {
+                        const elapsed = Date.now() - startTime;
+                        const progress = Math.min(elapsed / duration, 1);
+                        // Ease out quart
+                        const ease = 1 - Math.pow(1 - progress, 4);
+                        setComparisons(Math.floor(start + (end - start) * ease));
+                        await new Promise(r => setTimeout(r, 16)); // ~60fps
+                    }
+                    setComparisons(totalComparisons);
+                } else {
+                    await new Promise(resolve => setTimeout(resolve, stepDuration));
+                }
+            }
+
+            setProgress(100);
+
             // Client-side prediction using TensorFlow.js
             const { predictionService } = await import('@/lib/prediction/predictionService');
 
@@ -324,6 +371,9 @@ export default function TasacionForm() {
             console.error(err);
         } finally {
             setLoading(false);
+            setLoadingMessage("");
+            setProgress(0);
+            setComparisons(0);
         }
     };
 
@@ -341,11 +391,11 @@ export default function TasacionForm() {
                 onChange={handleChange}
                 className="w-full border bg-gray-50 pl-10 p-3 rounded-xl text-black
                 focus:ring-2 focus:ring-black focus:bg-white transition-all
-                placeholder-transparent peer"
+                placeholder-transparent peer text-sm"
             />
-            <label className="absolute left-9 -top-2.5 text-gray-500 text-sm bg-white px-1 transition-all
-                peer-placeholder-shown:top-3 peer-placeholder-shown:text-base
-                peer-focus:-top-2.5 peer-focus:text-sm peer-focus:text-black">
+            <label className="absolute left-9 -top-2.5 text-gray-500 text-xs bg-white px-1 transition-all
+                peer-placeholder-shown:top-3 peer-placeholder-shown:text-sm
+                peer-focus:-top-2.5 peer-focus:text-xs peer-focus:text-black">
                 {label}
             </label>
         </div>
@@ -362,14 +412,14 @@ export default function TasacionForm() {
                 onChange={(e) => onChange ? onChange(e.target.value) : handleChange(e)}
                 disabled={disabled}
                 className="w-full border bg-gray-50 pl-10 p-3 rounded-xl text-black
-                focus:ring-2 focus:ring-black focus:bg-white transition-all appearance-none disabled:bg-gray-100 disabled:text-gray-400"
+                focus:ring-2 focus:ring-black focus:bg-white transition-all appearance-none disabled:bg-gray-100 disabled:text-gray-400 text-sm"
             >
                 <option value="">{disabled ? `Selecciona ${label.toLowerCase()} primero` : label}</option>
                 {options.map(option => (
                     <option key={option} value={option}>{option}</option>
                 ))}
             </select>
-            <label className="absolute left-9 -top-2.5 text-gray-500 text-sm bg-white px-1 transition-all">
+            <label className="absolute left-9 -top-2.5 text-gray-500 text-xs bg-white px-1 transition-all">
                 {label}
             </label>
         </div>
@@ -474,17 +524,37 @@ export default function TasacionForm() {
 
                 {loading && (
                     <div className="bg-gradient-to-br from-blue-50 to-cyan-50 p-8 rounded-2xl border border-blue-200 text-center">
-                        <div className="flex justify-center mb-4">
-                            <div className="animate-spin">
-                                <CircleDollarSign className="w-12 h-12 text-blue-600" />
+                        <div className="flex justify-center mb-6">
+                            <div className="relative">
+                                <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-blue-600"></div>
+                                <div className="absolute inset-0 flex items-center justify-center text-xs font-bold text-blue-600">
+                                    {progress}%
+                                </div>
                             </div>
                         </div>
+
                         <h3 className="text-lg font-semibold text-blue-700 mb-2">
                             Analizando Datos
                         </h3>
-                        <p className="text-sm text-blue-600">
-                            Nuestro modelo de IA está procesando la información de su propiedad...
+
+                        <p className="text-sm text-blue-600 min-h-[40px] transition-all duration-300 mb-4">
+                            {loadingMessage || "Procesando..."}
                         </p>
+
+                        {/* Progress Bar */}
+                        <div className="w-full bg-blue-200 rounded-full h-2.5 mb-4 overflow-hidden">
+                            <div
+                                className="bg-blue-600 h-2.5 rounded-full transition-all duration-500 ease-out"
+                                style={{ width: `${progress}%` }}
+                            ></div>
+                        </div>
+
+                        {/* Comparisons Counter */}
+                        {comparisons > 0 && (
+                            <div className="text-xs text-blue-500 font-medium animate-pulse">
+                                Comparando con <span className="font-bold text-blue-700 text-sm">{comparisons.toLocaleString()}</span> propiedades
+                            </div>
+                        )}
                     </div>
                 )}
 
