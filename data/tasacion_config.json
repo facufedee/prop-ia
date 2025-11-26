@@ -1,0 +1,20 @@
+{
+  "area_total": 0,
+  "area_covered": 0,
+  "rooms": 0,
+  "bedrooms": 0,
+  "bathrooms": 0,
+  "floor": 0,
+  "construction_year": 0,
+  "expenses": 0,
+  "pileta": 0,
+  "sum": 0,
+  "seguridad": 0,
+  "cochera": 0,
+  "balcon": 0,
+  "terraza": 0,
+  "jardin": 0,
+  "gimnasio": 0,
+  "laundry": 0,
+  "calefaccion": 0
+}

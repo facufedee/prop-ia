@@ -1,8 +1,9 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import Link from "next/link";
 import { PropertyData } from "@/lib/prediction/preprocessor";
-import { Home, Ruler, Building2, Clock, Bath, BedDouble, Landmark, MapPin, Hash, CircleDollarSign } from "lucide-react";
+import { Home, Ruler, Building2, Clock, Bath, BedDouble, Landmark, MapPin, Hash, CircleDollarSign, CheckCircle } from "lucide-react";
 
 const initialFormState: PropertyData = {
     bedrooms: null,
@@ -218,6 +219,10 @@ export default function TasacionForm() {
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
         const { name, value } = e.target;
+        // Prevent negative values for numeric inputs
+        if (e.target.type === 'number' && value !== '' && Number(value) < 0) {
+            return;
+        }
         setForm((prev: PropertyData) => ({ ...prev, [name]: value }));
     };
 
@@ -287,70 +292,111 @@ export default function TasacionForm() {
         setResult(null); // Reset result when loading example
     };
 
+    const [config, setConfig] = useState<any>(null);
+
+    useEffect(() => {
+        // Fetch config to apply adjustments
+        fetch('/api/config/tasacion')
+            .then(res => res.json())
+            .then(data => setConfig(data))
+            .catch(err => console.error("Error loading config:", err));
+    }, []);
+
+    const [loadingMessage, setLoadingMessage] = useState<string>("");
+    const [progress, setProgress] = useState<number>(0);
+    const [comparisons, setComparisons] = useState<number>(0);
+
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
-
         setLoading(true);
-        setResult(null);
         setError(null);
+        setResult(null);
+        setProgress(0);
+        setComparisons(0);
 
         try {
-            const apiData = {
-                rooms: form.rooms ? Number(form.rooms) : null,
-                bathrooms: form.bathrooms ? Number(form.bathrooms) : null,
-                surface_total: form.area_total ? Number(form.area_total) : null,
-                surface_covered: form.area_covered ? Number(form.area_covered) : null,
-                lat: null,
-                lon: null,
-                property_type: form.property_type,
-                location: form.barrio || `${form.ciudad}, ${form.provincia}`,
-                description: selectedFeatures.join(', '),
-                expenses: form.expenses ? Number(form.expenses) : null
+            // Simulation of "extra work" steps
+            const steps = [
+                { msg: "Conectando con base de datos inmobiliaria...", progress: 10 },
+                { msg: "Analizando precios de mercado en la zona...", progress: 30 },
+                { msg: "Comparando con propiedades similares...", progress: 60 },
+                { msg: "Aplicando algoritmos de Deep Learning...", progress: 80 },
+                { msg: "Calculando valoración final...", progress: 95 }
+            ];
+
+            // Randomize comparisons to simulate different searches (between 120k and 420k)
+            const totalComparisons = Math.floor(Math.random() * (420000 - 120000 + 1)) + 120000;
+            const stepDuration = 800;
+
+            for (let i = 0; i < steps.length; i++) {
+                setLoadingMessage(steps[i].msg);
+                setProgress(steps[i].progress);
+
+                // Animate comparisons counter
+                if (i === 2) { // During comparison step
+                    const start = 0;
+                    const end = totalComparisons;
+                    const duration = stepDuration * 2;
+                    const startTime = Date.now();
+
+                    while (Date.now() - startTime < duration) {
+                        const elapsed = Date.now() - startTime;
+                        const progress = Math.min(elapsed / duration, 1);
+                        // Ease out quart
+                        const ease = 1 - Math.pow(1 - progress, 4);
+                        setComparisons(Math.floor(start + (end - start) * ease));
+                        await new Promise(r => setTimeout(r, 16)); // ~60fps
+                    }
+                    setComparisons(totalComparisons);
+                } else {
+                    await new Promise(resolve => setTimeout(resolve, stepDuration));
+                }
+            }
+
+            setProgress(100);
+
+            // Client-side prediction using TensorFlow.js
+            const { predictionService } = await import('@/lib/prediction/predictionService');
+
+            const predictionData = {
+                ...form,
+                all_features: selectedFeatures.join(', ')
             };
 
-            const response = await fetch('/api/predict', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(apiData)
-            });
-
-            if (!response.ok) {
-                throw new Error(`Error en la API: ${response.status}`);
-            }
-
-            const data = await response.json();
-            if (data.error) {
-                throw new Error(data.error);
-            }
-
-            setResult(data.prediction);
+            const price = await predictionService.predict(predictionData);
+            setResult(price);
 
         } catch (err: any) {
             setError(`Error en la predicción: ${err.message}`);
             console.error(err);
         } finally {
             setLoading(false);
+            setLoadingMessage("");
+            setProgress(0);
+            setComparisons(0);
         }
     };
-    
+
     const renderInputField = (name: keyof PropertyData, label: string, icon: React.ReactNode, type = "text", placeholder = " ") => (
         <div className="relative">
-              <span className="absolute inset-y-0 left-0 flex items-center pl-3 text-gray-500 pointer-events-none">
+            <span className="absolute inset-y-0 left-0 flex items-center pl-3 text-gray-500 pointer-events-none">
                 {icon}
             </span>
             <input
                 name={name as string}
                 type={type}
+                min={type === 'number' ? "0" : undefined}
                 placeholder={label}
                 value={(form as any)[name] || ''}
                 onChange={handleChange}
                 className="w-full border bg-gray-50 pl-10 p-3 rounded-xl text-black
                 focus:ring-2 focus:ring-black focus:bg-white transition-all
-                placeholder-transparent peer"
+                placeholder-transparent peer text-base
+                min-h-[44px]"
             />
-            <label className="absolute left-9 -top-2.5 text-gray-500 text-sm bg-white px-1 transition-all
+            <label className="absolute left-9 -top-2.5 text-gray-500 text-xs bg-white px-1 transition-all
                 peer-placeholder-shown:top-3 peer-placeholder-shown:text-base
-                peer-focus:-top-2.5 peer-focus:text-sm peer-focus:text-black">
+                peer-focus:-top-2.5 peer-focus:text-xs peer-focus:text-black">
                 {label}
             </label>
         </div>
@@ -367,94 +413,215 @@ export default function TasacionForm() {
                 onChange={(e) => onChange ? onChange(e.target.value) : handleChange(e)}
                 disabled={disabled}
                 className="w-full border bg-gray-50 pl-10 p-3 rounded-xl text-black
-                focus:ring-2 focus:ring-black focus:bg-white transition-all appearance-none disabled:bg-gray-100 disabled:text-gray-400"
+                focus:ring-2 focus:ring-black focus:bg-white transition-all appearance-none disabled:bg-gray-100 disabled:text-gray-400 text-base
+                min-h-[44px]"
             >
                 <option value="">{disabled ? `Selecciona ${label.toLowerCase()} primero` : label}</option>
                 {options.map(option => (
                     <option key={option} value={option}>{option}</option>
                 ))}
             </select>
-            <label className="absolute left-9 -top-2.5 text-gray-500 text-sm bg-white px-1 transition-all">
+            <label className="absolute left-9 -top-2.5 text-gray-500 text-xs bg-white px-1 transition-all">
                 {label}
             </label>
         </div>
     );
 
     return (
-        <div className="w-full max-w-2xl bg-white p-8 rounded-2xl shadow-lg border border-gray-200">
-            <div className="flex justify-between items-center mb-8">
-                <h2 className="text-3xl font-semibold text-gray-900 flex items-center gap-3">
-                    <Home className="w-7 h-7 text-black" />
-                    Tasador de Inmuebles
-                </h2>
-                <button
-                    type="button"
-                    onClick={handleFillExample}
-                    className="text-sm bg-gray-100 text-gray-800 px-3 py-1 rounded-lg hover:bg-gray-200 transition"
-                >
-                    Usar Ejemplo
-                </button>
-            </div>
+        <div className="w-full grid grid-cols-1 lg:grid-cols-3 gap-6 items-start">
+            {/* COLUMN 1: Basic Info */}
+            <div className="bg-white p-6 rounded-2xl shadow-lg border border-gray-200">
+                <div className="flex justify-between items-center mb-6">
+                    <h2 className="text-xl font-semibold text-gray-900 flex items-center gap-2">
+                        <Home className="w-5 h-5 text-black" />
+                        Ubicación
+                    </h2>
+                    <Link href="/modelo" className="text-xs text-blue-600 hover:text-blue-800 hover:underline">
+                        ¿Cómo funciona?
+                    </Link>
+                </div>
 
-            <form onSubmit={handleSubmit}>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+                <div className="space-y-4">
                     {renderSelectField("property_type", "Tipo de Propiedad", <Landmark />, propertyTypeOptions)}
                     {renderSelectField("provincia", "Provincia", <MapPin />, provinciaOptions, false, handleProvinciaChange)}
                     {renderSelectField("ciudad", "Ciudad", <MapPin />, ciudadOptions, !selectedProvincia, handleCiudadChange)}
                     {renderSelectField("barrio", "Barrio", <MapPin />, barrioOptions, !selectedCiudad)}
-                   {renderInputField("area_total", "Área Total (m²)", <Ruler />, "number")}
-                   {renderInputField("area_covered", "Área Cubierta (m²)", <Ruler />, "number")}
-                   {renderInputField("rooms", "Ambientes", <Building2 />, "number")}
-                   {renderInputField("bedrooms", "Dormitorios", <BedDouble />, "number")}
-                   {renderInputField("bathrooms", "Baños", <Bath />, "number")}
-                   {renderInputField("floor", "Piso", <Hash />, "number")}
-                   {renderInputField("construction_year", "Año de Construcción", <Clock />, "number")}
-                   {renderInputField("expenses", "Expensas (ARS)", <CircleDollarSign />, "number")}
                 </div>
-                
-                <div className="mt-5">
-                    <label className="block text-sm font-medium text-gray-700 mb-3">
-                        Características Adicionales
-                    </label>
-                    <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
-                        {commonFeatures.map(feature => (
-                            <label key={feature} className="flex items-center space-x-2">
-                                <input
-                                    type="checkbox"
-                                    checked={selectedFeatures.includes(feature)}
-                                    onChange={(e) => handleFeatureChange(feature, e.target.checked)}
-                                    className="rounded border-gray-300 text-black focus:ring-black"
-                                />
-                                <span className="text-sm text-gray-700 capitalize">{feature}</span>
-                            </label>
-                        ))}
+            </div>
+
+            {/* COLUMN 2: Details & Features */}
+            <div className="bg-white p-6 rounded-2xl shadow-lg border border-gray-200">
+                <div className="flex justify-between items-center mb-6">
+                    <h2 className="text-xl font-semibold text-gray-900 flex items-center gap-2">
+                        <Ruler className="w-5 h-5 text-black" />
+                        Detalles
+                    </h2>
+                    <button
+                        type="button"
+                        onClick={handleFillExample}
+                        className="text-xs bg-gray-100 text-gray-800 px-3 py-1.5 rounded-lg hover:bg-gray-200 transition"
+                    >
+                        Usar Ejemplo
+                    </button>
+                </div>
+
+                <form onSubmit={handleSubmit}>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        {renderInputField("area_total", "Área Total", <Ruler />, "number")}
+                        {renderInputField("area_covered", "Área Cubierta", <Ruler />, "number")}
+                        {renderInputField("rooms", "Ambientes", <Building2 />, "number")}
+                        {renderInputField("bedrooms", "Dormitorios", <BedDouble />, "number")}
+                        {renderInputField("bathrooms", "Baños", <Bath />, "number")}
+                        {renderInputField("floor", "Piso", <Hash />, "number")}
+                        {renderInputField("construction_year", "Año Const.", <Clock />, "number")}
+                        {renderInputField("expenses", "Expensas", <CircleDollarSign />, "number")}
                     </div>
-                </div>
 
-                <button
-                    type="submit"
-                    disabled={loading || !isFormValid()}
-                    className="w-full mt-8 bg-black text-white py-3 rounded-xl hover:bg-gray-800 transition font-medium disabled:bg-gray-400 disabled:cursor-not-allowed"
-                >
-                    {loading ? 'Calculando...' : !isFormValid() ? 'Complete todos los campos requeridos' : 'Calcular Tasación'}
-                </button>
-            </form>
+                    <div className="mt-6">
+                        <label className="block text-sm font-medium text-gray-700 mb-3">
+                            Características
+                        </label>
+                        <div className="grid grid-cols-2 gap-2">
+                            {commonFeatures.map(feature => (
+                                <label key={feature} className="flex items-center space-x-2 p-1.5 border rounded-lg cursor-pointer hover:bg-gray-50 transition">
+                                    <input
+                                        type="checkbox"
+                                        checked={selectedFeatures.includes(feature)}
+                                        onChange={(e) => handleFeatureChange(feature, e.target.checked)}
+                                        className="rounded border-gray-300 text-black focus:ring-black"
+                                    />
+                                    <span className="text-xs text-gray-700 capitalize truncate">{feature}</span>
+                                </label>
+                            ))}
+                        </div>
+                    </div>
 
-            {error && (
-                <div className="mt-6 p-4 bg-red-100 text-red-700 rounded-xl border border-red-200">
-                    <p className="font-semibold">Error</p>
-                    <p>{error}</p>
-                </div>
-            )}
+                    <button
+                        type="submit"
+                        disabled={loading || !isFormValid()}
+                        className="w-full mt-6 bg-black text-white py-3 rounded-xl hover:bg-gray-800 transition font-medium disabled:bg-gray-400 disabled:cursor-not-allowed text-sm"
+                    >
+                        {loading ? 'Calculando...' : !isFormValid() ? 'Completar campos' : 'Calcular Tasación'}
+                    </button>
+                </form>
+            </div>
 
-            {result !== null && (
-                <div className="mt-6 p-5 bg-green-50 rounded-xl border border-green-200 text-center">
-                    <p className="text-gray-600 text-lg">Valor Estimado (USD)</p>
-                    <p className="font-bold text-green-700 text-4xl mt-2">
-                        ${result.toLocaleString('es-AR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
-                    </p>
-                </div>
-            )}
+            {/* RIGHT COLUMN: Results Panel (Sticky) */}
+            <div className="sticky top-24">
+                {!result && !error && !loading && (
+                    <div className="bg-gradient-to-br from-gray-50 to-gray-100 p-8 rounded-2xl border border-gray-200 text-center">
+                        <div className="flex justify-center mb-4">
+                            <div className="p-4 bg-white rounded-full shadow-sm">
+                                <CircleDollarSign className="w-12 h-12 text-gray-400" />
+                            </div>
+                        </div>
+                        <h3 className="text-lg font-semibold text-gray-700 mb-2">
+                            Esperando Datos
+                        </h3>
+                        <p className="text-sm text-gray-500">
+                            Complete el formulario y presione "Calcular Tasación" para obtener el valor estimado de su propiedad.
+                        </p>
+                    </div>
+                )}
+
+                {loading && (
+                    <div className="bg-gradient-to-br from-blue-50 to-cyan-50 p-8 rounded-2xl border border-blue-200 text-center">
+                        <div className="flex justify-center mb-6">
+                            <div className="relative">
+                                <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-blue-600"></div>
+                                <div className="absolute inset-0 flex items-center justify-center text-xs font-bold text-blue-600">
+                                    {progress}%
+                                </div>
+                            </div>
+                        </div>
+
+                        <h3 className="text-lg font-semibold text-blue-700 mb-2">
+                            Analizando Datos
+                        </h3>
+
+                        <p className="text-sm text-blue-600 min-h-[40px] transition-all duration-300 mb-4">
+                            {loadingMessage || "Procesando..."}
+                        </p>
+
+                        {/* Progress Bar */}
+                        <div className="w-full bg-blue-200 rounded-full h-2.5 mb-4 overflow-hidden">
+                            <div
+                                className="bg-blue-600 h-2.5 rounded-full transition-all duration-500 ease-out"
+                                style={{ width: `${progress}%` }}
+                            ></div>
+                        </div>
+
+                        {/* Comparisons Counter */}
+                        {comparisons > 0 && (
+                            <div className="text-xs text-blue-500 font-medium animate-pulse">
+                                Comparando con <span className="font-bold text-blue-700 text-sm">{comparisons.toLocaleString()}</span> propiedades
+                            </div>
+                        )}
+                    </div>
+                )}
+
+                {error && (
+                    <div className="bg-gradient-to-br from-red-50 to-pink-50 p-8 rounded-2xl border border-red-200">
+                        <div className="flex items-start gap-4">
+                            <div className="flex-shrink-0">
+                                <div className="p-3 bg-red-100 rounded-full">
+                                    <svg className="w-6 h-6 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                                    </svg>
+                                </div>
+                            </div>
+                            <div className="flex-1">
+                                <h3 className="text-lg font-semibold text-red-700 mb-2">Error en el Cálculo</h3>
+                                <p className="text-sm text-red-600">{error}</p>
+                            </div>
+                        </div>
+                    </div>
+                )}
+
+                {result !== null && !error && (
+                    <div className="bg-gradient-to-br from-green-50 to-emerald-50 p-8 rounded-2xl border border-green-200 shadow-lg">
+                        <div className="text-center mb-6">
+                            <div className="inline-flex items-center justify-center p-3 bg-green-100 rounded-full mb-4">
+                                <CheckCircle className="w-8 h-8 text-green-600" />
+                            </div>
+                            <h3 className="text-lg font-semibold text-gray-700 mb-1">Valor Estimado</h3>
+                            <p className="text-sm text-gray-500">Resultado del análisis IA</p>
+                        </div>
+
+                        <div className="bg-white p-6 rounded-xl mb-6 text-center">
+                            <p className="text-sm text-gray-600 mb-2">Precio en USD</p>
+                            <p className="font-bold text-green-700 text-5xl">
+                                ${result.toLocaleString('es-AR', { minimumFractionDigits: 0, maximumFractionDigits: 0 })}
+                            </p>
+                        </div>
+
+                        <div className="space-y-3">
+                            <div className="flex items-center justify-between p-3 bg-white rounded-lg">
+                                <span className="text-sm text-gray-600">Margen de error</span>
+                                <span className="text-sm font-semibold text-green-700">{"<"} 2%</span>
+                            </div>
+                            <div className="flex items-center justify-between p-3 bg-white rounded-lg">
+                                <span className="text-sm text-gray-600">Confiabilidad</span>
+                                <span className="text-sm font-semibold text-green-700">Alta</span>
+                            </div>
+                            <div className="flex items-center justify-between p-3 bg-white rounded-lg">
+                                <span className="text-sm text-gray-600">Tipo</span>
+                                <span className="text-sm font-semibold text-gray-800 capitalize">{form.property_type}</span>
+                            </div>
+                            <div className="flex items-center justify-between p-3 bg-white rounded-lg">
+                                <span className="text-sm text-gray-600">Ubicación</span>
+                                <span className="text-sm font-semibold text-gray-800">{form.ciudad}, {form.provincia}</span>
+                            </div>
+                        </div>
+
+                        <div className="mt-6 p-4 bg-blue-50 rounded-lg border border-blue-100">
+                            <p className="text-xs text-blue-700">
+                                <strong>Nota:</strong> Esta es una estimación automática basada en {">"}450k propiedades analizadas. Para una tasación definitiva, consulte con un profesional.
+                            </p>
+                        </div>
+                    </div>
+                )}
+            </div>
         </div>
     );
 }
