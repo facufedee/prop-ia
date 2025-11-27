@@ -26,6 +26,7 @@ export const PERMISSIONS: Permission[] = [
     { id: "/dashboard/calendario", label: "Calendario", description: "Agenda y eventos" },
     { id: "/dashboard/cuenta", label: "Cuenta", description: "Configuración de cuenta personal" },
     { id: "/dashboard/configuracion", label: "Configuración", description: "Configuración global del sistema" },
+    { id: "/dashboard/configuracion/roles", label: "Roles y Permisos", description: "Gestión de roles y permisos (solo administradores)" },
 ];
 
 const ROLES_COLLECTION = "roles";

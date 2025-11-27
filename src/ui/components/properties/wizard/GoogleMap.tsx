@@ -14,10 +14,6 @@ const defaultCenter = {
     lng: -58.3816
 };
 
-// WARNING: You need to replace this with your actual Google Maps API Key
-// You can get one at https://console.cloud.google.com/
-const GOOGLE_MAPS_API_KEY = "YOUR_API_KEY_HERE";
-
 interface MapProps {
     lat: number;
     lng: number;
@@ -25,11 +21,6 @@ interface MapProps {
 }
 
 export default function GoogleMapComponent({ lat, lng, onLocationSelect }: MapProps) {
-    const { isLoaded } = useJsApiLoader({
-        id: 'google-map-script',
-        googleMapsApiKey: GOOGLE_MAPS_API_KEY
-    });
-
     const [map, setMap] = useState<google.maps.Map | null>(null);
     const [markerPosition, setMarkerPosition] = useState({ lat, lng });
 
@@ -53,25 +44,6 @@ export default function GoogleMapComponent({ lat, lng, onLocationSelect }: MapPr
             onLocationSelect(newLat, newLng);
         }
     };
-
-    if (!isLoaded) {
-        return (
-            <div className="w-full h-full flex items-center justify-center bg-gray-100 text-gray-500">
-                <Loader2 className="animate-spin mr-2" /> Cargando Google Maps...
-            </div>
-        );
-    }
-
-    // If no API Key is provided, show a friendly warning (for development)
-    if (GOOGLE_MAPS_API_KEY === "YOUR_API_KEY_HERE") {
-        return (
-            <div className="w-full h-full flex flex-col items-center justify-center bg-gray-100 text-gray-500 p-4 text-center">
-                <p className="font-semibold mb-2">Google Maps API Key Missing</p>
-                <p className="text-sm">Please add your API Key in <code>src/ui/components/properties/wizard/GoogleMap.tsx</code></p>
-                <p className="text-xs mt-4 text-gray-400">Showing default view for now.</p>
-            </div>
-        );
-    }
 
     return (
         <GoogleMap

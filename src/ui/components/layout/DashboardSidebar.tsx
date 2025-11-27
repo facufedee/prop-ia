@@ -1,5 +1,8 @@
+"use client";
+
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { useEffect, useState } from "react";
 import {
   Home,
   Calculator,
@@ -15,6 +18,9 @@ import {
   X,
   Shield
 } from "lucide-react";
+import { auth } from "@/infrastructure/firebase/client";
+import { roleService, Role } from "@/infrastructure/services/roleService";
+import { onAuthStateChanged } from "firebase/auth";
 
 interface DashboardSidebarProps {
   isOpen?: boolean;
@@ -33,11 +39,50 @@ const MENU_ITEMS = [
   { href: "/dashboard/calendario", label: "Calendario", icon: Calendar },
   { href: "/dashboard/cuenta", label: "Cuenta", icon: User },
   { href: "/dashboard/configuracion", label: "Configuración", icon: Settings },
-  { href: "/dashboard/configuracion/roles", label: "Roles y Permisos", icon: Shield },
+  { href: "/dashboard/configuracion/roles", label: "Roles y Permisos", icon: Shield, adminOnly: true },
 ];
 
 export default function DashboardSidebar({ isOpen = false, onClose }: DashboardSidebarProps) {
   const pathname = usePathname();
+  const [userRole, setUserRole] = useState<Role | null>(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, async (user) => {
+      if (user) {
+        try {
+          const role = await roleService.getUserRole(user.uid);
+          setUserRole(role);
+        } catch (error) {
+          console.error("Error fetching user role:", error);
+        }
+      }
+      setLoading(false);
+    });
+
+    return () => unsubscribe();
+  }, []);
+
+  // Filter menu items based on user permissions
+  const filteredMenuItems = MENU_ITEMS.filter(item => {
+    // If item is admin-only, check if user is admin
+    if (item.adminOnly) {
+      return userRole?.name === "Administrador";
+    }
+
+    // Otherwise, check if user has permission for this route
+    if (!userRole) return false;
+
+    return userRole.permissions.includes(item.href);
+  });
+
+  if (loading) {
+    return (
+      <aside className="fixed inset-y-0 left-0 z-50 w-64 bg-white border-r shadow-lg md:shadow-sm p-6 flex items-center justify-center">
+        <div className="text-gray-500">Cargando...</div>
+      </aside>
+    );
+  }
 
   return (
     <>
@@ -64,7 +109,7 @@ export default function DashboardSidebar({ isOpen = false, onClose }: DashboardS
         </div>
 
         <nav className="flex flex-col gap-2 text-gray-600 overflow-y-auto flex-1">
-          {MENU_ITEMS.map((item) => {
+          {filteredMenuItems.map((item) => {
             const isActive = pathname === item.href;
             const Icon = item.icon;
 
