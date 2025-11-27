@@ -1,6 +1,8 @@
 // src/infrastructure/firebase/client.ts
 import { initializeApp, getApps } from "firebase/app";
 import { getAuth } from "firebase/auth";
+import { initializeFirestore, persistentLocalCache, persistentMultipleTabManager } from "firebase/firestore";
+import { getStorage } from "firebase/storage";
 
 const firebaseConfig = {
   apiKey: "AIzaSyC6MdDwOlP5sDfkIDzIqWhKYfSW6uCCs4s",
@@ -15,4 +17,10 @@ const firebaseConfig = {
 const app = getApps().length ? getApps()[0] : initializeApp(firebaseConfig);
 
 export const auth = getAuth(app);
+export const db = initializeFirestore(app, {
+  localCache: persistentLocalCache({
+    tabManager: persistentMultipleTabManager()
+  })
+}, "propia");
+export const storage = getStorage(app);
 export { app };

@@ -1,14 +1,15 @@
 import PropertiesTable from "@/ui/components/tables/PropertiesTable";
 import { Plus, Building2, Home, Key } from "lucide-react";
+import Link from "next/link";
 
 export default function PropiedadesPage() {
     return (
         <div className="space-y-6">
             <div className="flex justify-between items-center">
                 <h1 className="text-2xl font-bold text-gray-900">Propiedades</h1>
-                <button className="flex items-center gap-2 bg-black text-white px-4 py-2 rounded-xl text-sm font-medium hover:bg-gray-800 transition">
+                <Link href="/dashboard/propiedades/nueva" className="flex items-center gap-2 bg-black text-white px-4 py-2 rounded-xl text-sm font-medium hover:bg-gray-800 transition">
                     <Plus className="w-4 h-4" /> Nueva Propiedad
-                </button>
+                </Link>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">

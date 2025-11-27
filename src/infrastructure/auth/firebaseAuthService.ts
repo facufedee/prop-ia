@@ -1,25 +1,66 @@
-import { auth } from "@/infrastructure/firebase/client";
+import { auth, db } from "@/infrastructure/firebase/client";
 import {
-GoogleAuthProvider,
-signInWithPopup,
-createUserWithEmailAndPassword,
-signInWithEmailAndPassword,
-signOut,
+    GoogleAuthProvider,
+    signInWithPopup,
+    createUserWithEmailAndPassword,
+    signInWithEmailAndPassword,
+    signOut,
+    User,
 } from "firebase/auth";
+import { doc, setDoc, getDoc } from "firebase/firestore";
 
+export const saveUserToFirestore = async (user: User, additionalData?: { agencyName?: string }) => {
+    try {
+        const userRef = doc(db, "users", user.uid);
+        const userSnap = await getDoc(userRef);
 
-export const loginWithGoogle = () => {
-const provider = new GoogleAuthProvider();
-return signInWithPopup(auth, provider);
+        if (!userSnap.exists()) {
+            // Get default role (Cliente)
+            const { roleService } = await import("@/infrastructure/services/roleService");
+            let defaultRole = await roleService.getDefaultRole();
+
+            // If default role doesn't exist, try to initialize roles
+            if (!defaultRole) {
+                await roleService.initializeDefaultRoles();
+                defaultRole = await roleService.getDefaultRole();
+            }
+
+            await setDoc(userRef, {
+                uid: user.uid,
+                email: user.email,
+                displayName: user.displayName || additionalData?.agencyName || "",
+                agencyName: additionalData?.agencyName || "",
+                photoURL: user.photoURL || "",
+                roleId: defaultRole?.id || null, // Assign default role
+                createdAt: new Date(),
+            });
+        }
+    } catch (error: any) {
+        console.warn("Error saving user to Firestore (likely offline):", error.message);
+        // We do not throw here to allow the auth flow to continue even if Firestore is unreachable
+    }
 };
 
+export const loginWithGoogle = async () => {
+    const provider = new GoogleAuthProvider();
+    const result = await signInWithPopup(auth, provider);
+    await saveUserToFirestore(result.user);
+    return result;
+};
 
-export const registerEmail = (email: string, pass: string) =>
-createUserWithEmailAndPassword(auth, email, pass);
+export const registerEmail = async (email: string, pass: string, displayName: string, agencyName: string) => {
+    const result = await createUserWithEmailAndPassword(auth, email, pass);
+    // Ideally we should also update the auth profile:
+    // await updateProfile(result.user, { displayName });
 
+    await saveUserToFirestore(result.user, { agencyName });
+    return result;
+};
 
-export const loginEmail = (email: string, pass: string) =>
-signInWithEmailAndPassword(auth, email, pass);
-
+export const loginEmail = async (email: string, pass: string) => {
+    const result = await signInWithEmailAndPassword(auth, email, pass);
+    await saveUserToFirestore(result.user);
+    return result;
+};
 
 export const logoutUser = () => signOut(auth);

@@ -1,20 +1,33 @@
 "use client";
 
 import { auth } from "@/infrastructure/firebase/client";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
-import { Menu, X, ChevronDown } from "lucide-react";
+import { Menu, X, ChevronDown, User as UserIcon, LogOut, LayoutDashboard, Settings, Bot } from "lucide-react";
 import { onAuthStateChanged, signOut, type User } from "firebase/auth";
 
 export default function Navbar() {
   const [open, setOpen] = useState(false);
   const [megaOpen, setMegaOpen] = useState(false);
+  const [profileOpen, setProfileOpen] = useState(false);
   const [user, setUser] = useState<User | null>(null);
+  const profileRef = useRef<HTMLDivElement>(null);
 
   // Firebase listener
   useEffect(() => {
     const unsub = onAuthStateChanged(auth, (u) => setUser(u));
     return () => unsub();
+  }, []);
+
+  // Close dropdown when clicking outside
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      if (profileRef.current && !profileRef.current.contains(event.target as Node)) {
+        setProfileOpen(false);
+      }
+    }
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
   return (
@@ -34,38 +47,56 @@ export default function Navbar() {
         </Link>
 
         {/* Desktop menu */}
-        <div className="hidden md:flex items-center gap-8 text-sm text-black">
-          <Link href="/#como-funciona" className="hover:text-gray-700">Cómo funciona</Link>
-          <Link href="/modelo" className="hover:text-gray-700">Tecnología</Link>
-          <Link href="/#pricing" className="hover:text-gray-700">Precios</Link>
-          <Link href="/#faq" className="hover:text-gray-700">Preguntas</Link>
+        <div className="hidden md:flex items-center gap-6 text-sm font-medium text-gray-600">
+          <Link href="/#como-funciona" className="flex items-center gap-2 hover:text-indigo-600 transition-colors">
+            Cómo funciona
+          </Link>
+          <Link href="/modelo" className="flex items-center gap-2 hover:text-indigo-600 transition-colors">
+            Tecnología
+          </Link>
+          <Link href="/blog" className="flex items-center gap-2 hover:text-indigo-600 transition-colors">
+            Blog
+          </Link>
+          <Link href="/#pricing" className="flex items-center gap-2 hover:text-indigo-600 transition-colors">
+            Precios
+          </Link>
 
           {/* Mega menu */}
-          <div className="relative">
+          <div className="relative group">
             <button
               onClick={() => setMegaOpen(!megaOpen)}
-              className="flex items-center gap-1 hover:text-gray-700"
+              className="flex items-center gap-1 hover:text-indigo-600 transition-colors"
             >
               Features <ChevronDown size={16} />
             </button>
 
             {megaOpen && (
-              <div className="absolute left-0 mt-3 bg-white shadow-lg border rounded-2xl 
-              p-6 grid grid-cols-2 gap-6 w-[400px]">
+              <div className="absolute left-0 mt-3 bg-white shadow-xl border border-gray-100 rounded-2xl 
+              p-6 grid grid-cols-2 gap-8 w-[500px] animate-in fade-in zoom-in-95 duration-200 z-50">
                 <div>
-                  <h4 className="font-semibold mb-2">IA</h4>
-                  <ul className="space-y-1 text-sm text-gray-600">
-                    <li>Tasación Inteligente</li>
-                    <li>Comparador de Mercado</li>
-                    <li>Automatizaciones</li>
+                  <h4 className="font-semibold mb-3 text-indigo-900 flex items-center gap-2">
+                    <div className="w-6 h-6 rounded-lg bg-indigo-100 flex items-center justify-center text-indigo-600">
+                      <Bot size={14} />
+                    </div>
+                    Inteligencia Artificial
+                  </h4>
+                  <ul className="space-y-2 text-sm text-gray-500">
+                    <li className="hover:text-indigo-600 cursor-pointer transition-colors">Tasación Inteligente</li>
+                    <li className="hover:text-indigo-600 cursor-pointer transition-colors">Comparador de Mercado</li>
+                    <li className="hover:text-indigo-600 cursor-pointer transition-colors">Automatizaciones</li>
                   </ul>
                 </div>
                 <div>
-                  <h4 className="font-semibold mb-2">Gestión</h4>
-                  <ul className="space-y-1 text-sm text-gray-600">
-                    <li>CRM de Clientes</li>
-                    <li>Publicación Multiplataforma</li>
-                    <li>Estadísticas</li>
+                  <h4 className="font-semibold mb-3 text-indigo-900 flex items-center gap-2">
+                    <div className="w-6 h-6 rounded-lg bg-indigo-100 flex items-center justify-center text-indigo-600">
+                      <LayoutDashboard size={14} />
+                    </div>
+                    Gestión Integral
+                  </h4>
+                  <ul className="space-y-2 text-sm text-gray-500">
+                    <li className="hover:text-indigo-600 cursor-pointer transition-colors">CRM de Clientes</li>
+                    <li className="hover:text-indigo-600 cursor-pointer transition-colors">Publicación Multiplataforma</li>
+                    <li className="hover:text-indigo-600 cursor-pointer transition-colors">Estadísticas Avanzadas</li>
                   </ul>
                 </div>
               </div>
@@ -84,19 +115,90 @@ export default function Navbar() {
                 Iniciar sesión
               </Link>
               <Link
-                href="/registro"
+                href="/register"
                 className="px-4 py-2 bg-black text-white rounded-xl text-sm hover:bg-gray-800 transition"
               >
                 Comenzar
               </Link>
             </>
           ) : (
-            <button
-              onClick={() => signOut(auth)}
-              className="px-4 py-2 bg-gray-100 text-black rounded-xl text-sm hover:bg-gray-200 transition"
-            >
-              Cerrar sesión
-            </button>
+            <div className="flex items-center gap-4">
+              <Link
+                href="/dashboard/propiedades/nueva"
+                className="hidden md:flex bg-indigo-600 text-white px-4 py-2 rounded-xl text-sm font-medium hover:bg-indigo-700 transition shadow-sm hover:shadow-md"
+              >
+                Publicar
+              </Link>
+
+              <div className="relative" ref={profileRef}>
+                <button
+                  onClick={() => setProfileOpen(!profileOpen)}
+                  className="flex items-center gap-2 px-3 py-2 rounded-xl hover:bg-gray-100 transition"
+                >
+                  <div className="w-8 h-8 rounded-full bg-indigo-100 flex items-center justify-center text-indigo-600">
+                    {user.photoURL ? (
+                      <img src={user.photoURL} alt="Profile" className="w-8 h-8 rounded-full object-cover" />
+                    ) : (
+                      <UserIcon size={18} />
+                    )}
+                  </div>
+                  <span className="text-sm font-medium text-gray-700 max-w-[100px] truncate">
+                    {user.displayName || user.email?.split('@')[0] || "Usuario"}
+                  </span>
+                  <ChevronDown size={16} className={`text-gray-400 transition-transform ${profileOpen ? 'rotate-180' : ''}`} />
+                </button>
+
+                {profileOpen && (
+                  <div className="absolute right-0 mt-2 w-56 bg-white rounded-xl shadow-lg border border-gray-100 py-2 animate-in fade-in zoom-in-95 duration-200">
+                    <div className="px-4 py-2 border-b border-gray-50">
+                      <p className="text-sm font-medium text-gray-900 truncate">
+                        {user.displayName || "Usuario"}
+                      </p>
+                      <p className="text-xs text-gray-500 truncate">
+                        {user.email}
+                      </p>
+                    </div>
+
+                    <div className="py-1">
+                      <Link
+                        href="/dashboard/propiedades"
+                        className="flex items-center gap-2 px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
+                        onClick={() => setProfileOpen(false)}
+                      >
+                        <LayoutDashboard size={16} />
+                        Mis avisos
+                      </Link>
+                      <Link
+                        href="/dashboard"
+                        className="flex items-center gap-2 px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
+                        onClick={() => setProfileOpen(false)}
+                      >
+                        <LayoutDashboard size={16} />
+                        Dashboard
+                      </Link>
+                      <Link
+                        href="/dashboard/cuenta"
+                        className="flex items-center gap-2 px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
+                        onClick={() => setProfileOpen(false)}
+                      >
+                        <Settings size={16} />
+                        Modificar datos
+                      </Link>
+                    </div>
+
+                    <div className="border-t border-gray-50 mt-1 pt-1">
+                      <button
+                        onClick={() => signOut(auth)}
+                        className="w-full flex items-center gap-2 px-4 py-2 text-sm text-red-600 hover:bg-red-50 transition-colors"
+                      >
+                        <LogOut size={16} />
+                        Cerrar sesión
+                      </button>
+                    </div>
+                  </div>
+                )}
+              </div>
+            </div>
           )}
         </div>
 
@@ -126,19 +228,57 @@ export default function Navbar() {
                   Iniciar sesión
                 </Link>
                 <Link
-                  href="/registro"
+                  href="/register"
                   className="block w-full bg-black text-white px-4 py-2 rounded-xl text-center"
                 >
                   Comenzar
                 </Link>
               </>
             ) : (
-              <button
-                onClick={() => signOut(auth)}
-                className="w-full bg-gray-200 text-black px-4 py-2 rounded-xl"
-              >
-                Cerrar sesión
-              </button>
+              <>
+                <div className="flex items-center gap-3 px-2 mb-4">
+                  <div className="w-10 h-10 rounded-full bg-indigo-100 flex items-center justify-center text-indigo-600">
+                    {user.photoURL ? (
+                      <img src={user.photoURL} alt="Profile" className="w-10 h-10 rounded-full object-cover" />
+                    ) : (
+                      <UserIcon size={20} />
+                    )}
+                  </div>
+                  <div>
+                    <p className="font-medium text-gray-900">{user.displayName || "Usuario"}</p>
+                    <p className="text-xs text-gray-500">{user.email}</p>
+                  </div>
+                </div>
+
+                <Link
+                  href="/dashboard/propiedades/nueva"
+                  className="block w-full bg-indigo-600 text-white px-4 py-2 rounded-xl text-center mb-2"
+                >
+                  Publicar
+                </Link>
+
+                <Link
+                  href="/dashboard"
+                  className="flex items-center gap-2 w-full px-4 py-2 text-gray-700 hover:bg-gray-50 rounded-xl"
+                >
+                  <LayoutDashboard size={16} />
+                  Dashboard
+                </Link>
+                <Link
+                  href="/dashboard/cuenta"
+                  className="flex items-center gap-2 w-full px-4 py-2 text-gray-700 hover:bg-gray-50 rounded-xl"
+                >
+                  <Settings size={16} />
+                  Modificar datos
+                </Link>
+                <button
+                  onClick={() => signOut(auth)}
+                  className="flex items-center gap-2 w-full px-4 py-2 text-red-600 hover:bg-red-50 rounded-xl mt-2"
+                >
+                  <LogOut size={16} />
+                  Cerrar sesión
+                </button>
+              </>
             )}
           </div>
         </div>

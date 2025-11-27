@@ -4,32 +4,40 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { Eye, EyeOff, Loader2, Mail, Lock } from "lucide-react";
-import { loginWithGoogle, loginEmail } from "@/infrastructure/auth/firebaseAuthService";
+import { loginWithGoogle, registerEmail } from "@/infrastructure/auth/firebaseAuthService";
 
-export default function LoginPage() {
+export default function RegisterPage() {
     const router = useRouter();
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
+    const [name, setName] = useState("");
+    const [agency, setAgency] = useState("");
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
     const [showPassword, setShowPassword] = useState(false);
 
-    const handleLogin = async (e: React.FormEvent) => {
+    const handleRegister = async (e: React.FormEvent) => {
         e.preventDefault();
         setLoading(true);
         setError(null);
 
+        if (!name.trim() || !agency.trim()) {
+            setError("Por favor completa todos los campos.");
+            setLoading(false);
+            return;
+        }
+
         try {
-            await loginEmail(email, password);
-            router.push("/dashboard");
+            await registerEmail(email, password, name, agency);
+            router.push("/dashboard"); // Redirect to dashboard after success
         } catch (err: any) {
             console.error(err);
-            if (err.code === "auth/invalid-credential" || err.code === "auth/user-not-found" || err.code === "auth/wrong-password") {
-                setError("Email o contraseña incorrectos.");
-            } else if (err.code === "auth/too-many-requests") {
-                setError("Demasiados intentos fallidos. Intenta más tarde.");
+            if (err.code === "auth/email-already-in-use") {
+                setError("Este correo electrónico ya está registrado.");
+            } else if (err.code === "auth/weak-password") {
+                setError("La contraseña debe tener al menos 6 caracteres.");
             } else {
-                setError("Ocurrió un error al iniciar sesión.");
+                setError("Ocurrió un error al registrarse. Inténtalo de nuevo.");
             }
         } finally {
             setLoading(false);
@@ -58,15 +66,15 @@ export default function LoginPage() {
             <div className="max-w-md w-full space-y-8 bg-white p-8 rounded-2xl shadow-xl border border-gray-100">
                 <div className="text-center">
                     <h2 className="mt-6 text-3xl font-extrabold text-gray-900 tracking-tight">
-                        Iniciar sesión
+                        Crear una cuenta
                     </h2>
                     <p className="mt-2 text-sm text-gray-600">
-                        ¿No tienes una cuenta?{" "}
+                        ¿Ya tienes una cuenta?{" "}
                         <Link
-                            href="/register"
+                            href="/login"
                             className="font-medium text-indigo-600 hover:text-indigo-500 transition-colors"
                         >
-                            Regístrate gratis
+                            Inicia sesión
                         </Link>
                     </p>
                 </div>
@@ -108,13 +116,45 @@ export default function LoginPage() {
                         </div>
                         <div className="relative flex justify-center text-sm">
                             <span className="px-2 bg-white text-gray-500">
-                                O inicia sesión con tu email
+                                O regístrate con tu email
                             </span>
                         </div>
                     </div>
 
-                    <form className="space-y-6" onSubmit={handleLogin}>
+                    <form className="space-y-6" onSubmit={handleRegister}>
                         <div className="space-y-4">
+                            <div>
+                                <label htmlFor="name" className="sr-only">
+                                    Nombre completo
+                                </label>
+                                <input
+                                    id="name"
+                                    name="name"
+                                    type="text"
+                                    required
+                                    className="appearance-none rounded-xl relative block w-full px-3 py-3 border border-gray-300 placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm transition-colors"
+                                    placeholder="Nombre completo"
+                                    value={name}
+                                    onChange={(e) => setName(e.target.value)}
+                                />
+                            </div>
+
+                            <div>
+                                <label htmlFor="agency" className="sr-only">
+                                    Nombre de la inmobiliaria
+                                </label>
+                                <input
+                                    id="agency"
+                                    name="agency"
+                                    type="text"
+                                    required
+                                    className="appearance-none rounded-xl relative block w-full px-3 py-3 border border-gray-300 placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm transition-colors"
+                                    placeholder="Nombre de la inmobiliaria"
+                                    value={agency}
+                                    onChange={(e) => setAgency(e.target.value)}
+                                />
+                            </div>
+
                             <div>
                                 <label htmlFor="email" className="sr-only">
                                     Email
@@ -149,7 +189,7 @@ export default function LoginPage() {
                                         id="password"
                                         name="password"
                                         type={showPassword ? "text" : "password"}
-                                        autoComplete="current-password"
+                                        autoComplete="new-password"
                                         required
                                         className="appearance-none rounded-xl relative block w-full pl-10 pr-10 px-3 py-3 border border-gray-300 placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm transition-colors"
                                         placeholder="Contraseña"
@@ -190,7 +230,7 @@ export default function LoginPage() {
                                 {loading ? (
                                     <Loader2 className="h-5 w-5 animate-spin" />
                                 ) : (
-                                    "Iniciar sesión"
+                                    "Crear cuenta"
                                 )}
                             </button>
                         </div>

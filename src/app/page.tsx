@@ -6,11 +6,12 @@ import { MockupSection } from "@/ui/sections/MockupSection";
 import { FAQ } from "@/ui/sections/FAQ";
 import { CTA } from "@/ui/sections/CTA";
 import Footer from "@/ui/components/layout/Footer";
-
+import GoogleAuthPrompt from "@/ui/components/auth/GoogleAuthPrompt";
 
 export default function LandingPage() {
     return (
         <main className="bg-white min-h-screen flex flex-col gap-0">
+            <GoogleAuthPrompt />
             <script
                 type="application/ld+json"
                 dangerouslySetInnerHTML={{

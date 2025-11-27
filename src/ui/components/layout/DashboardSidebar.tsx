@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import {
   Home,
   Calculator,
@@ -11,7 +12,8 @@ import {
   Calendar,
   User,
   Settings,
-  X
+  X,
+  Shield
 } from "lucide-react";
 
 interface DashboardSidebarProps {
@@ -19,7 +21,24 @@ interface DashboardSidebarProps {
   onClose?: () => void;
 }
 
+const MENU_ITEMS = [
+  { href: "/dashboard", label: "Dashboard", icon: Home },
+  { href: "/dashboard/tasacion", label: "Tasación Inteligente", icon: Calculator },
+  { href: "/dashboard/propiedades", label: "Propiedades", icon: Building2 },
+  { href: "/dashboard/leads", label: "Leads / Consultas", icon: MessageSquare },
+  { href: "/dashboard/clientes", label: "Clientes", icon: Users },
+  { href: "/dashboard/chat", label: "Chat Prop-IA", icon: Bot },
+  { href: "/dashboard/publicaciones", label: "Publicaciones", icon: Megaphone },
+  { href: "/dashboard/finanzas", label: "Finanzas", icon: Banknote },
+  { href: "/dashboard/calendario", label: "Calendario", icon: Calendar },
+  { href: "/dashboard/cuenta", label: "Cuenta", icon: User },
+  { href: "/dashboard/configuracion", label: "Configuración", icon: Settings },
+  { href: "/dashboard/configuracion/roles", label: "Roles y Permisos", icon: Shield },
+];
+
 export default function DashboardSidebar({ isOpen = false, onClose }: DashboardSidebarProps) {
+  const pathname = usePathname();
+
   return (
     <>
       {/* Mobile Overlay */}
@@ -38,60 +57,37 @@ export default function DashboardSidebar({ isOpen = false, onClose }: DashboardS
         ${isOpen ? 'translate-x-0' : '-translate-x-full'}
       `}>
         <div className="flex justify-between items-center">
-          <h1 className="text-xl font-bold tracking-tight text-black">PROP-IA</h1>
+          <h1 className="text-xl font-bold tracking-tight text-indigo-900">PROP-IA</h1>
           <button onClick={onClose} className="md:hidden p-1 hover:bg-gray-100 rounded-lg">
             <X className="w-5 h-5 text-gray-500" />
           </button>
         </div>
 
-        <nav className="flex flex-col gap-3 text-gray-700 overflow-y-auto">
+        <nav className="flex flex-col gap-2 text-gray-600 overflow-y-auto flex-1">
+          {MENU_ITEMS.map((item) => {
+            const isActive = pathname === item.href;
+            const Icon = item.icon;
 
-          <Link href="/dashboard" className="flex items-center gap-2 hover:text-black" onClick={onClose}>
-            <Home className="w-5 h-5" /> Dashboard
-          </Link>
-
-          <Link href="/dashboard/tasacion" className="flex items-center gap-2 hover:text-black" onClick={onClose}>
-            <Calculator className="w-5 h-5" /> Tasación Inteligente
-          </Link>
-
-          <Link href="/dashboard/propiedades" className="flex items-center gap-2 hover:text-black" onClick={onClose}>
-            <Building2 className="w-5 h-5" /> Propiedades
-          </Link>
-
-          <Link href="/dashboard/leads" className="flex items-center gap-2 hover:text-black" onClick={onClose}>
-            <MessageSquare className="w-5 h-5" /> Leads / Consultas
-          </Link>
-
-          <Link href="/dashboard/clientes" className="flex items-center gap-2 hover:text-black" onClick={onClose}>
-            <Users className="w-5 h-5" /> Clientes
-          </Link>
-
-          <Link href="/dashboard/chat" className="flex items-center gap-2 hover:text-black" onClick={onClose}>
-            <Bot className="w-5 h-5" /> Chat Prop-IA
-          </Link>
-
-          <Link href="/dashboard/publicaciones" className="flex items-center gap-2 hover:text-black" onClick={onClose}>
-            <Megaphone className="w-5 h-5" /> Publicaciones
-          </Link>
-
-          <Link href="/dashboard/finanzas" className="flex items-center gap-2 hover:text-black" onClick={onClose}>
-            <Banknote className="w-5 h-5" /> Finanzas
-          </Link>
-
-          <Link href="/dashboard/calendario" className="flex items-center gap-2 hover:text-black" onClick={onClose}>
-            <Calendar className="w-5 h-5" /> Calendario
-          </Link>
-
-          <Link href="/dashboard/cuenta" className="flex items-center gap-2 hover:text-black" onClick={onClose}>
-            <User className="w-5 h-5" /> Cuenta
-          </Link>
-
-          <Link href="/dashboard/configuracion" className="flex items-center gap-2 hover:text-black" onClick={onClose}>
-            <Settings className="w-5 h-5" /> Configuración
-          </Link>
+            return (
+              <Link
+                key={item.href}
+                href={item.href}
+                className={`flex items-center gap-3 px-3 py-2 rounded-xl transition-all duration-200
+                  ${isActive
+                    ? 'bg-indigo-50 text-indigo-700 font-medium'
+                    : 'hover:bg-gray-50 hover:text-gray-900'
+                  }
+                `}
+                onClick={onClose}
+              >
+                <Icon className={`w-5 h-5 ${isActive ? 'text-indigo-600' : 'text-gray-400'}`} />
+                {item.label}
+              </Link>
+            );
+          })}
 
           <div className="mt-auto pt-6 border-t">
-            <Link href="/" className="flex items-center gap-2 text-gray-500 hover:text-black transition-colors">
+            <Link href="/" className="flex items-center gap-3 px-3 py-2 text-gray-500 hover:text-gray-900 hover:bg-gray-50 rounded-xl transition-colors">
               <Home className="w-5 h-5" /> Volver al Inicio
             </Link>
           </div>
