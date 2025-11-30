@@ -1,53 +1,59 @@
-import type { Metadata } from "next";
-import { Inter } from "next/font/google";
-import "./globals.css";
+import type { Metadata } from 'next';
+import { Inter } from 'next/font/google';
+import './globals.css';
+import ClientLayout from '@/ui/components/layout/ClientLayout';
 
-import Navbar from "@/ui/components/layout/navbar/Navbar";
-import { AuthProvider } from "@/ui/context/AuthContext";
-
-const inter = Inter({
-  subsets: ["latin"],
-  variable: "--font-inter",
-  display: "swap",
-});
+const inter = Inter({ subsets: ['latin'] });
 
 export const metadata: Metadata = {
-  metadataBase: new URL('https://prop-ia.com'), // Replace with actual domain
+  metadataBase: new URL('https://prop-ia.com'),
   title: {
-    default: "PROP-IA | Tasación Inmobiliaria con Inteligencia Artificial",
-    template: "%s | PROP-IA"
+    default: 'PROP-IA | Plataforma de Gestión Inmobiliaria con IA en Argentina',
+    template: '%s | PROP-IA'
   },
-  description: "La plataforma líder en Argentina para tasaciones inmobiliarias precisas impulsadas por IA. Datos de +450k propiedades y análisis de mercado en tiempo real.",
-  keywords: ["tasación inmobiliaria", "inteligencia artificial", "real estate argentina", "valoración de propiedades", "proptech", "tasador online", "precios propiedades argentina"],
-  authors: [{ name: "PROP-IA Team" }],
-  creator: "PROP-IA",
-  publisher: "PROP-IA",
+  description: 'Plataforma de gestión inmobiliaria con Inteligencia Artificial. Tasaciones automáticas, CRM, publicación multiplataforma y más. Optimiza tu inmobiliaria en Argentina.',
+  keywords: [
+    'inmobiliaria',
+    'tasación',
+    'inteligencia artificial',
+    'CRM inmobiliario',
+    'gestión de propiedades',
+    'Argentina',
+    'Buenos Aires',
+    'software inmobiliario',
+    'valuación de propiedades',
+    'automatización inmobiliaria'
+  ],
+  authors: [{ name: 'PROP-IA Team' }],
+  creator: 'PROP-IA',
+  publisher: 'PROP-IA',
   formatDetection: {
     email: false,
     address: false,
     telephone: false,
   },
   openGraph: {
-    title: "PROP-IA | Tasación Inmobiliaria Inteligente",
-    description: "Descubrí el valor real de tu propiedad con nuestra IA entrenada con +450k datos históricos. Precisión, rapidez y tecnología de vanguardia.",
-    url: 'https://prop-ia.com',
-    siteName: 'PROP-IA',
-    locale: 'es_AR',
     type: 'website',
+    locale: 'es_AR',
+    url: 'https://prop-ia.com',
+    title: 'PROP-IA | Plataforma de Gestión Inmobiliaria con IA',
+    description: 'Revoluciona tu inmobiliaria con IA. Tasaciones automáticas, CRM completo y publicación multiplataforma.',
+    siteName: 'PROP-IA',
     images: [
       {
-        url: '/og-image.jpg', // Ensure this image exists or is created
+        url: '/og-image.png',
         width: 1200,
         height: 630,
-        alt: 'PROP-IA Dashboard y Análisis',
+        alt: 'PROP-IA - Gestión Inmobiliaria Inteligente',
       },
     ],
   },
   twitter: {
     card: 'summary_large_image',
-    title: "PROP-IA | Tasación Inmobiliaria Inteligente",
-    description: "Tasaciones precisas en segundos con Inteligencia Artificial. +450k propiedades analizadas.",
-    images: ['/og-image.jpg'], // Same image for consistency
+    title: 'PROP-IA | Plataforma de Gestión Inmobiliaria con IA',
+    description: 'Revoluciona tu inmobiliaria con IA. Tasaciones automáticas, CRM completo y publicación multiplataforma.',
+    images: ['/og-image.png'],
+    creator: '@propia',
   },
   robots: {
     index: true,
@@ -60,12 +66,19 @@ export const metadata: Metadata = {
       'max-snippet': -1,
     },
   },
+  verification: {
+    google: 'your-google-verification-code',
+    // yandex: 'your-yandex-verification-code',
+    // bing: 'your-bing-verification-code',
+  },
   alternates: {
     canonical: 'https://prop-ia.com',
+    languages: {
+      'es-AR': 'https://prop-ia.com',
+    },
   },
+  category: 'technology',
 };
-
-import NextTopLoader from "nextjs-toploader";
 
 export default function RootLayout({
   children,
@@ -73,31 +86,71 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="es">
-      <body
-        suppressHydrationWarning={true}
-        className={`
-          min-h-screen
-          bg-white text-black
-          antialiased
-          ${inter.variable}
-        `}
-      >
-        <NextTopLoader
-          color="#000000"
-          initialPosition={0.08}
-          crawlSpeed={200}
-          height={2}
-          crawl={true}
-          showSpinner={false}
-          easing="ease"
-          speed={200}
-          shadow="0 0 10px #000000,0 0 5px #000000"
+    <html lang="es-AR">
+      <head>
+        <link rel="icon" href="/favicon.ico" sizes="any" />
+        <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+        <link rel="manifest" href="/manifest.json" />
+        <meta name="theme-color" content="#4F46E5" />
+        <meta name="apple-mobile-web-app-capable" content="yes" />
+        <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+        <meta name="apple-mobile-web-app-title" content="PROP-IA" />
+
+        {/* Preconnect to external domains */}
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
+        <link rel="preconnect" href="https://firebasestorage.googleapis.com" />
+
+        {/* DNS Prefetch */}
+        <link rel="dns-prefetch" href="https://www.googletagmanager.com" />
+      </head>
+      <body className={inter.className}>
+        <ClientLayout>
+          {children}
+        </ClientLayout>
+
+        {/* Structured Data - Organization */}
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{
+            __html: JSON.stringify({
+              '@context': 'https://schema.org',
+              '@type': 'Organization',
+              name: 'PROP-IA',
+              url: 'https://prop-ia.com',
+              logo: 'https://prop-ia.com/logo.png',
+              description: 'Plataforma de gestión inmobiliaria con Inteligencia Artificial para Argentina',
+              address: {
+                '@type': 'PostalAddress',
+                addressCountry: 'AR',
+                addressLocality: 'Buenos Aires',
+              },
+              sameAs: [
+                'https://twitter.com/propia',
+                'https://linkedin.com/company/propia',
+                'https://facebook.com/propia',
+              ],
+            }),
+          }}
         />
-        <AuthProvider>
-          <Navbar />
-          <main className="pt-[65px]">{children}</main>
-        </AuthProvider>
+
+        {/* Structured Data - WebSite */}
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{
+            __html: JSON.stringify({
+              '@context': 'https://schema.org',
+              '@type': 'WebSite',
+              name: 'PROP-IA',
+              url: 'https://prop-ia.com',
+              potentialAction: {
+                '@type': 'SearchAction',
+                target: 'https://prop-ia.com/buscar?q={search_term_string}',
+                'query-input': 'required name=search_term_string',
+              },
+            }),
+          }}
+        />
       </body>
     </html>
   );

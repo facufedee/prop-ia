@@ -54,11 +54,11 @@ export default function Navbar() {
           <Link href="/modelo" className="flex items-center gap-2 hover:text-indigo-600 transition-colors">
             Tecnología
           </Link>
+          <Link href="/catalogo" className="flex items-center gap-2 hover:text-indigo-600 transition-colors">
+            Precios
+          </Link>
           <Link href="/blog" className="flex items-center gap-2 hover:text-indigo-600 transition-colors">
             Blog
-          </Link>
-          <Link href="/#pricing" className="flex items-center gap-2 hover:text-indigo-600 transition-colors">
-            Precios
           </Link>
 
           {/* Mega menu */}

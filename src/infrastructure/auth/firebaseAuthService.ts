@@ -8,6 +8,7 @@ import {
     User,
 } from "firebase/auth";
 import { doc, setDoc, getDoc } from "firebase/firestore";
+import { auditLogService } from "@/infrastructure/services/auditLogService";
 
 export const saveUserToFirestore = async (user: User, additionalData?: { agencyName?: string }) => {
     try {
@@ -45,6 +46,16 @@ export const loginWithGoogle = async () => {
     const provider = new GoogleAuthProvider();
     const result = await signInWithPopup(auth, provider);
     await saveUserToFirestore(result.user);
+
+    // Log authentication
+    await auditLogService.logAuth(
+        result.user.uid,
+        result.user.email || '',
+        result.user.displayName || result.user.email || 'Usuario',
+        'login',
+        result.user.uid
+    );
+
     return result;
 };
 
@@ -54,12 +65,32 @@ export const registerEmail = async (email: string, pass: string, displayName: st
     // await updateProfile(result.user, { displayName });
 
     await saveUserToFirestore(result.user, { agencyName });
+
+    // Log registration
+    await auditLogService.logAuth(
+        result.user.uid,
+        email,
+        displayName || email,
+        'register',
+        result.user.uid
+    );
+
     return result;
 };
 
 export const loginEmail = async (email: string, pass: string) => {
     const result = await signInWithEmailAndPassword(auth, email, pass);
     await saveUserToFirestore(result.user);
+
+    // Log login
+    await auditLogService.logAuth(
+        result.user.uid,
+        email,
+        result.user.displayName || email,
+        'login',
+        result.user.uid
+    );
+
     return result;
 };
 

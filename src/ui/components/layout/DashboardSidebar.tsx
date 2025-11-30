@@ -16,7 +16,13 @@ import {
   User,
   Settings,
   X,
-  Shield
+  Shield,
+  FileText,
+  ScrollText,
+  HardDrive,
+  Headphones,
+  Ticket,
+  CreditCard
 } from "lucide-react";
 import { auth } from "@/infrastructure/firebase/client";
 import { roleService, Role } from "@/infrastructure/services/roleService";
@@ -31,15 +37,22 @@ const MENU_ITEMS = [
   { href: "/dashboard", label: "Dashboard", icon: Home },
   { href: "/dashboard/tasacion", label: "Tasación Inteligente", icon: Calculator },
   { href: "/dashboard/propiedades", label: "Propiedades", icon: Building2 },
+  { href: "/dashboard/alquileres", label: "Alquileres", icon: FileText },
+  { href: "/dashboard/agentes", label: "Agentes", icon: Users },
   { href: "/dashboard/leads", label: "Leads / Consultas", icon: MessageSquare },
   { href: "/dashboard/clientes", label: "Clientes", icon: Users },
   { href: "/dashboard/chat", label: "Chat Prop-IA", icon: Bot },
   { href: "/dashboard/publicaciones", label: "Publicaciones", icon: Megaphone },
   { href: "/dashboard/finanzas", label: "Finanzas", icon: Banknote },
   { href: "/dashboard/calendario", label: "Calendario", icon: Calendar },
+  { href: "/dashboard/soporte", label: "Soporte", icon: Headphones },
+  { href: "/dashboard/soporte/ticketera", label: "Ticketera", icon: Ticket, adminOnly: true },
+  { href: "/dashboard/bitacora", label: "Bitácora", icon: ScrollText, adminOnly: true },
+  { href: "/catalogo", label: "Mi Suscripción", icon: CreditCard },
   { href: "/dashboard/cuenta", label: "Cuenta", icon: User },
   { href: "/dashboard/configuracion", label: "Configuración", icon: Settings },
   { href: "/dashboard/configuracion/roles", label: "Roles y Permisos", icon: Shield, adminOnly: true },
+  { href: "/dashboard/configuracion/backup", label: "Backup", icon: HardDrive, adminOnly: true },
 ];
 
 export default function DashboardSidebar({ isOpen = false, onClose }: DashboardSidebarProps) {
@@ -96,19 +109,24 @@ export default function DashboardSidebar({ isOpen = false, onClose }: DashboardS
 
       {/* Sidebar */}
       <aside className={`
-        fixed inset-y-0 left-0 z-50 w-64 bg-white border-r shadow-lg md:shadow-sm p-6 flex flex-col gap-6
+        fixed inset-y-0 left-0 z-50 w-64 bg-white shadow-lg md:shadow-sm p-6 flex flex-col gap-6 overflow-y-auto
         transform transition-transform duration-300 ease-in-out
         md:relative md:translate-x-0
         ${isOpen ? 'translate-x-0' : '-translate-x-full'}
       `}>
-        <div className="flex justify-between items-center">
-          <h1 className="text-xl font-bold tracking-tight text-indigo-900">PROP-IA</h1>
-          <button onClick={onClose} className="md:hidden p-1 hover:bg-gray-100 rounded-lg">
+        <div className="flex justify-between items-center mb-6">
+          <Link href="/dashboard" className="flex items-center gap-3 px-2">
+            <div className="w-8 h-8 bg-gradient-to-br from-indigo-600 to-purple-600 rounded-lg flex items-center justify-center shadow-sm">
+              <span className="text-white font-bold text-lg">P</span>
+            </div>
+            <span className="text-xl font-bold text-gray-900 tracking-tight">PROP-IA</span>
+          </Link>
+          <button onClick={onClose} className="p-1 hover:bg-gray-100 rounded-lg md:hidden">
             <X className="w-5 h-5 text-gray-500" />
           </button>
         </div>
 
-        <nav className="flex flex-col gap-2 text-gray-600 overflow-y-auto flex-1">
+        <nav className="flex flex-col gap-2 text-gray-600 flex-1">
           {filteredMenuItems.map((item) => {
             const isActive = pathname === item.href;
             const Icon = item.icon;

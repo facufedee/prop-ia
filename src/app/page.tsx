@@ -1,10 +1,7 @@
 import Hero from "@/ui/sections/Hero";
 import Features from "@/ui/sections/Features";
-import { Pricing } from "@/ui/sections/Pricing";
-import { HowItWorks } from "@/ui/sections/HowItWorks";
-import { MockupSection } from "@/ui/sections/MockupSection";
-import { FAQ } from "@/ui/sections/FAQ";
-import { CTA } from "@/ui/sections/CTA";
+import Testimonials from "@/ui/sections/Testimonials";
+import ContactForm from "@/ui/sections/ContactForm";
 import Footer from "@/ui/components/layout/Footer";
 import GoogleAuthPrompt from "@/ui/components/auth/GoogleAuthPrompt";
 
@@ -12,6 +9,8 @@ export default function LandingPage() {
     return (
         <main className="bg-white min-h-screen flex flex-col gap-0">
             <GoogleAuthPrompt />
+
+            {/* Structured Data for Software Application */}
             <script
                 type="application/ld+json"
                 dangerouslySetInnerHTML={{
@@ -35,29 +34,11 @@ export default function LandingPage() {
                     })
                 }}
             />
-            <script
-                type="application/ld+json"
-                dangerouslySetInnerHTML={{
-                    __html: JSON.stringify({
-                        "@context": "https://schema.org",
-                        "@type": "Organization",
-                        "name": "PROP-IA",
-                        "url": "https://prop-ia.com",
-                        "logo": "https://prop-ia.com/logo.png",
-                        "sameAs": [
-                            "https://twitter.com/propia",
-                            "https://linkedin.com/company/propia"
-                        ]
-                    })
-                }}
-            />
+
             <Hero />
             <Features />
-            <HowItWorks />
-            <MockupSection />
-            <Pricing />
-            <FAQ />
-            <CTA />
+            <Testimonials />
+            <ContactForm />
             <Footer />
         </main>
     );

@@ -18,15 +18,21 @@ export const PERMISSIONS: Permission[] = [
     { id: "/dashboard", label: "Dashboard", description: "Acceso al panel principal" },
     { id: "/dashboard/tasacion", label: "Tasación Inteligente", description: "Acceso a herramientas de tasación" },
     { id: "/dashboard/propiedades", label: "Propiedades", description: "Gestión de propiedades" },
+    { id: "/dashboard/alquileres", label: "Alquileres", description: "Gestión de contratos de alquiler" },
+    { id: "/dashboard/agentes", label: "Agentes", description: "Gestión de agentes y comisiones" },
     { id: "/dashboard/leads", label: "Leads / Consultas", description: "Gestión de clientes potenciales" },
     { id: "/dashboard/clientes", label: "Clientes", description: "Base de datos de clientes" },
     { id: "/dashboard/chat", label: "Chat Prop-IA", description: "Acceso al asistente de IA" },
     { id: "/dashboard/publicaciones", label: "Publicaciones", description: "Gestión de publicaciones en portales" },
     { id: "/dashboard/finanzas", label: "Finanzas", description: "Módulo financiero" },
     { id: "/dashboard/calendario", label: "Calendario", description: "Agenda y eventos" },
+    { id: "/dashboard/soporte", label: "Soporte", description: "Mesa de ayuda y tickets de soporte" },
+    { id: "/dashboard/soporte/ticketera", label: "Ticketera", description: "Gestión de tickets (solo administradores)" },
+    { id: "/dashboard/bitacora", label: "Bitácora", description: "Registro de auditoría del sistema" },
     { id: "/dashboard/cuenta", label: "Cuenta", description: "Configuración de cuenta personal" },
     { id: "/dashboard/configuracion", label: "Configuración", description: "Configuración global del sistema" },
     { id: "/dashboard/configuracion/roles", label: "Roles y Permisos", description: "Gestión de roles y permisos (solo administradores)" },
+    { id: "/dashboard/configuracion/backup", label: "Backup y Restauración", description: "Copias de seguridad de la base de datos (solo administradores)" },
 ];
 
 const ROLES_COLLECTION = "roles";
@@ -106,6 +112,8 @@ export const roleService = {
                 permissions: [
                     "/dashboard",
                     "/dashboard/propiedades",
+                    "/dashboard/alquileres",
+                    "/dashboard/agentes",
                     "/dashboard/leads",
                     "/dashboard/calendario",
                     "/dashboard/cuenta"

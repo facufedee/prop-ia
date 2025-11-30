@@ -1,0 +1,154 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    
+    // Helper Functions
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+    
+    function isOwner(userId) {
+      return isAuthenticated() && request.auth.uid == userId;
+    }
+    
+    function isAdmin() {
+      return isAuthenticated() && 
+             exists(/databases/$(database)/documents/users/$(request.auth.uid)) &&
+             get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'Administrador';
+    }
+    
+    function hasRole(role) {
+      return isAuthenticated() && 
+             exists(/databases/$(database)/documents/users/$(request.auth.uid)) &&
+             get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == role;
+    }
+    
+    function validateString(value, minLen, maxLen) {
+      return value is string && 
+             value.size() >= minLen && 
+             value.size() <= maxLen;
+    }
+    
+    function validateEmail(email) {
+      return email is string && email.matches('^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$');
+    }
+    
+    // Users Collection
+    match /users/{userId} {
+      allow read: if isAuthenticated();
+      allow create: if isOwner(userId) && 
+                      validateEmail(request.resource.data.email) &&
+                      validateString(request.resource.data.displayName, 2, 100);
+      allow update: if isOwner(userId) || isAdmin();
+      allow delete: if isAdmin();
+    }
+    
+    // Properties Collection
+    match /properties/{propertyId} {
+      allow read: if true; // Public read for property listings
+      allow create: if isAuthenticated() && 
+                      request.resource.data.userId == request.auth.uid &&
+                      validateString(request.resource.data.title, 5, 100) &&
+                      validateString(request.resource.data.description, 20, 2000) &&
+                      request.resource.data.price is number &&
+                      request.resource.data.price > 0;
+      allow update: if isOwner(resource.data.userId) || isAdmin();
+      allow delete: if isOwner(resource.data.userId) || isAdmin();
+    }
+    
+    // Agents Collection
+    match /agents/{agentId} {
+      allow read: if isAuthenticated();
+      allow create: if isAuthenticated() && 
+                      request.resource.data.userId == request.auth.uid &&
+                      validateEmail(request.resource.data.email) &&
+                      validateString(request.resource.data.nombre, 2, 100);
+      allow update: if isOwner(resource.data.userId) || isAdmin();
+      allow delete: if isOwner(resource.data.userId) || isAdmin();
+    }
+    
+    // Leads Collection
+    match /leads/{leadId} {
+      allow read: if isOwner(resource.data.userId) || isAdmin();
+      allow create: if true; // Allow public lead creation from forms
+      allow update: if isOwner(resource.data.userId) || isAdmin();
+      allow delete: if isOwner(resource.data.userId) || isAdmin();
+    }
+    
+    // Tickets Collection
+    match /tickets/{ticketId} {
+      allow read: if isOwner(resource.data.userId) || isAdmin();
+      allow create: if isAuthenticated() && 
+                      request.resource.data.userId == request.auth.uid &&
+                      validateString(request.resource.data.title, 5, 200) &&
+                      validateString(request.resource.data.description, 10, 5000);
+      allow update: if isOwner(resource.data.userId) || isAdmin();
+      allow delete: if isAdmin();
+    }
+    
+    // Ticket Messages Collection
+    match /ticket_messages/{messageId} {
+      allow read: if isAuthenticated();
+      allow create: if isAuthenticated() && 
+                      request.resource.data.userId == request.auth.uid &&
+                      validateString(request.resource.data.message, 1, 5000);
+      allow update: if false; // Messages cannot be edited
+      allow delete: if isAdmin();
+    }
+    
+    // Audit Logs Collection
+    match /audit_logs/{logId} {
+      allow read: if isAdmin();
+      allow create: if isAuthenticated();
+      allow update: if false; // Logs are immutable
+      allow delete: if false; // Logs cannot be deleted
+    }
+    
+    // Roles Collection
+    match /roles/{roleId} {
+      allow read: if isAuthenticated();
+      allow write: if isAdmin();
+    }
+    
+    // Plans Collection (Subscriptions)
+    match /plans/{planId} {
+      allow read: if true; // Public read for pricing
+      allow write: if isAdmin();
+    }
+    
+    // Subscriptions Collection
+    match /subscriptions/{subscriptionId} {
+      allow read: if isOwner(resource.data.userId) || isAdmin();
+      allow create: if isAuthenticated() && request.resource.data.userId == request.auth.uid;
+      allow update: if isOwner(resource.data.userId) || isAdmin();
+      allow delete: if isAdmin();
+    }
+    
+    // Payments Collection
+    match /payments/{paymentId} {
+      allow read: if isOwner(resource.data.userId) || isAdmin();
+      allow create: if isAuthenticated() && request.resource.data.userId == request.auth.uid;
+      allow update: if isAdmin(); // Only admins can update payment status
+      allow delete: if false; // Payments cannot be deleted
+    }
+    
+    // Transactions Collection
+    match /transactions/{transactionId} {
+      allow read: if isOwner(resource.data.userId) || isAdmin();
+      allow create: if isAuthenticated() && request.resource.data.userId == request.auth.uid;
+      allow update: if isOwner(resource.data.userId) || isAdmin();
+      allow delete: if isAdmin();
+    }
+    
+    // Commission Configuration
+    match /commission_config/{configId} {
+      allow read: if isOwner(resource.data.userId) || isAdmin();
+      allow write: if isOwner(resource.data.userId) || isAdmin();
+    }
+    
+    // Default deny all other collections
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}
