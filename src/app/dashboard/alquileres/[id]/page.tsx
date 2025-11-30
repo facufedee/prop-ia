@@ -24,9 +24,11 @@ export default function AlquilerDetailPage() {
             try {
                 const data = await alquileresService.getAlquilerById(params.id as string);
                 setAlquiler(data);
-                setEditData(data);
+                // Fix: Handle null data safely. If data is null, default to empty object.
+                setEditData(data || {});
             } catch (error) {
                 console.error("Error fetching contract:", error);
+                // Ensure loading is set to false even on error
             } finally {
                 setLoading(false);
             }
@@ -52,7 +54,9 @@ export default function AlquilerDetailPage() {
         try {
             await alquileresService.registrarPago(alquiler.id, updatedPago);
             const updated = await alquileresService.getAlquilerById(alquiler.id);
-            setAlquiler(updated);
+            if (updated) {
+                setAlquiler(updated);
+            }
         } catch (error) {
             console.error("Error registering payment:", error);
             alert("Error al registrar el pago");
@@ -76,7 +80,9 @@ export default function AlquilerDetailPage() {
         try {
             await alquileresService.updateAlquiler(alquiler.id, { incidencias });
             const updated = await alquileresService.getAlquilerById(alquiler.id);
-            setAlquiler(updated);
+            if (updated) {
+                setAlquiler(updated);
+            }
         } catch (error) {
             console.error("Error updating incidencia:", error);
             alert("Error al actualizar la incidencia");
@@ -89,7 +95,9 @@ export default function AlquilerDetailPage() {
         try {
             await alquileresService.updateAlquiler(alquiler.id, { estado: 'finalizado' });
             const updated = await alquileresService.getAlquilerById(alquiler.id);
-            setAlquiler(updated);
+            if (updated) {
+                setAlquiler(updated);
+            }
         } catch (error) {
             console.error("Error finalizing contract:", error);
             alert("Error al finalizar el contrato");
@@ -103,7 +111,9 @@ export default function AlquilerDetailPage() {
             const updatedDocuments = [...alquiler.documentos, ...urls];
             await alquileresService.updateAlquiler(alquiler.id, { documentos: updatedDocuments });
             const updated = await alquileresService.getAlquilerById(alquiler.id);
-            setAlquiler(updated);
+            if (updated) {
+                setAlquiler(updated);
+            }
         } catch (error) {
             console.error("Error updating documents:", error);
             alert("Error al actualizar documentos");
@@ -116,8 +126,10 @@ export default function AlquilerDetailPage() {
         try {
             await alquileresService.updateAlquiler(alquiler.id, editData);
             const updated = await alquileresService.getAlquilerById(alquiler.id);
-            setAlquiler(updated);
-            setEditData(updated);
+            if (updated) {
+                setAlquiler(updated);
+                setEditData(updated);
+            }
             setIsEditing(false);
         } catch (error) {
             console.error("Error updating contract:", error);
@@ -174,8 +186,8 @@ export default function AlquilerDetailPage() {
                     <p className="text-gray-500">{alquiler.propiedadTipo}</p>
                 </div>
                 <span className={`px-3 py-1 text-sm font-medium rounded-full ${alquiler.estado === 'activo' ? 'bg-green-100 text-green-700' :
-                        alquiler.estado === 'pendiente' ? 'bg-yellow-100 text-yellow-700' :
-                            'bg-gray-100 text-gray-700'
+                    alquiler.estado === 'pendiente' ? 'bg-yellow-100 text-yellow-700' :
+                        'bg-gray-100 text-gray-700'
                     }`}>
                     {alquiler.estado}
                 </span>
@@ -191,8 +203,8 @@ export default function AlquilerDetailPage() {
                                 key={tab.id}
                                 onClick={() => setActiveTab(tab.id)}
                                 className={`flex items-center gap-2 px-4 py-3 border-b-2 transition-colors whitespace-nowrap ${activeTab === tab.id
-                                        ? 'border-indigo-600 text-indigo-600 font-medium'
-                                        : 'border-transparent text-gray-600 hover:text-gray-900'
+                                    ? 'border-indigo-600 text-indigo-600 font-medium'
+                                    : 'border-transparent text-gray-600 hover:text-gray-900'
                                     }`}
                             >
                                 <Icon className="w-5 h-5" />
