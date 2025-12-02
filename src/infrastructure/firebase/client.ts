@@ -16,7 +16,13 @@ const firebaseConfig = {
 
 const app = getApps().length ? getApps()[0] : initializeApp(firebaseConfig);
 
-export const auth = getAuth(app);
+// Safe Auth Init for Build/Server Environments
+let auth: any;
+try {
+  auth = getAuth(app);
+} catch (e) {
+  console.warn("Firebase Auth failed to initialize. This is expected during server-side build if env vars are missing.");
+}
 
 let firestoreDb;
 try {
@@ -36,4 +42,4 @@ try {
 
 export const db = firestoreDb;
 export const storage = getStorage(app);
-export { app };
+export { auth, app };
