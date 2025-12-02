@@ -228,6 +228,7 @@ export default function PropertyWizard({ initialData, isEditing = false }: Prope
 
             if (isEditing && initialData?.id) {
                 // Update existing document
+                if (!db) throw new Error("Firestore not initialized");
                 propertyRef = doc(db, "properties", initialData.id);
                 await updateDoc(propertyRef, {
                     ...formData,
@@ -236,6 +237,7 @@ export default function PropertyWizard({ initialData, isEditing = false }: Prope
                 });
             } else {
                 // Create new document
+                if (!db) throw new Error("Firestore not initialized");
                 const docRef = await addDoc(collection(db, "properties"), {
                     ...formData,
                     userId: auth.currentUser.uid,
