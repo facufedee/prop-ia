@@ -1,11 +1,11 @@
 // src/infrastructure/firebase/client.ts
-import { initializeApp, getApps, FirebaseOptions } from "firebase/app";
-import { getAuth } from "firebase/auth";
-import { initializeFirestore, persistentLocalCache, persistentMultipleTabManager, getFirestore } from "firebase/firestore";
-import { getStorage } from "firebase/storage";
+import { initializeApp, getApps, FirebaseApp, FirebaseOptions } from "firebase/app";
+import { getAuth, Auth } from "firebase/auth";
+import { initializeFirestore, persistentLocalCache, persistentMultipleTabManager, getFirestore, Firestore } from "firebase/firestore";
+import { getStorage, FirebaseStorage } from "firebase/storage";
 
 // Helper to get config from various sources
-const getFirebaseConfig = (): FirebaseOptions => {
+const getFirebaseConfig = (): FirebaseOptions | null => {
   // 1. Try individual env vars (Local & Vercel)
   if (process.env.NEXT_PUBLIC_FIREBASE_API_KEY) {
     return {
@@ -23,46 +23,61 @@ const getFirebaseConfig = (): FirebaseOptions => {
   if (process.env.FIREBASE_CONFIG) {
     try {
       const config = JSON.parse(process.env.FIREBASE_CONFIG);
-      // Ensure we have at least apiKey
-      if (config.apiKey) return config;
+      // Ensure we have at least apiKey and projectId
+      if (config.apiKey && config.projectId) return config;
     } catch (e) {
       console.warn("Failed to parse FIREBASE_CONFIG", e);
     }
   }
 
-  // 3. Return empty object if nothing found (prevents build crash, but services won't work)
-  return {};
+  // 3. Return null if nothing found
+  return null;
 };
 
 const firebaseConfig = getFirebaseConfig();
-const app = getApps().length ? getApps()[0] : initializeApp(firebaseConfig);
 
-// Safe Auth Init: Only initialize if we have an API Key AND we are in the browser
-let auth: any = null;
-if (typeof window !== "undefined" && firebaseConfig.apiKey) {
+let app: FirebaseApp | undefined;
+let auth: Auth | undefined;
+let db: Firestore | undefined;
+let storage: FirebaseStorage | undefined;
+
+// Only initialize if we have a valid config
+if (firebaseConfig) {
   try {
-    auth = getAuth(app);
-  } catch (e) {
-    console.warn("Firebase Auth failed to initialize.", e);
+    app = getApps().length ? getApps()[0] : initializeApp(firebaseConfig);
+
+    // Auth (Browser Only)
+    if (typeof window !== "undefined") {
+      try {
+        auth = getAuth(app);
+      } catch (e) {
+        console.warn("Firebase Auth failed to initialize.", e);
+      }
+    }
+
+    // Firestore
+    try {
+      db = initializeFirestore(app, {
+        localCache: persistentLocalCache({
+          tabManager: persistentMultipleTabManager()
+        })
+      }, "propia");
+    } catch (e) {
+      try {
+        db = getFirestore(app, "propia");
+      } catch (e2) {
+        db = getFirestore(app);
+      }
+    }
+
+    // Storage
+    storage = getStorage(app);
+
+  } catch (error) {
+    console.error("Error initializing Firebase:", error);
   }
+} else {
+  console.warn("Firebase Config missing. Skipping initialization. (Expected during build if env vars are missing)");
 }
 
-// Safe Firestore Init
-let firestoreDb;
-try {
-  firestoreDb = initializeFirestore(app, {
-    localCache: persistentLocalCache({
-      tabManager: persistentMultipleTabManager()
-    })
-  }, "propia");
-} catch (e) {
-  try {
-    firestoreDb = getFirestore(app, "propia");
-  } catch (e2) {
-    firestoreDb = getFirestore(app);
-  }
-}
-
-export const db = firestoreDb;
-export const storage = getStorage(app);
-export { auth, app };
+export { app, auth, db, storage };
