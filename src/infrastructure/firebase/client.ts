@@ -16,12 +16,14 @@ const firebaseConfig = {
 
 const app = getApps().length ? getApps()[0] : initializeApp(firebaseConfig);
 
-// Safe Auth Init for Build/Server Environments
+// Safe Auth Init: Only initialize Auth in the browser
 let auth: any;
-try {
-  auth = getAuth(app);
-} catch (e) {
-  console.warn("Firebase Auth failed to initialize. This is expected during server-side build if env vars are missing.");
+if (typeof window !== "undefined") {
+  try {
+    auth = getAuth(app);
+  } catch (e) {
+    console.warn("Firebase Auth failed to initialize. This is expected if env vars are missing.");
+  }
 }
 
 let firestoreDb;
