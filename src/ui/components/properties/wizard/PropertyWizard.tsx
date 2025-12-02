@@ -253,6 +253,7 @@ export default function PropertyWizard({ initialData, isEditing = false }: Prope
             for (let i = 0; i < totalImages; i++) {
                 const image = images[i];
                 // Use propertyRef.id (works for both new and existing docs)
+                if (!storage) throw new Error("Firebase Storage not initialized");
                 const storageRef = ref(storage, `properties/${auth.currentUser.uid}/${propertyRef.id}/${image.name}-${Date.now()}`);
                 await uploadBytes(storageRef, image);
                 const url = await getDownloadURL(storageRef);

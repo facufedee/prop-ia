@@ -84,6 +84,7 @@ export default function UploadDocuments({
 
                 // Upload to Firebase Storage
                 const fileName = `alquileres/${alquilerId}/${doc.type}_${Date.now()}_${doc.file.name}`;
+                if (!storage) throw new Error("Firebase Storage not initialized");
                 const storageRef = ref(storage, fileName);
 
                 await uploadBytes(storageRef, doc.file);

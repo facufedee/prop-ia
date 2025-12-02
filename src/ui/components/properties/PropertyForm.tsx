@@ -140,212 +140,201 @@ export default function PropertyForm() {
             setError("Debes iniciar sesión para registrar una propiedad.");
             return;
         }
+        status: 'active',
+            imageUrls: [] // Will update later
+    });
 
-        setLoading(true);
-        setUploading(true);
-        setError(null);
+    const propertyId = propertyRef.id;
+    const imageUrls: string[] = [];
 
-        try {
-            // 1. Create Property Document in Firestore (to get ID)
-            const propertyRef = await addDoc(collection(db, "properties"), {
-                ...form,
-                features: selectedFeatures,
-                userId: auth.currentUser.uid,
-                createdAt: new Date(),
-                status: 'active',
-                imageUrls: [] // Will update later
-            });
+    // 2. Upload Images to Storage
+    const totalImages = images.length;
+    for (let i = 0; i < totalImages; i++) {
+        const image = images[i];
+        if (!storage) throw new Error("Firebase Storage not initialized");
+        const storageRef = ref(storage, `properties/${auth.currentUser.uid}/${propertyId}/${image.name}-${Date.now()}`);
+        await uploadBytes(storageRef, image);
+        const url = await getDownloadURL(storageRef);
+        imageUrls.push(url);
+        setUploadProgress(Math.round(((i + 1) / totalImages) * 100));
+    }
 
-            const propertyId = propertyRef.id;
-            const imageUrls: string[] = [];
+    // 3. Update Firestore with Image URLs
+    await updateDoc(propertyRef, { imageUrls });
 
-            // 2. Upload Images to Storage
-            const totalImages = images.length;
-            for (let i = 0; i < totalImages; i++) {
-                const image = images[i];
-                const storageRef = ref(storage, `properties/${auth.currentUser.uid}/${propertyId}/${image.name}-${Date.now()}`);
-                await uploadBytes(storageRef, image);
-                const url = await getDownloadURL(storageRef);
-                imageUrls.push(url);
-                setUploadProgress(Math.round(((i + 1) / totalImages) * 100));
-            }
+    router.push("/dashboard/propiedades");
 
-            // 3. Update Firestore with Image URLs
-            await updateDoc(propertyRef, { imageUrls });
-
-            router.push("/dashboard/propiedades");
-
-        } catch (err: any) {
-            console.error(err);
-            setError("Error al guardar la propiedad: " + err.message);
-        } finally {
-            setLoading(false);
-            setUploading(false);
-        }
+} catch (err: any) {
+    console.error(err);
+    setError("Error al guardar la propiedad: " + err.message);
+} finally {
+    setLoading(false);
+    setUploading(false);
+}
     };
 
-    const renderInputField = (name: keyof PropertyData, label: string, icon: React.ReactNode, type = "text") => (
-        <div className="relative">
-            <span className="absolute inset-y-0 left-0 flex items-center pl-3 text-gray-500 pointer-events-none">
-                {icon}
-            </span>
-            <input
-                name={name as string}
-                type={type}
-                min={type === 'number' ? "0" : undefined}
-                placeholder={label}
-                value={(form as any)[name] || ''}
-                onChange={handleChange}
-                className="w-full border bg-gray-50 pl-10 p-3 rounded-xl text-black focus:ring-2 focus:ring-black focus:bg-white transition-all min-h-[44px]"
-            />
-        </div>
-    );
+const renderInputField = (name: keyof PropertyData, label: string, icon: React.ReactNode, type = "text") => (
+    <div className="relative">
+        <span className="absolute inset-y-0 left-0 flex items-center pl-3 text-gray-500 pointer-events-none">
+            {icon}
+        </span>
+        <input
+            name={name as string}
+            type={type}
+            min={type === 'number' ? "0" : undefined}
+            placeholder={label}
+            value={(form as any)[name] || ''}
+            onChange={handleChange}
+            className="w-full border bg-gray-50 pl-10 p-3 rounded-xl text-black focus:ring-2 focus:ring-black focus:bg-white transition-all min-h-[44px]"
+        />
+    </div>
+);
 
-    const renderSelectField = (name: keyof PropertyData, label: string, icon: React.ReactNode, options: string[], disabled: boolean = false, onChange?: (value: string) => void) => (
-        <div className="relative">
-            <span className="absolute inset-y-0 left-0 flex items-center pl-3 text-gray-500 pointer-events-none">
-                {icon}
-            </span>
-            <select
-                name={name as string}
-                value={(form as any)[name] || ''}
-                onChange={(e) => onChange ? onChange(e.target.value) : handleChange(e)}
-                disabled={disabled}
-                className="w-full border bg-gray-50 pl-10 p-3 rounded-xl text-black focus:ring-2 focus:ring-black focus:bg-white transition-all appearance-none disabled:bg-gray-100 disabled:text-gray-400 min-h-[44px]"
-            >
-                <option value="">{disabled ? `Selecciona ${label.toLowerCase()} primero` : label}</option>
-                {options.map(option => (
-                    <option key={option} value={option}>{option}</option>
-                ))}
-            </select>
-        </div>
-    );
+const renderSelectField = (name: keyof PropertyData, label: string, icon: React.ReactNode, options: string[], disabled: boolean = false, onChange?: (value: string) => void) => (
+    <div className="relative">
+        <span className="absolute inset-y-0 left-0 flex items-center pl-3 text-gray-500 pointer-events-none">
+            {icon}
+        </span>
+        <select
+            name={name as string}
+            value={(form as any)[name] || ''}
+            onChange={(e) => onChange ? onChange(e.target.value) : handleChange(e)}
+            disabled={disabled}
+            className="w-full border bg-gray-50 pl-10 p-3 rounded-xl text-black focus:ring-2 focus:ring-black focus:bg-white transition-all appearance-none disabled:bg-gray-100 disabled:text-gray-400 min-h-[44px]"
+        >
+            <option value="">{disabled ? `Selecciona ${label.toLowerCase()} primero` : label}</option>
+            {options.map(option => (
+                <option key={option} value={option}>{option}</option>
+            ))}
+        </select>
+    </div>
+);
 
-    return (
-        <div className="max-w-4xl mx-auto">
-            <form onSubmit={handleSubmit} className="space-y-8">
+return (
+    <div className="max-w-4xl mx-auto">
+        <form onSubmit={handleSubmit} className="space-y-8">
 
-                {/* Location Section */}
-                <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-200">
-                    <h2 className="text-xl font-semibold text-gray-900 mb-6 flex items-center gap-2">
-                        <MapPin className="w-5 h-5" /> Ubicación
-                    </h2>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        {renderSelectField("provincia", "Provincia", <MapPin />, provinciaOptions, false, handleProvinciaChange)}
-                        {renderSelectField("ciudad", "Ciudad", <MapPin />, ciudadOptions, !selectedProvincia, handleCiudadChange)}
-                        {renderSelectField("barrio", "Barrio", <MapPin />, barrioOptions, !selectedCiudad)}
-                        {renderInputField("property_type", "Dirección (Calle y Altura)", <Home />)}
+            {/* Location Section */}
+            <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-200">
+                <h2 className="text-xl font-semibold text-gray-900 mb-6 flex items-center gap-2">
+                    <MapPin className="w-5 h-5" /> Ubicación
+                </h2>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    {renderSelectField("provincia", "Provincia", <MapPin />, provinciaOptions, false, handleProvinciaChange)}
+                    {renderSelectField("ciudad", "Ciudad", <MapPin />, ciudadOptions, !selectedProvincia, handleCiudadChange)}
+                    {renderSelectField("barrio", "Barrio", <MapPin />, barrioOptions, !selectedCiudad)}
+                    {renderInputField("property_type", "Dirección (Calle y Altura)", <Home />)}
+                </div>
+            </div>
+
+            {/* Details Section */}
+            <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-200">
+                <h2 className="text-xl font-semibold text-gray-900 mb-6 flex items-center gap-2">
+                    <Building2 className="w-5 h-5" /> Detalles de la Propiedad
+                </h2>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    {renderSelectField("property_type", "Tipo de Propiedad", <Landmark />, propertyTypeOptions)}
+                    {renderInputField("area_total", "Área Total (m²)", <Ruler />, "number")}
+                    {renderInputField("area_covered", "Área Cubierta (m²)", <Ruler />, "number")}
+                    {renderInputField("rooms", "Ambientes", <Building2 />, "number")}
+                    {renderInputField("bedrooms", "Dormitorios", <BedDouble />, "number")}
+                    {renderInputField("bathrooms", "Baños", <Bath />, "number")}
+                    {renderInputField("floor", "Piso", <Hash />, "number")}
+                    {renderInputField("construction_year", "Año Construcción", <Clock />, "number")}
+                    {renderInputField("expenses", "Expensas ($)", <CircleDollarSign />, "number")}
+                </div>
+
+                <div className="mt-6">
+                    <label className="block text-sm font-medium text-gray-700 mb-3">Características Adicionales</label>
+                    <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                        {commonFeatures.map(feature => (
+                            <label key={feature} className="flex items-center space-x-2 p-2 border rounded-lg cursor-pointer hover:bg-gray-50 transition">
+                                <input
+                                    type="checkbox"
+                                    checked={selectedFeatures.includes(feature)}
+                                    onChange={(e) => handleFeatureChange(feature, e.target.checked)}
+                                    className="rounded border-gray-300 text-black focus:ring-black"
+                                />
+                                <span className="text-sm text-gray-700 capitalize">{feature}</span>
+                            </label>
+                        ))}
+                    </div>
+                </div>
+            </div>
+
+            {/* Image Upload Section */}
+            <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-200">
+                <h2 className="text-xl font-semibold text-gray-900 mb-6 flex items-center gap-2">
+                    <ImageIcon className="w-5 h-5" /> Imágenes
+                </h2>
+
+                <div
+                    className="border-2 border-dashed border-gray-300 rounded-xl p-8 text-center hover:bg-gray-50 transition cursor-pointer"
+                    onClick={() => fileInputRef.current?.click()}
+                >
+                    <input
+                        type="file"
+                        ref={fileInputRef}
+                        className="hidden"
+                        multiple
+                        accept="image/*"
+                        onChange={handleImageSelect}
+                    />
+                    <div className="flex flex-col items-center gap-2 text-gray-500">
+                        <Upload className="w-10 h-10 text-gray-400" />
+                        <p className="font-medium">Hacé click para subir imágenes</p>
+                        <p className="text-xs">Soporta JPG, PNG (Máx 30 imágenes)</p>
                     </div>
                 </div>
 
-                {/* Details Section */}
-                <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-200">
-                    <h2 className="text-xl font-semibold text-gray-900 mb-6 flex items-center gap-2">
-                        <Building2 className="w-5 h-5" /> Detalles de la Propiedad
-                    </h2>
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                        {renderSelectField("property_type", "Tipo de Propiedad", <Landmark />, propertyTypeOptions)}
-                        {renderInputField("area_total", "Área Total (m²)", <Ruler />, "number")}
-                        {renderInputField("area_covered", "Área Cubierta (m²)", <Ruler />, "number")}
-                        {renderInputField("rooms", "Ambientes", <Building2 />, "number")}
-                        {renderInputField("bedrooms", "Dormitorios", <BedDouble />, "number")}
-                        {renderInputField("bathrooms", "Baños", <Bath />, "number")}
-                        {renderInputField("floor", "Piso", <Hash />, "number")}
-                        {renderInputField("construction_year", "Año Construcción", <Clock />, "number")}
-                        {renderInputField("expenses", "Expensas ($)", <CircleDollarSign />, "number")}
-                    </div>
-
-                    <div className="mt-6">
-                        <label className="block text-sm font-medium text-gray-700 mb-3">Características Adicionales</label>
-                        <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-                            {commonFeatures.map(feature => (
-                                <label key={feature} className="flex items-center space-x-2 p-2 border rounded-lg cursor-pointer hover:bg-gray-50 transition">
-                                    <input
-                                        type="checkbox"
-                                        checked={selectedFeatures.includes(feature)}
-                                        onChange={(e) => handleFeatureChange(feature, e.target.checked)}
-                                        className="rounded border-gray-300 text-black focus:ring-black"
-                                    />
-                                    <span className="text-sm text-gray-700 capitalize">{feature}</span>
-                                </label>
-                            ))}
-                        </div>
-                    </div>
-                </div>
-
-                {/* Image Upload Section */}
-                <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-200">
-                    <h2 className="text-xl font-semibold text-gray-900 mb-6 flex items-center gap-2">
-                        <ImageIcon className="w-5 h-5" /> Imágenes
-                    </h2>
-
-                    <div
-                        className="border-2 border-dashed border-gray-300 rounded-xl p-8 text-center hover:bg-gray-50 transition cursor-pointer"
-                        onClick={() => fileInputRef.current?.click()}
-                    >
-                        <input
-                            type="file"
-                            ref={fileInputRef}
-                            className="hidden"
-                            multiple
-                            accept="image/*"
-                            onChange={handleImageSelect}
-                        />
-                        <div className="flex flex-col items-center gap-2 text-gray-500">
-                            <Upload className="w-10 h-10 text-gray-400" />
-                            <p className="font-medium">Hacé click para subir imágenes</p>
-                            <p className="text-xs">Soporta JPG, PNG (Máx 30 imágenes)</p>
-                        </div>
-                    </div>
-
-                    {previews.length > 0 && (
-                        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-6">
-                            {previews.map((src, index) => (
-                                <div key={index} className="relative group aspect-square rounded-lg overflow-hidden border">
-                                    <img src={src} alt={`Preview ${index}`} className="w-full h-full object-cover" />
-                                    <button
-                                        type="button"
-                                        onClick={() => removeImage(index)}
-                                        className="absolute top-1 right-1 bg-black/50 text-white p-1 rounded-full opacity-0 group-hover:opacity-100 transition"
-                                    >
-                                        <X size={14} />
-                                    </button>
-                                </div>
-                            ))}
-                        </div>
-                    )}
-                </div>
-
-                {error && (
-                    <div className="bg-red-50 text-red-700 p-4 rounded-xl border border-red-200">
-                        {error}
+                {previews.length > 0 && (
+                    <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-6">
+                        {previews.map((src, index) => (
+                            <div key={index} className="relative group aspect-square rounded-lg overflow-hidden border">
+                                <img src={src} alt={`Preview ${index}`} className="w-full h-full object-cover" />
+                                <button
+                                    type="button"
+                                    onClick={() => removeImage(index)}
+                                    className="absolute top-1 right-1 bg-black/50 text-white p-1 rounded-full opacity-0 group-hover:opacity-100 transition"
+                                >
+                                    <X size={14} />
+                                </button>
+                            </div>
+                        ))}
                     </div>
                 )}
+            </div>
 
-                <div className="flex justify-end gap-4">
-                    <button
-                        type="button"
-                        onClick={() => router.back()}
-                        className="px-6 py-3 border border-gray-300 rounded-xl text-gray-700 hover:bg-gray-50 transition"
-                    >
-                        Cancelar
-                    </button>
-                    <button
-                        type="submit"
-                        disabled={loading || !isFormValid()}
-                        className="px-6 py-3 bg-black text-white rounded-xl hover:bg-gray-800 transition disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
-                    >
-                        {loading ? (
-                            <>
-                                <Loader2 className="w-4 h-4 animate-spin" />
-                                {uploading ? `Subiendo ${uploadProgress}%` : 'Guardando...'}
-                            </>
-                        ) : (
-                            'Registrar Propiedad'
-                        )}
-                    </button>
+            {error && (
+                <div className="bg-red-50 text-red-700 p-4 rounded-xl border border-red-200">
+                    {error}
                 </div>
-            </form>
-        </div>
-    );
+            )}
+
+            <div className="flex justify-end gap-4">
+                <button
+                    type="button"
+                    onClick={() => router.back()}
+                    className="px-6 py-3 border border-gray-300 rounded-xl text-gray-700 hover:bg-gray-50 transition"
+                >
+                    Cancelar
+                </button>
+                <button
+                    type="submit"
+                    disabled={loading || !isFormValid()}
+                    className="px-6 py-3 bg-black text-white rounded-xl hover:bg-gray-800 transition disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+                >
+                    {loading ? (
+                        <>
+                            <Loader2 className="w-4 h-4 animate-spin" />
+                            {uploading ? `Subiendo ${uploadProgress}%` : 'Guardando...'}
+                        </>
+                    ) : (
+                        'Registrar Propiedad'
+                    )}
+                </button>
+            </div>
+        </form>
+    </div>
+);
 }
