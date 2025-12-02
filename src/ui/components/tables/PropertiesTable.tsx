@@ -37,6 +37,7 @@ export default function PropertiesTable() {
 
     const fetchProperties = async (userId: string) => {
         try {
+            if (!db) throw new Error("Firestore not initialized");
             const q = query(
                 collection(db, "properties"),
                 where("userId", "==", userId)
@@ -58,6 +59,7 @@ export default function PropertiesTable() {
         if (!confirm("¿Estás seguro de que querés eliminar esta propiedad?")) return;
 
         try {
+            if (!db) throw new Error("Firestore not initialized");
             await deleteDoc(doc(db, "properties", id));
             setProperties(prev => prev.filter(p => p.id !== id));
         } catch (error) {
@@ -118,8 +120,8 @@ export default function PropertiesTable() {
                             <td className="p-4 font-medium text-sm">{p.currency} {p.price?.toLocaleString()}</td>
                             <td className="p-4">
                                 <span className={`px-2 py-1 rounded-full text-xs font-medium ${p.operation_type === 'Venta' ? 'bg-green-100 text-green-700' :
-                                        p.operation_type === 'Alquiler' ? 'bg-blue-100 text-blue-700' :
-                                            'bg-purple-100 text-purple-700'
+                                    p.operation_type === 'Alquiler' ? 'bg-blue-100 text-blue-700' :
+                                        'bg-purple-100 text-purple-700'
                                     }`}>
                                     {p.operation_type}
                                 </span>

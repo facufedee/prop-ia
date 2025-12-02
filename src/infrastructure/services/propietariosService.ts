@@ -18,6 +18,7 @@ const COLLECTION_NAME = "propietarios";
 export const propietariosService = {
     // Get all propietarios for a user
     getPropietarios: async (userId: string): Promise<Propietario[]> => {
+        if (!db) throw new Error("Firestore not initialized");
         const q = query(collection(db, COLLECTION_NAME), where("userId", "==", userId));
         const snapshot = await getDocs(q);
 
@@ -31,6 +32,7 @@ export const propietariosService = {
 
     // Get propietario by ID
     getPropietarioById: async (id: string): Promise<Propietario | null> => {
+        if (!db) throw new Error("Firestore not initialized");
         const docRef = doc(db, COLLECTION_NAME, id);
         const docSnap = await getDoc(docRef);
 
@@ -46,6 +48,7 @@ export const propietariosService = {
 
     // Create new propietario
     createPropietario: async (data: Omit<Propietario, "id" | "createdAt" | "updatedAt">): Promise<string> => {
+        if (!db) throw new Error("Firestore not initialized");
         const docRef = await addDoc(collection(db, COLLECTION_NAME), {
             ...data,
             createdAt: Timestamp.now(),
@@ -56,6 +59,7 @@ export const propietariosService = {
 
     // Update propietario
     updatePropietario: async (id: string, data: Partial<Propietario>): Promise<void> => {
+        if (!db) throw new Error("Firestore not initialized");
         const docRef = doc(db, COLLECTION_NAME, id);
         await updateDoc(docRef, {
             ...data,
@@ -65,6 +69,7 @@ export const propietariosService = {
 
     // Delete propietario
     deletePropietario: async (id: string): Promise<void> => {
+        if (!db) throw new Error("Firestore not initialized");
         const docRef = doc(db, COLLECTION_NAME, id);
         await deleteDoc(docRef);
     },

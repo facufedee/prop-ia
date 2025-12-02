@@ -29,6 +29,7 @@ export const auditLogService = {
         level: LogLevel = 'info'
     ): Promise<void> => {
         try {
+            if (!db) throw new Error("Firestore not initialized");
             await addDoc(collection(db, LOGS_COLLECTION), {
                 userId,
                 userEmail,

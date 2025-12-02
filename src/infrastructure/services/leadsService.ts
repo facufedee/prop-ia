@@ -18,6 +18,7 @@ const COLLECTION_NAME = "leads";
 export const leadsService = {
     // Get all leads for a user
     getLeads: async (userId: string): Promise<Lead[]> => {
+        if (!db) throw new Error("Firestore not initialized");
         const q = query(collection(db, COLLECTION_NAME), where("userId", "==", userId));
         const snapshot = await getDocs(q);
 
@@ -32,6 +33,7 @@ export const leadsService = {
 
     // Get lead by ID
     getLeadById: async (id: string): Promise<Lead | null> => {
+        if (!db) throw new Error("Firestore not initialized");
         const docRef = doc(db, COLLECTION_NAME, id);
         const docSnap = await getDoc(docRef);
 
@@ -48,6 +50,7 @@ export const leadsService = {
 
     // Create new lead
     createLead: async (data: Omit<Lead, "id" | "createdAt" | "updatedAt">): Promise<string> => {
+        if (!db) throw new Error("Firestore not initialized");
         const docRef = await addDoc(collection(db, COLLECTION_NAME), {
             ...data,
             fechaContacto: data.fechaContacto ? Timestamp.fromDate(data.fechaContacto) : null,
@@ -59,6 +62,7 @@ export const leadsService = {
 
     // Update lead
     updateLead: async (id: string, data: Partial<Lead>): Promise<void> => {
+        if (!db) throw new Error("Firestore not initialized");
         const docRef = doc(db, COLLECTION_NAME, id);
         const updateData: any = {
             ...data,
@@ -74,12 +78,14 @@ export const leadsService = {
 
     // Delete lead
     deleteLead: async (id: string): Promise<void> => {
+        if (!db) throw new Error("Firestore not initialized");
         const docRef = doc(db, COLLECTION_NAME, id);
         await deleteDoc(docRef);
     },
 
     // Get leads by estado
     getLeadsByEstado: async (userId: string, estado: LeadEstado): Promise<Lead[]> => {
+        if (!db) throw new Error("Firestore not initialized");
         const q = query(
             collection(db, COLLECTION_NAME),
             where("userId", "==", userId),

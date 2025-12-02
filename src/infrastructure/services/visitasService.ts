@@ -19,6 +19,7 @@ const COLLECTION_NAME = "visitas";
 export const visitasService = {
     // Get all visitas for a user
     getVisitas: async (userId: string): Promise<Visita[]> => {
+        if (!db) throw new Error("Firestore not initialized");
         const q = query(
             collection(db, COLLECTION_NAME),
             where("userId", "==", userId),
@@ -39,6 +40,7 @@ export const visitasService = {
 
     // Get visitas by date range
     getVisitasByDateRange: async (userId: string, startDate: Date, endDate: Date): Promise<Visita[]> => {
+        if (!db) throw new Error("Firestore not initialized");
         const q = query(
             collection(db, COLLECTION_NAME),
             where("userId", "==", userId),
@@ -61,6 +63,7 @@ export const visitasService = {
 
     // Get visita by ID
     getVisitaById: async (id: string): Promise<Visita | null> => {
+        if (!db) throw new Error("Firestore not initialized");
         const docRef = doc(db, COLLECTION_NAME, id);
         const docSnap = await getDoc(docRef);
 
@@ -79,6 +82,7 @@ export const visitasService = {
 
     // Create new visita
     createVisita: async (data: Omit<Visita, "id" | "createdAt" | "updatedAt">): Promise<string> => {
+        if (!db) throw new Error("Firestore not initialized");
         const docRef = await addDoc(collection(db, COLLECTION_NAME), {
             ...data,
             fechaHora: Timestamp.fromDate(data.fechaHora),
@@ -92,6 +96,7 @@ export const visitasService = {
 
     // Update visita
     updateVisita: async (id: string, data: Partial<Visita>): Promise<void> => {
+        if (!db) throw new Error("Firestore not initialized");
         const docRef = doc(db, COLLECTION_NAME, id);
         const updateData: any = {
             ...data,
@@ -113,6 +118,7 @@ export const visitasService = {
 
     // Delete visita
     deleteVisita: async (id: string): Promise<void> => {
+        if (!db) throw new Error("Firestore not initialized");
         const docRef = doc(db, COLLECTION_NAME, id);
         await deleteDoc(docRef);
     },
@@ -143,6 +149,7 @@ export const visitasService = {
 
     // Get visitas by agente
     getVisitasByAgente: async (userId: string, agenteId: string): Promise<Visita[]> => {
+        if (!db) throw new Error("Firestore not initialized");
         const q = query(
             collection(db, COLLECTION_NAME),
             where("userId", "==", userId),
@@ -164,6 +171,7 @@ export const visitasService = {
 
     // Get visitas by estado
     getVisitasByEstado: async (userId: string, estado: VisitaEstado): Promise<Visita[]> => {
+        if (!db) throw new Error("Firestore not initialized");
         const q = query(
             collection(db, COLLECTION_NAME),
             where("userId", "==", userId),

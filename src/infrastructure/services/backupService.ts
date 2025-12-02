@@ -35,6 +35,7 @@ export const backupService = {
 
         for (const collectionName of COLLECTIONS_TO_BACKUP) {
             try {
+                if (!db) throw new Error("Firestore not initialized");
                 const q = collection(db, collectionName);
                 const snapshot = await getDocs(q);
 
@@ -91,6 +92,7 @@ export const backupService = {
                 // Restore in batches of 500 (Firestore limit)
                 const batchSize = 500;
                 for (let i = 0; i < documents.length; i += batchSize) {
+                    if (!db) throw new Error("Firestore not initialized");
                     const batch = writeBatch(db);
                     const batchDocs = documents.slice(i, i + batchSize);
 

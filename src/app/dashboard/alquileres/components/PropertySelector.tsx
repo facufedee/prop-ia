@@ -30,6 +30,8 @@ export default function PropertySelector({ onSelect, selectedId }: PropertySelec
                 const { collection, query, where, getDocs } = await import("firebase/firestore");
                 const { db } = await import("@/infrastructure/firebase/client");
 
+                if (!db) return;
+
                 const q = query(
                     collection(db, "properties"),
                     where("userId", "==", auth.currentUser.uid)

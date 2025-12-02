@@ -21,6 +21,7 @@ export const ticketsService = {
 
     // Obtener todos los tickets (para admins)
     getAllTickets: async (): Promise<Ticket[]> => {
+        if (!db) throw new Error("Firestore not initialized");
         const q = query(collection(db, TICKETS_COLLECTION), orderBy("createdAt", "desc"));
         const snapshot = await getDocs(q);
 
@@ -37,6 +38,7 @@ export const ticketsService = {
 
     // Obtener tickets de un usuario
     getUserTickets: async (userId: string): Promise<Ticket[]> => {
+        if (!db) throw new Error("Firestore not initialized");
         const q = query(
             collection(db, TICKETS_COLLECTION),
             where("userId", "==", userId),
@@ -57,6 +59,7 @@ export const ticketsService = {
 
     // Obtener ticket por ID
     getTicketById: async (id: string): Promise<Ticket | null> => {
+        if (!db) throw new Error("Firestore not initialized");
         const docRef = doc(db, TICKETS_COLLECTION, id);
         const docSnap = await getDoc(docRef);
 
@@ -75,6 +78,7 @@ export const ticketsService = {
 
     // Crear ticket
     createTicket: async (data: Omit<Ticket, "id" | "createdAt" | "updatedAt" | "messagesCount">): Promise<string> => {
+        if (!db) throw new Error("Firestore not initialized");
         const docRef = await addDoc(collection(db, TICKETS_COLLECTION), {
             ...data,
             messagesCount: 0,
@@ -86,6 +90,7 @@ export const ticketsService = {
 
     // Actualizar ticket
     updateTicket: async (id: string, data: Partial<Ticket>): Promise<void> => {
+        if (!db) throw new Error("Firestore not initialized");
         const docRef = doc(db, TICKETS_COLLECTION, id);
         const updateData: any = {
             ...data,
@@ -115,12 +120,14 @@ export const ticketsService = {
             updateData.closedAt = Timestamp.now();
         }
 
+        if (!db) throw new Error("Firestore not initialized");
         const docRef = doc(db, TICKETS_COLLECTION, id);
         await updateDoc(docRef, updateData);
     },
 
     // Asignar ticket
     assignTicket: async (id: string, adminId: string, adminName: string): Promise<void> => {
+        if (!db) throw new Error("Firestore not initialized");
         const docRef = doc(db, TICKETS_COLLECTION, id);
         await updateDoc(docRef, {
             assignedToId: adminId,
@@ -134,6 +141,7 @@ export const ticketsService = {
 
     // Obtener mensajes de un ticket
     getTicketMessages: async (ticketId: string): Promise<TicketMessage[]> => {
+        if (!db) throw new Error("Firestore not initialized");
         const q = query(
             collection(db, MESSAGES_COLLECTION),
             where("ticketId", "==", ticketId),
@@ -150,6 +158,7 @@ export const ticketsService = {
 
     // Agregar mensaje
     addMessage: async (data: Omit<TicketMessage, "id" | "timestamp">): Promise<string> => {
+        if (!db) throw new Error("Firestore not initialized");
         const docRef = await addDoc(collection(db, MESSAGES_COLLECTION), {
             ...data,
             timestamp: Timestamp.now(),
@@ -177,6 +186,7 @@ export const ticketsService = {
         priority?: TicketPriority;
         assignedToId?: string;
     }): Promise<Ticket[]> => {
+        if (!db) throw new Error("Firestore not initialized");
         let q = query(collection(db, TICKETS_COLLECTION));
 
         if (filters.status) {

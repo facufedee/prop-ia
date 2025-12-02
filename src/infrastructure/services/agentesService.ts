@@ -21,6 +21,7 @@ export const agentesService = {
     // ========== AGENTES ==========
 
     getAgentes: async (userId: string): Promise<Agente[]> => {
+        if (!db) throw new Error("Firestore not initialized");
         const q = query(collection(db, AGENTES_COLLECTION), where("userId", "==", userId));
         const snapshot = await getDocs(q);
 
@@ -34,6 +35,7 @@ export const agentesService = {
     },
 
     getAgenteById: async (id: string): Promise<Agente | null> => {
+        if (!db) throw new Error("Firestore not initialized");
         const docRef = doc(db, AGENTES_COLLECTION, id);
         const docSnap = await getDoc(docRef);
 
@@ -49,6 +51,7 @@ export const agentesService = {
     },
 
     createAgente: async (data: Omit<Agente, "id" | "createdAt" | "updatedAt">): Promise<string> => {
+        if (!db) throw new Error("Firestore not initialized");
         const docRef = await addDoc(collection(db, AGENTES_COLLECTION), {
             ...data,
             fechaIngreso: Timestamp.fromDate(data.fechaIngreso),
@@ -59,6 +62,7 @@ export const agentesService = {
     },
 
     updateAgente: async (id: string, data: Partial<Agente>): Promise<void> => {
+        if (!db) throw new Error("Firestore not initialized");
         const docRef = doc(db, AGENTES_COLLECTION, id);
         const updateData: any = {
             ...data,
@@ -73,6 +77,7 @@ export const agentesService = {
     },
 
     deleteAgente: async (id: string): Promise<void> => {
+        if (!db) throw new Error("Firestore not initialized");
         const docRef = doc(db, AGENTES_COLLECTION, id);
         await deleteDoc(docRef);
     },
@@ -96,6 +101,7 @@ export const agentesService = {
     // ========== TRANSACCIONES ==========
 
     getTransacciones: async (userId: string): Promise<Transaccion[]> => {
+        if (!db) throw new Error("Firestore not initialized");
         const q = query(collection(db, TRANSACCIONES_COLLECTION), where("userId", "==", userId));
         const snapshot = await getDocs(q);
 
@@ -110,6 +116,7 @@ export const agentesService = {
     },
 
     getTransaccionesByAgente: async (userId: string, agenteId: string): Promise<Transaccion[]> => {
+        if (!db) throw new Error("Firestore not initialized");
         const q = query(
             collection(db, TRANSACCIONES_COLLECTION),
             where("userId", "==", userId),
@@ -128,6 +135,7 @@ export const agentesService = {
     },
 
     createTransaccion: async (data: Omit<Transaccion, "id" | "createdAt" | "updatedAt">): Promise<string> => {
+        if (!db) throw new Error("Firestore not initialized");
         const docRef = await addDoc(collection(db, TRANSACCIONES_COLLECTION), {
             ...data,
             fechaTransaccion: Timestamp.fromDate(data.fechaTransaccion),
@@ -156,6 +164,7 @@ export const agentesService = {
     },
 
     marcarComoPagada: async (id: string): Promise<void> => {
+        if (!db) throw new Error("Firestore not initialized");
         const docRef = doc(db, TRANSACCIONES_COLLECTION, id);
         await updateDoc(docRef, {
             estado: 'pagada',
@@ -193,6 +202,7 @@ export const agentesService = {
     // ========== CONFIGURACIÓN ==========
 
     getConfiguracion: async (userId: string): Promise<ConfiguracionComisiones | null> => {
+        if (!db) throw new Error("Firestore not initialized");
         const q = query(collection(db, CONFIG_COLLECTION), where("userId", "==", userId));
         const snapshot = await getDocs(q);
 
@@ -213,6 +223,7 @@ export const agentesService = {
         const existing = await agentesService.getConfiguracion(userId);
 
         if (existing) {
+            if (!db) throw new Error("Firestore not initialized");
             const docRef = doc(db, CONFIG_COLLECTION, existing.id);
             await updateDoc(docRef, {
                 ...data,

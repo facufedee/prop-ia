@@ -19,6 +19,7 @@ const COLLECTION = "alquileres";
 export const alquileresService = {
     // Get all contracts for a user
     getAlquileres: async (userId: string): Promise<Alquiler[]> => {
+        if (!db) throw new Error("Firestore not initialized");
         const q = query(
             collection(db, COLLECTION),
             where("userId", "==", userId),
@@ -37,6 +38,7 @@ export const alquileresService = {
 
     // Get contract by ID
     getAlquilerById: async (id: string): Promise<Alquiler | null> => {
+        if (!db) throw new Error("Firestore not initialized");
         const docRef = doc(db, COLLECTION, id);
         const docSnap = await getDoc(docRef);
 
@@ -56,6 +58,7 @@ export const alquileresService = {
 
     // Create new contract
     createAlquiler: async (alquiler: Omit<Alquiler, "id" | "createdAt" | "updatedAt">): Promise<string> => {
+        if (!db) throw new Error("Firestore not initialized");
         const docRef = await addDoc(collection(db, COLLECTION), {
             ...alquiler,
             fechaInicio: Timestamp.fromDate(new Date(alquiler.fechaInicio)),
@@ -68,6 +71,7 @@ export const alquileresService = {
 
     // Update contract
     updateAlquiler: async (id: string, updates: Partial<Alquiler>): Promise<void> => {
+        if (!db) throw new Error("Firestore not initialized");
         const docRef = doc(db, COLLECTION, id);
         const updateData: any = {
             ...updates,
@@ -86,6 +90,7 @@ export const alquileresService = {
 
     // Delete contract
     deleteAlquiler: async (id: string): Promise<void> => {
+        if (!db) throw new Error("Firestore not initialized");
         await deleteDoc(doc(db, COLLECTION, id));
     },
 
@@ -128,6 +133,7 @@ export const alquileresService = {
 
     // Get active contracts
     getAlquileresActivos: async (userId: string): Promise<Alquiler[]> => {
+        if (!db) throw new Error("Firestore not initialized");
         const q = query(
             collection(db, COLLECTION),
             where("userId", "==", userId),

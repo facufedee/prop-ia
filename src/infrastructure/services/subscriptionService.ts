@@ -22,6 +22,7 @@ export const subscriptionService = {
     // ========== PLANS ==========
 
     getAllPlans: async (): Promise<Plan[]> => {
+        if (!db) throw new Error("Firestore not initialized");
         const snapshot = await getDocs(collection(db, PLANS_COLLECTION));
         return snapshot.docs.map(doc => ({
             id: doc.id,
@@ -32,6 +33,7 @@ export const subscriptionService = {
     },
 
     getPlanById: async (id: string): Promise<Plan | null> => {
+        if (!db) throw new Error("Firestore not initialized");
         const docSnap = await getDoc(doc(db, PLANS_COLLECTION, id));
         if (!docSnap.exists()) return null;
 
@@ -46,6 +48,7 @@ export const subscriptionService = {
     // ========== SUBSCRIPTIONS ==========
 
     getUserSubscription: async (userId: string): Promise<Subscription | null> => {
+        if (!db) throw new Error("Firestore not initialized");
         const q = query(
             collection(db, SUBSCRIPTIONS_COLLECTION),
             where("userId", "==", userId),
@@ -72,6 +75,7 @@ export const subscriptionService = {
     },
 
     createSubscription: async (data: Omit<Subscription, "id" | "createdAt" | "updatedAt">): Promise<string> => {
+        if (!db) throw new Error("Firestore not initialized");
         const docRef = await addDoc(collection(db, SUBSCRIPTIONS_COLLECTION), {
             ...data,
             startDate: Timestamp.fromDate(data.startDate),
@@ -93,10 +97,14 @@ export const subscriptionService = {
         if (data.cancelledAt) updateData.cancelledAt = Timestamp.fromDate(data.cancelledAt);
         if (data.nextPaymentDate) updateData.nextPaymentDate = Timestamp.fromDate(data.nextPaymentDate);
 
+        if (data.nextPaymentDate) updateData.nextPaymentDate = Timestamp.fromDate(data.nextPaymentDate);
+
+        if (!db) throw new Error("Firestore not initialized");
         await updateDoc(doc(db, SUBSCRIPTIONS_COLLECTION, id), updateData);
     },
 
     cancelSubscription: async (id: string): Promise<void> => {
+        if (!db) throw new Error("Firestore not initialized");
         await updateDoc(doc(db, SUBSCRIPTIONS_COLLECTION, id), {
             status: 'cancelled',
             cancelledAt: Timestamp.now(),
@@ -107,6 +115,7 @@ export const subscriptionService = {
     // ========== PAYMENTS ==========
 
     getUserPayments: async (userId: string): Promise<Payment[]> => {
+        if (!db) throw new Error("Firestore not initialized");
         const q = query(
             collection(db, PAYMENTS_COLLECTION),
             where("userId", "==", userId),
@@ -123,6 +132,7 @@ export const subscriptionService = {
     },
 
     createPayment: async (data: Omit<Payment, "id" | "createdAt" | "updatedAt">): Promise<string> => {
+        if (!db) throw new Error("Firestore not initialized");
         const docRef = await addDoc(collection(db, PAYMENTS_COLLECTION), {
             ...data,
             createdAt: Timestamp.now(),
@@ -132,6 +142,7 @@ export const subscriptionService = {
     },
 
     updatePaymentStatus: async (id: string, status: Payment['status']): Promise<void> => {
+        if (!db) throw new Error("Firestore not initialized");
         await updateDoc(doc(db, PAYMENTS_COLLECTION, id), {
             status,
             updatedAt: Timestamp.now(),
@@ -141,6 +152,7 @@ export const subscriptionService = {
     // ========== ADDONS ==========
 
     getAllAddons: async (): Promise<Addon[]> => {
+        if (!db) throw new Error("Firestore not initialized");
         const snapshot = await getDocs(collection(db, ADDONS_COLLECTION));
         return snapshot.docs.map(doc => ({
             id: doc.id,
@@ -152,6 +164,7 @@ export const subscriptionService = {
     // ========== USAGE TRACKING ==========
 
     updateUsage: async (subscriptionId: string, usage: Partial<Subscription['usage']>): Promise<void> => {
+        if (!db) throw new Error("Firestore not initialized");
         const subDoc = await getDoc(doc(db, SUBSCRIPTIONS_COLLECTION, subscriptionId));
         if (!subDoc.exists()) return;
 

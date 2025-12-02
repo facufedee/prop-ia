@@ -42,12 +42,14 @@ const USERS_COLLECTION = "users";
 export const roleService = {
     // Get all roles
     getRoles: async (): Promise<Role[]> => {
+        if (!db) throw new Error("Firestore not initialized");
         const querySnapshot = await getDocs(collection(db, ROLES_COLLECTION));
         return querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Role));
     },
 
     // Get a specific role by ID
     getRoleById: async (roleId: string): Promise<Role | null> => {
+        if (!db) throw new Error("Firestore not initialized");
         const docRef = doc(db, ROLES_COLLECTION, roleId);
         const docSnap = await getDoc(docRef);
         if (docSnap.exists()) {
@@ -58,29 +60,34 @@ export const roleService = {
 
     // Create a new role
     createRole: async (role: Omit<Role, "id">): Promise<void> => {
+        if (!db) throw new Error("Firestore not initialized");
         const newRoleRef = doc(collection(db, ROLES_COLLECTION));
         await setDoc(newRoleRef, { ...role, isSystem: false });
     },
 
     // Update an existing role
     updateRole: async (roleId: string, updates: Partial<Role>): Promise<void> => {
+        if (!db) throw new Error("Firestore not initialized");
         const roleRef = doc(db, ROLES_COLLECTION, roleId);
         await updateDoc(roleRef, updates);
     },
 
     // Delete a role
     deleteRole: async (roleId: string): Promise<void> => {
+        if (!db) throw new Error("Firestore not initialized");
         await deleteDoc(doc(db, ROLES_COLLECTION, roleId));
     },
 
     // Assign a role to a user
     assignRoleToUser: async (userId: string, roleId: string): Promise<void> => {
+        if (!db) throw new Error("Firestore not initialized");
         const userRef = doc(db, USERS_COLLECTION, userId);
         await updateDoc(userRef, { roleId });
     },
 
     // Get user's role
     getUserRole: async (userId: string): Promise<Role | null> => {
+        if (!db) throw new Error("Firestore not initialized");
         const userRef = doc(db, USERS_COLLECTION, userId);
         const userSnap = await getDoc(userRef);
 
@@ -140,6 +147,7 @@ export const roleService = {
     },
     // Get the default role (Cliente)
     getDefaultRole: async (): Promise<Role | null> => {
+        if (!db) throw new Error("Firestore not initialized");
         const q = query(collection(db, ROLES_COLLECTION), where("name", "==", "Cliente"));
         const querySnapshot = await getDocs(q);
         if (!querySnapshot.empty) {
