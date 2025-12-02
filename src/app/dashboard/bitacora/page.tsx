@@ -1,7 +1,10 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { auth } from "@/infrastructure/firebase/client";
+import { app } from "@/infrastructure/firebase/client";
+import { getAuth } from "firebase/auth";
+
+const auth = getAuth(app);
 import { auditLogService } from "@/infrastructure/services/auditLogService";
 import { AuditLog, LogAction, LogLevel } from "@/domain/models/AuditLog";
 import { FileText, Filter, Download, Search, Calendar, User, Activity } from "lucide-react";

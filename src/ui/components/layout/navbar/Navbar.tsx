@@ -1,10 +1,12 @@
 "use client";
 
-import { auth } from "@/infrastructure/firebase/client";
+import { app } from "@/infrastructure/firebase/client";
 import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import { Menu, X, ChevronDown, User as UserIcon, LogOut, LayoutDashboard, Settings, Bot } from "lucide-react";
-import { onAuthStateChanged, signOut, type User } from "firebase/auth";
+import { onAuthStateChanged, signOut, type User, getAuth } from "firebase/auth";
+
+const auth = getAuth(app);
 
 export default function Navbar() {
   const [open, setOpen] = useState(false);

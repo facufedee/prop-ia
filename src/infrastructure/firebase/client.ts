@@ -1,26 +1,39 @@
 // src/infrastructure/firebase/client.ts
 import { initializeApp, getApps } from "firebase/app";
 import { getAuth } from "firebase/auth";
-import { initializeFirestore, persistentLocalCache, persistentMultipleTabManager } from "firebase/firestore";
+import { initializeFirestore, persistentLocalCache, persistentMultipleTabManager, getFirestore } from "firebase/firestore";
 import { getStorage } from "firebase/storage";
 
 const firebaseConfig = {
-  apiKey: "AIzaSyC6MdDwOlP5sDfkIDzIqWhKYfSW6uCCs4s",
-  authDomain: "propia-ab2e4.firebaseapp.com",
-  projectId: "propia-ab2e4",
-  storageBucket: "propia-ab2e4.firebasestorage.app",
-  messagingSenderId: "771949809974",
-  appId: "1:771949809974:web:5f11ba447fa30983f72397",
-  measurementId: "G-6KXB4TYWHH"
+  apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
+  authDomain: process.env.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN,
+  projectId: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID,
+  storageBucket: process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET,
+  messagingSenderId: process.env.NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID,
+  appId: process.env.NEXT_PUBLIC_FIREBASE_APP_ID,
+  measurementId: process.env.NEXT_PUBLIC_FIREBASE_MEASUREMENT_ID
 };
 
 const app = getApps().length ? getApps()[0] : initializeApp(firebaseConfig);
 
 export const auth = getAuth(app);
-export const db = initializeFirestore(app, {
-  localCache: persistentLocalCache({
-    tabManager: persistentMultipleTabManager()
-  })
-}, "propia");
+
+let firestoreDb;
+try {
+  firestoreDb = initializeFirestore(app, {
+    localCache: persistentLocalCache({
+      tabManager: persistentMultipleTabManager()
+    })
+  }, "propia");
+} catch (e) {
+  // If already initialized, use existing instance
+  try {
+    firestoreDb = getFirestore(app, "propia");
+  } catch (e2) {
+    firestoreDb = getFirestore(app);
+  }
+}
+
+export const db = firestoreDb;
 export const storage = getStorage(app);
 export { app };

@@ -1,7 +1,10 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { auth } from "@/infrastructure/firebase/client";
+import { app } from "@/infrastructure/firebase/client";
+import { getAuth } from "firebase/auth";
+
+const auth = getAuth(app);
 import { visitasService } from "@/infrastructure/services/visitasService";
 import { Visita } from "@/domain/models/Visita";
 import { Calendar, Plus, Filter, ChevronLeft, ChevronRight } from "lucide-react";

@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { alquileresService } from "@/infrastructure/services/alquileresService";
-import { auth } from "@/infrastructure/firebase/client";
+
 
 // GET - List all contracts for user
 export async function GET(request: NextRequest) {

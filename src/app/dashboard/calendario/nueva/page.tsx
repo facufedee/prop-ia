@@ -2,10 +2,12 @@
 
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { auth } from "@/infrastructure/firebase/client";
+import { app, db } from "@/infrastructure/firebase/client";
+import { getAuth } from "firebase/auth";
+
+const auth = getAuth(app);
 import { visitasService } from "@/infrastructure/services/visitasService";
 import { collection, getDocs, query, where } from "firebase/firestore";
-import { db } from "@/infrastructure/firebase/client";
 import { ArrowLeft } from "lucide-react";
 import Link from "next/link";
 

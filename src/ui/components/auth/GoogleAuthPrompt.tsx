@@ -4,8 +4,10 @@ import { useState, useEffect } from "react";
 import { X } from "lucide-react";
 import { loginWithGoogle } from "@/infrastructure/auth/firebaseAuthService";
 import { useRouter } from "next/navigation";
-import { auth } from "@/infrastructure/firebase/client";
-import { onAuthStateChanged } from "firebase/auth";
+import { app } from "@/infrastructure/firebase/client";
+import { onAuthStateChanged, getAuth } from "firebase/auth";
+
+const auth = getAuth(app);
 
 export default function GoogleAuthPrompt() {
     const [isVisible, setIsVisible] = useState(false);

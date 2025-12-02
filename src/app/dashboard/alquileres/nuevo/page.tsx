@@ -2,8 +2,11 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { auth } from "@/infrastructure/firebase/client";
+import { app } from "@/infrastructure/firebase/client";
+import { getAuth } from "firebase/auth";
 import { alquileresService } from "@/infrastructure/services/alquileresService";
+
+const auth = getAuth(app);
 import { inquilinosService } from "@/infrastructure/services/inquilinosService";
 import PropertySelector from "../components/PropertySelector";
 import TenantForm, { TenantFormData } from "../components/TenantForm";
@@ -141,8 +144,8 @@ export default function NuevoAlquilerPage() {
                             <div className="flex flex-col items-center flex-1">
                                 <div
                                     className={`w-10 h-10 rounded-full flex items-center justify-center font-semibold ${currentStep >= step.num
-                                            ? "bg-indigo-600 text-white"
-                                            : "bg-gray-200 text-gray-500"
+                                        ? "bg-indigo-600 text-white"
+                                        : "bg-gray-200 text-gray-500"
                                         }`}
                                 >
                                     {currentStep > step.num ? <Check className="w-5 h-5" /> : step.num}

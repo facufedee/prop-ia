@@ -1,9 +1,9 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { auth, db } from "@/infrastructure/firebase/client";
+import { app, db } from "@/infrastructure/firebase/client";
 import { collection, query, where, getDocs } from "firebase/firestore";
-import { onAuthStateChanged } from "firebase/auth";
+import { onAuthStateChanged, getAuth } from "firebase/auth";
 import {
     Home,
     TrendingUp,
@@ -20,6 +20,8 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+
+const auth = getAuth(app);
 
 export default function DashboardPage() {
     const router = useRouter();

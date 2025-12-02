@@ -1,7 +1,16 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
     images: {
-        domains: ['firebasestorage.googleapis.com', 'lh3.googleusercontent.com'],
+        remotePatterns: [
+            {
+                protocol: 'https',
+                hostname: 'firebasestorage.googleapis.com',
+            },
+            {
+                protocol: 'https',
+                hostname: 'lh3.googleusercontent.com',
+            },
+        ],
     },
 
     // Security Headers
@@ -45,12 +54,12 @@ const nextConfig = {
                         key: 'Content-Security-Policy',
                         value: [
                             "default-src 'self'",
-                            "script-src 'self' 'unsafe-eval' 'unsafe-inline' https://www.googletagmanager.com",
+                            "script-src 'self' 'unsafe-eval' 'unsafe-inline' https://www.googletagmanager.com https://apis.google.com https://sdk.mercadopago.com https://http2.mlstatic.com",
                             "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
-                            "img-src 'self' data: https: blob:",
+                            "img-src 'self' data: https: blob: https://http2.mlstatic.com",
                             "font-src 'self' https://fonts.gstatic.com",
-                            "connect-src 'self' https://*.firebaseio.com https://*.googleapis.com https://firestore.googleapis.com",
-                            "frame-src 'self' https://www.google.com",
+                            "connect-src 'self' https://*.firebaseio.com https://*.googleapis.com https://firestore.googleapis.com https://api.mercadopago.com https://events.mercadopago.com",
+                            "frame-src 'self' https://www.google.com https://*.firebaseapp.com https://accounts.google.com https://www.mercadopago.com.ar https://sdk.mercadopago.com",
                             "object-src 'none'",
                             "base-uri 'self'",
                             "form-action 'self'",
@@ -75,7 +84,6 @@ const nextConfig = {
 
     // Production optimizations
     reactStrictMode: true,
-    swcMinify: true,
 
     // Disable x-powered-by header
     poweredByHeader: false,

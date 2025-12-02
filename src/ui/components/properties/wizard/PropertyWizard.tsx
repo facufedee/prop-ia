@@ -4,11 +4,14 @@ import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import StepIndicator from "./StepIndicator";
 import { ChevronLeft, ChevronRight, Loader2, Upload, X, MapPin } from "lucide-react";
-import { auth, db, storage } from "@/infrastructure/firebase/client";
+import { app, db, storage } from "@/infrastructure/firebase/client";
 import { collection, addDoc, updateDoc, doc } from "firebase/firestore";
 import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
 import { locationService, Provincia, Localidad } from "@/infrastructure/services/locationService";
 import dynamic from 'next/dynamic';
+import { getAuth } from "firebase/auth";
+
+const auth = getAuth(app);
 
 import { useJsApiLoader, Autocomplete } from '@react-google-maps/api';
 

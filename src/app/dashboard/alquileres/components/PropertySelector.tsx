@@ -1,7 +1,10 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { auth } from "@/infrastructure/firebase/client";
+import { app } from "@/infrastructure/firebase/client";
+import { getAuth } from "firebase/auth";
+
+const auth = getAuth(app);
 
 interface Property {
     id: string;

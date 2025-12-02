@@ -1,7 +1,10 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { auth } from "@/infrastructure/firebase/client";
+import { app } from "@/infrastructure/firebase/client";
+import { getAuth } from "firebase/auth";
+
+const auth = getAuth(app);
 import { agentesService } from "@/infrastructure/services/agentesService";
 import { Agente } from "@/domain/models/Agente";
 import { Users, Plus, TrendingUp, DollarSign, Award } from "lucide-react";
@@ -182,8 +185,8 @@ export default function AgentesPage() {
                                         </td>
                                         <td className="px-6 py-4">
                                             <span className={`px-2 py-1 text-xs font-medium rounded-full ${agente.activo
-                                                    ? 'bg-green-100 text-green-700'
-                                                    : 'bg-gray-100 text-gray-700'
+                                                ? 'bg-green-100 text-green-700'
+                                                : 'bg-gray-100 text-gray-700'
                                                 }`}>
                                                 {agente.activo ? 'Activo' : 'Inactivo'}
                                             </span>

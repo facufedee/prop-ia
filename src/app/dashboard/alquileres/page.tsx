@@ -2,7 +2,10 @@
 
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { auth } from "@/infrastructure/firebase/client";
+import { app } from "@/infrastructure/firebase/client";
+import { getAuth } from "firebase/auth";
+
+const auth = getAuth(app);
 import { alquileresService } from "@/infrastructure/services/alquileresService";
 import { Alquiler } from "@/domain/models/Alquiler";
 import ContractsTable from "./components/ContractsTable";
@@ -114,8 +117,8 @@ export default function AlquileresPage() {
                             key={f}
                             onClick={() => setFilter(f)}
                             className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${filter === f
-                                    ? 'bg-indigo-600 text-white'
-                                    : 'bg-white border border-gray-200 text-gray-700 hover:bg-gray-50'
+                                ? 'bg-indigo-600 text-white'
+                                : 'bg-white border border-gray-200 text-gray-700 hover:bg-gray-50'
                                 }`}
                         >
                             {f.charAt(0).toUpperCase() + f.slice(1)}

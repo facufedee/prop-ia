@@ -1,4 +1,7 @@
-import { auth, db } from "@/infrastructure/firebase/client";
+import { app, db } from "@/infrastructure/firebase/client";
+import { getAuth } from "firebase/auth";
+
+const auth = getAuth(app);
 import {
     GoogleAuthProvider,
     signInWithPopup,

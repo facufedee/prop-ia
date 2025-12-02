@@ -2,7 +2,10 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { auth, db } from "@/infrastructure/firebase/client";
+import { app, db } from "@/infrastructure/firebase/client";
+import { getAuth } from "firebase/auth";
+
+const auth = getAuth(app);
 import { getDoc, doc } from "firebase/firestore";
 import { ticketsService } from "@/infrastructure/services/ticketsService";
 import { TicketCategory, TicketPriority } from "@/domain/models/Ticket";

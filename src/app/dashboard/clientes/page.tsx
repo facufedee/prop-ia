@@ -1,7 +1,10 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { auth } from "@/infrastructure/firebase/client";
+import { app } from "@/infrastructure/firebase/client";
+import { getAuth } from "firebase/auth";
+
+const auth = getAuth(app);
 import { inquilinosService } from "@/infrastructure/services/inquilinosService";
 import { propietariosService } from "@/infrastructure/services/propietariosService";
 import { leadsService } from "@/infrastructure/services/leadsService";
@@ -196,15 +199,15 @@ export default function ClientesPage() {
                                 key={tab.id}
                                 onClick={() => setActiveTab(tab.id)}
                                 className={`flex items-center gap-2 px-4 py-3 border-b-2 transition-colors whitespace-nowrap ${activeTab === tab.id
-                                        ? 'border-indigo-600 text-indigo-600 font-medium'
-                                        : 'border-transparent text-gray-600 hover:text-gray-900'
+                                    ? 'border-indigo-600 text-indigo-600 font-medium'
+                                    : 'border-transparent text-gray-600 hover:text-gray-900'
                                     }`}
                             >
                                 <Icon className="w-5 h-5" />
                                 {tab.label}
                                 <span className={`px-2 py-0.5 text-xs rounded-full ${activeTab === tab.id
-                                        ? 'bg-indigo-100 text-indigo-700'
-                                        : 'bg-gray-100 text-gray-600'
+                                    ? 'bg-indigo-100 text-indigo-700'
+                                    : 'bg-gray-100 text-gray-600'
                                     }`}>
                                     {tab.count}
                                 </span>

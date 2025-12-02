@@ -33,6 +33,7 @@ export const PERMISSIONS: Permission[] = [
     { id: "/dashboard/configuracion", label: "Configuración", description: "Configuración global del sistema" },
     { id: "/dashboard/configuracion/roles", label: "Roles y Permisos", description: "Gestión de roles y permisos (solo administradores)" },
     { id: "/dashboard/configuracion/backup", label: "Backup y Restauración", description: "Copias de seguridad de la base de datos (solo administradores)" },
+    { id: "/dashboard/blog", label: "Blog / Novedades", description: "Gestión de noticias y blog" },
 ];
 
 const ROLES_COLLECTION = "roles";
@@ -116,7 +117,8 @@ export const roleService = {
                     "/dashboard/agentes",
                     "/dashboard/leads",
                     "/dashboard/calendario",
-                    "/dashboard/cuenta"
+                    "/dashboard/cuenta",
+                    "/dashboard/blog"
                 ],
                 isSystem: true
             };

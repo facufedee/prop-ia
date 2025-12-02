@@ -24,9 +24,11 @@ import {
   Ticket,
   CreditCard
 } from "lucide-react";
-import { auth } from "@/infrastructure/firebase/client";
+import { app } from "@/infrastructure/firebase/client";
 import { roleService, Role } from "@/infrastructure/services/roleService";
-import { onAuthStateChanged } from "firebase/auth";
+import { onAuthStateChanged, getAuth } from "firebase/auth";
+
+const auth = getAuth(app);
 
 interface DashboardSidebarProps {
   isOpen?: boolean;
@@ -43,6 +45,7 @@ const MENU_ITEMS = [
   { href: "/dashboard/clientes", label: "Clientes", icon: Users },
   { href: "/dashboard/chat", label: "Chat Prop-IA", icon: Bot },
   { href: "/dashboard/publicaciones", label: "Publicaciones", icon: Megaphone },
+  { href: "/dashboard/blog", label: "Blog / Novedades", icon: FileText },
   { href: "/dashboard/finanzas", label: "Finanzas", icon: Banknote },
   { href: "/dashboard/calendario", label: "Calendario", icon: Calendar },
   { href: "/dashboard/soporte", label: "Soporte", icon: Headphones },
