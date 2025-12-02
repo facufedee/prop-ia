@@ -33,6 +33,7 @@ export const blogService = {
     // Get all posts (for dashboard)
     async getAllPosts(): Promise<BlogPost[]> {
         try {
+            if (!db) throw new Error("Firestore not initialized");
             const q = query(collection(db, COLLECTION_NAME), orderBy("createdAt", "desc"));
             const snapshot = await getDocs(q);
             return snapshot.docs.map(doc => ({
@@ -48,6 +49,7 @@ export const blogService = {
     // Get only published posts (for public site)
     async getPublishedPosts(): Promise<BlogPost[]> {
         try {
+            if (!db) throw new Error("Firestore not initialized");
             const q = query(
                 collection(db, COLLECTION_NAME),
                 where("published", "==", true),
@@ -67,6 +69,7 @@ export const blogService = {
     // Get single post by ID
     async getPostById(id: string): Promise<BlogPost | null> {
         try {
+            if (!db) throw new Error("Firestore not initialized");
             const docRef = doc(db, COLLECTION_NAME, id);
             const docSnap = await getDoc(docRef);
 
@@ -83,6 +86,7 @@ export const blogService = {
     // Get single post by Slug (for public site)
     async getPostBySlug(slug: string): Promise<BlogPost | null> {
         try {
+            if (!db) throw new Error("Firestore not initialized");
             const q = query(collection(db, COLLECTION_NAME), where("slug", "==", slug), where("published", "==", true));
             const snapshot = await getDocs(q);
 
@@ -100,6 +104,7 @@ export const blogService = {
     // Create new post
     async createPost(post: Omit<BlogPost, "id" | "createdAt" | "updatedAt">): Promise<string> {
         try {
+            if (!db) throw new Error("Firestore not initialized");
             const docRef = await addDoc(collection(db, COLLECTION_NAME), {
                 ...post,
                 createdAt: Timestamp.now(),
@@ -115,6 +120,7 @@ export const blogService = {
     // Update existing post
     async updatePost(id: string, post: Partial<BlogPost>): Promise<void> {
         try {
+            if (!db) throw new Error("Firestore not initialized");
             const docRef = doc(db, COLLECTION_NAME, id);
             await updateDoc(docRef, {
                 ...post,
@@ -129,6 +135,7 @@ export const blogService = {
     // Delete post
     async deletePost(id: string): Promise<void> {
         try {
+            if (!db) throw new Error("Firestore not initialized");
             const docRef = doc(db, COLLECTION_NAME, id);
             await deleteDoc(docRef);
         } catch (error) {

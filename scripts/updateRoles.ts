@@ -8,6 +8,11 @@ async function updateRoles() {
     try {
         console.log("Actualizando roles...");
 
+        if (!db) {
+            console.error("Firestore no está inicializado.");
+            return;
+        }
+
         const rolesRef = collection(db, "roles");
         const snapshot = await getDocs(rolesRef);
 
