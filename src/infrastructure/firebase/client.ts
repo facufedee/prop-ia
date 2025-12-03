@@ -1,40 +1,34 @@
 // src/infrastructure/firebase/client.ts
-import { initializeApp, getApps, FirebaseApp } from "firebase/app";
-import { getAuth, Auth } from "firebase/auth";
-import { getFirestore, Firestore } from "firebase/firestore";
-import { getStorage, FirebaseStorage } from "firebase/storage";
+import { initializeApp, getApps } from "firebase/app";
+import { getAuth } from "firebase/auth";
+import { getFirestore } from "firebase/firestore";
+import { getStorage } from "firebase/storage";
 
 let firebaseConfig: any = {};
 
-// Firebase App Hosting ALWAYS sets FIREBASE_CONFIG in server environment
+// Determine which config to use based on environment
 if (typeof window === "undefined") {
-  // Server-side (SSR / Cloud Run / Build time)
-  try {
-    const configStr = process.env.FIREBASE_CONFIG || "{}";
-    firebaseConfig = JSON.parse(configStr);
+  // Server-side (SSR / Cloud Run / Build)
+  // Try FIREBASE_CONFIG first (Firebase App Hosting)
+  const fbConfigStr = process.env.FIREBASE_CONFIG || process.env.FIREBASE_WEBAPP_CONFIG;
 
-    // If config is empty or missing projectId, use a dummy config for build time
-    if (!firebaseConfig.projectId) {
-      console.warn("Firebase config not available during build. Using dummy config.");
-      firebaseConfig = {
-        apiKey: "dummy-api-key-for-build",
-        authDomain: "dummy.firebaseapp.com",
-        projectId: "dummy-project-id",
-        storageBucket: "dummy.appspot.com",
-        messagingSenderId: "123456789",
-        appId: "1:123456789:web:dummy",
-      };
+  if (fbConfigStr) {
+    try {
+      firebaseConfig = JSON.parse(fbConfigStr);
+    } catch (e) {
+      console.error("Error parsing FIREBASE_CONFIG:", e);
     }
-  } catch (e) {
-    console.error("Error parsing FIREBASE_CONFIG:", e);
-    // Fallback to dummy config
+  }
+
+  // Fallback to NEXT_PUBLIC variables if FIREBASE_CONFIG not available (local build)
+  if (!firebaseConfig || !firebaseConfig.projectId) {
     firebaseConfig = {
-      apiKey: "dummy-api-key-for-build",
-      authDomain: "dummy.firebaseapp.com",
-      projectId: "dummy-project-id",
-      storageBucket: "dummy.appspot.com",
-      messagingSenderId: "123456789",
-      appId: "1:123456789:web:dummy",
+      apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
+      authDomain: process.env.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN,
+      projectId: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID,
+      storageBucket: process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET,
+      messagingSenderId: process.env.NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID,
+      appId: process.env.NEXT_PUBLIC_FIREBASE_APP_ID,
     };
   }
 } else {
@@ -56,14 +50,9 @@ const app = !getApps().length ? initializeApp(firebaseConfig) : getApps()[0];
 const db = getFirestore(app);
 const storage = getStorage(app);
 
-// Auth helper - only works on client-side
-let authInstance: Auth | undefined;
-if (typeof window !== "undefined") {
-  authInstance = getAuth(app);
-}
+// Auth - only initialize on client-side
+// On server-side, auth will be undefined which is expected
+const auth = typeof window !== "undefined" ? getAuth(app) : (undefined as any);
 
-// Export with type assertions for compatibility
-export { app, db, storage };
-export const auth = authInstance as Auth;
-
+export { app, auth, db, storage };
 export default app;
