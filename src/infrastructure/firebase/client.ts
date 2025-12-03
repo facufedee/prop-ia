@@ -1,88 +1,69 @@
 // src/infrastructure/firebase/client.ts
-import { initializeApp, getApps, FirebaseApp, FirebaseOptions } from "firebase/app";
+import { initializeApp, getApps, FirebaseApp } from "firebase/app";
 import { getAuth, Auth } from "firebase/auth";
-import { initializeFirestore, persistentLocalCache, persistentMultipleTabManager, getFirestore, Firestore } from "firebase/firestore";
+import { getFirestore, Firestore } from "firebase/firestore";
 import { getStorage, FirebaseStorage } from "firebase/storage";
 
-// Helper to get config from various sources
-const getFirebaseConfig = (): FirebaseOptions | null => {
-  // 1. Try individual env vars (Local & Vercel)
-  if (process.env.NEXT_PUBLIC_FIREBASE_API_KEY) {
-    return {
-      apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
-      authDomain: process.env.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN,
-      projectId: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID,
-      storageBucket: process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET,
-      messagingSenderId: process.env.NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID,
-      appId: process.env.NEXT_PUBLIC_FIREBASE_APP_ID,
-      measurementId: process.env.NEXT_PUBLIC_FIREBASE_MEASUREMENT_ID
+let firebaseConfig: any = {};
+
+// Firebase App Hosting ALWAYS sets FIREBASE_CONFIG in server environment
+if (typeof window === "undefined") {
+  // Server-side (SSR / Cloud Run / Build time)
+  try {
+    const configStr = process.env.FIREBASE_CONFIG || "{}";
+    firebaseConfig = JSON.parse(configStr);
+
+    // If config is empty or missing projectId, use a dummy config for build time
+    if (!firebaseConfig.projectId) {
+      console.warn("Firebase config not available during build. Using dummy config.");
+      firebaseConfig = {
+        apiKey: "dummy-api-key-for-build",
+        authDomain: "dummy.firebaseapp.com",
+        projectId: "dummy-project-id",
+        storageBucket: "dummy.appspot.com",
+        messagingSenderId: "123456789",
+        appId: "1:123456789:web:dummy",
+      };
+    }
+  } catch (e) {
+    console.error("Error parsing FIREBASE_CONFIG:", e);
+    // Fallback to dummy config
+    firebaseConfig = {
+      apiKey: "dummy-api-key-for-build",
+      authDomain: "dummy.firebaseapp.com",
+      projectId: "dummy-project-id",
+      storageBucket: "dummy.appspot.com",
+      messagingSenderId: "123456789",
+      appId: "1:123456789:web:dummy",
     };
   }
-
-  // 2. Try FIREBASE_CONFIG (Firebase App Hosting)
-  if (process.env.FIREBASE_CONFIG) {
-    try {
-      const config = JSON.parse(process.env.FIREBASE_CONFIG);
-      // Ensure we have at least apiKey and projectId
-      if (config.apiKey && config.projectId) return config;
-    } catch (e) {
-      console.warn("Failed to parse FIREBASE_CONFIG", e);
-    }
-  }
-
-  // 3. Return null if nothing found
-  return null;
-};
-
-const firebaseConfig = getFirebaseConfig();
-
-let appInstance: FirebaseApp | undefined;
-let authInstance: Auth | undefined;
-let dbInstance: Firestore | undefined;
-let storageInstance: FirebaseStorage | undefined;
-
-// Only initialize if we have a valid config
-if (firebaseConfig) {
-  try {
-    appInstance = getApps().length ? getApps()[0] : initializeApp(firebaseConfig);
-
-    // Auth (Browser Only)
-    if (typeof window !== "undefined") {
-      try {
-        authInstance = getAuth(appInstance);
-      } catch (e) {
-        console.warn("Firebase Auth failed to initialize.", e);
-      }
-    }
-
-    // Firestore
-    try {
-      dbInstance = initializeFirestore(appInstance, {
-        localCache: persistentLocalCache({
-          tabManager: persistentMultipleTabManager()
-        })
-      }, "propia");
-    } catch (e) {
-      try {
-        dbInstance = getFirestore(appInstance, "propia");
-      } catch (e2) {
-        dbInstance = getFirestore(appInstance);
-      }
-    }
-
-    // Storage
-    storageInstance = getStorage(appInstance);
-
-  } catch (error) {
-    console.error("Error initializing Firebase:", error);
-  }
 } else {
-  console.warn("Firebase Config missing. Skipping initialization. (Expected during build if env vars are missing)");
+  // Client-side (browser)
+  firebaseConfig = {
+    apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY!,
+    authDomain: process.env.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN!,
+    projectId: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID!,
+    storageBucket: process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET!,
+    messagingSenderId: process.env.NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID!,
+    appId: process.env.NEXT_PUBLIC_FIREBASE_APP_ID!,
+  };
 }
 
-// Export Firebase instances as non-nullable for TypeScript, but they may be undefined at runtime
-// Components should still check if instances exist before using them
-export const app = appInstance as FirebaseApp;
+// Initialize Firebase App
+const app = !getApps().length ? initializeApp(firebaseConfig) : getApps()[0];
+
+// Initialize Firestore and Storage (safe on both server and client)
+const db = getFirestore(app);
+const storage = getStorage(app);
+
+// Auth helper - only works on client-side
+let authInstance: Auth | undefined;
+if (typeof window !== "undefined") {
+  authInstance = getAuth(app);
+}
+
+// Export with type assertions for compatibility
+export { app, db, storage };
 export const auth = authInstance as Auth;
-export const db = dbInstance as Firestore;
-export const storage = storageInstance as FirebaseStorage;
+
+export default app;
