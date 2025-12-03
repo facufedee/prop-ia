@@ -2,11 +2,9 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { onAuthStateChanged, getAuth } from "firebase/auth";
-import { app } from "@/infrastructure/firebase/client";
+import { onAuthStateChanged } from "firebase/auth";
+import { app, auth } from "@/infrastructure/firebase/client";
 import { Loader2 } from "lucide-react";
-
-const auth = getAuth(app);
 
 export default function AuthGuard({ children }: { children: React.ReactNode }) {
     const router = useRouter();

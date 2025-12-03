@@ -1,10 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { app } from "@/infrastructure/firebase/client";
-import { getAuth } from "firebase/auth";
-
-const auth = getAuth(app);
+import { app, auth } from "@/infrastructure/firebase/client";
 import { backupService } from "@/infrastructure/services/backupService";
 import { Database, Download, Upload, AlertTriangle, CheckCircle, FileJson } from "lucide-react";
 

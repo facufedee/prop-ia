@@ -2,11 +2,8 @@
 
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { app } from "@/infrastructure/firebase/client";
-import { getAuth } from "firebase/auth";
+import { app, auth } from "@/infrastructure/firebase/client";
 import { agentesService } from "@/infrastructure/services/agentesService";
-
-const auth = getAuth(app);
 import { Agente } from "@/domain/models/Agente";
 import { ArrowLeft } from "lucide-react";
 import Link from "next/link";

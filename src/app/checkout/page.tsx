@@ -2,10 +2,7 @@
 
 import { useState, useEffect, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { app } from "@/infrastructure/firebase/client";
-import { getAuth } from "firebase/auth";
-
-const auth = getAuth(app);
+import { app, auth } from "@/infrastructure/firebase/client";
 import { Check, CreditCard, Building, User, Mail, ShieldCheck } from "lucide-react";
 import Link from "next/link";
 
@@ -262,8 +259,8 @@ function CheckoutContent() {
                                             type="button"
                                             onClick={() => setBilling('monthly')}
                                             className={`flex-1 py-1.5 text-sm font-medium rounded-md transition-all ${billing === 'monthly'
-                                                    ? 'bg-indigo-50 text-indigo-700 shadow-sm'
-                                                    : 'text-gray-500 hover:text-gray-700'
+                                                ? 'bg-indigo-50 text-indigo-700 shadow-sm'
+                                                : 'text-gray-500 hover:text-gray-700'
                                                 }`}
                                         >
                                             Mensual
@@ -272,8 +269,8 @@ function CheckoutContent() {
                                             type="button"
                                             onClick={() => setBilling('yearly')}
                                             className={`flex-1 py-1.5 text-sm font-medium rounded-md transition-all ${billing === 'yearly'
-                                                    ? 'bg-indigo-50 text-indigo-700 shadow-sm'
-                                                    : 'text-gray-500 hover:text-gray-700'
+                                                ? 'bg-indigo-50 text-indigo-700 shadow-sm'
+                                                : 'text-gray-500 hover:text-gray-700'
                                                 }`}
                                         >
                                             Anual

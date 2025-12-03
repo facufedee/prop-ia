@@ -1,10 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { app } from "@/infrastructure/firebase/client";
-import { getAuth } from "firebase/auth";
-
-const auth = getAuth(app);
+import { app, auth } from "@/infrastructure/firebase/client";
 import { inquilinosService } from "@/infrastructure/services/inquilinosService";
 import { propietariosService } from "@/infrastructure/services/propietariosService";
 import { leadsService } from "@/infrastructure/services/leadsService";

@@ -4,12 +4,9 @@ import { useState, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { PropertyData } from "@/lib/prediction/preprocessor";
 import { Home, Ruler, Building2, Clock, Bath, BedDouble, Landmark, MapPin, Hash, CircleDollarSign, Upload, X, Loader2, Image as ImageIcon } from "lucide-react";
-import { app, db, storage } from "@/infrastructure/firebase/client";
+import { app, db, storage, auth } from "@/infrastructure/firebase/client";
 import { collection, addDoc, updateDoc } from "firebase/firestore";
 import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
-import { getAuth } from "firebase/auth";
-
-const auth = getAuth(app);
 
 const initialFormState: PropertyData = {
     bedrooms: null,

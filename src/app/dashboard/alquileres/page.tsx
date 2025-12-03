@@ -2,10 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { app } from "@/infrastructure/firebase/client";
-import { getAuth } from "firebase/auth";
-
-const auth = getAuth(app);
+import { app, auth } from "@/infrastructure/firebase/client";
 import { alquileresService } from "@/infrastructure/services/alquileresService";
 import { Alquiler } from "@/domain/models/Alquiler";
 import ContractsTable from "./components/ContractsTable";

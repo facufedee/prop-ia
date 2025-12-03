@@ -1,10 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { app } from "@/infrastructure/firebase/client";
-import { getAuth } from "firebase/auth";
-
-const auth = getAuth(app);
+import { app, auth } from "@/infrastructure/firebase/client";
 import { agentesService } from "@/infrastructure/services/agentesService";
 import { ConfiguracionComisiones } from "@/domain/models/Agente";
 import { Save, DollarSign, TrendingUp, Award } from "lucide-react";

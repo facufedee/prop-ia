@@ -2,10 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { app } from "@/infrastructure/firebase/client";
-import { getAuth } from "firebase/auth";
-
-const auth = getAuth(app);
+import { app, auth } from "@/infrastructure/firebase/client";
 import { ticketsService } from "@/infrastructure/services/ticketsService";
 import { Ticket } from "@/domain/models/Ticket";
 import { Plus, MessageSquare, Clock, CheckCircle } from "lucide-react";

@@ -2,11 +2,8 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { app } from "@/infrastructure/firebase/client";
-import { getAuth } from "firebase/auth";
+import { app, auth } from "@/infrastructure/firebase/client";
 import { alquileresService } from "@/infrastructure/services/alquileresService";
-
-const auth = getAuth(app);
 import { inquilinosService } from "@/infrastructure/services/inquilinosService";
 import PropertySelector from "../components/PropertySelector";
 import TenantForm, { TenantFormData } from "../components/TenantForm";

@@ -24,11 +24,9 @@ import {
   Ticket,
   CreditCard
 } from "lucide-react";
-import { app } from "@/infrastructure/firebase/client";
+import { app, auth } from "@/infrastructure/firebase/client";
 import { roleService, Role } from "@/infrastructure/services/roleService";
-import { onAuthStateChanged, getAuth } from "firebase/auth";
-
-const auth = getAuth(app);
+import { onAuthStateChanged } from "firebase/auth";
 
 interface DashboardSidebarProps {
   isOpen?: boolean;
