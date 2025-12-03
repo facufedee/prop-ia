@@ -29,7 +29,7 @@ export default function NuevoTicketPage() {
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
-        if (!auth.currentUser) return;
+        if (!auth.currentUser || !db) return;
 
         try {
             setLoading(true);

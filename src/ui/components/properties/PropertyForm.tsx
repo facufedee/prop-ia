@@ -136,26 +136,65 @@ export default function PropertyForm() {
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
-        if (!auth.currentUser) {
+        if (!auth.currentUser || !db) {
             setError("Debes iniciar sesión para registrar una propiedad.");
             return;
         }
-        status: 'active',
-            imageUrls: [] // Will update later
-    });
-    { icon }
-        </span >
-        <input
-            name={name as string}
-            type={type}
-            min={type === 'number' ? "0" : undefined}
-            placeholder={label}
-            value={(form as any)[name] || ''}
-            onChange={handleChange}
-            className="w-full border bg-gray-50 pl-10 p-3 rounded-xl text-black focus:ring-2 focus:ring-black focus:bg-white transition-all min-h-[44px]"
-        />
-    </div >
-);
+
+        try {
+            setLoading(true);
+            setUploading(true);
+
+            // Upload images first
+            const imageUrls: string[] = [];
+            for (let i = 0; i < images.length; i++) {
+                if (!storage) throw new Error("Firebase Storage not initialized");
+                const storageRef = ref(storage, `properties/${auth.currentUser.uid}/${Date.now()}-${images[i].name}`);
+                await uploadBytes(storageRef, images[i]);
+                const url = await getDownloadURL(storageRef);
+                imageUrls.push(url);
+                setUploadProgress(Math.round(((i + 1) / images.length) * 100));
+            }
+
+            setUploading(false);
+
+            // Create property document
+            const propertyData = {
+                ...form,
+                all_features: selectedFeatures.join(', '),
+                userId: auth.currentUser.uid,
+                createdAt: new Date(),
+                status: 'active',
+                imageUrls
+            };
+
+            await addDoc(collection(db, "properties"), propertyData);
+            router.push("/dashboard/propiedades");
+        } catch (error) {
+            console.error("Error creating property:", error);
+            setError("Error al registrar la propiedad");
+        } finally {
+            setLoading(false);
+            setUploading(false);
+        }
+    };
+
+    const renderInputField = (name: keyof PropertyData, label: string, icon: React.ReactNode, type = "text") => (
+        <div className="relative">
+            <span className="absolute inset-y-0 left-0 flex items-center pl-3 text-gray-500 pointer-events-none">
+                {icon}
+            </span>
+            <input
+                name={name as string}
+                type={type}
+                min={type === 'number' ? "0" : undefined}
+                placeholder={label}
+                value={(form as any)[name] || ''}
+                onChange={handleChange}
+                className="w-full border bg-gray-50 pl-10 p-3 rounded-xl text-black focus:ring-2 focus:ring-black focus:bg-white transition-all min-h-[44px]"
+            />
+        </div>
+    );
 
     const renderSelectField = (name: keyof PropertyData, label: string, icon: React.ReactNode, options: string[], disabled: boolean = false, onChange?: (value: string) => void) => (
         <div className="relative">

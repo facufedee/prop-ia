@@ -36,9 +36,11 @@ export default function RolesPage() {
             setRoles(rolesData);
 
             // Fetch users
-            const usersSnap = await getDocs(collection(db, "users"));
-            const usersData = usersSnap.docs.map(doc => ({ uid: doc.id, ...doc.data() } as UserData));
-            setUsers(usersData);
+            if (db) {
+                const usersSnap = await getDocs(collection(db, "users"));
+                const usersData = usersSnap.docs.map(doc => ({ uid: doc.id, ...doc.data() } as UserData));
+                setUsers(usersData);
+            }
         } catch (error) {
             console.error("Error loading data:", error);
         } finally {

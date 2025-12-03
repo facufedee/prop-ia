@@ -36,20 +36,20 @@ const getFirebaseConfig = (): FirebaseOptions | null => {
 
 const firebaseConfig = getFirebaseConfig();
 
-let app: FirebaseApp | undefined;
-let auth: Auth | undefined;
-let db: Firestore | undefined;
-let storage: FirebaseStorage | undefined;
+let appInstance: FirebaseApp | undefined;
+let authInstance: Auth | undefined;
+let dbInstance: Firestore | undefined;
+let storageInstance: FirebaseStorage | undefined;
 
 // Only initialize if we have a valid config
 if (firebaseConfig) {
   try {
-    app = getApps().length ? getApps()[0] : initializeApp(firebaseConfig);
+    appInstance = getApps().length ? getApps()[0] : initializeApp(firebaseConfig);
 
     // Auth (Browser Only)
     if (typeof window !== "undefined") {
       try {
-        auth = getAuth(app);
+        authInstance = getAuth(appInstance);
       } catch (e) {
         console.warn("Firebase Auth failed to initialize.", e);
       }
@@ -57,21 +57,21 @@ if (firebaseConfig) {
 
     // Firestore
     try {
-      db = initializeFirestore(app, {
+      dbInstance = initializeFirestore(appInstance, {
         localCache: persistentLocalCache({
           tabManager: persistentMultipleTabManager()
         })
       }, "propia");
     } catch (e) {
       try {
-        db = getFirestore(app, "propia");
+        dbInstance = getFirestore(appInstance, "propia");
       } catch (e2) {
-        db = getFirestore(app);
+        dbInstance = getFirestore(appInstance);
       }
     }
 
     // Storage
-    storage = getStorage(app);
+    storageInstance = getStorage(appInstance);
 
   } catch (error) {
     console.error("Error initializing Firebase:", error);
@@ -80,4 +80,9 @@ if (firebaseConfig) {
   console.warn("Firebase Config missing. Skipping initialization. (Expected during build if env vars are missing)");
 }
 
-export { app, auth, db, storage };
+// Export Firebase instances as non-nullable for TypeScript, but they may be undefined at runtime
+// Components should still check if instances exist before using them
+export const app = appInstance as FirebaseApp;
+export const auth = authInstance as Auth;
+export const db = dbInstance as Firestore;
+export const storage = storageInstance as FirebaseStorage;

@@ -41,7 +41,7 @@ export default function NuevaVisitaPage() {
     }, []);
 
     const fetchProperties = async () => {
-        if (!auth.currentUser) return;
+        if (!auth.currentUser || !db) return;
 
         try {
             const q = query(
@@ -61,7 +61,7 @@ export default function NuevaVisitaPage() {
     };
 
     const fetchAgents = async () => {
-        if (!auth.currentUser) return;
+        if (!auth.currentUser || !db) return;
 
         try {
             // Get users with Agente or Administrador role

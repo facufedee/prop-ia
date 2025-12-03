@@ -15,7 +15,7 @@ export default function EditPropertyPage() {
 
     useEffect(() => {
         const fetchProperty = async () => {
-            if (!params.id) return;
+            if (!params.id || !db) return;
 
             try {
                 const docRef = doc(db, "properties", params.id as string);
