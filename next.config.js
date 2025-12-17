@@ -67,6 +67,11 @@ const nextConfig = {
                             "frame-ancestors 'none'",
                             "upgrade-insecure-requests"
                         ].join('; ')
+                    },
+                    // Allow Google Sign-in popups
+                    {
+                        key: 'Cross-Origin-Opener-Policy',
+                        value: 'same-origin-allow-popups'
                     }
                 ],
             },

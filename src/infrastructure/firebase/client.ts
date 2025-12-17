@@ -6,22 +6,39 @@ import { getStorage } from "firebase/storage";
 
 let firebaseConfig: any = {};
 
-// Determine which config to use based on environment
-if (typeof window === "undefined") {
-  // Server-side (SSR / Cloud Run / Build)
-  // Try FIREBASE_CONFIG first (Firebase App Hosting)
-  const fbConfigStr = process.env.FIREBASE_CONFIG || process.env.FIREBASE_WEBAPP_CONFIG;
+// -------------------------------
+// HARDCODED CONFIGURATION (DEBUGGING)
+// -------------------------------
+firebaseConfig = {
+  apiKey: "AIzaSyAILIUiGZhz0Ic4dKFFlcQrCg3OdrWCnwQ",
+  authDomain: "prop-ia.firebaseapp.com",
+  projectId: "prop-ia",
+  storageBucket: "prop-ia.firebasestorage.app",
+  messagingSenderId: "815439555210",
+  appId: "1:815439555210:web:2449fdcf832d756613db73",
+  databaseURL: "https://prop-ia-default-rtdb.firebaseio.com",
+  measurementId: "G-W7RMLDXWYQ",
+};
 
-  if (fbConfigStr) {
+/*
+// -------------------------------
+// SERVER-SIDE
+// -------------------------------
+if (typeof window === "undefined") {
+  // 1) Firebase Hosting / Cloud Run env (JSON string)
+  const configStr =
+    process.env.FIREBASE_CONFIG || process.env.FIREBASE_WEBAPP_CONFIG;
+
+  if (configStr) {
     try {
-      firebaseConfig = JSON.parse(fbConfigStr);
-    } catch (e) {
-      console.error("Error parsing FIREBASE_CONFIG:", e);
+      firebaseConfig = JSON.parse(configStr);
+    } catch (err) {
+      console.error("Error parsing FIREBASE_CONFIG:", err);
     }
   }
 
-  // Fallback to NEXT_PUBLIC variables if FIREBASE_CONFIG not available (local build)
-  if (!firebaseConfig || !firebaseConfig.projectId) {
+  // 2) Local dev / Vercel / SSR fallback
+  if (!firebaseConfig?.projectId) {
     firebaseConfig = {
       apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
       authDomain: process.env.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN,
@@ -29,10 +46,16 @@ if (typeof window === "undefined") {
       storageBucket: process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET,
       messagingSenderId: process.env.NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID,
       appId: process.env.NEXT_PUBLIC_FIREBASE_APP_ID,
+      databaseURL: process.env.NEXT_PUBLIC_FIREBASE_DATABASE_URL,
+      measurementId: process.env.NEXT_PUBLIC_FIREBASE_MEASUREMENT_ID,
     };
   }
-} else {
-  // Client-side (browser)
+}
+
+// -------------------------------
+// CLIENT-SIDE
+// -------------------------------
+else {
   firebaseConfig = {
     apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY!,
     authDomain: process.env.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN!,
@@ -40,19 +63,35 @@ if (typeof window === "undefined") {
     storageBucket: process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET!,
     messagingSenderId: process.env.NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID!,
     appId: process.env.NEXT_PUBLIC_FIREBASE_APP_ID!,
+    databaseURL: process.env.NEXT_PUBLIC_FIREBASE_DATABASE_URL!,
+    measurementId: process.env.NEXT_PUBLIC_FIREBASE_MEASUREMENT_ID!,
   };
 }
+*/
 
-// Initialize Firebase App
+console.log("🔥 Firebase Config (Client):", {
+  projectId: firebaseConfig.projectId,
+  authDomain: firebaseConfig.authDomain,
+  apiKeyPresent: !!firebaseConfig.apiKey,
+  dbUrl: firebaseConfig.databaseURL
+});
+
+// -------------------------------
+// INITIALIZATION (safe on SSR)
+// -------------------------------
 const app = !getApps().length ? initializeApp(firebaseConfig) : getApps()[0];
 
-// Initialize Firestore and Storage (safe on both server and client)
-const db = getFirestore(app);
+// Firestore + Storage (ambos valen en server y client)
+// Usamos initializeFirestore para forzar long polling si hay problemas de websockets
+import { initializeFirestore } from "firebase/firestore";
+const db = initializeFirestore(app, {
+  experimentalForceLongPolling: true,
+});
 const storage = getStorage(app);
 
-// Auth - only initialize on client-side
-// On server-side, auth will be undefined which is expected
-const auth = typeof window !== "undefined" ? getAuth(app) : (undefined as any);
+// Auth SOLO en cliente, jamás en SSR
+const auth =
+  typeof window !== "undefined" ? getAuth(app) : (undefined as any);
 
 export { app, auth, db, storage };
 export default app;
