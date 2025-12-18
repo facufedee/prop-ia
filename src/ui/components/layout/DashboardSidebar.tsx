@@ -66,6 +66,7 @@ export default function DashboardSidebar({ isOpen = false, onClose }: DashboardS
       if (user) {
         try {
           const role = await roleService.getUserRole(user.uid);
+          console.log("DashboardSidebar: User role fetched:", role);
           setUserRole(role);
         } catch (error) {
           console.error("Error fetching user role:", error);

@@ -93,9 +93,16 @@ export const roleService = {
 
         if (userSnap.exists()) {
             const userData = userSnap.data();
+            console.log("roleService: User data found:", userData);
             if (userData.roleId) {
-                return await roleService.getRoleById(userData.roleId);
+                const role = await roleService.getRoleById(userData.roleId);
+                console.log("roleService: Role fetched:", role);
+                return role;
+            } else {
+                console.warn("roleService: User has no roleId");
             }
+        } else {
+            console.warn("roleService: User document not found for ID:", userId);
         }
         return null;
     },
