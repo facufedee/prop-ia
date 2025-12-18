@@ -14,13 +14,13 @@ service cloud.firestore {
     function isAdmin() {
       return isAuthenticated() && 
              exists(/databases/$(database)/documents/users/$(request.auth.uid)) &&
-             get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'Administrador';
+             get(/databases/$(database)/documents/users/$(request.auth.uid)).data.roleId == 'admin';
     }
     
     function hasRole(role) {
       return isAuthenticated() && 
              exists(/databases/$(database)/documents/users/$(request.auth.uid)) &&
-             get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == role;
+             get(/databases/$(database)/documents/users/$(request.auth.uid)).data.roleId == role;
     }
     
     function validateString(value, minLen, maxLen) {

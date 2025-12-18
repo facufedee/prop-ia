@@ -83,10 +83,8 @@ const app = !getApps().length ? initializeApp(firebaseConfig) : getApps()[0];
 
 // Firestore + Storage (ambos valen en server y client)
 // Usamos initializeFirestore para forzar long polling si hay problemas de websockets
-import { initializeFirestore } from "firebase/firestore";
-const db = initializeFirestore(app, {
-  experimentalForceLongPolling: true,
-});
+// import { getFirestore } from "firebase/firestore"; // Already imported at top
+const db = getFirestore(app);
 const storage = getStorage(app);
 
 // Auth SOLO en cliente, jamás en SSR
