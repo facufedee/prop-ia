@@ -35,6 +35,12 @@ export type LogAction =
     | 'transaction_create'
     | 'transaction_update'
     | 'commission_paid'
+    // Tasaciones
+    | 'valuation_create'
+    // Tickets
+    | 'ticket_create'
+    | 'ticket_update'
+    | 'ticket_status_update'
     // Configuración
     | 'config_update'
     | 'role_update'

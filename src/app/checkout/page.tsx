@@ -45,11 +45,12 @@ function CheckoutContent() {
     const price = selectedPlan ? (billing === 'yearly' ? selectedPlan.price.yearly : selectedPlan.price.monthly) : 0;
 
     useEffect(() => {
-        if (auth.currentUser) {
+        if (auth?.currentUser) {
             setFormData(prev => ({
+
                 ...prev,
-                email: auth.currentUser?.email || '',
-                name: auth.currentUser?.displayName || '',
+                email: auth?.currentUser?.email || '',
+                name: auth?.currentUser?.displayName || '',
             }));
         }
     }, []);
@@ -64,7 +65,7 @@ function CheckoutContent() {
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
-        if (!auth.currentUser || !selectedPlan) return;
+        if (!auth?.currentUser || !selectedPlan) return;
 
         setLoading(true);
 

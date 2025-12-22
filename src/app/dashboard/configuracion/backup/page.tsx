@@ -12,7 +12,7 @@ export default function BackupPage() {
     const [restoreResult, setRestoreResult] = useState<any>(null);
 
     const handleCreateBackup = async () => {
-        if (!auth.currentUser) return;
+        if (!auth?.currentUser) return;
 
         try {
             setLoading(true);
@@ -27,11 +27,11 @@ export default function BackupPage() {
     };
 
     const handlePreviewBackup = async () => {
-        if (!auth.currentUser) return;
+        if (!auth?.currentUser) return;
 
         try {
             setLoading(true);
-            const backup = await backupService.createBackup(auth.currentUser.uid);
+            const backup = await backupService.createBackup(auth?.currentUser?.uid || '');
             const stats = backupService.getBackupStats(backup);
             setBackupStats(stats);
         } catch (error) {
@@ -43,7 +43,7 @@ export default function BackupPage() {
     };
 
     const handleRestoreBackup = async (event: React.ChangeEvent<HTMLInputElement>) => {
-        if (!auth.currentUser || !event.target.files?.[0]) return;
+        if (!auth?.currentUser || !event.target.files?.[0]) return;
 
         const file = event.target.files[0];
         const reader = new FileReader();
@@ -66,13 +66,15 @@ export default function BackupPage() {
                 }
 
                 // Restore
-                const result = await backupService.restoreBackup(backupData, auth.currentUser!.uid);
-                setRestoreResult(result);
+                if (auth?.currentUser) {
+                    const result = await backupService.restoreBackup(backupData, auth.currentUser.uid);
+                    setRestoreResult(result);
 
-                if (result.success) {
-                    alert(`✅ Backup restaurado exitosamente!\n${result.restored} documentos restaurados.`);
-                } else {
-                    alert(`⚠️ Backup restaurado con errores:\n${result.errors.join('\n')}`);
+                    if (result.success) {
+                        alert(`✅ Backup restaurado exitosamente!\n${result.restored} documentos restaurados.`);
+                    } else {
+                        alert(`⚠️ Backup restaurado con errores:\n${result.errors.join('\n')}`);
+                    }
                 }
             } catch (error) {
                 console.error("Error restoring backup:", error);

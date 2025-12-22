@@ -38,7 +38,7 @@ export default function NuevaVisitaPage() {
     }, []);
 
     const fetchProperties = async () => {
-        if (!auth.currentUser || !db) return;
+        if (!auth?.currentUser || !db) return;
 
         try {
             const q = query(
@@ -58,7 +58,7 @@ export default function NuevaVisitaPage() {
     };
 
     const fetchAgents = async () => {
-        if (!auth.currentUser || !db) return;
+        if (!auth?.currentUser || !db) return;
 
         try {
             // Get users with Agente or Administrador role
@@ -70,7 +70,7 @@ export default function NuevaVisitaPage() {
                     nombre: doc.data().displayName || doc.data().email,
                     email: doc.data().email,
                 }))
-                .filter(u => u.id === auth.currentUser!.uid); // For now, only current user
+                .filter(u => u.id === auth?.currentUser?.uid); // For now, only current user
 
             setAgents([...users, { id: auth.currentUser.uid, nombre: "Yo", email: auth.currentUser.email }]);
         } catch (error) {
@@ -90,7 +90,7 @@ export default function NuevaVisitaPage() {
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
-        if (!auth.currentUser) return;
+        if (!auth?.currentUser) return;
 
         try {
             setLoading(true);

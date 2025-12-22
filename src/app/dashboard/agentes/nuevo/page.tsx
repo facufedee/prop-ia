@@ -28,7 +28,7 @@ export default function NuevoAgentePage() {
     }, []);
 
     const fetchConfig = async () => {
-        if (!auth.currentUser) return;
+        if (!auth?.currentUser) return;
 
         try {
             const data = await agentesService.getConfiguracion(auth.currentUser.uid);
@@ -60,7 +60,7 @@ export default function NuevoAgentePage() {
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
-        if (!auth.currentUser) return;
+        if (!auth?.currentUser) return;
 
         try {
             setLoading(true);

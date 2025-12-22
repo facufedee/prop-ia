@@ -50,21 +50,21 @@ const nextConfig = {
                         key: 'Permissions-Policy',
                         value: 'camera=(), microphone=(), geolocation=(self), interest-cohort=()'
                     },
-                    // Content Security Policy
+                    // Content Security Policy - Properly configured for Firebase
                     {
                         key: 'Content-Security-Policy',
                         value: [
                             "default-src 'self'",
-                            "script-src 'self' 'unsafe-eval' 'unsafe-inline' https://www.googletagmanager.com https://apis.google.com https://sdk.mercadopago.com https://http2.mlstatic.com",
+                            "script-src 'self' 'unsafe-eval' 'unsafe-inline' https://www.googletagmanager.com https://apis.google.com https://sdk.mercadopago.com https://http2.mlstatic.com https://maps.googleapis.com https://maps.gstatic.com",
                             "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
-                            "img-src 'self' data: https: blob: https://http2.mlstatic.com",
+                            "img-src 'self' data: https: blob: https://http2.mlstatic.com https://maps.gstatic.com https://maps.googleapis.com",
                             "font-src 'self' https://fonts.gstatic.com",
-                            "connect-src 'self' https://*.firebaseio.com https://*.googleapis.com https://firestore.googleapis.com https://api.mercadopago.com https://events.mercadopago.com",
+                            "connect-src 'self' https://*.googleapis.com https://*.firebaseio.com https://*.firebaseapp.com wss://*.firebaseio.com https://api.mercadopago.com https://events.mercadopago.com https://apis.datos.gob.ar",
                             "frame-src 'self' https://www.google.com https://*.firebaseapp.com https://accounts.google.com https://www.mercadopago.com.ar https://sdk.mercadopago.com",
                             "object-src 'none'",
                             "base-uri 'self'",
                             "form-action 'self'",
-                            "frame-ancestors 'none'",
+                            "frame-ancestors 'self'",
                             "upgrade-insecure-requests"
                         ].join('; ')
                     },
@@ -78,7 +78,8 @@ const nextConfig = {
         ];
     },
 
-    // Environment variables validation
+    // Environment variables validation and exposure
+    // This ensures all NEXT_PUBLIC_ variables are available in the browser
     env: {
         NEXT_PUBLIC_FIREBASE_API_KEY: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
         NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN: process.env.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN,
@@ -86,6 +87,10 @@ const nextConfig = {
         NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET: process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET,
         NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID: process.env.NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID,
         NEXT_PUBLIC_FIREBASE_APP_ID: process.env.NEXT_PUBLIC_FIREBASE_APP_ID,
+        NEXT_PUBLIC_FIREBASE_DATABASE_URL: process.env.NEXT_PUBLIC_FIREBASE_DATABASE_URL,
+        NEXT_PUBLIC_FIREBASE_MEASUREMENT_ID: process.env.NEXT_PUBLIC_FIREBASE_MEASUREMENT_ID,
+        NEXT_PUBLIC_APP_URL: process.env.NEXT_PUBLIC_APP_URL,
+        NEXT_PUBLIC_GOOGLE_MAPS_API_KEY: process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY,
     },
 
     // Production optimizations

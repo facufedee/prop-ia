@@ -300,4 +300,55 @@ export const auditLogService = {
             'warning'
         );
     },
+
+    logValuation: async (
+        userId: string,
+        userEmail: string,
+        userName: string,
+        propertyType: string,
+        location: string,
+        value: number,
+        organizationId: string
+    ) => {
+        await auditLogService.createLog(
+            userId,
+            userEmail,
+            userName,
+            'valuation_create',
+            'Tasaciones',
+            `${userName} realizó una tasación para ${propertyType} en ${location}: USD ${value.toLocaleString()}`,
+            organizationId,
+            { propertyType, location, value },
+            'info'
+        );
+    },
+
+    logTicket: async (
+        userId: string,
+        userEmail: string,
+        userName: string,
+        action: 'ticket_create' | 'ticket_status_update' | 'ticket_update',
+        ticketId: string,
+        ticketTitle: string,
+        organizationId: string,
+        metadata?: Record<string, any>
+    ) => {
+        const descriptions = {
+            ticket_create: `${userName} creó el ticket "${ticketTitle}"`,
+            ticket_status_update: `${userName} actualizó el estado del ticket "${ticketTitle}"`,
+            ticket_update: `${userName} actualizó el ticket "${ticketTitle}"`,
+        };
+
+        await auditLogService.createLog(
+            userId,
+            userEmail,
+            userName,
+            action,
+            'Soporte',
+            descriptions[action],
+            organizationId,
+            { ticketId, ticketTitle, ...metadata },
+            'info'
+        );
+    },
 };

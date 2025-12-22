@@ -30,7 +30,7 @@ export default function ClientesPage() {
     }, []);
 
     const fetchAllData = async () => {
-        if (!auth.currentUser) return;
+        if (!auth?.currentUser) return;
 
         try {
             setLoading(true);
@@ -119,8 +119,10 @@ export default function ClientesPage() {
 
         try {
             await leadsService.convertLead(id);
-            const updated = await leadsService.getLeads(auth.currentUser!.uid);
-            setLeads(updated);
+            if (auth?.currentUser) {
+                const updated = await leadsService.getLeads(auth.currentUser.uid);
+                setLeads(updated);
+            }
         } catch (error) {
             console.error("Error converting lead:", error);
             alert("Error al convertir el lead");

@@ -18,7 +18,7 @@ export default function SoportePage() {
     }, []);
 
     const fetchTickets = async () => {
-        if (!auth.currentUser) return;
+        if (!auth?.currentUser) return;
 
         try {
             const data = await ticketsService.getUserTickets(auth.currentUser.uid);

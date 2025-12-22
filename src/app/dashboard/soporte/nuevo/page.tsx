@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { app, db, auth } from "@/infrastructure/firebase/client";
 import { getDoc, doc } from "firebase/firestore";
 import { ticketsService } from "@/infrastructure/services/ticketsService";
+import { auditLogService } from "@/infrastructure/services/auditLogService";
 import { TicketCategory, TicketPriority } from "@/domain/models/Ticket";
 import { ArrowLeft } from "lucide-react";
 import Link from "next/link";
@@ -26,20 +27,20 @@ export default function NuevoTicketPage() {
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
-        if (!auth.currentUser || !db) return;
+        if (!auth?.currentUser || !db) return;
 
         try {
             setLoading(true);
 
             // Get user data
-            const userDoc = await getDoc(doc(db, "users", auth.currentUser.uid));
+            const userDoc = await getDoc(doc(db, "users", auth.currentUser?.uid || ''));
             const userData = userDoc.data();
 
             await ticketsService.createTicket({
-                userId: auth.currentUser.uid,
-                userEmail: auth.currentUser.email || '',
-                userName: userData?.displayName || auth.currentUser.email || 'Usuario',
-                organizationId: auth.currentUser.uid,
+                userId: auth.currentUser?.uid || '',
+                userEmail: auth.currentUser?.email || '',
+                userName: userData?.displayName || auth.currentUser?.email || 'Usuario',
+                organizationId: auth.currentUser?.uid || '',
                 organizationName: userData?.agencyName || 'Mi Inmobiliaria',
                 title: formData.title,
                 description: formData.description,
@@ -47,6 +48,20 @@ export default function NuevoTicketPage() {
                 priority: formData.priority,
                 status: 'abierto',
             });
+
+            // Log Ticket Creation
+            if (auth.currentUser) {
+                await auditLogService.logTicket(
+                    auth.currentUser.uid,
+                    auth.currentUser.email || '',
+                    userData?.displayName || auth.currentUser.email || 'Usuario',
+                    'ticket_create',
+                    'ticket-id-placeholder',
+                    formData.title,
+                    "default-org-id",
+                    { category: formData.category, priority: formData.priority }
+                );
+            }
 
             router.push("/dashboard/soporte");
         } catch (error) {

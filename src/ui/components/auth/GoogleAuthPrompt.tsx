@@ -14,6 +14,7 @@ export default function GoogleAuthPrompt() {
 
     useEffect(() => {
         // Check if user is already logged in
+        if (!auth) return;
         const unsubscribe = onAuthStateChanged(auth, (user) => {
             if (!user) {
                 // Show prompt after a short delay if not logged in

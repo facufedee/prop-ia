@@ -4,6 +4,8 @@ import { useState, useEffect } from "react";
 import Link from "next/link";
 import { PropertyData } from "@/lib/prediction/preprocessor";
 import { Home, Ruler, Building2, Clock, Bath, BedDouble, Landmark, MapPin, Hash, CircleDollarSign, CheckCircle } from "lucide-react";
+import { auth } from "@/infrastructure/firebase/client";
+import { auditLogService } from "@/infrastructure/services/auditLogService";
 
 const initialFormState: PropertyData = {
     bedrooms: null,
@@ -365,6 +367,19 @@ export default function TasacionForm() {
 
             const price = await predictionService.predict(predictionData);
             setResult(price);
+
+            // Log Valuation
+            if (auth?.currentUser) {
+                await auditLogService.logValuation(
+                    auth.currentUser.uid,
+                    auth.currentUser.email || '',
+                    auth.currentUser.displayName || 'Usuario',
+                    form.property_type,
+                    `${form.ciudad}, ${form.provincia}`,
+                    price,
+                    "default-org-id"
+                );
+            }
 
         } catch (err: any) {
             setError(`Error en la predicción: ${err.message}`);

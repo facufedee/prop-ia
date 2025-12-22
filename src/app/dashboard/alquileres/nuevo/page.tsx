@@ -9,6 +9,7 @@ import PropertySelector from "../components/PropertySelector";
 import TenantForm, { TenantFormData } from "../components/TenantForm";
 import { ChevronLeft, ChevronRight, Check } from "lucide-react";
 import { Alquiler } from "@/domain/models/Alquiler";
+import { auditLogService } from "@/infrastructure/services/auditLogService";
 
 export default function NuevoAlquilerPage() {
     const router = useRouter();
@@ -41,7 +42,7 @@ export default function NuevoAlquilerPage() {
     };
 
     const handleTenantSubmit = async (data: TenantFormData) => {
-        if (!auth.currentUser) return;
+        if (!auth?.currentUser) return;
 
         try {
             setLoading(true);
@@ -58,10 +59,23 @@ export default function NuevoAlquilerPage() {
                     dni: "",
                 },
                 documentos: [],
-                userId: auth.currentUser.uid,
+                userId: auth.currentUser?.uid || '',
             });
             setInquilinoId(id);
             setTenantData(data);
+
+            // Log Tenant Creation
+            auditLogService.createLog(
+                auth.currentUser?.uid || '',
+                auth.currentUser?.email || '',
+                auth.currentUser?.displayName || 'Usuario',
+                'client_create',
+                'Inquilinos',
+                `Se registró al inquilino ${data.nombre}`,
+                "default-org-id",
+                { tenantId: id, name: data.nombre }
+            );
+
             setCurrentStep(3);
         } catch (error) {
             console.error("Error creating tenant:", error);
@@ -77,7 +91,7 @@ export default function NuevoAlquilerPage() {
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
-        if (!auth.currentUser || !tenantData) return;
+        if (!auth?.currentUser || !tenantData) return;
 
         try {
             setLoading(true);
@@ -90,8 +104,8 @@ export default function NuevoAlquilerPage() {
                 nombreInquilino: tenantData.nombre,
                 contactoInquilino: tenantData.email,
                 tipoGarantia: tenantData.tipoGarantia,
-                garante: tenantData.tipoGarantia === 'garante' ? tenantData.datosGarante : undefined,
-                seguroCaucion: tenantData.tipoGarantia === 'seguro_caucion' ? tenantData.seguroCaucion : undefined,
+                garante: tenantData.tipoGarantia === 'garante' ? tenantData.datosGarante : null,
+                seguroCaucion: tenantData.tipoGarantia === 'seguro_caucion' ? tenantData.seguroCaucion : null,
                 fechaInicio: new Date(contractData.fechaInicio),
                 fechaFin: new Date(contractData.fechaFin),
                 montoMensual: parseFloat(contractData.montoMensual),
@@ -102,10 +116,23 @@ export default function NuevoAlquilerPage() {
                 incidencias: [],
                 estado: 'activo',
                 documentos: [],
-                userId: auth.currentUser.uid,
+                userId: auth.currentUser?.uid || '',
             };
 
             const id = await alquileresService.createAlquiler(alquiler);
+
+            // Log Rental Creation
+            await auditLogService.logRental(
+                auth.currentUser?.uid || '',
+                auth.currentUser?.email || '',
+                auth.currentUser?.displayName || 'Usuario',
+                'rental_create',
+                id,
+                alquiler.direccion,
+                "default-org-id",
+                { tenantName: alquiler.nombreInquilino, amount: alquiler.montoMensual }
+            );
+
             router.push(`/dashboard/alquileres/${id}`);
         } catch (error) {
             console.error("Error creating contract:", error);

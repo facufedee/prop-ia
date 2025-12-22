@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import {
   Home,
   Calculator,
@@ -13,7 +13,7 @@ import {
   Megaphone,
   Banknote,
   Calendar,
-  User,
+  User as UserIcon,
   Settings,
   X,
   Shield,
@@ -22,11 +22,14 @@ import {
   HardDrive,
   Headphones,
   Ticket,
-  CreditCard
+  CreditCard,
+  LogOut,
+  ChevronUp,
+  ChevronDown
 } from "lucide-react";
 import { app, auth } from "@/infrastructure/firebase/client";
 import { roleService, Role } from "@/infrastructure/services/roleService";
-import { onAuthStateChanged } from "firebase/auth";
+import { onAuthStateChanged, signOut, User as FirebaseUser } from "firebase/auth";
 
 interface DashboardSidebarProps {
   isOpen?: boolean;
@@ -50,7 +53,7 @@ const MENU_ITEMS = [
   { href: "/dashboard/soporte/ticketera", label: "Ticketera", icon: Ticket, adminOnly: true },
   { href: "/dashboard/bitacora", label: "Bitácora", icon: ScrollText, adminOnly: true },
   { href: "/catalogo", label: "Mi Suscripción", icon: CreditCard },
-  { href: "/dashboard/cuenta", label: "Cuenta", icon: User },
+  // { href: "/dashboard/cuenta", label: "Cuenta", icon: UserIcon }, // Moved to User Menu
   { href: "/dashboard/configuracion", label: "Configuración", icon: Settings },
   { href: "/dashboard/configuracion/roles", label: "Roles y Permisos", icon: Shield, adminOnly: true },
   { href: "/dashboard/configuracion/backup", label: "Backup", icon: HardDrive, adminOnly: true },
@@ -59,17 +62,25 @@ const MENU_ITEMS = [
 export default function DashboardSidebar({ isOpen = false, onClose }: DashboardSidebarProps) {
   const pathname = usePathname();
   const [userRole, setUserRole] = useState<Role | null>(null);
+  const [user, setUser] = useState<FirebaseUser | null>(null);
   const [loading, setLoading] = useState(true);
+  const [profileOpen, setProfileOpen] = useState(false);
+  const profileRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, async (user) => {
-      if (user) {
+    if (!auth) {
+      setLoading(false);
+      return;
+    }
+
+    const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
+      setUser(currentUser);
+      if (currentUser) {
         try {
-          const role = await roleService.getUserRole(user.uid);
-          console.log("DashboardSidebar: User role fetched:", role);
+          const role = await roleService.getUserRole(currentUser.uid);
           setUserRole(role);
-        } catch (error) {
-          console.error("Error fetching user role:", error);
+        } catch (error: any) {
+          console.error('Error fetching user role:', error);
         }
       }
       setLoading(false);
@@ -78,16 +89,20 @@ export default function DashboardSidebar({ isOpen = false, onClose }: DashboardS
     return () => unsubscribe();
   }, []);
 
-  // Filter menu items based on user permissions
-  const filteredMenuItems = MENU_ITEMS.filter(item => {
-    // If item is admin-only, check if user is admin
-    if (item.adminOnly) {
-      return userRole?.name === "Administrador";
+  // Close dropdown when clicking outside
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      if (profileRef.current && !profileRef.current.contains(event.target as Node)) {
+        setProfileOpen(false);
+      }
     }
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
 
-    // Otherwise, check if user has permission for this route
+  const filteredMenuItems = MENU_ITEMS.filter(item => {
+    if (item.adminOnly) return userRole?.name === "Administrador";
     if (!userRole) return false;
-
     return userRole.permissions.includes(item.href);
   });
 
@@ -151,10 +166,61 @@ export default function DashboardSidebar({ isOpen = false, onClose }: DashboardS
             );
           })}
 
-          <div className="mt-auto pt-6 border-t">
+          <div className="mt-auto pt-4 border-t space-y-2">
+            {/* Main Page Link */}
             <Link href="/" className="flex items-center gap-3 px-3 py-2 text-gray-500 hover:text-gray-900 hover:bg-gray-50 rounded-xl transition-colors">
-              <Home className="w-5 h-5" /> Volver al Inicio
+              <Home className="w-5 h-5" />
+              <span className="font-medium text-sm">Volver al Inicio</span>
             </Link>
+
+            {/* User Profile Menu */}
+            {user && (
+              <div className="relative pt-1" ref={profileRef}>
+                {profileOpen && (
+                  <div className="absolute bottom-full left-0 mb-2 w-full bg-white rounded-xl shadow-xl border border-gray-100 py-1 animate-in fade-in zoom-in-95 duration-200 overflow-hidden">
+                    <Link
+                      href="/dashboard/cuenta"
+                      className="flex items-center gap-3 px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
+                      onClick={() => { setProfileOpen(false); onClose?.(); }}
+                    >
+                      <UserIcon size={16} />
+                      Ver Perfil / Cuenta
+                    </Link>
+                    <button
+                      onClick={() => { if (auth) signOut(auth); }}
+                      className="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-red-600 hover:bg-red-50 transition-colors border-t border-gray-50"
+                    >
+                      <LogOut size={16} />
+                      Cerrar Sesión
+                    </button>
+                  </div>
+                )}
+
+                <button
+                  onClick={() => setProfileOpen(!profileOpen)}
+                  className={`flex items-center justify-between w-full p-2 rounded-xl border transition-all duration-200 ${profileOpen ? 'bg-indigo-50 border-indigo-100' : 'bg-white border-transparent hover:bg-gray-50 hover:border-gray-100'}`}
+                >
+                  <div className="flex items-center gap-3 overflow-hidden">
+                    <div className="w-9 h-9 rounded-full bg-indigo-100 flex items-center justify-center text-indigo-600 flex-shrink-0">
+                      {user.photoURL ? (
+                        <img src={user.photoURL} alt="Profile" className="w-9 h-9 rounded-full object-cover" />
+                      ) : (
+                        <span className="font-bold text-xs">{user.displayName?.charAt(0).toUpperCase() || user.email?.charAt(0).toUpperCase()}</span>
+                      )}
+                    </div>
+                    <div className="flex flex-col items-start overflow-hidden">
+                      <span className="text-sm font-semibold text-gray-900 truncate max-w-[100px]">
+                        {user.displayName?.split(' ')[0] || "Usuario"}
+                      </span>
+                      <span className="text-[10px] text-gray-500 truncate max-w-[100px]" title={user.email || ""}>
+                        {user.email}
+                      </span>
+                    </div>
+                  </div>
+                  {profileOpen ? <ChevronDown size={16} className="text-indigo-400" /> : <ChevronUp size={16} className="text-gray-400" />}
+                </button>
+              </div>
+            )}
           </div>
         </nav>
       </aside>

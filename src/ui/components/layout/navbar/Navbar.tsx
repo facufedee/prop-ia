@@ -3,8 +3,8 @@
 import { app, auth } from "@/infrastructure/firebase/client";
 import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
-import { Menu, X, ChevronDown, User as UserIcon, LogOut, LayoutDashboard, Settings, Bot } from "lucide-react";
-import { onAuthStateChanged, signOut, type User } from "firebase/auth";
+import { Menu, X, ChevronDown, User as UserIcon, LogOut, LayoutDashboard, Settings, Bot, Home } from "lucide-react";
+import { onAuthStateChanged, signOut, type User, type Auth } from "firebase/auth";
 
 export default function Navbar() {
   const [open, setOpen] = useState(false);
@@ -15,6 +15,7 @@ export default function Navbar() {
 
   // Firebase listener
   useEffect(() => {
+    if (!auth) return;
     const unsub = onAuthStateChanged(auth, (u) => setUser(u));
     return () => unsub();
   }, []);
@@ -142,24 +143,41 @@ export default function Navbar() {
                       <UserIcon size={18} />
                     )}
                   </div>
-                  <span className="text-sm font-medium text-gray-700 max-w-[100px] truncate">
+                  <span className="hidden md:block text-sm font-medium text-gray-700 max-w-[100px] truncate">
                     {user.displayName || user.email?.split('@')[0] || "Usuario"}
                   </span>
                   <ChevronDown size={16} className={`text-gray-400 transition-transform ${profileOpen ? 'rotate-180' : ''}`} />
                 </button>
 
                 {profileOpen && (
-                  <div className="absolute right-0 mt-2 w-56 bg-white rounded-xl shadow-lg border border-gray-100 py-2 animate-in fade-in zoom-in-95 duration-200">
-                    <div className="px-4 py-2 border-b border-gray-50">
-                      <p className="text-sm font-medium text-gray-900 truncate">
-                        {user.displayName || "Usuario"}
-                      </p>
-                      <p className="text-xs text-gray-500 truncate">
-                        {user.email}
-                      </p>
+                  <div className="absolute right-0 mt-2 w-64 bg-white rounded-xl shadow-lg border border-gray-100 py-2 animate-in fade-in zoom-in-95 duration-200">
+                    <div className="px-4 py-3 border-b border-gray-50 flex items-center gap-3">
+                      <div className="w-10 h-10 rounded-full bg-indigo-100 flex items-center justify-center text-indigo-600 flex-shrink-0">
+                        {user.photoURL ? (
+                          <img src={user.photoURL} alt="Profile" className="w-10 h-10 rounded-full object-cover" />
+                        ) : (
+                          <span className="font-bold text-lg">{user.displayName?.charAt(0).toUpperCase() || user.email?.charAt(0).toUpperCase()}</span>
+                        )}
+                      </div>
+                      <div className="overflow-hidden">
+                        <p className="text-sm font-semibold text-gray-900 truncate">
+                          {user.displayName || "Usuario"}
+                        </p>
+                        <p className="text-xs text-gray-500 truncate">
+                          {user.email}
+                        </p>
+                      </div>
                     </div>
 
                     <div className="py-1">
+                      <Link
+                        href="/"
+                        className="flex items-center gap-2 px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
+                        onClick={() => setProfileOpen(false)}
+                      >
+                        <Home size={16} /> {/* Note: Need to import Home if not already, or use ArrowLeft/House */}
+                        Volver al inicio
+                      </Link>
                       <Link
                         href="/dashboard/propiedades"
                         className="flex items-center gap-2 px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
@@ -188,7 +206,7 @@ export default function Navbar() {
 
                     <div className="border-t border-gray-50 mt-1 pt-1">
                       <button
-                        onClick={() => signOut(auth)}
+                        onClick={() => { if (auth) signOut(auth); }}
                         className="w-full flex items-center gap-2 px-4 py-2 text-sm text-red-600 hover:bg-red-50 transition-colors"
                       >
                         <LogOut size={16} />
@@ -272,7 +290,7 @@ export default function Navbar() {
                   Modificar datos
                 </Link>
                 <button
-                  onClick={() => signOut(auth)}
+                  onClick={() => { if (auth) signOut(auth); }}
                   className="flex items-center gap-2 w-full px-4 py-2 text-red-600 hover:bg-red-50 rounded-xl mt-2"
                 >
                   <LogOut size={16} />

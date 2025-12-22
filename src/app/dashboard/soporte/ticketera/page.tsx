@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { app, auth } from "@/infrastructure/firebase/client";
 import { ticketsService } from "@/infrastructure/services/ticketsService";
+import { auditLogService } from "@/infrastructure/services/auditLogService";
 import { Ticket, TicketStatus, TicketCategory, TicketPriority } from "@/domain/models/Ticket";
 import { Filter, Clock, CheckCircle, AlertCircle, XCircle } from "lucide-react";
 
@@ -22,7 +23,7 @@ export default function TicketeraPage() {
     }, []);
 
     const fetchTickets = async () => {
-        if (!auth.currentUser) return;
+        if (!auth?.currentUser) return;
 
         try {
             const data = await ticketsService.getAllTickets();
@@ -35,7 +36,7 @@ export default function TicketeraPage() {
     };
 
     const applyFilters = async () => {
-        if (!auth.currentUser) return;
+        if (!auth?.currentUser) return;
 
         try {
             setLoading(true);
@@ -58,6 +59,21 @@ export default function TicketeraPage() {
             setTickets(prev => prev.map(t =>
                 t.id === ticketId ? { ...t, status: newStatus } : t
             ));
+
+            // Log Status Update
+            const ticket = tickets.find(t => t.id === ticketId);
+            if (ticket && auth?.currentUser) {
+                await auditLogService.logTicket(
+                    auth.currentUser.uid,
+                    auth.currentUser.email || '',
+                    auth.currentUser.displayName || 'Usuario',
+                    'ticket_status_update',
+                    ticketId,
+                    ticket.title,
+                    "default-org-id",
+                    { oldStatus: ticket.status, newStatus: newStatus }
+                );
+            }
         } catch (error) {
             console.error("Error updating status:", error);
             alert("Error al actualizar el estado");

@@ -12,6 +12,10 @@ export default function AuthGuard({ children }: { children: React.ReactNode }) {
     const [authenticated, setAuthenticated] = useState(false);
 
     useEffect(() => {
+        if (!auth) {
+            setLoading(false);
+            return;
+        }
         const unsubscribe = onAuthStateChanged(auth, (user) => {
             if (!user) {
                 router.push("/access-denied");

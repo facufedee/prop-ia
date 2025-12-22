@@ -48,8 +48,8 @@ export interface Alquiler {
 
     // Tipo de garantía
     tipoGarantia: 'garante' | 'seguro_caucion';
-    garante?: Garante; // Solo si tipoGarantia === 'garante'
-    seguroCaucion?: SeguroCaucion; // Solo si tipoGarantia === 'seguro_caucion'
+    garante?: Garante | null; // Solo si tipoGarantia === 'garante'
+    seguroCaucion?: SeguroCaucion | null; // Solo si tipoGarantia === 'seguro_caucion'
 
     fechaInicio: Date;
     fechaFin: Date;

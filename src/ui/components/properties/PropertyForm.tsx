@@ -133,7 +133,7 @@ export default function PropertyForm() {
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
-        if (!auth.currentUser || !db) {
+        if (!auth?.currentUser || !db) {
             setError("Debes iniciar sesión para registrar una propiedad.");
             return;
         }
@@ -146,7 +146,7 @@ export default function PropertyForm() {
             const imageUrls: string[] = [];
             for (let i = 0; i < images.length; i++) {
                 if (!storage) throw new Error("Firebase Storage not initialized");
-                const storageRef = ref(storage, `properties/${auth.currentUser.uid}/${Date.now()}-${images[i].name}`);
+                const storageRef = ref(storage, `properties/${auth?.currentUser?.uid}/${Date.now()}-${images[i].name}`);
                 await uploadBytes(storageRef, images[i]);
                 const url = await getDownloadURL(storageRef);
                 imageUrls.push(url);
@@ -159,7 +159,7 @@ export default function PropertyForm() {
             const propertyData = {
                 ...form,
                 all_features: selectedFeatures.join(', '),
-                userId: auth.currentUser.uid,
+                userId: auth?.currentUser?.uid,
                 createdAt: new Date(),
                 status: 'active',
                 imageUrls

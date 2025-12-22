@@ -26,7 +26,7 @@ export default function BitacoraPage() {
     }, []);
 
     const fetchLogs = async () => {
-        if (!auth.currentUser) return;
+        if (!auth?.currentUser) return;
 
         try {
             setLoading(true);

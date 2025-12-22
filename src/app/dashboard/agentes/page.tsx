@@ -16,7 +16,7 @@ export default function AgentesPage() {
     }, []);
 
     const fetchAgentes = async () => {
-        if (!auth.currentUser) return;
+        if (!auth?.currentUser) return;
 
         try {
             setLoading(true);

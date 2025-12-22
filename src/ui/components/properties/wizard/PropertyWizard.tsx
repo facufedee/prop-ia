@@ -3,11 +3,12 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import StepIndicator from "./StepIndicator";
-import { ChevronLeft, ChevronRight, Loader2, Upload, X, MapPin } from "lucide-react";
+import { ChevronLeft, ChevronRight, Loader2, Upload, X, MapPin, Sparkles } from "lucide-react";
 import { app, db, storage, auth } from "@/infrastructure/firebase/client";
 import { collection, addDoc, updateDoc, doc } from "firebase/firestore";
 import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
 import { locationService, Provincia, Localidad } from "@/infrastructure/services/locationService";
+import { auditLogService } from "@/infrastructure/services/auditLogService";
 import dynamic from 'next/dynamic';
 
 import { useJsApiLoader, Autocomplete } from '@react-google-maps/api';
@@ -27,6 +28,19 @@ const STEPS = [
     "Precio",
     "Multimedia",
     "Descripción"
+];
+
+const AMENITIES_LIST = [
+    "Gimnasio",
+    "Pileta",
+    "SUM",
+    "Laundry",
+    "Balcón",
+    "Terraza",
+    "Seguridad",
+    "Parrilla",
+    "Jardín",
+    "Sauna"
 ];
 
 interface PropertyWizardProps {
@@ -63,8 +77,8 @@ export default function PropertyWizard({ initialData, isEditing = false }: Prope
         rooms: initialData?.rooms || '',
         bedrooms: initialData?.bedrooms || '',
         bathrooms: initialData?.bathrooms || '',
-        toilettes: initialData?.toilettes || '',
         garages: initialData?.garages || '',
+        amenities: initialData?.amenities || [], // New Amenities field
         antiquity_type: initialData?.antiquity_type || 'A estrenar',
         antiquity_years: initialData?.antiquity_years || '',
 
@@ -72,6 +86,7 @@ export default function PropertyWizard({ initialData, isEditing = false }: Prope
         currency: initialData?.currency || 'USD',
         price: initialData?.price || '',
         expenses: initialData?.expenses || '',
+        hasExpenses: initialData?.expenses ? true : false,
 
         // Step 6: Description
         title: initialData?.title || '',
@@ -88,7 +103,8 @@ export default function PropertyWizard({ initialData, isEditing = false }: Prope
     const [localidades, setLocalidades] = useState<Localidad[]>([]);
 
     // Google Maps API Key
-    const GOOGLE_MAPS_API_KEY = "AIzaSyB9-8L-SaT3rMmfl6O80nq8uK7lPJoHYZE";
+    // Google Maps API Key
+    const GOOGLE_MAPS_API_KEY = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY || "";
 
     const { isLoaded } = useJsApiLoader({
         id: 'google-map-script',
@@ -134,7 +150,26 @@ export default function PropertyWizard({ initialData, isEditing = false }: Prope
     }, [formData.calle, formData.altura, formData.localidad, formData.provincia, isEditing, initialData]);
 
     const handleChange = (field: string, value: any) => {
+        // Special handling for number inputs to clean leading zeros
+        if (['area_total', 'area_covered', 'rooms', 'bedrooms', 'bathrooms', 'garages', 'antiquity_years', 'price', 'expenses'].includes(field)) {
+            // Remove leading zeros if it's a valid number string, but allow empty string
+            if (value !== '' && !isNaN(value)) {
+                value = String(Number(value));
+            }
+        }
         setFormData(prev => ({ ...prev, [field]: value }));
+        if (error) setError(null); // Clear error on edit
+    };
+
+    const handleAmenityToggle = (amenity: string) => {
+        setFormData(prev => {
+            const current = prev.amenities || [];
+            if (current.includes(amenity)) {
+                return { ...prev, amenities: current.filter((a: string) => a !== amenity) };
+            } else {
+                return { ...prev, amenities: [...current, amenity] };
+            }
+        });
     };
 
     const handleProvinciaChange = async (e: React.ChangeEvent<HTMLSelectElement>) => {
@@ -195,12 +230,63 @@ export default function PropertyWizard({ initialData, isEditing = false }: Prope
     };
 
     const nextStep = () => {
+        if (!validateStep(currentStep)) return; // Stop if validation fails
+
         if (currentStep < STEPS.length) {
             setCurrentStep(prev => prev + 1);
             window.scrollTo(0, 0);
         } else {
             handleSubmit();
         }
+    };
+
+    const validateStep = (step: number) => {
+        setError(null);
+
+        if (step === 3) { // Characteristics Validation
+            const {
+                area_total, area_covered,
+                rooms, bedrooms, bathrooms, garages
+            } = formData;
+
+            // 1. Basic Number & Negative checks
+            if (Number(area_total) < 0 || Number(area_covered) < 0) {
+                setError("Las superficies no pueden ser negativas.");
+                return false;
+            }
+            if (Number(rooms) < 0 || Number(bedrooms) < 0 || Number(bathrooms) < 0 || Number(garages) < 0) {
+                setError("Las cantidades no pueden ser negativas.");
+                return false;
+            }
+
+            // 2. Logical Checks
+            if (Number(area_covered) > Number(area_total)) {
+                setError("La superficie cubierta no puede ser mayor a la total.");
+                return false;
+            }
+
+            // 3. Reasonable Max Limits
+            if (Number(area_total) > 100000) {
+                setError("La superficie total parece incorrecta (máx 100.000 m²).");
+                return false;
+            }
+            if (Number(rooms) > 50) {
+                setError("La cantidad de ambientes excede el límite permitido (máx 50).");
+                return false;
+            }
+            if (Number(bedrooms) > Number(rooms)) {
+                setError("No puede haber más dormitorios que ambientes totales.");
+                return false;
+            }
+            if (Number(bathrooms) > 20) {
+                setError("La cantidad de baños excede el límite permitido.");
+                return false;
+            }
+
+            // 4. "002" Leading Zero cleanup is handled in handleChange (see below modification)
+        }
+
+        return true;
     };
 
     const prevStep = () => {
@@ -211,7 +297,7 @@ export default function PropertyWizard({ initialData, isEditing = false }: Prope
     };
 
     const handleSubmit = async () => {
-        if (!auth.currentUser) return;
+        if (!auth?.currentUser) return;
         setLoading(true);
         setError(null);
 
@@ -237,7 +323,7 @@ export default function PropertyWizard({ initialData, isEditing = false }: Prope
                 if (!db) throw new Error("Firestore not initialized");
                 const docRef = await addDoc(collection(db, "properties"), {
                     ...formData,
-                    userId: auth.currentUser.uid,
+                    userId: auth.currentUser?.uid,
                     createdAt: new Date(),
                     status: 'active',
                     imageUrls: []
@@ -253,7 +339,7 @@ export default function PropertyWizard({ initialData, isEditing = false }: Prope
                 const image = images[i];
                 // Use propertyRef.id (works for both new and existing docs)
                 if (!storage) throw new Error("Firebase Storage not initialized");
-                const storageRef = ref(storage, `properties/${auth.currentUser.uid}/${propertyRef.id}/${image.name}-${Date.now()}`);
+                const storageRef = ref(storage, `properties/${auth.currentUser?.uid}/${propertyRef.id}/${image.name}-${Date.now()}`);
                 await uploadBytes(storageRef, image);
                 const url = await getDownloadURL(storageRef);
                 newImageUrls.push(url);
@@ -266,11 +352,64 @@ export default function PropertyWizard({ initialData, isEditing = false }: Prope
             // Update Document with final image list
             await updateDoc(propertyRef, { imageUrls: finalImageUrls });
 
+            // Create Audit Log
+            try {
+                const action = isEditing && initialData?.id ? 'property_update' : 'property_create';
+                const address = `${formData.calle} ${formData.altura}, ${formData.localidad}`;
+
+                await auditLogService.logProperty(
+                    auth.currentUser?.uid || '',
+                    auth.currentUser?.email || '',
+                    auth.currentUser?.displayName || 'Usuario',
+                    action,
+                    propertyRef.id,
+                    address,
+                    "default-org-id", // TODO: Replace with actual org ID if available
+                    {
+                        operation: formData.operation_type,
+                        price: formData.price,
+                        currency: formData.currency
+                    }
+                );
+            } catch (logErr) {
+                console.error("Error creating audit log:", logErr);
+            }
+
             router.push("/dashboard/propiedades");
 
         } catch (err: any) {
             console.error(err);
             setError("Error al guardar: " + err.message);
+            setLoading(false);
+        }
+    };
+
+    const handleGenerateDescription = async () => {
+        setLoading(true);
+        setError(null);
+        try {
+            const response = await fetch('/api/generate-description', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(formData),
+            });
+
+            if (!response.ok) {
+                throw new Error('Error generando descripción');
+            }
+
+            const data = await response.json();
+            setFormData(prev => ({
+                ...prev,
+                title: data.title,
+                description: data.description
+            }));
+        } catch (err: any) {
+            console.error(err);
+            setError("No pudimos generar la descripción automáticamente. Intentá de nuevo.");
+        } finally {
             setLoading(false);
         }
     };
@@ -289,7 +428,11 @@ export default function PropertyWizard({ initialData, isEditing = false }: Prope
                                 {['Venta', 'Alquiler', 'Temporada'].map(op => (
                                     <button
                                         key={op}
-                                        onClick={() => handleChange('operation_type', op)}
+                                        onClick={() => {
+                                            // Handle special case for currency
+                                            const newCurrency = op === 'Alquiler' ? 'ARS' : 'USD';
+                                            setFormData(prev => ({ ...prev, operation_type: op, currency: newCurrency }));
+                                        }}
                                         className={`flex-1 py-3 px-4 rounded-xl border transition-all ${formData.operation_type === op
                                             ? 'border-indigo-600 bg-indigo-50 text-indigo-700 font-medium'
                                             : 'border-gray-200 hover:border-gray-300'
@@ -345,7 +488,7 @@ export default function PropertyWizard({ initialData, isEditing = false }: Prope
                                         // Store autocomplete instance if needed
                                         (window as any).autocomplete = autocomplete;
                                     }}
-                                    onPlaceChanged={() => {
+                                    onPlaceChanged={async () => {
                                         const autocomplete = (window as any).autocomplete;
                                         if (autocomplete) {
                                             const place = autocomplete.getPlace();
@@ -356,8 +499,8 @@ export default function PropertyWizard({ initialData, isEditing = false }: Prope
                                                 // Extract address components
                                                 let calle = '';
                                                 let altura = '';
-                                                let localidad = '';
-                                                let provincia = '';
+                                                let localidadName = '';
+                                                let provinciaName = '';
 
                                                 place.address_components?.forEach((component: any) => {
                                                     const types = component.types;
@@ -368,22 +511,72 @@ export default function PropertyWizard({ initialData, isEditing = false }: Prope
                                                         altura = component.long_name;
                                                     }
                                                     if (types.includes('locality') || types.includes('sublocality')) {
-                                                        localidad = component.long_name;
+                                                        localidadName = component.long_name;
                                                     }
                                                     if (types.includes('administrative_area_level_1')) {
-                                                        provincia = component.long_name;
+                                                        provinciaName = component.long_name;
                                                     }
                                                 });
 
+                                                // Update Basic Data
                                                 setFormData(prev => ({
                                                     ...prev,
                                                     lat,
                                                     lng,
                                                     calle: calle || prev.calle,
                                                     altura: altura || prev.altura,
-                                                    localidad: localidad || prev.localidad,
-                                                    provincia: provincia || prev.provincia
                                                 }));
+
+                                                // Fuzzy Match Helper
+                                                const normalize = (str: string) => str.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace("province", "").trim();
+
+                                                // 1. Find and Set Provincia
+                                                let provinciaId = '';
+                                                if (provinciaName) {
+                                                    const cleanProv = normalize(provinciaName);
+
+                                                    // Special case for CABA
+                                                    if (cleanProv.includes("ciudad autonoma") || cleanProv === "caba") {
+                                                        // Find ID for CABA (usually 02)
+                                                        const p = provincias.find(p => p.id === "02" || normalize(p.nombre).includes("ciudad autonoma"));
+                                                        if (p) {
+                                                            provinciaId = p.id;
+                                                            provinciaName = p.nombre; // Update to exact name
+                                                        }
+                                                    } else {
+                                                        const match = provincias.find(p => normalize(p.nombre) === cleanProv || normalize(p.nombre).includes(cleanProv) || cleanProv.includes(normalize(p.nombre)));
+                                                        if (match) {
+                                                            provinciaId = match.id;
+                                                            provinciaName = match.nombre;
+                                                        }
+                                                    }
+
+                                                    if (provinciaId) {
+                                                        setFormData(prev => ({ ...prev, provincia_id: provinciaId, provincia: provinciaName }));
+
+                                                        // 2. Fetch Localities for this Province
+                                                        try {
+                                                            const locs = await locationService.getLocalidades(provinciaId);
+                                                            setLocalidades(locs);
+
+                                                            // 3. Find and Set Localidad
+                                                            if (localidadName) {
+                                                                const cleanLoc = normalize(localidadName);
+                                                                const locMatch = locs.find(l => normalize(l.nombre) === cleanLoc || normalize(l.nombre).includes(cleanLoc));
+
+                                                                if (locMatch) {
+                                                                    setFormData(prev => ({
+                                                                        ...prev,
+                                                                        localidad_id: locMatch.id,
+                                                                        localidad: locMatch.nombre
+                                                                    }));
+                                                                }
+                                                            }
+                                                        } catch (err) {
+                                                            console.error("Error fetching localities in autocomplete:", err);
+                                                        }
+                                                    }
+                                                }
                                             }
                                         }
                                     }}
@@ -498,19 +691,40 @@ export default function PropertyWizard({ initialData, isEditing = false }: Prope
                                 { label: 'Ambientes', field: 'rooms' },
                                 { label: 'Dormitorios', field: 'bedrooms' },
                                 { label: 'Baños', field: 'bathrooms' },
-                                { label: 'Toilettes', field: 'toilettes' },
                                 { label: 'Cocheras', field: 'garages' },
                             ].map(item => (
                                 <div key={item.field}>
                                     <label className="block text-sm font-medium text-gray-700 mb-2">{item.label}</label>
                                     <input
                                         type="number"
+                                        min="0" // Prevent negative UI input
                                         className="w-full p-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
                                         value={(formData as any)[item.field]}
                                         onChange={(e) => handleChange(item.field, e.target.value)}
                                     />
                                 </div>
                             ))}
+                        </div>
+
+                        <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-2">Amenities</label>
+                            <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+                                {AMENITIES_LIST.map(amenity => (
+                                    <button
+                                        key={amenity}
+                                        onClick={() => handleAmenityToggle(amenity)}
+                                        className={`p-3 rounded-xl border text-left transition-all flex items-center justify-between ${(formData.amenities || []).includes(amenity)
+                                            ? 'border-indigo-600 bg-indigo-50 text-indigo-700 ring-1 ring-indigo-600'
+                                            : 'border-gray-200 hover:border-gray-300 text-gray-600'
+                                            }`}
+                                    >
+                                        <span className="text-sm font-medium">{amenity}</span>
+                                        {(formData.amenities || []).includes(amenity) && (
+                                            <div className="w-2 h-2 rounded-full bg-indigo-600" />
+                                        )}
+                                    </button>
+                                ))}
+                            </div>
                         </div>
 
                         <div>
@@ -543,6 +757,9 @@ export default function PropertyWizard({ initialData, isEditing = false }: Prope
                 );
 
             case 4: // Price
+                // Auto-set currency based on operation type when entering/rendering this step
+                // Note: Better handled in useEffect or handleChange, but for now we render correctly
+
                 return (
                     <div className="space-y-6 animate-in fade-in slide-in-from-right-4 duration-300">
                         <h2 className="text-xl font-semibold">Valor de la propiedad</h2>
@@ -560,7 +777,9 @@ export default function PropertyWizard({ initialData, isEditing = false }: Prope
                                 </select>
                             </div>
                             <div className="flex-1">
-                                <label className="block text-sm font-medium text-gray-700 mb-2">Precio</label>
+                                <label className="block text-sm font-medium text-gray-700 mb-2">
+                                    Precio {formData.operation_type === 'Alquiler' ? '(Mensual)' : ''}
+                                </label>
                                 <input
                                     type="number"
                                     className="w-full p-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
@@ -571,16 +790,38 @@ export default function PropertyWizard({ initialData, isEditing = false }: Prope
                         </div>
 
                         <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-2">Expensas (Mensual)</label>
-                            <div className="relative">
-                                <span className="absolute left-3 top-3 text-gray-500">$</span>
+                            <div className="flex items-center gap-2 mb-2">
                                 <input
-                                    type="number"
-                                    className="w-full p-3 pl-8 border border-gray-300 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
-                                    value={formData.expenses}
-                                    onChange={(e) => handleChange('expenses', e.target.value)}
+                                    type="checkbox"
+                                    id="hasExpenses"
+                                    checked={formData.hasExpenses}
+                                    onChange={(e) => {
+                                        const checked = e.target.checked;
+                                        setFormData(prev => ({
+                                            ...prev,
+                                            hasExpenses: checked,
+                                            expenses: checked ? prev.expenses : ''
+                                        }));
+                                    }}
+                                    className="w-4 h-4 text-indigo-600 border-gray-300 rounded focus:ring-indigo-500"
                                 />
+                                <label htmlFor="hasExpenses" className="text-sm font-medium text-gray-700 cursor-pointer">
+                                    Paga expensas
+                                </label>
                             </div>
+
+                            {formData.hasExpenses && (
+                                <div className="relative animate-in fade-in slide-in-from-top-2 duration-200">
+                                    <span className="absolute left-3 top-3 text-gray-500">$</span>
+                                    <input
+                                        type="number"
+                                        placeholder="Valor mensual aproximado"
+                                        className="w-full p-3 pl-8 border border-gray-300 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                                        value={formData.expenses}
+                                        onChange={(e) => handleChange('expenses', e.target.value)}
+                                    />
+                                </div>
+                            )}
                         </div>
                     </div>
                 );
@@ -631,34 +872,56 @@ export default function PropertyWizard({ initialData, isEditing = false }: Prope
                     </div>
                 );
 
+
             case 6: // Description
                 return (
                     <div className="space-y-6 animate-in fade-in slide-in-from-right-4 duration-300">
-                        <h2 className="text-xl font-semibold">Descripción del aviso</h2>
+                        <div className="flex items-center justify-between">
+                            <h2 className="text-xl font-semibold">Descripción del aviso</h2>
+                            <button
+                                onClick={handleGenerateDescription}
+                                disabled={loading}
+                                className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-indigo-500 to-purple-600 text-white rounded-lg text-sm font-medium hover:from-indigo-600 hover:to-purple-700 transition-all shadow-md group"
+                            >
+                                {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Sparkles className="w-4 h-4 group-hover:animate-pulse" />}
+                                Generar con IA
+                            </button>
+                        </div>
 
                         <div>
                             <label className="block text-sm font-medium text-gray-700 mb-2">Título del aviso</label>
-                            <input
-                                type="text"
-                                className="w-full p-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
-                                placeholder="Ej. Hermoso departamento 2 ambientes en Palermo"
-                                value={formData.title}
-                                onChange={(e) => handleChange('title', e.target.value)}
-                            />
+                            <div className="relative">
+                                <input
+                                    type="text"
+                                    className="w-full p-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                                    placeholder="Ej. Hermoso departamento 2 ambientes en Palermo"
+                                    value={formData.title}
+                                    onChange={(e) => handleChange('title', e.target.value)}
+                                    maxLength={60}
+                                />
+                                <Sparkles className="absolute right-3 top-3.5 w-5 h-5 text-indigo-200" />
+                            </div>
+                            <p className="text-xs text-gray-400 mt-1 text-right">{formData.title.length}/60</p>
                         </div>
 
                         <div>
                             <label className="block text-sm font-medium text-gray-700 mb-2">Descripción detallada</label>
-                            <textarea
-                                rows={8}
-                                className="w-full p-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
-                                placeholder="Describí las características, ubicación, estado, etc..."
-                                value={formData.description}
-                                onChange={(e) => handleChange('description', e.target.value)}
-                            />
+                            <div className="relative">
+                                <textarea
+                                    rows={8}
+                                    className="w-full p-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                                    placeholder="Describí las características, ubicación, estado, etc..."
+                                    value={formData.description}
+                                    onChange={(e) => handleChange('description', e.target.value)}
+                                />
+                                <Sparkles className="absolute right-3 top-3.5 w-5 h-5 text-indigo-200" />
+                            </div>
                         </div>
                     </div>
                 );
+
+            default:
+                return null;
         }
     };
 

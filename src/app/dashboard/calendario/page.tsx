@@ -18,7 +18,7 @@ export default function CalendarioPage() {
     }, [currentDate]);
 
     const fetchVisitas = async () => {
-        if (!auth.currentUser) return;
+        if (!auth?.currentUser) return;
 
         try {
             setLoading(true);

@@ -59,7 +59,7 @@ export default function RolesPage() {
         setEditingRole(role);
         setIsCreating(false);
         setNewRoleName(role.name);
-        setSelectedPermissions(role.permissions);
+        setSelectedPermissions(role.permissions || []);
     };
 
     const handleSaveRole = async () => {
@@ -157,7 +157,7 @@ export default function RolesPage() {
                                                 {role.name}
                                             </h3>
                                             <p className="text-xs text-gray-500 mt-1">
-                                                {role.permissions.length} permisos activos
+                                                {role.permissions?.length || 0} permisos activos
                                             </p>
                                         </div>
                                         <div className="flex gap-1">

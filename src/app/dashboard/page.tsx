@@ -4,6 +4,9 @@ import { useEffect, useState } from "react";
 import { app, db, auth } from "@/infrastructure/firebase/client";
 import { collection, query, where, getDocs } from "firebase/firestore";
 import { onAuthStateChanged } from "firebase/auth";
+import { leadsService } from "@/infrastructure/services/leadsService";
+import { auditLogService } from "@/infrastructure/services/auditLogService";
+import { AuditLog } from "@/domain/models/AuditLog";
 import {
     Home,
     TrendingUp,
@@ -28,11 +31,16 @@ export default function DashboardPage() {
         totalProperties: 0,
         totalTasaciones: 0,
         totalLeads: 0,
-        totalValue: 0
+        totalValue: 0,
+        recentActivity: [] as AuditLog[]
     });
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
+        if (!auth) {
+            setLoading(false);
+            return;
+        }
         const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
             if (!currentUser) {
                 router.push("/login");
@@ -57,27 +65,38 @@ export default function DashboardPage() {
         if (!db) return;
 
         try {
-            // Properties
+            // 1. Properties & Value
             const propsQuery = query(collection(db, "properties"), where("userId", "==", userId));
             const propsSnapshot = await getDocs(propsQuery);
             const totalProps = propsSnapshot.size;
 
-            // Calculate total value
             let totalVal = 0;
             propsSnapshot.docs.forEach(doc => {
                 const data = doc.data();
                 if (data.price) totalVal += Number(data.price);
             });
 
-            // Tasaciones (mock for now or real if collection exists)
-            // const tasacionesQuery = query(collection(db, "tasaciones"), where("userId", "==", userId));
-            // const tasacionesSnapshot = await getDocs(tasacionesQuery);
+            // 2. Leads (Real)
+            const leads = await leadsService.getLeads(userId);
+            const totalLeadsCount = leads.length;
+
+            // 3. Activity & Tasaciones (from Audit Logs)
+            // Use "default-org-id" as observed in other components
+            const recentLogs = await auditLogService.getLogs("default-org-id", { userId }, 10);
+
+            // Count tasaciones from logs
+            const tasacionesLogs = await auditLogService.getLogs("default-org-id", {
+                userId,
+                action: 'valuation_create',
+                module: 'Tasaciones'
+            }, 1000);
 
             setStats({
                 totalProperties: totalProps,
-                totalTasaciones: 34, // Mock
-                totalLeads: 12, // Mock
-                totalValue: totalVal
+                totalTasaciones: tasacionesLogs.length,
+                totalLeads: totalLeadsCount,
+                totalValue: totalVal,
+                recentActivity: recentLogs
             });
         } catch (error) {
             console.error("Error fetching dashboard stats:", error);
@@ -153,7 +172,7 @@ export default function DashboardPage() {
                     </div>
                     <h3 className="text-2xl font-bold text-gray-900">{stats.totalTasaciones}</h3>
                     <p className="text-sm text-gray-500 mt-1">Tasaciones</p>
-                    <p className="text-xs text-gray-400 mt-2">Este mes</p>
+                    <p className="text-xs text-gray-400 mt-2">Histórico</p>
                 </div>
 
                 <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 hover:shadow-md transition-shadow">
@@ -167,7 +186,7 @@ export default function DashboardPage() {
                     </div>
                     <h3 className="text-2xl font-bold text-gray-900">{stats.totalLeads}</h3>
                     <p className="text-sm text-gray-500 mt-1">Leads Nuevos</p>
-                    <p className="text-xs text-gray-400 mt-2">Hoy</p>
+                    <p className="text-xs text-gray-400 mt-2">Total histórico</p>
                 </div>
 
                 <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 hover:shadow-md transition-shadow">
@@ -181,7 +200,7 @@ export default function DashboardPage() {
                     </div>
                     <h3 className="text-2xl font-bold text-gray-900">{formatCurrency(stats.totalValue)}</h3>
                     <p className="text-sm text-gray-500 mt-1">Valor Total</p>
-                    <p className="text-xs text-gray-400 mt-2">Cartera cerrada</p>
+                    <p className="text-xs text-gray-400 mt-2">Inventario activo</p>
                 </div>
             </div>
 
@@ -235,18 +254,35 @@ export default function DashboardPage() {
                 <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
                     <h2 className="text-lg font-bold text-gray-900 mb-6">Actividad Reciente</h2>
                     <div className="space-y-6">
-                        {[1, 2, 3].map((_, i) => (
-                            <div key={i} className="flex gap-4">
-                                <div className="w-10 h-10 rounded-full bg-gray-100 flex items-center justify-center flex-shrink-0">
-                                    <Home size={18} className="text-gray-500" />
+                        {stats.recentActivity.length === 0 ? (
+                            <p className="text-sm text-gray-500 text-center py-4">No hay actividad reciente.</p>
+                        ) : (
+                            stats.recentActivity.map((log) => (
+                                <div key={log.id} className="flex gap-4">
+                                    <div className={`w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0
+                                        ${log.level === 'error' ? 'bg-red-100 text-red-600' :
+                                            log.level === 'warning' ? 'bg-orange-100 text-orange-600' :
+                                                log.level === 'success' ? 'bg-green-100 text-green-600' : 'bg-blue-100 text-blue-600'}`}>
+                                        {/* Simple icon logic based on module */}
+                                        {log.module === 'Propiedades' ? <Home size={18} /> :
+                                            log.module === 'Alquileres' ? <Building2 size={18} /> :
+                                                log.module === 'Tasaciones' ? <BarChart3 size={18} /> :
+                                                    log.module === 'Visitas' ? <Calendar size={18} /> :
+                                                        <TrendingUp size={18} />}
+                                    </div>
+                                    <div>
+                                        <p className="text-sm font-medium text-gray-900">{log.description}</p>
+                                        <div className="flex items-center gap-2 mt-1">
+                                            <span className="text-xs text-gray-500 capitalize">{log.module.toLowerCase()}</span>
+                                            <span className="text-gray-300">•</span>
+                                            <span className="text-xs text-gray-400">
+                                                {new Date(log.timestamp).toLocaleDateString()} {new Date(log.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                                            </span>
+                                        </div>
+                                    </div>
                                 </div>
-                                <div>
-                                    <p className="text-sm font-medium text-gray-900">Nueva propiedad agregada</p>
-                                    <p className="text-xs text-gray-500">Av. Libertador 1234</p>
-                                    <p className="text-xs text-gray-400 mt-1">Hace 2 horas</p>
-                                </div>
-                            </div>
-                        ))}
+                            ))
+                        )}
                     </div>
                 </div>
             </div>

@@ -18,7 +18,7 @@ export default function AlquileresPage() {
 
     useEffect(() => {
         const fetchContracts = async () => {
-            if (!auth.currentUser) return;
+            if (!auth?.currentUser) return;
 
             try {
                 const data = await alquileresService.getAlquileres(auth.currentUser.uid);

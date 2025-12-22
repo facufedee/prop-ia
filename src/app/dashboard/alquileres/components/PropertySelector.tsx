@@ -20,7 +20,7 @@ export default function PropertySelector({ onSelect, selectedId }: PropertySelec
 
     useEffect(() => {
         const fetchProperties = async () => {
-            if (!auth.currentUser) return;
+            if (!auth?.currentUser) return;
 
             try {
                 // Fetch properties from Firestore

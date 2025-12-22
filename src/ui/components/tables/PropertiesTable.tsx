@@ -7,7 +7,7 @@ import { collection, query, where, getDocs, deleteDoc, doc } from "firebase/fire
 import { onAuthStateChanged } from "firebase/auth";
 import Link from "next/link";
 
-interface Property {
+export interface Property {
     id: string;
     title: string;
     localidad: string;
@@ -17,56 +17,17 @@ interface Property {
     currency: string;
     operation_type: string;
     imageUrls?: string[];
+    userId?: string;
 }
 
-export default function PropertiesTable() {
-    const [properties, setProperties] = useState<Property[]>([]);
-    const [loading, setLoading] = useState(true);
+interface PropertiesTableProps {
+    properties: Property[];
+    loading: boolean;
+    onDelete: (id: string) => void;
+}
 
-    useEffect(() => {
-        const unsubscribe = onAuthStateChanged(auth, async (user) => {
-            if (user) {
-                fetchProperties(user.uid);
-            } else {
-                setLoading(false);
-            }
-        });
-
-        return () => unsubscribe();
-    }, []);
-
-    const fetchProperties = async (userId: string) => {
-        try {
-            if (!db) throw new Error("Firestore not initialized");
-            const q = query(
-                collection(db, "properties"),
-                where("userId", "==", userId)
-            );
-            const querySnapshot = await getDocs(q);
-            const props = querySnapshot.docs.map(doc => ({
-                id: doc.id,
-                ...doc.data()
-            })) as Property[];
-            setProperties(props);
-        } catch (error) {
-            console.error("Error fetching properties:", error);
-        } finally {
-            setLoading(false);
-        }
-    };
-
-    const handleDelete = async (id: string) => {
-        if (!confirm("¿Estás seguro de que querés eliminar esta propiedad?")) return;
-
-        try {
-            if (!db) throw new Error("Firestore not initialized");
-            await deleteDoc(doc(db, "properties", id));
-            setProperties(prev => prev.filter(p => p.id !== id));
-        } catch (error) {
-            console.error("Error deleting property:", error);
-            alert("Error al eliminar la propiedad");
-        }
-    };
+export default function PropertiesTable({ properties, loading, onDelete }: PropertiesTableProps) {
+    // Internal state removed, using props
 
     if (loading) {
         return (
@@ -132,7 +93,7 @@ export default function PropertiesTable() {
                                         <Edit size={16} />
                                     </Link>
                                     <button
-                                        onClick={() => handleDelete(p.id)}
+                                        onClick={() => onDelete(p.id)}
                                         className="p-2 hover:bg-red-50 rounded-full text-red-500 transition"
                                     >
                                         <Trash2 size={16} />
