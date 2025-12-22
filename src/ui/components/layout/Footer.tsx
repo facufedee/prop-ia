@@ -12,10 +12,10 @@ export default function Footer() {
                             La plataforma de inteligencia artificial líder para tasaciones inmobiliarias en Argentina.
                         </p>
                         <div className="flex gap-4">
-                            <a href="#" className="text-gray-400 hover:text-white transition"><Facebook className="w-5 h-5" /></a>
-                            <a href="#" className="text-gray-400 hover:text-white transition"><Twitter className="w-5 h-5" /></a>
-                            <a href="#" className="text-gray-400 hover:text-white transition"><Instagram className="w-5 h-5" /></a>
-                            <a href="#" className="text-gray-400 hover:text-white transition"><Linkedin className="w-5 h-5" /></a>
+                            <a href="#" aria-label="Facebook" className="text-gray-400 hover:text-white transition"><Facebook className="w-5 h-5" /></a>
+                            <a href="#" aria-label="Twitter" className="text-gray-400 hover:text-white transition"><Twitter className="w-5 h-5" /></a>
+                            <a href="#" aria-label="Instagram" className="text-gray-400 hover:text-white transition"><Instagram className="w-5 h-5" /></a>
+                            <a href="#" aria-label="LinkedIn" className="text-gray-400 hover:text-white transition"><Linkedin className="w-5 h-5" /></a>
                         </div>
                     </div>
 

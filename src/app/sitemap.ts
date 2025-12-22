@@ -1,44 +1,30 @@
-import { MetadataRoute } from 'next';
+import { MetadataRoute } from 'next'
 
 export default function sitemap(): MetadataRoute.Sitemap {
-    const baseUrl = 'https://prop-ia.com';
-
     return [
         {
-            url: baseUrl,
+            url: 'https://prop-ia.com',
             lastModified: new Date(),
-            changeFrequency: 'daily',
+            changeFrequency: 'weekly',
             priority: 1,
         },
         {
-            url: `${baseUrl}/catalogo`,
-            lastModified: new Date(),
-            changeFrequency: 'weekly',
-            priority: 0.9,
-        },
-        {
-            url: `${baseUrl}/modelo`,
+            url: 'https://prop-ia.com/catalogo',
             lastModified: new Date(),
             changeFrequency: 'monthly',
             priority: 0.8,
         },
         {
-            url: `${baseUrl}/blog`,
+            url: 'https://prop-ia.com/login',
             lastModified: new Date(),
-            changeFrequency: 'daily',
-            priority: 0.7,
+            changeFrequency: 'yearly',
+            priority: 0.5,
         },
         {
-            url: `${baseUrl}/login`,
+            url: 'https://prop-ia.com/registro',
             lastModified: new Date(),
-            changeFrequency: 'monthly',
-            priority: 0.6,
+            changeFrequency: 'yearly',
+            priority: 0.5,
         },
-        {
-            url: `${baseUrl}/register`,
-            lastModified: new Date(),
-            changeFrequency: 'monthly',
-            priority: 0.6,
-        },
-    ];
+    ]
 }

@@ -1,4 +1,5 @@
-import { db } from "@/infrastructure/firebase/client";
+import { db, auth } from "@/infrastructure/firebase/client";
+import { auditLogService } from "@/infrastructure/services/auditLogService";
 import { collection, doc, getDocs, getDoc, setDoc, updateDoc, deleteDoc, query, where } from "firebase/firestore";
 
 export interface Permission {
@@ -63,6 +64,18 @@ export const roleService = {
         if (!db) throw new Error("Firestore not initialized");
         const newRoleRef = doc(collection(db, ROLES_COLLECTION));
         await setDoc(newRoleRef, { ...role, isSystem: false });
+
+        if (auth?.currentUser) {
+            await auditLogService.logConfig(
+                auth.currentUser.uid,
+                auth.currentUser.email || "",
+                auth.currentUser.displayName || "Usuario",
+                'role_update',
+                `Creó el rol "${role.name}"`,
+                "system", // Org ID not clear here, using system or generic
+                { role: role.name }
+            );
+        }
     },
 
     // Update an existing role
@@ -70,12 +83,44 @@ export const roleService = {
         if (!db) throw new Error("Firestore not initialized");
         const roleRef = doc(db, ROLES_COLLECTION, roleId);
         await updateDoc(roleRef, updates);
+
+        if (auth?.currentUser) {
+            const roleSnap = await getDoc(roleRef);
+            const roleName = roleSnap.exists() ? roleSnap.data().name : roleId;
+
+            await auditLogService.logConfig(
+                auth.currentUser.uid,
+                auth.currentUser.email || "",
+                auth.currentUser.displayName || "Usuario",
+                'role_update',
+                `Actualizó el rol "${roleName}"`,
+                "system",
+                { roleId, changes: Object.keys(updates) }
+            );
+        }
     },
 
     // Delete a role
     deleteRole: async (roleId: string): Promise<void> => {
         if (!db) throw new Error("Firestore not initialized");
-        await deleteDoc(doc(db, ROLES_COLLECTION, roleId));
+        const roleRef = doc(db, ROLES_COLLECTION, roleId);
+        // Get name before delete
+        const roleSnap = await getDoc(roleRef);
+        const roleName = roleSnap.exists() ? roleSnap.data().name : roleId;
+
+        await deleteDoc(roleRef);
+
+        if (auth?.currentUser) {
+            await auditLogService.logConfig(
+                auth.currentUser.uid,
+                auth.currentUser.email || "",
+                auth.currentUser.displayName || "Usuario",
+                'role_update',
+                `Eliminó el rol "${roleName}"`,
+                "system",
+                { roleId, roleName }
+            );
+        }
     },
 
     // Assign a role to a user
@@ -83,6 +128,20 @@ export const roleService = {
         if (!db) throw new Error("Firestore not initialized");
         const userRef = doc(db, USERS_COLLECTION, userId);
         await updateDoc(userRef, { roleId });
+
+        if (auth?.currentUser) {
+            const role = await roleService.getRoleById(roleId);
+
+            await auditLogService.logConfig(
+                auth.currentUser.uid,
+                auth.currentUser.email || "",
+                auth.currentUser.displayName || "Usuario",
+                'user_update',
+                `Asignó el rol "${role?.name || roleId}" al usuario ${userId}`,
+                "system",
+                { userId, roleId, roleName: role?.name }
+            );
+        }
     },
 
     // Get user's role

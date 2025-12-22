@@ -49,8 +49,11 @@ export default function Navbar() {
 
         {/* Desktop menu */}
         <div className="hidden md:flex items-center gap-6 text-sm font-medium text-gray-600">
-          <Link href="/#como-funciona" className="flex items-center gap-2 hover:text-indigo-600 transition-colors">
+          <Link href="/como-funciona" className="flex items-center gap-2 hover:text-indigo-600 transition-colors">
             Cómo funciona
+          </Link>
+          <Link href="/about" className="flex items-center gap-2 hover:text-indigo-600 transition-colors">
+            Nosotros
           </Link>
           <Link href="/modelo" className="flex items-center gap-2 hover:text-indigo-600 transition-colors">
             Tecnología
@@ -231,7 +234,8 @@ export default function Navbar() {
         <div className="md:hidden mt-3 flex flex-col gap-4 
         bg-white/95 backdrop-blur-xl border-t border-white/20 py-4 px-2 text-sm">
 
-          <Link href="/#como-funciona" className="px-2 py-1 hover:text-black">Cómo funciona</Link>
+          <Link href="/como-funciona" className="px-2 py-1 hover:text-black">Cómo funciona</Link>
+          <Link href="/about" className="px-2 py-1 hover:text-black">Nosotros</Link>
           <Link href="/modelo" className="px-2 py-1 hover:text-black">Tecnología</Link>
           <Link href="/#pricing" className="px-2 py-1 hover:text-black">Precios</Link>
           <Link href="/#faq" className="px-2 py-1 hover:text-black">Preguntas</Link>

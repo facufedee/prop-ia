@@ -27,9 +27,11 @@ import {
   ChevronUp,
   ChevronDown
 } from "lucide-react";
-import { app, auth } from "@/infrastructure/firebase/client";
+import { app, auth, db } from "@/infrastructure/firebase/client";
 import { roleService, Role } from "@/infrastructure/services/roleService";
 import { onAuthStateChanged, signOut, User as FirebaseUser } from "firebase/auth";
+import { doc, onSnapshot } from "firebase/firestore";
+import { ticketsService } from "@/infrastructure/services/ticketsService";
 
 interface DashboardSidebarProps {
   isOpen?: boolean;
@@ -54,6 +56,7 @@ const MENU_ITEMS = [
   { href: "/dashboard/bitacora", label: "Bitácora", icon: ScrollText, adminOnly: true },
   { href: "/catalogo", label: "Mi Suscripción", icon: CreditCard },
   // { href: "/dashboard/cuenta", label: "Cuenta", icon: UserIcon }, // Moved to User Menu
+  { href: "/dashboard/admin", label: "Gestión Plataforma", icon: Shield, adminOnly: true },
   { href: "/dashboard/configuracion", label: "Configuración", icon: Settings },
   { href: "/dashboard/configuracion/roles", label: "Roles y Permisos", icon: Shield, adminOnly: true },
   { href: "/dashboard/configuracion/backup", label: "Backup", icon: HardDrive, adminOnly: true },
@@ -73,21 +76,57 @@ export default function DashboardSidebar({ isOpen = false, onClose }: DashboardS
       return;
     }
 
-    const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
+    const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
       setUser(currentUser);
-      if (currentUser) {
-        try {
-          const role = await roleService.getUserRole(currentUser.uid);
-          setUserRole(role);
-        } catch (error: any) {
-          console.error('Error fetching user role:', error);
+      if (!currentUser) {
+        setUserRole(null);
+        setLoading(false);
+      }
+    });
+
+    return () => unsubscribe();
+  }, []);
+
+  // Effect for Role Listener
+  useEffect(() => {
+    if (!user) return;
+
+    // Use real-time listener for user role
+    const userRef = doc(db, "users", user.uid);
+    const unsubscribeSnapshot = onSnapshot(userRef, async (docSnap) => {
+      if (docSnap.exists()) {
+        const userData = docSnap.data();
+        if (userData.roleId) {
+          try {
+            const role = await roleService.getRoleById(userData.roleId);
+            setUserRole(role);
+          } catch (error) {
+            console.error('Error fetching role details:', error);
+          }
         }
       }
       setLoading(false);
     });
 
-    return () => unsubscribe();
-  }, []);
+    return () => unsubscribeSnapshot();
+    return () => unsubscribeSnapshot();
+  }, [user]);
+
+  // Effect for Notifications (Tickets)
+  const [notificationCount, setNotificationCount] = useState(0);
+
+  useEffect(() => {
+    if (!user || !userRole) return;
+    // Only check for standard users (or agents), not necessarily admins unless they want to see their own requests? 
+    // Requirement says: "notification in the menu... de que tiene mensajes". Assuming for the regular user.
+
+    const unsubTickets = ticketsService.subscribeToUserTickets(user.uid, (tickets) => {
+      const waitingCount = tickets.filter(t => t.status === 'esperando_respuesta').length;
+      setNotificationCount(waitingCount);
+    });
+
+    return () => unsubTickets();
+  }, [user, userRole]);
 
   // Close dropdown when clicking outside
   useEffect(() => {
@@ -138,7 +177,7 @@ export default function DashboardSidebar({ isOpen = false, onClose }: DashboardS
             </div>
             <span className="text-xl font-bold text-gray-900 tracking-tight">PROP-IA</span>
           </Link>
-          <button onClick={onClose} className="p-1 hover:bg-gray-100 rounded-lg md:hidden">
+          <button onClick={onClose} className="p-1 hover:bg-gray-100 rounded-lg md:hidden" aria-label="Cerrar menú">
             <X className="w-5 h-5 text-gray-500" />
           </button>
         </div>
@@ -161,17 +200,19 @@ export default function DashboardSidebar({ isOpen = false, onClose }: DashboardS
                 onClick={onClose}
               >
                 <Icon className={`w-5 h-5 ${isActive ? 'text-indigo-600' : 'text-gray-400'}`} />
-                {item.label}
+                <span className="flex-1">{item.label}</span>
+                {item.href === '/dashboard/soporte' && notificationCount > 0 && (
+                  <span className="bg-red-500 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full min-w-[18px] text-center">
+                    {notificationCount}
+                  </span>
+                )}
               </Link>
             );
           })}
 
           <div className="mt-auto pt-4 border-t space-y-2">
             {/* Main Page Link */}
-            <Link href="/" className="flex items-center gap-3 px-3 py-2 text-gray-500 hover:text-gray-900 hover:bg-gray-50 rounded-xl transition-colors">
-              <Home className="w-5 h-5" />
-              <span className="font-medium text-sm">Volver al Inicio</span>
-            </Link>
+
 
             {/* User Profile Menu */}
             {user && (

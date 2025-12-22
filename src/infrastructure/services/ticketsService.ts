@@ -1,4 +1,5 @@
-import { db } from "@/infrastructure/firebase/client";
+import { db, auth } from "@/infrastructure/firebase/client";
+import { auditLogService } from "@/infrastructure/services/auditLogService";
 import {
     collection,
     doc,
@@ -9,7 +10,8 @@ import {
     query,
     where,
     orderBy,
-    Timestamp
+    Timestamp,
+    onSnapshot
 } from "firebase/firestore";
 import { Ticket, TicketMessage, TicketStatus, TicketCategory, TicketPriority } from "@/domain/models/Ticket";
 
@@ -85,6 +87,20 @@ export const ticketsService = {
             createdAt: Timestamp.now(),
             updatedAt: Timestamp.now(),
         });
+
+        // Log Bitácora
+        if (auth?.currentUser) {
+            await auditLogService.logTicket(
+                auth.currentUser.uid,
+                auth.currentUser.email || "",
+                auth.currentUser.displayName || "Usuario",
+                'ticket_create',
+                docRef.id,
+                data.title,
+                data.organizationId
+            );
+        }
+
         return docRef.id;
     },
 
@@ -105,6 +121,25 @@ export const ticketsService = {
         }
 
         await updateDoc(docRef, updateData);
+
+        // Log Bitácora (Generic update)
+        if (auth?.currentUser) {
+            // We'd ideally fetch the ticket to get the title, but for now we skip or just log ID
+            // Optimally we pass title or fetch it. Let's fetch it for the log to be useful.
+            const ticketSnap = await getDoc(docRef);
+            const ticketTitle = ticketSnap.exists() ? ticketSnap.data().title : "Sin título";
+
+            await auditLogService.logTicket(
+                auth.currentUser.uid,
+                auth.currentUser.email || "",
+                auth.currentUser.displayName || "Usuario",
+                'ticket_update',
+                id,
+                ticketTitle,
+                ticketSnap.exists() ? ticketSnap.data().organizationId : "unknown",
+                { changes: Object.keys(data) }
+            );
+        }
     },
 
     // Cambiar estado
@@ -123,6 +158,23 @@ export const ticketsService = {
         if (!db) throw new Error("Firestore not initialized");
         const docRef = doc(db, TICKETS_COLLECTION, id);
         await updateDoc(docRef, updateData);
+
+        // Log Bitácora
+        if (auth?.currentUser) {
+            const ticketSnap = await getDoc(docRef);
+            const ticketData = ticketSnap.data();
+
+            await auditLogService.logTicket(
+                auth.currentUser.uid,
+                auth.currentUser.email || "",
+                auth.currentUser.displayName || "Usuario",
+                'ticket_status_update',
+                id,
+                ticketData?.title || "Sin título",
+                ticketData?.organizationId || "unknown",
+                { newStatus: status }
+            );
+        }
     },
 
     // Asignar ticket
@@ -135,6 +187,23 @@ export const ticketsService = {
             status: 'en_progreso',
             updatedAt: Timestamp.now(),
         });
+
+        // Log Bitácora
+        if (auth?.currentUser) {
+            const ticketSnap = await getDoc(docRef);
+            const ticketData = ticketSnap.data();
+
+            await auditLogService.logTicket(
+                auth.currentUser.uid,
+                auth.currentUser.email || "",
+                auth.currentUser.displayName || "Usuario",
+                'ticket_update',
+                id,
+                ticketData?.title || "Sin título",
+                ticketData?.organizationId || "unknown",
+                { assignedTo: adminName }
+            );
+        }
     },
 
     // ========== MENSAJES ==========
@@ -169,10 +238,22 @@ export const ticketsService = {
         const ticketSnap = await getDoc(ticketRef);
 
         if (ticketSnap.exists()) {
+            // Determinar nuevo estado
+            let newStatus = ticketSnap.data().status;
+
+            if (data.isAdmin) {
+                // Si responde un admin, pasa a "Esperando Respuesta" del usuario
+                newStatus = 'esperando_respuesta';
+            } else {
+                // Si responde el usuario, pasa a "En Progreso" (para que el admin lo vea)
+                newStatus = 'en_progreso';
+            }
+
             await updateDoc(ticketRef, {
                 messagesCount: (ticketSnap.data().messagesCount || 0) + 1,
                 lastMessageAt: Timestamp.now(),
                 updatedAt: Timestamp.now(),
+                status: newStatus
             });
         }
 
@@ -215,5 +296,70 @@ export const ticketsService = {
             closedAt: doc.data().closedAt?.toDate(),
             lastMessageAt: doc.data().lastMessageAt?.toDate(),
         })) as Ticket[];
+    },
+    // ========== SUBSCRIPCIONES (REAL-TIME) ==========
+
+    // Suscribirse a un ticket
+    subscribeToTicket: (id: string, callback: (ticket: Ticket | null) => void): (() => void) => {
+        if (!db) throw new Error("Firestore not initialized");
+        const docRef = doc(db, TICKETS_COLLECTION, id);
+
+        return onSnapshot(docRef, (docSnap) => {
+            if (docSnap.exists()) {
+                callback({
+                    id: docSnap.id,
+                    ...docSnap.data(),
+                    createdAt: docSnap.data().createdAt?.toDate() || new Date(),
+                    updatedAt: docSnap.data().updatedAt?.toDate() || new Date(),
+                    resolvedAt: docSnap.data().resolvedAt?.toDate(),
+                    closedAt: docSnap.data().closedAt?.toDate(),
+                    lastMessageAt: docSnap.data().lastMessageAt?.toDate(),
+                } as Ticket);
+            } else {
+                callback(null);
+            }
+        });
+    },
+
+    // Suscribirse a mensajes de un ticket
+    subscribeToMessages: (ticketId: string, callback: (messages: TicketMessage[]) => void): (() => void) => {
+        if (!db) throw new Error("Firestore not initialized");
+        const q = query(
+            collection(db, MESSAGES_COLLECTION),
+            where("ticketId", "==", ticketId),
+            orderBy("timestamp", "asc")
+        );
+
+        return onSnapshot(q, (snapshot) => {
+            const messages = snapshot.docs.map(doc => ({
+                id: doc.id,
+                ...doc.data(),
+                timestamp: doc.data().timestamp?.toDate() || new Date(),
+            })) as TicketMessage[];
+            callback(messages);
+        });
+    },
+
+    // Suscribirse a tickets de un usuario (para notificaciones)
+    subscribeToUserTickets: (userId: string, callback: (tickets: Ticket[]) => void): (() => void) => {
+        if (!db) throw new Error("Firestore not initialized");
+        const q = query(
+            collection(db, TICKETS_COLLECTION),
+            where("userId", "==", userId),
+            orderBy("updatedAt", "desc") // Ordenar por actualización para notar cambios recientes
+        );
+
+        return onSnapshot(q, (snapshot) => {
+            const tickets = snapshot.docs.map(doc => ({
+                id: doc.id,
+                ...doc.data(),
+                createdAt: doc.data().createdAt?.toDate() || new Date(),
+                updatedAt: doc.data().updatedAt?.toDate() || new Date(),
+                resolvedAt: doc.data().resolvedAt?.toDate(),
+                closedAt: doc.data().closedAt?.toDate(),
+                lastMessageAt: doc.data().lastMessageAt?.toDate(),
+            })) as Ticket[];
+            callback(tickets);
+        });
     },
 };

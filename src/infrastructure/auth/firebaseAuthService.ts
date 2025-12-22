@@ -50,7 +50,8 @@ export const loginWithGoogle = async () => {
 
     const provider = new GoogleAuthProvider();
     const result = await signInWithPopup(auth, provider);
-    await saveUserToFirestore(result.user);
+    // Fire and forget user creation/update to prevent blocking redirect
+    saveUserToFirestore(result.user).catch(e => console.error("Background user sync failed:", e));
 
     await auditLogService.logAuth(
         result.user.uid,
@@ -70,7 +71,7 @@ export const registerEmail = async (email: string, pass: string, displayName: st
     if (!auth) throw new Error('Auth not available');
 
     const result = await createUserWithEmailAndPassword(auth, email, pass);
-    await saveUserToFirestore(result.user, { agencyName });
+    saveUserToFirestore(result.user, { agencyName }).catch(e => console.error("Background user creation failed:", e));
 
     await auditLogService.logAuth(
         result.user.uid,
@@ -90,7 +91,7 @@ export const loginEmail = async (email: string, pass: string) => {
     if (!auth) throw new Error('Auth not available');
 
     const result = await signInWithEmailAndPassword(auth, email, pass);
-    await saveUserToFirestore(result.user);
+    saveUserToFirestore(result.user).catch(e => console.error("Background user sync failed:", e));
 
     await auditLogService.logAuth(
         result.user.uid,

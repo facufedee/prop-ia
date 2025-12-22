@@ -9,6 +9,8 @@ import { collection, addDoc, updateDoc, doc } from "firebase/firestore";
 import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
 import { locationService, Provincia, Localidad } from "@/infrastructure/services/locationService";
 import { auditLogService } from "@/infrastructure/services/auditLogService";
+import { subscriptionService } from "@/infrastructure/services/subscriptionService";
+import LimitReachedModal from "@/ui/components/modals/LimitReachedModal";
 import dynamic from 'next/dynamic';
 
 import { useJsApiLoader, Autocomplete } from '@react-google-maps/api';
@@ -53,6 +55,10 @@ export default function PropertyWizard({ initialData, isEditing = false }: Prope
     const [currentStep, setCurrentStep] = useState(1);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
+
+    // Limit Modal State
+    const [showLimitModal, setShowLimitModal] = useState(false);
+    const [currentLimit, setCurrentLimit] = useState<number | string>(5);
 
     // Form State
     const [formData, setFormData] = useState({
@@ -298,6 +304,27 @@ export default function PropertyWizard({ initialData, isEditing = false }: Prope
 
     const handleSubmit = async () => {
         if (!auth?.currentUser) return;
+
+        // Check limits before proceeding (only for creation)
+        if (!isEditing && !initialData?.id) {
+            setLoading(true);
+            try {
+                const limitCheck = await subscriptionService.checkUsageLimit(auth.currentUser.uid, 'properties');
+                if (!limitCheck.allowed) {
+                    setCurrentLimit(limitCheck.limit);
+                    setShowLimitModal(true);
+                    setLoading(false);
+                    return;
+                }
+            } catch (err) {
+                console.error("Error checking limits:", err);
+                // Optional: decide if we block or allow on error. Blocking is safer for business.
+                setError("Error verificando límites del plan.");
+                setLoading(false);
+                return;
+            }
+        }
+
         setLoading(true);
         setError(null);
 
@@ -927,6 +954,12 @@ export default function PropertyWizard({ initialData, isEditing = false }: Prope
 
     return (
         <div className="max-w-4xl mx-auto">
+            <LimitReachedModal
+                isOpen={showLimitModal}
+                onClose={() => setShowLimitModal(false)}
+                resource="propiedades"
+                limit={currentLimit}
+            />
             <StepIndicator currentStep={currentStep} totalSteps={STEPS.length} steps={STEPS} />
 
             <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-6 md:p-8 mt-6">

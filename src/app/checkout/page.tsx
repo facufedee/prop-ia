@@ -63,11 +63,26 @@ function CheckoutContent() {
         }).format(price);
     };
 
+    const [paymentMethod, setPaymentMethod] = useState<'mercadopago' | 'transfer'>('mercadopago');
+
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         if (!auth?.currentUser || !selectedPlan) return;
 
         setLoading(true);
+
+        if (paymentMethod === 'transfer') {
+            // Transfer Flow: Just simulate success and show instructions again or redirect to a success page
+            // For now, we'll use a simple alert/notification approach or effectively "finish" the process.
+            // Ideally, we'd send this to the backend to create a "Pending" subscription.
+
+            // Simulating a delay
+            await new Promise(resolve => setTimeout(resolve, 1000));
+
+            alert(`¡Solicitud registrada!\n\nPor favor enviá el comprobante de transferencia a administracion@prop-ia.com.ar para activar tu cuenta.\n\nTe hemos enviado un correo con estos datos.`);
+            setLoading(false);
+            return;
+        }
 
         try {
             const response = await fetch("/api/payments/create-preference", {
@@ -213,29 +228,138 @@ function CheckoutContent() {
                                 />
                             </div>
 
-                            <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 flex gap-3">
-                                <ShieldCheck className="w-5 h-5 text-blue-600 flex-shrink-0" />
-                                <div className="text-sm text-blue-800">
-                                    <p className="font-medium mb-1">Pago seguro con MercadoPago</p>
-                                    <p>
-                                        Tus datos están protegidos. Recibirás un email de confirmación con tu factura y credenciales de acceso inmediatamente después del pago.
-                                    </p>
+                            {/* Payment Method Selector */}
+                            <div className="space-y-4 pt-4 border-t border-gray-100">
+                                <h3 className="text-lg font-semibold text-gray-900">Método de Pago</h3>
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                    <button
+                                        type="button"
+                                        onClick={() => setPaymentMethod('mercadopago')}
+                                        className={`flex items-center gap-3 p-4 rounded-xl border-2 transition-all duration-200 active:scale-[0.98] text-left ${paymentMethod === 'mercadopago'
+                                            ? 'border-indigo-600 bg-indigo-50 ring-1 ring-indigo-600'
+                                            : 'border-gray-200 hover:border-gray-300 hover:bg-gray-50'
+                                            }`}
+                                    >
+                                        <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center flex-shrink-0 ${paymentMethod === 'mercadopago' ? 'border-indigo-600' : 'border-gray-300'
+                                            }`}>
+                                            {paymentMethod === 'mercadopago' && <div className="w-2.5 h-2.5 rounded-full bg-indigo-600" />}
+                                        </div>
+                                        <div>
+                                            <span className="block font-medium text-gray-900">Mercado Pago</span>
+                                            <span className="block text-xs text-gray-500">Tarjeta, Débito, Efectivo</span>
+                                        </div>
+                                    </button>
+
+                                    <button
+                                        type="button"
+                                        onClick={() => setPaymentMethod('transfer')}
+                                        className={`flex items-center gap-3 p-4 rounded-xl border-2 transition-all duration-200 active:scale-[0.98] text-left ${paymentMethod === 'transfer'
+                                            ? 'border-indigo-600 bg-indigo-50 ring-1 ring-indigo-600'
+                                            : 'border-gray-200 hover:border-gray-300 hover:bg-gray-50'
+                                            }`}
+                                    >
+                                        <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center flex-shrink-0 ${paymentMethod === 'transfer' ? 'border-indigo-600' : 'border-gray-300'
+                                            }`}>
+                                            {paymentMethod === 'transfer' && <div className="w-2.5 h-2.5 rounded-full bg-indigo-600" />}
+                                        </div>
+                                        <div>
+                                            <span className="block font-medium text-gray-900">Transferencia</span>
+                                            <span className="block text-xs text-gray-500">Manual (Demora 24hs)</span>
+                                        </div>
+                                    </button>
                                 </div>
                             </div>
+
+                            {
+                                paymentMethod === 'mercadopago' && (
+                                    <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 flex gap-3 animate-in fade-in slide-in-from-top-2">
+                                        <ShieldCheck className="w-5 h-5 text-blue-600 flex-shrink-0" />
+                                        <div className="text-sm text-blue-800">
+                                            <p className="font-medium mb-1">Activación Inmediata</p>
+                                            <p>
+                                                Tu suscripción se activará automáticamente apenas se procese el pago.
+                                            </p>
+                                        </div>
+                                    </div>
+                                )
+                            }
+
+                            {
+                                paymentMethod === 'transfer' && (
+                                    <div className="bg-orange-50 border border-orange-200 rounded-xl p-6 space-y-4 animate-in fade-in slide-in-from-top-2">
+                                        <div className="flex items-start gap-3">
+                                            <div className="p-2 bg-orange-100 rounded-lg">
+                                                <Building className="w-5 h-5 text-orange-700" />
+                                            </div>
+                                            <div>
+                                                <h4 className="font-semibold text-gray-900">Datos Bancarios</h4>
+                                                <p className="text-sm text-gray-600 mt-1">Realizá la transferencia a la siguiente cuenta:</p>
+                                            </div>
+                                        </div>
+
+                                        <div className="bg-white rounded-lg p-4 text-sm space-y-2 border border-orange-100 shadow-sm">
+                                            <div className="flex justify-between">
+                                                <span className="text-gray-500">Banco</span>
+                                                <span className="font-medium text-gray-900">Santander</span>
+                                            </div>
+                                            <div className="flex justify-between">
+                                                <span className="text-gray-500">Tipo</span>
+                                                <span className="font-medium text-gray-900">Caja de Ahorro en Pesos</span>
+                                            </div>
+                                            <div className="flex justify-between">
+                                                <span className="text-gray-500">Cuenta</span>
+                                                <span className="font-medium text-gray-900 font-mono">086-378169/4</span>
+                                            </div>
+                                            <div className="grid grid-cols-[auto_1fr] gap-4 pt-2 border-t border-gray-100 mt-2">
+                                                <span className="text-gray-500">CBU</span>
+                                                <span className="font-bold text-gray-900 font-mono text-right break-all">0720086188000037816940</span>
+                                            </div>
+                                            <div className="flex justify-between">
+                                                <span className="text-gray-500">Titular</span>
+                                                <span className="font-medium text-gray-900 text-right">FLORES ZAMORANO FACUNDO FEDERICO</span>
+                                            </div>
+                                            <div className="flex justify-between">
+                                                <span className="text-gray-500">CUIT</span>
+                                                <span className="font-medium text-gray-900">20351634015</span>
+                                            </div>
+                                        </div>
+
+                                        <div className="text-sm text-orange-800 bg-orange-100/50 p-3 rounded-lg border border-orange-100">
+                                            <p className="font-semibold mb-1">⚠️ Importante</p>
+                                            <p className="mb-2">La activación puede demorar hasta 24hs hábiles.</p>
+                                            <p>
+                                                Enviá el comprobante a: <strong className="select-all">administracion@prop-ia.com.ar</strong>
+                                            </p>
+                                        </div>
+                                    </div>
+                                )
+                            }
 
                             <button
                                 type="submit"
                                 disabled={loading}
-                                className="w-full py-4 bg-indigo-600 text-white rounded-lg font-semibold hover:bg-indigo-700 transition-colors disabled:opacity-50 flex items-center justify-center gap-2"
+                                className={`w-full py-4 text-white rounded-lg font-semibold transition-all duration-200 active:scale-[0.98] disabled:opacity-50 flex items-center justify-center gap-2 ${paymentMethod === 'transfer'
+                                    ? 'bg-orange-600 hover:bg-orange-700 shadow-lg shadow-orange-200 hover:shadow-xl'
+                                    : 'bg-indigo-600 hover:bg-indigo-700 shadow-lg shadow-indigo-200 hover:shadow-xl'
+                                    }`}
                             >
-                                <CreditCard className="w-5 h-5" />
-                                {loading ? 'Procesando...' : price === 0 ? 'Activar Plan Gratis' : 'Ir a Pagar con MercadoPago'}
+                                {paymentMethod === 'transfer' ? (
+                                    <>
+                                        <Mail className="w-5 h-5" />
+                                        {loading ? 'Procesando...' : 'Confirmar y Ver Datos'}
+                                    </>
+                                ) : (
+                                    <>
+                                        <CreditCard className="w-5 h-5" />
+                                        {loading ? 'Procesando...' : price === 0 ? 'Activar Plan Gratis' : 'Ir a Pagar con MercadoPago'}
+                                    </>
+                                )}
                             </button>
-                        </form>
-                    </div>
+                        </form >
+                    </div >
 
                     {/* Right: Summary */}
-                    <div>
+                    < div >
                         <div className="bg-white rounded-2xl shadow-lg p-8 sticky top-8">
                             <h3 className="text-xl font-bold text-gray-900 mb-6">Resumen del Pedido</h3>
 
@@ -326,10 +450,10 @@ function CheckoutContent() {
                                 )}
                             </div>
                         </div>
-                    </div>
-                </div>
-            </div>
-        </div>
+                    </div >
+                </div >
+            </div >
+        </div >
     );
 }
 

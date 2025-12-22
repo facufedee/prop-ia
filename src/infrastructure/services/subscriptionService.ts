@@ -176,10 +176,59 @@ export const subscriptionService = {
         });
     },
 
+    checkUsageLimit: async (userId: string, resource: 'properties' | 'clients'): Promise<{ allowed: boolean; current: number; limit: number | string }> => {
+        if (!db) throw new Error("Firestore not initialized");
+
+        // 1. Get Plan Limits
+        const subscription = await subscriptionService.getUserSubscription(userId);
+        let limit: number | 'unlimited' = 5; // Default Free Limit
+
+        if (subscription) {
+            const plan = await subscriptionService.getPlanById(subscription.planId);
+            if (plan) {
+                // @ts-ignore
+                limit = plan.limits[resource] ?? (resource === 'clients' ? 5 : 5); // Fallback to 5 if undefined
+            }
+            // If subscription exists but NO plan is active/found, we might default to free limits or block.
+            // Assuming active subscription implies a valid plan, but fallback is safe.
+        }
+
+        if (limit === 'unlimited') {
+            return { allowed: true, current: 0, limit: 'unlimited' };
+        }
+
+        // 2. Count Current Usage (Real-time)
+        let count = 0;
+
+        if (resource === 'properties') {
+            const q = query(collection(db, "properties"), where("userId", "==", userId));
+            const snapshot = await getDocs(q);
+            count = snapshot.size;
+        } else if (resource === 'clients') {
+            // Count Inquilinos + Propietarios
+            const qInquilinos = query(collection(db, "inquilinos"), where("userId", "==", userId));
+            const snapInquilinos = await getDocs(qInquilinos);
+
+            const qPropietarios = query(collection(db, "propietarios"), where("userId", "==", userId));
+            const snapPropietarios = await getDocs(qPropietarios);
+
+            count = snapInquilinos.size + snapPropietarios.size;
+        }
+
+        return {
+            allowed: count < (limit as number),
+            current: count,
+            limit
+        };
+    },
+
+    // Legacy check based on stored usage (can be kept for lighter checks if needed)
     checkLimit: async (userId: string, limitType: keyof Subscription['usage']): Promise<{ allowed: boolean; current: number; limit: number | string }> => {
         const subscription = await subscriptionService.getUserSubscription(userId);
 
         if (!subscription) {
+            // Treat no subscription as "Free Plan" for this check, effectively max 0 or default handling? 
+            // Logic above in checkUsageLimit is more robust for the "Action Guard"
             return { allowed: false, current: 0, limit: 0 };
         }
 

@@ -11,6 +11,7 @@ import { Lead } from "@/domain/models/Lead";
 import InquilinosTable from "./components/InquilinosTable";
 import PropietariosTable from "./components/PropietariosTable";
 import LeadsTable from "./components/LeadsTable";
+import NewClientModal from "./components/NewClientModal";
 import { Users, Building2, UserPlus, Plus, Search } from "lucide-react";
 
 type TabType = 'inquilinos' | 'propietarios' | 'leads';
@@ -19,6 +20,7 @@ export default function ClientesPage() {
     const [activeTab, setActiveTab] = useState<TabType>('inquilinos');
     const [loading, setLoading] = useState(true);
     const [searchTerm, setSearchTerm] = useState("");
+    const [isModalOpen, setIsModalOpen] = useState(false);
 
     // Data states
     const [inquilinos, setInquilinos] = useState<Inquilino[]>([]);
@@ -26,18 +28,29 @@ export default function ClientesPage() {
     const [leads, setLeads] = useState<Lead[]>([]);
 
     useEffect(() => {
-        fetchAllData();
+        if (!auth) {
+            setLoading(false);
+            return;
+        }
+
+        const unsubscribe = auth.onAuthStateChanged((user) => {
+            if (user) {
+                fetchAllData(user.uid);
+            } else {
+                setLoading(false);
+            }
+        });
+
+        return () => unsubscribe();
     }, []);
 
-    const fetchAllData = async () => {
-        if (!auth?.currentUser) return;
-
+    const fetchAllData = async (uid: string) => {
         try {
             setLoading(true);
             const [inquilinosData, propietariosData, leadsData] = await Promise.all([
-                inquilinosService.getInquilinos(auth.currentUser.uid),
-                propietariosService.getPropietarios(auth.currentUser.uid),
-                leadsService.getLeads(auth.currentUser.uid),
+                inquilinosService.getInquilinos(uid),
+                propietariosService.getPropietarios(uid),
+                leadsService.getLeads(uid),
             ]);
 
             setInquilinos(inquilinosData);
@@ -47,6 +60,14 @@ export default function ClientesPage() {
             console.error("Error fetching data:", error);
         } finally {
             setLoading(false);
+        }
+    };
+
+    const handleCreateSuccess = (type: TabType) => {
+        // Refresh data associated with the created type, or all
+        if (auth?.currentUser) {
+            setActiveTab(type); // Switch to the tab of the new item
+            fetchAllData(auth.currentUser.uid); // Refresh list
         }
     };
 
@@ -164,13 +185,23 @@ export default function ClientesPage() {
 
     return (
         <div className="p-6 max-w-7xl mx-auto space-y-6">
+            <NewClientModal
+                isOpen={isModalOpen}
+                onClose={() => setIsModalOpen(false)}
+                onSuccess={handleCreateSuccess}
+                initialType={activeTab}
+            />
+
             {/* Header */}
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
                 <div>
                     <h1 className="text-2xl font-bold text-gray-900">Clientes</h1>
                     <p className="text-gray-500">Gestión de inquilinos, propietarios y leads</p>
                 </div>
-                <button className="flex items-center gap-2 px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors">
+                <button
+                    onClick={() => setIsModalOpen(true)}
+                    className="flex items-center gap-2 px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors shadow-sm shadow-indigo-200"
+                >
                     <Plus className="w-5 h-5" />
                     Nuevo Cliente
                 </button>

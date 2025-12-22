@@ -21,6 +21,7 @@ export interface Plan {
     limits: {
         properties: number | 'unlimited';
         users: number | 'unlimited';
+        clients: number | 'unlimited'; // Added clients limit
         tasaciones: number | 'unlimited';
         aiCredits: number | 'unlimited';
         storage: string; // e.g., "10GB", "unlimited"
@@ -57,6 +58,7 @@ export interface Subscription {
     usage: {
         properties: number;
         users: number;
+        clients: number; // Added clients usage
         tasaciones: number;
         aiCredits: number;
     };
