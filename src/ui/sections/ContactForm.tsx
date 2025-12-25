@@ -142,10 +142,11 @@ export default function ContactForm() {
 
                         <form onSubmit={handleSubmit} className="space-y-6">
                             <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-2">
+                                <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-2">
                                     Nombre completo *
                                 </label>
                                 <input
+                                    id="name"
                                     type="text"
                                     name="name"
                                     required
@@ -157,10 +158,11 @@ export default function ContactForm() {
                             </div>
 
                             <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-2">
+                                <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-2">
                                     Email *
                                 </label>
                                 <input
+                                    id="email"
                                     type="email"
                                     name="email"
                                     required
@@ -172,10 +174,11 @@ export default function ContactForm() {
                             </div>
 
                             <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-2">
+                                <label htmlFor="phone" className="block text-sm font-medium text-gray-700 mb-2">
                                     Teléfono
                                 </label>
                                 <input
+                                    id="phone"
                                     type="tel"
                                     name="phone"
                                     value={formData.phone}
@@ -186,10 +189,11 @@ export default function ContactForm() {
                             </div>
 
                             <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-2">
+                                <label htmlFor="company" className="block text-sm font-medium text-gray-700 mb-2">
                                     Inmobiliaria
                                 </label>
                                 <input
+                                    id="company"
                                     type="text"
                                     name="company"
                                     value={formData.company}
@@ -200,10 +204,11 @@ export default function ContactForm() {
                             </div>
 
                             <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-2">
+                                <label htmlFor="message" className="block text-sm font-medium text-gray-700 mb-2">
                                     Mensaje *
                                 </label>
                                 <textarea
+                                    id="message"
                                     name="message"
                                     required
                                     value={formData.message}

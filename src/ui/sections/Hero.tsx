@@ -44,6 +44,7 @@ export default function Hero() {
           <button
             onClick={() => router.push('/register')}
             className="group px-8 py-4 bg-gray-900 text-white rounded-2xl font-semibold text-lg hover:bg-black hover:shadow-2xl hover:-translate-y-1 active:scale-95 transition-all duration-300 flex items-center gap-3"
+            aria-label="Comenzar Gratis - Ir a registro"
           >
             Comenzar Gratis
             <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform text-indigo-400" />
@@ -52,6 +53,7 @@ export default function Hero() {
           <button
             onClick={() => router.push('/login')}
             className="group px-8 py-4 bg-white text-gray-900 rounded-2xl font-semibold text-lg border border-gray-200 hover:border-indigo-200 hover:bg-indigo-50/50 hover:shadow-lg hover:-translate-y-1 active:scale-95 transition-all duration-300"
+            aria-label="Iniciar Sesión"
           >
             Iniciar Sesión
           </button>
