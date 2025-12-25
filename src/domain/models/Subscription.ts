@@ -27,6 +27,7 @@ export interface Plan {
         storage: string; // e.g., "10GB", "unlimited"
     };
     popular?: boolean;
+    icon?: string; // Icon name from Lucide
     createdAt: Date;
     updatedAt: Date;
 }

@@ -1,6 +1,6 @@
 "use client";
 
-import { Info, User, Mail, Lock, Bell, Loader2 } from "lucide-react";
+import { Info, User, Mail, Lock, Bell, Loader2, Building2 } from "lucide-react";
 import { useState, useEffect } from "react";
 import { app, auth, db } from "@/infrastructure/firebase/client";
 import { onAuthStateChanged, updateProfile, sendPasswordResetEmail, User as FirebaseUser } from "firebase/auth";
@@ -20,6 +20,17 @@ export default function CuentaPage() {
     const [loading, setLoading] = useState(true);
     const [saving, setSaving] = useState(false);
     const [message, setMessage] = useState<{ text: string, type: 'success' | 'error' } | null>(null);
+
+    // Agency Data States
+    const [agencyData, setAgencyData] = useState({
+        agencyName: "",
+        agencyLicense: "",
+        agencyAddress: "",
+        agencyManager: "",
+        agencyWhatsapp: "",
+        agencyCuit: "",
+        agencyWebsite: ""
+    });
 
     // Preferences State
     const [preferences, setPreferences] = useState({
@@ -48,11 +59,24 @@ export default function CuentaPage() {
                             setPlan(p);
                         }
 
-                        // 3. Fetch Preferences (from user doc)
+                        // 3. Fetch Preferences & Agency Data (from user doc)
                         const userDocRef = doc(db, "users", currentUser.uid);
                         const userDocSnap = await getDoc(userDocRef);
-                        if (userDocSnap.exists() && userDocSnap.data().preferences) {
-                            setPreferences(userDocSnap.data().preferences);
+                        if (userDocSnap.exists()) {
+                            const data = userDocSnap.data();
+                            if (data.preferences) {
+                                setPreferences(data.preferences);
+                            }
+                            // Load existing agency data if available
+                            setAgencyData({
+                                agencyName: data.agencyName || "",
+                                agencyLicense: data.agencyLicense || "",
+                                agencyAddress: data.agencyAddress || "",
+                                agencyManager: data.agencyManager || "",
+                                agencyWhatsapp: data.agencyWhatsapp || "",
+                                agencyCuit: data.agencyCuit || "",
+                                agencyWebsite: data.agencyWebsite || ""
+                            });
                         }
 
                     } catch (error) {
@@ -64,6 +88,10 @@ export default function CuentaPage() {
         });
         return () => unsubscribe();
     }, []);
+
+    const handleAgencyChange = (field: keyof typeof agencyData, value: string) => {
+        setAgencyData(prev => ({ ...prev, [field]: value }));
+    };
 
     const handleSaveProfile = async () => {
         if (!user || !db) return;
@@ -79,7 +107,8 @@ export default function CuentaPage() {
             // Use setDoc with merge to ensure doc exists
             await setDoc(userRef, {
                 displayName,
-                updatedAt: new Date()
+                updatedAt: new Date(),
+                ...agencyData // Spread agency data to save it
             }, { merge: true });
 
             setMessage({ text: "Perfil actualizado correctamente.", type: 'success' });
@@ -197,6 +226,94 @@ export default function CuentaPage() {
                                     />
                                 </div>
                                 <p className="text-xs text-gray-400">El email no se puede cambiar.</p>
+                            </div>
+                        </div>
+                    </section>
+
+                    <div className="border-t border-gray-100 my-6"></div>
+
+                    {/* Agency Information - NEW SECTION */}
+                    <section className="space-y-4">
+                        <h3 className="text-lg font-bold text-gray-900 flex items-center gap-2">
+                            <Building2 className="w-5 h-5 text-gray-400" />
+                            Datos de la Inmobiliaria
+                        </h3>
+                        <div className="grid md:grid-cols-2 gap-6">
+                            <div className="space-y-2">
+                                <label className="text-sm font-medium text-gray-700">Nombre de Inmobiliaria / Fantasía</label>
+                                <input
+                                    type="text"
+                                    value={agencyData.agencyName}
+                                    onChange={(e) => handleAgencyChange('agencyName', e.target.value)}
+                                    className="w-full p-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all"
+                                    placeholder="Ej. Inmobiliaria Prop-IA"
+                                />
+                            </div>
+
+                            <div className="space-y-2">
+                                <label className="text-sm font-medium text-gray-700">Matrícula / Legajo</label>
+                                <input
+                                    type="text"
+                                    value={agencyData.agencyLicense}
+                                    onChange={(e) => handleAgencyChange('agencyLicense', e.target.value)}
+                                    className="w-full p-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all"
+                                    placeholder="Ej. CUCICBA 1234"
+                                />
+                            </div>
+
+                            <div className="space-y-2">
+                                <label className="text-sm font-medium text-gray-700">Responsable / Corredor</label>
+                                <input
+                                    type="text"
+                                    value={agencyData.agencyManager}
+                                    onChange={(e) => handleAgencyChange('agencyManager', e.target.value)}
+                                    className="w-full p-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all"
+                                    placeholder="Ej. Juan Pérez"
+                                />
+                            </div>
+
+                            <div className="space-y-2">
+                                <label className="text-sm font-medium text-gray-700">CUIT</label>
+                                <input
+                                    type="text"
+                                    value={agencyData.agencyCuit}
+                                    onChange={(e) => handleAgencyChange('agencyCuit', e.target.value)}
+                                    className="w-full p-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all"
+                                    placeholder="Ej. 20-12345678-9"
+                                />
+                            </div>
+
+                            <div className="md:col-span-2 space-y-2">
+                                <label className="text-sm font-medium text-gray-700">Dirección Comercial</label>
+                                <input
+                                    type="text"
+                                    value={agencyData.agencyAddress}
+                                    onChange={(e) => handleAgencyChange('agencyAddress', e.target.value)}
+                                    className="w-full p-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all"
+                                    placeholder="Ej. Av. Libertador 1000, CABA"
+                                />
+                            </div>
+
+                            <div className="space-y-2">
+                                <label className="text-sm font-medium text-gray-700">WhatsApp Comercial</label>
+                                <input
+                                    type="text"
+                                    value={agencyData.agencyWhatsapp}
+                                    onChange={(e) => handleAgencyChange('agencyWhatsapp', e.target.value)}
+                                    className="w-full p-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all"
+                                    placeholder="Ej. 5491112345678"
+                                />
+                            </div>
+
+                            <div className="space-y-2">
+                                <label className="text-sm font-medium text-gray-700">Sitio Web</label>
+                                <input
+                                    type="text"
+                                    value={agencyData.agencyWebsite}
+                                    onChange={(e) => handleAgencyChange('agencyWebsite', e.target.value)}
+                                    className="w-full p-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all"
+                                    placeholder="Ej. www.tuinmobiliaria.com"
+                                />
                             </div>
                         </div>
                     </section>

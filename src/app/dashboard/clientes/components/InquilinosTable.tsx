@@ -7,10 +7,11 @@ import Link from "next/link";
 interface InquilinosTableProps {
     inquilinos: Inquilino[];
     onDelete: (id: string) => void;
+    onEdit: (inquilino: Inquilino) => void;
     onViewDetail: (inquilino: Inquilino) => void;
 }
 
-export default function InquilinosTable({ inquilinos, onDelete, onViewDetail }: InquilinosTableProps) {
+export default function InquilinosTable({ inquilinos, onDelete, onEdit, onViewDetail }: InquilinosTableProps) {
     return (
         <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
             <div className="overflow-x-auto">
@@ -62,6 +63,13 @@ export default function InquilinosTable({ inquilinos, onDelete, onViewDetail }: 
                                                 title="Ver detalle"
                                             >
                                                 <Eye className="w-4 h-4" />
+                                            </button>
+                                            <button
+                                                onClick={() => onEdit(inquilino)}
+                                                className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
+                                                title="Editar"
+                                            >
+                                                <Edit className="w-4 h-4" />
                                             </button>
                                             <button
                                                 onClick={() => onDelete(inquilino.id)}

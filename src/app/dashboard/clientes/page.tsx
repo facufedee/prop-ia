@@ -11,7 +11,7 @@ import { Lead } from "@/domain/models/Lead";
 import InquilinosTable from "./components/InquilinosTable";
 import PropietariosTable from "./components/PropietariosTable";
 import LeadsTable from "./components/LeadsTable";
-import NewClientModal from "./components/NewClientModal";
+import ClientFormModal from "./components/ClientFormModal";
 import { Users, Building2, UserPlus, Plus, Search } from "lucide-react";
 
 type TabType = 'inquilinos' | 'propietarios' | 'leads';
@@ -20,7 +20,10 @@ export default function ClientesPage() {
     const [activeTab, setActiveTab] = useState<TabType>('inquilinos');
     const [loading, setLoading] = useState(true);
     const [searchTerm, setSearchTerm] = useState("");
+
+    // Modal state
     const [isModalOpen, setIsModalOpen] = useState(false);
+    const [editingClient, setEditingClient] = useState<Inquilino | Propietario | Lead | null>(null);
 
     // Data states
     const [inquilinos, setInquilinos] = useState<Inquilino[]>([]);
@@ -63,18 +66,27 @@ export default function ClientesPage() {
         }
     };
 
-    const handleCreateSuccess = (type: TabType) => {
-        // Refresh data associated with the created type, or all
+    const handleSuccess = (type: TabType) => {
         if (auth?.currentUser) {
-            setActiveTab(type); // Switch to the tab of the new item
-            fetchAllData(auth.currentUser.uid); // Refresh list
+            setActiveTab(type);
+            fetchAllData(auth.currentUser.uid);
         }
     };
 
-    // Inquilinos handlers
+    const handleCloseModal = () => {
+        setIsModalOpen(false);
+        setEditingClient(null);
+    };
+
+    // --- Create ---
+    const handleNewClient = () => {
+        setEditingClient(null);
+        setIsModalOpen(true);
+    };
+
+    // --- Inquilinos Handlers ---
     const handleDeleteInquilino = async (id: string) => {
         if (!confirm("¿Estás seguro de eliminar este inquilino?")) return;
-
         try {
             await inquilinosService.deleteInquilino(id);
             setInquilinos(prev => prev.filter(i => i.id !== id));
@@ -84,15 +96,20 @@ export default function ClientesPage() {
         }
     };
 
-    const handleViewInquilinoDetail = (inquilino: Inquilino) => {
-        // TODO: Open modal or navigate to detail page
-        console.log("View inquilino:", inquilino);
+    const handleEditInquilino = (inquilino: Inquilino) => {
+        setEditingClient(inquilino);
+        setActiveTab('inquilinos'); // Ensure correct tab context if needed
+        setIsModalOpen(true);
     };
 
-    // Propietarios handlers
+    const handleViewInquilinoDetail = (inquilino: Inquilino) => {
+        // Reuse edit for view detail for now, or just log
+        handleEditInquilino(inquilino);
+    };
+
+    // --- Propietarios Handlers ---
     const handleDeletePropietario = async (id: string) => {
         if (!confirm("¿Estás seguro de eliminar este propietario?")) return;
-
         try {
             await propietariosService.deletePropietario(id);
             setPropietarios(prev => prev.filter(p => p.id !== id));
@@ -103,19 +120,18 @@ export default function ClientesPage() {
     };
 
     const handleEditPropietario = (propietario: Propietario) => {
-        // TODO: Open edit modal
-        console.log("Edit propietario:", propietario);
+        setEditingClient(propietario);
+        setActiveTab('propietarios');
+        setIsModalOpen(true);
     };
 
     const handleViewPropietarioDetail = (propietario: Propietario) => {
-        // TODO: Open modal or navigate to detail page
-        console.log("View propietario:", propietario);
+        handleEditPropietario(propietario);
     };
 
-    // Leads handlers
+    // --- Leads Handlers ---
     const handleDeleteLead = async (id: string) => {
         if (!confirm("¿Estás seguro de eliminar este lead?")) return;
-
         try {
             await leadsService.deleteLead(id);
             setLeads(prev => prev.filter(l => l.id !== id));
@@ -126,18 +142,17 @@ export default function ClientesPage() {
     };
 
     const handleEditLead = (lead: Lead) => {
-        // TODO: Open edit modal
-        console.log("Edit lead:", lead);
+        setEditingClient(lead);
+        setActiveTab('leads');
+        setIsModalOpen(true);
     };
 
     const handleViewLeadDetail = (lead: Lead) => {
-        // TODO: Open modal or navigate to detail page
-        console.log("View lead:", lead);
+        handleEditLead(lead);
     };
 
     const handleConvertLead = async (id: string) => {
         if (!confirm("¿Marcar este lead como convertido?")) return;
-
         try {
             await leadsService.convertLead(id);
             if (auth?.currentUser) {
@@ -150,7 +165,7 @@ export default function ClientesPage() {
         }
     };
 
-    // Filter data based on search
+    // --- Filters ---
     const filteredInquilinos = inquilinos.filter(i =>
         i.nombre.toLowerCase().includes(searchTerm.toLowerCase()) ||
         i.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -185,11 +200,12 @@ export default function ClientesPage() {
 
     return (
         <div className="p-6 max-w-7xl mx-auto space-y-6">
-            <NewClientModal
+            <ClientFormModal
                 isOpen={isModalOpen}
-                onClose={() => setIsModalOpen(false)}
-                onSuccess={handleCreateSuccess}
+                onClose={handleCloseModal}
+                onSuccess={handleSuccess}
                 initialType={activeTab}
+                initialData={editingClient}
             />
 
             {/* Header */}
@@ -199,7 +215,7 @@ export default function ClientesPage() {
                     <p className="text-gray-500">Gestión de inquilinos, propietarios y leads</p>
                 </div>
                 <button
-                    onClick={() => setIsModalOpen(true)}
+                    onClick={handleNewClient}
                     className="flex items-center gap-2 px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors shadow-sm shadow-indigo-200"
                 >
                     <Plus className="w-5 h-5" />
@@ -253,6 +269,7 @@ export default function ClientesPage() {
                     <InquilinosTable
                         inquilinos={filteredInquilinos}
                         onDelete={handleDeleteInquilino}
+                        onEdit={handleEditInquilino}
                         onViewDetail={handleViewInquilinoDetail}
                     />
                 )}

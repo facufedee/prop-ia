@@ -118,7 +118,7 @@ export default function RootLayout({
               '@type': 'Organization',
               name: 'PROP-IA',
               url: 'https://prop-ia.com',
-              logo: 'https://prop-ia.com/logo.png',
+              logo: 'https://prop-ia.com/assets/img/favincon.png',
               description: 'Plataforma de gestión inmobiliaria con Inteligencia Artificial para Argentina',
               address: {
                 '@type': 'PostalAddress',

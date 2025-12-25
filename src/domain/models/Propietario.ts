@@ -10,6 +10,7 @@ export interface Propietario {
     email: string;
     telefono: string;
     dni: string;
+    cuit?: string;
     domicilio: string;
     propiedades: string[]; // IDs de propiedades
     cuentaBancaria?: CuentaBancaria;

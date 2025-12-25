@@ -4,10 +4,11 @@ import { useState, useEffect } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { alquileresService } from "@/infrastructure/services/alquileresService";
 import { Alquiler, Pago, Incidencia } from "@/domain/models/Alquiler";
-import PaymentTable from "../components/PaymentTable";
-import MaintenanceList from "../components/MaintenanceList";
+import PaymentPlanTable from "../components/PaymentPlanTable";
+import MaintenanceTab from "../components/MaintenanceTab";
 import UploadDocuments from "../components/UploadDocuments";
-import { ArrowLeft, FileText, DollarSign, Wrench, RefreshCw, Edit, Save, X } from "lucide-react";
+import { contractDocxService } from "@/infrastructure/services/contractDocxService";
+import { ArrowLeft, FileText, DollarSign, Wrench, Edit, Save, X, Download, Pause, Check, MoreVertical, Trash2, AlertCircle } from "lucide-react";
 import Link from "next/link";
 
 export default function AlquilerDetailPage() {
@@ -15,9 +16,11 @@ export default function AlquilerDetailPage() {
     const router = useRouter();
     const [alquiler, setAlquiler] = useState<Alquiler | null>(null);
     const [loading, setLoading] = useState(true);
-    const [activeTab, setActiveTab] = useState<'info' | 'pagos' | 'documentos' | 'mantenimiento' | 'renovacion'>('info');
+    const [activeTab, setActiveTab] = useState<'info' | 'pagos' | 'documentos' | 'mantenimiento'>('info');
     const [isEditing, setIsEditing] = useState(false);
     const [editData, setEditData] = useState<Partial<Alquiler>>({});
+    const [showContractModal, setShowContractModal] = useState(false);
+    const [showMenu, setShowMenu] = useState(false);
 
     useEffect(() => {
         const fetchAlquiler = async () => {
@@ -39,27 +42,47 @@ export default function AlquilerDetailPage() {
         }
     }, [params.id]);
 
-    const handleRegisterPayment = async (pagoId: string) => {
+    const handleUpdatePayment = async (updatedPayment: Pago) => {
         if (!alquiler) return;
 
-        const pago = alquiler.historialPagos.find(p => p.id === pagoId);
-        if (!pago) return;
+        // Find if payment exists in history
+        const message = updatedPayment.estado === 'pagado' ? "Pago registrado" : "Pago actualizado";
 
-        const updatedPago: Pago = {
-            ...pago,
-            estado: 'pagado',
-            fechaPago: new Date(),
-        };
+        // Remove old entry if exists and add new one (or just update)
+        // Since we are handling an array of objects, we can filter out the old one and add the new one
+        // To ensure order, maybe we should sort, but key is ID or Month.
+
+        let newHistory = alquiler.historialPagos.filter(p => p.id !== updatedPayment.id);
+
+        // If the ID was virtual (starts with virtual-), we should have generated a new ID in the component
+        // But the component generates a new ID if it was virtual. 
+        // Let's assume the component passed a clean Pago object with a real ID.
+        // Wait, if I'm editing an existing "virtual" pay, the component assigns a randomUUID.
+        // So filter by ID won't match "virtual-..." because ID in updatedPayment is new.
+        // BUT if I'm editing a REAL payment, ID matches.
+        // The component logic: const periodId = format(periodDate, "yyyy-MM");
+        // We really should check by 'mes' to be safe if ID changed?
+        // Let's match by ID first.
+
+        // Actually, if we are editing a "virtual" payment, it's not in the array yet.
+        // So `filter` removes nothing. We just add `updatedPayment`.
+        // However, if we are editing a REAL payment, `filter` removes the old version.
+
+        newHistory.push(updatedPayment);
+
+        // Sort by date (optional but good)
+        newHistory.sort((a, b) => new Date(a.fechaVencimiento).getTime() - new Date(b.fechaVencimiento).getTime());
 
         try {
-            await alquileresService.registrarPago(alquiler.id, updatedPago);
+            await alquileresService.updateAlquiler(alquiler.id, { historialPagos: newHistory });
             const updated = await alquileresService.getAlquilerById(alquiler.id);
             if (updated) {
                 setAlquiler(updated);
             }
+            // alert(message); // Optional
         } catch (error) {
-            console.error("Error registering payment:", error);
-            alert("Error al registrar el pago");
+            console.error("Error updating payment:", error);
+            alert("Error al actualizar el pago");
         }
     };
 
@@ -104,6 +127,31 @@ export default function AlquilerDetailPage() {
         }
     };
 
+    const handleCreateIncidencia = async (incidencia: Omit<Incidencia, 'id' | 'fechaCreacion' | 'comentarios'>) => {
+        if (!alquiler) return;
+
+        const nuevaIncidencia: Incidencia = {
+            ...incidencia,
+            id: crypto.randomUUID(),
+            fechaCreacion: new Date(),
+            comentarios: [],
+            estado: 'abierto'
+        };
+
+        const updatedIncidencias = [...(alquiler.incidencias || []), nuevaIncidencia];
+
+        try {
+            await alquileresService.updateAlquiler(alquiler.id, { incidencias: updatedIncidencias });
+            const updated = await alquileresService.getAlquilerById(alquiler.id);
+            if (updated) {
+                setAlquiler(updated);
+            }
+        } catch (error) {
+            console.error("Error creating incidencia:", error);
+            alert("Error al crear la incidencia");
+        }
+    };
+
     const handleDocumentsUploaded = async (urls: string[]) => {
         if (!alquiler) return;
 
@@ -142,6 +190,55 @@ export default function AlquilerDetailPage() {
         setIsEditing(false);
     };
 
+    const handleSuspender = async () => {
+        if (!alquiler || !confirm("¿Estás seguro de suspender este contrato?")) return;
+
+        try {
+            await alquileresService.updateAlquiler(alquiler.id, { estado: 'suspendido' });
+            const updated = await alquileresService.getAlquilerById(alquiler.id);
+            if (updated) {
+                setAlquiler(updated);
+            }
+        } catch (error) {
+            console.error("Error suspending contract:", error);
+            alert("Error al suspender el contrato");
+        }
+    };
+
+    const handleActivar = async () => {
+        if (!alquiler || !confirm("¿Estás seguro de activar este contrato?")) return;
+
+        try {
+            await alquileresService.updateAlquiler(alquiler.id, { estado: 'activo' });
+            const updated = await alquileresService.getAlquilerById(alquiler.id);
+            if (updated) {
+                setAlquiler(updated);
+            }
+        } catch (error) {
+            console.error("Error activating contract:", error);
+            alert("Error al activar el contrato");
+        }
+    };
+
+    const handleDownloadContract = () => {
+        setShowContractModal(true);
+    };
+
+    const confirmDownloadContract = async () => {
+        setShowContractModal(false);
+        if (!alquiler) return;
+        try {
+            await contractDocxService.generateAndDownload(alquiler);
+        } catch (error) {
+            console.error("Error generating contract:", error);
+            alert("Error al generar el contrato");
+        }
+    };
+
+    const handleEditChange = (field: string, value: any) => {
+        setEditData(prev => ({ ...prev, [field]: value }));
+    };
+
     if (loading) {
         return (
             <div className="p-6 flex items-center justify-center min-h-[400px]">
@@ -168,7 +265,6 @@ export default function AlquilerDetailPage() {
         { id: 'pagos', label: 'Pagos', icon: DollarSign },
         { id: 'documentos', label: 'Documentos', icon: FileText },
         { id: 'mantenimiento', label: 'Mantenimiento', icon: Wrench },
-        { id: 'renovacion', label: 'Renovación', icon: RefreshCw },
     ] as const;
 
     return (
@@ -185,12 +281,96 @@ export default function AlquilerDetailPage() {
                     <h1 className="text-2xl font-bold text-gray-900">{alquiler.direccion}</h1>
                     <p className="text-gray-500">{alquiler.propiedadTipo}</p>
                 </div>
-                <span className={`px-3 py-1 text-sm font-medium rounded-full ${alquiler.estado === 'activo' ? 'bg-green-100 text-green-700' :
-                    alquiler.estado === 'pendiente' ? 'bg-yellow-100 text-yellow-700' :
-                        'bg-gray-100 text-gray-700'
-                    }`}>
-                    {alquiler.estado}
-                </span>
+                <div className="flex items-center gap-2 flex-shrink-0">
+                    {isEditing ? (
+                        <>
+                            <button
+                                onClick={handleCancelEdit}
+                                className="flex items-center gap-2 px-3 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors text-sm font-medium whitespace-nowrap"
+                            >
+                                <X className="w-4 h-4" />
+                                Cancelar
+                            </button>
+                            <button
+                                onClick={handleSaveEdit}
+                                className="flex items-center gap-2 px-3 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors text-sm font-medium whitespace-nowrap"
+                            >
+                                <Save className="w-4 h-4" />
+                                Guardar
+                            </button>
+                        </>
+                    ) : (
+                        <>
+                            <button
+                                onClick={() => { setIsEditing(true); setEditData({ ...alquiler }); }}
+                                className="flex items-center gap-2 px-3 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors text-sm font-medium whitespace-nowrap"
+                            >
+                                <Edit className="w-4 h-4" />
+                                Editar
+                            </button>
+
+                            <div className="relative">
+                                <button
+                                    onClick={() => setShowMenu(!showMenu)}
+                                    className="p-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors"
+                                    title="Más acciones"
+                                >
+                                    <MoreVertical className="w-5 h-5" />
+                                </button>
+
+                                {showMenu && (
+                                    <div className="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg border border-gray-100 py-1 z-50">
+                                        <button
+                                            onClick={() => { setShowMenu(false); handleDownloadContract(); }}
+                                            className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 flex items-center gap-2"
+                                        >
+                                            <Download className="w-4 h-4" />
+                                            Descargar Contrato
+                                        </button>
+
+                                        {alquiler.estado === 'activo' && (
+                                            <button
+                                                onClick={() => { setShowMenu(false); handleSuspender(); }}
+                                                className="w-full text-left px-4 py-2 text-sm text-orange-700 hover:bg-orange-50 flex items-center gap-2"
+                                            >
+                                                <Pause className="w-4 h-4" />
+                                                Suspender
+                                            </button>
+                                        )}
+
+                                        {alquiler.estado === 'suspendido' && (
+                                            <button
+                                                onClick={() => { setShowMenu(false); handleActivar(); }}
+                                                className="w-full text-left px-4 py-2 text-sm text-green-700 hover:bg-green-50 flex items-center gap-2"
+                                            >
+                                                <Check className="w-4 h-4" />
+                                                Activar
+                                            </button>
+                                        )}
+
+                                        <div className="border-t border-gray-100 my-1"></div>
+
+                                        <button
+                                            onClick={() => { setShowMenu(false); handleFinalizarContrato(); }}
+                                            className="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-red-50 flex items-center gap-2"
+                                        >
+                                            <Trash2 className="w-4 h-4" />
+                                            Finalizar Contrato
+                                        </button>
+                                    </div>
+                                )}
+                            </div>
+                        </>
+                    )}
+
+                    <span className={`px-3 py-1 text-sm font-medium rounded-full whitespace-nowrap ${alquiler.estado === 'activo' ? 'bg-green-100 text-green-700' :
+                        alquiler.estado === 'pendiente' ? 'bg-yellow-100 text-yellow-700' :
+                            alquiler.estado === 'suspendido' ? 'bg-orange-100 text-orange-700' :
+                                'bg-gray-100 text-gray-700'
+                        }`}>
+                        {alquiler.estado}
+                    </span>
+                </div>
             </div>
 
             {/* Tabs */}
@@ -220,46 +400,8 @@ export default function AlquilerDetailPage() {
                 {activeTab === 'info' && (
                     <div className="space-y-6">
                         <div className="bg-white rounded-xl border border-gray-200 p-6">
-                            <div className="flex items-center justify-between mb-6">
+                            <div className="mb-6">
                                 <h2 className="text-lg font-semibold text-gray-900">Información General</h2>
-                                <div className="flex gap-2">
-                                    {isEditing ? (
-                                        <>
-                                            <button
-                                                onClick={handleCancelEdit}
-                                                className="flex items-center gap-2 px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors text-sm"
-                                            >
-                                                <X className="w-4 h-4" />
-                                                Cancelar
-                                            </button>
-                                            <button
-                                                onClick={handleSaveEdit}
-                                                className="flex items-center gap-2 px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors text-sm"
-                                            >
-                                                <Save className="w-4 h-4" />
-                                                Guardar
-                                            </button>
-                                        </>
-                                    ) : (
-                                        <>
-                                            <button
-                                                onClick={() => setIsEditing(true)}
-                                                className="flex items-center gap-2 px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors text-sm"
-                                            >
-                                                <Edit className="w-4 h-4" />
-                                                Editar
-                                            </button>
-                                            {alquiler.estado === 'activo' && (
-                                                <button
-                                                    onClick={handleFinalizarContrato}
-                                                    className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors text-sm"
-                                                >
-                                                    Finalizar Contrato
-                                                </button>
-                                            )}
-                                        </>
-                                    )}
-                                </div>
                             </div>
 
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -328,9 +470,10 @@ export default function AlquilerDetailPage() {
                                     </div>
                                 </div>
 
-                                {/* Datos del Inquilino y Garantía */}
+                                {/* Datos del Inquilino - SOLO LECTURA */}
                                 <div>
                                     <h3 className="text-sm font-medium text-gray-500 mb-3">Datos del Inquilino</h3>
+                                    <p className="text-xs text-gray-400 mb-2">Los datos del inquilino se editan en el módulo Clientes</p>
                                     <div className="space-y-2">
                                         <div className="flex justify-between">
                                             <span className="text-gray-600">Nombre:</span>
@@ -398,9 +541,9 @@ export default function AlquilerDetailPage() {
 
                 {activeTab === 'pagos' && (
                     <div className="space-y-6">
-                        <PaymentTable
-                            payments={alquiler.historialPagos}
-                            onRegisterPayment={handleRegisterPayment}
+                        <PaymentPlanTable
+                            alquiler={alquiler}
+                            onUpdatePayment={handleUpdatePayment}
                         />
                     </div>
                 )}
@@ -415,22 +558,11 @@ export default function AlquilerDetailPage() {
                 )}
 
                 {activeTab === 'mantenimiento' && (
-                    <div className="space-y-6">
-                        <MaintenanceList
-                            incidencias={alquiler.incidencias || []}
-                            onUpdateStatus={handleUpdateIncidenciaStatus}
-                        />
-                    </div>
-                )}
-
-                {activeTab === 'renovacion' && (
-                    <div className="bg-white rounded-xl border border-gray-200 p-12 text-center">
-                        <RefreshCw className="w-12 h-12 text-gray-400 mx-auto mb-4" />
-                        <p className="text-gray-500 mb-4">Funcionalidad de renovación próximamente</p>
-                        <button className="px-6 py-3 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors">
-                            Generar Propuesta de Renovación
-                        </button>
-                    </div>
+                    <MaintenanceTab
+                        incidencias={alquiler.incidencias || []}
+                        onUpdateStatus={handleUpdateIncidenciaStatus}
+                        onCreateIncidencia={handleCreateIncidencia}
+                    />
                 )}
             </div>
         </div>

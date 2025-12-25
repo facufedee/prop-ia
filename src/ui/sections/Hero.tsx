@@ -73,51 +73,19 @@ export default function Hero() {
           </div>
         </div>
 
-        {/* Mockup Placeholder - Glassy Effect */}
+        {/* Hero Image */}
         <div className="mt-20 animate-fade-in-up animation-delay-800 perspective-1000">
           <div className="relative mx-auto max-w-5xl transform rotate-x-12 hover:rotate-x-0 transition-transform duration-700 ease-out">
             {/* Glow behind */}
             <div className="absolute -inset-4 bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 rounded-[2rem] blur-2xl opacity-20 animate-pulse"></div>
 
-            {/* Main Card */}
-            <div className="relative bg-white rounded-2xl shadow-2xl border border-gray-200/50 overflow-hidden ring-1 ring-gray-900/5">
-              {/* Header of Mockup */}
-              <div className="h-10 bg-gray-50 border-b border-gray-100 flex items-center px-4 gap-2">
-                <div className="flex gap-1.5">
-                  <div className="w-3 h-3 rounded-full bg-red-400/80"></div>
-                  <div className="w-3 h-3 rounded-full bg-yellow-400/80"></div>
-                  <div className="w-3 h-3 rounded-full bg-green-400/80"></div>
-                </div>
-              </div>
-              {/* Body of Mockup - Abstract Representation */}
-              <div className="aspect-[16/9] bg-white p-8 overflow-hidden relative">
-                {/* Sidebar */}
-                <div className="absolute left-0 top-0 bottom-0 w-64 border-r border-gray-100 p-6 hidden md:block">
-                  <div className="w-8 h-8 bg-indigo-600 rounded-lg mb-8"></div>
-                  <div className="space-y-4">
-                    <div className="h-2 w-32 bg-gray-100 rounded"></div>
-                    <div className="h-2 w-24 bg-gray-100 rounded"></div>
-                    <div className="h-2 w-28 bg-gray-100 rounded"></div>
-                    <div className="h-2 w-20 bg-gray-100 rounded"></div>
-                  </div>
-                </div>
-                {/* Main Content Area */}
-                <div className="md:ml-64 h-full flex flex-col">
-                  <div className="flex justify-between items-center mb-8">
-                    <div className="h-8 w-48 bg-gray-100 rounded-lg"></div>
-                    <div className="flex gap-3">
-                      <div className="h-8 w-8 bg-gray-100 rounded-full"></div>
-                      <div className="h-8 w-8 bg-gray-100 rounded-full"></div>
-                    </div>
-                  </div>
-                  <div className="grid grid-cols-3 gap-6 mb-8">
-                    <div className="h-32 bg-indigo-50 rounded-xl border border-indigo-100"></div>
-                    <div className="h-32 bg-purple-50 rounded-xl border border-purple-100"></div>
-                    <div className="h-32 bg-pink-50 rounded-xl border border-pink-100"></div>
-                  </div>
-                  <div className="flex-1 bg-gray-50 rounded-xl border border-gray-100"></div>
-                </div>
-              </div>
+            {/* Image Container */}
+            <div className="relative rounded-2xl shadow-2xl overflow-hidden ring-1 ring-gray-900/5">
+              <img
+                src="/assets/img/despues_hero.webp"
+                alt="PROP-IA Dashboard Preview"
+                className="w-full h-auto"
+              />
             </div>
           </div>
         </div>

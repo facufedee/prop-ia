@@ -18,12 +18,19 @@ export interface SeguroCaucion {
 export interface Pago {
     id: string;
     mes: string; // "2024-01"
-    monto: number;
+    monto: number; // Total a pagar o pagado
+    montoAlquiler?: number;
+    montoServicios?: number;
+    montoPunitorios?: number;
+    montoDescuento?: number;
+    pagoParcial?: number;
+    detalleServicios?: { concepto: string; monto: number }[];
     fechaPago?: Date;
     fechaVencimiento: Date;
-    estado: 'pendiente' | 'pagado' | 'vencido';
+    estado: 'pendiente' | 'pagado' | 'vencido' | 'parcial';
     metodoPago?: string;
     comprobante?: string;
+    moneda?: string;
 }
 
 export interface Incidencia {
@@ -42,9 +49,29 @@ export interface Alquiler {
     propiedadId: string;
     propiedadTipo: string;
     direccion: string;
+    // Datos del Inquilino
     inquilinoId: string;
     nombreInquilino: string;
     contactoInquilino: string;
+    telefonoInquilino?: string;
+    whatsappInquilino?: string;
+    dniInquilino?: string;
+    cuitInquilino?: string;
+    domicilioInquilino?: string;
+
+    // Datos del Propietario
+    nombrePropietario?: string;
+    dniPropietario?: string;
+    domicilioPropietario?: string;
+    emailPropietario?: string;
+    cuitPropietario?: string;
+    telefonoPropietario?: string;
+
+    // Datos Bancarios
+    cuentaBancaria?: string;
+    banco?: string;
+    cbu?: string;
+    alias?: string;
 
     // Tipo de garantía
     tipoGarantia: 'garante' | 'seguro_caucion';
@@ -57,9 +84,11 @@ export interface Alquiler {
     diaVencimiento: number;
     ajusteTipo: 'porcentaje' | 'ICL' | 'manual';
     ajusteValor: number;
+    estadoInmueble?: string;
+    tasaPunitorios?: number; // Tasa diaria por mora (default 1%)
     historialPagos: Pago[];
     incidencias: Incidencia[];
-    estado: 'activo' | 'pendiente' | 'finalizado';
+    estado: 'activo' | 'pendiente' | 'finalizado' | 'suspendido';
     documentos: string[];
     userId: string;
     createdAt: Date;

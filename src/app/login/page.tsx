@@ -1,10 +1,12 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { Eye, EyeOff, Loader2, Mail, Lock } from "lucide-react";
 import { loginWithGoogle, loginEmail } from "@/infrastructure/auth/firebaseAuthService";
+import { auth } from "@/infrastructure/firebase/client";
+import { onAuthStateChanged } from "firebase/auth";
 
 export default function LoginPage() {
     const router = useRouter();
@@ -13,6 +15,19 @@ export default function LoginPage() {
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
     const [showPassword, setShowPassword] = useState(false);
+
+    // Redirect if already logged in
+    useEffect(() => {
+        if (!auth) return;
+
+        const unsubscribe = onAuthStateChanged(auth, (user) => {
+            if (user) {
+                router.push("/dashboard");
+            }
+        });
+
+        return () => unsubscribe();
+    }, [router]);
 
     const handleLogin = async (e: React.FormEvent) => {
         e.preventDefault();

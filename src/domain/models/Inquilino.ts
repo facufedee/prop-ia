@@ -11,7 +11,9 @@ export interface Inquilino {
     nombre: string;
     email: string;
     telefono: string;
+    whatsapp?: string;
     dni: string;
+    cuit?: string;
     domicilio: string;
     datosGarante: DatosGarante;
     documentos: string[];

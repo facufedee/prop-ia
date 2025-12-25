@@ -10,6 +10,7 @@ import TenantForm, { TenantFormData } from "../components/TenantForm";
 import { ChevronLeft, ChevronRight, Check } from "lucide-react";
 import { Alquiler } from "@/domain/models/Alquiler";
 import { auditLogService } from "@/infrastructure/services/auditLogService";
+import { DNIInput, CUITInput, EmailInput, PhoneInput, TextInput, CBUInput, AliasInput, TextAreaInput } from "@/ui/components/forms";
 
 export default function NuevoAlquilerPage() {
     const router = useRouter();
@@ -27,7 +28,20 @@ export default function NuevoAlquilerPage() {
     const [tenantData, setTenantData] = useState<TenantFormData | null>(null);
     const [inquilinoId, setInquilinoId] = useState("");
 
-    // Step 3: Contract details
+    // Step 3: Owner and Bank data
+    const [ownerData, setOwnerData] = useState({
+        nombrePropietario: "",
+        dniPropietario: "",
+        cuitPropietario: "",
+        domicilioPropietario: "",
+        emailPropietario: "",
+        telefonoPropietario: "",
+        banco: "",
+        cbu: "",
+        alias: "",
+    });
+
+    // Step 4: Contract details and inventory
     const [contractData, setContractData] = useState({
         fechaInicio: "",
         fechaFin: "",
@@ -35,6 +49,7 @@ export default function NuevoAlquilerPage() {
         diaVencimiento: "10",
         ajusteTipo: "porcentaje" as 'porcentaje' | 'ICL' | 'manual',
         ajusteValor: "0",
+        estadoInmueble: "",
     });
 
     const handlePropertySelect = (id: string, direccion: string, tipo: string) => {
@@ -103,6 +118,20 @@ export default function NuevoAlquilerPage() {
                 inquilinoId,
                 nombreInquilino: tenantData.nombre,
                 contactoInquilino: tenantData.email,
+                telefonoInquilino: tenantData.telefono,
+                whatsappInquilino: tenantData.whatsapp,
+                dniInquilino: tenantData.dni,
+                cuitInquilino: tenantData.cuit,
+                domicilioInquilino: tenantData.domicilio,
+                nombrePropietario: ownerData.nombrePropietario,
+                dniPropietario: ownerData.dniPropietario,
+                cuitPropietario: ownerData.cuitPropietario,
+                domicilioPropietario: ownerData.domicilioPropietario,
+                emailPropietario: ownerData.emailPropietario,
+                telefonoPropietario: ownerData.telefonoPropietario,
+                banco: ownerData.banco,
+                cbu: ownerData.cbu,
+                alias: ownerData.alias,
                 tipoGarantia: tenantData.tipoGarantia,
                 garante: tenantData.tipoGarantia === 'garante' ? tenantData.datosGarante : null,
                 seguroCaucion: tenantData.tipoGarantia === 'seguro_caucion' ? tenantData.seguroCaucion : null,
@@ -112,6 +141,7 @@ export default function NuevoAlquilerPage() {
                 diaVencimiento: parseInt(contractData.diaVencimiento),
                 ajusteTipo: contractData.ajusteTipo,
                 ajusteValor: parseFloat(contractData.ajusteValor),
+                estadoInmueble: contractData.estadoInmueble,
                 historialPagos: [],
                 incidencias: [],
                 estado: 'activo',
@@ -142,9 +172,14 @@ export default function NuevoAlquilerPage() {
         }
     };
 
+    const handleOwnerChange = (field: string, value: string) => {
+        setOwnerData(prev => ({ ...prev, [field]: value }));
+    };
+
     const canProceed = () => {
         if (currentStep === 1) return selectedProperty.id !== "";
         if (currentStep === 2) return tenantData !== null;
+        if (currentStep === 3) return ownerData.nombrePropietario !== "";
         return true;
     };
 
@@ -162,7 +197,8 @@ export default function NuevoAlquilerPage() {
                     {[
                         { num: 1, label: "Propiedad" },
                         { num: 2, label: "Inquilino" },
-                        { num: 3, label: "Contrato" },
+                        { num: 3, label: "Propietario" },
+                        { num: 4, label: "Contrato" },
                     ].map((step, idx) => (
                         <div key={step.num} className="flex items-center flex-1">
                             <div className="flex flex-col items-center flex-1">
@@ -176,7 +212,7 @@ export default function NuevoAlquilerPage() {
                                 </div>
                                 <div className="text-sm mt-2 font-medium text-gray-700">{step.label}</div>
                             </div>
-                            {idx < 2 && (
+                            {idx < 3 && (
                                 <div
                                     className={`h-1 flex-1 mx-4 ${currentStep > step.num ? "bg-indigo-600" : "bg-gray-200"
                                         }`}
@@ -210,6 +246,120 @@ export default function NuevoAlquilerPage() {
                 )}
 
                 {currentStep === 3 && (
+                    <div>
+                        <h2 className="text-lg font-semibold text-gray-900 mb-4">Datos del Propietario y Bancarios</h2>
+
+                        <div className="space-y-6">
+                            {/* Datos del Propietario */}
+                            <div className="bg-gray-50 rounded-lg p-4">
+                                <h3 className="text-md font-medium text-gray-900 mb-4">Información del Propietario</h3>
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                    <div className="md:col-span-2">
+                                        <TextInput
+                                            label="Nombre Completo del Propietario"
+                                            value={ownerData.nombrePropietario}
+                                            onChange={(value) => handleOwnerChange("nombrePropietario", value)}
+                                            placeholder="Juan Pérez"
+                                            maxLength={100}
+                                            required
+                                            showCharCount={false}
+                                        />
+                                    </div>
+
+                                    <DNIInput
+                                        label="DNI del Propietario"
+                                        value={ownerData.dniPropietario}
+                                        onChange={(value) => handleOwnerChange("dniPropietario", value)}
+                                        required
+                                    />
+
+                                    <CUITInput
+                                        label="CUIT/CUIL del Propietario"
+                                        value={ownerData.cuitPropietario}
+                                        onChange={(value) => handleOwnerChange("cuitPropietario", value)}
+                                        required={false}
+                                    />
+
+                                    <EmailInput
+                                        label="Email del Propietario"
+                                        value={ownerData.emailPropietario}
+                                        onChange={(value) => handleOwnerChange("emailPropietario", value)}
+                                        required={false}
+                                    />
+
+                                    <PhoneInput
+                                        label="Teléfono del Propietario"
+                                        value={ownerData.telefonoPropietario}
+                                        onChange={(value) => handleOwnerChange("telefonoPropietario", value)}
+                                        required={false}
+                                    />
+
+                                    <div className="md:col-span-2">
+                                        <TextInput
+                                            label="Domicilio del Propietario"
+                                            value={ownerData.domicilioPropietario}
+                                            onChange={(value) => handleOwnerChange("domicilioPropietario", value)}
+                                            placeholder="Av. Corrientes 1234, CABA"
+                                            maxLength={200}
+                                            required={false}
+                                            showCharCount={false}
+                                        />
+                                    </div>
+                                </div>
+                            </div>
+
+                            {/* Datos Bancarios */}
+                            <div className="bg-gray-50 rounded-lg p-4">
+                                <h3 className="text-md font-medium text-gray-900 mb-4">Datos Bancarios para Pagos</h3>
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                    <TextInput
+                                        label="Banco"
+                                        value={ownerData.banco}
+                                        onChange={(value) => handleOwnerChange("banco", value)}
+                                        placeholder="Banco Galicia"
+                                        maxLength={50}
+                                        required={false}
+                                        showCharCount={false}
+                                    />
+
+                                    <AliasInput
+                                        value={ownerData.alias}
+                                        onChange={(value) => handleOwnerChange("alias", value)}
+                                        required={false}
+                                    />
+
+                                    <div className="md:col-span-2">
+                                        <CBUInput
+                                            value={ownerData.cbu}
+                                            onChange={(value) => handleOwnerChange("cbu", value)}
+                                            required={false}
+                                        />
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div className="mt-6 flex justify-between">
+                            <button
+                                type="button"
+                                onClick={() => setCurrentStep(2)}
+                                className="px-6 py-3 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors"
+                            >
+                                Anterior
+                            </button>
+                            <button
+                                type="button"
+                                onClick={() => setCurrentStep(4)}
+                                disabled={!canProceed()}
+                                className="px-6 py-3 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors disabled:opacity-50"
+                            >
+                                Siguiente
+                            </button>
+                        </div>
+                    </div>
+                )}
+
+                {currentStep === 4 && (
                     <form onSubmit={handleSubmit}>
                         <h2 className="text-lg font-semibold text-gray-900 mb-4">Datos del Contrato</h2>
 
@@ -300,12 +450,24 @@ export default function NuevoAlquilerPage() {
                                     placeholder="0"
                                 />
                             </div>
+
+                            <div className="md:col-span-2">
+                                <TextAreaInput
+                                    label="Estado del Inmueble / Inventario"
+                                    value={contractData.estadoInmueble}
+                                    onChange={(value) => handleContractChange("estadoInmueble", value)}
+                                    placeholder="Descripción del estado del inmueble al inicio del contrato, inventario de muebles, electrodomésticos, etc."
+                                    maxLength={2000}
+                                    required={false}
+                                    rows={6}
+                                />
+                            </div>
                         </div>
 
                         <div className="mt-6 flex justify-end gap-3">
                             <button
                                 type="button"
-                                onClick={() => setCurrentStep(2)}
+                                onClick={() => setCurrentStep(3)}
                                 className="px-6 py-3 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors"
                             >
                                 Anterior

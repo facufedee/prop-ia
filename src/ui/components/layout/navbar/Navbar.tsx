@@ -43,8 +43,12 @@ export default function Navbar() {
       <div className="flex items-center justify-between max-w-7xl mx-auto">
 
         {/* Logo */}
-        <Link href="/" className="text-xl font-semibold text-black hover:opacity-80">
-          PROP-IA
+        <Link href="/" className="flex items-center gap-2 hover:opacity-80">
+          <img
+            src="/assets/img/logo_web_propia.png"
+            alt="PROP-IA Logo"
+            className="h-8 w-auto"
+          />
         </Link>
 
         {/* Desktop menu */}

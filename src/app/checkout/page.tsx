@@ -12,8 +12,10 @@ function CheckoutContent() {
     const planId = searchParams.get('plan');
     const initialBilling = searchParams.get('billing') as 'monthly' | 'yearly' || 'monthly';
 
-    const [loading, setLoading] = useState(false);
+    const [loading, setLoading] = useState(true);
+    const [planLoading, setPlanLoading] = useState(true);
     const [billing, setBilling] = useState<'monthly' | 'yearly'>(initialBilling);
+    const [selectedPlan, setSelectedPlan] = useState<any>(null); // Plan type
     const [formData, setFormData] = useState({
         name: "",
         email: "",
@@ -23,31 +25,32 @@ function CheckoutContent() {
         address: "",
     });
 
-    const plans: Record<string, any> = {
-        free: {
-            name: 'Gratis',
-            price: { monthly: 0, yearly: 0 },
-            features: ['5 propiedades', '10 tasaciones/mes', '1 usuario', '1GB storage'],
-        },
-        professional: {
-            name: 'Profesional',
-            price: { monthly: 29900, yearly: 299000 },
-            features: ['50 propiedades', 'Tasaciones ilimitadas', '3 usuarios', '50GB storage', 'Soporte prioritario'],
-        },
-        enterprise: {
-            name: 'Empresarial',
-            price: { monthly: 79900, yearly: 799000 },
-            features: ['Propiedades ilimitadas', 'Todo ilimitado', 'Usuarios ilimitados', 'API access', 'White-label'],
-        },
-    };
+    useEffect(() => {
+        const fetchPlan = async () => {
+            if (!planId) {
+                setPlanLoading(false);
+                return;
+            }
+            try {
+                // Dynamically import or standard import - assuming standard is fine but for consistency with previous step
+                const { subscriptionService } = await import("@/infrastructure/services/subscriptionService");
+                const plan = await subscriptionService.getPlanById(planId);
+                setSelectedPlan(plan);
+            } catch (error) {
+                console.error("Error fetching plan:", error);
+            } finally {
+                setPlanLoading(false);
+            }
+        };
 
-    const selectedPlan = planId ? plans[planId] : null;
+        fetchPlan();
+    }, [planId]);
+
     const price = selectedPlan ? (billing === 'yearly' ? selectedPlan.price.yearly : selectedPlan.price.monthly) : 0;
 
     useEffect(() => {
         if (auth?.currentUser) {
             setFormData(prev => ({
-
                 ...prev,
                 email: auth?.currentUser?.email || '',
                 name: auth?.currentUser?.displayName || '',
@@ -72,13 +75,7 @@ function CheckoutContent() {
         setLoading(true);
 
         if (paymentMethod === 'transfer') {
-            // Transfer Flow: Just simulate success and show instructions again or redirect to a success page
-            // For now, we'll use a simple alert/notification approach or effectively "finish" the process.
-            // Ideally, we'd send this to the backend to create a "Pending" subscription.
-
-            // Simulating a delay
             await new Promise(resolve => setTimeout(resolve, 1000));
-
             alert(`¡Solicitud registrada!\n\nPor favor enviá el comprobante de transferencia a administracion@prop-ia.com.ar para activar tu cuenta.\n\nTe hemos enviado un correo con estos datos.`);
             setLoading(false);
             return;
@@ -111,6 +108,10 @@ function CheckoutContent() {
             setLoading(false);
         }
     };
+
+    if (planLoading) {
+        return <div className="min-h-screen flex items-center justify-center"><div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600"></div></div>;
+    }
 
     if (!selectedPlan) {
         return (
@@ -421,10 +422,12 @@ function CheckoutContent() {
                             <div className="border-t border-gray-200 pt-4 mb-6">
                                 <h4 className="font-semibold text-gray-900 mb-3">Incluye:</h4>
                                 <ul className="space-y-2">
-                                    {selectedPlan.features.map((feature: string, idx: number) => (
+                                    {selectedPlan.features.map((feature: any, idx: number) => (
                                         <li key={idx} className="flex items-start gap-2">
                                             <Check className="w-5 h-5 text-green-500 flex-shrink-0 mt-0.5" />
-                                            <span className="text-sm text-gray-700">{feature}</span>
+                                            <span className="text-sm text-gray-700">
+                                                {typeof feature === 'string' ? feature : feature.name}
+                                            </span>
                                         </li>
                                     ))}
                                 </ul>

@@ -65,36 +65,36 @@ export default function DashboardPage() {
         if (!db) return;
 
         try {
-            // 1. Properties & Value
-            const propsQuery = query(collection(db, "properties"), where("userId", "==", userId));
-            const propsSnapshot = await getDocs(propsQuery);
-            const totalProps = propsSnapshot.size;
+            // Run all queries in parallel for better performance
+            const [propsSnapshot, leads, recentLogs, tasacionesLogs] = await Promise.all([
+                // 1. Properties & Value
+                getDocs(query(collection(db, "properties"), where("userId", "==", userId))),
 
+                // 2. Leads
+                leadsService.getLeads(userId),
+
+                // 3. Recent Activity
+                auditLogService.getLogs("default-org-id", { userId }, 10),
+
+                // 4. Tasaciones count
+                auditLogService.getLogs("default-org-id", {
+                    userId,
+                    action: 'valuation_create',
+                    module: 'Tasaciones'
+                }, 100) // Reduced from 1000 to 100 for better performance
+            ]);
+
+            // Calculate total value
             let totalVal = 0;
             propsSnapshot.docs.forEach(doc => {
                 const data = doc.data();
                 if (data.price) totalVal += Number(data.price);
             });
 
-            // 2. Leads (Real)
-            const leads = await leadsService.getLeads(userId);
-            const totalLeadsCount = leads.length;
-
-            // 3. Activity & Tasaciones (from Audit Logs)
-            // Use "default-org-id" as observed in other components
-            const recentLogs = await auditLogService.getLogs("default-org-id", { userId }, 10);
-
-            // Count tasaciones from logs
-            const tasacionesLogs = await auditLogService.getLogs("default-org-id", {
-                userId,
-                action: 'valuation_create',
-                module: 'Tasaciones'
-            }, 1000);
-
             setStats({
-                totalProperties: totalProps,
+                totalProperties: propsSnapshot.size,
                 totalTasaciones: tasacionesLogs.length,
-                totalLeads: totalLeadsCount,
+                totalLeads: leads.length,
                 totalValue: totalVal,
                 recentActivity: recentLogs
             });
@@ -112,8 +112,29 @@ export default function DashboardPage() {
 
     if (loading) {
         return (
-            <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600"></div>
+            <div className="fixed inset-0 bg-white z-50 flex items-center justify-center">
+                <div className="text-center space-y-6">
+                    {/* Custom loading image */}
+                    <div className="flex justify-center mb-8">
+                        <div className="relative">
+                            <div className="absolute inset-0 bg-gradient-to-r from-indigo-600 via-purple-600 to-cyan-500 rounded-2xl blur-3xl opacity-30 animate-pulse" />
+                            <img
+                                src="/assets/img/loading.png"
+                                alt="Cargando PROP-IA"
+                                className="relative h-20 w-auto animate-pulse"
+                            />
+                        </div>
+                    </div>
+
+                    {/* Loading dots animation */}
+                    <div className="flex justify-center gap-2">
+                        <div className="w-3 h-3 bg-indigo-600 rounded-full animate-bounce" style={{ animationDelay: '0ms' }} />
+                        <div className="w-3 h-3 bg-purple-600 rounded-full animate-bounce" style={{ animationDelay: '150ms' }} />
+                        <div className="w-3 h-3 bg-cyan-500 rounded-full animate-bounce" style={{ animationDelay: '300ms' }} />
+                    </div>
+
+                    <p className="text-sm text-gray-500 font-medium">Cargando dashboard...</p>
+                </div>
             </div>
         );
     }

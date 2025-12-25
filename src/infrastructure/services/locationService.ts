@@ -62,10 +62,14 @@ export const locationService = {
         try {
             // Fetch localities for a specific province
             const response = await fetch(`${BASE_URL}/localidades?provincia=${provinciaId}&orden=nombre&max=1000`);
+            if (!response.ok) {
+                console.warn("⚠️ API Georef no disponible para localidades");
+                return [];
+            }
             const data = await response.json();
-            return data.localidades;
+            return data.localidades || [];
         } catch (error) {
-            console.error("Error fetching localidades:", error);
+            console.warn("⚠️ Error de red al cargar localidades. Continuando sin localidades.", error);
             return [];
         }
     },
