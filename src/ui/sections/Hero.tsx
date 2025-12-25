@@ -27,16 +27,16 @@ export default function Hero() {
 
         {/* Main Headline */}
         <h1 className="text-5xl md:text-7xl font-bold text-gray-900 mb-6 leading-[1.1] animate-fade-in-up tracking-tight">
-          Gestiona tu Inmobiliaria <br />
+          La Plataforma Integral de <br />
           <span className="bg-gradient-to-r from-indigo-600 via-purple-600 to-indigo-600 bg-clip-text text-transparent bg-[length:200%_auto] animate-gradient">
-            Sin límites ni instalación
+            Gestión Inmobiliaria
           </span>
         </h1>
 
         {/* Subheadline */}
         <p className="text-xl text-gray-600 mb-10 max-w-2xl mx-auto leading-relaxed animate-fade-in-up animation-delay-200">
-          Centraliza propiedades, clientes y contratos en una plataforma 100% web.
-          Accede desde cualquier lugar y potencia tus ventas con Inteligencia Artificial.
+          Potencia tu inmobiliaria con IA. Centraliza <strong>alquileres, ventas, tasaciones y clientes</strong> en un solo lugar.
+          Automatiza procesos y cierra más operaciones sin complicaciones.
         </p>
 
         {/* CTA Buttons */}
@@ -75,22 +75,7 @@ export default function Hero() {
           </div>
         </div>
 
-        {/* Hero Image */}
-        <div className="mt-20 animate-fade-in-up animation-delay-800 perspective-1000">
-          <div className="relative mx-auto max-w-5xl transform rotate-x-12 hover:rotate-x-0 transition-transform duration-700 ease-out">
-            {/* Glow behind */}
-            <div className="absolute -inset-4 bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 rounded-[2rem] blur-2xl opacity-20 animate-pulse"></div>
 
-            {/* Image Container */}
-            <div className="relative rounded-2xl shadow-2xl overflow-hidden ring-1 ring-gray-900/5">
-              <img
-                src="/assets/img/despues_hero.webp"
-                alt="PROP-IA Dashboard Preview"
-                className="w-full h-auto"
-              />
-            </div>
-          </div>
-        </div>
 
       </div>
 

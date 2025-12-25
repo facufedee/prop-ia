@@ -27,6 +27,7 @@ export default function BlogForm({ initialData, isEditing = false }: BlogFormPro
         content: "",
         imageUrl: "",
         category: "Novedades",
+        tags: [],
         author: { name: "", photo: "" },
         published: true,
         publishedAt: new Date(),
@@ -46,20 +47,22 @@ export default function BlogForm({ initialData, isEditing = false }: BlogFormPro
             setFormData(data);
         } else {
             // If creating new, try to pre-fill author
-            if (auth?.currentUser) {
+            // If creating new, try to pre-fill author
+            const currentUser = auth?.currentUser;
+            if (currentUser) {
                 const fetchUser = async () => {
                     try {
                         // Try to get from Firestore profile first
-                        if (auth.currentUser?.uid) {
-                            const userDoc = await getDoc(doc(db, "users", auth.currentUser.uid));
+                        if (currentUser.uid) {
+                            const userDoc = await getDoc(doc(db, "users", currentUser.uid));
                             if (userDoc.exists()) {
                                 const userData = userDoc.data();
                                 setFormData(prev => ({
                                     ...prev,
                                     author: {
-                                        name: userData.displayName || userData.name || auth.currentUser?.displayName || "Admin",
-                                        photo: userData.photoURL || auth.currentUser?.photoURL || "",
-                                        uid: auth.currentUser?.uid
+                                        name: userData.displayName || userData.name || currentUser.displayName || "Admin",
+                                        photo: userData.photoURL || currentUser.photoURL || "",
+                                        uid: currentUser.uid
                                     }
                                 }));
                                 return;
@@ -70,9 +73,9 @@ export default function BlogForm({ initialData, isEditing = false }: BlogFormPro
                         setFormData(prev => ({
                             ...prev,
                             author: {
-                                name: auth.currentUser?.displayName || "Admin",
-                                photo: auth.currentUser?.photoURL || "",
-                                uid: auth.currentUser?.uid
+                                name: currentUser.displayName || "Admin",
+                                photo: currentUser.photoURL || "",
+                                uid: currentUser.uid
                             }
                         }));
                     } catch (e) {
@@ -246,7 +249,7 @@ export default function BlogForm({ initialData, isEditing = false }: BlogFormPro
                 <div className="space-y-6">
 
                     {/* Actions */}
-                    <div className="bg-white p-6 rounded-xl border border-gray-200 shadow-sm sticky top-24">
+                    <div className="bg-white p-6 rounded-xl border border-gray-200 shadow-sm">
                         <h3 className="font-semibold text-gray-900 mb-4">Publicación</h3>
 
                         <div className="space-y-4">
@@ -389,9 +392,52 @@ export default function BlogForm({ initialData, isEditing = false }: BlogFormPro
                         </div>
                     </div>
 
+                    {/* Tags */}
+                    <div className="bg-white p-6 rounded-xl border border-gray-200 shadow-sm">
+                        <label className="block text-sm font-medium text-gray-700 mb-3">Etiquetas (Tags)</label>
+                        <div className="flex gap-2 mb-3">
+                            <input
+                                type="text"
+                                placeholder="Añadir etiqueta..."
+                                className="flex-1 px-3 py-2 text-sm border border-gray-200 rounded-lg focus:ring-2 focus:ring-indigo-500"
+                                onKeyDown={(e) => {
+                                    if (e.key === 'Enter') {
+                                        e.preventDefault();
+                                        const val = e.currentTarget.value.trim();
+                                        if (val && !formData.tags?.includes(val)) {
+                                            setFormData(prev => ({
+                                                ...prev,
+                                                tags: [...(prev.tags || []), val]
+                                            }));
+                                            e.currentTarget.value = '';
+                                        }
+                                    }
+                                }}
+                            />
+                        </div>
+                        <div className="flex flex-wrap gap-2">
+                            {formData.tags?.map((tag) => (
+                                <span key={tag} className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium bg-indigo-50 text-indigo-700">
+                                    {tag}
+                                    <button
+                                        type="button"
+                                        onClick={() => setFormData(prev => ({
+                                            ...prev,
+                                            tags: prev.tags?.filter(t => t !== tag)
+                                        }))}
+                                        className="hover:text-indigo-900"
+                                    >
+                                        <X size={12} />
+                                    </button>
+                                </span>
+                            ))}
+                        </div>
+                        <p className="text-xs text-gray-500 mt-2">Presiona Enter para añadir.</p>
+                    </div>
+
                     {/* Category */}
                     <div className="bg-white p-6 rounded-xl border border-gray-200 shadow-sm">
-                        <label className="block text-sm font-medium text-gray-700 mb-3">Categoría</label>
+                        <label className="block text-sm font-medium text-gray-700 mb-3">Categoría Principal</label>
                         <select
                             name="category"
                             value={formData.category}

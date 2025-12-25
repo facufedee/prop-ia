@@ -1,0 +1,17 @@
+[
+    {
+        "origin": [
+            "http://localhost:3000",
+            "https://prop-ia.com",
+            "https://prop-ia.vercel.app"
+        ],
+        "method": [
+            "GET",
+            "PUT",
+            "POST",
+            "DELETE",
+            "HEAD"
+        ],
+        "maxAgeSeconds": 3600
+    }
+]

@@ -7,6 +7,9 @@ const ContactForm = dynamic(() => import("@/ui/sections/ContactForm"));
 const Footer = dynamic(() => import("@/ui/components/layout/Footer"));
 const GoogleAuthPrompt = dynamic(() => import("@/ui/components/auth/GoogleAuthPrompt"));
 
+const LatestBlogPosts = dynamic(() => import("@/ui/sections/LatestBlogPosts"));
+const FAQ = dynamic(() => import("@/ui/sections/FAQ"));
+
 export default function LandingPage() {
     return (
         <main className="bg-white min-h-screen flex flex-col gap-0">
@@ -40,6 +43,8 @@ export default function LandingPage() {
             <Hero />
             <Features />
             <Testimonials />
+            <LatestBlogPosts />
+            <FAQ />
             <ContactForm />
             <Footer />
         </main>

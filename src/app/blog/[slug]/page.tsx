@@ -2,7 +2,11 @@ import { blogService } from "@/infrastructure/services/blogService";
 import Link from "next/link";
 import { ArrowLeft, Calendar, User, Clock } from "lucide-react";
 import { notFound } from "next/navigation";
+import Image from "next/image";
 import { Metadata } from "next";
+import ReactMarkdown from "react-markdown";
+import remarkBreaks from "remark-breaks";
+import ShareButtons from "../components/ShareButtons";
 
 interface Props {
     params: Promise<{ slug: string }>;
@@ -61,10 +65,13 @@ export default async function BlogPostPage({ params }: Props) {
                 {post.imageUrl && (
                     <>
                         <div className="absolute inset-0 bg-black/60 z-10" />
-                        <img
+                        <Image
                             src={post.imageUrl}
                             alt={post.title}
-                            className="absolute inset-0 w-full h-full object-cover z-0"
+                            fill
+                            priority
+                            className="object-cover z-0"
+                            sizes="100vw"
                         />
                     </>
                 )}
@@ -107,16 +114,31 @@ export default async function BlogPostPage({ params }: Props) {
             <div className="max-w-3xl mx-auto px-6 -mt-20 relative z-30">
                 <article className="bg-white rounded-2xl p-8 md:p-12 shadow-xl border border-gray-100">
 
+                    {/* Share Buttons (Top) */}
+                    <ShareButtons title={post.title} slug={post.slug} />
+
                     {/* Excerpt */}
                     <p className="text-xl md:text-2xl text-gray-600 font-serif leading-relaxed mb-10 italic border-l-4 border-indigo-500 pl-6">
                         {post.excerpt}
                     </p>
 
                     {/* Main Text */}
-                    <div
-                        className="prose prose-lg prose-indigo max-w-none text-gray-700"
-                        dangerouslySetInnerHTML={{ __html: post.content.replace(/\n/g, '<br />') }}
-                    />
+                    <div className="prose prose-lg prose-indigo max-w-none text-gray-700">
+                        <ReactMarkdown remarkPlugins={[remarkBreaks]}>
+                            {post.content}
+                        </ReactMarkdown>
+                    </div>
+
+                    {/* Tags */}
+                    {post.tags && post.tags.length > 0 && (
+                        <div className="mt-8 flex flex-wrap gap-2">
+                            {post.tags.map(tag => (
+                                <span key={tag} className="px-3 py-1 bg-gray-100 text-gray-600 text-sm rounded-full font-medium shadow-sm">
+                                    #{tag}
+                                </span>
+                            ))}
+                        </div>
+                    )}
 
                     <div className="mt-12 pt-8 border-t border-gray-100 flex justify-between items-center">
                         <Link href="/blog" className="text-gray-500 hover:text-indigo-600 font-medium flex items-center gap-2 transition-colors">
@@ -136,9 +158,15 @@ export default async function BlogPostPage({ params }: Props) {
                         {related.map((p) => (
                             <Link key={p.id} href={`/blog/${p.slug}`} className="group">
                                 <div className="bg-white rounded-xl overflow-hidden shadow-sm border border-gray-100 hover:shadow-md transition-all">
-                                    <div className="aspect-video overflow-hidden">
+                                    <div className="aspect-video overflow-hidden relative">
                                         {p.imageUrl ? (
-                                            <img src={p.imageUrl} alt={p.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform" />
+                                            <Image
+                                                src={p.imageUrl}
+                                                alt={p.title}
+                                                fill
+                                                className="object-cover group-hover:scale-105 transition-transform"
+                                                sizes="(max-width: 768px) 100vw, 33vw"
+                                            />
                                         ) : (
                                             <div className="w-full h-full bg-gray-100" />
                                         )}

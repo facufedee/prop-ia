@@ -18,88 +18,60 @@ import {
 export default function Features() {
   const features = [
     {
-      icon: BarChart3,
-      title: "Tasación Inteligente",
-      description: "IA que valúa propiedades en segundos con precisión del 95%. Basada en datos reales del mercado argentino.",
-      color: "from-blue-500 to-cyan-500",
-      benefits: ["Ahorra 2 horas por tasación", "Reportes profesionales", "Comparables automáticos"]
-    },
-    {
       icon: Building2,
       title: "Gestión de Propiedades",
-      description: "Administra todo tu portfolio desde un solo lugar. CRM completo con seguimiento de leads y visitas.",
-      color: "from-purple-500 to-pink-500",
-      benefits: ["Catálogo ilimitado", "Fotos y videos HD", "Estados personalizables"]
-    },
-    {
-      icon: Megaphone,
-      title: "Publicación Multiplataforma",
-      description: "Publica en Mercado Libre, Argenprop, Zonaprop y más con un solo click. Sincronización automática.",
-      color: "from-orange-500 to-red-500",
-      benefits: ["10+ portales", "Actualización automática", "Analytics integrado"]
+      description: "Centraliza todo tu inventario en un solo lugar. Fichas técnicas completas, fotos, videos y estados en tiempo real.",
+      color: "from-blue-500 to-cyan-500",
+      benefits: ["Catálogo digital", "Historial de cambios", "Fichas PDF automáticas"]
     },
     {
       icon: Users,
       title: "CRM de Clientes",
-      description: "Gestiona leads, clientes y agentes. Seguimiento completo del embudo de ventas y conversión.",
+      description: "No pierdas ni una venta. Seguimiento automático de leads, perfiles de búsqueda y embudo de conversión.",
       color: "from-green-500 to-emerald-500",
-      benefits: ["Pipeline visual", "Automatizaciones", "Recordatorios inteligentes"]
+      benefits: ["Pipeline visual", "Scoring de clientes", "Alertas de matching"]
     },
     {
-      icon: Bot,
+      icon: MessageSquare,
       title: "Chat Prop-IA",
-      description: "Asistente de IA que responde consultas, genera descripciones y te ayuda en tu día a día.",
-      color: "from-indigo-500 to-purple-500",
-      benefits: ["Disponible 24/7", "Aprende de tu negocio", "Multiidioma"]
+      description: "Tu asistente virtual disponible 24/7. Responde consultas, agendamiento de visitas y pre-calificación de interesados.",
+      color: "from-purple-500 to-indigo-500",
+      benefits: ["Respuestas inmediatas", "Guiones de venta", "Integrado a WhatsApp"]
     },
     {
       icon: Calendar,
       title: "Agenda Inteligente",
-      description: "Calendario compartido para visitas, reuniones y seguimientos. Recordatorios automáticos.",
+      description: "Coordina visitas sin solapamientos. Sincronización automática con Google Calendar y recordatorios push.",
       color: "from-pink-500 to-rose-500",
-      benefits: ["Sincroniza con Google", "Notificaciones push", "Vista de equipo"]
+      benefits: ["Recordatorios x WhatsApp", "Rutas optimizadas", "Vista de equipo"]
     },
     {
       icon: DollarSign,
       title: "Gestión Financiera",
-      description: "Control de comisiones, pagos y facturación. Reportes financieros en tiempo real.",
-      color: "from-yellow-500 to-orange-500",
-      benefits: ["Comisiones automáticas", "Reportes fiscales", "Múltiples monedas"]
+      description: "Control total de tu caja. Seguimiento de comisiones, gastos operativos y facturación electrónica.",
+      color: "from-yellow-500 to-amber-500",
+      benefits: ["Cálculo de comisiones", "Reportes de caja", "Alertas de cobro"]
     },
     {
       icon: FileText,
       title: "Contratos Digitales",
-      description: "Genera contratos de alquiler y venta con firma digital. Plantillas personalizables.",
+      description: "Generación automática de contratos de alquiler y venta. El sistema los crea listos para descargar e imprimir.",
       color: "from-teal-500 to-cyan-500",
-      benefits: ["Firma electrónica", "Plantillas legales", "Almacenamiento seguro"]
+      benefits: ["Sin firma digital", "Plantillas legales", "Descarga PDF inmediata"]
     },
     {
       icon: TrendingUp,
       title: "Analytics Avanzado",
-      description: "Dashboards con métricas clave: conversión, tiempo promedio de venta, ROI por propiedad.",
+      description: "Toma decisiones basadas en datos. Métricas de rendimiento de agentes, propiedades más vistas y tiempos de venta.",
       color: "from-violet-500 to-purple-500",
-      benefits: ["Métricas en tiempo real", "Exportar a Excel", "Comparativas"]
+      benefits: ["Dashboards en vivo", "Exportación a Excel", "ROI por portal"]
     },
     {
-      icon: MessageSquare,
+      icon: Shield, // Using Shield as LifeBuoy/HelpCircle alternative if needed, but let's import proper HelpCircle if possible or use Shield for now as "Support" often implies security/safety net. Actually let's use Shield or swap for HelpCircle if available. Let's check imports.
       title: "Mesa de Ayuda",
-      description: "Soporte técnico dedicado. Tickets, chat en vivo y base de conocimientos.",
-      color: "from-blue-500 to-indigo-500",
-      benefits: ["Respuesta < 24hs", "Chat en vivo", "Tutoriales en video"]
-    },
-    {
-      icon: Shield,
-      title: "Seguridad Total",
-      description: "Encriptación end-to-end, backups automáticos y cumplimiento de normativas.",
-      color: "from-gray-600 to-gray-800",
-      benefits: ["Backups diarios", "SSL/TLS", "GDPR compliant"]
-    },
-    {
-      icon: Zap,
-      title: "Automatizaciones",
-      description: "Workflows automáticos para tareas repetitivas. Ahorra hasta 15 horas por semana.",
-      color: "from-amber-500 to-yellow-500",
-      benefits: ["Email automático", "Seguimientos", "Recordatorios"]
+      description: "Soporte técnico prioritario siempre que lo necesites. Base de conocimientos y tickets de resolución rápida.",
+      color: "from-red-500 to-orange-500",
+      benefits: ["Soporte 24/7", "Video tutoriales", "Gestor de cuenta"]
     },
   ];
 
@@ -159,15 +131,7 @@ export default function Features() {
           })}
         </div>
 
-        {/* CTA */}
-        <div className="mt-16 text-center">
-          <p className="text-gray-600 mb-6">
-            ¿Querés ver todas las características en acción?
-          </p>
-          <button className="px-8 py-4 bg-gradient-to-r from-indigo-600 to-purple-600 text-white rounded-xl font-semibold hover:shadow-lg transform hover:scale-105 transition-all">
-            Solicitar Demo Gratuita
-          </button>
-        </div>
+
       </div>
     </section>
   );

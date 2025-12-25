@@ -73,12 +73,7 @@ export const metadata: Metadata = {
     canonical: 'https://prop-ia.com',
   },
   category: 'business',
-  themeColor: '#4F46E5',
-  viewport: {
-    width: 'device-width',
-    initialScale: 1,
-    maximumScale: 1,
-  },
+  category: 'business',
   verification: {
     google: 'verification_token', // Placeholder
   },

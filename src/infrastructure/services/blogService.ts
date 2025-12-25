@@ -28,6 +28,7 @@ export interface BlogPost {
         photo?: string;
         uid?: string;
     };
+    tags: string[];
     published: boolean;
     publishedAt?: Timestamp | Date;
     expiresAt?: Timestamp | Date;
@@ -88,10 +89,25 @@ export const blogService = {
             );
 
             const snapshot = await getDocs(q);
-            const posts = snapshot.docs.map(doc => ({
-                id: doc.id,
-                ...doc.data()
-            } as BlogPost));
+            const posts = snapshot.docs.map(doc => {
+                const data = doc.data();
+                // Generate excerpt from content if missing
+                let excerpt = data.excerpt;
+                if (!excerpt && data.content) {
+                    // Remove markdown symbols and get first 150 chars
+                    const plainText = data.content
+                        .replace(/[#*`_\[\]]/g, '') // Basic markdown stripping
+                        .replace(/\n/g, ' ')
+                        .trim();
+                    excerpt = plainText.substring(0, 150);
+                }
+
+                return {
+                    id: doc.id,
+                    ...data,
+                    excerpt: excerpt || ""
+                } as BlogPost;
+            });
 
             // Client-side filtering for expiration and scheduled publication if needed
             return posts.filter(post => {
@@ -152,8 +168,14 @@ export const blogService = {
     async createPost(post: Omit<BlogPost, "id" | "createdAt" | "updatedAt">): Promise<string> {
         try {
             if (!db) throw new Error("Firestore not initialized");
+
+            // Remove undefined fields
+            const cleanPost = Object.fromEntries(
+                Object.entries(post).filter(([_, v]) => v !== undefined)
+            );
+
             const docRef = await addDoc(collection(db, COLLECTION_NAME), {
-                ...post,
+                ...cleanPost,
                 createdAt: Timestamp.now(),
                 updatedAt: Timestamp.now()
             });
@@ -168,9 +190,15 @@ export const blogService = {
     async updatePost(id: string, post: Partial<BlogPost>): Promise<void> {
         try {
             if (!db) throw new Error("Firestore not initialized");
+
+            // Remove undefined fields
+            const cleanPost = Object.fromEntries(
+                Object.entries(post).filter(([_, v]) => v !== undefined)
+            );
+
             const docRef = doc(db, COLLECTION_NAME, id);
             await updateDoc(docRef, {
-                ...post,
+                ...cleanPost,
                 updatedAt: Timestamp.now()
             });
         } catch (error) {

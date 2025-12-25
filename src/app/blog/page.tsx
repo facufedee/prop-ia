@@ -2,6 +2,7 @@ import { blogService } from "@/infrastructure/services/blogService";
 import Link from "next/link";
 import { Calendar, User, ArrowRight } from "lucide-react";
 import { Metadata } from "next";
+import Image from "next/image";
 
 export const metadata: Metadata = {
     title: "Blog - Prop-IA",
@@ -46,12 +47,14 @@ export default async function BlogPage() {
                                 key={post.id}
                                 className="bg-white rounded-2xl overflow-hidden shadow-sm hover:shadow-xl transition-all duration-300 border border-gray-100 flex flex-col group"
                             >
-                                <Link href={`/blog/${post.slug}`} className="block overflow-hidden aspect-[16/10]">
+                                <Link href={`/blog/${post.slug}`} className="block overflow-hidden aspect-[16/10] relative">
                                     {post.imageUrl ? (
-                                        <img
+                                        <Image
                                             src={post.imageUrl}
                                             alt={post.title}
-                                            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                                            fill
+                                            className="object-cover group-hover:scale-105 transition-transform duration-500"
+                                            sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
                                         />
                                     ) : (
                                         <div className="w-full h-full bg-gray-100 flex items-center justify-center">
