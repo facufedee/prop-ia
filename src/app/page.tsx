@@ -1,9 +1,13 @@
+import dynamic from "next/dynamic";
 import Hero from "@/ui/sections/Hero";
-import Features from "@/ui/sections/Features";
-import Testimonials from "@/ui/sections/Testimonials";
-import ContactForm from "@/ui/sections/ContactForm";
-import Footer from "@/ui/components/layout/Footer";
-import GoogleAuthPrompt from "@/ui/components/auth/GoogleAuthPrompt";
+
+const Features = dynamic(() => import("@/ui/sections/Features"));
+const Testimonials = dynamic(() => import("@/ui/sections/Testimonials"));
+const ContactForm = dynamic(() => import("@/ui/sections/ContactForm"));
+const Footer = dynamic(() => import("@/ui/components/layout/Footer"));
+const GoogleAuthPrompt = dynamic(() => import("@/ui/components/auth/GoogleAuthPrompt"), {
+    ssr: false
+});
 
 export default function LandingPage() {
     return (

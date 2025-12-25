@@ -50,10 +50,10 @@ export default function Footer() {
                 </div>
 
                 <div className="border-t border-gray-800 pt-8 flex flex-col md:flex-row justify-between items-center gap-4">
-                    <p className="text-sm text-gray-500">
+                    <p className="text-sm text-gray-400">
                         © {new Date().getFullYear()} PROP-IA. Todos los derechos reservados.
                     </p>
-                    <div className="flex items-center gap-2 text-sm text-gray-500">
+                    <div className="flex items-center gap-2 text-sm text-gray-400">
                         <span>Hecho con ❤️ en Buenos Aires</span>
                     </div>
                 </div>

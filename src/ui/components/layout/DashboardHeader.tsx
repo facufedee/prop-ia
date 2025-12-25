@@ -84,6 +84,7 @@ export default function DashboardHeader({ onMobileMenuClick }: DashboardHeaderPr
                 <button
                     onClick={onMobileMenuClick}
                     className="md:hidden p-2 text-gray-600 hover:bg-gray-100 rounded-lg"
+                    aria-label="Abrir menú"
                 >
                     <Menu className="w-6 h-6" />
                 </button>
@@ -93,7 +94,11 @@ export default function DashboardHeader({ onMobileMenuClick }: DashboardHeaderPr
             <div className="flex items-center gap-4 md:gap-6">
 
                 {/* Notifications */}
-                <Link href="/dashboard/soporte" className="relative p-2 text-gray-500 hover:bg-gray-100 rounded-full transition-colors group">
+                <Link
+                    href="/dashboard/soporte"
+                    className="relative p-2 text-gray-500 hover:bg-gray-100 rounded-full transition-colors group"
+                    aria-label="Notificaciones"
+                >
                     <Bell className="w-6 h-6 group-hover:text-indigo-600" />
                     {notificationCount > 0 && (
                         <span className="absolute top-1 right-1 w-5 h-5 bg-red-500 text-white text-xs font-bold flex items-center justify-center rounded-full border-2 border-white">
