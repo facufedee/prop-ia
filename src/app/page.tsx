@@ -5,9 +5,7 @@ const Features = dynamic(() => import("@/ui/sections/Features"));
 const Testimonials = dynamic(() => import("@/ui/sections/Testimonials"));
 const ContactForm = dynamic(() => import("@/ui/sections/ContactForm"));
 const Footer = dynamic(() => import("@/ui/components/layout/Footer"));
-const GoogleAuthPrompt = dynamic(() => import("@/ui/components/auth/GoogleAuthPrompt"), {
-    ssr: false
-});
+const GoogleAuthPrompt = dynamic(() => import("@/ui/components/auth/GoogleAuthPrompt"));
 
 export default function LandingPage() {
     return (
