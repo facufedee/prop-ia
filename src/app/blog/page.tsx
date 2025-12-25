@@ -1,100 +1,116 @@
-"use client";
-
-import { useState, useEffect } from "react";
+import { blogService } from "@/infrastructure/services/blogService";
 import Link from "next/link";
-import { ArrowLeft, Calendar, User, ArrowRight, Loader2 } from "lucide-react";
-import { blogService, BlogPost } from "@/infrastructure/services/blogService";
+import { Calendar, User, ArrowRight } from "lucide-react";
+import { Metadata } from "next";
 
-export default function BlogPage() {
-    const [posts, setPosts] = useState<BlogPost[]>([]);
-    const [loading, setLoading] = useState(true);
+export const metadata: Metadata = {
+    title: "Blog - Prop-IA",
+    description: "Novedades, tutoriales y noticias sobre el mercado inmobiliario y la tecnología.",
+};
 
-    useEffect(() => {
-        const fetchPosts = async () => {
-            try {
-                const data = await blogService.getPublishedPosts();
-                setPosts(data);
-            } catch (error) {
-                console.error("Error fetching blog posts:", error);
-            } finally {
-                setLoading(false);
-            }
-        };
+export const revalidate = 60; // Revalidate every minute
 
-        fetchPosts();
-    }, []);
+export default async function BlogPage() {
+    // Determine if we need to filter on client or server. 
+    // blogService returns all published posts. Client logic filtered by date in service.
+    // Since this is a server component, we can use the service directly.
+    const posts = await blogService.getPublishedPosts();
 
     return (
-        <div className="min-h-screen bg-white">
+        <main className="bg-gray-50 min-h-screen pb-24">
             {/* Header */}
-            <div className="bg-slate-900 text-white py-20 px-6">
-                <div className="max-w-7xl mx-auto">
-                    <Link href="/" className="inline-flex items-center gap-2 text-slate-400 hover:text-white mb-8 transition-colors">
-                        <ArrowLeft size={20} /> Volver al inicio
-                    </Link>
-                    <h1 className="text-4xl md:text-5xl font-bold mb-4">Blog Inmobiliario</h1>
-                    <p className="text-xl text-slate-300 max-w-2xl">
-                        Noticias, tendencias y consejos expertos sobre el mercado inmobiliario y la tecnología que lo impulsa.
+            <div className="bg-white border-b border-gray-200 py-16 md:py-24">
+                <div className="max-w-7xl mx-auto px-6 text-center">
+                    <span className="inline-block px-4 py-2 bg-indigo-100 text-indigo-700 rounded-full text-sm font-semibold mb-4">
+                        BLOG & NOVEDADES
+                    </span>
+                    <h1 className="text-4xl md:text-5xl font-bold text-gray-900 mb-6 tracking-tight">
+                        Insights del Mercado Inmobiliario
+                    </h1>
+                    <p className="text-xl text-gray-600 max-w-2xl mx-auto">
+                        Descubre las últimas tendencias, tutoriales de la plataforma y noticias del sector.
                     </p>
                 </div>
             </div>
 
             {/* Content */}
-            <div className="max-w-7xl mx-auto px-6 py-16">
-                {loading ? (
-                    <div className="flex justify-center py-20">
-                        <Loader2 className="w-10 h-10 text-indigo-600 animate-spin" />
-                    </div>
-                ) : posts.length === 0 ? (
-                    <div className="text-center py-20 text-gray-500">
-                        <p className="text-xl">No hay publicaciones disponibles por el momento.</p>
+            <div className="max-w-7xl mx-auto px-6 mt-12">
+                {posts.length === 0 ? (
+                    <div className="text-center py-20">
+                        <p className="text-gray-500 text-lg">No hay artículos publicados aún.</p>
                     </div>
                 ) : (
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+                    <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
                         {posts.map((post) => (
-                            <article key={post.id} className="group flex flex-col bg-white border border-gray-100 rounded-2xl overflow-hidden hover:shadow-xl transition-all duration-300">
-                                <div className="relative h-48 overflow-hidden">
-                                    <img
-                                        src={post.image}
-                                        alt={post.title}
-                                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                                    />
-                                    <div className="absolute top-4 left-4 bg-white/90 backdrop-blur-sm px-3 py-1 rounded-full text-xs font-semibold text-indigo-600">
-                                        {post.category}
-                                    </div>
-                                </div>
+                            <article
+                                key={post.id}
+                                className="bg-white rounded-2xl overflow-hidden shadow-sm hover:shadow-xl transition-all duration-300 border border-gray-100 flex flex-col group"
+                            >
+                                <Link href={`/blog/${post.slug}`} className="block overflow-hidden aspect-[16/10]">
+                                    {post.imageUrl ? (
+                                        <img
+                                            src={post.imageUrl}
+                                            alt={post.title}
+                                            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                                        />
+                                    ) : (
+                                        <div className="w-full h-full bg-gray-100 flex items-center justify-center">
+                                            <span className="text-gray-400 font-medium">Sin imagen</span>
+                                        </div>
+                                    )}
+                                </Link>
 
                                 <div className="p-6 flex-1 flex flex-col">
-                                    <div className="flex items-center gap-4 text-xs text-gray-500 mb-3">
-                                        <span className="flex items-center gap-1">
-                                            <Calendar size={14} />
-                                            {post.createdAt instanceof Date
-                                                ? post.createdAt.toLocaleDateString()
-                                                : post.createdAt?.toDate().toLocaleDateString()}
+                                    <div className="flex items-center gap-3 text-xs text-gray-500 mb-4">
+                                        <span className="bg-indigo-50 text-indigo-700 px-2.5 py-1 rounded-full font-medium">
+                                            {post.category}
                                         </span>
-                                        <span className="flex items-center gap-1"><User size={14} /> {post.author}</span>
+                                        <div className="flex items-center gap-1">
+                                            <Calendar size={14} />
+                                            {post.publishedAt
+                                                ? (post.publishedAt instanceof Date ? post.publishedAt.toLocaleDateString() : (post.publishedAt as any)?.toDate?.().toLocaleDateString())
+                                                : "Reciente"}
+                                        </div>
                                     </div>
 
-                                    <h3 className="text-xl font-bold text-gray-900 mb-3 group-hover:text-indigo-600 transition-colors">
-                                        {post.title}
-                                    </h3>
+                                    <h2 className="text-xl font-bold text-gray-900 mb-3 group-hover:text-indigo-600 transition-colors line-clamp-2">
+                                        <Link href={`/blog/${post.slug}`}>
+                                            {post.title}
+                                        </Link>
+                                    </h2>
 
-                                    <p className="text-gray-600 text-sm mb-6 flex-1 line-clamp-3">
+                                    <p className="text-gray-600 text-sm leading-relaxed mb-6 line-clamp-3">
                                         {post.excerpt}
                                     </p>
 
-                                    <Link
-                                        href={`/blog/${post.slug}`}
-                                        className="flex items-center gap-2 text-indigo-600 font-medium text-sm group-hover:gap-3 transition-all"
-                                    >
-                                        Leer artículo <ArrowRight size={16} />
-                                    </Link>
+                                    <div className="mt-auto flex items-center justify-between pt-6 border-t border-gray-50">
+                                        <div className="flex items-center gap-2">
+                                            {post.author?.photo ? (
+                                                <img src={post.author.photo} alt={post.author.name} className="w-8 h-8 rounded-full object-cover" />
+                                            ) : (
+                                                <div className="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center">
+                                                    <User size={14} className="text-gray-500" />
+                                                </div>
+                                            )}
+                                            <span className="text-sm font-medium text-gray-700">
+                                                {post.author?.name || "Equipo Prop-IA"}
+                                            </span>
+                                        </div>
+
+                                        <Link
+                                            href={`/blog/${post.slug}`}
+                                            className="text-indigo-600 font-medium text-sm flex items-center gap-1 group/link"
+                                        >
+                                            Leer más
+                                            <ArrowRight size={16} className="group-hover/link:translate-x-1 transition-transform" />
+                                        </Link>
+                                    </div>
                                 </div>
                             </article>
                         ))}
                     </div>
                 )}
             </div>
-        </div>
+        </main>
     );
 }

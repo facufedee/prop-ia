@@ -99,8 +99,23 @@ export default function BlogListPage() {
                                 filteredPosts.map((post) => (
                                     <tr key={post.id} className="hover:bg-gray-50 transition-colors">
                                         <td className="px-6 py-4">
-                                            <div className="font-medium text-gray-900">{post.title}</div>
-                                            <div className="text-xs text-gray-500 truncate max-w-xs">{post.slug}</div>
+                                            <div className="flex items-center gap-3">
+                                                {post.imageUrl ? (
+                                                    <img
+                                                        src={post.imageUrl}
+                                                        alt={post.title}
+                                                        className="w-10 h-10 rounded-lg object-cover border border-gray-200"
+                                                    />
+                                                ) : (
+                                                    <div className="w-10 h-10 rounded-lg bg-gray-100 flex items-center justify-center text-gray-400">
+                                                        <FileText size={16} />
+                                                    </div>
+                                                )}
+                                                <div>
+                                                    <div className="font-medium text-gray-900 line-clamp-1">{post.title}</div>
+                                                    <div className="text-xs text-gray-500 truncate max-w-xs">{post.slug}</div>
+                                                </div>
+                                            </div>
                                         </td>
                                         <td className="px-6 py-4">
                                             <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
@@ -108,23 +123,30 @@ export default function BlogListPage() {
                                             </span>
                                         </td>
                                         <td className="px-6 py-4">
-                                            {post.published ? (
-                                                <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
-                                                    <span className="w-1.5 h-1.5 rounded-full bg-green-600"></span>
-                                                    Publicado
-                                                </span>
-                                            ) : (
-                                                <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">
-                                                    <span className="w-1.5 h-1.5 rounded-full bg-yellow-600"></span>
-                                                    Borrador
-                                                </span>
-                                            )}
+                                            <div className="space-y-1">
+                                                {post.published ? (
+                                                    <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                                                        <span className="w-1.5 h-1.5 rounded-full bg-green-600"></span>
+                                                        Publicado
+                                                    </span>
+                                                ) : (
+                                                    <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">
+                                                        <span className="w-1.5 h-1.5 rounded-full bg-yellow-600"></span>
+                                                        Borrador
+                                                    </span>
+                                                )}
+                                                {post.expiresAt && (
+                                                    <div className="text-xs text-orange-600">
+                                                        Vence: {post.expiresAt instanceof Date ? post.expiresAt.toLocaleDateString() : (post.expiresAt as any)?.toDate?.().toLocaleDateString()}
+                                                    </div>
+                                                )}
+                                            </div>
                                         </td>
-                                        <td className="px-6 py-4 text-gray-500">
-                                            {/* Handle both Firestore Timestamp and Date objects */}
-                                            {post.createdAt instanceof Date
-                                                ? post.createdAt.toLocaleDateString()
-                                                : post.createdAt?.toDate().toLocaleDateString()}
+                                        <td className="px-6 py-4 text-gray-500 text-sm">
+                                            {post.publishedAt
+                                                ? (post.publishedAt instanceof Date ? post.publishedAt.toLocaleDateString() : (post.publishedAt as any)?.toDate?.().toLocaleDateString())
+                                                : "-"
+                                            }
                                         </td>
                                         <td className="px-6 py-4 text-right">
                                             <div className="flex items-center justify-end gap-2">
