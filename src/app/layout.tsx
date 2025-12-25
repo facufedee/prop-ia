@@ -73,7 +73,7 @@ export const metadata: Metadata = {
     canonical: 'https://prop-ia.com',
   },
   category: 'business',
-  category: 'business',
+
   verification: {
     google: 'verification_token', // Placeholder
   },
