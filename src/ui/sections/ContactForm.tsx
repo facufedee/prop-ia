@@ -1,7 +1,8 @@
 "use client";
 
 import { useState } from "react";
-import { Mail, Phone, Building, MessageSquare, Send, CheckCircle } from "lucide-react";
+import { Mail, Building, MessageSquare, Send, CheckCircle } from "lucide-react";
+import { contactService } from "@/infrastructure/services/contactService";
 
 export default function ContactForm() {
     const [formData, setFormData] = useState({
@@ -18,17 +19,22 @@ export default function ContactForm() {
         e.preventDefault();
         setLoading(true);
 
-        // Simulate API call
-        await new Promise(resolve => setTimeout(resolve, 1500));
-
-        setSubmitted(true);
-        setLoading(false);
-
-        // Reset form after 3 seconds
-        setTimeout(() => {
-            setSubmitted(false);
+        try {
+            await contactService.createMessage(formData);
+            setSubmitted(true);
             setFormData({ name: "", email: "", phone: "", company: "", message: "" });
-        }, 3000);
+
+            // Reset state after 5 seconds to allow sending another message if needed
+            setTimeout(() => {
+                setSubmitted(false);
+            }, 5000);
+        } catch (error) {
+            console.error("Error sending message:", error);
+            // Optionally add error handling UI here
+            alert("Hubo un error al enviar el mensaje. Por favor intenta nuevamente.");
+        } finally {
+            setLoading(false);
+        }
     };
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
@@ -91,16 +97,7 @@ export default function ContactForm() {
                                 </div>
                             </div>
 
-                            <div className="flex items-start gap-4">
-                                <div className="w-12 h-12 bg-gradient-to-r from-green-500 to-emerald-500 rounded-xl flex items-center justify-center flex-shrink-0">
-                                    <Phone className="w-6 h-6 text-white" />
-                                </div>
-                                <div>
-                                    <h4 className="font-semibold text-gray-900 mb-1">WhatsApp</h4>
-                                    <p className="text-gray-600">+54 9 11 1234-5678</p>
-                                    <p className="text-sm text-gray-500">Lun a Vie, 9am - 6pm</p>
-                                </div>
-                            </div>
+
 
                             <div className="flex items-start gap-4">
                                 <div className="w-12 h-12 bg-gradient-to-r from-blue-500 to-cyan-500 rounded-xl flex items-center justify-center flex-shrink-0">

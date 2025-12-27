@@ -33,17 +33,48 @@ const STEPS = [
 ];
 
 const AMENITIES_LIST = [
+    "Parrilla",
+    "Apto mascotas",
+    "Apto profesional",
+    "Preinstalación de A/A",
+    "Luminoso",
+    "Laundry",
+    "Calefacción individual",
     "Gimnasio",
     "Pileta",
     "SUM",
-    "Laundry",
     "Balcón",
     "Terraza",
     "Seguridad",
-    "Parrilla",
-    "Jardín",
     "Sauna"
 ];
+
+const SERVICES_LIST = [
+    "Agua Corriente",
+    "Cloaca",
+    "Gas Natural",
+    "Internet",
+    "Electricidad",
+    "Pavimento",
+    "Teléfono",
+    "Cable"
+];
+
+const ROOMS_LIST = [
+    "Cocina",
+    "Hall",
+    "Jardín",
+    "Lavadero",
+    "Living comedor",
+    "Patio",
+    "Toilette",
+    "Escritorio",
+    "Vestidor"
+];
+
+const CONDITIONS_LIST = ["A estrenar", "Muy bueno", "Bueno", "Regular", "A refaccionar"];
+const SITUATIONS_LIST = ["Habitada", "Vacía", "Alquilada"];
+const ORIENTATIONS_LIST = ["Norte", "Sur", "Este", "Oeste", "Noreste", "Noroeste", "Sureste", "Suroeste"];
 
 interface PropertyWizardProps {
     initialData?: any;
@@ -83,10 +114,19 @@ export default function PropertyWizard({ initialData, isEditing = false }: Prope
         rooms: initialData?.rooms || '',
         bedrooms: initialData?.bedrooms || '',
         bathrooms: initialData?.bathrooms || '',
+        toilettes: initialData?.toilettes || '', // New
         garages: initialData?.garages || '',
-        amenities: initialData?.amenities || [], // New Amenities field
+        floors: initialData?.floors || '', // New
+
+        amenities: initialData?.amenities || [],
+        services: initialData?.services || [], // New
+        room_tags: initialData?.room_tags || [], // New
+
         antiquity_type: initialData?.antiquity_type || 'A estrenar',
         antiquity_years: initialData?.antiquity_years || '',
+        condition: initialData?.condition || 'Muy bueno', // New
+        situation: initialData?.situation || 'Habitada', // New
+        orientation: initialData?.orientation || 'Norte', // New
 
         // Step 4: Price
         currency: initialData?.currency || 'USD',
@@ -178,9 +218,33 @@ export default function PropertyWizard({ initialData, isEditing = false }: Prope
         });
     };
 
+    const handleServiceToggle = (service: string) => {
+        setFormData(prev => {
+            const current = (prev as any).services || [];
+            if (current.includes(service)) {
+                return { ...prev, services: current.filter((s: string) => s !== service) };
+            } else {
+                return { ...prev, services: [...current, service] };
+            }
+        });
+    };
+
+    const handleRoomTagToggle = (room: string) => {
+        setFormData(prev => {
+            const current = (prev as any).room_tags || [];
+            if (current.includes(room)) {
+                return { ...prev, room_tags: current.filter((r: string) => r !== room) };
+            } else {
+                return { ...prev, room_tags: [...current, room] };
+            }
+        });
+    };
+
     const handleProvinciaChange = async (e: React.ChangeEvent<HTMLSelectElement>) => {
         const provinciaId = e.target.value;
         const provincia = provincias.find(p => p.id === provinciaId);
+
+        console.log("Selected Province ID:", provinciaId, "Name:", provincia?.nombre);
 
         handleChange('provincia_id', provinciaId);
         handleChange('provincia', provincia?.nombre || '');
@@ -188,8 +252,14 @@ export default function PropertyWizard({ initialData, isEditing = false }: Prope
         handleChange('localidad', '');
 
         if (provinciaId) {
-            const locs = await locationService.getLocalidades(provinciaId);
-            setLocalidades(locs);
+            try {
+                const locs = await locationService.getLocalidades(provinciaId);
+                console.log(`Fetched ${locs.length} localities for province ${provinciaId}`);
+                setLocalidades(locs);
+            } catch (error) {
+                console.error("Error fetching localities manual:", error);
+                setLocalidades([]);
+            }
         } else {
             setLocalidades([]);
         }
@@ -441,6 +511,27 @@ export default function PropertyWizard({ initialData, isEditing = false }: Prope
         }
     };
 
+    const handleStepClick = (step: number) => {
+        // Allow going back always
+        if (step < currentStep) {
+            setCurrentStep(step);
+            window.scrollTo(0, 0);
+            return;
+        }
+
+        // Allow going forward only one step at a time and if current is valid
+        if (step === currentStep + 1) {
+            if (validateStep(currentStep)) {
+                setCurrentStep(step);
+                window.scrollTo(0, 0);
+            }
+        }
+
+        // You could also allow jumping forward to any step if all intermediate steps are valid,
+        // but that requires more complex validation logic. 
+        // For now, next step or back steps.
+    };
+
     // Render Steps
     const renderStep = () => {
         switch (currentStep) {
@@ -475,16 +566,26 @@ export default function PropertyWizard({ initialData, isEditing = false }: Prope
                             <div>
                                 <label className="block text-sm font-medium text-gray-700 mb-2">Tipo de propiedad</label>
                                 <select
-                                    className="w-full p-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                                    className="w-full p-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 font-sans text-base bg-white appearance-none"
                                     value={formData.property_type}
                                     onChange={(e) => handleChange('property_type', e.target.value)}
+                                    style={{ fontFamily: 'inherit' }}
                                 >
                                     <option value="Departamento">Departamento</option>
+                                    <option value="Bodega-Galpon">Bodega-Galpon</option>
+                                    <option value="Bóveda, nicho o parcela">Bóveda, nicho o parcela</option>
+                                    <option value="Cama Náutica">Cama Náutica</option>
                                     <option value="Casa">Casa</option>
+                                    <option value="Consultorio">Consultorio</option>
+                                    <option value="Depósito">Depósito</option>
+                                    <option value="Edificio">Edificio</option>
+                                    <option value="Fondo de comercio">Fondo de comercio</option>
+                                    <option value="Cochera">Cochera</option>
+                                    <option value="Hotel">Hotel</option>
+                                    <option value="Local comercial">Local comercial</option>
+                                    <option value="Oficina comercial">Oficina comercial</option>
                                     <option value="PH">PH</option>
-                                    <option value="Terreno">Terreno</option>
-                                    <option value="Local">Local</option>
-                                    <option value="Oficina">Oficina</option>
+                                    <option value="Quinta Vacacional">Quinta Vacacional</option>
                                 </select>
                             </div>
                             <div>
@@ -512,8 +613,11 @@ export default function PropertyWizard({ initialData, isEditing = false }: Prope
                                 <label className="block text-sm font-medium text-gray-700 mb-2">Buscar dirección (Autocompletar)</label>
                                 <Autocomplete
                                     onLoad={(autocomplete) => {
-                                        // Store autocomplete instance if needed
                                         (window as any).autocomplete = autocomplete;
+                                        // Restrict to Argentina
+                                        autocomplete.setComponentRestrictions({ country: "ar" });
+                                        // Also restrict types to address only
+                                        autocomplete.setTypes(["address"]);
                                     }}
                                     onPlaceChanged={async () => {
                                         const autocomplete = (window as any).autocomplete;
@@ -527,6 +631,7 @@ export default function PropertyWizard({ initialData, isEditing = false }: Prope
                                                 let calle = '';
                                                 let altura = '';
                                                 let localidadName = '';
+                                                let sublocalidadName = '';
                                                 let provinciaName = '';
 
                                                 place.address_components?.forEach((component: any) => {
@@ -537,8 +642,11 @@ export default function PropertyWizard({ initialData, isEditing = false }: Prope
                                                     if (types.includes('street_number')) {
                                                         altura = component.long_name;
                                                     }
-                                                    if (types.includes('locality') || types.includes('sublocality')) {
+                                                    if (types.includes('locality')) {
                                                         localidadName = component.long_name;
+                                                    }
+                                                    if (types.includes('sublocality')) {
+                                                        sublocalidadName = component.long_name;
                                                     }
                                                     if (types.includes('administrative_area_level_1')) {
                                                         provinciaName = component.long_name;
@@ -559,27 +667,24 @@ export default function PropertyWizard({ initialData, isEditing = false }: Prope
 
                                                 // 1. Find and Set Provincia
                                                 let provinciaId = '';
+                                                let pMatch = null;
+
                                                 if (provinciaName) {
                                                     const cleanProv = normalize(provinciaName);
 
-                                                    // Special case for CABA
+                                                    // Map common variations specifically for BsAs
                                                     if (cleanProv.includes("ciudad autonoma") || cleanProv === "caba") {
-                                                        // Find ID for CABA (usually 02)
-                                                        const p = provincias.find(p => p.id === "02" || normalize(p.nombre).includes("ciudad autonoma"));
-                                                        if (p) {
-                                                            provinciaId = p.id;
-                                                            provinciaName = p.nombre; // Update to exact name
-                                                        }
+                                                        pMatch = provincias.find(p => p.id === "02" || normalize(p.nombre).includes("ciudad autonoma"));
+                                                    } else if (cleanProv === "buenos aires") {
+                                                        pMatch = provincias.find(p => p.id === "06");
                                                     } else {
-                                                        const match = provincias.find(p => normalize(p.nombre) === cleanProv || normalize(p.nombre).includes(cleanProv) || cleanProv.includes(normalize(p.nombre)));
-                                                        if (match) {
-                                                            provinciaId = match.id;
-                                                            provinciaName = match.nombre;
-                                                        }
+                                                        pMatch = provincias.find(p => normalize(p.nombre) === cleanProv || normalize(p.nombre).includes(cleanProv) || cleanProv.includes(normalize(p.nombre)));
                                                     }
 
-                                                    if (provinciaId) {
-                                                        setFormData(prev => ({ ...prev, provincia_id: provinciaId, provincia: provinciaName }));
+                                                    if (pMatch) {
+                                                        provinciaId = pMatch.id;
+                                                        // Update province immediately
+                                                        setFormData(prev => ({ ...prev, provincia_id: provinciaId, provincia: pMatch!.nombre }));
 
                                                         // 2. Fetch Localities for this Province
                                                         try {
@@ -587,15 +692,35 @@ export default function PropertyWizard({ initialData, isEditing = false }: Prope
                                                             setLocalidades(locs);
 
                                                             // 3. Find and Set Localidad
-                                                            if (localidadName) {
-                                                                const cleanLoc = normalize(localidadName);
-                                                                const locMatch = locs.find(l => normalize(l.nombre) === cleanLoc || normalize(l.nombre).includes(cleanLoc));
+                                                            // Try locality first, then sublocality
+                                                            const targetLoc = localidadName || sublocalidadName;
+
+                                                            if (targetLoc) {
+                                                                const cleanLoc = normalize(targetLoc);
+
+                                                                // Try exact match first, then includes
+                                                                let locMatch = locs.find(l => normalize(l.nombre) === cleanLoc);
+
+                                                                // Robust fuzzy matching
+                                                                if (!locMatch) {
+                                                                    // 1. Try includes check
+                                                                    locMatch = locs.find(l => normalize(l.nombre).includes(cleanLoc) || cleanLoc.includes(normalize(l.nombre)));
+
+                                                                    // 2. Try removing common prefixes if still not found
+                                                                    if (!locMatch) {
+                                                                        const targetClean = cleanLoc.replace("partido de ", "").replace("departamento de ", "");
+                                                                        locMatch = locs.find(l => {
+                                                                            const sourceClean = normalize(l.nombre).replace("partido de ", "").replace("departamento de ", "");
+                                                                            return sourceClean === targetClean || sourceClean.includes(targetClean) || targetClean.includes(sourceClean);
+                                                                        });
+                                                                    }
+                                                                }
 
                                                                 if (locMatch) {
                                                                     setFormData(prev => ({
                                                                         ...prev,
-                                                                        localidad_id: locMatch.id,
-                                                                        localidad: locMatch.nombre
+                                                                        localidad_id: locMatch!.id,
+                                                                        localidad: locMatch!.nombre
                                                                     }));
                                                                 }
                                                             }
@@ -622,9 +747,10 @@ export default function PropertyWizard({ initialData, isEditing = false }: Prope
                             <div>
                                 <label className="block text-sm font-medium text-gray-700 mb-2">Provincia</label>
                                 <select
-                                    className="w-full p-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                                    className="w-full p-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 font-sans"
                                     value={formData.provincia_id}
                                     onChange={handleProvinciaChange}
+                                    style={{ fontFamily: 'inherit' }}
                                 >
                                     <option value="">Seleccionar...</option>
                                     {provincias.map(p => (
@@ -635,10 +761,11 @@ export default function PropertyWizard({ initialData, isEditing = false }: Prope
                             <div>
                                 <label className="block text-sm font-medium text-gray-700 mb-2">Localidad / Barrio</label>
                                 <select
-                                    className="w-full p-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                                    className="w-full p-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 font-sans"
                                     value={formData.localidad_id}
                                     onChange={handleLocalidadChange}
                                     disabled={!formData.provincia_id}
+                                    style={{ fontFamily: 'inherit' }}
                                 >
                                     <option value="">Seleccionar...</option>
                                     {localidades.map(l => (
@@ -960,7 +1087,7 @@ export default function PropertyWizard({ initialData, isEditing = false }: Prope
                 resource="propiedades"
                 limit={currentLimit}
             />
-            <StepIndicator currentStep={currentStep} totalSteps={STEPS.length} steps={STEPS} />
+            <StepIndicator currentStep={currentStep} totalSteps={STEPS.length} steps={STEPS} onStepClick={handleStepClick} />
 
             <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-6 md:p-8 mt-6">
                 {error && (

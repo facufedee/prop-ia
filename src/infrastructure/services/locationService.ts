@@ -61,12 +61,16 @@ export const locationService = {
     async getLocalidades(provinciaId: string): Promise<Localidad[]> {
         try {
             // Fetch localities for a specific province
-            const response = await fetch(`${BASE_URL}/localidades?provincia=${provinciaId}&orden=nombre&max=1000`);
+            const url = `${BASE_URL}/localidades?provincia=${provinciaId}&orden=nombre&max=5000`;
+            console.log("Fetching localities from:", url);
+
+            const response = await fetch(url);
             if (!response.ok) {
                 console.warn("⚠️ API Georef no disponible para localidades");
                 return [];
             }
             const data = await response.json();
+            console.log(`API returned ${data.localidades?.length} localities`);
             return data.localidades || [];
         } catch (error) {
             console.warn("⚠️ Error de red al cargar localidades. Continuando sin localidades.", error);

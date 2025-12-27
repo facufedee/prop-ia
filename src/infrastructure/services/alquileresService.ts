@@ -51,6 +51,16 @@ export const alquileresService = {
                 fechaFin: data.fechaFin?.toDate(),
                 createdAt: data.createdAt?.toDate(),
                 updatedAt: data.updatedAt?.toDate(),
+                historialPagos: (data.historialPagos || []).map((p: any) => ({
+                    ...p,
+                    fechaVencimiento: p.fechaVencimiento?.toDate ? p.fechaVencimiento.toDate() : (p.fechaVencimiento ? new Date(p.fechaVencimiento) : undefined),
+                    fechaPago: p.fechaPago?.toDate ? p.fechaPago.toDate() : (p.fechaPago ? new Date(p.fechaPago) : undefined),
+                })),
+                incidencias: (data.incidencias || []).map((i: any) => ({
+                    ...i,
+                    fechaCreacion: i.fechaCreacion?.toDate ? i.fechaCreacion.toDate() : (i.fechaCreacion ? new Date(i.fechaCreacion) : undefined),
+                    fechaResolucion: i.fechaResolucion?.toDate ? i.fechaResolucion.toDate() : (i.fechaResolucion ? new Date(i.fechaResolucion) : undefined),
+                })),
             } as Alquiler;
         }
         return null;
@@ -69,10 +79,33 @@ export const alquileresService = {
         return docRef.id;
     },
 
+
     // Update contract
     updateAlquiler: async (id: string, updates: Partial<Alquiler>): Promise<void> => {
         if (!db) throw new Error("Firestore not initialized");
         const docRef = doc(db, COLLECTION, id);
+
+        // Helper for deep cleaning
+        const deepCleanUndefined = (obj: any): any => {
+            if (Array.isArray(obj)) {
+                return obj.map(v => deepCleanUndefined(v));
+            }
+            if (obj && typeof obj === 'object') {
+                // If it's a Firestore Timestamp or Date, return as is
+                if (obj instanceof Date || (obj.toDate && typeof obj.toDate === 'function') || (obj.seconds && obj.nanoseconds)) {
+                    return obj;
+                }
+                return Object.entries(obj).reduce((acc, [key, value]) => {
+                    const cleaned = deepCleanUndefined(value);
+                    if (cleaned !== undefined) {
+                        acc[key] = cleaned;
+                    }
+                    return acc;
+                }, {} as any);
+            }
+            return obj;
+        };
+
         const updateData: any = {
             ...updates,
             updatedAt: Timestamp.now(),
@@ -85,7 +118,9 @@ export const alquileresService = {
             updateData.fechaFin = Timestamp.fromDate(new Date(updates.fechaFin));
         }
 
-        await updateDoc(docRef, updateData);
+        const sanitizedData = deepCleanUndefined(updateData);
+
+        await updateDoc(docRef, sanitizedData);
     },
 
     // Delete contract
@@ -99,13 +134,24 @@ export const alquileresService = {
         const alquiler = await alquileresService.getAlquilerById(alquilerId);
         if (!alquiler) throw new Error("Contrato no encontrado");
 
+        // Helper to remove undefined values which Firestore rejects
+        const cleanUndefined = (obj: any) => {
+            return Object.entries(obj).reduce((acc, [key, value]) => {
+                if (value !== undefined) {
+                    acc[key] = value;
+                }
+                return acc;
+            }, {} as any);
+        };
+
+        const pagoSanitizado = cleanUndefined(pago);
         const historialActualizado = [...alquiler.historialPagos];
         const index = historialActualizado.findIndex(p => p.id === pago.id);
 
         if (index >= 0) {
-            historialActualizado[index] = pago;
+            historialActualizado[index] = pagoSanitizado;
         } else {
-            historialActualizado.push(pago);
+            historialActualizado.push(pagoSanitizado);
         }
 
         await alquileresService.updateAlquiler(alquilerId, {

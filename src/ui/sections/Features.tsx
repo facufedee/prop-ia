@@ -86,7 +86,7 @@ export default function Features() {
           <h2 className="text-4xl md:text-5xl font-bold text-gray-900 mb-6">
             Todo lo que necesitas para
             <span className="block bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent">
-              hacer crecer tu inmobiliaria
+              hacer crecer tu inmobiliaria en Argentina
             </span>
           </h2>
           <p className="text-xl text-gray-600 max-w-3xl mx-auto">

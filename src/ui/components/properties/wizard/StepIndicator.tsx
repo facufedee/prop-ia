@@ -1,21 +1,22 @@
 "use client";
 
-import { Check } from "lucide-react";
+
 
 interface StepIndicatorProps {
     currentStep: number;
     totalSteps: number;
     steps: string[];
+    onStepClick?: (step: number) => void;
 }
 
-export default function StepIndicator({ currentStep, totalSteps, steps }: StepIndicatorProps) {
+export default function StepIndicator({ currentStep, totalSteps, steps, onStepClick }: StepIndicatorProps) {
     return (
-        <div className="w-full py-6">
+        <div className="w-full py-6 px-4">
             <div className="flex items-center justify-between relative">
-                {/* Progress Bar Background */}
-                <div className="absolute left-0 top-1/2 transform -translate-y-1/2 w-full h-1 bg-gray-200 -z-10 rounded-full"></div>
+                {/* Background Line */}
+                <div className="absolute left-0 top-1/2 transform -translate-y-1/2 w-full h-1 bg-indigo-50 -z-10 rounded-full"></div>
 
-                {/* Active Progress Bar */}
+                {/* Active Progress Line */}
                 <div
                     className="absolute left-0 top-1/2 transform -translate-y-1/2 h-1 bg-indigo-600 -z-10 rounded-full transition-all duration-300 ease-in-out"
                     style={{ width: `${((currentStep - 1) / (totalSteps - 1)) * 100}%` }}
@@ -27,16 +28,26 @@ export default function StepIndicator({ currentStep, totalSteps, steps }: StepIn
                     const isCompleted = stepNumber < currentStep;
 
                     return (
-                        <div key={index} className="flex flex-col items-center">
+                        <div
+                            key={index}
+                            className={`flex flex-col items-center relative group ${onStepClick ? 'cursor-pointer' : ''}`}
+                            onClick={() => onStepClick && onStepClick(stepNumber)}
+                        >
                             <div
-                                className={`w-8 h-8 rounded-full flex items-center justify-center border-2 transition-all duration-300 bg-white
-                                ${isActive ? 'border-indigo-600 text-indigo-600 font-bold scale-110' :
-                                        isCompleted ? 'border-indigo-600 bg-indigo-600 text-white' : 'border-gray-300 text-gray-400'}
-                                `}
+                                className={`w-10 h-10 rounded-full flex items-center justify-center border-2 text-sm font-bold transition-all duration-300 z-10
+                                ${isActive
+                                        ? 'bg-indigo-600 text-white border-indigo-600 ring-4 ring-indigo-100 shadow-lg scale-110'
+                                        : isCompleted
+                                            ? 'bg-white text-gray-700 border-gray-300 font-medium'
+                                            : 'bg-white text-gray-400 border-gray-200'
+                                    }`}
                             >
-                                {isCompleted ? <Check size={16} /> : stepNumber}
+                                {stepNumber}
                             </div>
-                            <span className={`text-xs mt-2 font-medium ${isActive ? 'text-indigo-700' : 'text-gray-500'}`}>
+                            <span
+                                className={`absolute top-12 text-xs font-semibold whitespace-nowrap transition-colors duration-300
+                                ${isActive ? 'text-indigo-700' : 'text-gray-400'}`}
+                            >
                                 {step}
                             </span>
                         </div>

@@ -8,10 +8,10 @@ const inter = Inter({ subsets: ['latin'] });
 export const metadata: Metadata = {
   metadataBase: new URL('https://prop-ia.com'),
   title: {
-    default: 'PROP-IA | Plataforma de Gestión Inmobiliaria con IA',
-    template: '%s | PROP-IA'
+    default: 'PROP-IA | Plataforma de Gestión Inmobiliaria en Argentina',
+    template: '%s | PROP-IA Argentina'
   },
-  description: 'Revoluciona tu inmobiliaria con PROP-IA. Tasaciones automáticas con IA, CRM inmobiliario integral, publicación multiplataforma y reportes inteligentes. La herramienta definitiva para martilleros y corredores en Argentina.',
+  description: 'Revoluciona tu inmobiliaria en Argentina con PROP-IA. Tasaciones automáticas con IA y CRM inteligente diseñado para el mercado argentino. Gestión de alquileres, ventas y clientes en un solo lugar.',
   keywords: [
     'inmobiliaria',
     'tasación inmobiliaria',

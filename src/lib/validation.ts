@@ -5,7 +5,25 @@ import { z } from 'zod';
 export const propertySchema = z.object({
     title: z.string().min(5, 'El título debe tener al menos 5 caracteres').max(100, 'El título no puede exceder 100 caracteres'),
     description: z.string().min(20, 'La descripción debe tener al menos 20 caracteres').max(2000, 'La descripción no puede exceder 2000 caracteres'),
-    type: z.enum(['casa', 'departamento', 'terreno', 'local', 'oficina', 'otro']),
+    type: z.enum([
+        'Departamento',
+        'Bodega-Galpon',
+        'Bóveda, nicho o parcela',
+        'Cama Náutica',
+        'Casa',
+        'Consultorio',
+        'Depósito',
+        'Edificio',
+        'Fondo de comercio',
+        'Cochera',
+        'Hotel',
+        'Local comercial',
+        'Oficina comercial',
+        'PH',
+        'Quinta Vacacional',
+        'Terreno', // Keeping Terreno just in case legacy data exists or user forgot it (it was in previous validation)
+        'Otro'
+    ]),
     operation: z.enum(['venta', 'alquiler', 'alquiler_temporal']),
     price: z.number().positive('El precio debe ser mayor a 0').max(999999999, 'Precio inválido'),
     currency: z.enum(['ARS', 'USD']),

@@ -35,29 +35,55 @@ export default function Chat() {
     { id: "3", title: "Descripción Venta", date: "22 Nov", preview: "Generar texto para..." },
   ];
 
-  const handleSend = () => {
-    if (!input.trim()) return;
+  const [loading, setLoading] = useState(false);
 
-    const newMessage: Message = {
+  const handleSend = async () => {
+    if (!input.trim() || loading) return;
+
+    const userMessage: Message = {
       id: crypto.randomUUID(),
       sender: "user",
       content: input,
       time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
     };
 
-    setMessages((prev) => [...prev, newMessage]);
+    setMessages((prev) => [...prev, userMessage]);
     setInput("");
+    setLoading(true);
 
-    // Simulate AI response
-    setTimeout(() => {
+    try {
+      const response = await fetch("/api/chat", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          messages: [...messages, userMessage]
+        })
+      });
+
+      if (!response.ok) throw new Error("Error en la respuesta del asistente");
+
+      const data = await response.json();
+
       const aiResponse: Message = {
         id: crypto.randomUUID(),
         sender: "assistant",
-        content: "Entendido. Como soy una demo, no puedo procesar esa solicitud real todavía, pero pronto estaré conectado a nuestros workflows de IA para ayudarte automáticamente.",
+        content: data.content,
         time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
       };
+
       setMessages((prev) => [...prev, aiResponse]);
-    }, 1000);
+    } catch (error) {
+      console.error("Chat error:", error);
+      const errorMsg: Message = {
+        id: crypto.randomUUID(),
+        sender: "assistant",
+        content: "Lo siento, tuve un problema al procesar tu solicitud. Por favor intenta de nuevo.",
+        time: new Date().toLocaleTimeString()
+      };
+      setMessages((prev) => [...prev, errorMsg]);
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -86,8 +112,8 @@ export default function Chat() {
                 key={chat.id}
                 onClick={() => setActiveChat(chat.id)}
                 className={`w-full text-left p-3 rounded-xl transition-all ${activeChat === chat.id
-                    ? "bg-white shadow-sm border border-gray-200"
-                    : "hover:bg-gray-200/50"
+                  ? "bg-white shadow-sm border border-gray-200"
+                  : "hover:bg-gray-200/50"
                   }`}
               >
                 <div className="flex justify-between items-start mb-1">
@@ -140,8 +166,8 @@ export default function Chat() {
               <div className={`flex flex-col ${msg.sender === "user" ? "items-end" : "items-start"}`}>
                 <div
                   className={`p-4 rounded-2xl shadow-sm text-sm leading-relaxed ${msg.sender === "user"
-                      ? "bg-black text-white rounded-tr-none"
-                      : "bg-white border border-gray-100 text-gray-800 rounded-tl-none"
+                    ? "bg-black text-white rounded-tr-none"
+                    : "bg-white border border-gray-100 text-gray-800 rounded-tl-none"
                     }`}
                 >
                   {msg.content}
@@ -165,16 +191,18 @@ export default function Chat() {
               value={input}
               onChange={(e) => setInput(e.target.value)}
               onKeyDown={(e) => e.key === 'Enter' && handleSend()}
-              placeholder="Escribe tu mensaje aquí..."
-              className="flex-1 bg-transparent border-none focus:ring-0 text-gray-900 placeholder-gray-400"
+              placeholder={loading ? "Escribiendo..." : "Escribe tu mensaje aquí..."}
+              disabled={loading}
+              className="flex-1 bg-transparent border-none focus:ring-0 text-gray-900 placeholder-gray-400 disabled:opacity-50"
             />
 
             {input.trim() ? (
               <button
                 onClick={handleSend}
-                className="p-2 bg-black text-white rounded-xl hover:bg-gray-800 transition shadow-md"
+                disabled={loading}
+                className="p-2 bg-black text-white rounded-xl hover:bg-gray-800 transition shadow-md disabled:opacity-50"
               >
-                <Send className="w-5 h-5" />
+                {loading ? <div className="w-5 h-5 rounded-full border-2 border-white border-t-transparent animate-spin" /> : <Send className="w-5 h-5" />}
               </button>
             ) : (
               <button className="p-2 text-gray-400 hover:text-black hover:bg-gray-100 rounded-xl transition">

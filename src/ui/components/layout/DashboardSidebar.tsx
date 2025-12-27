@@ -51,6 +51,7 @@ const MENU_ITEMS = [
   { href: "/dashboard/soporte/ticketera", label: "Ticketera", icon: Ticket, adminOnly: true },
   { href: "/dashboard/bitacora", label: "Bitácora", icon: ScrollText, adminOnly: true },
   { href: "/catalogo", label: "Mi Suscripción", icon: CreditCard },
+  { href: "/dashboard/admin/mensajes", label: "Mensajes", icon: MessageSquare, adminOnly: true },
   { href: "/dashboard/admin", label: "Gestión Plataforma", icon: Shield, adminOnly: true },
   { href: "/dashboard/configuracion", label: "Configuración", icon: Settings },
   { href: "/dashboard/configuracion/roles", label: "Roles y Permisos", icon: Shield, adminOnly: true },

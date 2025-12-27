@@ -7,10 +7,12 @@ interface Property {
     id: string;
     direccion: string;
     property_type: string;
+    price?: number;
+    currency?: string;
 }
 
 interface PropertySelectorProps {
-    onSelect: (propertyId: string, direccion: string, tipo: string) => void;
+    onSelect: (propertyId: string, direccion: string, tipo: string, price?: number, currency?: string) => void;
     selectedId?: string;
 }
 
@@ -39,6 +41,8 @@ export default function PropertySelector({ onSelect, selectedId }: PropertySelec
                     id: doc.id,
                     direccion: `${doc.data().calle} ${doc.data().altura}, ${doc.data().localidad}`,
                     property_type: doc.data().property_type,
+                    price: doc.data().price,
+                    currency: doc.data().currency,
                 }));
 
                 setProperties(props);
@@ -56,7 +60,7 @@ export default function PropertySelector({ onSelect, selectedId }: PropertySelec
         const propId = e.target.value;
         const prop = properties.find(p => p.id === propId);
         if (prop) {
-            onSelect(prop.id, prop.direccion, prop.property_type);
+            onSelect(prop.id, prop.direccion, prop.property_type, prop.price, prop.currency);
         }
     };
 

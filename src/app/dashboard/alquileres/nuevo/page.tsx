@@ -47,13 +47,17 @@ export default function NuevoAlquilerPage() {
         fechaFin: "",
         montoMensual: "",
         diaVencimiento: "10",
-        ajusteTipo: "porcentaje" as 'porcentaje' | 'ICL' | 'manual',
+        ajusteTipo: "porcentaje" as 'porcentaje' | 'ICL' | 'IPC' | 'manual',
         ajusteValor: "0",
+        tasaPunitorios: "1", // Default 1%
         estadoInmueble: "",
     });
 
-    const handlePropertySelect = (id: string, direccion: string, tipo: string) => {
+    const handlePropertySelect = (id: string, direccion: string, tipo: string, price?: number, currency?: string) => {
         setSelectedProperty({ id, direccion, tipo });
+        if (price) {
+            setContractData(prev => ({ ...prev, montoMensual: price.toString() }));
+        }
     };
 
     const handleTenantSubmit = async (data: TenantFormData) => {
@@ -139,6 +143,7 @@ export default function NuevoAlquilerPage() {
                 fechaFin: new Date(contractData.fechaFin),
                 montoMensual: parseFloat(contractData.montoMensual),
                 diaVencimiento: parseInt(contractData.diaVencimiento),
+                tasaPunitorios: parseFloat(contractData.tasaPunitorios || "0"),
                 ajusteTipo: contractData.ajusteTipo,
                 ajusteValor: parseFloat(contractData.ajusteValor),
                 estadoInmueble: contractData.estadoInmueble,
@@ -392,18 +397,21 @@ export default function NuevoAlquilerPage() {
 
                             <div>
                                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                                    Monto Mensual *
+                                    Monto Mensual * (Valor visual aprox: {contractData.montoMensual ? `$${new Intl.NumberFormat('es-AR').format(Number(contractData.montoMensual))}` : ''})
                                 </label>
-                                <input
-                                    type="number"
-                                    required
-                                    min="0"
-                                    step="0.01"
-                                    className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
-                                    value={contractData.montoMensual}
-                                    onChange={(e) => handleContractChange("montoMensual", e.target.value)}
-                                    placeholder="0.00"
-                                />
+                                <div className="relative">
+                                    <span className="absolute left-3 top-3 text-gray-500">$</span>
+                                    <input
+                                        type="number"
+                                        required
+                                        min="0"
+                                        className="w-full p-3 pl-8 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                                        value={contractData.montoMensual}
+                                        onChange={(e) => handleContractChange("montoMensual", e.target.value)}
+                                        placeholder="0"
+                                    />
+                                </div>
+                                <p className="text-xs text-gray-400 mt-1">Escribí solo números. Nosotros le ponemos los puntos visualmente.</p>
                             </div>
 
                             <div>
@@ -423,6 +431,27 @@ export default function NuevoAlquilerPage() {
 
                             <div>
                                 <label className="block text-sm font-medium text-gray-700 mb-2">
+                                    Punitorios por Mora (%) *
+                                </label>
+                                <div className="flex gap-2 items-center">
+                                    <input
+                                        type="number"
+                                        required
+                                        min="0"
+                                        step="0.1"
+                                        className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                                        value={contractData.tasaPunitorios}
+                                        onChange={(e) => handleContractChange("tasaPunitorios", e.target.value)}
+                                        placeholder="1"
+                                    />
+                                    <span className="text-sm text-gray-500 whitespace-nowrap">diario sobre el monto</span>
+                                </div>
+                            </div>
+
+                            <div className="hidden md:block"></div> {/* Spacer */}
+
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-2">
                                     Tipo de Ajuste *
                                 </label>
                                 <select
@@ -431,9 +460,10 @@ export default function NuevoAlquilerPage() {
                                     value={contractData.ajusteTipo}
                                     onChange={(e) => handleContractChange("ajusteTipo", e.target.value)}
                                 >
-                                    <option value="porcentaje">Porcentaje</option>
-                                    <option value="ICL">ICL</option>
-                                    <option value="manual">Manual</option>
+                                    <option value="porcentaje">Porcentaje Fijo</option>
+                                    <option value="ICL">ICL (Índice Contratos Locación)</option>
+                                    <option value="IPC">IPC (Índice Precios Consumidor)</option>
+                                    <option value="manual">Manual / Otro</option>
                                 </select>
                             </div>
 
@@ -448,7 +478,11 @@ export default function NuevoAlquilerPage() {
                                     value={contractData.ajusteValor}
                                     onChange={(e) => handleContractChange("ajusteValor", e.target.value)}
                                     placeholder="0"
+                                    disabled={contractData.ajusteTipo === 'ICL' || contractData.ajusteTipo === 'IPC'}
                                 />
+                                {(contractData.ajusteTipo === 'ICL' || contractData.ajusteTipo === 'IPC') && (
+                                    <p className="text-xs text-gray-400 mt-1">El valor se calculará automáticamente según el índice.</p>
+                                )}
                             </div>
 
                             <div className="md:col-span-2">

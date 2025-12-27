@@ -24,7 +24,23 @@ const initialFormState: PropertyData = {
     all_features: '',
 };
 
-const propertyTypeOptions = ["Departamento", "Casa", "PH"];
+const propertyTypeOptions = [
+    "Departamento",
+    "Bodega-Galpon",
+    "Bóveda, nicho o parcela",
+    "Cama Náutica",
+    "Casa",
+    "Consultorio",
+    "Depósito",
+    "Edificio",
+    "Fondo de comercio",
+    "Cochera",
+    "Hotel",
+    "Local comercial",
+    "Oficina comercial",
+    "PH",
+    "Quinta Vacacional"
+];
 
 const commonFeatures = [
     "pileta", "sum", "seguridad", "cochera", "balcon", "terraza", "jardin", "gimnasio", "laundry", "calefaccion"
@@ -203,7 +219,7 @@ export default function PropertyForm() {
                 value={(form as any)[name] || ''}
                 onChange={(e) => onChange ? onChange(e.target.value) : handleChange(e)}
                 disabled={disabled}
-                className="w-full border bg-gray-50 pl-10 p-3 rounded-xl text-black focus:ring-2 focus:ring-black focus:bg-white transition-all appearance-none disabled:bg-gray-100 disabled:text-gray-400 min-h-[44px]"
+                className="w-full border bg-gray-50 pl-10 p-3 rounded-xl text-black focus:ring-2 focus:ring-black focus:bg-white transition-all appearance-none disabled:bg-gray-100 disabled:text-gray-400 min-h-[44px] font-sans"
             >
                 <option value="">{disabled ? `Selecciona ${label.toLowerCase()} primero` : label}</option>
                 {options.map(option => (

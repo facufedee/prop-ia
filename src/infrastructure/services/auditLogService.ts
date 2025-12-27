@@ -50,15 +50,20 @@ export const auditLogService = {
 
     // Obtener logs con filtros
     getLogs: async (
-        organizationId: string,
+        organizationId: string | null, // Allow null for Admin view
         filters?: LogFilter,
-        limitCount: number = 100
-    ): Promise<AuditLog[]> => {
+        limitCount: number = 100,
+        lastVisible?: unknown // QueryDocumentSnapshot
+    ): Promise<{ logs: AuditLog[], lastVisible: unknown }> => {
         const constraints: QueryConstraint[] = [
-            where("organizationId", "==", organizationId),
             orderBy("timestamp", "desc"),
             limit(limitCount)
         ];
+
+        // Only filter by organization if provided
+        if (organizationId) {
+            constraints.push(where("organizationId", "==", organizationId));
+        }
 
         // Aplicar filtros
         if (filters?.userId) {
@@ -80,6 +85,11 @@ export const auditLogService = {
             constraints.push(where("timestamp", "<=", Timestamp.fromDate(filters.endDate)));
         }
 
+        // Pagination
+        if (lastVisible) {
+            constraints.push(startAfter(lastVisible));
+        }
+
         const q = query(collection(db, LOGS_COLLECTION), ...constraints);
         const snapshot = await getDocs(q);
 
@@ -99,7 +109,9 @@ export const auditLogService = {
             );
         }
 
-        return logs;
+        const lastVisibleDoc = snapshot.docs[snapshot.docs.length - 1];
+
+        return { logs, lastVisible: lastVisibleDoc };
     },
 
     // Helpers para crear logs específicos

@@ -46,11 +46,11 @@ export function middleware(request: NextRequest) {
     // IMPORTANT: For production, you might need to refine 'img-src' etc depending on where user content comes from.
     const cspHeader = `
     default-src 'self';
-    script-src 'self' 'unsafe-eval' 'unsafe-inline' https://apis.google.com https://*.firebaseapp.com https://*.googleapis.com;
+    script-src 'self' 'unsafe-eval' 'unsafe-inline' https://apis.google.com https://*.firebaseapp.com https://*.googleapis.com https://maps.googleapis.com https://maps.gstatic.com;
     style-src 'self' 'unsafe-inline' https://fonts.googleapis.com;
-    img-src 'self' blob: data: https://*.googleusercontent.com https://*.googleapis.com;
+    img-src 'self' blob: data: https://*.googleusercontent.com https://*.googleapis.com https://maps.gstatic.com https://maps.googleapis.com;
     font-src 'self' https://fonts.gstatic.com;
-    connect-src 'self' https://*.googleapis.com https://*.firebaseio.com https://*.cloudfunctions.net;
+    connect-src 'self' https://*.googleapis.com https://*.firebaseio.com https://*.cloudfunctions.net https://apis.datos.gob.ar;
     frame-src 'self' https://*.firebaseapp.com;
     object-src 'none';
     base-uri 'self';

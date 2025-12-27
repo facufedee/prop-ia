@@ -7,35 +7,36 @@ export default function Footer() {
             <div className="max-w-7xl mx-auto px-6">
                 <div className="grid grid-cols-1 md:grid-cols-4 gap-12 mb-12">
                     <div className="space-y-4">
-                        <h3 className="text-2xl font-bold text-white">PROP-IA</h3>
+                        <img
+                            src="/assets/img/logo_web_propia_fondoNegro.png"
+                            alt="PROP-IA"
+                            className="h-10 w-auto"
+                        />
                         <p className="text-gray-400 text-sm leading-relaxed">
-                            La plataforma de inteligencia artificial líder para tasaciones inmobiliarias en Argentina.
+                            La plataforma integral para inmobiliarias modernas. Tasaciones con IA, gestión de alquileres, CRM y sitios web automáticos. Todo lo que necesitas para escalar tu negocio en un solo lugar.
                         </p>
                         <div className="flex gap-4">
-                            <a href="#" aria-label="Facebook" className="text-gray-400 hover:text-white transition"><Facebook className="w-5 h-5" /></a>
-                            <a href="#" aria-label="Twitter" className="text-gray-400 hover:text-white transition"><Twitter className="w-5 h-5" /></a>
-                            <a href="#" aria-label="Instagram" className="text-gray-400 hover:text-white transition"><Instagram className="w-5 h-5" /></a>
-                            <a href="#" aria-label="LinkedIn" className="text-gray-400 hover:text-white transition"><Linkedin className="w-5 h-5" /></a>
+                            <a href="https://instagram.com/propia.argentina" target="_blank" rel="noopener noreferrer" aria-label="Instagram" className="text-gray-400 hover:text-white transition"><Instagram className="w-5 h-5" /></a>
+                            <a href="https://www.linkedin.com/company/propia-arg" target="_blank" rel="noopener noreferrer" aria-label="LinkedIn" className="text-gray-400 hover:text-white transition"><Linkedin className="w-5 h-5" /></a>
                         </div>
                     </div>
 
                     <div>
                         <h4 className="font-bold text-white mb-4">Producto</h4>
                         <ul className="space-y-2 text-sm text-gray-400">
-                            <li><Link href="/#features" className="hover:text-white transition">Características</Link></li>
-                            <li><Link href="/#pricing" className="hover:text-white transition">Precios</Link></li>
-                            <li><Link href="/dashboard/tasacion" className="hover:text-white transition">Tasador IA</Link></li>
-                            <li><Link href="/api-docs" className="hover:text-white transition">API</Link></li>
+                            <li><Link href="/#features" className="hover:text-white transition">Gestión de Propiedades</Link></li>
+                            <li><Link href="/#features" className="hover:text-white transition">CRM Inmobiliario</Link></li>
+                            <li><Link href="/#features" className="hover:text-white transition">Contratos Digitales</Link></li>
+                            <li><Link href="/#features" className="hover:text-white transition">Agenda Inteligente</Link></li>
                         </ul>
                     </div>
 
                     <div>
                         <h4 className="font-bold text-white mb-4">Compañía</h4>
                         <ul className="space-y-2 text-sm text-gray-400">
-                            <li><Link href="/about" className="hover:text-white transition">Sobre Nosotros</Link></li>
+                            <li><Link href="/" className="hover:text-white transition">Inicio</Link></li>
                             <li><Link href="/blog" className="hover:text-white transition">Blog</Link></li>
-                            <li><Link href="/careers" className="hover:text-white transition">Carreras</Link></li>
-                            <li><Link href="/contact" className="hover:text-white transition">Contacto</Link></li>
+                            <li><Link href="/#contact" className="hover:text-white transition">Contacto</Link></li>
                         </ul>
                     </div>
 
@@ -54,7 +55,10 @@ export default function Footer() {
                         © {new Date().getFullYear()} PROP-IA. Todos los derechos reservados.
                     </p>
                     <div className="flex items-center gap-2 text-sm text-gray-400">
-                        <span>Hecho con ❤️ en Buenos Aires</span>
+                        <span className="text-right">
+                            Creado por ingenieros expertos en el mercado inmobiliario <br />
+                            Hecho con ❤️ en Buenos Aires, Argentina
+                        </span>
                     </div>
                 </div>
             </div>

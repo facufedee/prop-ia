@@ -22,15 +22,48 @@ export default function ContractsTable({ contracts, onDelete }: ContractsTablePr
     };
 
     const calcularProximoVencimiento = (alquiler: Alquiler) => {
-        const { vencido, diasRestantes } = alquileresService.calcularVencimiento(alquiler);
+        const hoy = new Date();
+        const currentPeriod = new Date(hoy.getFullYear(), hoy.getMonth(), 1).toISOString().slice(0, 7); // YYYY-MM
 
-        if (vencido) {
-            return <span className="text-red-600 font-medium">Vencido</span>;
+        // Check if current period is paid
+        const isCurrentPaid = alquiler.historialPagos?.some(p => p.mes === currentPeriod && p.estado === 'pagado');
+
+        let targetDate = new Date(hoy.getFullYear(), hoy.getMonth(), alquiler.diaVencimiento);
+
+        // If paid or if we are past due date but it's not strictly "vencido" in terms of logic (optional, but requested behavior is: if paid, show next)
+        // Actually, if today > due date, and NOT paid, it is Vencido.
+        // If today > due date, and PAID, we look at next month.
+
+        if (isCurrentPaid) {
+            targetDate.setMonth(targetDate.getMonth() + 1);
         }
-        if (diasRestantes <= 3) {
+
+        const diffTime = targetDate.getTime() - hoy.getTime();
+        const diasRestantes = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+
+        if (diasRestantes < 0) {
+            return <span className="text-red-600 font-medium font-bold">Vencido</span>;
+        }
+
+        if (diasRestantes === 0) {
+            return <span className="text-orange-600 font-medium">Vence hoy</span>;
+        }
+
+        if (diasRestantes <= 5) {
             return <span className="text-orange-600 font-medium">En {diasRestantes} días</span>;
         }
-        return <span className="text-gray-600">En {diasRestantes} días</span>;
+
+        // Format: 10/01/2026
+        const dateStr = targetDate.toLocaleDateString('es-AR', { day: '2-digit', month: '2-digit', year: 'numeric' });
+
+        return (
+            <div className="flex flex-col">
+                <span className="font-medium text-gray-900">{dateStr}</span>
+                <span className={`text-xs ${diasRestantes <= 5 ? 'text-orange-600 font-medium' : 'text-gray-500'}`}>
+                    {diasRestantes === 0 ? "Vence hoy" : `Faltan ${diasRestantes} días`}
+                </span>
+            </div>
+        );
     };
 
     return (

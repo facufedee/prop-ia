@@ -66,7 +66,7 @@ export default function DashboardPage() {
 
         try {
             // Run all queries in parallel for better performance
-            const [propsSnapshot, leads, recentLogs, tasacionesLogs] = await Promise.all([
+            const [propsSnapshot, leads, recentLogsData, tasacionesLogsData] = await Promise.all([
                 // 1. Properties & Value
                 getDocs(query(collection(db, "properties"), where("userId", "==", userId))),
 
@@ -93,10 +93,10 @@ export default function DashboardPage() {
 
             setStats({
                 totalProperties: propsSnapshot.size,
-                totalTasaciones: tasacionesLogs.length,
+                totalTasaciones: tasacionesLogsData.logs.length,
                 totalLeads: leads.length,
                 totalValue: totalVal,
-                recentActivity: recentLogs
+                recentActivity: recentLogsData.logs
             });
         } catch (error) {
             console.error("Error fetching dashboard stats:", error);

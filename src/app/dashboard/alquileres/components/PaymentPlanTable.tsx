@@ -8,8 +8,11 @@ import { CheckCircle2, Clock, AlertCircle, Edit2, ExternalLink } from "lucide-re
 import PaymentEditModal from "./PaymentEditModal";
 import { whatsappService } from "@/infrastructure/services/whatsappService";
 
+import { Inquilino } from "@/domain/models/Inquilino";
+
 interface PaymentPlanTableProps {
     alquiler: Alquiler;
+    inquilino?: Inquilino | null;
     onUpdatePayment: (payment: Pago) => void;
 }
 
@@ -24,7 +27,7 @@ const WhatsAppIcon = ({ className = "w-5 h-5" }: { className?: string }) => (
     </svg>
 );
 
-export default function PaymentPlanTable({ alquiler, onUpdatePayment }: PaymentPlanTableProps) {
+export default function PaymentPlanTable({ alquiler, inquilino, onUpdatePayment }: PaymentPlanTableProps) {
     const [selectedPayment, setSelectedPayment] = useState<Pago | null>(null);
 
     const generatePeriods = () => {
@@ -46,12 +49,17 @@ export default function PaymentPlanTable({ alquiler, onUpdatePayment }: PaymentP
             if (existing) {
                 periods.push(existing);
             } else {
+                // Ensure valid day (1-28/30/31). Default to 10 if missing/invalid.
+                const day = (alquiler.diaVencimiento && alquiler.diaVencimiento > 0 && alquiler.diaVencimiento <= 31)
+                    ? alquiler.diaVencimiento
+                    : 10;
+
                 periods.push({
                     id: `proj-${periodKey}`,
                     mes: periodKey,
                     monto: alquiler.montoMensual,
                     montoAlquiler: alquiler.montoMensual,
-                    fechaVencimiento: new Date(current.getFullYear(), current.getMonth(), alquiler.diaVencimiento),
+                    fechaVencimiento: new Date(current.getFullYear(), current.getMonth(), day),
                     estado: 'pendiente',
                     detalleServicios: []
                 });
@@ -78,19 +86,36 @@ export default function PaymentPlanTable({ alquiler, onUpdatePayment }: PaymentP
     };
 
     const handleSendWhatsApp = (pago: Pago) => {
-        if (!pago || (!alquiler.telefonoInquilino && !alquiler.contactoInquilino)) {
-            alert("No hay teléfono registrado para el inquilino");
+        // Priority: Inquilino WhatsApp > Inquilino Phone > Contract Phone > Contract Contact
+        const phone = inquilino?.whatsapp || inquilino?.telefono || alquiler.telefonoInquilino || alquiler.contactoInquilino || '';
+
+        if (!pago || !phone) {
+            alert("No hay teléfono registrado para el inquilino (verifica la ficha del cliente)");
             return;
         }
         const message = whatsappService.generatePaymentMessage(alquiler, pago);
-        const phone = alquiler.telefonoInquilino || alquiler.contactoInquilino || '';
         whatsappService.sendMessage(phone, message);
     };
 
     const handleMarkAsPaid = (pago: Pago) => {
+        if (!window.confirm(`¿Estás seguro de marcar el periodo ${pago.mes} como PAGADO?\n\nEsta acción registrará la fecha de pago actual.`)) {
+            return;
+        }
         const updated: Pago = { ...pago, estado: 'pagado', fechaPago: new Date() };
         onUpdatePayment(updated);
     };
+
+    const handleRevertPayment = (pago: Pago) => {
+        if (!window.confirm(`¿Estás seguro de REVERTIR el pago del periodo ${pago.mes}?\n\nEl estado volverá a PENDIENTE.`)) {
+            return;
+        }
+
+        // Use destructuring to remove fechaPago to avoid "undefined" in Firestore
+        const { fechaPago, ...rest } = pago;
+        const updated: Pago = { ...rest, estado: 'pendiente' };
+
+        onUpdatePayment(updated);
+    }
 
     return (
         <div className="space-y-4">
@@ -174,13 +199,21 @@ export default function PaymentPlanTable({ alquiler, onUpdatePayment }: PaymentP
                                                     <WhatsAppIcon className="w-5 h-5" />
                                                 </button>
 
-                                                {!isPaid && (
+                                                {!isPaid ? (
                                                     <button
                                                         onClick={() => handleMarkAsPaid(pago)}
                                                         className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors border border-transparent hover:border-blue-100"
                                                         title="Marcar como pagado"
                                                     >
                                                         <CheckCircle2 className="w-5 h-5" />
+                                                    </button>
+                                                ) : (
+                                                    <button
+                                                        onClick={() => handleRevertPayment(pago)}
+                                                        className="p-2 text-orange-500 hover:bg-orange-50 rounded-lg transition-colors border border-transparent hover:border-orange-100"
+                                                        title="Revertir a pendiente"
+                                                    >
+                                                        <AlertCircle className="w-5 h-5" />
                                                     </button>
                                                 )}
                                             </div>

@@ -82,7 +82,7 @@ export interface Alquiler {
     fechaFin: Date;
     montoMensual: number;
     diaVencimiento: number;
-    ajusteTipo: 'porcentaje' | 'ICL' | 'manual';
+    ajusteTipo: 'porcentaje' | 'ICL' | 'IPC' | 'manual';
     ajusteValor: number;
     estadoInmueble?: string;
     tasaPunitorios?: number; // Tasa diaria por mora (default 1%)

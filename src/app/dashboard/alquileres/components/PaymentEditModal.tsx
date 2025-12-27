@@ -70,57 +70,82 @@ const CurrencyInput = ({
     );
 };
 
-const DateInput = ({ value, onChange, minDate, maxDate, className = "" }: { value?: Date, onChange: (d: Date | undefined) => void, minDate?: string, maxDate?: string, className?: string }) => {
-    const [inputValue, setInputValue] = useState("");
+import { es } from "date-fns/locale";
 
-    useEffect(() => {
-        if (value && isValid(value)) {
-            setInputValue(format(value, "dd/MM/yyyy"));
-        } else {
-            setInputValue("");
-        }
-    }, [value]);
+const DateInput = ({ value, onChange, minDate, maxDate, className = "" }: { value?: Date, onChange: (d: Date | undefined) => void, minDate?: string, maxDate?: string, className?: string }) => {
+
+    // Convert Date -> YYYY-MM-DD string for input value
+    const dateToString = (date?: Date) => {
+        if (!date || !isValid(date)) return "";
+        return format(date, "yyyy-MM-dd");
+    };
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        let val = e.target.value.replace(/[^0-9/]/g, "");
-        if (val.length === 2 && !val.includes('/')) val += '/';
-        if (val.length === 5 && val.split('/').length === 2) val += '/';
+        const val = e.target.value;
+        if (!val) {
+            onChange(undefined);
+            return;
+        }
 
-        setInputValue(val);
+        // Parse YYYY-MM-DD local date (fixing timezone issues)
+        // new Date("2024-01-01") parses as UTC, which might be previous day in local time.
+        // We use parseISO (if string is ISO like) or parse from date-fns
+        // Ideally: parse(val, 'yyyy-MM-dd', new Date())
+        const parsed = parse(val, "yyyy-MM-dd", new Date());
 
-        if (val.length === 10) {
-            const parsed = parse(val, "dd/MM/yyyy", new Date());
-            if (isValid(parsed)) {
-                if (minDate && format(parsed, "yyyy-MM-dd") < minDate) {
-                    alert("Fecha anterior al mes permitido");
-                    return;
-                }
-                if (maxDate && format(parsed, "yyyy-MM-dd") > maxDate) {
-                    alert("Fecha posterior al mes permitido");
-                    return;
-                }
-                onChange(parsed);
+        if (isValid(parsed)) {
+            // Check min/max if needed
+            if (minDate && val < minDate) {
+                alert("Fecha anterior al mes permitido");
+                return;
             }
+            if (maxDate && val > maxDate) {
+                alert("Fecha posterior al mes permitido");
+                return;
+            }
+            onChange(parsed);
         }
     };
 
     return (
         <div className="relative">
             <input
-                type="text"
+                type="date"
                 className={className}
-                placeholder="dd/mm/aaaa"
-                value={inputValue}
+                value={dateToString(value)}
                 onChange={handleChange}
-                maxLength={10}
+                min={minDate}
+                max={maxDate}
             />
-            <Calendar className="absolute right-3 top-2.5 w-4 h-4 text-gray-400 pointer-events-none" />
+            {/* Calendar icon might be redundant with native picker, but user asked for "calendario" */}
+            {value && isValid(value) && (
+                <p className="text-xs text-green-600 mt-1 capitalize font-medium">
+                    {format(value, "EEEE d 'de' MMMM 'de' yyyy", { locale: es })}
+                </p>
+            )}
         </div>
     );
 };
 
 export default function PaymentEditModal({ isOpen, onClose, payment, rental, onSave }: PaymentEditModalProps) {
-    const [form, setForm] = useState<Partial<Pago>>({ ...payment });
+    // Helper to safely parse any date format (Date, string, Timestamp)
+    const toDate = (value: any): Date | undefined => {
+        if (!value) return undefined;
+        if (value instanceof Date) return value;
+        if (typeof value === 'object' && value.toDate) return value.toDate(); // Firestore Timestamp
+        if (typeof value === 'string') {
+            const parsed = parseISO(value);
+            return isValid(parsed) ? parsed : undefined;
+        }
+        return undefined;
+    };
+
+    const [form, setForm] = useState<Partial<Pago>>({
+        ...payment,
+        fechaVencimiento: toDate(payment.fechaVencimiento),
+        fechaPago: toDate(payment.fechaPago)
+    });
+
     const [services, setServices] = useState<{ concepto: string; monto: number }[]>([]);
 
     // Discount logic
@@ -132,12 +157,17 @@ export default function PaymentEditModal({ isOpen, onClose, payment, rental, onS
 
     useEffect(() => {
         if (isOpen) {
-            setForm({ ...payment });
+            setForm({
+                ...payment,
+                fechaVencimiento: toDate(payment.fechaVencimiento),
+                fechaPago: toDate(payment.fechaPago)
+            });
             setDiscountInputValue(payment.montoDescuento || 0);
             setDiscountType('amount');
 
             // Calculate initial penalty suggestion
             calculatePenalty({ ...payment });
+
 
             const currentServices = payment.detalleServicios || [];
             const mergedServices = [...currentServices];
@@ -448,8 +478,8 @@ export default function PaymentEditModal({ isOpen, onClose, payment, rental, onS
                                     <button
                                         onClick={() => setDiscountType('amount')}
                                         className={`px-2 py-0.5 text-[10px] font-medium rounded-md transition-all ${discountType === 'amount'
-                                                ? 'bg-white text-indigo-600 shadow-sm'
-                                                : 'text-gray-500 hover:text-gray-700'
+                                            ? 'bg-white text-indigo-600 shadow-sm'
+                                            : 'text-gray-500 hover:text-gray-700'
                                             }`}
                                     >
                                         $ Monto
@@ -457,8 +487,8 @@ export default function PaymentEditModal({ isOpen, onClose, payment, rental, onS
                                     <button
                                         onClick={() => setDiscountType('percent')}
                                         className={`px-2 py-0.5 text-[10px] font-medium rounded-md transition-all ${discountType === 'percent'
-                                                ? 'bg-white text-indigo-600 shadow-sm'
-                                                : 'text-gray-500 hover:text-gray-700'
+                                            ? 'bg-white text-indigo-600 shadow-sm'
+                                            : 'text-gray-500 hover:text-gray-700'
                                             }`}
                                     >
                                         % Porc

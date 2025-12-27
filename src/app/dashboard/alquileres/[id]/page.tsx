@@ -4,9 +4,11 @@ import { useState, useEffect } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { alquileresService } from "@/infrastructure/services/alquileresService";
 import { Alquiler, Pago, Incidencia } from "@/domain/models/Alquiler";
+import { inquilinosService } from "@/infrastructure/services/inquilinosService";
+import { Inquilino } from "@/domain/models/Inquilino";
 import PaymentPlanTable from "../components/PaymentPlanTable";
 import MaintenanceTab from "../components/MaintenanceTab";
-import UploadDocuments from "../components/UploadDocuments";
+
 import { contractDocxService } from "@/infrastructure/services/contractDocxService";
 import { ArrowLeft, FileText, DollarSign, Wrench, Edit, Save, X, Download, Pause, Check, MoreVertical, Trash2, AlertCircle } from "lucide-react";
 import Link from "next/link";
@@ -15,6 +17,7 @@ export default function AlquilerDetailPage() {
     const params = useParams();
     const router = useRouter();
     const [alquiler, setAlquiler] = useState<Alquiler | null>(null);
+    const [inquilino, setInquilino] = useState<Inquilino | null>(null);
     const [loading, setLoading] = useState(true);
     const [activeTab, setActiveTab] = useState<'info' | 'pagos' | 'documentos' | 'mantenimiento'>('info');
     const [isEditing, setIsEditing] = useState(false);
@@ -27,8 +30,16 @@ export default function AlquilerDetailPage() {
             try {
                 const data = await alquileresService.getAlquilerById(params.id as string);
                 setAlquiler(data);
-                // Fix: Handle null data safely. If data is null, default to empty object.
                 setEditData(data || {});
+
+                if (data?.inquilinoId) {
+                    try {
+                        const inq = await inquilinosService.getInquilinoById(data.inquilinoId);
+                        setInquilino(inq);
+                    } catch (error) {
+                        console.error("Error fetching inquilino:", error);
+                    }
+                }
             } catch (error) {
                 console.error("Error fetching contract:", error);
                 // Ensure loading is set to false even on error
@@ -152,21 +163,7 @@ export default function AlquilerDetailPage() {
         }
     };
 
-    const handleDocumentsUploaded = async (urls: string[]) => {
-        if (!alquiler) return;
 
-        try {
-            const updatedDocuments = [...alquiler.documentos, ...urls];
-            await alquileresService.updateAlquiler(alquiler.id, { documentos: updatedDocuments });
-            const updated = await alquileresService.getAlquilerById(alquiler.id);
-            if (updated) {
-                setAlquiler(updated);
-            }
-        } catch (error) {
-            console.error("Error updating documents:", error);
-            alert("Error al actualizar documentos");
-        }
-    };
 
     const handleSaveEdit = async () => {
         if (!alquiler) return;
@@ -263,7 +260,6 @@ export default function AlquilerDetailPage() {
     const tabs = [
         { id: 'info', label: 'Información', icon: FileText },
         { id: 'pagos', label: 'Pagos', icon: DollarSign },
-        { id: 'documentos', label: 'Documentos', icon: FileText },
         { id: 'mantenimiento', label: 'Mantenimiento', icon: Wrench },
     ] as const;
 
@@ -470,92 +466,60 @@ export default function AlquilerDetailPage() {
                                     </div>
                                 </div>
 
-                                {/* Datos del Inquilino - SOLO LECTURA */}
+                                {/* Datos del Inquilino - LIVE DATA */}
                                 <div>
                                     <h3 className="text-sm font-medium text-gray-500 mb-3">Datos del Inquilino</h3>
-                                    <p className="text-xs text-gray-400 mb-2">Los datos del inquilino se editan en el módulo Clientes</p>
-                                    <div className="space-y-2">
-                                        <div className="flex justify-between">
-                                            <span className="text-gray-600">Nombre:</span>
-                                            <span className="font-medium">{alquiler.nombreInquilino}</span>
+                                    <p className="text-xs text-gray-400 mb-4">
+                                        Estos datos se actualizan desde el módulo <Link href="/dashboard/clientes" className="text-indigo-600 hover:underline">Clientes</Link>
+                                    </p>
+
+                                    <div className="space-y-3">
+                                        <div className="flex justify-between items-center border-b border-gray-50 pb-2">
+                                            <span className="text-gray-600 text-sm">Nombre:</span>
+                                            <span className="font-medium text-gray-900">{inquilino?.nombre || alquiler.nombreInquilino}</span>
                                         </div>
-                                        <div className="flex justify-between">
-                                            <span className="text-gray-600">Contacto:</span>
-                                            <span className="font-medium">{alquiler.contactoInquilino}</span>
+
+                                        <div className="flex justify-between items-center border-b border-gray-50 pb-2">
+                                            <span className="text-gray-600 text-sm">DNI:</span>
+                                            <span className="font-medium text-gray-900">{inquilino?.dni || '-'}</span>
                                         </div>
+
+                                        <div className="flex justify-between items-center border-b border-gray-50 pb-2">
+                                            <span className="text-gray-600 text-sm">Teléfono:</span>
+                                            <span className="font-medium text-gray-900">{inquilino?.telefono || alquiler.contactoInquilino}</span>
+                                        </div>
+
+                                        <div className="flex justify-between items-center border-b border-gray-50 pb-2">
+                                            <span className="text-gray-600 text-sm">Email:</span>
+                                            <span className="font-medium text-gray-900">{inquilino?.email || '-'}</span>
+                                        </div>
+
+                                        {inquilino?.whatsapp && (
+                                            <div className="flex justify-between items-center border-b border-gray-50 pb-2">
+                                                <span className="text-gray-600 text-sm">WhatsApp:</span>
+                                                <span className="font-medium text-gray-900">{inquilino.whatsapp}</span>
+                                            </div>
+                                        )}
+
+
                                     </div>
-
-                                    {/* Mostrar Garante o Seguro según corresponda */}
-                                    {alquiler.tipoGarantia === 'garante' && alquiler.garante && (
-                                        <>
-                                            <h3 className="text-sm font-medium text-gray-500 mb-3 mt-6">Datos del Garante</h3>
-                                            <div className="space-y-2">
-                                                <div className="flex justify-between">
-                                                    <span className="text-gray-600">Nombre:</span>
-                                                    <span className="font-medium">{alquiler.garante.nombre}</span>
-                                                </div>
-                                                <div className="flex justify-between">
-                                                    <span className="text-gray-600">Teléfono:</span>
-                                                    <span className="font-medium">{alquiler.garante.telefono}</span>
-                                                </div>
-                                                <div className="flex justify-between">
-                                                    <span className="text-gray-600">Email:</span>
-                                                    <span className="font-medium">{alquiler.garante.email}</span>
-                                                </div>
-                                            </div>
-                                        </>
-                                    )}
-
-                                    {alquiler.tipoGarantia === 'seguro_caucion' && alquiler.seguroCaucion && (
-                                        <>
-                                            <h3 className="text-sm font-medium text-gray-500 mb-3 mt-6">🛡️ Seguro de Caución</h3>
-                                            <div className="space-y-2">
-                                                <div className="flex justify-between">
-                                                    <span className="text-gray-600">Compañía:</span>
-                                                    <span className="font-medium">{alquiler.seguroCaucion.compania}</span>
-                                                </div>
-                                                <div className="flex justify-between">
-                                                    <span className="text-gray-600">Póliza:</span>
-                                                    <span className="font-medium">{alquiler.seguroCaucion.numeroPoliza}</span>
-                                                </div>
-                                                <div className="flex justify-between">
-                                                    <span className="text-gray-600">Monto Asegurado:</span>
-                                                    <span className="font-medium">${alquiler.seguroCaucion.montoAsegurado.toLocaleString()}</span>
-                                                </div>
-                                                <div className="flex justify-between">
-                                                    <span className="text-gray-600">Vencimiento:</span>
-                                                    <span className="font-medium">{new Date(alquiler.seguroCaucion.fechaVencimiento).toLocaleDateString()}</span>
-                                                </div>
-                                                <div className="flex justify-between">
-                                                    <span className="text-gray-600">Contacto:</span>
-                                                    <span className="font-medium">{alquiler.seguroCaucion.contactoCompania}</span>
-                                                </div>
-                                            </div>
-                                        </>
-                                    )}
                                 </div>
                             </div>
                         </div>
                     </div>
                 )}
 
-                {activeTab === 'pagos' && (
+                {activeTab === 'pagos' && alquiler && (
                     <div className="space-y-6">
                         <PaymentPlanTable
                             alquiler={alquiler}
+                            inquilino={inquilino}
                             onUpdatePayment={handleUpdatePayment}
                         />
                     </div>
                 )}
 
-                {activeTab === 'documentos' && (
-                    <UploadDocuments
-                        alquilerId={alquiler.id}
-                        inquilinoId={alquiler.inquilinoId}
-                        onDocumentsUploaded={handleDocumentsUploaded}
-                        existingDocuments={alquiler.documentos}
-                    />
-                )}
+
 
                 {activeTab === 'mantenimiento' && (
                     <MaintenanceTab

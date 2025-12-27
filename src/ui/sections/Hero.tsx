@@ -21,7 +21,7 @@ export default function Hero() {
         <div className="inline-flex items-center gap-2 px-4 py-1.5 bg-white border border-indigo-100 rounded-full shadow-sm mb-8 animate-fade-in hover:scale-105 transition-transform cursor-default">
           <Sparkles className="w-4 h-4 text-indigo-600" />
           <span className="text-sm font-medium text-gray-800">
-            La revolución del Real Estate con IA
+            La revolución del Real Estate en Buenos Aires - Argentina 🇦🇷
           </span>
         </div>
 

@@ -11,6 +11,12 @@ export default function BitacoraPage() {
     const [loading, setLoading] = useState(true);
     const [showFilters, setShowFilters] = useState(false);
 
+    // Pagination State
+    const [lastVisible, setLastVisible] = useState<unknown>(null);
+    const [pageStack, setPageStack] = useState<unknown[]>([]); // Stack of "lastVisible" for previous pages
+    const [pageNumber, setPageNumber] = useState(1);
+    const LIMIT = 50;
+
     const [filters, setFilters] = useState({
         module: "",
         action: "",
@@ -22,16 +28,36 @@ export default function BitacoraPage() {
     });
 
     useEffect(() => {
+        // Initial fetch logic: 
+        // When using pagination, the first fetch has NO startAfterDoc.
         fetchLogs();
     }, []);
 
-    const fetchLogs = async () => {
+    const fetchLogs = async (startAfterDoc: unknown = null, isNextPage: boolean = false, isPrevPage: boolean = false) => {
         if (!auth?.currentUser) return;
 
         try {
             setLoading(true);
-            const data = await auditLogService.getLogs(
-                auth.currentUser.uid,
+
+            // Fetch User Role first to determine if Admin
+            const { roleService } = await import("@/infrastructure/services/roleService");
+            const { doc, getDoc } = await import("firebase/firestore");
+            const { db } = await import("@/infrastructure/firebase/client");
+
+            let isAdmin = false;
+
+            // Minimal role check logic (duplicated from Sidebar for safety/speed)
+            const userRef = doc(db, "users", auth.currentUser.uid);
+            const userSnap = await getDoc(userRef);
+            if (userSnap.exists() && userSnap.data().roleId) {
+                const role = await roleService.getRoleById(userSnap.data().roleId);
+                if (role?.name === "Administrador") {
+                    isAdmin = true;
+                }
+            }
+
+            const { logs: newLogs, lastVisible: newLastVisible } = await auditLogService.getLogs(
+                isAdmin ? null : auth.currentUser.uid, // Pass null if admin to see ALL logs
                 {
                     module: filters.module || undefined,
                     action: filters.action as LogAction || undefined,
@@ -40,14 +66,49 @@ export default function BitacoraPage() {
                     startDate: filters.startDate ? new Date(filters.startDate) : undefined,
                     endDate: filters.endDate ? new Date(filters.endDate) : undefined,
                 },
-                200
+                LIMIT,
+                startAfterDoc
             );
-            setLogs(data);
+
+            setLogs(newLogs);
+            setLastVisible(newLastVisible);
+
+            if (isNextPage && startAfterDoc) {
+                // Push the doc used to START this page to history
+                setPageStack(prev => [...prev, startAfterDoc]);
+                setPageNumber(prev => prev + 1);
+            } else if (isPrevPage) {
+                // Stack popping happens BEFORE calling fetch in handlePrevPage usually,
+                // but here we just update page number.
+                setPageNumber(prev => Math.max(1, prev - 1));
+            } else if (!startAfterDoc) {
+                // Reset / First Load
+                setPageStack([]);
+                setPageNumber(1);
+            }
+
         } catch (error) {
             console.error("Error fetching logs:", error);
         } finally {
             setLoading(false);
         }
+    };
+
+    const handleNextPage = () => {
+        if (lastVisible) {
+            const cursorToPush = lastVisible;
+            fetchLogs(cursorToPush, true);
+        }
+    };
+
+    const handlePrevPage = () => {
+        const newStack = [...pageStack];
+        newStack.pop(); // Remove cursor for current page (DocB)
+
+        const cursorForPrevPage = newStack.length > 0 ? newStack[newStack.length - 1] : null;
+
+        setPageStack(newStack);
+        fetchLogs(cursorForPrevPage, false, true); // isPrevPage=true
     };
 
     const handleFilterChange = (field: string, value: string) => {
@@ -330,6 +391,29 @@ export default function BitacoraPage() {
                             )}
                         </tbody>
                     </table>
+                </div>
+            </div>
+
+            {/* Pagination Controls */}
+            <div className="flex items-center justify-between bg-white p-4 rounded-xl border border-gray-200">
+                <div className="text-sm text-gray-500">
+                    Página {pageNumber}
+                </div>
+                <div className="flex gap-2">
+                    <button
+                        onClick={handlePrevPage}
+                        disabled={pageNumber === 1 || loading}
+                        className="px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                    >
+                        Anterior
+                    </button>
+                    <button
+                        onClick={handleNextPage}
+                        disabled={logs.length < LIMIT || loading}
+                        className="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                    >
+                        Siguiente
+                    </button>
                 </div>
             </div>
         </div>
