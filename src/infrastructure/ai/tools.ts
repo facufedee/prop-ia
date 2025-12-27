@@ -1,8 +1,8 @@
 import { db } from "@/infrastructure/firebase/client";
 import { collection, query, where, getDocs, limit, orderBy } from "firebase/firestore";
-import { SchemaType } from "@google/generative-ai";
+import { SchemaType, FunctionDeclaration } from "@google/generative-ai";
 
-export const tools = [
+export const tools: FunctionDeclaration[] = [
     {
         name: "search_properties",
         description: "Buscar propiedades en la base de datos según criterios. Usa esto cuando el usuario pregunte por inmuebles, casas, departamentos disponible, precios, etc.",

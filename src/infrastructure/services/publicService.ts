@@ -91,7 +91,7 @@ export const publicService = {
 
             if (!snap.exists()) return null;
 
-            const data = snap.data() as PublicProperty;
+            const data = snap.data() as Omit<PublicProperty, "id">;
             const agency = await publicService.getAgencyById(data.userId);
 
             return {
