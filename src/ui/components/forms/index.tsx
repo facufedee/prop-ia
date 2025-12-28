@@ -230,3 +230,4 @@ export function TextAreaInput({
 
 // Exportar todos los componentes
 export { ValidatedInput };
+export * from './MoneyInput';

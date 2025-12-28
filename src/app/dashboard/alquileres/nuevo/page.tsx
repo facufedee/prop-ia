@@ -1,19 +1,21 @@
 "use client";
 
-import { useState } from "react";
-import { useRouter } from "next/navigation";
-import { app, auth } from "@/infrastructure/firebase/client";
+import { useState, useEffect } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
+import { app, auth, db } from "@/infrastructure/firebase/client";
+import { doc, getDoc } from "firebase/firestore";
 import { alquileresService } from "@/infrastructure/services/alquileresService";
 import { inquilinosService } from "@/infrastructure/services/inquilinosService";
 import PropertySelector from "../components/PropertySelector";
-import TenantForm, { TenantFormData } from "../components/TenantForm";
+import ClientSelector from "@/ui/components/forms/ClientSelector";
 import { ChevronLeft, ChevronRight, Check } from "lucide-react";
 import { Alquiler } from "@/domain/models/Alquiler";
 import { auditLogService } from "@/infrastructure/services/auditLogService";
-import { DNIInput, CUITInput, EmailInput, PhoneInput, TextInput, CBUInput, AliasInput, TextAreaInput } from "@/ui/components/forms";
+import { TextInput, MoneyInput, TextAreaInput } from "@/ui/components/forms";
 
 export default function NuevoAlquilerPage() {
     const router = useRouter();
+    const searchParams = useSearchParams();
     const [currentStep, setCurrentStep] = useState(1);
     const [loading, setLoading] = useState(false);
 
@@ -24,22 +26,11 @@ export default function NuevoAlquilerPage() {
         tipo: "",
     });
 
-    // Step 2: Tenant
-    const [tenantData, setTenantData] = useState<TenantFormData | null>(null);
-    const [inquilinoId, setInquilinoId] = useState("");
+    // Step 2: Tenant (Now object)
+    const [selectedInquilino, setSelectedInquilino] = useState<any | null>(null);
 
-    // Step 3: Owner and Bank data
-    const [ownerData, setOwnerData] = useState({
-        nombrePropietario: "",
-        dniPropietario: "",
-        cuitPropietario: "",
-        domicilioPropietario: "",
-        emailPropietario: "",
-        telefonoPropietario: "",
-        banco: "",
-        cbu: "",
-        alias: "",
-    });
+    // Step 3: Owner (Now object)
+    const [selectedPropietario, setSelectedPropietario] = useState<any | null>(null);
 
     // Step 4: Contract details and inventory
     const [contractData, setContractData] = useState({
@@ -47,60 +38,62 @@ export default function NuevoAlquilerPage() {
         fechaFin: "",
         montoMensual: "",
         diaVencimiento: "10",
-        ajusteTipo: "porcentaje" as 'porcentaje' | 'ICL' | 'IPC' | 'manual',
+        ajusteTipo: "porcentaje" as 'porcentaje' | 'ICL' | 'IPC' | 'casa_propia' | 'manual',
         ajusteValor: "0",
-        tasaPunitorios: "1", // Default 1%
+        // punitorios
+        punitoriosTipo: "porcentaje" as 'fijo' | 'porcentaje',
+        punitoriosValor: "1",
+
+        // nuevos
+        nroPartidaInmobiliaria: "",
+        valorDeposito: "",
+        honorariosTipo: "fijo" as 'fijo' | 'porcentaje',
+        honorariosValor: "",
+        metodoPago: "",
+
         estadoInmueble: "",
     });
+
+    const [servicios, setServicios] = useState<{ [key: string]: boolean }>({
+        luz: false,
+        gas: false,
+        cochera: false,
+        wifi: false,
+        expensas: false,
+        agua: false,
+    });
+
+    // Check for createdPropertyId param
+    useEffect(() => {
+        const createdId = searchParams.get('createdPropertyId');
+        if (createdId && createdId !== selectedProperty.id) {
+            const fetchCreatedProperty = async () => {
+                try {
+                    if (!db) return;
+                    const docRef = doc(db, "properties", createdId);
+                    const docSnap = await getDoc(docRef);
+                    if (docSnap.exists()) {
+                        const data = docSnap.data();
+                        const direccion = `${data.calle} ${data.altura}, ${data.localidad}`;
+                        handlePropertySelect(createdId, direccion, data.property_type, data.price, data.currency);
+                        setCurrentStep(2); // Auto advance to Tenant step
+
+                        // Optional: Clean URL
+                        router.replace('/dashboard/alquileres/nuevo', { scroll: false });
+                    }
+                } catch (err) {
+                    console.error("Error fetching created property:", err);
+                }
+            };
+            fetchCreatedProperty();
+        }
+    }, [searchParams, router]);
+
 
     const handlePropertySelect = (id: string, direccion: string, tipo: string, price?: number, currency?: string) => {
         setSelectedProperty({ id, direccion, tipo });
         if (price) {
             setContractData(prev => ({ ...prev, montoMensual: price.toString() }));
-        }
-    };
-
-    const handleTenantSubmit = async (data: TenantFormData) => {
-        if (!auth?.currentUser) return;
-
-        try {
-            setLoading(true);
-            const id = await inquilinosService.createInquilino({
-                nombre: data.nombre,
-                email: data.email,
-                telefono: data.telefono,
-                dni: data.dni,
-                domicilio: data.domicilio,
-                datosGarante: data.datosGarante || {
-                    nombre: "",
-                    telefono: "",
-                    email: "",
-                    dni: "",
-                },
-                documentos: [],
-                userId: auth.currentUser?.uid || '',
-            });
-            setInquilinoId(id);
-            setTenantData(data);
-
-            // Log Tenant Creation
-            auditLogService.createLog(
-                auth.currentUser?.uid || '',
-                auth.currentUser?.email || '',
-                auth.currentUser?.displayName || 'Usuario',
-                'client_create',
-                'Inquilinos',
-                `Se registró al inquilino ${data.nombre}`,
-                "default-org-id",
-                { tenantId: id, name: data.nombre }
-            );
-
-            setCurrentStep(3);
-        } catch (error) {
-            console.error("Error creating tenant:", error);
-            alert("Error al crear el inquilino");
-        } finally {
-            setLoading(false);
         }
     };
 
@@ -110,40 +103,71 @@ export default function NuevoAlquilerPage() {
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
-        if (!auth?.currentUser || !tenantData) return;
+        if (!auth?.currentUser || !selectedInquilino || !selectedPropietario) return;
 
         try {
             setLoading(true);
+
+            // Use data from selected entities
+            // Inquilino
+            const inquilinoData = {
+                id: selectedInquilino.id,
+                nombre: selectedInquilino.nombre,
+                email: selectedInquilino.email,
+                telefono: selectedInquilino.telefono,
+                dni: selectedInquilino.dni,
+                cuit: selectedInquilino.cuit,
+                domicilio: selectedInquilino.domicilio,
+            };
+
+            // Propietario
+            const propietarioData = {
+                id: selectedPropietario.id,
+                nombre: selectedPropietario.nombre,
+                email: selectedPropietario.email,
+                telefono: selectedPropietario.telefono,
+                dni: selectedPropietario.dni,
+                cuit: selectedPropietario.cuit,
+                domicilio: selectedPropietario.domicilio,
+            };
 
             const alquiler: Omit<Alquiler, "id" | "createdAt" | "updatedAt"> = {
                 propiedadId: selectedProperty.id,
                 propiedadTipo: selectedProperty.tipo,
                 direccion: selectedProperty.direccion,
-                inquilinoId,
-                nombreInquilino: tenantData.nombre,
-                contactoInquilino: tenantData.email,
-                telefonoInquilino: tenantData.telefono,
-                whatsappInquilino: tenantData.whatsapp,
-                dniInquilino: tenantData.dni,
-                cuitInquilino: tenantData.cuit,
-                domicilioInquilino: tenantData.domicilio,
-                nombrePropietario: ownerData.nombrePropietario,
-                dniPropietario: ownerData.dniPropietario,
-                cuitPropietario: ownerData.cuitPropietario,
-                domicilioPropietario: ownerData.domicilioPropietario,
-                emailPropietario: ownerData.emailPropietario,
-                telefonoPropietario: ownerData.telefonoPropietario,
-                banco: ownerData.banco,
-                cbu: ownerData.cbu,
-                alias: ownerData.alias,
-                tipoGarantia: tenantData.tipoGarantia,
-                garante: tenantData.tipoGarantia === 'garante' ? tenantData.datosGarante : null,
-                seguroCaucion: tenantData.tipoGarantia === 'seguro_caucion' ? tenantData.seguroCaucion : null,
+
+                inquilinoId: inquilinoData.id,
+                nombreInquilino: inquilinoData.nombre,
+                contactoInquilino: inquilinoData.email,
+                telefonoInquilino: inquilinoData.telefono,
+                whatsappInquilino: selectedInquilino.whatsapp || inquilinoData.telefono,
+                dniInquilino: inquilinoData.dni,
+                cuitInquilino: inquilinoData.cuit,
+                domicilioInquilino: inquilinoData.domicilio,
+
+                propietarioId: propietarioData.id,
+                nombrePropietario: propietarioData.nombre,
+                dniPropietario: propietarioData.dni,
+                cuitPropietario: propietarioData.cuit,
+                domicilioPropietario: propietarioData.domicilio,
+                emailPropietario: propietarioData.email,
+                telefonoPropietario: propietarioData.telefono,
+
+                punitoriosTipo: contractData.punitoriosTipo,
+                punitoriosValor: parseFloat(contractData.punitoriosValor),
+
+                nroPartidaInmobiliaria: contractData.nroPartidaInmobiliaria,
+                valorDeposito: parseFloat(contractData.valorDeposito || "0"),
+                honorariosTipo: contractData.honorariosTipo,
+                honorariosValor: parseFloat(contractData.honorariosValor || "0"),
+                metodoPago: contractData.metodoPago,
+                serviciosAdicionales: Object.keys(servicios).filter(k => servicios[k]),
+
                 fechaInicio: new Date(contractData.fechaInicio),
                 fechaFin: new Date(contractData.fechaFin),
                 montoMensual: parseFloat(contractData.montoMensual),
                 diaVencimiento: parseInt(contractData.diaVencimiento),
-                tasaPunitorios: parseFloat(contractData.tasaPunitorios || "0"),
+                // tasaPunitorios deprecated
                 ajusteTipo: contractData.ajusteTipo,
                 ajusteValor: parseFloat(contractData.ajusteValor),
                 estadoInmueble: contractData.estadoInmueble,
@@ -177,14 +201,10 @@ export default function NuevoAlquilerPage() {
         }
     };
 
-    const handleOwnerChange = (field: string, value: string) => {
-        setOwnerData(prev => ({ ...prev, [field]: value }));
-    };
-
     const canProceed = () => {
         if (currentStep === 1) return selectedProperty.id !== "";
-        if (currentStep === 2) return tenantData !== null;
-        if (currentStep === 3) return ownerData.nombrePropietario !== "";
+        if (currentStep === 2) return selectedInquilino !== null;
+        if (currentStep === 3) return selectedPropietario !== null;
         return true;
     };
 
@@ -237,113 +257,73 @@ export default function NuevoAlquilerPage() {
                             onSelect={handlePropertySelect}
                             selectedId={selectedProperty.id}
                         />
+                        <div className="mt-6 flex justify-end">
+                            <button
+                                type="button"
+                                onClick={() => setCurrentStep(2)}
+                                disabled={!selectedProperty.id}
+                                className="px-6 py-3 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors disabled:opacity-50"
+                            >
+                                Siguiente
+                            </button>
+                        </div>
                     </div>
                 )}
 
                 {currentStep === 2 && (
                     <div>
                         <h2 className="text-lg font-semibold text-gray-900 mb-4">Datos del Inquilino</h2>
-                        <TenantForm
-                            onSubmit={handleTenantSubmit}
-                            onCancel={() => setCurrentStep(1)}
+                        <ClientSelector
+                            type="inquilinos"
+                            selectedId={selectedInquilino?.id}
+                            onSelect={(client) => setSelectedInquilino(client)}
+                            label="Buscar Inquilino existente o crear nuevo"
                         />
+                        {selectedInquilino && (
+                            <div className="mt-4 p-4 bg-gray-50 rounded-lg">
+                                <h3 className="text-sm font-medium text-gray-900 mb-2">Detalles Seleccionados:</h3>
+                                <p className="text-sm text-gray-600">Nombre: {selectedInquilino.nombre}</p>
+                                <p className="text-sm text-gray-600">DNI: {selectedInquilino.dni}</p>
+                                <p className="text-sm text-gray-600">Email: {selectedInquilino.email}</p>
+                            </div>
+                        )}
+                        <div className="mt-6 flex justify-between">
+                            <button
+                                type="button"
+                                onClick={() => setCurrentStep(1)}
+                                className="px-6 py-3 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors"
+                            >
+                                Anterior
+                            </button>
+                            <button
+                                type="button"
+                                onClick={() => setCurrentStep(3)}
+                                disabled={!canProceed()}
+                                className="px-6 py-3 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors disabled:opacity-50"
+                            >
+                                Siguiente
+                            </button>
+                        </div>
                     </div>
                 )}
 
                 {currentStep === 3 && (
                     <div>
-                        <h2 className="text-lg font-semibold text-gray-900 mb-4">Datos del Propietario y Bancarios</h2>
-
-                        <div className="space-y-6">
-                            {/* Datos del Propietario */}
-                            <div className="bg-gray-50 rounded-lg p-4">
-                                <h3 className="text-md font-medium text-gray-900 mb-4">Información del Propietario</h3>
-                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                    <div className="md:col-span-2">
-                                        <TextInput
-                                            label="Nombre Completo del Propietario"
-                                            value={ownerData.nombrePropietario}
-                                            onChange={(value) => handleOwnerChange("nombrePropietario", value)}
-                                            placeholder="Juan Pérez"
-                                            maxLength={100}
-                                            required
-                                            showCharCount={false}
-                                        />
-                                    </div>
-
-                                    <DNIInput
-                                        label="DNI del Propietario"
-                                        value={ownerData.dniPropietario}
-                                        onChange={(value) => handleOwnerChange("dniPropietario", value)}
-                                        required
-                                    />
-
-                                    <CUITInput
-                                        label="CUIT/CUIL del Propietario"
-                                        value={ownerData.cuitPropietario}
-                                        onChange={(value) => handleOwnerChange("cuitPropietario", value)}
-                                        required={false}
-                                    />
-
-                                    <EmailInput
-                                        label="Email del Propietario"
-                                        value={ownerData.emailPropietario}
-                                        onChange={(value) => handleOwnerChange("emailPropietario", value)}
-                                        required={false}
-                                    />
-
-                                    <PhoneInput
-                                        label="Teléfono del Propietario"
-                                        value={ownerData.telefonoPropietario}
-                                        onChange={(value) => handleOwnerChange("telefonoPropietario", value)}
-                                        required={false}
-                                    />
-
-                                    <div className="md:col-span-2">
-                                        <TextInput
-                                            label="Domicilio del Propietario"
-                                            value={ownerData.domicilioPropietario}
-                                            onChange={(value) => handleOwnerChange("domicilioPropietario", value)}
-                                            placeholder="Av. Corrientes 1234, CABA"
-                                            maxLength={200}
-                                            required={false}
-                                            showCharCount={false}
-                                        />
-                                    </div>
-                                </div>
+                        <h2 className="text-lg font-semibold text-gray-900 mb-4">Datos del Propietario</h2>
+                        <ClientSelector
+                            type="propietarios"
+                            selectedId={selectedPropietario?.id}
+                            onSelect={(client) => setSelectedPropietario(client)}
+                            label="Buscar Propietario existente o crear nuevo"
+                        />
+                        {selectedPropietario && (
+                            <div className="mt-4 p-4 bg-gray-50 rounded-lg">
+                                <h3 className="text-sm font-medium text-gray-900 mb-2">Detalles Seleccionados:</h3>
+                                <p className="text-sm text-gray-600">Nombre: {selectedPropietario.nombre}</p>
+                                <p className="text-sm text-gray-600">DNI: {selectedPropietario.dni}</p>
+                                <p className="text-sm text-gray-600">Email: {selectedPropietario.email}</p>
                             </div>
-
-                            {/* Datos Bancarios */}
-                            <div className="bg-gray-50 rounded-lg p-4">
-                                <h3 className="text-md font-medium text-gray-900 mb-4">Datos Bancarios para Pagos</h3>
-                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                    <TextInput
-                                        label="Banco"
-                                        value={ownerData.banco}
-                                        onChange={(value) => handleOwnerChange("banco", value)}
-                                        placeholder="Banco Galicia"
-                                        maxLength={50}
-                                        required={false}
-                                        showCharCount={false}
-                                    />
-
-                                    <AliasInput
-                                        value={ownerData.alias}
-                                        onChange={(value) => handleOwnerChange("alias", value)}
-                                        required={false}
-                                    />
-
-                                    <div className="md:col-span-2">
-                                        <CBUInput
-                                            value={ownerData.cbu}
-                                            onChange={(value) => handleOwnerChange("cbu", value)}
-                                            required={false}
-                                        />
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
+                        )}
                         <div className="mt-6 flex justify-between">
                             <button
                                 type="button"
@@ -368,124 +348,270 @@ export default function NuevoAlquilerPage() {
                     <form onSubmit={handleSubmit}>
                         <h2 className="text-lg font-semibold text-gray-900 mb-4">Datos del Contrato</h2>
 
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                            <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-2">
-                                    Fecha de Inicio *
-                                </label>
-                                <input
-                                    type="date"
-                                    required
-                                    className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
-                                    value={contractData.fechaInicio}
-                                    onChange={(e) => handleContractChange("fechaInicio", e.target.value)}
-                                />
-                            </div>
-
-                            <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-2">
-                                    Fecha de Fin *
-                                </label>
-                                <input
-                                    type="date"
-                                    required
-                                    className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
-                                    value={contractData.fechaFin}
-                                    onChange={(e) => handleContractChange("fechaFin", e.target.value)}
-                                />
-                            </div>
-
-                            <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-2">
-                                    Monto Mensual * (Valor visual aprox: {contractData.montoMensual ? `$${new Intl.NumberFormat('es-AR').format(Number(contractData.montoMensual))}` : ''})
-                                </label>
-                                <div className="relative">
-                                    <span className="absolute left-3 top-3 text-gray-500">$</span>
+                        <div className="space-y-6">
+                            {/* General */}
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                                        Fecha de Inicio *
+                                    </label>
                                     <input
-                                        type="number"
+                                        type="date"
                                         required
-                                        min="0"
-                                        className="w-full p-3 pl-8 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                                        className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                                        value={contractData.fechaInicio}
+                                        onChange={(e) => handleContractChange("fechaInicio", e.target.value)}
+                                    />
+                                </div>
+
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                                        Fecha de Fin *
+                                    </label>
+                                    <input
+                                        type="date"
+                                        required
+                                        className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                                        value={contractData.fechaFin}
+                                        onChange={(e) => handleContractChange("fechaFin", e.target.value)}
+                                    />
+                                </div>
+
+                                <div>
+                                    <MoneyInput
+                                        label="Monto Mensual"
                                         value={contractData.montoMensual}
-                                        onChange={(e) => handleContractChange("montoMensual", e.target.value)}
+                                        onChange={(val) => handleContractChange("montoMensual", val)}
+                                        required
                                         placeholder="0"
                                     />
                                 </div>
-                                <p className="text-xs text-gray-400 mt-1">Escribí solo números. Nosotros le ponemos los puntos visualmente.</p>
-                            </div>
 
-                            <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-2">
-                                    Día de Vencimiento *
-                                </label>
-                                <input
-                                    type="number"
-                                    required
-                                    min="1"
-                                    max="31"
-                                    className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
-                                    value={contractData.diaVencimiento}
-                                    onChange={(e) => handleContractChange("diaVencimiento", e.target.value)}
-                                />
-                            </div>
+                                <div>
+                                    <MoneyInput
+                                        label="Valor de Depósito"
+                                        value={contractData.valorDeposito}
+                                        onChange={(val) => handleContractChange("valorDeposito", val)}
+                                        placeholder="0"
+                                    />
+                                </div>
 
-                            <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-2">
-                                    Punitorios por Mora (%) *
-                                </label>
-                                <div className="flex gap-2 items-center">
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                                        Día de Vencimiento *
+                                    </label>
                                     <input
                                         type="number"
                                         required
-                                        min="0"
-                                        step="0.1"
+                                        min="1"
+                                        max="31"
                                         className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
-                                        value={contractData.tasaPunitorios}
-                                        onChange={(e) => handleContractChange("tasaPunitorios", e.target.value)}
-                                        placeholder="1"
+                                        value={contractData.diaVencimiento}
+                                        onChange={(e) => handleContractChange("diaVencimiento", e.target.value)}
                                     />
-                                    <span className="text-sm text-gray-500 whitespace-nowrap">diario sobre el monto</span>
+                                </div>
+
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                                        Método de Pago Preferido
+                                    </label>
+                                    <select
+                                        className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                                        value={contractData.metodoPago}
+                                        onChange={(e) => handleContractChange("metodoPago", e.target.value)}
+                                    >
+                                        <option value="">Seleccionar...</option>
+                                        <option value="transferencia">Transferencia Bancaria</option>
+                                        <option value="efectivo">Efectivo</option>
+                                        <option value="deposito">Depósito Bancario</option>
+                                        <option value="cheque">Cheque</option>
+                                        <option value="debito_automatico">Débito Automático</option>
+                                        <option value="otro">Otro</option>
+                                    </select>
                                 </div>
                             </div>
 
-                            <div className="hidden md:block"></div> {/* Spacer */}
-
-                            <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-2">
-                                    Tipo de Ajuste *
-                                </label>
-                                <select
-                                    required
-                                    className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
-                                    value={contractData.ajusteTipo}
-                                    onChange={(e) => handleContractChange("ajusteTipo", e.target.value)}
-                                >
-                                    <option value="porcentaje">Porcentaje Fijo</option>
-                                    <option value="ICL">ICL (Índice Contratos Locación)</option>
-                                    <option value="IPC">IPC (Índice Precios Consumidor)</option>
-                                    <option value="manual">Manual / Otro</option>
-                                </select>
-                            </div>
-
-                            <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-2">
-                                    Valor de Ajuste {contractData.ajusteTipo === 'porcentaje' ? '(%)' : ''}
-                                </label>
-                                <input
-                                    type="number"
-                                    step="0.01"
-                                    className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
-                                    value={contractData.ajusteValor}
-                                    onChange={(e) => handleContractChange("ajusteValor", e.target.value)}
-                                    placeholder="0"
-                                    disabled={contractData.ajusteTipo === 'ICL' || contractData.ajusteTipo === 'IPC'}
+                            {/* Partida */}
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <TextInput
+                                    label="Nro de Partida Inmobiliaria"
+                                    value={contractData.nroPartidaInmobiliaria}
+                                    onChange={(val) => handleContractChange("nroPartidaInmobiliaria", val)}
+                                    required={false}
+                                    showCharCount={false}
                                 />
-                                {(contractData.ajusteTipo === 'ICL' || contractData.ajusteTipo === 'IPC') && (
-                                    <p className="text-xs text-gray-400 mt-1">El valor se calculará automáticamente según el índice.</p>
-                                )}
                             </div>
 
-                            <div className="md:col-span-2">
+                            {/* Honorarios */}
+                            <div className="bg-gray-50 p-4 rounded-lg">
+                                <h3 className="text-sm font-medium text-gray-900 mb-4">Honorarios de Inmobiliaria</h3>
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                    <div>
+                                        <label className="block text-sm font-medium text-gray-700 mb-2">
+                                            Tipo de Honorarios
+                                        </label>
+                                        <select
+                                            className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                                            value={contractData.honorariosTipo}
+                                            onChange={(e) => handleContractChange("honorariosTipo", e.target.value)}
+                                        >
+                                            <option value="fijo">Monto Fijo</option>
+                                            <option value="porcentaje">Porcentaje Total Contrato</option>
+                                        </select>
+                                    </div>
+                                    <div>
+                                        {contractData.honorariosTipo === 'fijo' ? (
+                                            <MoneyInput
+                                                label="Monto de Honorarios"
+                                                value={contractData.honorariosValor}
+                                                onChange={(val) => handleContractChange("honorariosValor", val)}
+                                                placeholder="0"
+                                            />
+                                        ) : (
+                                            <div>
+                                                <label className="block text-sm font-medium text-gray-700 mb-2">
+                                                    Porcentaje (%)
+                                                </label>
+                                                <input
+                                                    type="number"
+                                                    step="0.1"
+                                                    className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                                                    value={contractData.honorariosValor}
+                                                    onChange={(e) => handleContractChange("honorariosValor", e.target.value)}
+                                                    placeholder="Ej: 4"
+                                                />
+                                            </div>
+                                        )}
+                                    </div>
+                                </div>
+                            </div>
+
+                            {/* Punitorios */}
+                            <div className="bg-gray-50 p-4 rounded-lg">
+                                <h3 className="text-sm font-medium text-gray-900 mb-4">Intereses Punitorios</h3>
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                    <div>
+                                        <label className="block text-sm font-medium text-gray-700 mb-2">
+                                            Tipo de Interés
+                                        </label>
+                                        <select
+                                            className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                                            value={contractData.punitoriosTipo}
+                                            onChange={(e) => handleContractChange("punitoriosTipo", e.target.value)}
+                                        >
+                                            <option value="porcentaje">Porcentaje Diario</option>
+                                            <option value="fijo">Monto Fijo Diario</option>
+                                        </select>
+                                    </div>
+                                    <div>
+                                        {contractData.punitoriosTipo === 'fijo' ? (
+                                            <MoneyInput
+                                                label="Monto Diario por Mora"
+                                                value={contractData.punitoriosValor}
+                                                onChange={(val) => handleContractChange("punitoriosValor", val)}
+                                                placeholder="0"
+                                            />
+                                        ) : (
+                                            <div>
+                                                <label className="block text-sm font-medium text-gray-700 mb-2">
+                                                    Porcentaje Diario (%)
+                                                </label>
+                                                <input
+                                                    type="number"
+                                                    step="0.01"
+                                                    className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                                                    value={contractData.punitoriosValor}
+                                                    onChange={(e) => handleContractChange("punitoriosValor", e.target.value)}
+                                                    placeholder="Ej: 0.5"
+                                                />
+                                            </div>
+                                        )}
+                                    </div>
+                                </div>
+                            </div>
+
+                            {/* Ajustes */}
+                            <div className="bg-gray-50 p-4 rounded-lg">
+                                <h3 className="text-sm font-medium text-gray-900 mb-4">Actualización / Ajuste</h3>
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                    <div>
+                                        <label className="block text-sm font-medium text-gray-700 mb-2">
+                                            Tipo de Ajuste *
+                                        </label>
+                                        <select
+                                            required
+                                            className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                                            value={contractData.ajusteTipo}
+                                            onChange={(e) => handleContractChange("ajusteTipo", e.target.value)}
+                                        >
+                                            <option value="porcentaje">Porcentaje Fijo</option>
+                                            <option value="ICL">ICL (Índice Contratos Locación)</option>
+                                            <option value="IPC">IPC (Índice Precios Consumidor)</option>
+                                            <option value="casa_propia">Índice Casa Propia</option>
+                                            <option value="manual">Otro / Manual</option>
+                                        </select>
+                                    </div>
+
+                                    {(contractData.ajusteTipo === 'porcentaje' || contractData.ajusteTipo === 'manual') && (
+                                        <div>
+                                            {contractData.ajusteTipo === 'manual' ? (
+                                                <MoneyInput
+                                                    label="Valor / Monto"
+                                                    value={contractData.ajusteValor}
+                                                    onChange={(val) => handleContractChange("ajusteValor", val)}
+                                                    placeholder="0"
+                                                />
+                                            ) : (
+                                                <>
+                                                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                                                        Valor de Ajuste (%)
+                                                    </label>
+                                                    <input
+                                                        type="number"
+                                                        step="0.01"
+                                                        className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                                                        value={contractData.ajusteValor}
+                                                        onChange={(e) => handleContractChange("ajusteValor", e.target.value)}
+                                                        placeholder="0"
+                                                    />
+                                                </>
+                                            )}
+                                        </div>
+                                    )}
+                                    {(contractData.ajusteTipo === 'ICL' || contractData.ajusteTipo === 'IPC' || contractData.ajusteTipo === 'casa_propia') && (
+                                        <div className="flex items-center text-sm text-gray-500">
+                                            El valor se calculará automáticamente según el índice seleccionado.
+                                        </div>
+                                    )}
+                                </div>
+                            </div>
+
+                            {/* Servicios */}
+                            <div className="bg-gray-50 p-4 rounded-lg">
+                                <h3 className="text-sm font-medium text-gray-900 mb-4">Servicios y Expensas a Cargo del Inquilino</h3>
+                                <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+                                    {[
+                                        { key: 'luz', label: 'Luz' },
+                                        { key: 'gas', label: 'Gas' },
+                                        { key: 'agua', label: 'Agua' },
+                                        { key: 'wifi', label: 'Internet / Wifi' },
+                                        { key: 'cochera', label: 'Cochera' },
+                                        { key: 'expensas', label: 'Expensas' },
+                                    ].map((sc) => (
+                                        <label key={sc.key} className="flex items-center gap-3 p-3 bg-white border border-gray-200 rounded-lg cursor-pointer hover:border-indigo-300">
+                                            <input
+                                                type="checkbox"
+                                                className="w-5 h-5 text-indigo-600 rounded focus:ring-indigo-500"
+                                                checked={servicios[sc.key]}
+                                                onChange={(e) => setServicios(prev => ({ ...prev, [sc.key]: e.target.checked }))}
+                                            />
+                                            <span className="text-gray-700 font-medium">{sc.label}</span>
+                                        </label>
+                                    ))}
+                                </div>
+                            </div>
+
+                            <div className="grid grid-cols-1">
                                 <TextAreaInput
                                     label="Estado del Inmueble / Inventario"
                                     value={contractData.estadoInmueble}
@@ -517,31 +643,7 @@ export default function NuevoAlquilerPage() {
                     </form>
                 )}
             </div>
-
-            {/* Navigation Buttons (for steps 1 and 2) */}
-            {currentStep < 3 && (
-                <div className="flex justify-between">
-                    <button
-                        onClick={() => setCurrentStep(prev => Math.max(1, prev - 1))}
-                        disabled={currentStep === 1}
-                        className="flex items-center gap-2 px-6 py-3 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                    >
-                        <ChevronLeft className="w-5 h-5" />
-                        Anterior
-                    </button>
-
-                    {currentStep === 1 && (
-                        <button
-                            onClick={() => setCurrentStep(2)}
-                            disabled={!canProceed()}
-                            className="flex items-center gap-2 px-6 py-3 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                        >
-                            Siguiente
-                            <ChevronRight className="w-5 h-5" />
-                        </button>
-                    )}
-                </div>
-            )}
         </div>
     );
 }
+

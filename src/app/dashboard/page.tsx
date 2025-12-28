@@ -6,7 +6,10 @@ import { collection, query, where, getDocs } from "firebase/firestore";
 import { onAuthStateChanged } from "firebase/auth";
 import { leadsService } from "@/infrastructure/services/leadsService";
 import { auditLogService } from "@/infrastructure/services/auditLogService";
+import { alquileresService } from "@/infrastructure/services/alquileresService";
 import { AuditLog } from "@/domain/models/AuditLog";
+import { Alquiler } from "@/domain/models/Alquiler";
+import { isSameMonth, parseISO } from "date-fns";
 import {
     Home,
     TrendingUp,
@@ -29,9 +32,10 @@ export default function DashboardPage() {
     const [user, setUser] = useState<any>(null);
     const [stats, setStats] = useState({
         totalProperties: 0,
-        totalTasaciones: 0,
+        totalAlquileres: 0,
+        activeRentals: 0,
         totalLeads: 0,
-        totalValue: 0,
+        honorariosMonth: 0,
         recentActivity: [] as AuditLog[]
     });
     const [loading, setLoading] = useState(true);
@@ -66,8 +70,8 @@ export default function DashboardPage() {
 
         try {
             // Run all queries in parallel for better performance
-            const [propsSnapshot, leads, recentLogsData, tasacionesLogsData] = await Promise.all([
-                // 1. Properties & Value
+            const [propsSnapshot, leads, recentLogsData, alquileres] = await Promise.all([
+                // 1. Properties
                 getDocs(query(collection(db, "properties"), where("userId", "==", userId))),
 
                 // 2. Leads
@@ -76,26 +80,47 @@ export default function DashboardPage() {
                 // 3. Recent Activity
                 auditLogService.getLogs("default-org-id", { userId }, 10),
 
-                // 4. Tasaciones count
-                auditLogService.getLogs("default-org-id", {
-                    userId,
-                    action: 'valuation_create',
-                    module: 'Tasaciones'
-                }, 100) // Reduced from 1000 to 100 for better performance
+                // 4. Alquileres
+                alquileresService.getAlquileres(userId)
             ]);
 
-            // Calculate total value
-            let totalVal = 0;
-            propsSnapshot.docs.forEach(doc => {
-                const data = doc.data();
-                if (data.price) totalVal += Number(data.price);
+            // Calculate Alquileres Stats
+            const activeRentals = alquileres.filter(a => a.estado === 'activo').length;
+
+            // Calculate Honorarios for Current Month
+            const now = new Date();
+            let honorariosMonth = 0;
+
+            alquileres.forEach(alquiler => {
+                alquiler.historialPagos.forEach(pago => {
+                    // Check if paid in current month
+                    const fechaPago = pago.fechaPago ? new Date(pago.fechaPago) : null;
+                    if (pago.estado === 'pagado' && fechaPago && isSameMonth(fechaPago, now)) {
+
+                        // Priority 1: Desglose explícito
+                        if (pago.desglose?.honorarios) {
+                            honorariosMonth += pago.desglose.honorarios;
+                        }
+                        // Priority 2: Fallback calculation
+                        else {
+                            if (alquiler.honorariosTipo === 'fijo' && alquiler.honorariosValor) {
+                                honorariosMonth += alquiler.honorariosValor;
+                            } else if (alquiler.honorariosTipo === 'porcentaje' && alquiler.honorariosValor) {
+                                // Default to applying % on base rent if total breakdown missing, or total amount
+                                const baseAmount = pago.montoAlquiler || pago.monto;
+                                honorariosMonth += baseAmount * (alquiler.honorariosValor / 100);
+                            }
+                        }
+                    }
+                });
             });
 
             setStats({
                 totalProperties: propsSnapshot.size,
-                totalTasaciones: tasacionesLogsData.logs.length,
+                totalAlquileres: alquileres.length,
+                activeRentals,
                 totalLeads: leads.length,
-                totalValue: totalVal,
+                honorariosMonth,
                 recentActivity: recentLogsData.logs
             });
         } catch (error) {
@@ -104,10 +129,7 @@ export default function DashboardPage() {
     };
 
     const formatCurrency = (value: number) => {
-        if (value >= 1000000) {
-            return `USD ${(value / 1000000).toFixed(1)}M`;
-        }
-        return `USD ${(value / 1000).toFixed(0)}k`;
+        return new Intl.NumberFormat('es-AR', { style: 'currency', currency: 'ARS', maximumFractionDigits: 0 }).format(value);
     };
 
     if (loading) {
@@ -185,15 +207,18 @@ export default function DashboardPage() {
                 <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 hover:shadow-md transition-shadow">
                     <div className="flex justify-between items-start mb-4">
                         <div className="p-3 bg-green-50 rounded-xl text-green-600">
-                            <BarChart3 size={20} />
+                            <Home size={20} />
                         </div>
                         <span className="flex items-center text-xs font-medium text-green-600 bg-green-50 px-2 py-1 rounded-full">
-                            <ArrowUpRight size={12} className="mr-1" /> +5%
+                            <ArrowUpRight size={12} className="mr-1" /> Activos
                         </span>
                     </div>
-                    <h3 className="text-2xl font-bold text-gray-900">{stats.totalTasaciones}</h3>
-                    <p className="text-sm text-gray-500 mt-1">Tasaciones</p>
-                    <p className="text-xs text-gray-400 mt-2">Histórico</p>
+                    <div className="flex items-baseline gap-2">
+                        <h3 className="text-2xl font-bold text-gray-900">{stats.activeRentals}</h3>
+                        <span className="text-sm text-gray-400">/ {stats.totalAlquileres}</span>
+                    </div>
+                    <p className="text-sm text-gray-500 mt-1">Alquileres</p>
+                    <p className="text-xs text-gray-400 mt-2">En curso</p>
                 </div>
 
                 <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 hover:shadow-md transition-shadow">
@@ -210,19 +235,23 @@ export default function DashboardPage() {
                     <p className="text-xs text-gray-400 mt-2">Total histórico</p>
                 </div>
 
-                <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 hover:shadow-md transition-shadow">
-                    <div className="flex justify-between items-start mb-4">
-                        <div className="p-3 bg-orange-50 rounded-xl text-orange-600">
-                            <DollarSign size={20} />
+                <Link href="/dashboard/finanzas" className="group">
+                    <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 hover:shadow-md transition-all md:hover:scale-[1.02] cursor-pointer h-full">
+                        <div className="flex justify-between items-start mb-4">
+                            <div className="p-3 bg-indigo-50 rounded-xl text-indigo-600 group-hover:bg-indigo-100 transition-colors">
+                                <DollarSign size={20} />
+                            </div>
+                            <span className="flex items-center text-xs font-medium text-green-600 bg-green-50 px-2 py-1 rounded-full">
+                                <TrendingUp size={12} className="mr-1" /> Mes actual
+                            </span>
                         </div>
-                        <span className="flex items-center text-xs font-medium text-green-600 bg-green-50 px-2 py-1 rounded-full">
-                            <ArrowUpRight size={12} className="mr-1" /> +8%
-                        </span>
+                        <h3 className="text-2xl font-bold text-gray-900">{formatCurrency(stats.honorariosMonth)}</h3>
+                        <p className="text-sm text-gray-500 mt-1">Ingresos Honorarios</p>
+                        <div className="flex items-center gap-1 mt-2 text-xs text-indigo-600 font-medium opacity-0 group-hover:opacity-100 transition-opacity">
+                            Ver detalles <ArrowUpRight size={12} />
+                        </div>
                     </div>
-                    <h3 className="text-2xl font-bold text-gray-900">{formatCurrency(stats.totalValue)}</h3>
-                    <p className="text-sm text-gray-500 mt-1">Valor Total</p>
-                    <p className="text-xs text-gray-400 mt-2">Inventario activo</p>
-                </div>
+                </Link>
             </div>
 
             {/* Quick Actions */}

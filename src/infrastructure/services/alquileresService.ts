@@ -33,6 +33,11 @@ export const alquileresService = {
             fechaFin: doc.data().fechaFin?.toDate(),
             createdAt: doc.data().createdAt?.toDate(),
             updatedAt: doc.data().updatedAt?.toDate(),
+            historialPagos: (doc.data().historialPagos || []).map((p: any) => ({
+                ...p,
+                fechaVencimiento: p.fechaVencimiento?.toDate ? p.fechaVencimiento.toDate() : (p.fechaVencimiento ? new Date(p.fechaVencimiento) : undefined),
+                fechaPago: p.fechaPago?.toDate ? p.fechaPago.toDate() : (p.fechaPago ? new Date(p.fechaPago) : undefined),
+            })),
         } as Alquiler));
     },
 

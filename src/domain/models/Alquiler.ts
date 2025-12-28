@@ -24,6 +24,18 @@ export interface Pago {
     montoPunitorios?: number;
     montoDescuento?: number;
     pagoParcial?: number;
+
+    // Detailed breakdown
+    desglose?: {
+        alquilerPuro: number;
+        servicios: number;
+        honorarios?: number;
+        cargosAdicionales?: number;
+        otros?: number;
+    };
+    cargosAdicionales?: { id: string; concepto: string; monto: number }[];
+    punitoriosAplicados?: { dias: number; monto: number; nota?: string; tasaApplied?: number };
+
     detalleServicios?: { concepto: string; monto: number }[];
     fechaPago?: Date;
     fechaVencimiento: Date;
@@ -31,6 +43,7 @@ export interface Pago {
     metodoPago?: string;
     comprobante?: string;
     moneda?: string;
+    nota?: string;
 }
 
 export interface Incidencia {
@@ -60,6 +73,7 @@ export interface Alquiler {
     domicilioInquilino?: string;
 
     // Datos del Propietario
+    propietarioId?: string;
     nombrePropietario?: string;
     dniPropietario?: string;
     domicilioPropietario?: string;
@@ -74,18 +88,32 @@ export interface Alquiler {
     alias?: string;
 
     // Tipo de garantía
-    tipoGarantia: 'garante' | 'seguro_caucion';
+    tipoGarantia?: 'garante' | 'seguro_caucion';
     garante?: Garante | null; // Solo si tipoGarantia === 'garante'
     seguroCaucion?: SeguroCaucion | null; // Solo si tipoGarantia === 'seguro_caucion'
+
+    // Nuevos campos
+    nroPartidaInmobiliaria?: string;
+    valorDeposito?: number;
+
+    honorariosTipo?: 'fijo' | 'porcentaje';
+    honorariosValor?: number;
+
+    metodoPago?: string;
+    serviciosAdicionales?: string[]; // Array de keys ['luz', 'gas', 'cochera', 'wifi', 'expensas', 'agua']
+
+    punitoriosTipo?: 'fijo' | 'porcentaje';
+    punitoriosValor?: number;
 
     fechaInicio: Date;
     fechaFin: Date;
     montoMensual: number;
     diaVencimiento: number;
-    ajusteTipo: 'porcentaje' | 'ICL' | 'IPC' | 'manual';
+    ajusteTipo: 'porcentaje' | 'ICL' | 'IPC' | 'casa_propia' | 'manual';
     ajusteValor: number;
     estadoInmueble?: string;
-    tasaPunitorios?: number; // Tasa diaria por mora (default 1%)
+    // tasaPunitorios deprecated in favor of punitoriosTipo/Val
+
     historialPagos: Pago[];
     incidencias: Incidencia[];
     estado: 'activo' | 'pendiente' | 'finalizado' | 'suspendido';

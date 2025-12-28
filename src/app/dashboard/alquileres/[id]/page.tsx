@@ -19,7 +19,7 @@ export default function AlquilerDetailPage() {
     const [alquiler, setAlquiler] = useState<Alquiler | null>(null);
     const [inquilino, setInquilino] = useState<Inquilino | null>(null);
     const [loading, setLoading] = useState(true);
-    const [activeTab, setActiveTab] = useState<'info' | 'pagos' | 'documentos' | 'mantenimiento'>('info');
+    const [activeTab, setActiveTab] = useState<'info' | 'pagos' | 'documentos' | 'mantenimiento'>('pagos');
     const [isEditing, setIsEditing] = useState(false);
     const [editData, setEditData] = useState<Partial<Alquiler>>({});
     const [showContractModal, setShowContractModal] = useState(false);
@@ -258,9 +258,9 @@ export default function AlquilerDetailPage() {
     }
 
     const tabs = [
-        { id: 'info', label: 'Información', icon: FileText },
         { id: 'pagos', label: 'Pagos', icon: DollarSign },
         { id: 'mantenimiento', label: 'Mantenimiento', icon: Wrench },
+        { id: 'info', label: 'Información', icon: FileText },
     ] as const;
 
     return (

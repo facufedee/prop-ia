@@ -5,6 +5,12 @@ import { useParams } from "next/navigation";
 import { PublicProperty, PublicAgency, publicService } from "@/infrastructure/services/publicService";
 import { MapPin, Bath, Bed, Maximize, Home, ChevronLeft, ChevronRight, Share2, Heart } from "lucide-react";
 import Link from "next/link";
+import dynamic from 'next/dynamic';
+
+const PublicMap = dynamic(() => import("@/ui/components/properties/public/PublicMap"), {
+    ssr: false,
+    loading: () => <div className="w-full h-full bg-gray-100 animate-pulse rounded-xl" />
+});
 
 export default function PropertyDetailPage() {
     const params = useParams();
@@ -15,12 +21,17 @@ export default function PropertyDetailPage() {
     const [currentImageIndex, setCurrentImageIndex] = useState(0);
     const [showGalleryModal, setShowGalleryModal] = useState(false);
 
+    const [isSaved, setIsSaved] = useState(false);
+
     useEffect(() => {
         const load = async () => {
             if (!id) return;
             try {
                 const data = await publicService.getPropertyById(id);
                 setProperty(data);
+                // Check if saved in local storage (mock persistence)
+                const saved = localStorage.getItem(`saved_${id}`);
+                if (saved) setIsSaved(true);
             } catch (error) {
                 console.error(error);
             } finally {
@@ -29,6 +40,43 @@ export default function PropertyDetailPage() {
         };
         load();
     }, [id]);
+
+    const handleSave = () => {
+        if (isSaved) {
+            localStorage.removeItem(`saved_${id}`);
+            setIsSaved(false);
+        } else {
+            localStorage.setItem(`saved_${id}`, 'true');
+            setIsSaved(true);
+        }
+    };
+
+    const handleShare = async () => {
+        const shareData = {
+            title: property?.title,
+            text: `Mira esta propiedad en PropIA: ${property?.title}`,
+            url: window.location.href
+        };
+
+        if (navigator.share) {
+            try {
+                await navigator.share(shareData);
+            } catch (err) {
+                console.error(err);
+            }
+        } else {
+            navigator.clipboard.writeText(window.location.href);
+            alert('Enlace copiado al portapapeles');
+        }
+    };
+
+    const handleContact = () => {
+        const phoneNumber = property?.agency?.phoneNumber || "5491112345678"; // Fallback to generic if missing
+        const cleanPhone = phoneNumber.replace(/\D/g, '');
+        const message = `Hola, estoy interesado en la propiedad "${property?.title}" que vi en PropIA.`;
+        const waLink = `https://wa.me/${cleanPhone}?text=${encodeURIComponent(message)}`;
+        window.open(waLink, '_blank');
+    };
 
     if (loading) return <div className="min-h-screen bg-white" />;
     if (!property) return <div className="min-h-screen flex items-center justify-center">Propiedad no encontrada</div>;
@@ -47,7 +95,7 @@ export default function PropertyDetailPage() {
         <div className="min-h-screen bg-white pb-20 pt-24">
             <main className="container mx-auto px-4">
                 {/* Header (Title & Price) */}
-                <div className="flex flex-col md:flex-row justify-between items-start md:items-end mb-6 gap-4">
+                <div className="flex flex-col md:flex-row justify-between items-start md:items-end mb-8 gap-4">
                     <div>
                         <div className="flex items-center gap-2 mb-3">
                             <span className={`px-2.5 py-0.5 rounded-md text-xs font-bold uppercase tracking-wider ${property.operation_type === 'Venta' ? 'bg-green-100 text-green-700' :
@@ -60,78 +108,115 @@ export default function PropertyDetailPage() {
                             </span>
                         </div>
                         <h1 className="text-2xl md:text-3xl font-bold text-gray-900 mb-1">{property.title}</h1>
-                        <p className="text-sm text-gray-500">Publicado hace 3 días</p>
+                        <div className="flex items-center gap-2 text-sm text-gray-500">
+                            <span>Publicado hace 3 días</span>
+                        </div>
                     </div>
 
                     <div className="flex flex-col items-end gap-2">
                         <p className="text-3xl font-bold text-gray-900">
-                            {property.currency} {property.price?.toLocaleString('es-AR')}
+                            {property.currency} {Number(property.price)?.toLocaleString('es-AR')}
                         </p>
                         <div className="flex gap-2">
-                            <button className="flex items-center gap-2 px-4 py-2 rounded-lg border border-gray-200 hover:bg-gray-50 text-sm font-medium transition">
+                            <button
+                                onClick={handleShare}
+                                className="flex items-center gap-2 px-4 py-2 rounded-lg border border-gray-200 hover:bg-gray-50 text-sm font-medium transition"
+                            >
                                 <Share2 className="w-4 h-4" /> Compartir
                             </button>
-                            <button className="flex items-center gap-2 px-4 py-2 rounded-lg border border-gray-200 hover:border-red-200 hover:bg-red-50 text-sm font-medium transition group">
-                                <Heart className="w-4 h-4 group-hover:text-red-500" /> Guardar
+                            <button
+                                onClick={handleSave}
+                                className={`flex items-center gap-2 px-4 py-2 rounded-lg border transition group text-sm font-medium ${isSaved
+                                    ? 'bg-red-50 border-red-200 text-red-600'
+                                    : 'border-gray-200 hover:border-red-200 hover:bg-red-50'
+                                    }`}
+                            >
+                                <Heart className={`w-4 h-4 ${isSaved ? 'fill-current' : 'group-hover:text-red-500'}`} />
+                                {isSaved ? 'Guardado' : 'Guardar'}
                             </button>
                         </div>
                     </div>
                 </div>
 
-                {/* Gallery Grid - Ecommerce Style */}
-                <div className="grid grid-cols-1 md:grid-cols-4 gap-2 h-[400px] md:h-[500px] rounded-2xl overflow-hidden mb-8 relative group">
-                    {/* Main Image */}
-                    <div className="md:col-span-2 h-full bg-gray-100 relative cursor-pointer" onClick={() => { setCurrentImageIndex(0); setShowGalleryModal(true); }}>
-                        {property.imageUrls && property.imageUrls[0] ? (
-                            <img
-                                src={property.imageUrls[0]}
-                                alt="Principal"
-                                className="w-full h-full object-cover hover:brightness-95 transition"
-                            />
-                        ) : (
-                            <div className="w-full h-full flex items-center justify-center text-gray-400">
-                                <Home size={48} opacity={0.3} />
-                            </div>
-                        )}
-                    </div>
+                <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                    {/* Main Content Column */}
+                    <div className="lg:col-span-2 space-y-8">
 
-                    {/* Side Images */}
-                    <div className="hidden md:grid md:col-span-2 grid-rows-2 gap-2 h-full">
-                        {/* Top Right */}
-                        <div className="bg-gray-100 relative cursor-pointer" onClick={() => { if (property.imageUrls?.[1]) { setCurrentImageIndex(1); setShowGalleryModal(true); } }}>
-                            {property.imageUrls && property.imageUrls[1] ? (
-                                <img src={property.imageUrls[1]} alt="Interior" className="w-full h-full object-cover hover:brightness-95 transition" />
-                            ) : (
-                                <div className="w-full h-full bg-gray-50" />
+                        {/* Interactive Gallery Slider */}
+                        <div className="flex flex-col gap-4">
+                            {/* Main Stage */}
+                            <div className="relative w-full h-[400px] bg-gray-900 rounded-2xl overflow-hidden group">
+                                {property.imageUrls && property.imageUrls.length > 0 ? (
+                                    <>
+                                        {/* Blurred Background Effect */}
+                                        <div className="absolute inset-0">
+                                            <img
+                                                src={property.imageUrls[currentImageIndex]}
+                                                className="w-full h-full object-cover blur-2xl opacity-50 scale-110"
+                                                alt="Fondo borroso"
+                                            />
+                                        </div>
+
+                                        {/* Main Image */}
+                                        <div className="absolute inset-0 flex items-center justify-center p-2">
+                                            <img
+                                                src={property.imageUrls[currentImageIndex]}
+                                                alt="Vista Principal"
+                                                className="max-w-full max-h-full object-contain cursor-pointer shadow-lg rounded-lg"
+                                                onClick={() => setShowGalleryModal(true)}
+                                            />
+                                        </div>
+
+                                        {/* Navigation Controls */}
+                                        {property.imageUrls.length > 1 && (
+                                            <>
+                                                <button
+                                                    onClick={(e) => { e.stopPropagation(); prevImage(); }}
+                                                    className="absolute left-4 top-1/2 -translate-y-1/2 p-2 bg-white/10 hover:bg-white/20 backdrop-blur-md rounded-full shadow-lg text-white transition-all duration-200"
+                                                >
+                                                    <ChevronLeft size={24} />
+                                                </button>
+                                                <button
+                                                    onClick={(e) => { e.stopPropagation(); nextImage(); }}
+                                                    className="absolute right-4 top-1/2 -translate-y-1/2 p-2 bg-white/10 hover:bg-white/20 backdrop-blur-md rounded-full shadow-lg text-white transition-all duration-200"
+                                                >
+                                                    <ChevronRight size={24} />
+                                                </button>
+
+                                                {/* Counter Badge */}
+                                                <div className="absolute bottom-4 right-4 bg-black/60 text-white text-xs font-medium px-3 py-1 rounded-full backdrop-blur-md border border-white/10">
+                                                    {currentImageIndex + 1} / {property.imageUrls.length}
+                                                </div>
+                                            </>
+                                        )}
+                                    </>
+                                ) : (
+                                    <div className="w-full h-full flex items-center justify-center text-gray-400">
+                                        <Home size={64} opacity={0.2} />
+                                        <span className="ml-4 text-lg font-medium">Sin imágenes disponibles</span>
+                                    </div>
+                                )}
+                            </div>
+
+                            {/* Thumbnails Strip */}
+                            {property.imageUrls && property.imageUrls.length > 1 && (
+                                <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-hide">
+                                    {property.imageUrls.map((url, idx) => (
+                                        <button
+                                            key={idx}
+                                            onClick={() => setCurrentImageIndex(idx)}
+                                            className={`relative w-24 h-20 flex-shrink-0 rounded-lg overflow-hidden transition-all duration-200 ${idx === currentImageIndex
+                                                ? 'ring-2 ring-indigo-600 ring-offset-2 opacity-100'
+                                                : 'opacity-60 hover:opacity-100 grayscale hover:grayscale-0'
+                                                }`}
+                                        >
+                                            <img src={url} alt={`Thumbnail ${idx}`} className="w-full h-full object-cover" />
+                                        </button>
+                                    ))}
+                                </div>
                             )}
                         </div>
 
-                        {/* Bottom Right Split */}
-                        <div className="grid grid-cols-2 gap-2">
-                            <div className="bg-gray-100 relative cursor-pointer" onClick={() => { if (property.imageUrls?.[2]) { setCurrentImageIndex(2); setShowGalleryModal(true); } }}>
-                                {property.imageUrls && property.imageUrls[2] ? (
-                                    <img src={property.imageUrls[2]} alt="Detalle" className="w-full h-full object-cover hover:brightness-95 transition" />
-                                ) : (
-                                    <div className="w-full h-full bg-gray-50" />
-                                )}
-                            </div>
-                            <div className="bg-gray-100 relative cursor-pointer group/more" onClick={() => setShowGalleryModal(true)}>
-                                {property.imageUrls && property.imageUrls[3] ? (
-                                    <img src={property.imageUrls[3]} alt="Detalle" className="w-full h-full object-cover hover:brightness-95 transition" />
-                                ) : (
-                                    <div className="w-full h-full bg-gray-50" />
-                                )}
-                                <div className="absolute inset-0 bg-black/10 group-hover/more:bg-black/20 flex items-center justify-center transition">
-                                    <span className="bg-white px-3 py-1.5 rounded-lg text-xs font-bold shadow-sm">Ver todas las fotos</span>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <div className="grid grid-cols-1 lg:grid-cols-3 gap-12">
-                    {/* Main Content */}
-                    <div className="lg:col-span-2 space-y-8">
                         {/* Specs Bar */}
                         <div className="flex items-center justify-between border-y border-gray-100 py-6">
                             <div className="flex items-center gap-3">
@@ -172,40 +257,74 @@ export default function PropertyDetailPage() {
                                 {property.description || "Sin descripción disponible."}
                             </div>
                         </div>
+
+                        {/* Location Map */}
+                        <div className="bg-white rounded-2xl p-8 shadow-sm border border-gray-100">
+                            <h2 className="text-xl font-bold text-gray-900 mb-4">Ubicación</h2>
+                            <div className="w-full h-[300px] rounded-xl overflow-hidden bg-gray-100 relative z-0">
+                                {property.lat && property.lng ? (
+                                    <PublicMap lat={property.lat} lng={property.lng} />
+                                ) : (
+                                    <iframe
+                                        width="100%"
+                                        height="100%"
+                                        id="gmap_canvas"
+                                        src={`https://maps.google.com/maps?q=${encodeURIComponent(`${property.title.replace(/^(ALQUILER|VENTA|ALQUILER TEMPORAL)\s*-\s*/i, '')}, ${property.localidad}, ${property.provincia}, Argentina`)}&t=&z=15&ie=UTF8&iwloc=&output=embed`}
+                                        frameBorder="0"
+                                        scrolling="no"
+                                        marginHeight={0}
+                                        marginWidth={0}
+                                        className="filter grayscale hover:grayscale-0 transition-all duration-500"
+                                    ></iframe>
+                                )}
+                            </div>
+                            <div className="mt-2 flex items-center gap-2 text-sm text-gray-500">
+                                <MapPin size={16} />
+                                <p>{property.localidad}, {property.provincia}</p>
+                            </div>
+                        </div>
                     </div>
 
-                    {/* Sidebar / Agency Info */}
-                    <div className="space-y-6">
-                        {property.agency && (
-                            <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100 sticky top-24">
-                                <div className="flex items-center gap-4 mb-6">
-                                    <div className="w-16 h-16 rounded-xl bg-gray-100 overflow-hidden shrink-0 border border-gray-200">
-                                        {property.agency.photoURL ? (
-                                            <img src={property.agency.photoURL} alt={property.agency.displayName} className="w-full h-full object-cover" />
-                                        ) : (
-                                            <div className="w-full h-full flex items-center justify-center font-bold text-indigo-600 text-xl">
-                                                {property.agency.displayName.substring(0, 2).toUpperCase()}
+                    {/* Sidebar / Agency Info (Sticky) */}
+                    <div className="lg:col-span-1">
+                        <div className="sticky top-24 space-y-6">
+                            {property.agency && (
+                                <div className="bg-white rounded-2xl p-6 shadow-lg border border-gray-100 hover:shadow-xl transition-shadow duration-300">
+                                    <div className="flex items-center gap-4 mb-8">
+                                        <div className="w-20 h-20 rounded-full bg-gray-100 overflow-hidden shrink-0 border border-gray-200 p-0.5">
+                                            {property.agency.photoURL ? (
+                                                <img src={property.agency.photoURL} alt={property.agency.displayName} className="w-full h-full object-cover rounded-full" />
+                                            ) : (
+                                                <div className="w-full h-full flex items-center justify-center font-bold text-indigo-600 text-2xl bg-indigo-50 rounded-full">
+                                                    {property.agency.displayName.substring(0, 2).toUpperCase()}
+                                                </div>
+                                            )}
+                                        </div>
+                                        <div className="overflow-hidden">
+                                            <p className="text-xs text-gray-500 uppercase tracking-wider font-bold mb-1">Publicado por</p>
+                                            <h3 className="font-bold text-gray-900 text-xl leading-tight truncate">
+                                                <Link href={`/propiedades/${property.agency.slug || property.userId}`} className="hover:underline hover:text-indigo-600 transition">
+                                                    {property.agency.displayName}
+                                                </Link>
+                                            </h3>
+                                            <div className="flex text-amber-500 text-xs mt-1">
+                                                ★★★★★ <span className="text-gray-400 ml-1">(4.9)</span>
                                             </div>
-                                        )}
+                                        </div>
                                     </div>
-                                    <div>
-                                        <p className="text-xs text-gray-500 uppercase tracking-wide font-medium">Publicado por</p>
-                                        <h3 className="font-bold text-gray-900 text-lg leading-tight">
-                                            <Link href={`/propiedades/${property.agency.slug || property.userId}`} className="hover:underline hover:text-indigo-600 transition">
-                                                {property.agency.displayName}
-                                            </Link>
-                                        </h3>
-                                    </div>
-                                </div>
 
-                                <button className="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 px-4 rounded-xl transition shadow-lg shadow-indigo-200 mb-3">
-                                    Contactar Inmobiliaria
-                                </button>
-                                <button className="w-full bg-white border border-gray-200 hover:bg-gray-50 text-gray-700 font-bold py-3 px-4 rounded-xl transition">
-                                    Ver todas sus propiedades
-                                </button>
-                            </div>
-                        )}
+                                    <button
+                                        onClick={handleContact}
+                                        className="w-full bg-gray-900 hover:bg-black text-white font-bold py-4 px-4 rounded-xl transition shadow-xl shadow-gray-200/50 mb-3 flex items-center justify-center gap-3 text-lg"
+                                    >
+                                        <span>Contactar Inmobiliaria</span>
+                                    </button>
+                                    <button className="w-full bg-white border border-gray-200 hover:bg-gray-50 text-gray-700 font-bold py-3 px-4 rounded-xl transition text-sm">
+                                        Ver más propiedades
+                                    </button>
+                                </div>
+                            )}
+                        </div>
                     </div>
                 </div>
             </main>

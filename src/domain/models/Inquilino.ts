@@ -15,7 +15,7 @@ export interface Inquilino {
     dni: string;
     cuit?: string;
     domicilio: string;
-    datosGarante: DatosGarante;
+    datosGarante?: DatosGarante;
     documentos: string[];
     userId: string;
     createdAt: Date;

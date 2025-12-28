@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import { Pago, Alquiler } from "@/domain/models/Alquiler";
 import { X, Plus, Trash2, AlertTriangle, Calendar, Calculator } from "lucide-react";
 import { parseISO, startOfMonth, endOfMonth, format, isValid, parse, differenceInDays } from "date-fns";
+import { es } from "date-fns/locale";
 
 interface PaymentEditModalProps {
     isOpen: boolean;
@@ -70,8 +71,6 @@ const CurrencyInput = ({
     );
 };
 
-import { es } from "date-fns/locale";
-
 const DateInput = ({ value, onChange, minDate, maxDate, className = "" }: { value?: Date, onChange: (d: Date | undefined) => void, minDate?: string, maxDate?: string, className?: string }) => {
 
     // Convert Date -> YYYY-MM-DD string for input value
@@ -87,14 +86,9 @@ const DateInput = ({ value, onChange, minDate, maxDate, className = "" }: { valu
             return;
         }
 
-        // Parse YYYY-MM-DD local date (fixing timezone issues)
-        // new Date("2024-01-01") parses as UTC, which might be previous day in local time.
-        // We use parseISO (if string is ISO like) or parse from date-fns
-        // Ideally: parse(val, 'yyyy-MM-dd', new Date())
         const parsed = parse(val, "yyyy-MM-dd", new Date());
 
         if (isValid(parsed)) {
-            // Check min/max if needed
             if (minDate && val < minDate) {
                 alert("Fecha anterior al mes permitido");
                 return;
@@ -117,7 +111,6 @@ const DateInput = ({ value, onChange, minDate, maxDate, className = "" }: { valu
                 min={minDate}
                 max={maxDate}
             />
-            {/* Calendar icon might be redundant with native picker, but user asked for "calendario" */}
             {value && isValid(value) && (
                 <p className="text-xs text-green-600 mt-1 capitalize font-medium">
                     {format(value, "EEEE d 'de' MMMM 'de' yyyy", { locale: es })}
@@ -148,6 +141,9 @@ export default function PaymentEditModal({ isOpen, onClose, payment, rental, onS
 
     const [services, setServices] = useState<{ concepto: string; monto: number }[]>([]);
 
+    // Honorarios Logic -- ADDED
+    const [honorarios, setHonorarios] = useState<number>(0);
+
     // Discount logic
     const [discountType, setDiscountType] = useState<'amount' | 'percent'>('amount');
     const [discountInputValue, setDiscountInputValue] = useState<number>(form.montoDescuento || 0);
@@ -164,6 +160,22 @@ export default function PaymentEditModal({ isOpen, onClose, payment, rental, onS
             });
             setDiscountInputValue(payment.montoDescuento || 0);
             setDiscountType('amount');
+
+            // Initialize Honorarios -- ADDED
+            if (payment.desglose?.honorarios !== undefined) {
+                setHonorarios(payment.desglose.honorarios);
+            } else {
+                // Calculate default from contract
+                if (rental.honorariosTipo === 'fijo' && rental.honorariosValor) {
+                    setHonorarios(rental.honorariosValor);
+                } else if (rental.honorariosTipo === 'porcentaje' && rental.honorariosValor) {
+                    // Usually calculated on base rent. 
+                    const baseRent = payment.montoAlquiler || rental.montoMensual || 0;
+                    setHonorarios(Math.floor(baseRent * (rental.honorariosValor / 100)));
+                } else {
+                    setHonorarios(0);
+                }
+            }
 
             // Calculate initial penalty suggestion
             calculatePenalty({ ...payment });
@@ -205,7 +217,11 @@ export default function PaymentEditModal({ isOpen, onClose, payment, rental, onS
         const daysLate = Math.max(0, diff);
 
         if (daysLate > 0) {
-            const dailyRate = rental.tasaPunitorios || DEFAULT_PENALTY_RATE;
+            // Use punitoriosValor if percentage, otherwise default to DEFAULT_PENALTY_RATE
+            const dailyRate = (rental.punitoriosTipo === 'porcentaje' && rental.punitoriosValor)
+                ? rental.punitoriosValor
+                : DEFAULT_PENALTY_RATE;
+
             // Formula: Rent * (Rate/100) * Days
             const calculated = Math.floor(currentForm.montoAlquiler * (dailyRate / 100) * daysLate);
             setPenaltyInfo({ days: daysLate, suggested: calculated });
@@ -216,9 +232,6 @@ export default function PaymentEditModal({ isOpen, onClose, payment, rental, onS
             }
         } else {
             setPenaltyInfo({ days: 0, suggested: 0 });
-            // Should we clear punitorios if no delay? 
-            // Only if it was matching the previous calc? 
-            // For safety, let's not clear manual entry, unless it's zero.
         }
     };
 
@@ -234,7 +247,10 @@ export default function PaymentEditModal({ isOpen, onClose, payment, rental, onS
             const daysLate = Math.max(0, diff);
 
             if (daysLate > 0) {
-                const dailyRate = rental.tasaPunitorios || DEFAULT_PENALTY_RATE;
+                const dailyRate = (rental.punitoriosTipo === 'porcentaje' && rental.punitoriosValor)
+                    ? rental.punitoriosValor
+                    : DEFAULT_PENALTY_RATE;
+
                 const calculated = Math.floor((form.montoAlquiler || 0) * (dailyRate / 100) * daysLate);
                 setPenaltyInfo({ days: daysLate, suggested: calculated });
 
@@ -248,14 +264,15 @@ export default function PaymentEditModal({ isOpen, onClose, payment, rental, onS
                 setForm(prev => ({ ...prev, montoPunitorios: 0 }));
             }
         }
-    }, [form.fechaVencimiento, form.fechaPago, form.montoAlquiler, rental.tasaPunitorios]);
+    }, [form.fechaVencimiento, form.fechaPago, form.montoAlquiler, rental.punitoriosValor, rental.punitoriosTipo]);
 
 
     const getSubtotal = () => {
         const alquilerVal = Number(form.montoAlquiler) || 0;
         const punitorios = Number(form.montoPunitorios) || 0;
         const servicesTotal = services.reduce((sum, s) => sum + (Number(s.monto) || 0), 0);
-        return alquilerVal + servicesTotal + punitorios;
+        const honorariosVal = Number(honorarios) || 0; // -- ADDED
+        return alquilerVal + servicesTotal + punitorios + honorariosVal;
     }
 
     const calculateDiscountAmount = () => {
@@ -274,7 +291,7 @@ export default function PaymentEditModal({ isOpen, onClose, payment, rental, onS
     useEffect(() => {
         const discount = calculateDiscountAmount();
         setForm(prev => ({ ...prev, montoDescuento: discount }));
-    }, [discountInputValue, discountType, services, form.montoPunitorios, form.montoAlquiler]);
+    }, [discountInputValue, discountType, services, form.montoPunitorios, form.montoAlquiler, honorarios]); // Added honorarios
 
 
     const handleServiceChange = (index: number, val: number) => {
@@ -316,6 +333,12 @@ export default function PaymentEditModal({ isOpen, onClose, payment, rental, onS
             detalleServicios: services,
             monto: total,
             montoDescuento: calculateDiscountAmount(),
+            desglose: {
+                ...payment.desglose, // keep existing Breakdown generic fields if any
+                alquilerPuro: Number(form.montoAlquiler) || 0,
+                servicios: services.reduce((sum, s) => sum + (Number(s.monto) || 0), 0),
+                honorarios: honorarios, // -- ADDED
+            }
         };
         onSave(finalPayment);
         onClose();
@@ -369,15 +392,44 @@ export default function PaymentEditModal({ isOpen, onClose, payment, rental, onS
                                 />
                             </div>
                         </div>
+
+                        {/* Honorarios Input -- ADDED */}
                         <div>
-                            <label className="block text-xs font-semibold text-gray-700 mb-1">Fecha Vencimiento</label>
-                            <DateInput
-                                value={form.fechaVencimiento}
-                                onChange={(d) => d && setForm({ ...form, fechaVencimiento: d })}
-                                minDate={minDate}
-                                maxDate={maxDate}
-                                className="w-full px-3 py-1.5 border rounded-lg focus:ring-2 focus:ring-indigo-500 text-sm"
-                            />
+                            <label className="block text-xs font-semibold text-gray-700 mb-1">
+                                Honorarios
+                                {rental.honorariosTipo && (
+                                    <span className="ml-2 text-[10px] text-gray-400 font-normal">
+                                        ({rental.honorariosTipo === 'porcentaje' ? `${rental.honorariosValor}%` : 'Fijo'})
+                                    </span>
+                                )}
+                            </label>
+                            <div className="relative">
+                                <span className="absolute left-3 top-2 text-gray-500 text-sm">$</span>
+                                <CurrencyInput
+                                    value={honorarios}
+                                    onChange={setHonorarios}
+                                    className="w-full pl-6 pr-3 py-1.5 border rounded-lg focus:ring-2 focus:ring-indigo-500 text-sm"
+                                    placeholder="0"
+                                />
+                            </div>
+                        </div>
+
+                        <div className="md:col-span-2">
+                            <div className="grid grid-cols-2 gap-3">
+                                <div>
+                                    <label className="block text-xs font-semibold text-gray-700 mb-1">Fecha Vencimiento</label>
+                                    <DateInput
+                                        value={form.fechaVencimiento}
+                                        onChange={(d) => d && setForm({ ...form, fechaVencimiento: d })}
+                                        minDate={minDate}
+                                        maxDate={maxDate}
+                                        className="w-full px-3 py-1.5 border rounded-lg focus:ring-2 focus:ring-indigo-500 text-sm"
+                                    />
+                                </div>
+                                <div>
+                                    {/* Placeholder for alignment if needed */}
+                                </div>
+                            </div>
                         </div>
                     </div>
 
@@ -457,7 +509,7 @@ export default function PaymentEditModal({ isOpen, onClose, payment, rental, onS
                             </div>
                             {penaltyInfo.days > 0 && (
                                 <div className="text-[10px] text-gray-500 mt-1 flex justify-between items-center">
-                                    <span>Tasa: {rental.tasaPunitorios || DEFAULT_PENALTY_RATE}%/día</span>
+                                    <span>Tasa: {(rental.punitoriosTipo === 'porcentaje' ? rental.punitoriosValor : DEFAULT_PENALTY_RATE)}%/día</span>
                                     <button
                                         onClick={() => setForm({ ...form, montoPunitorios: penaltyInfo.suggested })}
                                         className="text-indigo-600 hover:underline flex items-center gap-0.5 font-medium"
@@ -569,3 +621,4 @@ export default function PaymentEditModal({ isOpen, onClose, payment, rental, onS
         </div>
     );
 }
+

@@ -16,6 +16,8 @@ export interface PublicProperty {
     bathrooms: number;
     userId: string;
     agency?: PublicAgency;
+    lat?: number;
+    lng?: number;
 }
 
 export interface PublicAgency {
@@ -23,6 +25,7 @@ export interface PublicAgency {
     displayName: string;
     photoURL?: string;
     email?: string;
+    phoneNumber?: string;
     slug?: string; // Derived or stored
 }
 
@@ -35,7 +38,7 @@ export const publicService = {
         if (!db) return [];
         try {
             // In a real app, strict rules should apply (e.g., status == 'published')
-            const q = query(collection(db, PROPERTIES_COLLECTION), limit(20)); // Removed orderBy for now to avoid index requirements
+            const q = query(collection(db, PROPERTIES_COLLECTION), where("publishToPortal", "==", true), limit(20)); // Removed orderBy for now to avoid index requirements
             const snapshot = await getDocs(q);
 
             const properties = snapshot.docs.map(doc => ({
@@ -118,6 +121,7 @@ export const publicService = {
                     displayName: data.displayName || "Inmobiliaria",
                     photoURL: data.photoURL,
                     email: data.email,
+                    phoneNumber: data.phoneNumber,
                     slug: publicService.slugify(data.displayName || "agency")
                 };
             }

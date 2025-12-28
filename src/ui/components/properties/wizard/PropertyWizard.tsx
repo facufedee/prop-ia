@@ -79,9 +79,10 @@ const ORIENTATIONS_LIST = ["Norte", "Sur", "Este", "Oeste", "Noreste", "Noroeste
 interface PropertyWizardProps {
     initialData?: any;
     isEditing?: boolean;
+    onSuccessRedirect?: string;
 }
 
-export default function PropertyWizard({ initialData, isEditing = false }: PropertyWizardProps) {
+export default function PropertyWizard({ initialData, isEditing = false, ...props }: PropertyWizardProps) {
     const router = useRouter();
     const [currentStep, setCurrentStep] = useState(1);
     const [loading, setLoading] = useState(false);
@@ -137,6 +138,10 @@ export default function PropertyWizard({ initialData, isEditing = false }: Prope
         // Step 6: Description
         title: initialData?.title || '',
         description: initialData?.description || '',
+
+        // Options
+        publishToPortal: initialData?.publishToPortal || false,
+        coverImageIndex: initialData?.coverImageIndex || 0,
     });
 
     // Step 5: Multimedia State
@@ -468,11 +473,19 @@ export default function PropertyWizard({ initialData, isEditing = false }: Prope
                         currency: formData.currency
                     }
                 );
+                // Log existing check
             } catch (logErr) {
                 console.error("Error creating audit log:", logErr);
             }
 
-            router.push("/dashboard/propiedades");
+            if ((props as any).onSuccessRedirect) {
+                const redirectUrl = (props as any).onSuccessRedirect;
+                // Add the new ID to the redirect URL
+                const separator = redirectUrl.includes('?') ? '&' : '?';
+                router.push(`${redirectUrl}${separator}createdPropertyId=${propertyRef.id}`);
+            } else {
+                router.push("/dashboard/propiedades");
+            }
 
         } catch (err: any) {
             console.error(err);
@@ -535,10 +548,44 @@ export default function PropertyWizard({ initialData, isEditing = false }: Prope
     // Render Steps
     const renderStep = () => {
         switch (currentStep) {
-            case 1: // Operation & Type
+            // Operation & Type
+            case 1:
                 return (
                     <div className="space-y-6 animate-in fade-in slide-in-from-right-4 duration-300">
-                        <h2 className="text-xl font-semibold">¿Qué querés publicar?</h2>
+                        <div className="space-y-4">
+                            {/* Portal Publication Toggle */}
+                            <div
+                                onClick={() => setFormData(prev => ({ ...prev, publishToPortal: !prev.publishToPortal }))}
+                                className={`rounded-xl p-5 border-2 flex items-start gap-4 transition-all cursor-pointer hover:shadow-md ${formData.publishToPortal ? 'bg-green-50 border-green-500' : 'bg-gray-50 border-gray-200 hover:border-gray-300'}`}
+                            >
+                                <div className="flex-1">
+                                    <h3 className={`font-semibold text-lg ${formData.publishToPortal ? 'text-green-900' : 'text-gray-900'}`}>
+                                        ¿Querés llegar a más clientes?
+                                    </h3>
+                                    <p className={`text-sm mt-1 leading-relaxed ${formData.publishToPortal ? 'text-green-800' : 'text-gray-600'}`}>
+                                        Al activar esta opción, aceptás publicar tu propiedad en nuestro portal exclusivo para alcanzar a miles de interesados.
+                                        <br />
+                                        <span className={`text-xs mt-1 block font-medium ${formData.publishToPortal ? 'text-green-700' : 'text-gray-500'}`}>
+                                            Aplican Términos y Condiciones.
+                                        </span>
+                                    </p>
+                                </div>
+                                <div className="relative inline-block w-14 mr-2 align-middle select-none transition duration-200 ease-in mt-1">
+                                    <input
+                                        type="checkbox"
+                                        name="toggle"
+                                        id="portal-toggle"
+                                        className="toggle-checkbox absolute block w-7 h-7 rounded-full bg-white border-4 appearance-none cursor-pointer peer checked:right-0 right-7 transition-all"
+                                        checked={formData.publishToPortal}
+                                        readOnly // Controlled by div onClick
+                                    />
+                                    <label
+                                        htmlFor="portal-toggle"
+                                        className={`toggle-label block overflow-hidden h-7 rounded-full cursor-pointer transition-colors ${formData.publishToPortal ? 'bg-green-500' : 'bg-gray-300'}`}
+                                    ></label>
+                                </div>
+                            </div>
+                        </div>
 
                         <div>
                             <label className="block text-sm font-medium text-gray-700 mb-2">Tipo de operación</label>
@@ -599,7 +646,7 @@ export default function PropertyWizard({ initialData, isEditing = false }: Prope
                                 />
                             </div>
                         </div>
-                    </div>
+                    </div >
                 );
 
             case 2: // Location
@@ -980,6 +1027,7 @@ export default function PropertyWizard({ initialData, isEditing = false }: Prope
                     </div>
                 );
 
+            // Operation & Type
             case 5: // Multimedia
                 return (
                     <div className="space-y-6 animate-in fade-in slide-in-from-right-4 duration-300">
@@ -1007,12 +1055,40 @@ export default function PropertyWizard({ initialData, isEditing = false }: Prope
                         {previews.length > 0 && (
                             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                                 {previews.map((src, index) => (
-                                    <div key={index} className="relative aspect-[4/3] group">
+                                    <div
+                                        key={index}
+                                        className={`relative aspect-[4/3] group rounded-lg overflow-hidden border-2 transition-all ${(formData as any).coverImageIndex === index
+                                            ? 'border-indigo-500 ring-2 ring-indigo-200'
+                                            : 'border-transparent hover:border-gray-300'
+                                            }`}
+                                    >
                                         <img
                                             src={src}
                                             alt={`Preview ${index}`}
-                                            className="w-full h-full object-cover rounded-lg"
+                                            className="w-full h-full object-cover"
                                         />
+
+                                        {/* Cover Image Badge/Toggle */}
+                                        <button
+                                            onClick={(e) => {
+                                                e.stopPropagation();
+                                                setFormData(prev => ({ ...prev, coverImageIndex: index }));
+                                            }}
+                                            className={`absolute top-2 left-2 p-1.5 rounded-full shadow-sm transition-all ${(formData as any).coverImageIndex === index
+                                                ? 'bg-indigo-500 text-white opacity-100'
+                                                : 'bg-white/80 text-gray-400 opacity-0 group-hover:opacity-100 hover:bg-white hover:text-yellow-500'
+                                                }`}
+                                            title="Establecer como portada"
+                                        >
+                                            <Sparkles className={`w-4 h-4 ${(formData as any).coverImageIndex === index ? 'fill-current' : ''}`} />
+                                        </button>
+
+                                        {(formData as any).coverImageIndex === index && (
+                                            <div className="absolute bottom-0 inset-x-0 bg-indigo-500/80 text-white text-[10px] font-bold text-center py-1 uppercase tracking-wider backdrop-blur-sm">
+                                                Portada
+                                            </div>
+                                        )}
+
                                         <button
                                             onClick={() => removeImage(index)}
                                             className="absolute top-2 right-2 p-1 bg-white rounded-full shadow-sm opacity-0 group-hover:opacity-100 transition-opacity hover:bg-red-50 text-red-600"

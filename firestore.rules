@@ -35,7 +35,7 @@ service cloud.firestore {
     
     // Users Collection
     match /users/{userId} {
-      allow read: if isAuthenticated();
+      allow read: if true; // Public profiles (Agents)
       allow create: if isOwner(userId) && 
                       validateEmail(request.resource.data.email) &&
                       validateString(request.resource.data.displayName, 2, 100);

@@ -13,7 +13,7 @@ import { Lead } from "@/domain/models/Lead";
 interface ClientFormModalProps {
     isOpen: boolean;
     onClose: () => void;
-    onSuccess: (type: 'inquilinos' | 'propietarios' | 'leads') => void;
+    onSuccess: (type: 'inquilinos' | 'propietarios' | 'leads', id?: string) => void;
     initialType?: 'inquilinos' | 'propietarios' | 'leads';
     initialData?: Inquilino | Propietario | Lead | null;
 }
@@ -153,6 +153,8 @@ export default function ClientFormModal({ isOpen, onClose, onSuccess, initialTyp
                 }
             }
 
+            let resultId = initialData?.id;
+
             if (clientType === 'inquilinos') {
                 const data = {
                     userId: uid,
@@ -169,7 +171,7 @@ export default function ClientFormModal({ isOpen, onClose, onSuccess, initialTyp
                 if (isEditing && initialData) {
                     await inquilinosService.updateInquilino(initialData.id, data);
                 } else {
-                    await inquilinosService.createInquilino(data as any);
+                    resultId = await inquilinosService.createInquilino(data as any);
                 }
 
             } else if (clientType === 'propietarios') {
@@ -191,7 +193,7 @@ export default function ClientFormModal({ isOpen, onClose, onSuccess, initialTyp
                 if (isEditing && initialData) {
                     await propietariosService.updatePropietario(initialData.id, data);
                 } else {
-                    await propietariosService.createPropietario(data as any);
+                    resultId = await propietariosService.createPropietario(data as any);
                 }
 
             } else if (clientType === 'leads') {
@@ -208,14 +210,16 @@ export default function ClientFormModal({ isOpen, onClose, onSuccess, initialTyp
                     await leadsService.updateLead(initialData.id, data as any);
                 } else {
                     // Leads service requires specific fields
-                    await leadsService.createLead({
+                    resultId = await leadsService.createLead({
                         ...data,
                         tipo: (initialData as Lead)?.tipo || 'consulta'
                     } as any);
                 }
             }
 
-            onSuccess(clientType);
+            // Pass back the ID and the type
+            // @ts-ignore - onSuccess signature might need update or we cast
+            onSuccess(clientType, resultId);
             onClose();
         } catch (err: any) {
             console.error("Error saving client:", err);

@@ -1,14 +1,33 @@
+import { useState } from "react";
 import Link from "next/link";
 import { PublicProperty } from "@/infrastructure/services/publicService";
-import { MapPin, Bath, Bed, Maximize, Home } from "lucide-react";
+import { MapPin, Bath, Bed, Maximize, Home, ChevronLeft, ChevronRight } from "lucide-react";
 
 interface PropertyPublicCardProps {
     property: PublicProperty;
 }
 
 export default function PropertyPublicCard({ property }: PropertyPublicCardProps) {
+    const [currentImageIndex, setCurrentImageIndex] = useState(0);
+
     const formatPrice = (currency: string, price: number) => {
         return new Intl.NumberFormat('es-AR', { style: 'currency', currency: currency, maximumFractionDigits: 0 }).format(price);
+    };
+
+    const nextImage = (e: React.MouseEvent) => {
+        e.preventDefault();
+        e.stopPropagation();
+        if (property.imageUrls && property.imageUrls.length > 0) {
+            setCurrentImageIndex((prev) => (prev + 1) % property.imageUrls.length);
+        }
+    };
+
+    const prevImage = (e: React.MouseEvent) => {
+        e.preventDefault();
+        e.stopPropagation();
+        if (property.imageUrls && property.imageUrls.length > 0) {
+            setCurrentImageIndex((prev) => (prev - 1 + property.imageUrls.length) % property.imageUrls.length);
+        }
     };
 
     return (
@@ -16,11 +35,51 @@ export default function PropertyPublicCard({ property }: PropertyPublicCardProps
             {/* Image Container */}
             <div className="relative aspect-[4/3] bg-gray-200 overflow-hidden">
                 {property.imageUrls && property.imageUrls.length > 0 ? (
-                    <img
-                        src={property.imageUrls[0]}
-                        alt={property.title}
-                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                    />
+                    <>
+                        {/* Slider Track */}
+                        <div
+                            className="flex h-full transition-transform duration-300 ease-out"
+                            style={{ transform: `translateX(-${currentImageIndex * 100}%)` }}
+                        >
+                            {property.imageUrls.map((url, idx) => (
+                                <img
+                                    key={idx}
+                                    src={url}
+                                    alt={`${property.title} - ${idx + 1}`}
+                                    className="w-full h-full object-cover flex-shrink-0"
+                                />
+                            ))}
+                        </div>
+
+                        {/* Carousel Controls (Visible on Hover) */}
+                        {property.imageUrls.length > 1 && (
+                            <>
+                                <button
+                                    onClick={prevImage}
+                                    className="absolute left-2 top-1/2 -translate-y-1/2 p-1 bg-white/80 rounded-full shadow-sm opacity-0 group-hover:opacity-100 transition-opacity hover:bg-white text-gray-700 hover:text-indigo-600 z-10"
+                                >
+                                    <ChevronLeft className="w-5 h-5" />
+                                </button>
+                                <button
+                                    onClick={nextImage}
+                                    className="absolute right-2 top-1/2 -translate-y-1/2 p-1 bg-white/80 rounded-full shadow-sm opacity-0 group-hover:opacity-100 transition-opacity hover:bg-white text-gray-700 hover:text-indigo-600 z-10"
+                                >
+                                    <ChevronRight className="w-5 h-5" />
+                                </button>
+
+                                {/* Dots Indicator */}
+                                <div className="absolute bottom-3 left-1/2 -translate-x-1/2 flex gap-1 z-10 opacity-0 group-hover:opacity-100 transition-opacity">
+                                    {property.imageUrls.slice(0, 5).map((_, idx) => (
+                                        <div
+                                            key={idx}
+                                            className={`w-1.5 h-1.5 rounded-full shadow-sm transition-colors ${idx === currentImageIndex ? 'bg-white' : 'bg-white/50'}`}
+                                        />
+                                    ))}
+                                    {property.imageUrls.length > 5 && <div className="w-1.5 h-1.5 rounded-full bg-white/50" />}
+                                </div>
+                            </>
+                        )}
+                    </>
                 ) : (
                     <div className="w-full h-full flex items-center justify-center text-gray-400">
                         <Home className="w-12 h-12 opacity-50" />
@@ -28,16 +87,16 @@ export default function PropertyPublicCard({ property }: PropertyPublicCardProps
                 )}
 
                 {/* Operation Tag */}
-                <span className={`absolute top-3 left-3 px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider ${property.operation_type === 'Venta' ? 'bg-green-500 text-white' :
-                        property.operation_type === 'Alquiler' ? 'bg-blue-600 text-white' : 'bg-purple-600 text-white'
+                <span className={`absolute top-3 left-3 px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider shadow-sm z-10 ${property.operation_type === 'Venta' ? 'bg-green-500 text-white' :
+                    property.operation_type === 'Alquiler' ? 'bg-blue-600 text-white' : 'bg-purple-600 text-white'
                     }`}>
                     {property.operation_type}
                 </span>
 
                 {/* Price Tag */}
-                <div className="absolute bottom-3 left-3 bg-white/95 backdrop-blur-sm px-3 py-1.5 rounded-lg shadow-sm">
+                <div className="absolute bottom-3 left-3 bg-white/95 backdrop-blur-sm px-3 py-1.5 rounded-lg shadow-sm z-10">
                     <p className="font-bold text-gray-900">
-                        {property.currency} {property.price?.toLocaleString('es-AR')}
+                        {property.currency} {Number(property.price)?.toLocaleString('es-AR')}
                     </p>
                 </div>
             </div>
@@ -56,7 +115,9 @@ export default function PropertyPublicCard({ property }: PropertyPublicCardProps
                                 </div>
                             )}
                         </div>
-                        <span className="text-xs text-gray-500 font-medium truncate">{property.agency.displayName}</span>
+                        <span className="text-xs text-gray-500 font-medium truncate">
+                            Publicado por {property.agency.displayName}
+                        </span>
                     </div>
                 )}
 
@@ -69,27 +130,37 @@ export default function PropertyPublicCard({ property }: PropertyPublicCardProps
                     <span className="truncate">{property.localidad}, {property.provincia}</span>
                 </div>
 
-                {/* Specs Grid */}
-                <div className="grid grid-cols-3 gap-2 py-3 border-t border-gray-100">
-                    <div className="flex flex-col items-center justify-center text-center">
-                        <div className="flex items-center gap-1 text-gray-400 mb-1">
-                            <Maximize className="w-3.5 h-3.5" />
-                        </div>
-                        <span className="text-xs font-semibold text-gray-700">{property.area_covered} m²</span>
+                {/* Specs Grid - Only show populated fields */}
+                {(Boolean(property.area_covered) || Boolean(property.rooms) || Boolean(property.bathrooms)) && (
+                    <div className="flex flex-wrap gap-4 py-3 border-t border-gray-100">
+                        {Number(property.area_covered) > 0 && (
+                            <div className="flex flex-col items-center justify-center text-center">
+                                <div className="flex items-center gap-1 text-gray-400 mb-1">
+                                    <Maximize className="w-3.5 h-3.5" />
+                                </div>
+                                <span className="text-xs font-semibold text-gray-700">{property.area_covered} m²</span>
+                            </div>
+                        )}
+
+                        {Number(property.rooms) > 0 && (
+                            <div className={`flex flex-col items-center justify-center text-center ${Number(property.area_covered) > 0 ? 'pl-4 border-l border-gray-100' : ''}`}>
+                                <div className="flex items-center gap-1 text-gray-400 mb-1">
+                                    <Bed className="w-3.5 h-3.5" />
+                                </div>
+                                <span className="text-xs font-semibold text-gray-700">{property.rooms} Amb.</span>
+                            </div>
+                        )}
+
+                        {Number(property.bathrooms) > 0 && (
+                            <div className={`flex flex-col items-center justify-center text-center ${Number(property.area_covered) > 0 || Number(property.rooms) > 0 ? 'pl-4 border-l border-gray-100' : ''}`}>
+                                <div className="flex items-center gap-1 text-gray-400 mb-1">
+                                    <Bath className="w-3.5 h-3.5" />
+                                </div>
+                                <span className="text-xs font-semibold text-gray-700">{property.bathrooms} Baños</span>
+                            </div>
+                        )}
                     </div>
-                    <div className="flex flex-col items-center justify-center text-center border-l border-gray-100">
-                        <div className="flex items-center gap-1 text-gray-400 mb-1">
-                            <Bed className="w-3.5 h-3.5" />
-                        </div>
-                        <span className="text-xs font-semibold text-gray-700">{property.rooms || '-'} Amb.</span>
-                    </div>
-                    <div className="flex flex-col items-center justify-center text-center border-l border-gray-100">
-                        <div className="flex items-center gap-1 text-gray-400 mb-1">
-                            <Bath className="w-3.5 h-3.5" />
-                        </div>
-                        <span className="text-xs font-semibold text-gray-700">{property.bathrooms || '-'} Baños</span>
-                    </div>
-                </div>
+                )}
             </div>
         </Link>
     );
