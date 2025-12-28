@@ -5,7 +5,7 @@ import { contactService } from "@/infrastructure/services/contactService";
 import { ContactMessage } from "@/domain/models/ContactMessage";
 import { format } from "date-fns";
 import { es } from "date-fns/locale";
-import { Mail, Phone, Building, MessageSquare, CheckCircle, Clock } from "lucide-react";
+import { Mail, Phone, Building, MessageSquare, CheckCircle, Clock, Trash2 } from "lucide-react";
 
 export default function AdminMessagesPage() {
     const [messages, setMessages] = useState<ContactMessage[]>([]);
@@ -35,6 +35,20 @@ export default function AdminMessagesPage() {
             ));
         } catch (error) {
             console.error("Error marking as read:", error);
+        }
+    };
+
+    const handleDelete = async (id: string) => {
+        if (!window.confirm("¿Estás seguro de que quieres eliminar este mensaje? Esta acción no se puede deshacer.")) {
+            return;
+        }
+
+        try {
+            await contactService.deleteMessage(id);
+            setMessages(prev => prev.filter(msg => msg.id !== id));
+        } catch (error) {
+            console.error("Error deleting message:", error);
+            alert("Error al eliminar el mensaje");
         }
     };
 
@@ -135,6 +149,14 @@ export default function AdminMessagesPage() {
                                         <Mail className="w-4 h-4" />
                                         Responder
                                     </a>
+
+                                    <button
+                                        onClick={() => msg.id && handleDelete(msg.id)}
+                                        className="px-4 py-2 bg-white border border-red-200 text-red-600 text-sm font-medium rounded-lg hover:bg-red-50 transition-colors w-full flex items-center justify-center gap-2"
+                                    >
+                                        <Trash2 className="w-4 h-4" />
+                                        Eliminar
+                                    </button>
                                 </div>
                             </div>
                         </div>

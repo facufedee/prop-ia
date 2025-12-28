@@ -1,5 +1,5 @@
 import { db } from "@/infrastructure/firebase/client";
-import { collection, addDoc, Timestamp, getDocs, query, orderBy, doc, updateDoc, getDoc } from "firebase/firestore";
+import { collection, addDoc, Timestamp, getDocs, query, orderBy, doc, updateDoc, getDoc, deleteDoc } from "firebase/firestore";
 import { ContactMessage } from "@/domain/models/ContactMessage";
 
 const COLLECTION_NAME = "contact_messages";
@@ -38,5 +38,11 @@ export const contactService = {
         await updateDoc(docRef, {
             read: true
         });
+    },
+
+    // Delete message
+    deleteMessage: async (id: string): Promise<void> => {
+        if (!db) throw new Error("Firestore not initialized");
+        await deleteDoc(doc(db, COLLECTION_NAME, id));
     },
 };

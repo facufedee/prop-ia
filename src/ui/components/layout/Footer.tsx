@@ -1,19 +1,20 @@
 import Link from "next/link";
-import { Facebook, Twitter, Instagram, Linkedin, Github } from "lucide-react";
+import { Facebook, Twitter, Instagram, Linkedin, Github, Mail, ArrowRight } from "lucide-react";
 
 export default function Footer() {
     return (
         <footer className="bg-black border-t border-gray-800 pt-16 pb-8">
             <div className="max-w-7xl mx-auto px-6">
                 <div className="grid grid-cols-1 md:grid-cols-4 gap-12 mb-12">
-                    <div className="space-y-4">
+                    {/* Brand & Description */}
+                    <div className="space-y-6">
                         <img
                             src="/assets/img/logo_web_propia_fondoNegro.png"
                             alt="PROP-IA"
                             className="h-10 w-auto"
                         />
                         <p className="text-gray-400 text-sm leading-relaxed">
-                            La plataforma integral para inmobiliarias modernas. Tasaciones con IA, gestión de alquileres, CRM y sitios web automáticos. Todo lo que necesitas para escalar tu negocio en un solo lugar.
+                            Impulsando el futuro del Real Estate con tecnología avanzada. Potenciamos inmobiliarias con Inteligencia Artificial, automatización y herramientas de gestión integral para escalar tu negocio.
                         </p>
                         <div className="flex gap-4">
                             <a href="https://instagram.com/propia.argentina" target="_blank" rel="noopener noreferrer" aria-label="Instagram" className="text-gray-400 hover:text-white transition"><Instagram className="w-5 h-5" /></a>
@@ -21,44 +22,55 @@ export default function Footer() {
                         </div>
                     </div>
 
+                    {/* Navigation */}
                     <div>
-                        <h4 className="font-bold text-white mb-4">Producto</h4>
-                        <ul className="space-y-2 text-sm text-gray-400">
-                            <li><Link href="/#features" className="hover:text-white transition">Gestión de Propiedades</Link></li>
-                            <li><Link href="/#features" className="hover:text-white transition">CRM Inmobiliario</Link></li>
-                            <li><Link href="/#features" className="hover:text-white transition">Contratos Digitales</Link></li>
-                            <li><Link href="/#features" className="hover:text-white transition">Agenda Inteligente</Link></li>
+                        <h4 className="font-bold text-white mb-6">Explorar</h4>
+                        <ul className="space-y-4 text-sm text-gray-400">
+                            <li><Link href="/servicios" className="hover:text-white transition flex items-center gap-2"><ArrowRight size={12} className="opacity-0 group-hover:opacity-100 transition-opacity" /> Servicios</Link></li>
+                            <li><Link href="/precios" className="hover:text-white transition flex items-center gap-2"><ArrowRight size={12} className="opacity-0 group-hover:opacity-100 transition-opacity" /> Precios</Link></li>
+                            <li><Link href="/nosotros" className="hover:text-white transition flex items-center gap-2"><ArrowRight size={12} className="opacity-0 group-hover:opacity-100 transition-opacity" /> Nosotros</Link></li>
+                            <li><Link href="/contacto" className="hover:text-white transition flex items-center gap-2"><ArrowRight size={12} className="opacity-0 group-hover:opacity-100 transition-opacity" /> Contacto</Link></li>
                         </ul>
                     </div>
 
+                    {/* Legal */}
                     <div>
-                        <h4 className="font-bold text-white mb-4">Compañía</h4>
-                        <ul className="space-y-2 text-sm text-gray-400">
-                            <li><Link href="/" className="hover:text-white transition">Inicio</Link></li>
-                            <li><Link href="/blog" className="hover:text-white transition">Blog</Link></li>
-                            <li><Link href="/#contact" className="hover:text-white transition">Contacto</Link></li>
-                        </ul>
-                    </div>
-
-                    <div>
-                        <h4 className="font-bold text-white mb-4">Legal</h4>
-                        <ul className="space-y-2 text-sm text-gray-400">
+                        <h4 className="font-bold text-white mb-6">Legal</h4>
+                        <ul className="space-y-4 text-sm text-gray-400">
                             <li><Link href="/privacidad" className="hover:text-white transition">Privacidad</Link></li>
                             <li><Link href="/terminos" className="hover:text-white transition">Términos de Uso</Link></li>
                             <li><Link href="/cookies" className="hover:text-white transition">Política de Cookies</Link></li>
                         </ul>
                     </div>
+
+                    {/* Newsletter */}
+                    <div>
+                        <h4 className="font-bold text-white mb-6">Newsletter</h4>
+                        <p className="text-gray-400 text-sm mb-4">
+                            Suscribite para recibir las últimas novedades del mercado y actualizaciones de la plataforma.
+                        </p>
+                        <form className="space-y-3" onSubmit={(e) => e.preventDefault()}>
+                            <div className="relative">
+                                <Mail className="absolute left-3 top-2.5 h-5 w-5 text-gray-500" />
+                                <input
+                                    type="email"
+                                    placeholder="Tu email"
+                                    className="w-full bg-gray-900 border border-gray-800 rounded-lg py-2 pl-10 pr-4 text-sm text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all"
+                                />
+                            </div>
+                            <button className="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-medium py-2 px-4 rounded-lg text-sm transition-colors">
+                                Suscribirme
+                            </button>
+                        </form>
+                    </div>
                 </div>
 
                 <div className="border-t border-gray-800 pt-8 flex flex-col md:flex-row justify-between items-center gap-4">
-                    <p className="text-sm text-gray-400">
+                    <p className="text-sm text-gray-500">
                         © {new Date().getFullYear()} PROP-IA. Todos los derechos reservados.
                     </p>
-                    <div className="flex items-center gap-2 text-sm text-gray-400">
-                        <span className="text-right">
-                            Creado por ingenieros expertos en el mercado inmobiliario <br />
-                            Hecho con ❤️ en Buenos Aires, Argentina
-                        </span>
+                    <div className="text-sm text-gray-500 text-center md:text-right">
+                        Hecho con ❤️ en Oeste de Buenos Aires, Argentina
                     </div>
                 </div>
             </div>

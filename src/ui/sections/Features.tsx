@@ -12,7 +12,8 @@ import {
   Zap,
   TrendingUp,
   MessageSquare,
-  FileText
+  FileText,
+  Receipt
 } from "lucide-react";
 
 export default function Features() {
@@ -32,11 +33,11 @@ export default function Features() {
       benefits: ["Pipeline visual", "Scoring de clientes", "Alertas de matching"]
     },
     {
-      icon: MessageSquare,
-      title: "Chat Prop-IA",
-      description: "Tu asistente virtual disponible 24/7. Responde consultas, agendamiento de visitas y pre-calificación de interesados.",
+      icon: Receipt,
+      title: "Gestión de Alquileres",
+      description: "Automatiza la administración. Emisión de recibos, cálculo de punitorios, liquidaciones a propietarios y control de caja.",
       color: "from-purple-500 to-indigo-500",
-      benefits: ["Respuestas inmediatas", "Guiones de venta", "Integrado a WhatsApp"]
+      benefits: ["Recibos automáticos", "Cálculo de punitorios", "Liq. a propietarios"]
     },
     {
       icon: Calendar,

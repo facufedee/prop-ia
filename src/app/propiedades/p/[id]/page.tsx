@@ -3,9 +3,10 @@
 import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
 import { PublicProperty, PublicAgency, publicService } from "@/infrastructure/services/publicService";
-import { MapPin, Bath, Bed, Maximize, Home, ChevronLeft, ChevronRight, Share2, Heart } from "lucide-react";
+import { MapPin, Bath, Bed, Maximize, Home, ChevronLeft, ChevronRight, Share2, Heart, ArrowRight } from "lucide-react";
 import Link from "next/link";
 import dynamic from 'next/dynamic';
+import SimilarPropertyCard from "@/ui/components/properties/public/SimilarPropertyCard";
 
 const PublicMap = dynamic(() => import("@/ui/components/properties/public/PublicMap"), {
     ssr: false,
@@ -17,6 +18,7 @@ export default function PropertyDetailPage() {
     const id = params.id as string;
 
     const [property, setProperty] = useState<PublicProperty | null>(null);
+    const [similarProperties, setSimilarProperties] = useState<PublicProperty[]>([]);
     const [loading, setLoading] = useState(true);
     const [currentImageIndex, setCurrentImageIndex] = useState(0);
     const [showGalleryModal, setShowGalleryModal] = useState(false);
@@ -27,9 +29,19 @@ export default function PropertyDetailPage() {
         const load = async () => {
             if (!id) return;
             try {
+                // 1. Get current property
                 const data = await publicService.getPropertyById(id);
                 setProperty(data);
-                // Check if saved in local storage (mock persistence)
+
+                // 2. Get similar properties (Mock: fetch all and take 5 random/first ones excluding current)
+                // In a real app, this would be a specific endpoint 'getSimilarProperties(id)'
+                const allProps = await publicService.getAllProperties();
+                const recommendations = allProps
+                    .filter(p => p.id !== id)
+                    .slice(0, 5);
+                setSimilarProperties(recommendations);
+
+                // Check persistence
                 const saved = localStorage.getItem(`saved_${id}`);
                 if (saved) setIsSaved(true);
             } catch (error) {
@@ -95,8 +107,8 @@ export default function PropertyDetailPage() {
         <div className="min-h-screen bg-white pb-20 pt-24">
             <main className="container mx-auto px-4">
                 {/* Header (Title & Price) */}
-                <div className="flex flex-col md:flex-row justify-between items-start md:items-end mb-8 gap-4">
-                    <div>
+                <div className="flex flex-col md:flex-row justify-between items-start mb-8 gap-4">
+                    <div className="md:max-w-[70%]">
                         <div className="flex items-center gap-2 mb-3">
                             <span className={`px-2.5 py-0.5 rounded-md text-xs font-bold uppercase tracking-wider ${property.operation_type === 'Venta' ? 'bg-green-100 text-green-700' :
                                 property.operation_type === 'Alquiler' ? 'bg-blue-100 text-blue-700' : 'bg-purple-100 text-purple-700'
@@ -113,32 +125,10 @@ export default function PropertyDetailPage() {
                         </div>
                     </div>
 
-                    <div className="flex flex-col items-end gap-2">
-                        <p className="text-3xl font-bold text-gray-900">
-                            {property.currency} {Number(property.price)?.toLocaleString('es-AR')}
-                        </p>
-                        <div className="flex gap-2">
-                            <button
-                                onClick={handleShare}
-                                className="flex items-center gap-2 px-4 py-2 rounded-lg border border-gray-200 hover:bg-gray-50 text-sm font-medium transition"
-                            >
-                                <Share2 className="w-4 h-4" /> Compartir
-                            </button>
-                            <button
-                                onClick={handleSave}
-                                className={`flex items-center gap-2 px-4 py-2 rounded-lg border transition group text-sm font-medium ${isSaved
-                                    ? 'bg-red-50 border-red-200 text-red-600'
-                                    : 'border-gray-200 hover:border-red-200 hover:bg-red-50'
-                                    }`}
-                            >
-                                <Heart className={`w-4 h-4 ${isSaved ? 'fill-current' : 'group-hover:text-red-500'}`} />
-                                {isSaved ? 'Guardado' : 'Guardar'}
-                            </button>
-                        </div>
-                    </div>
+
                 </div>
 
-                <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-20">
                     {/* Main Content Column */}
                     <div className="lg:col-span-2 space-y-8">
 
@@ -288,6 +278,30 @@ export default function PropertyDetailPage() {
                     {/* Sidebar / Agency Info (Sticky) */}
                     <div className="lg:col-span-1">
                         <div className="sticky top-24 space-y-6">
+                            {/* Price & Actions Card */}
+                            <div className="bg-white rounded-2xl p-6 shadow-lg border border-gray-100">
+                                <p className="text-3xl font-bold text-gray-900 mb-6 text-center">
+                                    {property.currency} {Number(property.price)?.toLocaleString('es-AR')}
+                                </p>
+                                <div className="flex gap-3">
+                                    <button
+                                        onClick={handleShare}
+                                        className="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl border border-gray-200 hover:bg-gray-50 text-sm font-bold text-gray-700 transition"
+                                    >
+                                        <Share2 className="w-4 h-4" /> Compartir
+                                    </button>
+                                    <button
+                                        onClick={handleSave}
+                                        className={`flex-1 flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl border transition group text-sm font-bold ${isSaved
+                                            ? 'bg-red-50 border-red-200 text-red-600'
+                                            : 'border-gray-200 hover:border-red-200 hover:bg-red-50 text-gray-700'
+                                            }`}
+                                    >
+                                        <Heart className={`w-4 h-4 ${isSaved ? 'fill-current' : 'group-hover:text-red-500'}`} />
+                                        {isSaved ? 'Guardado' : 'Guardar'}
+                                    </button>
+                                </div>
+                            </div>
                             {property.agency && (
                                 <div className="bg-white rounded-2xl p-6 shadow-lg border border-gray-100 hover:shadow-xl transition-shadow duration-300">
                                     <div className="flex items-center gap-4 mb-8">
@@ -327,6 +341,26 @@ export default function PropertyDetailPage() {
                         </div>
                     </div>
                 </div>
+
+                {/* Similar Properties Section */}
+                {similarProperties.length > 0 && (
+                    <div className="border-t border-gray-100 pt-16 mt-16">
+                        <div className="flex items-center justify-between mb-8">
+                            <h2 className="text-2xl font-bold text-gray-900">Encontrá propiedades similares</h2>
+                            <Link href="/propiedades" className="flex items-center gap-2 text-indigo-600 font-bold text-sm hover:underline">
+                                Ver más recomendaciones <ArrowRight size={16} />
+                            </Link>
+                        </div>
+
+                        <div className="relative -mx-4 px-4 overflow-x-auto pb-8 scrollbar-hide">
+                            <div className="flex gap-6 w-max">
+                                {similarProperties.map((prop) => (
+                                    <SimilarPropertyCard key={prop.id} property={prop} />
+                                ))}
+                            </div>
+                        </div>
+                    </div>
+                )}
             </main>
 
             {/* Gallery Modal */}

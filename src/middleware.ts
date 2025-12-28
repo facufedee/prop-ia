@@ -1,8 +1,24 @@
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
+import { InMemoryRateLimiter } from './infrastructure/security/InMemoryRateLimiter';
 
-export function middleware(request: NextRequest) {
+const limiter = new InMemoryRateLimiter({
+    interval: 60 * 1000, // 60 seconds
+    uniqueTokenPerInterval: 500, // Max 500 users per second
+});
+
+export async function middleware(request: NextRequest) {
     const nonce = Buffer.from(crypto.getRandomValues(new Uint8Array(16))).toString('base64');
+
+    // Rate Limiting (Simple IP-based) - Skip in Development
+    if (process.env.NODE_ENV !== 'development') {
+        const ip = request.headers.get('x-forwarded-for') ?? '127.0.0.1';
+        try {
+            await limiter.check(ip, 20); // 20 requests per minute per IP in Production
+        } catch {
+            return new NextResponse('Too Many Requests', { status: 429 });
+        }
+    }
 
     // Custom headers for security
     const headers = new Headers(request.headers);

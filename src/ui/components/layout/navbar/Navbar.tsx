@@ -54,63 +54,21 @@ export default function Navbar() {
 
         {/* Desktop menu */}
         <div className="hidden md:flex items-center gap-6 text-sm font-medium text-gray-600">
-          <Link href="/como-funciona" className="flex items-center gap-2 hover:text-indigo-600 transition-colors">
-            Cómo funciona
+          <Link href="/servicios" className="flex items-center gap-2 hover:text-indigo-600 transition-colors">
+            Servicios
           </Link>
-          <Link href="/about" className="flex items-center gap-2 hover:text-indigo-600 transition-colors">
-            Nosotros
-          </Link>
-          <Link href="/modelo" className="flex items-center gap-2 hover:text-indigo-600 transition-colors">
-            Tecnología
-          </Link>
-          <Link href="/catalogo" className="flex items-center gap-2 hover:text-indigo-600 transition-colors">
+          <Link href="/precios" className="flex items-center gap-2 hover:text-indigo-600 transition-colors">
             Precios
           </Link>
-          <Link href="/blog" className="flex items-center gap-2 hover:text-indigo-600 transition-colors">
-            Blog
+          <Link href="/nosotros" className="flex items-center gap-2 hover:text-indigo-600 transition-colors">
+            Nosotros
           </Link>
-
-          {/* Mega menu */}
-          <div className="relative group">
-            <button
-              onClick={() => setMegaOpen(!megaOpen)}
-              className="flex items-center gap-1 hover:text-indigo-600 transition-colors"
-            >
-              Features <ChevronDown size={16} />
-            </button>
-
-            {megaOpen && (
-              <div className="absolute left-0 mt-3 bg-white shadow-xl border border-gray-100 rounded-2xl 
-              p-6 grid grid-cols-2 gap-8 w-[500px] animate-in fade-in zoom-in-95 duration-200 z-50">
-                <div>
-                  <h4 className="font-semibold mb-3 text-indigo-900 flex items-center gap-2">
-                    <div className="w-6 h-6 rounded-lg bg-indigo-100 flex items-center justify-center text-indigo-600">
-                      <Bot size={14} />
-                    </div>
-                    Inteligencia Artificial
-                  </h4>
-                  <ul className="space-y-2 text-sm text-gray-500">
-                    <li className="hover:text-indigo-600 cursor-pointer transition-colors">Tasación Inteligente</li>
-                    <li className="hover:text-indigo-600 cursor-pointer transition-colors">Comparador de Mercado</li>
-                    <li className="hover:text-indigo-600 cursor-pointer transition-colors">Automatizaciones</li>
-                  </ul>
-                </div>
-                <div>
-                  <h4 className="font-semibold mb-3 text-indigo-900 flex items-center gap-2">
-                    <div className="w-6 h-6 rounded-lg bg-indigo-100 flex items-center justify-center text-indigo-600">
-                      <LayoutDashboard size={14} />
-                    </div>
-                    Gestión Integral
-                  </h4>
-                  <ul className="space-y-2 text-sm text-gray-500">
-                    <li className="hover:text-indigo-600 cursor-pointer transition-colors">CRM de Clientes</li>
-                    <li className="hover:text-indigo-600 cursor-pointer transition-colors">Publicación Multiplataforma</li>
-                    <li className="hover:text-indigo-600 cursor-pointer transition-colors">Estadísticas Avanzadas</li>
-                  </ul>
-                </div>
-              </div>
-            )}
-          </div>
+          <Link href="/propiedades" className="flex items-center gap-2 hover:text-indigo-600 transition-colors">
+            Propiedades
+          </Link>
+          <Link href="/contacto" className="flex items-center gap-2 hover:text-indigo-600 transition-colors">
+            Contacto
+          </Link>
         </div>
 
         {/* Auth */}
@@ -186,14 +144,7 @@ export default function Navbar() {
                         <Home size={16} /> {/* Note: Need to import Home if not already, or use ArrowLeft/House */}
                         Volver al inicio
                       </Link>
-                      <Link
-                        href="/dashboard/propiedades"
-                        className="flex items-center gap-2 px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
-                        onClick={() => setProfileOpen(false)}
-                      >
-                        <LayoutDashboard size={16} />
-                        Mis avisos
-                      </Link>
+
                       <Link
                         href="/dashboard"
                         className="flex items-center gap-2 px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
@@ -239,11 +190,11 @@ export default function Navbar() {
         <div className="md:hidden mt-3 flex flex-col gap-4 
         bg-white/95 backdrop-blur-xl border-t border-white/20 py-4 px-2 text-sm">
 
-          <Link href="/como-funciona" className="px-2 py-1 hover:text-black">Cómo funciona</Link>
-          <Link href="/about" className="px-2 py-1 hover:text-black">Nosotros</Link>
-          <Link href="/modelo" className="px-2 py-1 hover:text-black">Tecnología</Link>
-          <Link href="/#pricing" className="px-2 py-1 hover:text-black">Precios</Link>
-          <Link href="/#faq" className="px-2 py-1 hover:text-black">Preguntas</Link>
+          <Link href="/servicios" className="px-2 py-1 hover:text-black">Servicios</Link>
+          <Link href="/precios" className="px-2 py-1 hover:text-black">Precios</Link>
+          <Link href="/nosotros" className="px-2 py-1 hover:text-black">Nosotros</Link>
+          <Link href="/propiedades" className="px-2 py-1 hover:text-black">Propiedades</Link>
+          <Link href="/contacto" className="px-2 py-1 hover:text-black">Contacto</Link>
 
           <div className="border-t pt-3">
             {!user ? (

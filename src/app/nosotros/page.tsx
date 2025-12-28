@@ -1,5 +1,6 @@
 import { Metadata } from 'next';
 import Link from 'next/link';
+import { Linkedin, Code2, Target, Lightbulb } from 'lucide-react';
 
 export const metadata: Metadata = {
     title: 'Nosotros | PROP-IA',
@@ -11,98 +12,106 @@ export const metadata: Metadata = {
 
 export default function AboutPage() {
     return (
-        <main className="bg-white min-h-screen">
+        <div className="bg-white font-sans text-gray-900">
             {/* Hero Section */}
-            <section className="bg-indigo-600 text-white py-20 px-4">
-                <div className="max-w-4xl mx-auto text-center">
-                    <h1 className="text-4xl md:text-5xl font-bold mb-6">Innovando el Real Estate con Inteligencia Artificial</h1>
-                    <p className="text-xl text-indigo-100 max-w-2xl mx-auto">
-                        Nuestra misión es potenciar a cada martillero y corredor inmobiliario de Argentina con herramientas tecnológicas de vanguardia.
+            <section className="bg-indigo-50/30 overflow-hidden relative py-20 px-4">
+                {/* Decorative Elements */}
+                <div className="absolute top-0 right-0 -mr-20 -mt-20 w-96 h-96 bg-purple-200/30 rounded-full blur-3xl pointer-events-none" />
+                <div className="absolute bottom-0 left-0 -ml-20 -mb-20 w-96 h-96 bg-indigo-200/30 rounded-full blur-3xl pointer-events-none" />
+
+                <div className="max-w-4xl mx-auto text-center relative z-10">
+                    <div className="inline-block px-4 py-1.5 bg-indigo-100 text-indigo-700 rounded-full text-sm font-semibold mb-6">
+                        Sobre Nosotros
+                    </div>
+                    <h1 className="text-4xl md:text-5xl font-extrabold mb-6 leading-tight text-gray-900">
+                        Impulsando el futuro del <br />
+                        <span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-600 to-purple-600">Real Estate en Argentina</span>
+                    </h1>
+                    <p className="text-xl text-gray-500 max-w-2xl mx-auto">
+                        Somos un equipo apasionado por la tecnología y el mercado inmobiliario, dedicados a crear herramientas que simplifican y potencian el trabajo de miles de profesionales.
                     </p>
                 </div>
             </section>
 
-            {/* Founder Section (E-E-A-T Core) */}
-            <section className="py-16 px-4">
-                <div className="max-w-4xl mx-auto">
-                    <div className="flex flex-col md:flex-row items-center gap-12">
-                        <div className="w-48 h-48 bg-gray-200 rounded-full flex-shrink-0 flex items-center justify-center text-4xl overflow-hidden relative">
-                            {/* Fallback avatar if no image */}
-                            <span className="z-10 text-gray-400">FF</span>
-                            {/* Setup for next/image if user provides one: <Image src="/facundo.jpg" fill className="object-cover" alt="Facundo Flores" /> */}
+            {/* Mission & Vision Grid */}
+            <section className="py-20 px-6 max-w-7xl mx-auto">
+                <div className="grid md:grid-cols-2 gap-8 mb-20">
+                    <div className="bg-white p-8 rounded-2xl shadow-sm border border-gray-100 flex flex-col items-start hover:shadow-md transition-shadow">
+                        <div className="w-12 h-12 bg-indigo-100 rounded-xl flex items-center justify-center text-indigo-600 mb-6">
+                            <Target size={24} />
                         </div>
+                        <h2 className="text-2xl font-bold mb-4">Nuestra Misión</h2>
+                        <p className="text-gray-600 leading-relaxed">
+                            Democratizar el acceso a herramientas tecnológicas avanzadas para el sector inmobiliario. Queremos que cada inmobiliaria, agente y tasador, sin importar su tamaño, cuente con el poder de la Inteligencia Artificial para ser más eficiente y brindar un mejor servicio.
+                        </p>
+                    </div>
+                    <div className="bg-white p-8 rounded-2xl shadow-sm border border-gray-100 flex flex-col items-start hover:shadow-md transition-shadow">
+                        <div className="w-12 h-12 bg-purple-100 rounded-xl flex items-center justify-center text-purple-600 mb-6">
+                            <Lightbulb size={24} />
+                        </div>
+                        <h2 className="text-2xl font-bold mb-4">Nuestra Visión</h2>
+                        <p className="text-gray-600 leading-relaxed">
+                            Ser la plataforma de referencia en Latinoamérica para la gestión inmobiliaria integral. Imaginamos un futuro donde la tecnología elimina las fricciones administrativas, permitiendo a los profesionales enfocarse en lo que realmente importa: las relaciones humanas.
+                        </p>
+                    </div>
+                </div>
 
-                        <div className="flex-1 text-center md:text-left">
-                            <span className="text-indigo-600 font-semibold tracking-wide uppercase text-sm">Fundador & CEO</span>
-                            <h2 className="text-3xl font-bold text-gray-900 mt-2 mb-4">Facundo Federico Flores Zamorano</h2>
-                            <p className="text-gray-600 leading-relaxed mb-6">
-                                Con una profunda trayectoria en el sector tecnológico y una visión clara sobre el futuro del mercado inmobiliario, Facundo lidera PROP-IA con el objetivo de democratizar el acceso a la Inteligencia Artificial para profesionales del rubro. Su experiencia combina desarrollo de software avanzado con entendimiento estratégico de negocios digitales.
-                            </p>
-                            <div className="flex gap-4 justify-center md:justify-start">
-                                <a href="#" className="text-gray-500 hover:text-indigo-600 transition-colors">LinkedIn</a>
-                                <a href="#" className="text-gray-500 hover:text-indigo-600 transition-colors">Twitter / X</a>
+                {/* Team Section */}
+                <div className="max-w-4xl mx-auto">
+                    <h2 className="text-3xl font-bold text-center mb-12">Quiénes Somos</h2>
+                    <div className="grid md:grid-cols-2 gap-12">
+
+                        {/* Facundo */}
+                        <div className="bg-white rounded-2xl overflow-hidden shadow-lg border border-gray-100 group hover:-translate-y-1 transition-transform duration-300">
+                            <div className="h-32 bg-gradient-to-r from-indigo-500 to-blue-500"></div>
+                            <div className="px-8 pb-8 -mt-12 text-center">
+                                <div className="w-24 h-24 bg-white rounded-full p-1 mx-auto shadow-md mb-4 flex items-center justify-center">
+                                    <div className="w-full h-full rounded-full bg-gray-100 flex items-center justify-center text-gray-400 font-bold text-2xl">
+                                        FF
+                                    </div>
+                                </div>
+                                <h3 className="text-xl font-bold text-gray-900">Facundo Flores</h3>
+                                <p className="text-indigo-600 font-medium mb-4">CEO & Fundador</p>
+                                <p className="text-gray-500 text-sm mb-6 leading-relaxed">
+                                    Ingeniero en Sistemas apasionado por la innovación. Lidera la estrategia y visión de Prop-IA con el objetivo de transformar la industria.
+                                </p>
+                                <a
+                                    href="https://www.linkedin.com/in/floreszamoranofacundo/"
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="inline-flex items-center gap-2 text-gray-600 hover:text-blue-600 transition-colors bg-gray-50 px-4 py-2 rounded-full text-sm font-medium hover:bg-blue-50"
+                                >
+                                    <Linkedin size={16} />
+                                    Ver LinkedIn
+                                </a>
                             </div>
                         </div>
+
+                        {/* Nahuel */}
+                        <div className="bg-white rounded-2xl overflow-hidden shadow-lg border border-gray-100 group hover:-translate-y-1 transition-transform duration-300">
+                            <div className="h-32 bg-gradient-to-r from-purple-500 to-pink-500"></div>
+                            <div className="px-8 pb-8 -mt-12 text-center">
+                                <div className="w-24 h-24 bg-white rounded-full p-1 mx-auto shadow-md mb-4 flex items-center justify-center">
+                                    <div className="w-full h-full rounded-full bg-gray-100 flex items-center justify-center text-gray-400 font-bold text-2xl">
+                                        NS
+                                    </div>
+                                </div>
+                                <h3 className="text-xl font-bold text-gray-900">Nahuel Serrano</h3>
+                                <p className="text-purple-600 font-medium mb-4">CTO</p>
+                                <p className="text-gray-500 text-sm mb-6 leading-relaxed">
+                                    El cerebro detrás de nuestra infraestructura tecnológica. Asegura que Prop-IA sea robusto, escalable y seguro para todos nuestros usuarios.
+                                </p>
+                                <div className="inline-flex items-center gap-2 text-gray-400 cursor-default bg-gray-50 px-4 py-2 rounded-full text-sm font-medium">
+                                    <Code2 size={16} />
+                                    Tech Lead
+                                </div>
+                            </div>
+                        </div>
+
                     </div>
                 </div>
-            </section>
 
-            {/* Values Section */}
-            <section className="bg-gray-50 py-16 px-4">
-                <div className="max-w-6xl mx-auto grid grid-cols-1 md:grid-cols-3 gap-8 text-center">
-                    <div className="bg-white p-8 rounded-xl shadow-sm">
-                        <div className="w-12 h-12 bg-blue-100 text-blue-600 rounded-lg flex items-center justify-center mx-auto mb-4">
-                            <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" /></svg>
-                        </div>
-                        <h3 className="text-xl font-bold text-gray-900 mb-2">Innovación Constante</h3>
-                        <p className="text-gray-600">No seguimos tendencias, las creamos. Usamos IA generativa para resolver problemas reales.</p>
-                    </div>
-                    <div className="bg-white p-8 rounded-xl shadow-sm">
-                        <div className="w-12 h-12 bg-green-100 text-green-600 rounded-lg flex items-center justify-center mx-auto mb-4">
-                            <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
-                        </div>
-                        <h3 className="text-xl font-bold text-gray-900 mb-2">Integridad y Confianza</h3>
-                        <p className="text-gray-600">Tus datos son sagrados. Priorizamos la seguridad y la transparencia en cada línea de código.</p>
-                    </div>
-                    <div className="bg-white p-8 rounded-xl shadow-sm">
-                        <div className="w-12 h-12 bg-purple-100 text-purple-600 rounded-lg flex items-center justify-center mx-auto mb-4">
-                            <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" /></svg>
-                        </div>
-                        <h3 className="text-xl font-bold text-gray-900 mb-2">Comunidad</h3>
-                        <p className="text-gray-600">Construimos junto a nuestros usuarios. Escuchamos, adaptamos y mejoramos la plataforma día a día.</p>
-                    </div>
-                </div>
             </section>
-
-            {/* CTA */}
-            <section className="py-20 px-4 text-center">
-                <h2 className="text-3xl font-bold text-gray-900 mb-6">¿Listo para transformar tu inmobiliaria?</h2>
-                <Link href="/registro" className="inline-block bg-indigo-600 text-white px-8 py-3 rounded-lg font-semibold hover:bg-indigo-700 transition-colors shadow-lg shadow-indigo-200">
-                    Comenzar Gratis
-                </Link>
-            </section>
-
-            {/* Structured Data - Person (E-E-A-T) */}
-            <script
-                type="application/ld+json"
-                dangerouslySetInnerHTML={{
-                    __html: JSON.stringify({
-                        '@context': 'https://schema.org',
-                        '@type': 'Person',
-                        name: 'Facundo Federico Flores Zamorano',
-                        jobTitle: 'Founder & CEO',
-                        worksFor: {
-                            '@type': 'Organization',
-                            name: 'PROP-IA',
-                            url: 'https://prop-ia.com'
-                        },
-                        url: 'https://prop-ia.com/nosotros',
-                        description: 'Experto en tecnología y mercado inmobiliario. Fundador de PROP-IA.',
-                        knowsAbout: ['Real Estate', 'Artificial Intelligence', 'Software Development', 'PropTech'],
-                        nationality: 'Argentine',
-                    }),
-                }}
-            />
-        </main>
+        </div>
     );
 }

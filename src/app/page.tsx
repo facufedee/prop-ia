@@ -3,8 +3,9 @@ import Hero from "@/ui/sections/Hero";
 
 const Features = dynamic(() => import("@/ui/sections/Features"));
 const Testimonials = dynamic(() => import("@/ui/sections/Testimonials"));
+const PropertyNetworkCTA = dynamic(() => import("@/ui/sections/PropertyNetworkCTA"));
 const ContactForm = dynamic(() => import("@/ui/sections/ContactForm"));
-const Footer = dynamic(() => import("@/ui/components/layout/Footer"));
+
 const GoogleAuthPrompt = dynamic(() => import("@/ui/components/auth/GoogleAuthPrompt"));
 
 const LatestBlogPosts = dynamic(() => import("@/ui/sections/LatestBlogPosts"));
@@ -42,11 +43,13 @@ export default function LandingPage() {
 
             <Hero />
             <Features />
-            <Testimonials />
+            {/* Testimonials removed as per user request */}
+            {/* <Testimonials /> */}
+            <PropertyNetworkCTA />
             <LatestBlogPosts />
             <FAQ />
             <ContactForm />
-            <Footer />
+
         </main>
     );
 }

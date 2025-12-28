@@ -1187,23 +1187,34 @@ export default function PropertyWizard({ initialData, isEditing = false, ...prop
                         Anterior
                     </button>
 
-                    <button
-                        onClick={nextStep}
-                        disabled={loading}
-                        className="flex items-center gap-2 px-8 py-3 bg-indigo-600 text-white rounded-xl font-medium hover:bg-indigo-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                    >
-                        {loading ? (
-                            <>
-                                <Loader2 className="w-5 h-5 animate-spin" />
-                                {uploadProgress > 0 ? `Subiendo ${uploadProgress}%` : 'Publicando...'}
-                            </>
-                        ) : (
-                            <>
-                                {currentStep === STEPS.length ? (isEditing ? 'Guardar Cambios' : 'Publicar') : 'Siguiente'}
-                                {currentStep !== STEPS.length && <ChevronRight className="w-5 h-5" />}
-                            </>
+                    <div className="flex gap-3">
+                        {isEditing && (
+                            <button
+                                onClick={handleSubmit}
+                                disabled={loading}
+                                className="flex items-center gap-2 px-6 py-3 bg-white border-2 border-green-500 text-green-600 rounded-xl font-medium hover:bg-green-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                            >
+                                {loading ? <Loader2 className="w-5 h-5 animate-spin" /> : "Guardar Cambios"}
+                            </button>
                         )}
-                    </button>
+                        <button
+                            onClick={nextStep}
+                            disabled={loading}
+                            className="flex items-center gap-2 px-8 py-3 bg-indigo-600 text-white rounded-xl font-medium hover:bg-indigo-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                        >
+                            {loading ? (
+                                <>
+                                    <Loader2 className="w-5 h-5 animate-spin" />
+                                    {uploadProgress > 0 ? `Subiendo ${uploadProgress}%` : 'Publicando...'}
+                                </>
+                            ) : (
+                                <>
+                                    {currentStep === STEPS.length ? (isEditing ? 'Finalizar Edición' : 'Publicar') : 'Siguiente'}
+                                    {currentStep !== STEPS.length && <ChevronRight className="w-5 h-5" />}
+                                </>
+                            )}
+                        </button>
+                    </div>
                 </div>
             </div>
         </div>

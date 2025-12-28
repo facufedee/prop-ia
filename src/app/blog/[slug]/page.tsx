@@ -123,7 +123,7 @@ export default async function BlogPostPage({ params }: Props) {
                     </p>
 
                     {/* Main Text */}
-                    <div className="prose prose-lg prose-indigo max-w-none text-gray-700">
+                    <div className="prose prose-lg prose-indigo max-w-none text-gray-700 whitespace-pre-wrap">
                         <ReactMarkdown remarkPlugins={[remarkBreaks]}>
                             {post.content}
                         </ReactMarkdown>

@@ -174,10 +174,6 @@ export default function DashboardPage() {
                     </p>
                 </div>
                 <div className="flex gap-3">
-                    <button className="flex items-center gap-2 px-4 py-2 bg-white border border-gray-200 rounded-xl hover:bg-gray-50 transition-colors text-sm font-medium text-gray-700">
-                        <ArrowDownRight size={16} />
-                        Descargar Reporte
-                    </button>
                     <Link
                         href="/dashboard/propiedades/nueva"
                         className="flex items-center gap-2 px-4 py-2 bg-indigo-600 text-white rounded-xl hover:bg-indigo-700 transition-colors text-sm font-medium shadow-sm hover:shadow-md"
@@ -189,51 +185,41 @@ export default function DashboardPage() {
             </div>
 
             {/* Stats Grid */}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-                <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 hover:shadow-md transition-shadow">
-                    <div className="flex justify-between items-start mb-4">
-                        <div className="p-3 bg-blue-50 rounded-xl text-blue-600">
-                            <Building2 size={20} />
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+                <Link href="/dashboard/propiedades" className="group">
+                    <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 hover:shadow-md transition-all md:hover:scale-[1.02] cursor-pointer h-full">
+                        <div className="flex justify-between items-start mb-4">
+                            <div className="p-3 bg-blue-50 rounded-xl text-blue-600 group-hover:bg-blue-100 transition-colors">
+                                <Building2 size={20} />
+                            </div>
+                            <span className="flex items-center text-xs font-medium text-green-600 bg-green-50 px-2 py-1 rounded-full">
+                                <ArrowUpRight size={12} className="mr-1" /> +12%
+                            </span>
                         </div>
-                        <span className="flex items-center text-xs font-medium text-green-600 bg-green-50 px-2 py-1 rounded-full">
-                            <ArrowUpRight size={12} className="mr-1" /> +12%
-                        </span>
+                        <h3 className="text-2xl font-bold text-gray-900">{stats.totalProperties}</h3>
+                        <p className="text-sm text-gray-500 mt-1">Propiedades Totales</p>
+                        <p className="text-xs text-gray-400 mt-2">0 activas</p>
                     </div>
-                    <h3 className="text-2xl font-bold text-gray-900">{stats.totalProperties}</h3>
-                    <p className="text-sm text-gray-500 mt-1">Propiedades Totales</p>
-                    <p className="text-xs text-gray-400 mt-2">0 activas</p>
-                </div>
+                </Link>
 
-                <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 hover:shadow-md transition-shadow">
-                    <div className="flex justify-between items-start mb-4">
-                        <div className="p-3 bg-green-50 rounded-xl text-green-600">
-                            <Home size={20} />
+                <Link href="/dashboard/alquileres" className="group">
+                    <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 hover:shadow-md transition-all md:hover:scale-[1.02] cursor-pointer h-full">
+                        <div className="flex justify-between items-start mb-4">
+                            <div className="p-3 bg-green-50 rounded-xl text-green-600 group-hover:bg-green-100 transition-colors">
+                                <Home size={20} />
+                            </div>
+                            <span className="flex items-center text-xs font-medium text-green-600 bg-green-50 px-2 py-1 rounded-full">
+                                <ArrowUpRight size={12} className="mr-1" /> Activos
+                            </span>
                         </div>
-                        <span className="flex items-center text-xs font-medium text-green-600 bg-green-50 px-2 py-1 rounded-full">
-                            <ArrowUpRight size={12} className="mr-1" /> Activos
-                        </span>
-                    </div>
-                    <div className="flex items-baseline gap-2">
-                        <h3 className="text-2xl font-bold text-gray-900">{stats.activeRentals}</h3>
-                        <span className="text-sm text-gray-400">/ {stats.totalAlquileres}</span>
-                    </div>
-                    <p className="text-sm text-gray-500 mt-1">Alquileres</p>
-                    <p className="text-xs text-gray-400 mt-2">En curso</p>
-                </div>
-
-                <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 hover:shadow-md transition-shadow">
-                    <div className="flex justify-between items-start mb-4">
-                        <div className="p-3 bg-purple-50 rounded-xl text-purple-600">
-                            <Users size={20} />
+                        <div className="flex items-baseline gap-2">
+                            <h3 className="text-2xl font-bold text-gray-900">{stats.activeRentals}</h3>
+                            <span className="text-sm text-gray-400">/ {stats.totalAlquileres}</span>
                         </div>
-                        <span className="flex items-center text-xs font-medium text-green-600 bg-green-50 px-2 py-1 rounded-full">
-                            <ArrowUpRight size={12} className="mr-1" /> +3
-                        </span>
+                        <p className="text-sm text-gray-500 mt-1">Alquileres</p>
+                        <p className="text-xs text-gray-400 mt-2">En curso</p>
                     </div>
-                    <h3 className="text-2xl font-bold text-gray-900">{stats.totalLeads}</h3>
-                    <p className="text-sm text-gray-500 mt-1">Leads Nuevos</p>
-                    <p className="text-xs text-gray-400 mt-2">Total histórico</p>
-                </div>
+                </Link>
 
                 <Link href="/dashboard/finanzas" className="group">
                     <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 hover:shadow-md transition-all md:hover:scale-[1.02] cursor-pointer h-full">
@@ -256,30 +242,24 @@ export default function DashboardPage() {
 
             {/* Quick Actions */}
             <h2 className="text-lg font-bold text-gray-900 mb-4">Acciones Rápidas</h2>
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
                 <Link href="/dashboard/propiedades/nueva" className="p-4 bg-indigo-50 rounded-xl border border-indigo-100 hover:bg-indigo-100 transition-colors flex flex-col items-center justify-center text-center gap-2 group">
                     <div className="p-2 bg-white rounded-lg text-indigo-600 group-hover:scale-110 transition-transform">
                         <Plus size={20} />
                     </div>
                     <span className="text-sm font-medium text-indigo-900">Nueva Propiedad</span>
                 </Link>
-                <Link href="/dashboard/tasacion" className="p-4 bg-green-50 rounded-xl border border-green-100 hover:bg-green-100 transition-colors flex flex-col items-center justify-center text-center gap-2 group">
+                <Link href="/dashboard/alquileres/nuevo" className="p-4 bg-green-50 rounded-xl border border-green-100 hover:bg-green-100 transition-colors flex flex-col items-center justify-center text-center gap-2 group">
                     <div className="p-2 bg-white rounded-lg text-green-600 group-hover:scale-110 transition-transform">
+                        <Home size={20} />
+                    </div>
+                    <span className="text-sm font-medium text-green-900">Nuevo Alquiler</span>
+                </Link>
+                <Link href="/dashboard/tasacion" className="p-4 bg-purple-50 rounded-xl border border-purple-100 hover:bg-purple-100 transition-colors flex flex-col items-center justify-center text-center gap-2 group">
+                    <div className="p-2 bg-white rounded-lg text-purple-600 group-hover:scale-110 transition-transform">
                         <BarChart3 size={20} />
                     </div>
-                    <span className="text-sm font-medium text-green-900">Tasar Propiedad</span>
-                </Link>
-                <Link href="/dashboard/leads" className="p-4 bg-blue-50 rounded-xl border border-blue-100 hover:bg-blue-100 transition-colors flex flex-col items-center justify-center text-center gap-2 group">
-                    <div className="p-2 bg-white rounded-lg text-blue-600 group-hover:scale-110 transition-transform">
-                        <MessageSquare size={20} />
-                    </div>
-                    <span className="text-sm font-medium text-blue-900">Ver Leads</span>
-                </Link>
-                <Link href="/dashboard/calendario" className="p-4 bg-purple-50 rounded-xl border border-purple-100 hover:bg-purple-100 transition-colors flex flex-col items-center justify-center text-center gap-2 group">
-                    <div className="p-2 bg-white rounded-lg text-purple-600 group-hover:scale-110 transition-transform">
-                        <Calendar size={20} />
-                    </div>
-                    <span className="text-sm font-medium text-purple-900">Calendario</span>
+                    <span className="text-sm font-medium text-purple-900">Tasar Propiedad</span>
                 </Link>
             </div>
 

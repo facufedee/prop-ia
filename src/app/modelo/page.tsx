@@ -1,7 +1,7 @@
 import { Brain, Database, CheckCircle, TrendingUp, AlertTriangle } from "lucide-react";
 import Image from "next/image";
 import type { Metadata } from "next";
-import Footer from "@/ui/components/layout/Footer";
+
 import { CTA } from "@/ui/sections/CTA";
 
 export const metadata: Metadata = {
@@ -133,7 +133,7 @@ export default function ModelExplanationPage() {
             </div>
 
             <CTA />
-            <Footer />
+
         </main>
     );
 }

@@ -1,9 +1,20 @@
 import type { Metadata } from 'next';
-import { Inter } from 'next/font/google';
+import { Geist, Geist_Mono } from 'next/font/google';
 import './globals.css';
 import ClientLayout from '@/ui/components/layout/ClientLayout';
 
-const inter = Inter({ subsets: ['latin'] });
+import { Toaster } from 'sonner';
+import CookieBanner from '@/ui/components/consent/CookieBanner';
+
+const geistSans = Geist({
+  variable: "--font-geist-sans",
+  subsets: ["latin"],
+});
+
+const geistMono = Geist_Mono({
+  variable: "--font-geist-mono",
+  subsets: ["latin"],
+});
 
 export const metadata: Metadata = {
   metadataBase: new URL('https://prop-ia.com'),
@@ -85,11 +96,11 @@ export const viewport = {
 
 export default function RootLayout({
   children,
-}: {
+}: Readonly<{
   children: React.ReactNode;
-}) {
+}>) {
   return (
-    <html lang="es-AR">
+    <html lang="es">
       <head>
         {/* Preconnect to external domains */}
         <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -99,10 +110,14 @@ export default function RootLayout({
         {/* DNS Prefetch */}
         <link rel="dns-prefetch" href="https://www.googletagmanager.com" />
       </head>
-      <body className={inter.className}>
+      <body
+        className={`${geistSans.variable} ${geistMono.variable} antialiased bg-gray-50 text-gray-900`}
+      >
+        <Toaster position="top-right" richColors />
         <ClientLayout>
           {children}
         </ClientLayout>
+        <CookieBanner />
 
         {/* Structured Data - Organization */}
         <script

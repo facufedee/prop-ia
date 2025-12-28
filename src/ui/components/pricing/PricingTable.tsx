@@ -194,7 +194,10 @@ export default function PricingTable() {
                     <p className="text-gray-600 mb-6">
                         Contactanos para planes empresariales a medida con funcionalidades específicas
                     </p>
-                    <button className="px-8 py-3 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors">
+                    <button
+                        onClick={() => router.push('/contacto')}
+                        className="px-8 py-3 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors"
+                    >
                         Contactar Ventas
                     </button>
                 </div>

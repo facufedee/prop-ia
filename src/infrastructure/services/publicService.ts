@@ -18,6 +18,7 @@ export interface PublicProperty {
     agency?: PublicAgency;
     lat?: number;
     lng?: number;
+    expenses?: number;
 }
 
 export interface PublicAgency {
@@ -32,9 +33,17 @@ export interface PublicAgency {
 const PROPERTIES_COLLECTION = "properties";
 const USERS_COLLECTION = "users";
 
+import { globalCache } from "@/infrastructure/cache/globalCache";
+
 export const publicService = {
     // Get all public properties (limit to recent 20 for now)
     getAllProperties: async (): Promise<PublicProperty[]> => {
+        const CACHE_KEY = "properties_all";
+
+        // 1. Try Cache
+        const cached = await globalCache.get<PublicProperty[]>(CACHE_KEY);
+        if (cached) return cached;
+
         if (!db) return [];
         try {
             // In a real app, strict rules should apply (e.g., status == 'published')
@@ -51,6 +60,9 @@ export const publicService = {
                 const agency = await publicService.getAgencyById(p.userId);
                 return { ...p, agency };
             }));
+
+            // 2. Set Cache (5 minutes TTL)
+            await globalCache.set(CACHE_KEY, propertiesWithAgency, 300);
 
             return propertiesWithAgency;
         } catch (error) {
