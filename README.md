@@ -22,11 +22,6 @@
 *   **Calendario**: Agenda integrada para visitas y recordatorios.
 *   **Soporte**: Sistema de tickets para resolución de incidencias.
 
-## 🏗️ Arquitectura
-
-El proyecto sigue una **Clean Architecture** estricta para asegurar escalabilidad y mantenibilidad.
-
-*   👉 **[Ver Documentación de Arquitectura](ARCHITECTURE.md)**: Explicación detallada de capas (Domain, UseCases, Infrastructure).
 
 ## 🛠️ Stack Tecnológico
 

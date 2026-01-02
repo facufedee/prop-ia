@@ -138,6 +138,21 @@ export const subscriptionService = {
             createdAt: Timestamp.now(),
             updatedAt: Timestamp.now(),
         });
+
+        // Notify Admins
+        try {
+            const { notificationService } = await import("./notificationService");
+            await notificationService.createNotification(
+                "Nuevo Pago Recibido",
+                `Se ha registrado un pago de $${data.amount} por el usuario ${data.userId}`,
+                "success",
+                "Administrador",
+                "/dashboard/admin/pagos" // Assuming this route exists or similar
+            );
+        } catch (error) {
+            console.error("Error sending payment notification:", error);
+        }
+
         return docRef.id;
     },
 

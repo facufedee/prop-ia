@@ -13,6 +13,9 @@ import { auditLogService } from "@/infrastructure/services/auditLogService";
 // ============================================================================
 // BREAKPOINT 5: Save User to Firestore
 // ============================================================================
+// ============================================================================
+// BREAKPOINT 5: Save User to Firestore
+// ============================================================================
 export const saveUserToFirestore = async (user: User, additionalData?: { agencyName?: string }) => {
     try {
         const userRef = doc(db, "users", user.uid);
@@ -22,9 +25,17 @@ export const saveUserToFirestore = async (user: User, additionalData?: { agencyN
             const { roleService } = await import("@/infrastructure/services/roleService");
             let defaultRole = await roleService.getDefaultRole();
 
+            // If "Cliente" role doesn't exist, initialize and retry
             if (!defaultRole) {
+                console.log("Default role 'Cliente' not found. Initializing roles...");
                 await roleService.initializeDefaultRoles();
                 defaultRole = await roleService.getDefaultRole();
+            }
+
+            // Fallback: If still no role, we can't properly assign permissions, but we create the user.
+            // Ideally, we should error out or ensure at least one role.
+            if (!defaultRole) {
+                console.error("CRITICAL: Failed to retrieve default role 'Cliente' even after initialization.");
             }
 
             await setDoc(userRef, {
@@ -33,12 +44,27 @@ export const saveUserToFirestore = async (user: User, additionalData?: { agencyN
                 displayName: user.displayName || additionalData?.agencyName || "",
                 agencyName: additionalData?.agencyName || "",
                 photoURL: user.photoURL || "",
-                roleId: defaultRole?.id || null,
+                roleId: defaultRole?.id || null, // Can be null if really failed
                 createdAt: new Date(),
             });
+
+            // Notify Admins of New User
+            try {
+                const { notificationService } = await import("@/infrastructure/services/notificationService");
+                await notificationService.createNotification(
+                    "Nuevo Usuario Registrado",
+                    `El usuario ${user.email} se ha unido a la plataforma.`,
+                    "info",
+                    "Administrador",
+                    "/dashboard/admin/usuarios"
+                );
+            } catch (notifyError) {
+                console.warn("Failed to notify admins of new user:", notifyError);
+            }
         }
     } catch (error: any) {
         console.warn("Error saving user to Firestore (likely offline):", error.message);
+        throw error; // Rethrow so we know if it failed
     }
 };
 
@@ -50,8 +76,9 @@ export const loginWithGoogle = async () => {
 
     const provider = new GoogleAuthProvider();
     const result = await signInWithPopup(auth, provider);
-    // Fire and forget user creation/update to prevent blocking redirect
-    saveUserToFirestore(result.user).catch(e => console.error("Background user sync failed:", e));
+
+    // Await this to ensure role is assigned before UI redirects
+    await saveUserToFirestore(result.user);
 
     await auditLogService.logAuth(
         result.user.uid,
@@ -71,7 +98,9 @@ export const registerEmail = async (email: string, pass: string, displayName: st
     if (!auth) throw new Error('Auth not available');
 
     const result = await createUserWithEmailAndPassword(auth, email, pass);
-    saveUserToFirestore(result.user, { agencyName }).catch(e => console.error("Background user creation failed:", e));
+
+    // Await this to ensure role is assigned before UI redirects
+    await saveUserToFirestore(result.user, { agencyName });
 
     await auditLogService.logAuth(
         result.user.uid,
@@ -91,7 +120,9 @@ export const loginEmail = async (email: string, pass: string) => {
     if (!auth) throw new Error('Auth not available');
 
     const result = await signInWithEmailAndPassword(auth, email, pass);
-    saveUserToFirestore(result.user).catch(e => console.error("Background user sync failed:", e));
+    // Note: loginEmail is for existing users, but saveUserToFirestore checks existence.
+    // It's safe to await it to ensure consistency, though typically login assumes existence.
+    await saveUserToFirestore(result.user);
 
     await auditLogService.logAuth(
         result.user.uid,
