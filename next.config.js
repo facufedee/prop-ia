@@ -1,7 +1,7 @@
 /** @type {import('next').NextConfig} */
 // Trigger redeploy
 const nextConfig = {
-    swcMinify: true,
+    // swcMinify: true, // Deprecated in Next.js 15+ (enabled by default)
     images: {
         formats: ['image/avif', 'image/webp'],
         remotePatterns: [

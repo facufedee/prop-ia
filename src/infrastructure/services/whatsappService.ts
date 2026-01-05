@@ -1,132 +1,66 @@
-import { Alquiler, Pago } from "@/domain/models/Alquiler";
-import { RentalService } from "@/domain/models/RentalService";
+import { db } from "@/infrastructure/firebase/client";
+
+// Constants for Meta Cloud API
+const API_VERSION = 'v17.0';
+// These should be environment variables. 
+// For now, we will use placeholders or try to read from process.env if available elsewhere, 
+// but usually in Next.js public/client side we shouldn't expose the Token.
+// SECURITY WARNING: This service should ideally be called from a Server Action or API Route 
+// to keep the Token secret. Client-side calls expose the token.
+
+// Therefore, I should create a SERVER-SIDE handler (API Route) and this service calls THAT.
+// But valid for prototype: I'll make this service call our own internal API `/api/whatsapp/send`.
 
 export const whatsappService = {
-    /**
-     * Genera el mensaje formateado de servicios para WhatsApp
-     */
-    generateServicesMessage(rental: Alquiler, services: RentalService): string {
-        const monthNames = [
-            'Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio',
-            'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'
-        ];
-
-        const month = monthNames[services.month - 1];
-        const address = `${rental.direccion || 'Propiedad'}`;
-
-        let message = `🏠 *Servicios - ${month} ${services.year}*\n`;
-        message += `${address}\n\n`;
-
-        // Agregar cada servicio
-        services.charges.forEach(charge => {
-            const icon = this.getServiceIcon(charge.type);
-            const label = this.getServiceLabel(charge.type);
-            const amount = this.formatCurrency(charge.amount);
-
-            message += `${icon} ${label}: ${amount}\n`;
-
-            if (charge.type === 'otros' && charge.description) {
-                message += `   (${charge.description})\n`;
-            }
-        });
-
-        message += `\n*Total: ${this.formatCurrency(services.total)}*\n\n`;
-
-        if (rental.diaVencimiento) {
-            const nextMonth = services.month === 12 ? 1 : services.month + 1;
-            const year = services.month === 12 ? services.year + 1 : services.year;
-            message += `Vencimiento: ${rental.diaVencimiento}/${nextMonth.toString().padStart(2, '0')}/${year}`;
-        }
-
-        return message;
-    },
-
-    generatePaymentMessage(rental: Alquiler, pago: Pago): string {
-        const address = `${rental.direccion || 'Propiedad'}`;
-        let message = `🏠 *Informe de Pago - ${pago.mes}*\n`;
-        message += `${address}\n\n`;
-
-        message += `Alquiler: ${this.formatCurrency(pago.montoAlquiler || 0)}\n`;
-
-        if (pago.detalleServicios && pago.detalleServicios.length > 0) {
-            message += `\n*Servicios:*\n`;
-            pago.detalleServicios.forEach(s => {
-                message += `- ${s.concepto}: ${this.formatCurrency(s.monto)}\n`;
+    // Envia un mensaje de plantilla (Template Message)
+    sendTemplate: async (
+        to: string,
+        templateName: string,
+        languageCode: string = 'es',
+        components: any[] = []
+    ) => {
+        try {
+            const response = await fetch('/api/whatsapp/send', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    to,
+                    type: 'template',
+                    template: {
+                        name: templateName,
+                        language: { code: languageCode },
+                        components
+                    }
+                }),
             });
+
+            if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(errorData.error || 'Error sending WhatsApp message');
+            }
+
+            return await response.json();
+        } catch (error) {
+            console.error('WhatsApp Service Error:', error);
+            // Don't crash the app if notification fails
+            return { success: false, error };
         }
-
-        if (pago.montoPunitorios) {
-            message += `Punitorios: ${this.formatCurrency(pago.montoPunitorios)}\n`;
-        }
-        if (pago.montoDescuento) {
-            message += `Descuento: -${this.formatCurrency(pago.montoDescuento)}\n`;
-        }
-
-        message += `\n*Total a Pagar: ${this.formatCurrency(pago.monto)}*\n`;
-
-        if (pago.fechaVencimiento) {
-            message += `\nVencimiento: ${new Date(pago.fechaVencimiento).toLocaleDateString()}`;
-        }
-
-        return message;
     },
 
-    /**
-     * Abre WhatsApp con el mensaje pre-cargado
-     */
-    sendMessage(phone: string, message: string): void {
-        // Limpiar el número de teléfono (quitar espacios, guiones, etc.)
-        const cleanPhone = phone.replace(/\D/g, '');
-
-        // Asegurarse de que tenga código de país (Argentina: 54)
-        const phoneWithCountry = cleanPhone.startsWith('54') ? cleanPhone : `54${cleanPhone}`;
-
-        // Codificar el mensaje para URL
-        const encodedMessage = encodeURIComponent(message);
-
-        // Abrir WhatsApp Web
-        const url = `https://wa.me/${phoneWithCountry}?text=${encodedMessage}`;
-        window.open(url, '_blank');
-    },
-
-    /**
-     * Genera un mensaje genérico para contactar al inquilino
-     */
-    generateGenericMessage(rental: Alquiler): string {
-        const address = `${rental.direccion || 'la propiedad'}`;
-        return `Hola! Te contacto por el alquiler de ${address}.`;
-    },
-
-    // Helpers privados
-    getServiceIcon(type: string): string {
-        const icons: Record<string, string> = {
-            luz: '💡',
-            gas: '🔥',
-            agua: '💧',
-            expensas: '🏢',
-            seguridad: '🛡️',
-            otros: '📋'
-        };
-        return icons[type] || '📋';
-    },
-
-    getServiceLabel(type: string): string {
-        const labels: Record<string, string> = {
-            luz: 'Luz',
-            gas: 'Gas',
-            agua: 'Agua',
-            expensas: 'Expensas',
-            seguridad: 'Seguridad',
-            otros: 'Otros Gastos'
-        };
-        return labels[type] || 'Otros';
-    },
-
-    formatCurrency(amount: number): string {
-        return new Intl.NumberFormat('es-AR', {
-            style: 'currency',
-            currency: 'ARS',
-            minimumFractionDigits: 0
-        }).format(amount);
+    // Helper: Enviar mensaje de bienvenida
+    sendWelcomeMessage: async (name: string, phone: string) => {
+        // Example template: "hello_world" or a custom "welcome_new_user"
+        // Components usually replace variables {{1}}, {{2}} in body
+        return await whatsappService.sendTemplate(
+            phone,
+            'hello_world', // Default testing template from Meta
+            'en_US', // hello_world is usually en_US
+            [
+                // Example body component parameters if template has them
+                // { type: 'body', parameters: [{ type: 'text', text: name }] } 
+            ]
+        );
     }
 };

@@ -29,7 +29,7 @@ export const subscriptionService = {
             ...doc.data(),
             createdAt: doc.data().createdAt?.toDate() || new Date(),
             updatedAt: doc.data().updatedAt?.toDate() || new Date(),
-        })) as Plan[];
+        } as unknown as Plan)) as Plan[];
     },
 
     getPlanById: async (id: string): Promise<Plan | null> => {
@@ -42,7 +42,14 @@ export const subscriptionService = {
             ...docSnap.data(),
             createdAt: docSnap.data().createdAt?.toDate() || new Date(),
             updatedAt: docSnap.data().updatedAt?.toDate() || new Date(),
-        } as Plan;
+        } as unknown as Plan;
+    },
+
+    deletePlan: async (id: string): Promise<void> => {
+        if (!db) throw new Error("Firestore not initialized");
+        // @ts-ignore
+        const { deleteDoc } = await import("firebase/firestore");
+        await deleteDoc(doc(db, PLANS_COLLECTION, id));
     },
 
     // ========== SUBSCRIPTIONS ==========
@@ -162,6 +169,179 @@ export const subscriptionService = {
             status,
             updatedAt: Timestamp.now(),
         });
+    },
+
+    processPaymentWebhook: async (paymentId: string): Promise<{ success: boolean; message: string }> => {
+        console.log(`[Webhook] Processing payment ${paymentId}...`);
+
+        // 1. Fetch payment details from Mercado Pago
+        const mpAccessToken = process.env.MP_ACCESS_TOKEN;
+        if (!mpAccessToken) {
+            console.error("[Webhook] MP_ACCESS_TOKEN not configured");
+            return { success: false, message: "Payment provider not configured" };
+        }
+
+        let paymentData: any;
+        try {
+            const res = await fetch(`https://api.mercadopago.com/v1/payments/${paymentId}`, {
+                headers: { 'Authorization': `Bearer ${mpAccessToken}` }
+            });
+
+            if (!res.ok) {
+                console.error(`[Webhook] Failed to fetch payment from MP: ${res.status}`);
+                return { success: false, message: "Could not verify payment with provider" };
+            }
+
+            paymentData = await res.json();
+            console.log(`[Webhook] Payment status: ${paymentData.status}`);
+        } catch (e) {
+            console.error("[Webhook] MP Fetch Error:", e);
+            return { success: false, message: "Could not verify payment with provider" };
+        }
+
+        // 2. Check payment status
+        if (paymentData.status !== 'approved') {
+            console.log(`[Webhook] Payment not approved yet: ${paymentData.status}`);
+            return { success: false, message: `Payment status is ${paymentData.status}` };
+        }
+
+        // 3. Extract metadata
+        const metadata = paymentData.metadata || {};
+        const planId = metadata.plan_id;
+        const billingPeriod = metadata.billing_period;
+        const preferenceId = paymentData.preference_id;
+
+        if (!planId || !billingPeriod) {
+            console.error("[Webhook] Missing plan_id or billing_period in metadata");
+            return { success: false, message: "Invalid payment metadata" };
+        }
+
+        if (!db) throw new Error("Firestore not initialized");
+
+        try {
+            // 4. Find pending payment record by preference_id
+            const paymentsRef = collection(db, PAYMENTS_COLLECTION);
+            const q = query(
+                paymentsRef,
+                where("preferenceId", "==", preferenceId),
+                where("status", "==", "pending")
+            );
+            const pendingPayments = await getDocs(q);
+
+            if (pendingPayments.empty) {
+                console.error("[Webhook] No pending payment found for preference:", preferenceId);
+                return { success: false, message: "No pending payment found" };
+            }
+
+            const pendingPayment = pendingPayments.docs[0];
+            const userId = pendingPayment.data().userId;
+
+            console.log(`[Webhook] Found pending payment for user: ${userId}`);
+
+            // 5. Get plan details
+            const plan = await subscriptionService.getPlanById(planId);
+            if (!plan) {
+                console.error("[Webhook] Plan not found:", planId);
+                return { success: false, message: "Plan not found" };
+            }
+
+            // 6. Calculate subscription dates and price
+            const startDate = new Date();
+            const endDate = new Date(startDate);
+            const price = billingPeriod === 'yearly' ? plan.price.yearly : plan.price.monthly;
+
+            if (billingPeriod === 'yearly') {
+                endDate.setFullYear(endDate.getFullYear() + 1);
+            } else {
+                endDate.setMonth(endDate.getMonth() + 1);
+            }
+
+            // 7. Check if user already has an active subscription
+            const existingSubscription = await subscriptionService.getUserSubscription(userId);
+
+            if (existingSubscription) {
+                // Extend existing subscription
+                console.log(`[Webhook] Extending existing subscription for user: ${userId}`);
+
+                const newEndDate = new Date(existingSubscription.endDate);
+                if (billingPeriod === 'yearly') {
+                    newEndDate.setFullYear(newEndDate.getFullYear() + 1);
+                } else {
+                    newEndDate.setMonth(newEndDate.getMonth() + 1);
+                }
+
+                await subscriptionService.updateSubscription(existingSubscription.id, {
+                    endDate: newEndDate,
+                    lastPaymentDate: startDate,
+                    status: 'active'
+                });
+            } else {
+                // Create new subscription
+                console.log(`[Webhook] Creating new subscription for user: ${userId}`);
+
+                await subscriptionService.createSubscription({
+                    userId,
+                    planId,
+                    planTier: plan.tier,
+                    status: 'active',
+                    billingPeriod: billingPeriod as 'monthly' | 'yearly',
+                    amount: price,
+                    currency: 'ARS',
+                    startDate,
+                    endDate,
+                    paymentMethod: 'mercadopago',
+                    lastPaymentDate: startDate,
+                    nextPaymentDate: endDate,
+                    usage: {
+                        properties: 0,
+                        users: 0,
+                        clients: 0,
+                        tasaciones: 0,
+                        aiCredits: 0
+                    }
+                });
+            }
+
+            // 8. Update payment record
+            await updateDoc(doc(db, PAYMENTS_COLLECTION, pendingPayment.id), {
+                status: 'completed',
+                providerPaymentId: String(paymentId),
+                amount: paymentData.transaction_amount,
+                updatedAt: Timestamp.now()
+            });
+
+            // 9. Send notifications
+            try {
+                const { notificationService } = await import("./notificationService");
+
+                // Notify user
+                await notificationService.createNotification(
+                    "¡Suscripción Activada!",
+                    `Tu plan ${plan.name} ha sido activado correctamente. ¡Bienvenido!`,
+                    "success",
+                    userId,
+                    "/dashboard/suscripcion"
+                );
+
+                // Notify admin
+                await notificationService.createNotification(
+                    "Nueva Suscripción",
+                    `Usuario ${userId} activó el plan ${plan.name} (${billingPeriod})`,
+                    "success",
+                    "Administrador",
+                    "/dashboard/admin/suscripciones"
+                );
+            } catch (error) {
+                console.error("[Webhook] Error sending notifications:", error);
+            }
+
+            console.log(`✅ [Webhook] Subscription activated successfully for user: ${userId}`);
+            return { success: true, message: "Subscription activated successfully" };
+
+        } catch (error: any) {
+            console.error("[Webhook] Error processing subscription:", error);
+            return { success: false, message: error.message };
+        }
     },
 
     // ========== ADDONS ==========

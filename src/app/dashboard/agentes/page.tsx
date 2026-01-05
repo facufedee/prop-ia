@@ -4,12 +4,15 @@ import { useState, useEffect } from "react";
 import { app, auth } from "@/infrastructure/firebase/client";
 import { agentesService } from "@/infrastructure/services/agentesService";
 import { Agente } from "@/domain/models/Agente";
-import { Users, Plus, TrendingUp, DollarSign, Award } from "lucide-react";
+import { Users, Plus, TrendingUp, DollarSign, Award, Building2 } from "lucide-react";
 import Link from "next/link";
+
+import { useBranchContext } from "@/infrastructure/context/BranchContext";
 
 export default function AgentesPage() {
     const [agentes, setAgentes] = useState<Agente[]>([]);
     const [loading, setLoading] = useState(true);
+    const { branches } = useBranchContext();
 
     useEffect(() => {
         fetchAgentes();
@@ -144,6 +147,9 @@ export default function AgentesPage() {
                                     Comisiones
                                 </th>
                                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
+                                    Sucursal
+                                </th>
+                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
                                     Estado
                                 </th>
                                 <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase">
@@ -154,7 +160,7 @@ export default function AgentesPage() {
                         <tbody className="divide-y divide-gray-200">
                             {agentes.length === 0 ? (
                                 <tr>
-                                    <td colSpan={7} className="px-6 py-12 text-center text-gray-500">
+                                    <td colSpan={8} className="px-6 py-12 text-center text-gray-500">
                                         No hay agentes registrados
                                     </td>
                                 </tr>
@@ -179,6 +185,9 @@ export default function AgentesPage() {
                                         <td className="px-6 py-4 text-sm text-gray-900 font-medium">{agente.totalAlquileres}</td>
                                         <td className="px-6 py-4 text-sm text-gray-900 font-medium">
                                             ${agente.totalComisiones.toLocaleString()}
+                                        </td>
+                                        <td className="px-6 py-4 text-sm text-gray-600">
+                                            {branches.find(b => b.id === agente.branchId)?.name || <span className="text-gray-400 italic">No Asignada</span>}
                                         </td>
                                         <td className="px-6 py-4">
                                             <span className={`px-2 py-1 text-xs font-medium rounded-full ${agente.activo

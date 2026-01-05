@@ -1,8 +1,11 @@
 export interface Agente {
     id: string; // userId
     nombre: string;
-    email: string;
     telefono: string;
+    email: string;
+    branchId?: string; // Branch assignment
+    authUserId?: string; // Linked Firebase Auth UID
+    tipo: 'interno' | 'externo';
     foto?: string;
 
     // Comisiones

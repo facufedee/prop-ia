@@ -1,9 +1,10 @@
 "use client";
 
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { PropertyData } from "@/lib/prediction/preprocessor";
 import { Home, Ruler, Building2, Clock, Bath, BedDouble, Landmark, MapPin, Hash, CircleDollarSign, Upload, X, Loader2, Image as ImageIcon } from "lucide-react";
+import { useBranchContext } from "@/infrastructure/context/BranchContext";
 import { app, db, storage, auth } from "@/infrastructure/firebase/client";
 import { collection, addDoc, updateDoc } from "firebase/firestore";
 import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
@@ -115,6 +116,15 @@ export default function PropertyForm() {
         }
     };
 
+    const { branches, selectedBranchId } = useBranchContext();
+    const [branchId, setBranchId] = useState(selectedBranchId || "");
+
+    useEffect(() => {
+        if (selectedBranchId) {
+            setBranchId(selectedBranchId);
+        }
+    }, [selectedBranchId]);
+
     // Image Handlers
     const handleImageSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
         if (e.target.files) {
@@ -178,6 +188,7 @@ export default function PropertyForm() {
                 userId: auth?.currentUser?.uid,
                 createdAt: new Date(),
                 status: 'active',
+                branchId: branchId || null,
                 imageUrls
             };
 
@@ -236,8 +247,26 @@ export default function PropertyForm() {
                 {/* Location Section */}
                 <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-200">
                     <h2 className="text-xl font-semibold text-gray-900 mb-6 flex items-center gap-2">
-                        <MapPin className="w-5 h-5" /> Ubicación
+                        <MapPin className="w-5 h-5" /> Ubicación y Sucursal
                     </h2>
+
+                    {/* Branch Selector (Visible only if not locked to a specific branch or manual override needed) */}
+                    {!selectedBranchId && branches.length > 0 && (
+                        <div className="mb-4">
+                            <label className="block text-sm font-medium text-gray-700 mb-2">Asignar a Sucursal</label>
+                            <select
+                                value={branchId}
+                                onChange={(e) => setBranchId(e.target.value)}
+                                className="w-full border bg-gray-50 p-3 rounded-xl text-black focus:ring-2 focus:ring-black focus:bg-white transition-all"
+                            >
+                                <option value="">-- Casa Central --</option>
+                                {branches.map(b => (
+                                    <option key={b.id} value={b.id}>{b.name}</option>
+                                ))}
+                            </select>
+                        </div>
+                    )}
+
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         {renderSelectField("provincia", "Provincia", <MapPin />, provinciaOptions, false, handleProvinciaChange)}
                         {renderSelectField("ciudad", "Ciudad", <MapPin />, ciudadOptions, !selectedProvincia, handleCiudadChange)}

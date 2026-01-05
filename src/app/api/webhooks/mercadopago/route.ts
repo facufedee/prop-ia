@@ -1,34 +1,32 @@
 import { NextRequest, NextResponse } from "next/server";
-import MercadoPagoConfig, { Payment } from "mercadopago";
+import { subscriptionService } from "@/infrastructure/services/subscriptionService";
 
-const client = new MercadoPagoConfig({
-    accessToken: process.env.MP_ACCESS_TOKEN || "",
-});
-
-export async function POST(req: NextRequest) {
+export async function POST(request: NextRequest) {
     try {
-        // 1. Validate the request
-        const body = await req.json();
+        const body = await request.json();
         const { type, data } = body;
 
-        if (type === "payment") {
-            // 2. Fetch the payment status from MercadoPago to verify it's real
-            const payment = new Payment(client);
-            const paymentInfo = await payment.get({ id: data.id });
+        // MercadoPago sends 'payment' type webhooks
+        if (type === "payment" && data?.id) {
+            console.log(`[Webhook] Processing payment ${data.id}...`);
 
-            // 3. Handle the payment status
-            if (paymentInfo.status === "approved") {
-                // TODO: Update user subscription in your database
-                // Example: await updateUserSubscription(paymentInfo.metadata.user_email, paymentInfo.metadata.plan_id);
-                console.log(`Payment approved for user: ${paymentInfo.metadata.user_email}`);
+            const result = await subscriptionService.processPaymentWebhook(data.id);
+
+            if (result.success) {
+                console.log(`[Webhook] Success for payment ${data.id}: ${result.message}`);
+                return NextResponse.json({ status: "success", message: result.message }, { status: 200 });
+            } else {
+                console.warn(`[Webhook] Failed logic for payment ${data.id}: ${result.message}`);
+                // Return 200 anyway to MP to stop retries if it's a logic error (e.g. status not approved yet)
+                // Return 400 only if we want retry.
+                return NextResponse.json({ status: "ignored", message: result.message }, { status: 200 });
             }
         }
 
-        // 4. Always return 200 OK to MercadoPago
-        return NextResponse.json({ status: "success" });
+        return NextResponse.json({ status: "ignored", message: "Not a payment event" }, { status: 200 });
 
-    } catch (error) {
-        console.error("Webhook error:", error);
-        return NextResponse.json({ status: "error" }, { status: 500 });
+    } catch (error: any) {
+        console.error("[Webhook] Error:", error);
+        return NextResponse.json({ status: "error", message: error.message }, { status: 500 });
     }
 }

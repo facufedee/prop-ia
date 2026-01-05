@@ -21,6 +21,8 @@ import { doc, onSnapshot } from "firebase/firestore";
 import { ticketsService } from "@/infrastructure/services/ticketsService";
 import { roleService, Role } from "@/infrastructure/services/roleService";
 import { notificationService, AppNotification } from "@/infrastructure/services/notificationService";
+import { useBranchContext } from "@/infrastructure/context/BranchContext";
+import { Building2 } from "lucide-react";
 
 interface DashboardHeaderProps {
     onMobileMenuClick?: () => void;
@@ -38,6 +40,8 @@ export default function DashboardHeader({ onMobileMenuClick }: DashboardHeaderPr
     const [notifOpen, setNotifOpen] = useState(false);
     const notifRef = useRef<HTMLDivElement>(null);
     const router = useRouter();
+
+    const { branches, selectedBranchId, setSelectedBranchId, currentContextLabel } = useBranchContext();
 
     // Auth & Role Listener
     useEffect(() => {
@@ -125,6 +129,46 @@ export default function DashboardHeader({ onMobileMenuClick }: DashboardHeaderPr
                 >
                     <Menu className="w-6 h-6" />
                 </button>
+
+                {/* Branch Context Selector */}
+                {branches.length > 0 && (
+                    <div className="hidden md:flex items-center gap-2 border-l border-gray-200 pl-4 ml-4">
+                        <span className="text-xs text-gray-400 font-medium uppercase tracking-wider">Sucursal:</span>
+                        <div className="relative group">
+                            <button className="flex items-center gap-2 text-sm font-semibold text-gray-700 hover:text-indigo-600 transition-colors">
+                                <Building2 className="w-4 h-4" />
+                                {currentContextLabel}
+                                {(userRole?.name === 'Administrador' || userRole?.name === 'Cliente Pro') && (
+                                    <ChevronDown className="w-3 h-3" />
+                                )}
+                            </button>
+
+                            {/* Dropdown for Admin/Pro only */}
+                            {(userRole?.name === 'Administrador' || userRole?.name === 'Cliente Pro') && (
+                                <div className="absolute top-full left-0 mt-2 w-56 bg-white rounded-lg shadow-lg border border-gray-100 py-1 hidden group-hover:block z-50 animate-in fade-in zoom-in-95 duration-100">
+                                    <button
+                                        onClick={() => setSelectedBranchId('all')}
+                                        className={`w-full text-left px-4 py-2 text-sm hover:bg-gray-50 flex items-center justify-between ${selectedBranchId === 'all' ? 'text-indigo-600 font-medium bg-indigo-50' : 'text-gray-600'}`}
+                                    >
+                                        Todas las Sucursales
+                                        {selectedBranchId === 'all' && <Check className="w-3 h-3" />}
+                                    </button>
+                                    <div className="border-t border-gray-50 my-1"></div>
+                                    {branches.map(branch => (
+                                        <button
+                                            key={branch.id}
+                                            onClick={() => setSelectedBranchId(branch.id)}
+                                            className={`w-full text-left px-4 py-2 text-sm hover:bg-gray-50 flex items-center justify-between ${selectedBranchId === branch.id ? 'text-indigo-600 font-medium bg-indigo-50' : 'text-gray-600'}`}
+                                        >
+                                            <span className="truncate">{branch.name}</span>
+                                            {selectedBranchId === branch.id && <Check className="w-3 h-3" />}
+                                        </button>
+                                    ))}
+                                </div>
+                            )}
+                        </div>
+                    </div>
+                )}
             </div>
 
             {/* Right Section: Notifications & User Profile */}

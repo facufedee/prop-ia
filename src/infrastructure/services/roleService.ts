@@ -11,7 +11,9 @@ export interface Permission {
 export interface Role {
     id: string;
     name: string;
+    description?: string;
     permissions: string[]; // List of permission IDs (which correspond to menu hrefs or specific actions)
+    logoUrl?: string; // Extended for UI checking
     isSystem?: boolean; // System roles cannot be deleted
 }
 
@@ -35,6 +37,7 @@ export const PERMISSIONS: Permission[] = [
     { id: "/dashboard/configuracion/roles", label: "Roles y Permisos", description: "Gestión de roles y permisos (solo administradores)" },
     { id: "/dashboard/configuracion/backup", label: "Backup y Restauración", description: "Copias de seguridad de la base de datos (solo administradores)" },
     { id: "/dashboard/configuracion/suscripciones", label: "Planes y Suscripciones", description: "Gestión de planes de suscripción (solo administradores)" },
+    { id: "/dashboard/sucursales", label: "Sucursales", description: "Gestión de sucursales (Multisucursal)" },
     { id: "/dashboard/blog", label: "Blog / Novedades", description: "Gestión de noticias y blog" },
 ];
 
@@ -175,10 +178,26 @@ export const roleService = {
         if (!roleNames.includes("Administrador")) {
             const adminRole: Omit<Role, "id"> = {
                 name: "Administrador",
+                description: "Acceso completo al sistema",
                 permissions: PERMISSIONS.map(p => p.id),
                 isSystem: true
             };
             await roleService.createRole(adminRole);
+        }
+
+        // Check if "Cliente Pro" role exists, if not create it (User request: Pro can use Sucursales)
+        if (!roleNames.includes("Cliente Pro")) {
+            const proRole: Omit<Role, "id"> = {
+                name: "Cliente Pro",
+                permissions: [
+                    "/dashboard",
+                    "/dashboard/propiedades",
+                    "/dashboard/cuenta",
+                    "/dashboard/sucursales" // Pro feature
+                ],
+                isSystem: false // Can be edited
+            };
+            await roleService.createRole(proRole);
         }
 
         if (!roleNames.includes("Agente")) {

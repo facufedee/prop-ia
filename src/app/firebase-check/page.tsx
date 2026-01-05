@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { app, db, auth } from "@/infrastructure/firebase/client";
 import { collection, getDocs, limit, query, addDoc, doc, getDoc, setDoc } from "firebase/firestore";
 import { roleService } from "@/infrastructure/services/roleService";
+import { checkAndFixRoles } from "@/infrastructure/utils/fixRoles";
 
 interface CheckItem {
     name: string;
@@ -253,6 +254,34 @@ export default function FirebaseCheckPage() {
         }
     };
 
+    const handleCheckAndFixRoles = async () => {
+        setConnCheck({ name: "Check & Fix Roles", status: "pending", message: "Verificando roles..." });
+        try {
+            const result = await checkAndFixRoles();
+
+            if (result.success) {
+                setConnCheck({
+                    name: "Check & Fix Roles",
+                    status: "success",
+                    message: result.message || "Verificación completada"
+                });
+                console.log("Roles encontrados:", result.roles);
+            } else {
+                setConnCheck({
+                    name: "Check & Fix Roles",
+                    status: "error",
+                    message: result.error || "Error desconocido"
+                });
+            }
+        } catch (error: any) {
+            setConnCheck({
+                name: "Check & Fix Roles",
+                status: "error",
+                message: `Error: ${error.message}`
+            });
+        }
+    };
+
     return (
         <div className="min-h-screen bg-gray-50 p-8">
             <div className="max-w-3xl mx-auto bg-white rounded-xl shadow-lg overflow-hidden">
@@ -340,6 +369,12 @@ export default function FirebaseCheckPage() {
                                 className="px-6 py-2 bg-purple-600 text-white font-medium rounded-lg hover:bg-purple-700 transition-colors shadow-sm active:transform active:scale-95"
                             >
                                 Probar RoleService
+                            </button>
+                            <button
+                                onClick={handleCheckAndFixRoles}
+                                className="px-6 py-2 bg-emerald-600 text-white font-medium rounded-lg hover:bg-emerald-700 transition-colors shadow-sm active:transform active:scale-95 mt-2"
+                            >
+                                ✅ Verificar y Corregir Roles
                             </button>
                         </div>
                     </section>

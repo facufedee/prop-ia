@@ -2,11 +2,17 @@ export type PlanTier = 'free' | 'professional' | 'enterprise';
 export type BillingPeriod = 'monthly' | 'yearly';
 export type SubscriptionStatus = 'active' | 'cancelled' | 'expired' | 'trial';
 
-export interface PlanFeature {
-    name: string;
-    included: boolean;
-    limit?: number | string;
-}
+// Feature Flags (Boolean capabilities)
+export type AppFeature =
+    | 'rentals_management'
+    | 'properties_publishing'
+    | 'whatsapp_bot'
+    | 'automatic_agenda'
+    | 'automatic_notifications'
+    | 'online_valuations'
+    | 'tenant_portal'
+    | 'custom_branding'
+    | 'multi_branch';
 
 export interface Plan {
     id: string;
@@ -17,11 +23,12 @@ export interface Plan {
         monthly: number;
         yearly: number;
     };
-    features: PlanFeature[];
+    // Replaced array with strict boolean record
+    features: Record<AppFeature, boolean>;
     limits: {
         properties: number | 'unlimited';
         users: number | 'unlimited';
-        clients: number | 'unlimited'; // Added clients limit
+        clients: number | 'unlimited';
         tasaciones: number | 'unlimited';
         aiCredits: number | 'unlimited';
         storage: string; // e.g., "10GB", "unlimited"

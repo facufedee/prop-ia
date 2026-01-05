@@ -8,17 +8,19 @@ import PlanForm from "./components/PlanForm";
 import { toast } from "sonner";
 import { RoleProtection } from "@/ui/components/auth/RoleProtection";
 
+import { MoreVertical } from "lucide-react";
+
 export default function SubscriptionsPage() {
     const [plans, setPlans] = useState<Plan[]>([]);
     const [loading, setLoading] = useState(true);
     const [isEditing, setIsEditing] = useState(false);
     const [selectedPlan, setSelectedPlan] = useState<Plan | null>(null);
+    const [openMenuId, setOpenMenuId] = useState<string | null>(null);
 
     const loadPlans = async () => {
         setLoading(true);
         try {
             const data = await subscriptionService.getAllPlans();
-            // Sort by price helper or predefined order if possible, here simplified
             setPlans(data.sort((a, b) => a.price.monthly - b.price.monthly));
         } catch (error) {
             console.error(error);
@@ -32,6 +34,8 @@ export default function SubscriptionsPage() {
         loadPlans();
     }, []);
 
+
+
     const handleCreate = () => {
         setSelectedPlan(null);
         setIsEditing(true);
@@ -40,6 +44,22 @@ export default function SubscriptionsPage() {
     const handleEdit = (plan: Plan) => {
         setSelectedPlan(plan);
         setIsEditing(true);
+        setOpenMenuId(null);
+    };
+
+    const handleDelete = async (planId: string) => {
+        if (!confirm("¿Estás seguro de que deseas eliminar este plan? Esta acción no se puede deshacer.")) return;
+
+        try {
+            setLoading(true);
+            await subscriptionService.deletePlan(planId);
+            toast.success("Plan eliminado correctamente");
+            await loadPlans();
+        } catch (error) {
+            console.error(error);
+            toast.error("Error al eliminar el plan");
+            setLoading(false);
+        }
     };
 
     const handleClose = () => {
@@ -107,7 +127,7 @@ export default function SubscriptionsPage() {
                                 className={`bg-white rounded-xl shadow-sm border p-6 hover:shadow-md transition-shadow relative ${plan.popular ? 'ring-2 ring-indigo-500 border-transparent' : 'border-gray-200'}`}
                             >
                                 {plan.popular && (
-                                    <div className="absolute top-0 right-0 bg-indigo-600 text-white text-xs font-bold px-3 py-1 rounded-bl-lg rounded-tr-lg">
+                                    <div className="absolute top-0 right-0 bg-indigo-600 text-white text-xs font-bold px-3 py-1 rounded-bl-lg rounded-tr-lg mr-[40px]">
                                         POPULAR
                                     </div>
                                 )}
@@ -117,12 +137,59 @@ export default function SubscriptionsPage() {
                                         <h3 className="text-lg font-bold text-gray-900">{plan.name}</h3>
                                         <p className="text-sm text-gray-500 capitalize">{plan.tier}</p>
                                     </div>
-                                    <button
-                                        onClick={() => handleEdit(plan)}
-                                        className="p-2 text-gray-400 hover:text-indigo-600 hover:bg-indigo-50 rounded-lg transition-colors"
-                                    >
-                                        <Edit size={18} />
-                                    </button>
+
+                                    <div className="relative">
+                                        <button
+                                            type="button"
+                                            onClick={(e) => {
+                                                e.stopPropagation();
+                                                setOpenMenuId(openMenuId === plan.id ? null : plan.id);
+                                            }}
+                                            className={`p-2 rounded-lg transition-colors ${openMenuId === plan.id ? 'bg-indigo-50 text-indigo-600' : 'text-gray-400 hover:text-gray-600 hover:bg-gray-100'}`}
+                                        >
+                                            <MoreVertical size={20} />
+                                        </button>
+
+                                        {openMenuId === plan.id && (
+                                            <>
+                                                {/* Backdrop to close menu */}
+                                                <div
+                                                    className="fixed inset-0 z-30 opacity-0 cursor-default"
+                                                    onClick={(e) => {
+                                                        e.stopPropagation();
+                                                        setOpenMenuId(null);
+                                                    }}
+                                                />
+
+                                                {/* Menu Content */}
+                                                <div className="absolute right-0 top-full mt-1 w-40 bg-white rounded-lg shadow-xl border border-gray-100 py-1 z-40 overflow-hidden">
+                                                    <button
+                                                        type="button"
+                                                        onClick={(e) => {
+                                                            e.stopPropagation();
+                                                            handleEdit(plan);
+                                                        }}
+                                                        className="w-full flex items-center gap-2 px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 text-left transition-colors"
+                                                    >
+                                                        <Edit size={16} />
+                                                        Editar
+                                                    </button>
+                                                    <div className="h-px bg-gray-100 my-0.5" />
+                                                    <button
+                                                        type="button"
+                                                        onClick={(e) => {
+                                                            e.stopPropagation();
+                                                            handleDelete(plan.id);
+                                                        }}
+                                                        className="w-full flex items-center gap-2 px-4 py-2.5 text-sm text-red-600 hover:bg-red-50 text-left transition-colors font-medium"
+                                                    >
+                                                        <Trash2 size={16} />
+                                                        Eliminar
+                                                    </button>
+                                                </div>
+                                            </>
+                                        )}
+                                    </div>
                                 </div>
 
                                 <p className="text-gray-600 text-sm mb-6 h-10 line-clamp-2">

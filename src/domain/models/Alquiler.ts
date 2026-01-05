@@ -62,6 +62,7 @@ export interface Alquiler {
     propiedadId: string;
     propiedadTipo: string;
     direccion: string;
+    contractCode?: string; // Unique code for tenant portal login
     // Datos del Inquilino
     inquilinoId: string;
     nombreInquilino: string;

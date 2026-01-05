@@ -7,10 +7,13 @@ import Link from "next/link";
 import { auth, db } from "@/infrastructure/firebase/client";
 import { collection, query, where, getDocs, deleteDoc, doc } from "firebase/firestore";
 import { onAuthStateChanged } from "firebase/auth";
+import { useBranchContext } from "@/infrastructure/context/BranchContext";
 
 export default function PropiedadesPage() {
     const [properties, setProperties] = useState<Property[]>([]);
     const [loading, setLoading] = useState(true);
+
+    const { selectedBranchId } = useBranchContext();
 
     useEffect(() => {
         if (!auth) {
@@ -19,22 +22,28 @@ export default function PropiedadesPage() {
         }
         const unsubscribe = onAuthStateChanged(auth, async (user) => {
             if (user) {
-                fetchProperties(user.uid);
+                fetchProperties(user.uid, selectedBranchId);
             } else {
                 setLoading(false);
             }
         });
 
         return () => unsubscribe();
-    }, []);
+    }, [selectedBranchId]);
 
-    const fetchProperties = async (userId: string) => {
+    const fetchProperties = async (userId: string, branchId?: string) => {
         try {
             if (!db) throw new Error("Firestore not initialized");
-            const q = query(
+
+            let q = query(
                 collection(db, "properties"),
                 where("userId", "==", userId)
             );
+
+            if (branchId) {
+                q = query(q, where("branchId", "==", branchId));
+            }
+
             const querySnapshot = await getDocs(q);
             const props = querySnapshot.docs.map(doc => ({
                 id: doc.id,

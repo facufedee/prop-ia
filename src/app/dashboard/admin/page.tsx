@@ -48,6 +48,17 @@ export default function PlatformAdminPage() {
         }
     };
 
+    const handleDeleteUser = async (uid: string) => {
+        try {
+            await adminService.deleteUser(uid);
+            setUsers(users.filter(u => u.uid !== uid));
+            // Show toast or alert here - keeping simple for now
+        } catch (error) {
+            console.error("Error deleting user:", error);
+            alert("Error al eliminar usuario");
+        }
+    };
+
     if (loading) {
         return (
             <div className="p-6 flex items-center justify-center min-h-[400px]">
@@ -132,14 +143,14 @@ export default function PlatformAdminPage() {
                                 <th className="px-6 py-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Usuario</th>
                                 <th className="px-6 py-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Plan</th>
                                 <th className="px-6 py-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Estado</th>
-                                <th className="px-6 py-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Rol</th>
-                                <th className="px-6 py-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Fecha Registro</th>
+                                <th className="px-6 py-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Identidad</th>
+                                <th className="px-6 py-4 text-right text-xs font-semibold text-gray-500 uppercase tracking-wider">Acciones</th>
                             </tr>
                         </thead>
                         <tbody className="divide-y divide-gray-200">
                             {filteredUsers.length === 0 ? (
                                 <tr>
-                                    <td colSpan={5} className="px-6 py-12 text-center text-gray-500">
+                                    <td colSpan={6} className="px-6 py-12 text-center text-gray-500">
                                         No se encontraron usuarios
                                     </td>
                                 </tr>
@@ -160,6 +171,7 @@ export default function PlatformAdminPage() {
                                                 <div className="ml-4">
                                                     <div className="text-sm font-medium text-gray-900">{user.displayName || 'Sin nombre'}</div>
                                                     <div className="text-sm text-gray-500">{user.email}</div>
+                                                    <div className="text-xs text-gray-400 mt-0.5">Reg: {user.createdAt ? new Date(user.createdAt).toLocaleDateString() : '-'}</div>
                                                 </div>
                                             </div>
                                         </td>
@@ -176,11 +188,42 @@ export default function PlatformAdminPage() {
                                                 {user.subscription?.status ? user.subscription.status.toUpperCase() : 'FREE'}
                                             </span>
                                         </td>
-                                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                            {user.roleId || 'N/A'}
+                                        <td className="px-6 py-4 whitespace-nowrap text-sm">
+                                            {user.verificationStatus === 'verified' ? (
+                                                <span className="px-2 py-1 inline-flex items-center gap-1 text-xs leading-5 font-semibold rounded-full bg-blue-100 text-blue-700">
+                                                    <Shield size={12} fill="currentColor" /> Verificado
+                                                </span>
+                                            ) : user.verificationStatus === 'pending' ? (
+                                                <span className="px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full bg-orange-100 text-orange-700">
+                                                    Pendiente
+                                                </span>
+                                            ) : (
+                                                <span className="text-gray-400 text-xs">No verificado</span>
+                                            )}
                                         </td>
-                                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                            {user.createdAt ? new Date(user.createdAt).toLocaleDateString() : '-'}
+                                        <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                                            <div className="flex items-center justify-end gap-2">
+                                                <a
+                                                    href={`mailto:${user.email}`}
+                                                    className="p-2 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
+                                                    title="Contactar"
+                                                >
+                                                    <div className="w-4 h-4 text-xl">✉</div>
+                                                </a>
+                                                {/* Actions for verify/delete implemented as needed or placeholder icons */}
+                                                <button
+                                                    className="p-2 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+                                                    title="Eliminar Usuario"
+                                                    onClick={() => {
+                                                        if (confirm('¿Estás seguro de eliminar este usuario? Esta acción no se puede deshacer.')) {
+                                                            // Logic handled in component function wrapper
+                                                            handleDeleteUser(user.uid);
+                                                        }
+                                                    }}
+                                                >
+                                                    <div className="w-4 h-4 text-xl">🗑</div>
+                                                </button>
+                                            </div>
                                         </td>
                                     </tr>
                                 ))

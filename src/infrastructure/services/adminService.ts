@@ -1,5 +1,5 @@
 import { db } from "@/infrastructure/firebase/client";
-import { collection, getDocs, query, orderBy, where, getDoc, doc } from "firebase/firestore";
+import { collection, getDocs, query, orderBy, where, getDoc, doc, deleteDoc, updateDoc } from "firebase/firestore";
 import { User } from "@/domain/models/User";
 import { Subscription } from "@/domain/models/Subscription";
 
@@ -79,5 +79,24 @@ export const adminService = {
             activeSubscriptions,
             mrr
         };
+    },
+
+    // Eliminar usuario
+    deleteUser: async (uid: string) => {
+        if (!db) throw new Error("Firestore not initialized");
+
+        // 1. Delete from users collection
+        await deleteDoc(doc(db, USERS_COLLECTION, uid));
+    },
+
+    // Verificar usuario
+    verifyUser: async (uid: string, status: 'verified' | 'rejected' | 'pending') => {
+        if (!db) throw new Error("Firestore not initialized");
+        const userRef = doc(db, USERS_COLLECTION, uid);
+
+        await updateDoc(userRef, {
+            isVerified: status === 'verified',
+            verificationStatus: status
+        });
     }
 };

@@ -1,74 +1,120 @@
-import { NextRequest, NextResponse } from "next/server";
-import MercadoPagoConfig, { Preference } from "mercadopago";
+import { NextResponse } from "next/server";
+import { mpPreference } from "@/lib/mercadopago";
+import { subscriptionService } from "@/infrastructure/services/subscriptionService";
+import { db } from "@/infrastructure/firebase/client";
+import { collection, addDoc, Timestamp } from "firebase/firestore";
 
-// Initialize MercadoPago client
-const client = new MercadoPagoConfig({
-    accessToken: process.env.MP_ACCESS_TOKEN || "",
-});
-
-export async function POST(req: NextRequest) {
+export async function POST(request: Request) {
     try {
-        const body = await req.json();
-        const { planId, planName, price, billing, user } = body;
+        // Parse request body to get plan information
+        const body = await request.json();
+        const { planId, billing, userId } = body;
 
-        if (!process.env.MP_ACCESS_TOKEN) {
+        if (!planId || !billing) {
             return NextResponse.json(
-                { error: "MercadoPago Access Token not configured" },
-                { status: 500 }
+                { error: "Missing planId or billing parameter" },
+                { status: 400 }
             );
         }
 
-        const preference = new Preference(client);
+        if (!userId) {
+            return NextResponse.json(
+                { error: "User not authenticated" },
+                { status: 401 }
+            );
+        }
 
-        const result = await preference.create({
+        // Fetch plan data from Firestore
+        const plan = await subscriptionService.getPlanById(planId);
+
+        if (!plan) {
+            return NextResponse.json(
+                { error: "Plan not found" },
+                { status: 404 }
+            );
+        }
+
+        // Calculate price based on billing period
+        const price = billing === 'monthly' ? plan.price.monthly : plan.price.yearly;
+        const billingLabel = billing === 'monthly' ? 'Mensual' : 'Anual';
+
+        // Base URL for redirects
+        const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000';
+
+        console.log(`Creating preference for ${plan.name} - ${billingLabel} - $${price}`);
+
+        // Create Mercado Pago preference with real plan data
+        const result = await mpPreference.create({
             body: {
                 items: [
                     {
                         id: planId,
-                        title: `PropIA - Plan ${planName} (${billing === 'yearly' ? 'Anual' : 'Mensual'})`,
+                        title: `${plan.name} - ${billingLabel}`,
+                        description: plan.description,
                         quantity: 1,
-                        unit_price: Number(price),
-                        currency_id: "ARS",
-                    },
-                ],
-                payer: {
-                    name: user.name,
-                    email: user.email,
-                    phone: {
-                        area_code: "",
-                        number: user.phone,
-                    },
-                    address: {
-                        street_name: user.address,
-                        street_number: "",
-                        zip_code: "",
+                        unit_price: price,
+                        currency_id: 'ARS'
                     }
-                },
+                ],
                 back_urls: {
-                    success: `${process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000"}/dashboard?payment=success`,
-                    failure: `${process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000"}/checkout?payment=failure`,
-                    pending: `${process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000"}/checkout?payment=pending`,
+                    success: `${baseUrl}/checkout/success`,
+                    failure: `${baseUrl}/checkout/failure`,
+                    pending: `${baseUrl}/checkout/pending`
                 },
-                auto_return: "approved",
+                // Metadata to identify the subscription when webhook is received
                 metadata: {
                     plan_id: planId,
-                    billing_cycle: billing,
-                    user_email: user.email,
-                    company: user.company,
-                    cuit: user.cuit
-                }
-            },
+                    billing_period: billing,
+                    plan_name: plan.name
+                },
+                // Notification URL for webhooks
+                notification_url: `${baseUrl}/api/webhooks/mercadopago`,
+                // Statement descriptor (what appears on credit card statement)
+                statement_descriptor: "PROP-IA"
+            }
         });
 
+        // Validate that result has an ID
+        if (!result.id) {
+            console.error("Mercado Pago returned no ID:", result);
+            return NextResponse.json(
+                { error: "Error creating preference", details: result },
+                { status: 500 }
+            );
+        }
+
+        console.log("✅ Preference created successfully:", result.id);
+
+        // Create pending payment record in Firestore
+        if (!db) throw new Error("Firestore not initialized");
+
+        const paymentRef = await addDoc(collection(db, "payments"), {
+            userId,
+            planId,
+            billingPeriod: billing,
+            amount: price,
+            provider: 'mercadopago',
+            preferenceId: result.id,
+            status: 'pending',
+            createdAt: Timestamp.now(),
+            updatedAt: Timestamp.now()
+        });
+
+        console.log("✅ Pending payment created:", paymentRef.id);
+
         return NextResponse.json({
-            id: result.id,
+            preference_id: result.id,
+            payment_id: paymentRef.id,
             init_point: result.init_point,
+            sandbox_init_point: result.sandbox_init_point
         });
 
     } catch (error: any) {
-        console.error("Error creating preference:", error);
+        console.error("❌ MercadoPago Error:", error);
+        console.error("Error details:", error.cause || error.message);
+
         return NextResponse.json(
-            { error: error.message || "Error creating payment preference" },
+            { error: error.message || "Internal server error", details: error.cause },
             { status: 500 }
         );
     }
