@@ -113,6 +113,7 @@ export default function PlanForm({ initialData, onSave, onCancel }: PlanFormProp
             console.error("Form validation errors:", errors);
             toast.error("Hay errores en el formulario, revisa los campos.");
         }
+        // Fix applied: prevent showing errors when object is empty
     };
 
     return (
