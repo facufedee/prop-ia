@@ -57,6 +57,9 @@ function CheckoutContent() {
     useEffect(() => {
         if (!planId || paymentMethod !== 'mercadopago') return;
 
+        // Wait for auth to initialize
+        if (authLoading) return;
+
         setLoading(true);
         const createPreference = async () => {
             try {
@@ -65,6 +68,9 @@ function CheckoutContent() {
                     setLoading(false);
                     return;
                 }
+
+                // Clear any previous errors
+                setError(null);
 
                 const response = await fetch("/api/payments/create-preference", {
                     method: "POST",
@@ -91,7 +97,7 @@ function CheckoutContent() {
         };
 
         createPreference();
-    }, [planId, billing, paymentMethod]);
+    }, [planId, billing, paymentMethod, authLoading, currentUser]);
 
     // Format price
     const formatPrice = (price: number) => {
