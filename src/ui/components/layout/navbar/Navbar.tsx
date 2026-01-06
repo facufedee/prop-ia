@@ -121,6 +121,9 @@ export default function Navbar() {
           <Link href="/nosotros" className="flex items-center gap-2 hover:text-indigo-600 transition-colors">
             Nosotros
           </Link>
+          <Link href="/blog" className="flex items-center gap-2 hover:text-indigo-600 transition-colors">
+            Blog
+          </Link>
           <Link href="/propiedades" className="flex items-center gap-2 hover:text-indigo-600 transition-colors">
             Propiedades
           </Link>
@@ -211,8 +214,8 @@ export default function Navbar() {
                               <div className="shrink-0 mt-1">
                                 {/* Icon based on Type */}
                                 <div className={`w-10 h-10 rounded-full flex items-center justify-center ${notif.type === 'success' ? 'bg-green-100 text-green-600' :
-                                    notif.type === 'warning' ? 'bg-orange-100 text-orange-600' :
-                                      notif.type === 'error' ? 'bg-red-100 text-red-600' : 'bg-blue-100 text-blue-600'
+                                  notif.type === 'warning' ? 'bg-orange-100 text-orange-600' :
+                                    notif.type === 'error' ? 'bg-red-100 text-red-600' : 'bg-blue-100 text-blue-600'
                                   }`}>
                                   {notif.type === 'success' ? <Check size={20} /> :
                                     notif.type === 'warning' ? <LogOut size={20} /> : /* alert triangle fallback? using logout as placeholder... wait Use Bell */
@@ -356,6 +359,7 @@ export default function Navbar() {
           <Link href="/servicios" className="px-2 py-1 hover:text-black">Servicios</Link>
           <Link href="/precios" className="px-2 py-1 hover:text-black">Precios</Link>
           <Link href="/nosotros" className="px-2 py-1 hover:text-black">Nosotros</Link>
+          <Link href="/blog" className="px-2 py-1 hover:text-black">Blog</Link>
           <Link href="/propiedades" className="px-2 py-1 hover:text-black">Propiedades</Link>
           <Link href="/contacto" className="px-2 py-1 hover:text-black">Contacto</Link>
 
