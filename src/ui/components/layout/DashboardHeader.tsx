@@ -287,9 +287,14 @@ export default function DashboardHeader({ onMobileMenuClick }: DashboardHeaderPr
                             onClick={() => setProfileOpen(!profileOpen)}
                             className="flex items-center gap-3 p-1.5 rounded-xl hover:bg-gray-50 transition-colors border border-transparent hover:border-gray-200"
                         >
-                            <div className="w-9 h-9 rounded-full bg-indigo-100 flex items-center justify-center text-indigo-600 overflow-hidden ring-2 ring-transparent group-hover:ring-indigo-100">
+                            <div className="w-9 h-9 rounded-full bg-gradient-to-br from-indigo-500 to-violet-500 flex items-center justify-center text-white overflow-hidden ring-2 ring-white shadow-sm">
                                 {user.photoURL ? (
-                                    <img src={user.photoURL} alt="Profile" className="w-full h-full object-cover" />
+                                    <img
+                                        src={user.photoURL}
+                                        alt="Profile"
+                                        className="w-full h-full object-cover"
+                                        referrerPolicy="no-referrer"
+                                    />
                                 ) : (
                                     <span className="font-bold text-sm">{user.displayName?.charAt(0).toUpperCase() || user.email?.charAt(0).toUpperCase()}</span>
                                 )}
