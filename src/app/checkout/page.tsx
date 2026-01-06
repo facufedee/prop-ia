@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, Suspense } from "react";
+import { useEffect, useState, Suspense, useRef } from "react";
 import { useSearchParams } from "next/navigation";
 import PaymentWallet from "@/ui/components/pricing/PaymentWallet";
 import { Loader2, CreditCard, Building2, Check } from "lucide-react";
@@ -21,6 +21,9 @@ function CheckoutContent() {
     const [planData, setPlanData] = useState<any>(null);
     const [paymentMethod, setPaymentMethod] = useState<'mercadopago' | 'transfer'>('mercadopago');
     const [billing, setBilling] = useState<'monthly' | 'yearly'>(billingParam as 'monthly' | 'yearly' || 'monthly');
+
+    // Cache for Mercado Pago preferences to avoid re-fetching
+    const preferenceCache = useRef<Record<string, string>>({});
 
     // Listen to auth state
     useEffect(() => {
@@ -53,22 +56,28 @@ function CheckoutContent() {
         fetchPlanData();
     }, [planId]);
 
-    // Create Mercado Pago preference
+    // Create Mercado Pago preference (Current selection)
     useEffect(() => {
         if (!planId || paymentMethod !== 'mercadopago') return;
 
         // Wait for auth to initialize
         if (authLoading) return;
 
+        if (!currentUser?.uid) {
+            setError("Debes iniciar sesión para continuar");
+            return;
+        }
+
+        const cacheKey = `${planId}-${billing}-${currentUser.uid}`;
+        if (preferenceCache.current[cacheKey]) {
+            setPreferenceId(preferenceCache.current[cacheKey]);
+            setLoading(false);
+            return;
+        }
+
         setLoading(true);
         const createPreference = async () => {
             try {
-                if (!currentUser?.uid) {
-                    setError("Debes iniciar sesión para continuar");
-                    setLoading(false);
-                    return;
-                }
-
                 // Clear any previous errors
                 setError(null);
 
@@ -87,6 +96,7 @@ function CheckoutContent() {
                 const data = await response.json();
                 if (data.preference_id) {
                     setPreferenceId(data.preference_id);
+                    preferenceCache.current[cacheKey] = data.preference_id;
                 }
             } catch (err) {
                 console.error(err);
@@ -98,6 +108,47 @@ function CheckoutContent() {
 
         createPreference();
     }, [planId, billing, paymentMethod, authLoading, currentUser]);
+
+    // Prefetch alternate billing cycle preference
+    useEffect(() => {
+        if (!planId || !currentUser?.uid || authLoading) return;
+
+        const prefetchAlternate = async () => {
+            const alternateBilling = billing === 'monthly' ? 'yearly' : 'monthly';
+            const cacheKey = `${planId}-${alternateBilling}-${currentUser.uid}`;
+
+            // If already cached, skip
+            if (preferenceCache.current[cacheKey]) return;
+
+            try {
+                const response = await fetch("/api/payments/create-preference", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({
+                        planId,
+                        billing: alternateBilling,
+                        userId: currentUser.uid
+                    })
+                });
+
+                if (response.ok) {
+                    const data = await response.json();
+                    if (data.preference_id) {
+                        // Store in cache silently
+                        preferenceCache.current[cacheKey] = data.preference_id;
+                        console.log(`Prefetched ${alternateBilling} preference`);
+                    }
+                }
+            } catch (err) {
+                // Silently fail prefetch
+                console.warn("Prefetch failed", err);
+            }
+        };
+
+        // Small delay to prioritize main fetch
+        const timer = setTimeout(prefetchAlternate, 1000);
+        return () => clearTimeout(timer);
+    }, [planId, billing, currentUser, authLoading]);
 
     // Format price
     const formatPrice = (price: number) => {
@@ -130,238 +181,260 @@ function CheckoutContent() {
     }
 
     return (
-        <div className="min-h-screen bg-gradient-to-br from-gray-50 to-indigo-50 py-12 px-4">
-            <div className="max-w-4xl mx-auto">
-                <div className="bg-white rounded-3xl shadow-2xl overflow-hidden">
-                    {/* Header */}
-                    <div className="bg-gradient-to-r from-indigo-600 to-purple-600 p-8 text-white">
-                        <h1 className="text-3xl font-bold mb-2">Checkout Seguro</h1>
-                        <p className="text-indigo-100">Completá tu suscripción de forma segura</p>
+        <div className="min-h-screen bg-gray-50 py-12 px-4 md:px-8 font-sans">
+            <div className="max-w-7xl mx-auto">
+                <div className="flex flex-col md:flex-row md:items-center justify-between mb-8 gap-4">
+                    <div>
+                        <Link href="/precios" className="text-sm text-gray-500 hover:text-gray-900 mb-2 inline-block">
+                            ← Volver a planes
+                        </Link>
+                        <h1 className="text-3xl font-bold text-gray-900">Finalizar Suscripción</h1>
+                        <p className="text-gray-500 mt-1">Revisá tu plan y completá el pago</p>
+                    </div>
+                </div>
+
+                <div className="grid lg:grid-cols-12 gap-8">
+                    {/* LEFT COLUMN - CONTEXT (User + Plan Details) */}
+                    <div className="lg:col-span-7 space-y-6">
+                        {planData && (
+                            <>
+                                {/* 1. User Details */}
+                                <section className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
+                                    <div className="flex items-center justify-between mb-4">
+                                        <h2 className="text-lg font-semibold text-gray-900">Tus Datos</h2>
+                                        <div className="bg-green-100 text-green-700 px-2 py-0.5 rounded text-xs font-bold uppercase tracking-wider">
+                                            Verificado
+                                        </div>
+                                    </div>
+
+                                    <div className="flex items-center gap-4 p-3 bg-gray-50 rounded-xl border border-gray-200">
+                                        <div className="w-10 h-10 rounded-full bg-indigo-100 flex items-center justify-center text-indigo-600 font-bold text-lg">
+                                            {currentUser?.displayName ? currentUser.displayName[0].toUpperCase() : (currentUser?.email ? currentUser.email[0].toUpperCase() : 'U')}
+                                        </div>
+                                        <div className="flex-1">
+                                            <p className="font-semibold text-gray-900 leading-tight">
+                                                {currentUser?.displayName || "Usuario"}
+                                            </p>
+                                            <p className="text-sm text-gray-500">
+                                                {currentUser?.email}
+                                            </p>
+                                        </div>
+                                    </div>
+                                </section>
+
+                                {/* 2. Plan Features (Moved from Right) */}
+                                <section className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
+                                    <h2 className="text-lg font-semibold text-gray-900 mb-4">Detalle del Plan</h2>
+
+                                    <div className="mb-6 pb-6 border-b border-gray-100">
+                                        <div className="flex justify-between items-start">
+                                            <div>
+                                                <h3 className="text-xl font-bold text-gray-900">{planData.name}</h3>
+                                                <p className="text-gray-500 mt-1">{planData.description}</p>
+                                            </div>
+                                            <div className="bg-indigo-50 text-indigo-700 px-3 py-1 rounded-full text-sm font-medium">
+                                                {billing === 'monthly' ? 'Mensual' : 'Anual'}
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div className="space-y-4">
+                                        <h4 className="text-sm font-semibold text-gray-500 uppercase tracking-wide">Incluye</h4>
+                                        <div className="grid sm:grid-cols-2 gap-4">
+                                            {/* Standard Features */}
+                                            <div className="flex items-start gap-3 p-3 rounded-lg bg-gray-50">
+                                                <div className="p-1 bg-green-100 rounded-full">
+                                                    <Check className="w-4 h-4 text-green-600" />
+                                                </div>
+                                                <div>
+                                                    <p className="font-medium text-gray-900">Propiedades</p>
+                                                    <p className="text-sm text-gray-500">
+                                                        {planData.limits.properties === 'unlimited' ? 'Ilimitadas' : `${planData.limits.properties} activas`}
+                                                    </p>
+                                                </div>
+                                            </div>
+
+                                            <div className="flex items-start gap-3 p-3 rounded-lg bg-gray-50">
+                                                <div className="p-1 bg-green-100 rounded-full">
+                                                    <Check className="w-4 h-4 text-green-600" />
+                                                </div>
+                                                <div>
+                                                    <p className="font-medium text-gray-900">Usuarios</p>
+                                                    <p className="text-sm text-gray-500">
+                                                        {planData.limits.users === 'unlimited' ? 'Ilimitados' : `${planData.limits.users} miembros`}
+                                                    </p>
+                                                </div>
+                                            </div>
+
+                                            {/* Decorative Extra Features just to fill space comfortably */}
+                                            <div className="flex items-start gap-3 p-3 rounded-lg bg-gray-50">
+                                                <div className="p-1 bg-green-100 rounded-full">
+                                                    <Check className="w-4 h-4 text-green-600" />
+                                                </div>
+                                                <div>
+                                                    <p className="font-medium text-gray-900">Soporte</p>
+                                                    <p className="text-sm text-gray-500">Prioritario 24/7</p>
+                                                </div>
+                                            </div>
+
+                                            <div className="flex items-start gap-3 p-3 rounded-lg bg-gray-50">
+                                                <div className="p-1 bg-green-100 rounded-full">
+                                                    <Check className="w-4 h-4 text-green-600" />
+                                                </div>
+                                                <div>
+                                                    <p className="font-medium text-gray-900">Actualizaciones</p>
+                                                    <p className="text-sm text-gray-500">Automáticas</p>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </section>
+                            </>
+                        )}
                     </div>
 
-                    <div className="p-8">
-                        {/* Plan Details */}
+                    {/* RIGHT COLUMN - CONTROL CENTER (Sticky) */}
+                    <div className="lg:col-span-5">
                         {planData && (
-                            <div className="mb-8 p-6 bg-gradient-to-br from-indigo-50 to-purple-50 rounded-2xl border border-indigo-100">
-                                <h2 className="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
-                                    <Check className="w-5 h-5 text-indigo-600" />
-                                    Resumen de tu plan
-                                </h2>
+                            <div className="sticky top-8 space-y-4">
+                                <div className="bg-white rounded-2xl shadow-xl border border-gray-100 overflow-hidden">
+                                    <div className="p-6 space-y-6">
 
-                                <div className="grid md:grid-cols-2 gap-4 mb-4">
-                                    <div>
-                                        <p className="text-sm text-gray-500 mb-1">Plan seleccionado</p>
-                                        <p className="text-xl font-bold text-gray-900">{planData.name}</p>
-                                        <p className="text-sm text-gray-600 mt-1">{planData.description}</p>
-                                    </div>
-
-                                    <div>
-                                        <p className="text-sm text-gray-500 mb-1">Precio</p>
-                                        <div className="flex items-baseline gap-2">
-                                            <p className="text-3xl font-bold text-indigo-600">
-                                                {formatPrice(getPricePerMonth())}
-                                            </p>
-                                            <span className="text-gray-500">/mes</span>
+                                        {/* 1. Billing Cycle Toggle */}
+                                        <div>
+                                            <p className="text-sm font-semibold text-gray-700 mb-3 block">Período de facturación</p>
+                                            <div className="flex p-1 bg-gray-100 rounded-xl">
+                                                <button
+                                                    onClick={() => setBilling('monthly')}
+                                                    className={`flex-1 py-3 px-4 rounded-lg text-base font-bold transition-all ${billing === 'monthly'
+                                                        ? 'bg-white text-gray-900 shadow-sm'
+                                                        : 'text-gray-500 hover:text-gray-900'
+                                                        }`}
+                                                >
+                                                    Mensual
+                                                </button>
+                                                <button
+                                                    onClick={() => setBilling('yearly')}
+                                                    className={`flex-1 py-3 px-4 rounded-lg text-base font-bold transition-all flex items-center justify-center gap-2 ${billing === 'yearly'
+                                                        ? 'bg-white text-gray-900 shadow-sm'
+                                                        : 'text-gray-500 hover:text-gray-900'
+                                                        }`}
+                                                >
+                                                    Anual
+                                                    <span className="text-[10px] px-1.5 py-0.5 rounded font-extrabold bg-green-100 text-green-700 border border-green-200">
+                                                        -17%
+                                                    </span>
+                                                </button>
+                                            </div>
                                         </div>
-                                        {billing === 'yearly' && (
-                                            <p className="text-sm text-green-600 font-medium mt-1">
-                                                💰 Facturado {formatPrice(getPrice())} al año
+
+                                        {/* 2. Price Display */}
+                                        <div className="text-center py-4 bg-gray-50 rounded-xl border border-gray-100 dashed">
+                                            <p className="text-sm text-gray-500 mb-1">Total a pagar ahora</p>
+                                            <p className="text-4xl font-extrabold text-gray-900 tracking-tight flex items-baseline justify-center gap-1">
+                                                {formatPrice(getPrice())}
+                                                <span className="text-lg text-gray-400 font-medium">
+                                                    /{billing === 'monthly' ? 'mes' : 'año'}
+                                                </span>
                                             </p>
-                                        )}
-                                        <p className="text-xs text-gray-500 mt-2 capitalize">
-                                            Facturación: {billing === 'monthly' ? 'Mensual' : 'Anual'}
-                                        </p>
-                                    </div>
-                                </div>
-
-                                {/* Billing Period Toggle - Inside Plan Summary */}
-                                <div className="mb-4 pb-4 border-b border-indigo-200">
-                                    <p className="text-sm font-semibold text-gray-700 mb-3">Período de facturación</p>
-                                    <div className="inline-flex items-center bg-white rounded-xl p-1 shadow-sm border border-indigo-200">
-                                        <button
-                                            onClick={() => setBilling('monthly')}
-                                            className={`px-6 py-2.5 rounded-lg transition-all font-medium text-sm ${billing === 'monthly'
-                                                ? 'bg-indigo-600 text-white shadow-sm'
-                                                : 'text-gray-600 hover:text-gray-900'
-                                                }`}
-                                        >
-                                            Mensual
-                                        </button>
-                                        <button
-                                            onClick={() => setBilling('yearly')}
-                                            className={`px-6 py-2.5 rounded-lg transition-all relative font-medium text-sm ${billing === 'yearly'
-                                                ? 'bg-indigo-600 text-white shadow-sm'
-                                                : 'text-gray-600 hover:text-gray-900'
-                                                }`}
-                                        >
-                                            Anual
-                                            <span className="absolute -top-2 -right-2 bg-green-500 text-white text-[10px] font-bold px-2 py-0.5 rounded-full shadow-sm">
-                                                17% OFF
-                                            </span>
-                                        </button>
-                                    </div>
-                                    {billing === 'yearly' && (
-                                        <p className="text-sm text-green-600 font-medium mt-2 flex items-center gap-1">
-                                            <span>🎉</span>
-                                            ¡Ahorrás 2 meses! Pagás 10 y usás 12
-                                        </p>
-                                    )}
-                                </div>
-
-                                {/* Plan Features Preview */}
-                                <div>
-                                    <p className="text-xs font-semibold text-gray-500 uppercase mb-2">Incluye:</p>
-                                    <div className="grid grid-cols-2 gap-2 text-sm text-gray-700">
-                                        <div className="flex items-center gap-1">
-                                            <Check className="w-4 h-4 text-green-600" />
-                                            <span>{planData.limits.properties === 'unlimited' ? 'Propiedades ilimitadas' : `${planData.limits.properties} propiedades`}</span>
+                                            {billing === 'yearly' && (
+                                                <div className="mt-2 inline-flex items-center gap-1 bg-green-50 text-green-700 px-3 py-1 rounded-full text-xs font-bold border border-green-100">
+                                                    <span>🎉</span>
+                                                    Ahorrás un 17% (2 meses off)
+                                                </div>
+                                            )}
                                         </div>
-                                        <div className="flex items-center gap-1">
-                                            <Check className="w-4 h-4 text-green-600" />
-                                            <span>{planData.limits.users === 'unlimited' ? 'Usuarios ilimitados' : `${planData.limits.users} usuarios`}</span>
+
+                                        {/* 3. Payment Method Selector */}
+                                        <div>
+                                            <p className="text-sm font-semibold text-gray-700 mb-3">Tu método de pago</p>
+                                            <div className="grid grid-cols-2 gap-3">
+                                                <button
+                                                    onClick={() => setPaymentMethod('mercadopago')}
+                                                    className={`p-3 rounded-xl border-2 transition-all flex flex-col items-center gap-2 text-center ${paymentMethod === 'mercadopago'
+                                                        ? 'border-indigo-600 bg-indigo-50 text-indigo-700'
+                                                        : 'border-gray-200 hover:border-gray-300 text-gray-600'
+                                                        }`}
+                                                >
+                                                    <CreditCard className="w-5 h-5 mb-1" />
+                                                    <span className="text-xs font-bold">Mercado Pago</span>
+                                                </button>
+
+                                                <button
+                                                    onClick={() => setPaymentMethod('transfer')}
+                                                    className={`p-3 rounded-xl border-2 transition-all flex flex-col items-center gap-2 text-center ${paymentMethod === 'transfer'
+                                                        ? 'border-indigo-600 bg-indigo-50 text-indigo-700'
+                                                        : 'border-gray-200 hover:border-gray-300 text-gray-600'
+                                                        }`}
+                                                >
+                                                    <Building2 className="w-5 h-5 mb-1" />
+                                                    <span className="text-xs font-bold">Transferencia</span>
+                                                </button>
+                                            </div>
+                                        </div>
+
+                                        {/* 4. Payment Action Area */}
+                                        <div className="pt-2 border-t border-gray-100">
+                                            {paymentMethod === 'mercadopago' ? (
+                                                <div className="mt-4">
+                                                    {loading ? (
+                                                        <button disabled className="w-full py-4 bg-gray-100 text-gray-400 rounded-xl font-bold flex items-center justify-center gap-2">
+                                                            <Loader2 className="w-5 h-5 animate-spin" />
+                                                            Cargando...
+                                                        </button>
+                                                    ) : error ? (
+                                                        <div className="text-center p-3 bg-red-50 text-red-600 rounded-xl text-sm border border-red-100">
+                                                            {error}
+                                                        </div>
+                                                    ) : preferenceId ? (
+                                                        <div className="animate-in fade-in zoom-in-95 duration-300">
+                                                            <PaymentWallet preferenceId={preferenceId} />
+                                                        </div>
+                                                    ) : null}
+                                                </div>
+                                            ) : (
+                                                <div className="mt-4 space-y-4">
+                                                    <div className="bg-blue-50 p-4 rounded-xl border border-blue-100 text-sm">
+                                                        <p className="font-semibold text-blue-900 mb-2">Datos para transferir:</p>
+                                                        <div className="space-y-1 text-gray-700">
+                                                            <div className="flex justify-between">
+                                                                <span>CBU:</span>
+                                                                <span className="font-mono font-medium">0720086188000037816940</span>
+                                                            </div>
+                                                            <div className="flex justify-between">
+                                                                <span>Alias:</span>
+                                                                <span className="font-bold text-indigo-600">FACU.FEDE.ROJO</span>
+                                                            </div>
+                                                            <div className="flex justify-between mt-2 pt-2 border-t border-blue-100">
+                                                                <span>Banco:</span>
+                                                                <span>Santander</span>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+
+                                                    <a
+                                                        href="https://wa.me/5491124000769?text=Hola!%20Realicé%20una%20transferencia%20para%20el%20plan%20de%20suscripción.%20Adjunto%20el%20comprobante."
+                                                        target="_blank"
+                                                        rel="noopener noreferrer"
+                                                        className="w-full py-3 bg-green-600 hover:bg-green-700 text-white rounded-xl font-bold flex items-center justify-center gap-2 transition-colors shadow-sm"
+                                                    >
+                                                        <span>Enviar Comprobante</span>
+                                                    </a>
+                                                </div>
+                                            )}
+                                        </div>
+
+                                        {/* Security Footer */}
+                                        <div className="flex items-center justify-center gap-2 text-[10px] text-gray-400 mt-2">
+                                            <div className="flex items-center gap-1">
+                                                <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+                                                Pago Encriptado SSL
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
                             </div>
                         )}
-
-                        {/* Payment Method Selection */}
-                        <div className="mb-6">
-                            <h2 className="text-lg font-semibold text-gray-900 mb-4">Método de pago</h2>
-                            <div className="grid md:grid-cols-2 gap-4">
-                                <button
-                                    onClick={() => setPaymentMethod('mercadopago')}
-                                    className={`p-4 rounded-xl border-2 transition-all ${paymentMethod === 'mercadopago'
-                                        ? 'border-indigo-600 bg-indigo-50'
-                                        : 'border-gray-200 hover:border-gray-300'
-                                        }`}
-                                >
-                                    <div className="flex items-center gap-3">
-                                        <CreditCard className={`w-5 h-5 ${paymentMethod === 'mercadopago' ? 'text-indigo-600' : 'text-gray-400'}`} />
-                                        <div className="text-left">
-                                            <p className="font-semibold text-gray-900">Mercado Pago</p>
-                                            <p className="text-xs text-gray-500">Tarjeta, débito o efectivo</p>
-                                        </div>
-                                    </div>
-                                </button>
-
-                                <button
-                                    onClick={() => setPaymentMethod('transfer')}
-                                    className={`p-4 rounded-xl border-2 transition-all ${paymentMethod === 'transfer'
-                                        ? 'border-indigo-600 bg-indigo-50'
-                                        : 'border-gray-200 hover:border-gray-300'
-                                        }`}
-                                >
-                                    <div className="flex items-center gap-3">
-                                        <Building2 className={`w-5 h-5 ${paymentMethod === 'transfer' ? 'text-indigo-600' : 'text-gray-400'}`} />
-                                        <div className="text-left">
-                                            <p className="font-semibold text-gray-900">Transferencia</p>
-                                            <p className="text-xs text-gray-500">Bancaria o billetera virtual</p>
-                                        </div>
-                                    </div>
-                                </button>
-                            </div>
-                        </div>
-
-                        {/* Payment Content */}
-                        {paymentMethod === 'mercadopago' ? (
-                            <div className="mt-8">
-                                {loading && (
-                                    <div className="flex flex-col items-center justify-center py-10">
-                                        <Loader2 className="w-8 h-8 text-indigo-600 animate-spin mb-2" />
-                                        <p className="text-sm text-gray-500">Preparando pago...</p>
-                                    </div>
-                                )}
-
-                                {error && (
-                                    <div className="bg-red-50 text-red-600 p-4 rounded-lg text-center mb-6">
-                                        {error}
-                                    </div>
-                                )}
-
-                                {preferenceId && (
-                                    <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
-                                        <PaymentWallet preferenceId={preferenceId} />
-                                    </div>
-                                )}
-                            </div>
-                        ) : (
-                            <div className="mt-8 p-6 bg-blue-50 border border-blue-200 rounded-2xl">
-                                <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
-                                    <Building2 className="w-5 h-5 text-blue-600" />
-                                    Datos para transferencia
-                                </h3>
-
-                                <div className="grid md:grid-cols-2 gap-4 mb-6">
-                                    {/* Left Column */}
-                                    <div className="space-y-4">
-                                        <div className="bg-white p-4 rounded-xl border border-blue-100">
-                                            <p className="text-xs text-gray-500 mb-1">Titular</p>
-                                            <p className="font-semibold text-gray-900">Facundo Federico Flores Zamorano</p>
-                                            <p className="text-xs text-gray-500 mt-1">CUIT: 20-35163401-5</p>
-                                        </div>
-
-                                        <div className="bg-white p-4 rounded-xl border border-blue-100">
-                                            <p className="text-xs text-gray-500 mb-1">Banco</p>
-                                            <p className="font-semibold text-gray-900">Santander</p>
-                                            <p className="text-xs text-gray-500 mt-1">Cuenta única</p>
-                                        </div>
-
-                                        <div className="bg-white p-4 rounded-xl border border-blue-100">
-                                            <p className="text-xs text-gray-500 mb-1">Sucursal</p>
-                                            <p className="font-semibold text-gray-900">086 - ALTO DEL TALAR</p>
-                                            <p className="text-xs text-gray-500 mt-1">Cuenta: 086-378169/4</p>
-                                        </div>
-                                    </div>
-
-                                    {/* Right Column */}
-                                    <div className="space-y-4">
-                                        <div className="bg-white p-4 rounded-xl border border-blue-100">
-                                            <p className="text-xs text-gray-500 mb-1">CBU</p>
-                                            <p className="font-mono font-semibold text-gray-900 text-sm">0720086188000037816940</p>
-                                        </div>
-
-                                        <div className="bg-white p-4 rounded-xl border border-blue-100">
-                                            <p className="text-xs text-gray-500 mb-1">Alias</p>
-                                            <p className="font-mono font-semibold text-indigo-600 text-lg">FACU.FEDE.ROJO</p>
-                                        </div>
-
-                                        <div className="bg-gradient-to-br from-indigo-50 to-purple-50 p-4 rounded-xl border border-indigo-200">
-                                            <p className="text-xs text-gray-500 mb-1">Monto a transferir</p>
-                                            <p className="text-3xl font-bold text-indigo-600">
-                                                {planData && formatPrice(getPrice())}
-                                            </p>
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <div className="bg-yellow-50 border border-yellow-200 rounded-xl p-4 mb-4">
-                                    <p className="text-sm font-semibold text-yellow-900 mb-2">📋 Instrucciones:</p>
-                                    <ol className="text-sm text-yellow-800 space-y-1 list-decimal list-inside">
-                                        <li>Realizá la transferencia por el monto indicado</li>
-                                        <li>Enviá el comprobante por WhatsApp al +54 9 11 2400 0769</li>
-                                        <li>Incluí tu email registrado en el mensaje</li>
-                                        <li>Tu suscripción se activará en 24-48hs hábiles</li>
-                                    </ol>
-                                </div>
-
-                                <a
-                                    href="https://wa.me/5491124000769?text=Hola!%20Realicé%20una%20transferencia%20para%20el%20plan%20de%20suscripción.%20Adjunto%20el%20comprobante."
-                                    target="_blank"
-                                    rel="noopener noreferrer"
-                                    className="block w-full py-4 bg-green-600 text-white text-center rounded-xl font-bold hover:bg-green-700 transition-colors"
-                                >
-                                    📱 Enviar comprobante por WhatsApp
-                                </a>
-                            </div>
-                        )}
-
-                        {/* Back Link */}
-                        <div className="mt-8 text-center">
-                            <Link href="/precios" className="text-sm text-gray-400 hover:text-gray-600">
-                                ← Volver a planes
-                            </Link>
-                        </div>
                     </div>
                 </div>
             </div>
