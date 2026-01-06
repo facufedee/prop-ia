@@ -40,7 +40,7 @@ export default function PropiedadesPage() {
                 where("userId", "==", userId)
             );
 
-            if (branchId) {
+            if (branchId && branchId !== 'all') {
                 q = query(q, where("branchId", "==", branchId));
             }
 

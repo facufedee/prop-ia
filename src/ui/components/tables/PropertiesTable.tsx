@@ -18,6 +18,7 @@ export interface Property {
     operation_type: string;
     imageUrls?: string[];
     userId?: string;
+    branchId?: string;
 }
 
 interface PropertiesTableProps {

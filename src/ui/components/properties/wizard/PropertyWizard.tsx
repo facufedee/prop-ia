@@ -8,6 +8,7 @@ import { app, db, storage, auth } from "@/infrastructure/firebase/client";
 import { collection, addDoc, updateDoc, doc } from "firebase/firestore";
 import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
 import { locationService, Provincia, Localidad } from "@/infrastructure/services/locationService";
+import { useBranchContext } from "@/infrastructure/context/BranchContext";
 import { auditLogService } from "@/infrastructure/services/auditLogService";
 import { subscriptionService } from "@/infrastructure/services/subscriptionService";
 import LimitReachedModal from "@/ui/components/modals/LimitReachedModal";
@@ -87,6 +88,9 @@ export default function PropertyWizard({ initialData, isEditing = false, ...prop
     const [currentStep, setCurrentStep] = useState(1);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
+
+    const { selectedBranchId } = useBranchContext();
+
 
     // Limit Modal State
     const [showLimitModal, setShowLimitModal] = useState(false);
@@ -418,7 +422,8 @@ export default function PropertyWizard({ initialData, isEditing = false, ...prop
                 await updateDoc(propertyRef, {
                     ...formData,
                     updatedAt: new Date(),
-                    imageUrls: imageUrls // Will be updated with new ones below
+                    imageUrls: imageUrls, // Will be updated with new ones below
+                    branchId: selectedBranchId !== 'all' ? selectedBranchId : (initialData?.branchId || null)
                 });
             } else {
                 // Create new document
@@ -428,7 +433,8 @@ export default function PropertyWizard({ initialData, isEditing = false, ...prop
                     userId: auth.currentUser?.uid,
                     createdAt: new Date(),
                     status: 'active',
-                    imageUrls: []
+                    imageUrls: [],
+                    branchId: selectedBranchId !== 'all' ? selectedBranchId : null
                 });
                 propertyRef = docRef; // docRef is a DocumentReference
             }
