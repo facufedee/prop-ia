@@ -5,8 +5,9 @@ import { Metadata } from "next";
 import Image from "next/image";
 
 export const metadata: Metadata = {
-    title: "Blog - Prop-IA",
-    description: "Novedades, tutoriales y noticias sobre el mercado inmobiliario y la tecnología.",
+    title: "Blog | Tasador Online, CRM y Software Inmobiliario | Prop-IA",
+    description: "Descubre cómo usar el tasador online, bot con IA, CRM para agentes inmobiliarios y gestión multisucursal. Guías, tutoriales y casos de éxito.",
+    keywords: "tasador online, bot con ia, crm agentes inmobiliarios, software inmobiliario multisucursal, blog inmobiliario",
 };
 
 export const revalidate = 60; // Revalidate every minute
