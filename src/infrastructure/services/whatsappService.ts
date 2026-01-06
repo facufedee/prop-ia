@@ -104,6 +104,91 @@ export const whatsappService = {
         return message;
     },
 
+    // Generar mensaje de pago/recordatorio para enviar al inquilino
+    generatePaymentMessage: (contract: Alquiler, payment: any): string => {
+        const formatDate = (date: Date | string) => {
+            const d = new Date(date);
+            return d.toLocaleDateString('es-AR', { day: '2-digit', month: '2-digit', year: 'numeric' });
+        };
+
+        const formatMoney = (amount: number) => {
+            return `$${amount.toLocaleString('es-AR')}`;
+        };
+
+        // Calcular totales
+        const baseAlquiler = payment.montoAlquiler || 0;
+        const servicios = (payment.detalleServicios || []).reduce((acc: number, s: any) => acc + (s.monto || 0), 0) + (payment.montoServicios || 0);
+        const adicionales = (payment.cargosAdicionales || []).reduce((acc: number, c: any) => acc + (c.monto || 0), 0);
+        const punitorios = payment.montoPunitorios || 0;
+        const descuentos = payment.montoDescuento || 0;
+
+        // Honorarios
+        let honorarios = payment.desglose?.honorarios || 0;
+        if (honorarios === 0) {
+            if (contract.honorariosTipo === 'fijo' && contract.honorariosValor) {
+                honorarios = contract.honorariosValor;
+            } else if (contract.honorariosTipo === 'porcentaje' && contract.honorariosValor) {
+                const base = payment.montoAlquiler || contract.montoMensual || 0;
+                honorarios = Math.floor(base * (contract.honorariosValor / 100));
+            }
+        }
+
+        const totalFinal = payment.monto || (baseAlquiler + servicios + adicionales + punitorios + honorarios - descuentos);
+        const isPaid = payment.estado === 'pagado';
+
+        // Construir mensaje
+        let message = isPaid
+            ? `✅ *Comprobante de Pago*\n\n`
+            : `💳 *Recordatorio de Pago*\n\n`;
+
+        message += `🏡 *Propiedad:* ${contract.direccion}\n`;
+        message += `📅 *Período:* ${payment.mes}\n`;
+        message += `📆 *Vencimiento:* ${formatDate(payment.fechaVencimiento)}\n\n`;
+
+        message += `📋 *Detalle del Pago:*\n`;
+        message += `\n• Alquiler: ${formatMoney(baseAlquiler)}`;
+
+        if (honorarios > 0) {
+            message += `\n• Honorarios: ${formatMoney(honorarios)}`;
+        }
+        if (servicios > 0) {
+            message += `\n• Servicios/Expensas: ${formatMoney(servicios)}`;
+        }
+        if (adicionales > 0) {
+            message += `\n• Cargos Adicionales: ${formatMoney(adicionales)}`;
+        }
+        if (punitorios > 0) {
+            message += `\n• Intereses/Mora: ${formatMoney(punitorios)}`;
+        }
+        if (descuentos > 0) {
+            message += `\n• Descuentos: -${formatMoney(descuentos)}`;
+        }
+
+        message += `\n\n💰 *TOTAL: ${formatMoney(totalFinal)}*\n\n`;
+
+        if (isPaid) {
+            message += `✅ *Pagado el:* ${payment.fechaPago ? formatDate(payment.fechaPago) : '-'}\n`;
+            if (payment.metodoPago) {
+                message += `💳 *Método:* ${payment.metodoPago}\n`;
+            }
+            message += `\n¡Gracias por tu pago!`;
+        } else {
+            const today = new Date();
+            const dueDate = new Date(payment.fechaVencimiento);
+            const isOverdue = today > dueDate;
+
+            if (isOverdue) {
+                const daysOverdue = Math.floor((today.getTime() - dueDate.getTime()) / (1000 * 60 * 60 * 24));
+                message += `⚠️ *PAGO VENCIDO* hace ${daysOverdue} día${daysOverdue > 1 ? 's' : ''}\n\n`;
+            }
+
+            message += `Por favor, proceder con el pago a la brevedad.\n`;
+            message += `Ante cualquier consulta, no dudes en contactarnos.`;
+        }
+
+        return message;
+    },
+
     // Helper: Enviar mensaje de bienvenida
     sendWelcomeMessage: async (name: string, phone: string) => {
         // Example template: "hello_world" or a custom "welcome_new_user"
