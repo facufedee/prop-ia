@@ -9,6 +9,10 @@ import RentalCard from "./components/RentalCard";
 import { Plus, Filter, Search } from "lucide-react";
 import Link from "next/link";
 
+import { useBranchContext } from "@/infrastructure/context/BranchContext";
+import { collection, query, where, getDocs } from "firebase/firestore";
+import { db } from "@/infrastructure/firebase/client";
+
 export default function AlquileresPage() {
     const router = useRouter();
     const [contracts, setContracts] = useState<Alquiler[]>([]);
@@ -16,15 +20,40 @@ export default function AlquileresPage() {
     const [loading, setLoading] = useState(true);
     const [filter, setFilter] = useState<'todos' | 'activo' | 'pendiente' | 'finalizado' | 'suspendido'>('activo');
     const [searchTerm, setSearchTerm] = useState("");
+    const { selectedBranchId } = useBranchContext();
 
     useEffect(() => {
         const fetchContracts = async () => {
             if (!auth?.currentUser) return;
 
             try {
-                const data = await alquileresService.getAlquileres(auth.currentUser.uid);
-                setContracts(data);
-                // Initial filter application handled by useEffect dependency
+                setLoading(true);
+
+                // Fetch rentals and Properties in parallel
+                const rentalsPromise = alquileresService.getAlquileres(auth.currentUser.uid);
+
+                // Only unnecessary if we could filter rentals by branchId directly, but we assume we need to check property
+                let propsQuery = query(collection(db, "properties"), where("userId", "==", auth.currentUser.uid));
+
+                if (selectedBranchId !== 'all') {
+                    propsQuery = query(propsQuery, where("branchId", "==", selectedBranchId));
+                }
+
+                const [rentals, propsSnapshot] = await Promise.all([
+                    rentalsPromise,
+                    getDocs(propsQuery)
+                ]);
+
+                // Get IDs of valid properties for this branch
+                const propertyIds = new Set(propsSnapshot.docs.map(doc => doc.id));
+
+                // Filter rentals based on property ownership
+                const filteredByBranch = selectedBranchId === 'all'
+                    ? rentals
+                    : rentals.filter(r => propertyIds.has(r.propiedadId));
+
+                setContracts(filteredByBranch);
+
             } catch (error) {
                 console.error("Error fetching contracts:", error);
             } finally {
@@ -33,7 +62,7 @@ export default function AlquileresPage() {
         };
 
         fetchContracts();
-    }, []);
+    }, [selectedBranchId]); // Re-run when branch changes
 
     useEffect(() => {
         let result = contracts;

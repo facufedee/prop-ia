@@ -67,7 +67,7 @@ const MENU_ITEMS: MenuItem[] = [
   { href: "/dashboard/bitacora", label: "Bitácora", icon: BookOpen, adminOnly: true },
   { href: "/dashboard/mensajes", label: "Mensajes", icon: Mail },
   { href: "/dashboard/gestion-plataforma", label: "Gestión Plataforma", icon: Shield, adminOnly: true },
-  { href: "/dashboard/configuracion", label: "Configuración", icon: Settings },
+  { href: "/dashboard/configuracion", label: "Tasación IA", icon: Settings },
   { href: "/dashboard/configuracion/roles", label: "Roles y Permisos", icon: UserCog, adminOnly: true },
   { href: "/dashboard/configuracion/suscripciones", label: "Planes y Suscripciones", icon: Package, adminOnly: true },
   { href: "/dashboard/configuracion/backup", label: "Backup", icon: Database, adminOnly: true },
@@ -92,7 +92,7 @@ export default function DashboardSidebar({ isOpen = false, onClose }: DashboardS
 
   const hasPermission = (item: MenuItem) => {
     // First check if it's admin only
-    if (item.adminOnly && userRole?.name !== "Administrador") return false;
+    if (item.adminOnly && userRole?.name !== "Administrador" && userRole?.name !== "Super Admin") return false;
 
     // Then check if user has permission for this specific route
     // If item has a specific permission field, use that, otherwise use the href

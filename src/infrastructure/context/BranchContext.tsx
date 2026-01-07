@@ -3,7 +3,7 @@
 import React, { createContext, useContext, useState, useEffect } from "react";
 import { User, onAuthStateChanged } from "firebase/auth";
 import { auth, db } from "@/infrastructure/firebase/client";
-import { doc, getDoc } from "firebase/firestore";
+import { doc, getDoc, onSnapshot, collection, query, where } from "firebase/firestore";
 import { branchService } from "@/infrastructure/services/branchService";
 import { Branch } from "@/domain/models/Branch";
 
@@ -27,10 +27,12 @@ export const useBranchContext = () => useContext(BranchContext);
 
 export const BranchProvider = ({ children }: { children: React.ReactNode }) => {
     const [user, setUser] = useState<User | null>(null);
+    const [userData, setUserData] = useState<any>(null);
     const [selectedBranchId, setSelectedBranchId] = useState<string>('all');
     const [branches, setBranches] = useState<Branch[]>([]);
     const [loadingDetails, setLoadingDetails] = useState(true);
 
+    // 1. Auth & User Profile Listener
     useEffect(() => {
         if (!auth) {
             setLoadingDetails(false);
@@ -40,33 +42,51 @@ export const BranchProvider = ({ children }: { children: React.ReactNode }) => {
             setUser(currentUser);
             if (currentUser) {
                 try {
-                    // Fetch user details to see if they are restricted to a branch (Agent)
                     const userDoc = await getDoc(doc(db, "users", currentUser.uid));
-                    const userData = userDoc.data();
-
-                    // Fetch all branches for the organization (assuming currentUser is part of one)
-                    // If the user is an AGENT, their organizationId should be set to the Agency Owner.
-                    // If the user is the OWNER, organizationId is their own uid (conceptually).
-                    // For simplicity in this iteration: We assume currentUser.uid is the organization owner ID 
-                    // OR we check organizationId field.
-                    const orgId = userData?.organizationId || currentUser.uid;
-                    const branchList = await branchService.getBranches(orgId);
-                    setBranches(branchList);
-
-                    // Logic: If user has a 'branchId' assigned (e.g. Agent), FORCE selection
-                    if (userData?.branchId) {
-                        setSelectedBranchId(userData.branchId);
-                    } else if (selectedBranchId === 'all' && branchList.length === 0) {
-                        // Keep 'all' or logic for default
+                    if (userDoc.exists()) {
+                        setUserData(userDoc.data());
                     }
                 } catch (err) {
-                    console.error("Error initializing branch context", err);
+                    console.error("Error fetching user data", err);
                 }
+            } else {
+                setUserData(null);
+                setBranches([]);
             }
-            setLoadingDetails(false);
+            if (!currentUser) setLoadingDetails(false);
         });
         return () => unsubscribe();
     }, []);
+
+    // 2. Real-time Branch Subscription
+    useEffect(() => {
+        if (!user || !userData) {
+            return;
+        }
+
+        const orgId = userData.organizationId || user.uid;
+        const q = query(collection(db, "branches"), where("organizationId", "==", orgId));
+
+        const unsubscribe = onSnapshot(q, (snapshot) => {
+            const branchList = snapshot.docs.map(doc => ({
+                id: doc.id,
+                ...doc.data(),
+                createdAt: doc.data().createdAt?.toDate(),
+                updatedAt: doc.data().updatedAt?.toDate(),
+            } as Branch));
+
+            setBranches(branchList);
+
+            // Force selection if user is restricted
+            if (userData.branchId) {
+                setSelectedBranchId(userData.branchId);
+            }
+
+            setLoadingDetails(false);
+        });
+
+        return () => unsubscribe();
+    }, [user, userData]); // Re-run when user/userData changes
 
     const currentContextLabel = selectedBranchId === 'all'
         ? "Todas las Sucursales"

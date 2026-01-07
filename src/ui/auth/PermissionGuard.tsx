@@ -36,8 +36,8 @@ export default function PermissionGuard({ children }: { children: React.ReactNod
                     return;
                 }
 
-                // If Admin, bypass checks (optional, but robust)
-                if (role.name === "Administrador") {
+                // If Super Admin or Admin, bypass checks
+                if (role.name === "Super Admin" || role.name === "Administrador") {
                     setAuthorized(true);
                     setLoading(false);
                     return;

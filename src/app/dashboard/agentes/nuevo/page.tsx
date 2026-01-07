@@ -2,7 +2,8 @@
 
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { app, auth } from "@/infrastructure/firebase/client";
+import { app, auth, db } from "@/infrastructure/firebase/client";
+import { doc, getDoc } from "firebase/firestore";
 import { agentesService } from "@/infrastructure/services/agentesService";
 import { branchService } from "@/infrastructure/services/branchService";
 import { invitationService } from "@/infrastructure/services/invitationService";
@@ -34,8 +35,14 @@ export default function NuevoAgentePage() {
         if (!auth?.currentUser) return;
 
         try {
-            const data = await agentesService.getConfiguracion(auth.currentUser.uid);
-            const branchList = await branchService.getBranches(auth.currentUser.uid); // Fetch branches
+            // Get Organization ID from User Profile
+            const userDoc = await getDoc(doc(db, "users", auth.currentUser.uid));
+            const userData = userDoc.data();
+            const organizationId = userData?.organizationId || auth.currentUser.uid;
+
+            // Fetch Config & Branches using Org ID
+            const data = await agentesService.getConfiguracion(organizationId);
+            const branchList = await branchService.getBranches(organizationId);
 
             if (data) {
                 setConfig({ ...data, branches: branchList });
@@ -46,6 +53,9 @@ export default function NuevoAgentePage() {
                     comisionPropiedadPropia: data.comisionPropiedadPropiaDefault.toString(),
                 }));
             } else {
+                // If no config, still show branches if any
+                setConfig({ branches: branchList });
+
                 // Defaults
                 setFormData(prev => ({
                     ...prev,

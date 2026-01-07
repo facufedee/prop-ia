@@ -15,26 +15,34 @@ export default function PropiedadesPage() {
 
     const { selectedBranchId } = useBranchContext();
 
-    useEffect(() => {
-        if (!auth) {
-            setLoading(false);
-            return;
-        }
-        const unsubscribe = onAuthStateChanged(auth, async (user) => {
-            if (user) {
-                fetchProperties(user.uid, selectedBranchId);
-            } else {
-                setLoading(false);
-            }
-        });
+    const [user, setUser] = useState<any>(null);
 
+
+
+    // 1. Auth Listener
+    useEffect(() => {
+        if (!auth) return;
+        const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
+            setUser(currentUser);
+            if (!currentUser) setLoading(false);
+        });
         return () => unsubscribe();
-    }, [selectedBranchId]);
+    }, []);
+
+    // 2. Fetch Data when User or Branch changes
+    useEffect(() => {
+        if (user) {
+            fetchProperties(user.uid, selectedBranchId);
+        }
+    }, [user, selectedBranchId]);
 
     const fetchProperties = async (userId: string, branchId?: string) => {
         try {
+            setLoading(true);
             if (!db) throw new Error("Firestore not initialized");
 
+            // TODO: Ideally we should filter by organizationId if the user is Admin
+            // For now, we keep userId but we MUST apply branch filter if selected
             let q = query(
                 collection(db, "properties"),
                 where("userId", "==", userId)
@@ -49,6 +57,7 @@ export default function PropiedadesPage() {
                 id: doc.id,
                 ...doc.data()
             })) as Property[];
+
             setProperties(props);
         } catch (error) {
             console.error("Error fetching properties:", error);

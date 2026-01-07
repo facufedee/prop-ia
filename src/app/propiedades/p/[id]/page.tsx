@@ -13,6 +13,8 @@ const PublicMap = dynamic(() => import("@/ui/components/properties/public/Public
     loading: () => <div className="w-full h-full bg-gray-100 animate-pulse rounded-xl" />
 });
 
+import ContactModal from "@/ui/components/properties/public/ContactModal";
+
 export default function PropertyDetailPage() {
     const params = useParams();
     const id = params.id as string;
@@ -22,6 +24,7 @@ export default function PropertyDetailPage() {
     const [loading, setLoading] = useState(true);
     const [currentImageIndex, setCurrentImageIndex] = useState(0);
     const [showGalleryModal, setShowGalleryModal] = useState(false);
+    const [showContactModal, setShowContactModal] = useState(false);
 
     const [isSaved, setIsSaved] = useState(false);
 
@@ -328,7 +331,7 @@ export default function PropertyDetailPage() {
                                     </div>
 
                                     <button
-                                        onClick={handleContact}
+                                        onClick={() => setShowContactModal(true)}
                                         className="w-full bg-gray-900 hover:bg-black text-white font-bold py-4 px-4 rounded-xl transition shadow-xl shadow-gray-200/50 mb-3 flex items-center justify-center gap-3 text-lg"
                                     >
                                         <span>Contactar Inmobiliaria</span>
@@ -420,6 +423,15 @@ export default function PropertyDetailPage() {
                     </div>
                 </div>
             )}
+
+            <ContactModal
+                isOpen={showContactModal}
+                onClose={() => setShowContactModal(false)}
+                propertyId={property.id}
+                propertyTitle={property.title}
+                ownerId={property.userId}
+                agencyId={property.agency?.uid}
+            />
         </div>
     );
 }

@@ -27,9 +27,12 @@ import {
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 
+import { useBranchContext } from "@/infrastructure/context/BranchContext";
+
 export default function DashboardPage() {
     const router = useRouter();
     const [user, setUser] = useState<any>(null);
+    const { selectedBranchId } = useBranchContext();
     const [stats, setStats] = useState({
         totalProperties: 0,
         totalAlquileres: 0,
@@ -51,47 +54,60 @@ export default function DashboardPage() {
                 return;
             }
             setUser(currentUser);
-
-            if (db) {
-                try {
-                    await fetchStats(currentUser.uid);
-                } catch (error) {
-                    console.error("Error fetching stats:", error);
-                }
-            }
-            setLoading(false);
         });
 
         return () => unsubscribe();
     }, [router]);
 
-    const fetchStats = async (userId: string) => {
+    useEffect(() => {
+        if (user) {
+            fetchStats(user.uid, selectedBranchId);
+        } else if (!auth?.currentUser && !loading) {
+            // Handle case where user isn't set yet but might be effectively logged out or loading
+        }
+        // When user is set, we fetch. selectedBranchId change also triggers fetch.
+    }, [user, selectedBranchId]);
+
+    const fetchStats = async (userId: string, branchId: string) => {
         if (!db) return;
 
         try {
-            // Run all queries in parallel for better performance
+            // 1. Properties Query - Filter by branch if needed
+            let propsQuery = query(collection(db, "properties"), where("userId", "==", userId));
+            if (branchId !== 'all') {
+                propsQuery = query(propsQuery, where("branchId", "==", branchId));
+            }
+
+            // Run all queries
             const [propsSnapshot, leads, recentLogsData, alquileres] = await Promise.all([
-                // 1. Properties
-                getDocs(query(collection(db, "properties"), where("userId", "==", userId))),
-
-                // 2. Leads
+                getDocs(propsQuery),
                 leadsService.getLeads(userId),
-
-                // 3. Recent Activity
                 auditLogService.getLogs("default-org-id", { userId }, 10),
-
-                // 4. Alquileres
                 alquileresService.getAlquileres(userId)
             ]);
 
-            // Calculate Alquileres Stats
-            const activeRentals = alquileres.filter(a => a.estado === 'activo').length;
+            // Capture valid Property IDs for this branch
+            const propertyIds = new Set(propsSnapshot.docs.map(d => d.id));
 
-            // Calculate Honorarios for Current Month
+            // 2. Leads - Filter by Property ownership
+            const filteredLeads = branchId === 'all'
+                ? leads
+                : leads.filter(l => l.propertyId && propertyIds.has(l.propertyId));
+
+            // 3. Alquileres - Filter by Property ownership
+            const filteredAlquileres = branchId === 'all'
+                ? alquileres
+                : alquileres.filter(a => propertyIds.has(a.propiedadId));
+
+
+            // Calculate Alquileres Stats (using filtered list)
+            const activeRentals = filteredAlquileres.filter(a => a.estado === 'activo').length;
+
+            // Calculate Honorarios for Current Month (using filtered list)
             const now = new Date();
             let honorariosMonth = 0;
 
-            alquileres.forEach(alquiler => {
+            filteredAlquileres.forEach(alquiler => {
                 alquiler.historialPagos.forEach(pago => {
                     // Check if paid in current month
                     const fechaPago = pago.fechaPago ? new Date(pago.fechaPago) : null;
@@ -117,14 +133,16 @@ export default function DashboardPage() {
 
             setStats({
                 totalProperties: propsSnapshot.size,
-                totalAlquileres: alquileres.length,
+                totalAlquileres: filteredAlquileres.length,
                 activeRentals,
-                totalLeads: leads.length,
+                totalLeads: filteredLeads.length,
                 honorariosMonth,
                 recentActivity: recentLogsData.logs
             });
+            setLoading(false); // Ensure loading is off after fetch
         } catch (error) {
             console.error("Error fetching dashboard stats:", error);
+            setLoading(false);
         }
     };
 

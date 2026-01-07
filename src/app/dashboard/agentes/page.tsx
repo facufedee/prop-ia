@@ -12,7 +12,7 @@ import { useBranchContext } from "@/infrastructure/context/BranchContext";
 export default function AgentesPage() {
     const [agentes, setAgentes] = useState<Agente[]>([]);
     const [loading, setLoading] = useState(true);
-    const { branches } = useBranchContext();
+    const { branches, selectedBranchId } = useBranchContext();
 
     useEffect(() => {
         fetchAgentes();
@@ -44,10 +44,14 @@ export default function AgentesPage() {
         }
     };
 
-    const totalVentas = agentes.reduce((sum, a) => sum + a.totalVentas, 0);
-    const totalAlquileres = agentes.reduce((sum, a) => sum + a.totalAlquileres, 0);
-    const totalComisiones = agentes.reduce((sum, a) => sum + a.totalComisiones, 0);
-    const agentesActivos = agentes.filter(a => a.activo).length;
+    const filteredAgentes = selectedBranchId === 'all'
+        ? agentes
+        : agentes.filter(a => a.branchId === selectedBranchId);
+
+    const totalVentas = filteredAgentes.reduce((sum, a) => sum + a.totalVentas, 0);
+    const totalAlquileres = filteredAgentes.reduce((sum, a) => sum + a.totalAlquileres, 0);
+    const totalComisiones = filteredAgentes.reduce((sum, a) => sum + a.totalComisiones, 0);
+    const agentesActivos = filteredAgentes.filter(a => a.activo).length;
 
     if (loading) {
         return (
@@ -158,14 +162,14 @@ export default function AgentesPage() {
                             </tr>
                         </thead>
                         <tbody className="divide-y divide-gray-200">
-                            {agentes.length === 0 ? (
+                            {filteredAgentes.length === 0 ? (
                                 <tr>
                                     <td colSpan={8} className="px-6 py-12 text-center text-gray-500">
-                                        No hay agentes registrados
+                                        No hay agentes registrados {selectedBranchId !== 'all' && 'en esta sucursal'}
                                     </td>
                                 </tr>
                             ) : (
-                                agentes.map((agente) => (
+                                filteredAgentes.map((agente) => (
                                     <tr key={agente.id} className="hover:bg-gray-50">
                                         <td className="px-6 py-4">
                                             <div className="flex items-center gap-3">

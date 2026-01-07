@@ -1,34 +1,41 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, use } from "react";
 import { useRouter } from "next/navigation";
-import { createUserWithEmailAndPassword } from "firebase/auth";
+import { createUserWithEmailAndPassword, signOut } from "firebase/auth";
 import { auth, db } from "@/infrastructure/firebase/client";
-import { doc, updateDoc } from "firebase/firestore";
+import { doc, updateDoc, collection, query, where, getDocs, limit, setDoc } from "firebase/firestore";
 import { invitationService, Invitation } from "@/infrastructure/services/invitationService";
-import { Loader2, AlertCircle, CheckCircle } from "lucide-react";
+import { Loader2, AlertCircle, CheckCircle, LogOut, User as UserIcon } from "lucide-react";
 
 import { whatsappService } from "@/infrastructure/services/whatsappService";
 
-export default function InvitationPage({ params }: { params: { token: string } }) {
+export default function InvitationPage({ params }: { params: Promise<{ token: string }> }) {
+    const { token } = use(params);
     const router = useRouter();
     const [invitation, setInvitation] = useState<Invitation | null>(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
+    const [activeUser, setActiveUser] = useState<any>(null);
 
     // Form state
     const [password, setPassword] = useState("");
     const [confirmPassword, setConfirmPassword] = useState("");
-    const [phone, setPhone] = useState(""); // Add phone state
+    const [phone, setPhone] = useState("");
     const [submitting, setSubmitting] = useState(false);
 
     useEffect(() => {
+        if (!auth) return;
+        const unsubscribe = auth.onAuthStateChanged((user) => {
+            setActiveUser(user);
+        });
         validateToken();
-    }, [params.token]);
+        return () => unsubscribe();
+    }, [token]);
 
     const validateToken = async () => {
         try {
-            const data = await invitationService.validateInvitation(params.token);
+            const data = await invitationService.validateInvitation(token);
             if (!data) {
                 setError("La invitación no es válida o ha expirado.");
             } else {
@@ -93,25 +100,25 @@ export default function InvitationPage({ params }: { params: { token: string } }
                 updatedAt: new Date()
             });
 
-            // 3. Create a User Profile for the Agent (optional, but good for roles)
-            // We might need to store their role "Agente" in a 'users' collection too.
-            // For Prop-IA to know they are an agent.
+            // 3. Create a User Profile for the Agent
+            // Find 'Agente' role ID first
+            const rolesRef = collection(db, "roles");
+            const q = query(rolesRef, where("name", "==", "Agente"), limit(1));
+            const querySnapshot = await getDocs(q);
 
-            /* 
-               We need to create a document in 'users' collection for this new user 
-               so roleService can find their role (Agente) and permissions.
-            */
-            // If it fails (doc doesn't exist), set it
-            // Actually `updateDoc` fails if doc doesn't exist. Use setDoc logic equivalent via specific service or native.
-            // Ideally use userService.createUser or simply setDoc here.
-            const { setDoc } = await import("firebase/firestore"); // Dynamic import to avoid global import mess if not needed
+            if (querySnapshot.empty) {
+                throw new Error("Error interno: El rol 'Agente' no está configurado en el sistema.");
+            }
+
+            const agentRoleId = querySnapshot.docs[0].id;
+
             await setDoc(doc(db, "users", user.uid), {
                 email: invitation.email,
-                role: "Agente",
-                organizationId: invitation.organizationId, // Link to organization
+                roleId: agentRoleId, // Correct field for PermissionGuard
+                organizationId: invitation.organizationId,
                 branchId: invitation.branchId,
                 createdAt: new Date(),
-                phone: phone // Save phone to user doc
+                phone: phone
             });
 
             // 4. Mark invitation as used
@@ -133,12 +140,13 @@ export default function InvitationPage({ params }: { params: { token: string } }
             console.error(err);
             if (err.code === 'auth/email-already-in-use') {
                 alert("Este email ya está registrado.");
+            } else if (err.code === 'auth/operation-not-allowed') {
+                alert("Error de configuración: El inicio de sesión con Email/Pass no está habilitado en Firebase Console.");
             } else {
                 alert("Error al registrar: " + err.message);
             }
-        } finally {
-            setSubmitting(false);
-        }
+
+        };
     };
 
     if (loading) {
@@ -158,6 +166,36 @@ export default function InvitationPage({ params }: { params: { token: string } }
                     </div>
                     <h2 className="text-xl font-bold text-gray-900 mb-2">Invitación Inválida</h2>
                     <p className="text-gray-600">{error}</p>
+                </div>
+            </div>
+        );
+    }
+
+    if (activeUser) {
+        return (
+            <div className="min-h-screen flex items-center justify-center bg-gray-50 p-4">
+                <div className="max-w-md w-full bg-white rounded-xl shadow-lg p-8 text-center">
+                    <div className="bg-blue-50 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
+                        <UserIcon className="w-8 h-8 text-blue-600" />
+                    </div>
+                    <h2 className="text-xl font-bold text-gray-900 mb-2">Sesión Activa detectada</h2>
+                    <p className="text-gray-600 mb-6">
+                        Estás conectado como <br /><span className="font-semibold text-gray-800">{activeUser.email}</span>
+                    </p>
+                    <div className="bg-gray-50 p-4 rounded-lg text-sm text-gray-600 mb-6">
+                        Esta invitación es para: <br />
+                        <span className="font-semibold text-indigo-600">{invitation?.email}</span>
+                    </div>
+                    <p className="text-sm text-gray-500 mb-6">
+                        Para continuar con el registro, necesitas cerrar tu sesión actual.
+                    </p>
+                    <button
+                        onClick={() => auth && signOut(auth)}
+                        className="w-full py-3 bg-white border-2 border-red-100 text-red-600 rounded-lg hover:bg-red-50 font-medium transition-colors flex items-center justify-center gap-2"
+                    >
+                        <LogOut size={18} />
+                        Cerrar Sesión
+                    </button>
                 </div>
             </div>
         );
@@ -245,3 +283,4 @@ export default function InvitationPage({ params }: { params: { token: string } }
         </div>
     );
 }
+

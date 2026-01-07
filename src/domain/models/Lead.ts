@@ -16,6 +16,9 @@ export interface Lead {
     fechaContacto?: Date;
     origen: LeadOrigen;
     userId: string;
+    organizationId?: string;
+    propertyId?: string;
+    propertyTitle?: string;
     createdAt: Date;
     updatedAt: Date;
 }

@@ -33,7 +33,7 @@ export const PERMISSIONS: Permission[] = [
     { id: "/dashboard/soporte/ticketera", label: "Ticketera", description: "Gestión de tickets (solo administradores)" },
     { id: "/dashboard/bitacora", label: "Bitácora", description: "Registro de auditoría del sistema" },
     { id: "/dashboard/cuenta", label: "Cuenta", description: "Configuración de cuenta personal" },
-    { id: "/dashboard/configuracion", label: "Configuración", description: "Configuración global del sistema" },
+    { id: "/dashboard/configuracion", label: "Tasación IA", description: "Configuración del tasador online" },
     { id: "/dashboard/configuracion/roles", label: "Roles y Permisos", description: "Gestión de roles y permisos (solo administradores)" },
     { id: "/dashboard/configuracion/backup", label: "Backup y Restauración", description: "Copias de seguridad de la base de datos (solo administradores)" },
     { id: "/dashboard/configuracion/suscripciones", label: "Planes y Suscripciones", description: "Gestión de planes de suscripción (solo administradores)" },
@@ -156,16 +156,42 @@ export const roleService = {
 
         if (userSnap.exists()) {
             const userData = userSnap.data();
-            console.log("roleService: User data found:", userData);
+
             if (userData.roleId) {
                 const role = await roleService.getRoleById(userData.roleId);
-                console.log("roleService: Role fetched:", role);
+
+                // Inheritance Logic for Agents
+                // If Agent, inherit "Sucursales" if Organization is Pro/Enterprise
+                if (role && role.name === "Agente" && userData.organizationId) {
+                    try {
+                        // Avoid fetching if org is self (unlikely for agent but safe check)
+                        if (userData.organizationId !== userId) {
+                            const orgRef = doc(db, USERS_COLLECTION, userData.organizationId);
+                            const orgSnap = await getDoc(orgRef);
+
+                            if (orgSnap.exists()) {
+                                const orgData = orgSnap.data();
+                                if (orgData.roleId) {
+                                    const orgRole = await roleService.getRoleById(orgData.roleId);
+
+                                    if (orgRole && (orgRole.name === "Cliente Pro" || orgRole.name === "Cliente Enterprise" || orgRole.name === "Super Admin")) {
+                                        // Add Pro features explicitly
+                                        // We can expand this list if more features are "Pro-only" but shared with Agents
+                                        const inherited = ["/dashboard/sucursales"];
+
+                                        const newPermissions = new Set([...role.permissions, ...inherited]);
+                                        role.permissions = Array.from(newPermissions);
+                                    }
+                                }
+                            }
+                        }
+                    } catch (e) {
+                        console.error("Error inheriting permissions:", e);
+                    }
+                }
+
                 return role;
-            } else {
-                console.warn("roleService: User has no roleId");
             }
-        } else {
-            console.warn("roleService: User document not found for ID:", userId);
         }
         return null;
     },
@@ -175,60 +201,99 @@ export const roleService = {
         const roles = await roleService.getRoles();
         const roleNames = roles.map(r => r.name);
 
-        if (!roleNames.includes("Administrador")) {
-            const adminRole: Omit<Role, "id"> = {
-                name: "Administrador",
-                description: "Acceso completo al sistema",
-                permissions: PERMISSIONS.map(p => p.id),
+        // 1. Super Admin
+        if (!roleNames.includes("Super Admin")) {
+            await roleService.createRole({
+                name: "Super Admin",
+                description: "Acceso total y configuración del sistema",
+                permissions: PERMISSIONS.map(p => p.id), // All permissions
                 isSystem: true
-            };
-            await roleService.createRole(adminRole);
+            });
         }
 
-        // Check if "Cliente Pro" role exists, if not create it (User request: Pro can use Sucursales)
+        // 2. Cliente Enterprise (Alles + Support?)
+        if (!roleNames.includes("Cliente Enterprise")) {
+            await roleService.createRole({
+                name: "Cliente Enterprise",
+                description: "Plan Enterprise con todas las funcionalidades de negocio",
+                permissions: [
+                    "/dashboard",
+                    "/dashboard/propiedades",
+                    "/dashboard/tasacion", // Advanced
+                    "/dashboard/alquileres",
+                    "/dashboard/agentes",
+                    "/dashboard/leads",
+                    "/dashboard/clientes",
+                    "/dashboard/chat",
+                    "/dashboard/publicaciones",
+                    "/dashboard/finanzas",
+                    "/dashboard/calendario",
+                    "/dashboard/soporte",
+                    "/dashboard/sucursales",
+                    "/dashboard/blog",
+                    "/dashboard/cuenta",
+                    "/dashboard/configuracion" // Maybe some settings?
+                ],
+                isSystem: false
+            });
+        }
+
+        // 3. Cliente Pro
         if (!roleNames.includes("Cliente Pro")) {
-            const proRole: Omit<Role, "id"> = {
+            await roleService.createRole({
                 name: "Cliente Pro",
+                description: "Plan Profesional con multisucursal y equipo",
+                permissions: [
+                    "/dashboard",
+                    "/dashboard/propiedades",
+                    "/dashboard/tasacion",
+                    "/dashboard/alquileres",
+                    "/dashboard/agentes",
+                    "/dashboard/leads",
+                    "/dashboard/clientes",
+                    "/dashboard/chat",
+                    "/dashboard/publicaciones",
+                    "/dashboard/finanzas",
+                    "/dashboard/calendario",
+                    "/dashboard/sucursales", // Pro Feature
+                    "/dashboard/blog",
+                    "/dashboard/cuenta"
+                ],
+                isSystem: false
+            });
+        }
+
+        // 4. Cliente Free
+        if (!roleNames.includes("Cliente Free")) {
+            await roleService.createRole({
+                name: "Cliente Free",
+                description: "Plan gratuito inicial",
                 permissions: [
                     "/dashboard",
                     "/dashboard/propiedades",
                     "/dashboard/cuenta",
-                    "/dashboard/sucursales" // Pro feature
+                    "/dashboard/blog"
                 ],
-                isSystem: false // Can be edited
-            };
-            await roleService.createRole(proRole);
+                isSystem: false
+            });
         }
 
+        // 5. Agente
         if (!roleNames.includes("Agente")) {
-            const agentRole: Omit<Role, "id"> = {
+            await roleService.createRole({
                 name: "Agente",
+                description: "Colaborador de inmobiliaria",
                 permissions: [
                     "/dashboard",
                     "/dashboard/propiedades",
                     "/dashboard/alquileres",
-                    "/dashboard/agentes",
                     "/dashboard/leads",
                     "/dashboard/calendario",
                     "/dashboard/cuenta",
                     "/dashboard/blog"
                 ],
                 isSystem: true
-            };
-            await roleService.createRole(agentRole);
-        }
-
-        if (!roleNames.includes("Cliente")) {
-            const clientRole: Omit<Role, "id"> = {
-                name: "Cliente",
-                permissions: [
-                    "/dashboard",
-                    "/dashboard/propiedades",
-                    "/dashboard/cuenta"
-                ],
-                isSystem: true
-            };
-            await roleService.createRole(clientRole);
+            });
         }
     },
     // Get the default role (Cliente)

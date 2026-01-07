@@ -9,7 +9,8 @@ import {
     Timestamp,
     updateDoc,
     doc,
-    arrayUnion
+    arrayUnion,
+    limit
 } from "firebase/firestore";
 
 export interface AppNotification {
@@ -81,7 +82,8 @@ export const notificationService = {
         const q = query(
             collection(db, NOTIFICATIONS_COLLECTION),
             where("targetRole", "==", userRole),
-            orderBy("createdAt", "desc")
+            orderBy("createdAt", "desc"),
+            limit(50)
         );
 
         return onSnapshot(q, (snapshot) => {
@@ -92,10 +94,7 @@ export const notificationService = {
                     createdAt: doc.data().createdAt?.toDate()
                 })) as AppNotification[];
 
-            // Filter out those read by the user
-            const unread = notifications.filter(n => !n.readBy.includes(userId));
-
-            callback(unread);
+            callback(notifications);
         });
     }
 };
