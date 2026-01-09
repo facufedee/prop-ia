@@ -74,12 +74,16 @@ export default function DashboardHeader({ onMobileMenuClick }: DashboardHeaderPr
 
     // Admin Notifications Listener
     useEffect(() => {
-        if (!user || userRole?.name !== 'Administrador') {
+        if (!user || (userRole?.name !== 'Administrador' && userRole?.name !== 'Super Admin')) {
             setNotifications([]);
             return;
         }
 
-        const unsubscribe = notificationService.subscribeToNotifications(user.uid, 'Administrador', (data) => {
+        // Subscribe as 'Administrador' even if Super Admin to receive admin alerts, 
+        // or check if service supports 'Super Admin'. Assuming 'Administrador' channel is what we want.
+        const roleToSubscribe = userRole.name === 'Super Admin' ? 'Administrador' : 'Administrador';
+
+        const unsubscribe = notificationService.subscribeToNotifications(user.uid, roleToSubscribe, (data) => {
             setNotifications(data);
         });
 
@@ -179,7 +183,7 @@ export default function DashboardHeader({ onMobileMenuClick }: DashboardHeaderPr
             {/* Right Section */}
             <div className="flex items-center gap-4 md:gap-6">
                 {/* Admin Notifications */}
-                {userRole?.name === 'Administrador' && (
+                {(userRole?.name === 'Administrador' || userRole?.name === 'Super Admin') && (
                     <div className="relative" ref={notifRef}>
                         <button
                             onClick={() => setNotifOpen(!notifOpen)}

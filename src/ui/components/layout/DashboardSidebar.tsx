@@ -51,7 +51,7 @@ type MenuItem = {
 // Menu Configuration - Flat list of all menu items
 const MENU_ITEMS: MenuItem[] = [
   { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
-  { href: "/dashboard/tasacion", label: "Tasación Inteligente", icon: Calculator },
+  { href: "/dashboard/tasacion", label: "Tasación IA", icon: Calculator },
   { href: "/dashboard/propiedades", label: "Propiedades", icon: Home },
   { href: "/dashboard/alquileres", label: "Alquileres", icon: Key },
   { href: "/dashboard/agentes", label: "Agentes", icon: Users },
@@ -67,7 +67,7 @@ const MENU_ITEMS: MenuItem[] = [
   { href: "/dashboard/bitacora", label: "Bitácora", icon: BookOpen, adminOnly: true },
   { href: "/dashboard/mensajes", label: "Mensajes", icon: Mail },
   { href: "/dashboard/gestion-plataforma", label: "Gestión Plataforma", icon: Shield, adminOnly: true },
-  { href: "/dashboard/configuracion", label: "Tasación IA", icon: Settings },
+  { href: "/dashboard/configuracion", label: "Config Tasador", icon: Settings },
   { href: "/dashboard/configuracion/roles", label: "Roles y Permisos", icon: UserCog, adminOnly: true },
   { href: "/dashboard/configuracion/suscripciones", label: "Planes y Suscripciones", icon: Package, adminOnly: true },
   { href: "/dashboard/configuracion/backup", label: "Backup", icon: Database, adminOnly: true },
