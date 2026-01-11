@@ -1,22 +1,22 @@
 import { NextResponse } from 'next/server';
 import { db } from '@/infrastructure/firebase/client';
 import { collection, addDoc } from 'firebase/firestore';
-import twilio from 'twilio';
+// import twilio from 'twilio';
 
-const accountSid = process.env.TWILIO_ACCOUNT_SID;
-const authToken = process.env.TWILIO_AUTH_TOKEN;
-const fromNumber = process.env.TWILIO_PHONE_NUMBER;
-const toNumber = process.env.WHATSAPP_TO_NUMBER;
+// const accountSid = process.env.TWILIO_ACCOUNT_SID;
+// const authToken = process.env.TWILIO_AUTH_TOKEN;
+// const fromNumber = process.env.TWILIO_PHONE_NUMBER;
+// const toNumber = process.env.WHATSAPP_TO_NUMBER;
 
 // Initialize Twilio client
-let client: any;
-try {
-    if (accountSid && authToken) {
-        client = twilio(accountSid, authToken);
-    }
-} catch (e) {
-    console.error("Twilio Init Error", e);
-}
+// let client: any;
+// try {
+//     if (accountSid && authToken) {
+//         client = twilio(accountSid, authToken);
+//     }
+// } catch (e) {
+//     console.error("Twilio Init Error", e);
+// }
 
 export async function POST(req: Request) {
     try {
@@ -40,16 +40,16 @@ export async function POST(req: Request) {
         }
 
         // 2. Send to WhatsApp via Twilio
-        if (client) {
-            const message = await client.messages.create({
-                body: `[Web Chat] ${sessionId}: ${text}`,
-                from: fromNumber,
-                to: toNumber
-            });
-            console.log("Twilio Message Sent:", message.sid);
-        } else {
-            console.warn("Twilio client not initialized (missing env vars)");
-        }
+        // if (client) {
+        //     const message = await client.messages.create({
+        //         body: `[Web Chat] ${sessionId}: ${text}`,
+        //         from: fromNumber,
+        //         to: toNumber
+        //     });
+        //     console.log("Twilio Message Sent:", message.sid);
+        // } else {
+        //     console.warn("Twilio client not initialized (missing env vars)");
+        // }
 
         return NextResponse.json({ success: true, status: 'sent' });
 
