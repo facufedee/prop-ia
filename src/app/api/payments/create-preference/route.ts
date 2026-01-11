@@ -70,7 +70,7 @@ export async function POST(request: Request) {
                 // Notification URL for webhooks
                 notification_url: `${baseUrl}/api/webhooks/mercadopago`,
                 // Statement descriptor (what appears on credit card statement)
-                statement_descriptor: "PROP-IA"
+                statement_descriptor: "Zeta Prop"
             }
         });
 

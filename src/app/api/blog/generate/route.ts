@@ -42,7 +42,7 @@ export async function POST(request: NextRequest) {
         const prompt = `
             Act as an expert real estate copywriter. 
             I will provide you with the text content of an article. 
-            Your task is to rewrite it into a compelling blog post for a real estate agency website ("PropIA").
+            Your task is to rewrite it into a compelling blog post for a real estate agency website ("Zeta Prop").
             
             The tone should be professional yet engaging, informative, and optimized for SEO.
             

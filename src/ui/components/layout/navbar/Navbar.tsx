@@ -104,8 +104,8 @@ export default function Navbar() {
         {/* Logo */}
         <Link href="/" className="flex items-center gap-2 hover:opacity-80">
           <img
-            src="/assets/img/logo_web_propia.png"
-            alt="PROP-IA Logo"
+            src="/assets/img/logo_web_ZetaProp.png"
+            alt="Zeta Prop Logo"
             className="h-8 w-auto"
           />
         </Link>

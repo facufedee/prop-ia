@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
 import StepIndicator from "./StepIndicator";
 import { ChevronLeft, ChevronRight, Loader2, Upload, X, MapPin, Sparkles } from "lucide-react";
@@ -29,8 +29,7 @@ const STEPS = [
     "Ubicación",
     "Características",
     "Precio",
-    "Multimedia",
-    "Descripción"
+    "Multimedia"
 ];
 
 const AMENITIES_LIST = [
@@ -77,8 +76,67 @@ const CONDITIONS_LIST = ["A estrenar", "Muy bueno", "Bueno", "Regular", "A refac
 const SITUATIONS_LIST = ["Habitada", "Vacía", "Alquilada"];
 const ORIENTATIONS_LIST = ["Norte", "Sur", "Este", "Oeste", "Noreste", "Noroeste", "Sureste", "Suroeste"];
 
+
+export interface PropertyData {
+    title: string;
+    operation_type: string;
+    property_type: string;
+    property_subtype: string;
+    apto_profesional: boolean;
+    apto_mascotas: boolean;
+    provincia: string;
+    provincia_id: string;
+    localidad: string;
+    localidad_id: string;
+    calle: string;
+    altura: string;
+    piso: string;
+    depto: string;
+    entre_calle_1: string;
+    entre_calle_2: string;
+    barrio_cerrado: boolean;
+    lat: number;
+    lng: number;
+    area_total: string;
+    area_covered: string;
+    area_semi_covered: string;
+    area_uncovered: string;
+    land_measures: string;
+    land_width: string;
+    land_length: string;
+    rooms: string;
+    bedrooms: string;
+    bathrooms: string;
+    toilettes: string;
+    garages: string;
+    floors: string;
+    heating_type: string;
+    water_heating_type: string;
+    amenities: string[];
+    services: string[];
+    room_tags: string[];
+    antiquity_type: string;
+    antiquity_years: string;
+    condition: string;
+    situation: string;
+    orientation: string;
+    currency: string;
+    price: string;
+    expenses: string;
+    hasExpenses: boolean;
+    video_url: string;
+    virtual_tour_url: string;
+    description: string;
+    publishToPortal: boolean;
+    coverImageIndex: number;
+    // Additional fields needed for logic
+    imageUrls?: string[];
+    id?: string;
+    branchId?: string;
+}
+
 interface PropertyWizardProps {
-    initialData?: any;
+    initialData?: Partial<PropertyData>;
     isEditing?: boolean;
     onSuccessRedirect?: string;
 }
@@ -97,11 +155,14 @@ export default function PropertyWizard({ initialData, isEditing = false, ...prop
     const [currentLimit, setCurrentLimit] = useState<number | string>(5);
 
     // Form State
-    const [formData, setFormData] = useState({
-        // Step 1: Operation
+    const [formData, setFormData] = useState<PropertyData>({
+        // Step 1: Operation & Basic Data
+        title: initialData?.title || '', // Moved from Step 6
         operation_type: initialData?.operation_type || 'Venta',
         property_type: initialData?.property_type || 'Departamento',
         property_subtype: initialData?.property_subtype || '',
+        apto_profesional: initialData?.apto_profesional || false,
+        apto_mascotas: initialData?.apto_mascotas || false,
 
         // Step 2: Location
         provincia: initialData?.provincia || '',
@@ -110,28 +171,41 @@ export default function PropertyWizard({ initialData, isEditing = false, ...prop
         localidad_id: initialData?.localidad_id || '',
         calle: initialData?.calle || '',
         altura: initialData?.altura || '',
+        piso: initialData?.piso || '',
+        depto: initialData?.depto || '',
+        entre_calle_1: initialData?.entre_calle_1 || '',
+        entre_calle_2: initialData?.entre_calle_2 || '',
+        barrio_cerrado: initialData?.barrio_cerrado || false,
         lat: initialData?.lat || -34.6037,
         lng: initialData?.lng || -58.3816,
 
         // Step 3: Characteristics
         area_total: initialData?.area_total || '',
         area_covered: initialData?.area_covered || '',
+        area_semi_covered: initialData?.area_semi_covered || '',
+        area_uncovered: initialData?.area_uncovered || '',
+        land_measures: initialData?.land_measures || '',
+        land_width: initialData?.land_width || '',
+        land_length: initialData?.land_length || '',
         rooms: initialData?.rooms || '',
         bedrooms: initialData?.bedrooms || '',
         bathrooms: initialData?.bathrooms || '',
-        toilettes: initialData?.toilettes || '', // New
+        toilettes: initialData?.toilettes || '',
         garages: initialData?.garages || '',
-        floors: initialData?.floors || '', // New
+        floors: initialData?.floors || '',
+
+        heating_type: initialData?.heating_type || '',
+        water_heating_type: initialData?.water_heating_type || '',
 
         amenities: initialData?.amenities || [],
-        services: initialData?.services || [], // New
-        room_tags: initialData?.room_tags || [], // New
+        services: initialData?.services || [],
+        room_tags: initialData?.room_tags || [],
 
         antiquity_type: initialData?.antiquity_type || 'A estrenar',
         antiquity_years: initialData?.antiquity_years || '',
-        condition: initialData?.condition || 'Muy bueno', // New
-        situation: initialData?.situation || 'Habitada', // New
-        orientation: initialData?.orientation || 'Norte', // New
+        condition: initialData?.condition || 'Muy bueno',
+        situation: initialData?.situation || 'Habitada',
+        orientation: initialData?.orientation || 'Norte',
 
         // Step 4: Price
         currency: initialData?.currency || 'USD',
@@ -139,8 +213,11 @@ export default function PropertyWizard({ initialData, isEditing = false, ...prop
         expenses: initialData?.expenses || '',
         hasExpenses: initialData?.expenses ? true : false,
 
-        // Step 6: Description
-        title: initialData?.title || '',
+        // Step 5: Multimedia
+        video_url: initialData?.video_url || '',
+        virtual_tour_url: initialData?.virtual_tour_url || '',
+
+        // Step 6: Description (Description remains here)
         description: initialData?.description || '',
 
         // Options
@@ -166,6 +243,8 @@ export default function PropertyWizard({ initialData, isEditing = false, ...prop
         googleMapsApiKey: GOOGLE_MAPS_API_KEY,
         libraries: libraries
     });
+
+    const autocompleteRef = useRef<google.maps.places.Autocomplete | null>(null);
 
     useEffect(() => {
         // Load provincias on mount
@@ -204,16 +283,81 @@ export default function PropertyWizard({ initialData, isEditing = false, ...prop
         }
     }, [formData.calle, formData.altura, formData.localidad, formData.provincia, isEditing, initialData]);
 
-    const handleChange = (field: string, value: any) => {
-        // Special handling for number inputs to clean leading zeros
-        if (['area_total', 'area_covered', 'rooms', 'bedrooms', 'bathrooms', 'garages', 'antiquity_years', 'price', 'expenses'].includes(field)) {
-            // Remove leading zeros if it's a valid number string, but allow empty string
-            if (value !== '' && !isNaN(value)) {
-                value = String(Number(value));
+    // Auto-calculate Land Area
+    useEffect(() => {
+        const width = parseFloat(formData.land_width);
+        const length = parseFloat(formData.land_length);
+        if (!isNaN(width) && !isNaN(length) && width > 0 && length > 0) {
+            const area = (width * length).toFixed(2);
+            // Only update if different to avoid loop
+            if (formData.area_total !== area) {
+                setFormData(prev => ({ ...prev, area_total: area, land_measures: `${width}x${length}` }));
             }
         }
+    }, [formData.land_width, formData.land_length]);
+
+    const handleChange = (field: keyof PropertyData, value: any) => {
+        // Validation Logic
+        if (typeof value === 'string') {
+            // 1. Integer Fields (Rooms, Bedrooms, etc, Antiguety)
+            const integerFields = ['rooms', 'bedrooms', 'bathrooms', 'toilettes', 'garages', 'floors', 'antiquity_years'];
+            if (integerFields.includes(field)) {
+                // Remove ANY non-digit character
+                value = value.replace(/\D/g, '');
+
+                // Apply specific length limits
+                if (field === 'antiquity_years') {
+                    if (value.length > 4) value = value.slice(0, 4);
+                } else {
+                    // Rooms, baths, etc max 3 digits (e.g. 999 is plenty)
+                    if (value.length > 3) value = value.slice(0, 3);
+                }
+            }
+
+
+            // 2. Decimal/Float Fields (Surfaces, Prices)
+            const decimalFields = ['area_total', 'area_covered', 'area_uncovered', 'area_semi_covered', 'price', 'expenses', 'land_width', 'land_length'];
+            if (decimalFields.includes(field)) {
+                // Allow digits and ONLY one dot
+                // First remove anything that is not digit or dot
+                value = value.replace(/[^0-9.]/g, '');
+
+                // Ensure only one dot exists
+                const parts = value.split('.');
+                if (parts.length > 2) {
+                    value = parts[0] + '.' + parts.slice(1).join('');
+                }
+
+                // Limit overall length
+                if (value.length > 15) value = value.slice(0, 15);
+
+                // Auto-calculation logic for Land Area
+                if (field === 'land_width' || field === 'land_length') {
+                    const width = field === 'land_width' ? value : formData.land_width;
+                    const length = field === 'land_length' ? value : formData.land_length;
+
+                    if (Number(width) > 0 && Number(length) > 0) {
+                        const area = (parseFloat(width) * parseFloat(length)).toFixed(2);
+                        // Using a timeout to avoid state update conflict within render cycle if we were using useEffect, 
+                        // but here in event handler it's fine to queue another update or just update all at once?
+                        // Better to update all at once to avoid double render, but setFormData accepts prev.
+                        // We can't update 'area_total' synchronously easily here because we need 'value' which is being set.
+                        // So we'll trust the useEffect approach or do it here. 
+                        // Let's do it in a useEffect to be cleaner and handle initial values too.
+                    }
+                }
+            }
+
+            // 3. Text Limits
+            if (field === 'land_measures' && value.length > 25) {
+                value = value.slice(0, 25);
+            }
+        }
+
         setFormData(prev => ({ ...prev, [field]: value }));
-        if (error) setError(null); // Clear error on edit
+
+        // Clear error if present
+        if (error) setError(null);
     };
 
     const handleAmenityToggle = (amenity: string) => {
@@ -335,7 +479,7 @@ export default function PropertyWizard({ initialData, isEditing = false, ...prop
             } = formData;
 
             // 1. Basic Number & Negative checks
-            if (Number(area_total) < 0 || Number(area_covered) < 0) {
+            if (Number(area_total) < 0 || Number(area_covered) < 0 || Number(formData.area_semi_covered) < 0 || Number(formData.area_uncovered) < 0) {
                 setError("Las superficies no pueden ser negativas.");
                 return false;
             }
@@ -500,35 +644,6 @@ export default function PropertyWizard({ initialData, isEditing = false, ...prop
         }
     };
 
-    const handleGenerateDescription = async () => {
-        setLoading(true);
-        setError(null);
-        try {
-            const response = await fetch('/api/generate-description', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify(formData),
-            });
-
-            if (!response.ok) {
-                throw new Error('Error generando descripción');
-            }
-
-            const data = await response.json();
-            setFormData(prev => ({
-                ...prev,
-                title: data.title,
-                description: data.description
-            }));
-        } catch (err: any) {
-            console.error(err);
-            setError("No pudimos generar la descripción automáticamente. Intentá de nuevo.");
-        } finally {
-            setLoading(false);
-        }
-    };
 
     const handleStepClick = (step: number) => {
         // Allow going back always
@@ -594,6 +709,17 @@ export default function PropertyWizard({ initialData, isEditing = false, ...prop
                         </div>
 
                         <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-2">Título de la publicación <span className="text-gray-400 font-normal">(Opcional)</span></label>
+                            <input
+                                type="text"
+                                className="w-full p-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 placeholder-gray-400 text-gray-900 font-medium"
+                                placeholder="Ej. Hermoso departamento en Recoleta con balcón aterrazado"
+                                value={formData.title}
+                                onChange={(e) => handleChange('title', e.target.value)}
+                            />
+                        </div>
+
+                        <div>
                             <label className="block text-sm font-medium text-gray-700 mb-2">Tipo de operación</label>
                             <div className="flex gap-4">
                                 {['Venta', 'Alquiler', 'Temporada'].map(op => (
@@ -606,7 +732,7 @@ export default function PropertyWizard({ initialData, isEditing = false, ...prop
                                         }}
                                         className={`flex-1 py-3 px-4 rounded-xl border transition-all ${formData.operation_type === op
                                             ? 'border-indigo-600 bg-indigo-50 text-indigo-700 font-medium'
-                                            : 'border-gray-200 hover:border-gray-300'
+                                            : 'border-gray-200 hover:border-gray-300 text-gray-700'
                                             }`}
                                     >
                                         {op}
@@ -619,7 +745,7 @@ export default function PropertyWizard({ initialData, isEditing = false, ...prop
                             <div>
                                 <label className="block text-sm font-medium text-gray-700 mb-2">Tipo de propiedad</label>
                                 <select
-                                    className="w-full p-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 font-sans text-base bg-white appearance-none"
+                                    className="w-full p-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 font-sans text-base bg-white appearance-none text-gray-900 font-medium"
                                     value={formData.property_type}
                                     onChange={(e) => handleChange('property_type', e.target.value)}
                                     style={{ fontFamily: 'inherit' }}
@@ -645,12 +771,45 @@ export default function PropertyWizard({ initialData, isEditing = false, ...prop
                                 <label className="block text-sm font-medium text-gray-700 mb-2">Subtipo (Opcional)</label>
                                 <input
                                     type="text"
-                                    className="w-full p-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                                    className="w-full p-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-gray-900 font-medium"
                                     placeholder="Ej. Duplex, Loft"
                                     value={formData.property_subtype}
                                     onChange={(e) => handleChange('property_subtype', e.target.value)}
                                 />
                             </div>
+                        </div>
+
+                        <div className="flex flex-wrap gap-6 pt-2">
+                            <label className="flex items-center gap-3 p-3 border border-gray-200 rounded-xl cursor-pointer hover:bg-gray-50 transition w-full md:w-auto">
+                                <input
+                                    type="checkbox"
+                                    className="w-5 h-5 text-indigo-600 rounded focus:ring-indigo-500 border-gray-300"
+                                    checked={formData.apto_profesional}
+                                    onChange={(e) => handleChange('apto_profesional', e.target.checked)}
+                                />
+                                <span className="text-gray-700 font-medium">Apto Profesional</span>
+                            </label>
+
+                            <label className="flex items-center gap-3 p-3 border border-gray-200 rounded-xl cursor-pointer hover:bg-gray-50 transition w-full md:w-auto">
+                                <input
+                                    type="checkbox"
+                                    className="w-5 h-5 text-indigo-600 rounded focus:ring-indigo-500 border-gray-300"
+                                    checked={formData.apto_mascotas}
+                                    onChange={(e) => handleChange('apto_mascotas', e.target.checked)}
+                                />
+                                <span className="text-gray-700 font-medium">Apto Mascotas</span>
+                            </label>
+                        </div>
+
+                        <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-2">Descripción detallada</label>
+                            <textarea
+                                rows={6}
+                                className="w-full p-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-gray-900 font-medium"
+                                placeholder="Describí las características, ubicación, estado, etc..."
+                                value={formData.description}
+                                onChange={(e) => handleChange('description', e.target.value)}
+                            />
                         </div>
                     </div >
                 );
@@ -666,17 +825,16 @@ export default function PropertyWizard({ initialData, isEditing = false, ...prop
                                 <label className="block text-sm font-medium text-gray-700 mb-2">Buscar dirección (Autocompletar)</label>
                                 <Autocomplete
                                     onLoad={(autocomplete) => {
-                                        (window as any).autocomplete = autocomplete;
+                                        autocompleteRef.current = autocomplete;
                                         // Restrict to Argentina
                                         autocomplete.setComponentRestrictions({ country: "ar" });
                                         // Also restrict types to address only
                                         autocomplete.setTypes(["address"]);
                                     }}
                                     onPlaceChanged={async () => {
-                                        const autocomplete = (window as any).autocomplete;
-                                        if (autocomplete) {
-                                            const place = autocomplete.getPlace();
-                                            if (place.geometry && place.geometry.location) {
+                                        if (autocompleteRef.current) {
+                                            const place = autocompleteRef.current.getPlace();
+                                            if (place && place.geometry && place.geometry.location) {
                                                 const lat = place.geometry.location.lat();
                                                 const lng = place.geometry.location.lng();
 
@@ -789,7 +947,7 @@ export default function PropertyWizard({ initialData, isEditing = false, ...prop
                                     <input
                                         type="text"
                                         placeholder="Escribí la dirección..."
-                                        className="w-full p-3 pl-10 border border-gray-300 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                                        className="w-full p-3 pl-10 border border-gray-300 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-gray-900 font-medium"
                                     />
                                 </Autocomplete>
                                 <MapPin className="absolute left-3 top-[38px] text-gray-400 w-5 h-5" />
@@ -800,7 +958,7 @@ export default function PropertyWizard({ initialData, isEditing = false, ...prop
                             <div>
                                 <label className="block text-sm font-medium text-gray-700 mb-2">Provincia</label>
                                 <select
-                                    className="w-full p-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 font-sans"
+                                    className="w-full p-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 font-sans text-gray-900 font-medium"
                                     value={formData.provincia_id}
                                     onChange={handleProvinciaChange}
                                     style={{ fontFamily: 'inherit' }}
@@ -814,7 +972,7 @@ export default function PropertyWizard({ initialData, isEditing = false, ...prop
                             <div>
                                 <label className="block text-sm font-medium text-gray-700 mb-2">Localidad / Barrio</label>
                                 <select
-                                    className="w-full p-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 font-sans"
+                                    className="w-full p-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 font-sans text-gray-900 font-medium"
                                     value={formData.localidad_id}
                                     onChange={handleLocalidadChange}
                                     disabled={!formData.provincia_id}
@@ -828,25 +986,77 @@ export default function PropertyWizard({ initialData, isEditing = false, ...prop
                             </div>
                         </div>
 
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                            <div>
+                        <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+                            <div className="md:col-span-2">
                                 <label className="block text-sm font-medium text-gray-700 mb-2">Calle</label>
                                 <input
                                     type="text"
-                                    className="w-full p-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                                    className="w-full p-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-gray-900 font-medium"
                                     value={formData.calle}
                                     onChange={(e) => handleChange('calle', e.target.value)}
                                 />
                             </div>
                             <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-2">Altura</label>
+                                <label className="block text-sm font-medium text-gray-700 mb-2">Nro. Calle</label>
                                 <input
                                     type="text"
-                                    className="w-full p-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                                    className="w-full p-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-gray-900 font-medium"
                                     value={formData.altura}
                                     onChange={(e) => handleChange('altura', e.target.value)}
                                 />
                             </div>
+                            <div className="grid grid-cols-2 gap-2">
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700 mb-2">Piso</label>
+                                    <input
+                                        type="text"
+                                        className="w-full p-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-gray-900 font-medium"
+                                        value={formData.piso}
+                                        onChange={(e) => handleChange('piso', e.target.value)}
+                                    />
+                                </div>
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700 mb-2">Depto</label>
+                                    <input
+                                        type="text"
+                                        className="w-full p-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-gray-900 font-medium"
+                                        value={formData.depto}
+                                        onChange={(e) => handleChange('depto', e.target.value)}
+                                    />
+                                </div>
+                            </div>
+                        </div>
+
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-2">Entre calle 1</label>
+                                <input
+                                    type="text"
+                                    className="w-full p-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-gray-900 font-medium"
+                                    value={formData.entre_calle_1}
+                                    onChange={(e) => handleChange('entre_calle_1', e.target.value)}
+                                />
+                            </div>
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-2">Entre calle 2</label>
+                                <input
+                                    type="text"
+                                    className="w-full p-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-gray-900 font-medium"
+                                    value={formData.entre_calle_2}
+                                    onChange={(e) => handleChange('entre_calle_2', e.target.value)}
+                                />
+                            </div>
+                        </div>
+
+                        <div className="flex items-center gap-2">
+                            <input
+                                type="checkbox"
+                                id="barrio_cerrado"
+                                className="w-4 h-4 text-indigo-600 rounded focus:ring-indigo-500 border-gray-300"
+                                checked={formData.barrio_cerrado}
+                                onChange={(e) => handleChange('barrio_cerrado', e.target.checked)}
+                            />
+                            <label htmlFor="barrio_cerrado" className="text-sm text-gray-700">Esta propiedad pertenece a un country / barrio cerrado</label>
                         </div>
 
                         <div className="h-[400px] rounded-xl overflow-hidden border border-gray-200">
@@ -874,10 +1084,33 @@ export default function PropertyWizard({ initialData, isEditing = false, ...prop
 
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                             <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-2">Superficie Total (m²)</label>
+                                <label className="block text-sm font-medium text-gray-700 mb-2">Ancho del terreno (m)</label>
                                 <input
-                                    type="number"
-                                    className="w-full p-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                                    type="text"
+                                    inputMode="decimal"
+                                    placeholder="Ej. 8.66"
+                                    className="w-full p-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-gray-900 font-medium"
+                                    value={formData.land_width}
+                                    onChange={(e) => handleChange('land_width', e.target.value)}
+                                />
+                            </div>
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-2">Largo del terreno (m)</label>
+                                <input
+                                    type="text"
+                                    inputMode="decimal"
+                                    placeholder="Ej. 30"
+                                    className="w-full p-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-gray-900 font-medium"
+                                    value={formData.land_length}
+                                    onChange={(e) => handleChange('land_length', e.target.value)}
+                                />
+                            </div>
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-2">Superficie Terreno (m²)</label>
+                                <input
+                                    type="text"
+                                    inputMode="decimal"
+                                    className="w-full p-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-gray-900 font-medium"
                                     value={formData.area_total}
                                     onChange={(e) => handleChange('area_total', e.target.value)}
                                 />
@@ -885,10 +1118,31 @@ export default function PropertyWizard({ initialData, isEditing = false, ...prop
                             <div>
                                 <label className="block text-sm font-medium text-gray-700 mb-2">Superficie Cubierta (m²)</label>
                                 <input
-                                    type="number"
-                                    className="w-full p-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                                    type="text"
+                                    inputMode="decimal"
+                                    className="w-full p-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-gray-900 font-medium"
                                     value={formData.area_covered}
                                     onChange={(e) => handleChange('area_covered', e.target.value)}
+                                />
+                            </div>
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-2">Superficie Descubierta (m²)</label>
+                                <input
+                                    type="text"
+                                    inputMode="decimal"
+                                    className="w-full p-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-gray-900 font-medium"
+                                    value={formData.area_uncovered}
+                                    onChange={(e) => handleChange('area_uncovered', e.target.value)}
+                                />
+                            </div>
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-2">Superficie Semi-cubierta (m²)</label>
+                                <input
+                                    type="text"
+                                    inputMode="decimal"
+                                    className="w-full p-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-gray-900 font-medium"
+                                    value={formData.area_semi_covered}
+                                    onChange={(e) => handleChange('area_semi_covered', e.target.value)}
                                 />
                             </div>
                         </div>
@@ -898,19 +1152,84 @@ export default function PropertyWizard({ initialData, isEditing = false, ...prop
                                 { label: 'Ambientes', field: 'rooms' },
                                 { label: 'Dormitorios', field: 'bedrooms' },
                                 { label: 'Baños', field: 'bathrooms' },
+                                { label: 'Toilettes', field: 'toilettes' },
                                 { label: 'Cocheras', field: 'garages' },
+                                { label: 'Plantas', field: 'floors' },
                             ].map(item => (
                                 <div key={item.field}>
                                     <label className="block text-sm font-medium text-gray-700 mb-2">{item.label}</label>
                                     <input
-                                        type="number"
-                                        min="0" // Prevent negative UI input
-                                        className="w-full p-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                                        type="text"
+                                        inputMode="numeric"
+                                        className="w-full p-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-gray-900 font-medium"
                                         value={(formData as any)[item.field]}
-                                        onChange={(e) => handleChange(item.field, e.target.value)}
+                                        onChange={(e) => handleChange(item.field as keyof PropertyData, e.target.value)}
                                     />
                                 </div>
                             ))}
+                        </div>
+
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-2">Estado</label>
+                                <select
+                                    className="w-full p-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 bg-white text-gray-900"
+                                    value={formData.condition}
+                                    onChange={(e) => handleChange('condition', e.target.value)}
+                                >
+                                    {CONDITIONS_LIST.map(c => <option key={c} value={c}>{c}</option>)}
+                                </select>
+                            </div>
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-2">Situación</label>
+                                <select
+                                    className="w-full p-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 bg-white text-gray-900 font-medium"
+                                    value={formData.situation}
+                                    onChange={(e) => handleChange('situation', e.target.value)}
+                                >
+                                    {SITUATIONS_LIST.map(s => <option key={s} value={s}>{s}</option>)}
+                                </select>
+                            </div>
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-2">Orientación</label>
+                                <select
+                                    className="w-full p-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 bg-white text-gray-900 font-medium"
+                                    value={formData.orientation}
+                                    onChange={(e) => handleChange('orientation', e.target.value)}
+                                >
+                                    {ORIENTATIONS_LIST.map(o => <option key={o} value={o}>{o}</option>)}
+                                </select>
+                            </div>
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-2">Calefacción</label>
+                                <select
+                                    className="w-full p-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 bg-white"
+                                    value={formData.heating_type}
+                                    onChange={(e) => handleChange('heating_type', e.target.value)}
+                                >
+                                    <option value="">Seleccionar</option>
+                                    <option value="Losa radiante">Losa radiante</option>
+                                    <option value="Radiadores">Radiadores</option>
+                                    <option value="Estufa tiro balanceado">Estufa tiro balanceado</option>
+                                    <option value="Aire acondicionado">Aire acondicionado</option>
+                                    <option value="Salamandra/Hogar">Salamandra/Hogar</option>
+                                    <option value="Otras">Otras</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-2">Agua Caliente</label>
+                                <select
+                                    className="w-full p-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 bg-white"
+                                    value={formData.water_heating_type}
+                                    onChange={(e) => handleChange('water_heating_type', e.target.value)}
+                                >
+                                    <option value="">Seleccionar</option>
+                                    <option value="Termotanque">Termotanque</option>
+                                    <option value="Calefón">Calefón</option>
+                                    <option value="Caldera dual">Caldera dual</option>
+                                    <option value="Central">Central</option>
+                                </select>
+                            </div>
                         </div>
 
                         <div>
@@ -954,7 +1273,7 @@ export default function PropertyWizard({ initialData, isEditing = false, ...prop
                                 <input
                                     type="number"
                                     placeholder="Cantidad de años"
-                                    className="w-full p-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                                    className="w-full p-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-gray-900"
                                     value={formData.antiquity_years}
                                     onChange={(e) => handleChange('antiquity_years', e.target.value)}
                                 />
@@ -975,7 +1294,7 @@ export default function PropertyWizard({ initialData, isEditing = false, ...prop
                             <div className="w-32">
                                 <label className="block text-sm font-medium text-gray-700 mb-2">Moneda</label>
                                 <select
-                                    className="w-full p-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                                    className="w-full p-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-gray-900 font-medium"
                                     value={formData.currency}
                                     onChange={(e) => handleChange('currency', e.target.value)}
                                 >
@@ -989,7 +1308,7 @@ export default function PropertyWizard({ initialData, isEditing = false, ...prop
                                 </label>
                                 <input
                                     type="number"
-                                    className="w-full p-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                                    className="w-full p-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-gray-900 font-medium"
                                     value={formData.price}
                                     onChange={(e) => handleChange('price', e.target.value)}
                                 />
@@ -1023,7 +1342,7 @@ export default function PropertyWizard({ initialData, isEditing = false, ...prop
                                     <input
                                         type="number"
                                         placeholder="Valor mensual aproximado"
-                                        className="w-full p-3 pl-8 border border-gray-300 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                                        className="w-full p-3 pl-8 border border-gray-300 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-gray-900 font-medium"
                                         value={formData.expenses}
                                         onChange={(e) => handleChange('expenses', e.target.value)}
                                     />
@@ -1105,52 +1424,17 @@ export default function PropertyWizard({ initialData, isEditing = false, ...prop
                                 ))}
                             </div>
                         )}
-                    </div>
-                );
 
-
-            case 6: // Description
-                return (
-                    <div className="space-y-6 animate-in fade-in slide-in-from-right-4 duration-300">
-                        <div className="flex items-center justify-between">
-                            <h2 className="text-xl font-semibold">Descripción del aviso</h2>
-                            <button
-                                onClick={handleGenerateDescription}
-                                disabled={loading}
-                                className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-indigo-500 to-purple-600 text-white rounded-lg text-sm font-medium hover:from-indigo-600 hover:to-purple-700 transition-all shadow-md group"
-                            >
-                                {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Sparkles className="w-4 h-4 group-hover:animate-pulse" />}
-                                Generar con IA
-                            </button>
-                        </div>
-
-                        <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-2">Título del aviso</label>
-                            <div className="relative">
+                        <div className="grid grid-cols-1 gap-6 pt-4 border-t border-gray-100">
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-2">Video (YouTube URL)</label>
                                 <input
                                     type="text"
-                                    className="w-full p-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
-                                    placeholder="Ej. Hermoso departamento 2 ambientes en Palermo"
-                                    value={formData.title}
-                                    onChange={(e) => handleChange('title', e.target.value)}
-                                    maxLength={60}
+                                    placeholder="https://youtube.com/watch?v=..."
+                                    className="w-full p-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-gray-900 font-medium"
+                                    value={formData.video_url}
+                                    onChange={(e) => handleChange('video_url', e.target.value)}
                                 />
-                                <Sparkles className="absolute right-3 top-3.5 w-5 h-5 text-indigo-200" />
-                            </div>
-                            <p className="text-xs text-gray-400 mt-1 text-right">{formData.title.length}/60</p>
-                        </div>
-
-                        <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-2">Descripción detallada</label>
-                            <div className="relative">
-                                <textarea
-                                    rows={8}
-                                    className="w-full p-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
-                                    placeholder="Describí las características, ubicación, estado, etc..."
-                                    value={formData.description}
-                                    onChange={(e) => handleChange('description', e.target.value)}
-                                />
-                                <Sparkles className="absolute right-3 top-3.5 w-5 h-5 text-indigo-200" />
                             </div>
                         </div>
                     </div>

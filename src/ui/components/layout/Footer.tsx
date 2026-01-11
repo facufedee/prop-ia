@@ -9,16 +9,26 @@ export default function Footer() {
                     {/* Brand & Description */}
                     <div className="space-y-6">
                         <img
-                            src="/assets/img/logo_web_propia_fondoNegro.png"
-                            alt="PROP-IA"
+                            src="/assets/img/logo_web_ZetaProp_fondonegro.png"
+                            alt="Zeta Prop"
                             className="h-10 w-auto"
                         />
                         <p className="text-gray-400 text-sm leading-relaxed">
                             Impulsando el futuro del Real Estate con tecnología avanzada. Potenciamos inmobiliarias con Inteligencia Artificial, automatización y herramientas de gestión integral para escalar tu negocio.
                         </p>
-                        <div className="flex gap-4">
-                            <a href="https://instagram.com/propia.argentina" target="_blank" rel="noopener noreferrer" aria-label="Instagram" className="text-gray-400 hover:text-white transition"><Instagram className="w-5 h-5" /></a>
-                            <a href="https://www.linkedin.com/company/propia-arg" target="_blank" rel="noopener noreferrer" aria-label="LinkedIn" className="text-gray-400 hover:text-white transition"><Linkedin className="w-5 h-5" /></a>
+                        <div className="flex flex-col gap-4">
+                            <div className="flex gap-4">
+                                <a href="https://www.instagram.com/zeta_prop" target="_blank" rel="noopener noreferrer" aria-label="Instagram" className="text-gray-400 hover:text-white transition"><Instagram className="w-5 h-5" /></a>
+                                <a href="https://www.linkedin.com/company/zetaprop" target="_blank" rel="noopener noreferrer" aria-label="LinkedIn" className="text-gray-400 hover:text-white transition"><Linkedin className="w-5 h-5" /></a>
+                            </div>
+                            <div className="space-y-2 text-sm text-gray-400">
+                                <a href="mailto:facundo@zetaprop.com.ar" className="flex items-center gap-2 hover:text-white transition">
+                                    <Mail size={16} /> facundo@zetaprop.com.ar
+                                </a>
+                                <a href="https://wa.me/5491124000769" target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 hover:text-white transition">
+                                    <img src="https://upload.wikimedia.org/wikipedia/commons/6/6b/WhatsApp.svg" alt="WhatsApp" className="w-4 h-4 opacity-70 grayscale hover:grayscale-0 hover:opacity-100 transition-all" /> +54 9 11 2400-0769
+                                </a>
+                            </div>
                         </div>
                     </div>
 
@@ -67,10 +77,10 @@ export default function Footer() {
 
                 <div className="border-t border-gray-800 pt-8 flex flex-col md:flex-row justify-between items-center gap-4">
                     <p className="text-sm text-gray-500">
-                        © {new Date().getFullYear()} PROP-IA. Todos los derechos reservados.
+                        © {new Date().getFullYear()} Zeta Prop. Todos los derechos reservados.
                     </p>
                     <div className="text-sm text-gray-500 text-center md:text-right">
-                        Hecho con ❤️ en Oeste de Buenos Aires, Argentina
+                        Hecho con ❤️ en Ituzaingó, Buenos Aires
                     </div>
                 </div>
             </div>

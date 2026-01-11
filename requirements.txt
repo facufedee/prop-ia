@@ -1,6 +1,6 @@
 # Archivo de requerimientos para un entorno de Python estable (ej. Python 3.11)
 
-tensorflow==2.15.0
+tensorflow>=2.15.0
 tensorflow-hub==0.16.1
 tensorflowjs==4.17.0
 scikit-learn==1.3.2

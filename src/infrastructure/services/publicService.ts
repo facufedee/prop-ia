@@ -19,6 +19,7 @@ export interface PublicProperty {
     lat?: number;
     lng?: number;
     expenses?: number;
+    video_url?: string;
 }
 
 export interface PublicAgency {

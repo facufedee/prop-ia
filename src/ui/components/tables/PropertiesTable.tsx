@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Home, Loader2, Trash2, Edit } from "lucide-react";
+import { Home, Loader2, Trash2, Edit, Printer, Share2 } from "lucide-react";
 import { db, auth } from "@/infrastructure/firebase/client";
 import { collection, query, where, getDocs, deleteDoc, doc } from "firebase/firestore";
 import { onAuthStateChanged } from "firebase/auth";
@@ -16,6 +16,9 @@ export interface Property {
     price: number;
     currency: string;
     operation_type: string;
+    bedrooms?: number;
+    bathrooms?: number;
+    garages?: number;
     imageUrls?: string[];
     userId?: string;
     branchId?: string;
@@ -90,6 +93,22 @@ export default function PropertiesTable({ properties, loading, onDelete }: Prope
                             </td>
                             <td className="p-4 text-right">
                                 <div className="flex items-center justify-end gap-2">
+                                    <Link
+                                        href={`/print/propiedades/${p.id}?mode=vertical`}
+                                        target="_blank"
+                                        className="p-2 hover:bg-green-50 rounded-full text-green-600 transition"
+                                        title="Enviar Ficha (WhatsApp)"
+                                    >
+                                        <Share2 size={16} />
+                                    </Link>
+                                    <Link
+                                        href={`/print/propiedades/${p.id}?mode=horizontal`}
+                                        target="_blank"
+                                        className="p-2 hover:bg-indigo-50 rounded-full text-indigo-600 transition"
+                                        title="Imprimir Ficha"
+                                    >
+                                        <Printer size={16} />
+                                    </Link>
                                     <Link href={`/dashboard/propiedades/editar/${p.id}`} className="p-2 hover:bg-gray-100 rounded-full text-gray-500 transition">
                                         <Edit size={16} />
                                     </Link>
@@ -105,6 +124,6 @@ export default function PropertiesTable({ properties, loading, onDelete }: Prope
                     ))}
                 </tbody>
             </table>
-        </div>
+        </div >
     );
 }

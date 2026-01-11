@@ -21,7 +21,7 @@ export function generateMetadata({
     canonical,
     noindex = false,
 }: SEOProps): Metadata {
-    const siteName = "Prop-IA";
+    const siteName = "Zeta Prop";
     const fullTitle = title.includes(siteName) ? title : `${title} | ${siteName}`;
 
     return {

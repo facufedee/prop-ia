@@ -132,7 +132,7 @@ export default function ContactForm() {
                             </span>
                         </h2>
                         <p className="text-xl text-gray-600 mb-8">
-                            Hablemos sobre cómo PROP-IA puede ayudarte a automatizar procesos,
+                            Hablemos sobre cómo Zeta Prop puede ayudarte a automatizar procesos,
                             ahorrar tiempo y aumentar tus ventas.
                         </p>
 
@@ -144,8 +144,21 @@ export default function ContactForm() {
                                 </div>
                                 <div>
                                     <h4 className="font-semibold text-gray-900 mb-1">Email</h4>
-                                    <p className="text-gray-600">contacto@prop-ia.com.ar</p>
-                                    <p className="text-sm text-gray-500">Respuesta en menos de 24hs</p>
+                                    <p className="text-gray-600">facundo@zetaprop.com.ar</p>
+                                    <p className="text-sm text-gray-500">Respuesta rápida</p>
+                                </div>
+                            </div>
+
+                            <div className="flex items-start gap-4">
+                                <div className="w-12 h-12 bg-gradient-to-r from-green-500 to-emerald-500 rounded-xl flex items-center justify-center flex-shrink-0">
+                                    <img src="https://upload.wikimedia.org/wikipedia/commons/6/6b/WhatsApp.svg" alt="WhatsApp" className="w-6 h-6 invert brightness-0" />
+                                </div>
+                                <div>
+                                    <h4 className="font-semibold text-gray-900 mb-1">WhatsApp</h4>
+                                    <a href="https://wa.me/5491124000769" target="_blank" rel="noopener noreferrer" className="text-gray-600 hover:text-green-600 transition-colors">
+                                        +54 9 11 2400-0769
+                                    </a>
+                                    <p className="text-sm text-gray-500">Facundo</p>
                                 </div>
                             </div>
 

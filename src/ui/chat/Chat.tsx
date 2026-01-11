@@ -22,7 +22,7 @@ export default function Chat() {
     {
       id: "1",
       sender: "assistant",
-      content: "¡Hola! Soy el asistente virtual de Prop-IA. ¿En qué puedo ayudarte hoy? Puedo asistirte con tasaciones, redacción de descripciones o consultas legales.",
+      content: "¡Hola! Soy el asistente virtual de Zeta Prop. ¿En qué puedo ayudarte hoy? Puedo asistirte con tasaciones, redacción de descripciones o consultas legales.",
       time: "10:00 AM"
     }
   ]);

@@ -43,7 +43,8 @@ export const adminService = {
                     planId: sub.planTier, // Using tier as ID for display
                     status: sub.status,
                     billingPeriod: sub.billingPeriod
-                } : undefined
+                } : undefined,
+                disabled: userData.disabled === true
             } as User;
         });
 
@@ -98,5 +99,12 @@ export const adminService = {
             isVerified: status === 'verified',
             verificationStatus: status
         });
+    },
+
+    // Habilitar/Deshabilitar usuario
+    toggleUserStatus: async (uid: string, disabled: boolean) => {
+        if (!db) throw new Error("Firestore not initialized");
+        const userRef = doc(db, USERS_COLLECTION, uid);
+        await updateDoc(userRef, { disabled });
     }
 };

@@ -27,7 +27,7 @@ export const saveUserToFirestore = async (user: User, additionalData?: { agencyN
 
             // If "Cliente" role doesn't exist, initialize and retry
             if (!defaultRole) {
-                console.log("Default role 'Cliente' not found. Initializing roles...");
+                console.log("Default role 'Cliente Free' not found. Initializing roles...");
                 await roleService.initializeDefaultRoles();
                 defaultRole = await roleService.getDefaultRole();
             }
@@ -35,7 +35,7 @@ export const saveUserToFirestore = async (user: User, additionalData?: { agencyN
             // Fallback: If still no role, we can't properly assign permissions, but we create the user.
             // Ideally, we should error out or ensure at least one role.
             if (!defaultRole) {
-                console.error("CRITICAL: Failed to retrieve default role 'Cliente' even after initialization.");
+                console.error("CRITICAL: Failed to retrieve default role 'Cliente Free' even after initialization.");
             }
 
             await setDoc(userRef, {

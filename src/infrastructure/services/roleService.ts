@@ -32,13 +32,15 @@ export const PERMISSIONS: Permission[] = [
     { id: "/dashboard/soporte", label: "Soporte", description: "Mesa de ayuda y tickets de soporte" },
     { id: "/dashboard/soporte/ticketera", label: "Ticketera", description: "Gestión de tickets (solo administradores)" },
     { id: "/dashboard/bitacora", label: "Bitácora", description: "Registro de auditoría del sistema" },
+    { id: "/dashboard/gestion-plataforma", label: "Gestión de Plataforma", description: "Administración de usuarios y plataforma" },
     { id: "/dashboard/cuenta", label: "Cuenta", description: "Configuración de cuenta personal" },
     { id: "/dashboard/configuracion", label: "Tasación IA", description: "Configuración del tasador online" },
     { id: "/dashboard/configuracion/roles", label: "Roles y Permisos", description: "Gestión de roles y permisos (solo administradores)" },
     { id: "/dashboard/configuracion/backup", label: "Backup y Restauración", description: "Copias de seguridad de la base de datos (solo administradores)" },
     { id: "/dashboard/configuracion/suscripciones", label: "Planes y Suscripciones", description: "Gestión de planes de suscripción (solo administradores)" },
     { id: "/dashboard/sucursales", label: "Sucursales", description: "Gestión de sucursales (Multisucursal)" },
-    { id: "/dashboard/blog", label: "Blog / Novedades", description: "Gestión de noticias y blog" },
+    { id: "/dashboard/blog", label: "Gestión Blog", description: "Gestión de noticias y blog (Admin)" }, // Renaming old /dashboard/blog permission to avoid confusion if needed, or keep as is. The user said "Novedades" for clients.
+    { id: "/dashboard/novedades", label: "Novedades Zeta", description: "Acceso a noticias y actualizaciones para clientes" },
 ];
 
 const ROLES_COLLECTION = "roles";
@@ -232,7 +234,9 @@ export const roleService = {
                     "/dashboard/sucursales",
                     "/dashboard/blog",
                     "/dashboard/cuenta",
-                    "/dashboard/configuracion" // Maybe some settings?
+                    "/dashboard/cuenta",
+                    "/dashboard/configuracion",
+                    "/dashboard/novedades"
                 ],
                 isSystem: false
             });
@@ -257,7 +261,8 @@ export const roleService = {
                     "/dashboard/calendario",
                     "/dashboard/sucursales", // Pro Feature
                     "/dashboard/blog",
-                    "/dashboard/cuenta"
+                    "/dashboard/cuenta",
+                    "/dashboard/novedades"
                 ],
                 isSystem: false
             });
@@ -272,7 +277,8 @@ export const roleService = {
                     "/dashboard",
                     "/dashboard/propiedades",
                     "/dashboard/cuenta",
-                    "/dashboard/blog"
+                    "/dashboard/blog",
+                    "/dashboard/novedades"
                 ],
                 isSystem: false
             });
@@ -290,7 +296,8 @@ export const roleService = {
                     "/dashboard/leads",
                     "/dashboard/calendario",
                     "/dashboard/cuenta",
-                    "/dashboard/blog"
+                    "/dashboard/blog",
+                    "/dashboard/novedades"
                 ],
                 isSystem: true
             });
@@ -299,7 +306,7 @@ export const roleService = {
     // Get the default role (Cliente)
     getDefaultRole: async (): Promise<Role | null> => {
         if (!db) throw new Error("Firestore not initialized");
-        const q = query(collection(db, ROLES_COLLECTION), where("name", "==", "Cliente"));
+        const q = query(collection(db, ROLES_COLLECTION), where("name", "==", "Cliente Free"));
         const querySnapshot = await getDocs(q);
         if (!querySnapshot.empty) {
             const doc = querySnapshot.docs[0];

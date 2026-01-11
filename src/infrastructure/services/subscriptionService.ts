@@ -382,7 +382,7 @@ export const subscriptionService = {
             const plan = await subscriptionService.getPlanById(subscription.planId);
             if (plan) {
                 // @ts-ignore
-                limit = plan.limits[resource] ?? (resource === 'clients' ? 5 : 5); // Fallback to 5 if undefined
+                limit = plan.limits[resource] ?? (resource === 'clients' ? 5 : 10); // Fallback to 10 for properties if undefined
             }
             // If subscription exists but NO plan is active/found, we might default to free limits or block.
             // Assuming active subscription implies a valid plan, but fallback is safe.
@@ -390,6 +390,13 @@ export const subscriptionService = {
 
         if (limit === 'unlimited') {
             return { allowed: true, current: 0, limit: 'unlimited' };
+        }
+
+        // If NO subscription (Free Tier default), set defaults here explicitly if plan logic didn't catch it
+        // The above block only runs if subscription exists.
+        // If subscription is null, we need to set the default limit.
+        if (!subscription) {
+            limit = resource === 'properties' ? 10 : 5;
         }
 
         // 2. Count Current Usage (Real-time)

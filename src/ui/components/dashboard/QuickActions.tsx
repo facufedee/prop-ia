@@ -6,7 +6,7 @@ export default function QuickActions() {
         { icon: <Calculator className="w-5 h-5" />, label: "Nueva Tasación", href: "/dashboard/tasacion" },
         { icon: <PlusCircle className="w-5 h-5" />, label: "Cargar Propiedad", href: "/dashboard/propiedades/nueva" },
         { icon: <Building2 className="w-5 h-5" />, label: "Ver Propiedades", href: "/dashboard/propiedades" },
-        { icon: <ChartBarBigIcon className="w-5 h-5" />, label: "Chat PropIA", href: "/dashboard/chat" },
+        { icon: <ChartBarBigIcon className="w-5 h-5" />, label: "Chat Zeta Prop", href: "/dashboard/chat" },
     ];
 
     return (

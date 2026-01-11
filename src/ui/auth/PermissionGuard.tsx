@@ -2,82 +2,85 @@
 
 import { useEffect, useState } from "react";
 import { usePathname, useRouter } from "next/navigation";
-import { onAuthStateChanged } from "firebase/auth";
 import { auth } from "@/infrastructure/firebase/client";
 import { roleService, PERMISSIONS } from "@/infrastructure/services/roleService";
+import { useAuth } from "@/ui/context/AuthContext";
 
 export default function PermissionGuard({ children }: { children: React.ReactNode }) {
     const router = useRouter();
     const pathname = usePathname();
-    const [loading, setLoading] = useState(true);
+    const { user, userRole, loading: authLoading } = useAuth();
     const [authorized, setAuthorized] = useState(false);
+    const [checking, setChecking] = useState(true);
 
     useEffect(() => {
-        if (!auth) {
-            setLoading(false);
+        if (authLoading) return;
+
+        if (!user) {
+            setAuthorized(false);
+            setChecking(false);
             return;
         }
 
-        const unsubscribe = onAuthStateChanged(auth, async (user) => {
-            if (!user) {
-                // Not logged in, AuthGuard handles this usually, but safe to redirect
-                setAuthorized(false);
-                setLoading(false);
+        // If user is logged in but has no role yet, wait.
+        // The AuthContext onSnapshot will eventually trigger with the role.
+        // We can show a loading state while 'userRole' is null.
+        if (!userRole) {
+            // Potentially we could add a timeout here if role never appears?
+            // For now, assume it's syncing or account setup is slightly delayed.
+            return;
+        }
+
+        const checkPermissions = () => {
+            // If Super Admin or Admin, bypass checks
+            if (userRole.name === "Super Admin" || userRole.name === "Administrador") {
+                setAuthorized(true);
+                setChecking(false);
                 return;
             }
 
-            try {
-                const role = await roleService.getUserRole(user.uid);
+            // Find the most specific permission matching the current path
+            const sortedPermissions = [...PERMISSIONS].sort((a, b) => b.id.length - a.id.length);
+            const matchingPermission = sortedPermissions.find(p => pathname.startsWith(p.id));
 
-                if (!role) {
-                    console.error("User has no role assigned");
-                    router.push("/access-denied");
-                    setLoading(false);
-                    return;
-                }
-
-                // If Super Admin or Admin, bypass checks
-                if (role.name === "Super Admin" || role.name === "Administrador") {
+            if (matchingPermission) {
+                const hasPermission = userRole.permissions.includes(matchingPermission.id);
+                if (hasPermission) {
                     setAuthorized(true);
-                    setLoading(false);
-                    return;
-                }
-
-                // Find the most specific permission matching the current path
-                // Sort permissions by length descending to match /dashboard/blog before /dashboard
-                const sortedPermissions = [...PERMISSIONS].sort((a, b) => b.id.length - a.id.length);
-
-                const matchingPermission = sortedPermissions.find(p => pathname.startsWith(p.id));
-
-                if (matchingPermission) {
-                    const hasPermission = role.permissions.includes(matchingPermission.id);
-                    if (hasPermission) {
-                        setAuthorized(true);
-                    } else {
-                        console.warn(`Access denied to ${pathname}. Missing permission: ${matchingPermission.id}`);
-                        // If user is on dashboard home but somehow restricted (unlikely), allow.
-                        // But if they are on /dashboard/blog and lack it, deny.
-                        router.push("/access-denied");
-                    }
                 } else {
-                    // Path not governed by explicit permissions (e.g. /dashboard/profile maybe?)
-                    // Default strict or allow? 
-                    // Given /dashboard covers the root, almost everything is covered.
-                    // If something falls through, we might allow it if it's not sensitive.
-                    setAuthorized(true);
+                    console.warn(`Access denied to ${pathname}. Missing permission: ${matchingPermission.id}`);
+                    setAuthorized(false);
+                    router.push("/access-denied");
                 }
-
-            } catch (error) {
-                console.error("Error verifying permissions:", error);
-            } finally {
-                setLoading(false);
+            } else {
+                setAuthorized(true);
             }
-        });
+            setChecking(false);
+        };
 
-        return () => unsubscribe();
-    }, [pathname, router]);
+        checkPermissions();
 
-    if (loading) {
+    }, [user, userRole, authLoading, pathname, router]);
+
+
+    if (authLoading || (user && !userRole)) {
+        return (
+            <div className="fixed inset-0 bg-white z-50 flex flex-col items-center justify-center gap-4">
+                <div className="w-8 h-8 border-4 border-indigo-600 border-t-transparent rounded-full animate-spin"></div>
+                <p className="text-gray-500 text-sm animate-pulse">
+                    {user && !userRole ? "Configurando su cuenta..." : "Verificando credenciales..."}
+                </p>
+            </div>
+        );
+    }
+
+    if (!user) {
+        // AuthGuard usually handles this, so rendering nothing is fine before redirect logic elsewhere kicks in
+        return null;
+    }
+
+    if (checking) {
+        // Keep spinner if still calculating permissions logic
         return (
             <div className="fixed inset-0 bg-white z-50 flex items-center justify-center">
                 <div className="w-8 h-8 border-4 border-indigo-600 border-t-transparent rounded-full animate-spin"></div>
@@ -86,7 +89,7 @@ export default function PermissionGuard({ children }: { children: React.ReactNod
     }
 
     if (!authorized) {
-        return null;
+        return null; // The useEffect redirects to /access-denied
     }
 
     return <>{children}</>;

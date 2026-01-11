@@ -1,4 +1,5 @@
 import { X, Rocket, Zap } from "lucide-react";
+import { useRouter } from "next/navigation";
 
 interface LimitReachedModalProps {
     isOpen: boolean;
@@ -8,6 +9,8 @@ interface LimitReachedModalProps {
 }
 
 export default function LimitReachedModal({ isOpen, onClose, resource, limit }: LimitReachedModalProps) {
+    const router = useRouter();
+
     if (!isOpen) return null;
 
     return (
@@ -42,12 +45,18 @@ export default function LimitReachedModal({ isOpen, onClose, resource, limit }: 
                         <button
                             onClick={() => {
                                 onClose();
-                                window.location.href = '/catalogo';
+                                router.push('/precios');
                             }}
                             className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-indigo-600 text-white rounded-xl hover:bg-indigo-700 transition-colors font-medium shadow-lg shadow-indigo-200 group"
                         >
                             <Rocket className="w-5 h-5 group-hover:animate-bounce" />
                             Ver Planes y Precios
+                        </button>
+                        <button
+                            onClick={onClose}
+                            className="text-gray-500 text-sm hover:text-gray-700 transition-colors text-center"
+                        >
+                            Cancelar
                         </button>
                     </div>
                 </div>

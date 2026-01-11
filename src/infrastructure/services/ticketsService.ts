@@ -297,6 +297,27 @@ export const ticketsService = {
             lastMessageAt: doc.data().lastMessageAt?.toDate(),
         })) as Ticket[];
     },
+    // Obtener tickets pendientes para admin (abierto o en_progreso)
+    getAdminPendingTickets: async (): Promise<Ticket[]> => {
+        if (!db) throw new Error("Firestore not initialized");
+        const q = query(
+            collection(db, TICKETS_COLLECTION),
+            where("status", "in", ["abierto", "en_progreso"]),
+            orderBy("updatedAt", "desc")
+        );
+        const snapshot = await getDocs(q);
+
+        return snapshot.docs.map(doc => ({
+            id: doc.id,
+            ...doc.data(),
+            createdAt: doc.data().createdAt?.toDate() || new Date(),
+            updatedAt: doc.data().updatedAt?.toDate() || new Date(),
+            resolvedAt: doc.data().resolvedAt?.toDate(),
+            closedAt: doc.data().closedAt?.toDate(),
+            lastMessageAt: doc.data().lastMessageAt?.toDate(),
+        })) as Ticket[];
+    },
+
     // ========== SUBSCRIPCIONES (REAL-TIME) ==========
 
     // Suscribirse a un ticket

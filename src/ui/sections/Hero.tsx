@@ -27,16 +27,15 @@ export default function Hero() {
 
         {/* Main Headline */}
         <h1 className="text-5xl md:text-7xl font-bold text-gray-900 mb-6 leading-[1.1] animate-fade-in-up tracking-tight">
-          La Plataforma Integral de <br />
+          El CRM Inmobiliario <br />
           <span className="bg-gradient-to-r from-indigo-600 via-purple-600 to-indigo-600 bg-clip-text text-transparent bg-[length:200%_auto] animate-gradient">
-            Gestión Inmobiliaria
+            más moderno de Argentina
           </span>
         </h1>
 
         {/* Subheadline */}
-        <p className="text-xl text-gray-600 mb-10 max-w-2xl mx-auto leading-relaxed animate-fade-in-up animation-delay-200">
-          Potencia tu inmobiliaria con IA. Centraliza <strong>alquileres, ventas, tasaciones y clientes</strong> en un solo lugar.
-          Automatiza procesos y cierra más operaciones sin complicaciones.
+        <p className="text-xl text-gray-600 mb-10 max-w-3xl mx-auto leading-relaxed animate-fade-in-up animation-delay-200">
+          Administración integral de propiedades, clientes, alquileres y emprendimientos. Agenda inteligente con Google Calendar, bot de WhatsApp, multisucursal y portal de inquilinos.
         </p>
 
         {/* CTA Buttons */}

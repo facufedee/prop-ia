@@ -70,7 +70,7 @@ export default function ChristmasModal() {
 
                         {/* Message */}
                         <p className="text-gray-600 mb-6 leading-relaxed">
-                            El equipo de <span className="font-semibold bg-gradient-to-r from-indigo-600 to-cyan-500 bg-clip-text text-transparent">PROP-IA</span> te desea una
+                            El equipo de <span className="font-semibold bg-gradient-to-r from-indigo-600 to-cyan-500 bg-clip-text text-transparent">Zeta Prop</span> te desea una
                             <span className="font-semibold"> Feliz Navidad</span> y un
                             <span className="font-semibold"> Próspero Año Nuevo</span>.
                             <br />

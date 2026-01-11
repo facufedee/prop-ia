@@ -8,7 +8,7 @@ export default function Testimonials() {
             name: "Carlos Rodríguez",
             role: "Director, Inmobiliaria Rodríguez",
             image: "https://randomuser.me/api/portraits/men/32.jpg",
-            content: "Desde que usamos PROP-IA, hemos reducido el tiempo de tasación en un 80%. La precisión de la IA es impresionante y a nuestros clientes les encantan los reportes detallados.",
+            content: "Desde que usamos Zeta Prop, hemos reducido el tiempo de tasación en un 80%. La precisión de la IA es impresionante y a nuestros clientes les encantan los reportes detallados.",
             stars: 5
         },
         {
@@ -42,7 +42,7 @@ export default function Testimonials() {
                         </h2>
 
                         <p className="text-xl text-gray-600 max-w-2xl mx-auto mb-4">
-                            Más de 1,200 inmobiliarias en Argentina ya confían en PROP-IA para hacer crecer su negocio.
+                            Más de 1,200 inmobiliarias en Argentina ya confían en Zeta Prop para hacer crecer su negocio.
                         </p>
 
                         <button className="px-8 py-3 bg-gray-900 text-white rounded-xl font-semibold hover:bg-black hover:shadow-lg transition-all transform hover:-translate-y-1">

@@ -39,7 +39,7 @@ export async function POST(request: NextRequest) {
         // The contract belongs to a User (Agency).
         const agencyUserId = alquilerData.userId;
         let branding = {
-            agencyName: "Prop-IA",
+            agencyName: "Zeta Prop",
             logoUrl: "",
             primaryColor: "#4f46e5" // Default Indigo
         };

@@ -19,4 +19,5 @@ export interface User {
     verificationStatus?: 'pending' | 'verified' | 'rejected' | 'none';
     identityDocument?: string; // URL to document or business domain
     logoUrl?: string; // URL to agency logo
+    disabled?: boolean;
 }

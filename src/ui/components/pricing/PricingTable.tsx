@@ -75,7 +75,7 @@ export default function PricingTable() {
     const effectivePlans = plans.length > 0 ? plans : [];
 
     return (
-        <div className="py-12 px-4">
+        <div className="pt-32 pb-12 px-4">
             <div className="max-w-7xl mx-auto">
                 {/* Header */}
                 <div className="text-center mb-12">

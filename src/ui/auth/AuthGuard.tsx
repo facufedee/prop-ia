@@ -38,7 +38,7 @@ export default function AuthGuard({ children }: { children: React.ReactNode }) {
                             <div className="absolute inset-0 bg-gradient-to-r from-indigo-600 via-purple-600 to-cyan-500 rounded-2xl blur-3xl opacity-30 animate-pulse" />
                             <img
                                 src="/assets/img/loading.png"
-                                alt="Cargando PROP-IA"
+                                alt="Cargando Zeta Prop"
                                 className="relative h-20 w-auto animate-pulse"
                             />
                         </div>

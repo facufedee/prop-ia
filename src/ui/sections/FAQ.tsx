@@ -35,7 +35,7 @@ const faqs = [
     },
     {
         question: "Ya tengo una planilla en Excel, ¿para qué cambiar?",
-        answer: "Una planilla de Excel es útil pero estática. PropIA trabaja por vos: te envía recordatorios de vencimientos, calcula intereses por mora día a día automáticamente, aplica índices de actualización al instante y mantiene todo respaldado en la nube con seguridad bancaria. Además, le das una imagen mucho más profesional a tus inquilinos."
+        answer: "Una planilla de Excel es útil pero estática. Zeta Prop trabaja por vos: te envía recordatorios de vencimientos, calcula intereses por mora día a día automáticamente, aplica índices de actualización al instante y mantiene todo respaldado en la nube con seguridad bancaria. Además, le das una imagen mucho más profesional a tus inquilinos."
     },
     {
         question: "¿Puedo usarla si tengo solo una propiedad?",
@@ -79,7 +79,7 @@ export default function FAQ() {
                     </div>
                     <h2 className="text-4xl font-bold text-gray-900 mb-4">Preguntas Frecuentes</h2>
                     <p className="text-xl text-gray-600">
-                        Resolvemos tus dudas sobre cómo gestionar tus alquileres con Prop-IA.
+                        Resolvemos tus dudas sobre cómo gestionar tus alquileres con Zeta Prop.
                     </p>
                 </div>
 
