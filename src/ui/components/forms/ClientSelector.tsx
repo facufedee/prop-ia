@@ -7,7 +7,7 @@ import { Propietario } from "@/domain/models/Propietario";
 import { inquilinosService } from "@/infrastructure/services/inquilinosService";
 import { propietariosService } from "@/infrastructure/services/propietariosService";
 import { auth } from "@/infrastructure/firebase/client";
-import ClientFormModal from "@/app/dashboard/clientes/components/ClientFormModal";
+import ClientFormModal from "@/app/(main)/dashboard/clientes/components/ClientFormModal";
 
 interface ClientSelectorProps {
     type: 'inquilinos' | 'propietarios';
