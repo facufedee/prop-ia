@@ -30,10 +30,8 @@ export async function POST(req: Request) {
         const match = Body.match(/^(guest_[a-z0-9]+):/i);
         if (match) {
             targetSessionId = match[1];
-        }
-
-        if (targetSessionId) {
             const replyText = Body.replace(match[0], '').trim();
+
             await addDoc(collection(db, "chat_sessions", targetSessionId, "messages"), {
                 text: replyText,
                 sender: 'agent',
