@@ -307,24 +307,7 @@ export default function PropertyDetailPage() {
                             </div>
                         </div>
 
-                        {/* Video Section */}
-                        {property.video_url && (
-                            <div className="bg-white rounded-2xl p-8 shadow-sm border border-gray-100">
-                                <h2 className="text-xl font-bold text-gray-900 mb-4">Video Recorrido</h2>
-                                <div className="aspect-video rounded-xl overflow-hidden bg-gray-100">
-                                    <iframe
-                                        width="100%"
-                                        height="100%"
-                                        src={`https://www.youtube.com/embed/${getYouTubeId(property.video_url)}`}
-                                        title="YouTube video player"
-                                        frameBorder="0"
-                                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                                        allowFullScreen
-                                        className="w-full h-full"
-                                    ></iframe>
-                                </div>
-                            </div>
-                        )}
+
 
                         {/* Description */}
                         <div className="bg-white rounded-2xl p-8 shadow-sm border border-gray-100">

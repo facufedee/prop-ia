@@ -11,7 +11,8 @@ import {
     where,
     orderBy,
     Timestamp,
-    onSnapshot
+    onSnapshot,
+    deleteDoc
 } from "firebase/firestore";
 import { Ticket, TicketMessage, TicketStatus, TicketCategory, TicketPriority } from "@/domain/models/Ticket";
 
@@ -204,6 +205,41 @@ export const ticketsService = {
                 { assignedTo: adminName }
             );
         }
+    },
+
+    // Eliminar ticket
+    deleteTicket: async (id: string): Promise<void> => {
+        if (!db) throw new Error("Firestore not initialized");
+
+        // 1. Obtener mensajes asociados
+        const qMessages = query(collection(db, MESSAGES_COLLECTION), where("ticketId", "==", id));
+        const messagesSnap = await getDocs(qMessages);
+
+        // 2. Eliminar mensajes (batch o uno por uno, aqui uno por uno es mas simple aunque menos atómico)
+        // Para consistencia seria mejor batch pero por brevedad:
+        const deletePromises = messagesSnap.docs.map(doc => deleteDoc(doc.ref));
+        await Promise.all(deletePromises);
+
+        // 3. Eliminar ticket
+        const ticketRef = doc(db, TICKETS_COLLECTION, id);
+
+        // Log antes de borrar para tener referencia
+        if (auth?.currentUser) {
+            const ticketSnap = await getDoc(ticketRef);
+            const ticketData = ticketSnap.data();
+            await auditLogService.logTicket(
+                auth.currentUser.uid,
+                auth.currentUser.email || "",
+                auth.currentUser.displayName || "Usuario",
+                'ticket_delete',
+                id,
+                ticketData?.title || "Sin título",
+                ticketData?.organizationId || "unknown",
+                {}
+            );
+        }
+
+        await deleteDoc(ticketRef);
     },
 
     // ========== MENSAJES ==========

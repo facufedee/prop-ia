@@ -41,6 +41,7 @@ export type LogAction =
     | 'ticket_create'
     | 'ticket_update'
     | 'ticket_status_update'
+    | 'ticket_delete'
     // Configuración
     | 'config_update'
     | 'role_update'

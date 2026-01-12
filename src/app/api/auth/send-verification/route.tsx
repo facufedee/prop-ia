@@ -1,8 +1,7 @@
 import { NextResponse } from 'next/server';
 import { adminAuth, adminDb } from '@/infrastructure/firebase/admin';
 import { postmarkClient } from '@/lib/email';
-import { VerificationEmail } from '@/ui/emails/VerificationEmail';
-import { renderToStaticMarkup } from 'react-dom/server';
+import { renderVerificationEmail } from '@/lib/email-helper';
 import crypto from 'crypto';
 
 export async function POST(req: Request) {
@@ -36,9 +35,7 @@ export async function POST(req: Request) {
         const verificationLink = `${baseUrl}/api/auth/verify?token=${token}&uid=${uid}`;
 
         // 4. Render email template
-        const emailHtml = renderToStaticMarkup(
-            <VerificationEmail verificationLink={ verificationLink } userName = { displayName } />
-        );
+        const emailHtml = await renderVerificationEmail(verificationLink, displayName);
 
         // 5. Send email via Postmark
         await postmarkClient.sendEmail({

@@ -339,7 +339,7 @@ export const auditLogService = {
         userId: string,
         userEmail: string,
         userName: string,
-        action: 'ticket_create' | 'ticket_status_update' | 'ticket_update',
+        action: 'ticket_create' | 'ticket_status_update' | 'ticket_update' | 'ticket_delete',
         ticketId: string,
         ticketTitle: string,
         organizationId: string,
@@ -349,6 +349,7 @@ export const auditLogService = {
             ticket_create: `${userName} creó el ticket "${ticketTitle}"`,
             ticket_status_update: `${userName} actualizó el estado del ticket "${ticketTitle}"`,
             ticket_update: `${userName} actualizó el ticket "${ticketTitle}"`,
+            ticket_delete: `${userName} eliminó el ticket "${ticketTitle}"`,
         };
 
         await auditLogService.createLog(

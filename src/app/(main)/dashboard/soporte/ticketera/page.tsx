@@ -239,85 +239,102 @@ export default function TicketeraPage() {
                 </div>
             </div>
 
-            {/* Tickets Table */}
-            <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
-                <div className="overflow-x-auto">
-                    <table className="w-full">
-                        <thead className="bg-gray-50 border-b border-gray-200">
-                            <tr>
-                                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Ticket</th>
-                                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Usuario</th>
-                                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Categoría</th>
-                                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Prioridad</th>
-                                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Estado</th>
-                                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Mensajes</th>
-                                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Acciones</th>
-                            </tr>
-                        </thead>
-                        <tbody className="divide-y divide-gray-200">
-                            {tickets.length === 0 ? (
-                                <tr>
-                                    <td colSpan={7} className="px-6 py-12 text-center text-gray-500">
-                                        No hay tickets
-                                    </td>
-                                </tr>
-                            ) : (
-                                tickets.map((ticket) => (
-                                    <tr
-                                        key={ticket.id}
-                                        className="hover:bg-gray-50 cursor-pointer"
-                                        onClick={() => router.push(`/dashboard/soporte/${ticket.id}`)}
-                                    >
-                                        <td className="px-4 py-3">
-                                            <div className="text-sm font-medium text-gray-900">{ticket.title}</div>
-                                            <div className="text-xs text-gray-500 line-clamp-1">{ticket.description}</div>
-                                        </td>
-                                        <td className="px-4 py-3">
-                                            <div className="text-sm text-gray-900">{ticket.userName}</div>
-                                            <div className="text-xs text-gray-500">{ticket.organizationName}</div>
-                                        </td>
-                                        <td className="px-4 py-3 text-sm text-gray-600">
-                                            {getCategoryLabel(ticket.category)}
-                                        </td>
-                                        <td className="px-4 py-3">
-                                            <span className={`text-sm font-medium ${getPriorityColor(ticket.priority)}`}>
-                                                {ticket.priority.toUpperCase()}
-                                            </span>
-                                        </td>
-                                        <td className="px-4 py-3" onClick={(e) => e.stopPropagation()}>
-                                            <select
-                                                className={`text-xs font-medium rounded-full px-3 py-1 border ${getStatusColor(ticket.status)}`}
-                                                value={ticket.status}
-                                                onChange={(e) => handleStatusChange(ticket.id, e.target.value as TicketStatus)}
-                                            >
-                                                <option value="abierto">Abierto</option>
-                                                <option value="en_progreso">En Progreso</option>
-                                                <option value="esperando_respuesta">Esperando Respuesta</option>
-                                                <option value="resuelto">Resuelto</option>
-                                                <option value="cerrado">Cerrado</option>
-                                            </select>
-                                        </td>
-                                        <td className="px-4 py-3 text-sm text-gray-600">
-                                            {ticket.messagesCount}
-                                        </td>
-                                        <td className="px-4 py-3">
-                                            <button
-                                                onClick={(e) => {
-                                                    e.stopPropagation();
-                                                    router.push(`/dashboard/soporte/${ticket.id}`);
-                                                }}
-                                                className="text-sm text-indigo-600 hover:text-indigo-800"
-                                            >
-                                                Ver Detalle
-                                            </button>
-                                        </td>
-                                    </tr>
-                                ))
-                            )}
-                        </tbody>
-                    </table>
+            {/* Tickets Grid */}
+            {tickets.length === 0 ? (
+                <div className="bg-white rounded-xl border border-gray-200 p-12 text-center text-gray-500">
+                    <p>No hay tickets encontrados con los filtros actuales.</p>
                 </div>
-            </div>
+            ) : (
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    {tickets.map((ticket) => (
+                        <div
+                            key={ticket.id}
+                            className="bg-white rounded-xl border border-gray-200 p-5 shadow-sm hover:shadow-md transition-shadow flex flex-col justify-between h-full group"
+                        >
+                            <div onClick={() => router.push(`/dashboard/soporte/${ticket.id}`)} className="cursor-pointer">
+                                {/* Header: Status and Priority */}
+                                <div className="flex justify-between items-start mb-3">
+                                    <select
+                                        className={`text-xs font-semibold rounded-full px-2 py-1 border outline-none cursor-pointer hover:opacity-80 transition-opacity ${getStatusColor(ticket.status)}`}
+                                        value={ticket.status}
+                                        onChange={(e) => {
+                                            e.stopPropagation();
+                                            handleStatusChange(ticket.id, e.target.value as TicketStatus)
+                                        }}
+                                        onClick={(e) => e.stopPropagation()}
+                                    >
+                                        <option value="abierto">Abierto</option>
+                                        <option value="en_progreso">En Progreso</option>
+                                        <option value="esperando_respuesta">Esperando Respuesta</option>
+                                        <option value="resuelto">Resuelto</option>
+                                        <option value="cerrado">Cerrado</option>
+                                    </select>
+
+                                    <span className={`text-xs font-bold ${getPriorityColor(ticket.priority)}`}>
+                                        {ticket.priority.toUpperCase()}
+                                    </span>
+                                </div>
+
+                                {/* Content */}
+                                <div className="mb-4">
+                                    <div className="flex items-center gap-2 mb-1">
+                                        <h3 className="font-semibold text-gray-900 line-clamp-1" title={ticket.title}>{ticket.title}</h3>
+                                    </div>
+                                    <div className="text-xs text-gray-500 mb-2 font-medium flex items-center gap-1">
+                                        <span>{ticket.userName}</span>
+                                        <span className="text-gray-300">•</span>
+                                        <span>{ticket.organizationName || 'Sin Org'}</span>
+                                    </div>
+                                    <p className="text-sm text-gray-600 line-clamp-2 min-h-[40px]">{ticket.description}</p>
+                                </div>
+                            </div>
+
+                            {/* Footer */}
+                            <div className="pt-4 border-t border-gray-100 flex items-center justify-between">
+                                <div className="flex flex-col gap-1">
+                                    <div className="text-xs text-gray-500 bg-gray-50 px-2 py-0.5 rounded border border-gray-100 w-fit">
+                                        {getCategoryLabel(ticket.category)}
+                                    </div>
+                                    <div className="text-xs text-gray-400 mt-1">
+                                        {new Date(ticket.createdAt).toLocaleDateString('es-AR')}
+                                    </div>
+                                </div>
+
+                                <div className="flex items-center gap-2">
+                                    <button
+                                        onClick={(e) => {
+                                            e.stopPropagation();
+                                            router.push(`/dashboard/soporte/${ticket.id}`);
+                                        }}
+                                        className="p-1.5 text-indigo-600 hover:bg-indigo-50 rounded-lg transition-colors"
+                                        title="Ver Detalles"
+                                    >
+                                        <CheckCircle className="w-4 h-4" /> {/* Reuse existing import or generic icon */}
+                                    </button>
+                                    <button
+                                        onClick={async (e) => {
+                                            e.stopPropagation();
+                                            if (confirm("¿Estás seguro de eliminar este ticket?")) {
+                                                try {
+                                                    await ticketsService.deleteTicket(ticket.id);
+                                                    setTickets(prev => prev.filter(t => t.id !== ticket.id));
+                                                } catch (error) {
+                                                    console.error(error);
+                                                    alert("Error al eliminar");
+                                                }
+                                            }
+                                        }}
+                                        className="p-1.5 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+                                        title="Eliminar"
+                                    >
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-trash-2"><path d="M3 6h18" /><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6" /><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2" /><line x1="10" x2="10" y1="11" y2="17" /><line x1="14" x2="14" y1="11" y2="17" /></svg>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    ))}
+                </div>
+            )}
         </div>
     );
 }

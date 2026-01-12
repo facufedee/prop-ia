@@ -199,8 +199,8 @@ export default function DashboardHeader({ onMobileMenuClick }: DashboardHeaderPr
 
                         {/* Notifications Dropdown */}
                         {notifOpen && (
-                            <div className="absolute right-0 mt-3 w-80 sm:w-96 bg-white rounded-md shadow-[0_8px_30px_rgb(0,0,0,0.12)] border border-gray-100 animate-in fade-in zoom-in-95 duration-200 z-50">
-                                <div className="absolute -top-2 right-3 w-4 h-4 bg-white border-t border-l border-gray-100 transform rotate-45"></div>
+                            <div className="fixed left-4 right-4 top-[70px] w-auto sm:absolute sm:right-0 sm:top-full sm:left-auto sm:w-96 sm:mt-3 bg-white rounded-md shadow-[0_8px_30px_rgb(0,0,0,0.12)] border border-gray-100 animate-in fade-in zoom-in-95 duration-200 z-50">
+                                <div className="hidden sm:block absolute -top-2 right-3 w-4 h-4 bg-white border-t border-l border-gray-100 transform rotate-45"></div>
 
                                 {/* Header */}
                                 <div className="relative px-4 py-3 border-b border-gray-100 flex justify-between items-center bg-white rounded-t-md z-10">
@@ -227,7 +227,7 @@ export default function DashboardHeader({ onMobileMenuClick }: DashboardHeaderPr
                                 </div>
 
                                 {/* List */}
-                                <div className="relative max-h-[400px] overflow-y-auto custom-scrollbar bg-white rounded-b-md z-10">
+                                <div className="relative max-h-[60vh] sm:max-h-[400px] overflow-y-auto custom-scrollbar bg-white rounded-b-md z-10">
                                     {notifications.length === 0 ? (
                                         <div className="p-10 text-center text-gray-500 flex flex-col items-center">
                                             <div className="w-16 h-16 bg-gray-50 rounded-full flex items-center justify-center mb-4">

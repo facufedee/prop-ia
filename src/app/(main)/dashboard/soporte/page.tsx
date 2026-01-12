@@ -142,64 +142,83 @@ export default function SoportePage() {
                 </div>
             </div>
 
-            {/* Tickets List */}
-            <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
-                <div className="overflow-x-auto">
-                    <table className="w-full">
-                        <thead className="bg-gray-50 border-b border-gray-200">
-                            <tr>
-                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Ticket</th>
-                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Categoría</th>
-                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Prioridad</th>
-                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Estado</th>
-                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Mensajes</th>
-                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Fecha</th>
-                            </tr>
-                        </thead>
-                        <tbody className="divide-y divide-gray-200">
-                            {tickets.length === 0 ? (
-                                <tr>
-                                    <td colSpan={6} className="px-6 py-12 text-center text-gray-500">
-                                        No tienes tickets. Crea uno para obtener ayuda.
-                                    </td>
-                                </tr>
-                            ) : (
-                                tickets.map((ticket) => (
-                                    <tr
-                                        key={ticket.id}
-                                        className="hover:bg-gray-50 cursor-pointer"
-                                        onClick={() => router.push(`/dashboard/soporte/${ticket.id}`)}
-                                    >
-                                        <td className="px-6 py-4">
-                                            <div className="text-sm font-medium text-gray-900">{ticket.title}</div>
-                                            <div className="text-xs text-gray-500 line-clamp-1">{ticket.description}</div>
-                                        </td>
-                                        <td className="px-6 py-4 text-sm text-gray-600">
-                                            {getCategoryLabel(ticket.category)}
-                                        </td>
-                                        <td className="px-6 py-4">
-                                            <span className={`text-sm font-medium ${getPriorityColor(ticket.priority)}`}>
-                                                {ticket.priority.charAt(0).toUpperCase() + ticket.priority.slice(1)}
-                                            </span>
-                                        </td>
-                                        <td className="px-6 py-4">
-                                            <span className={`px-2 py-1 text-xs font-medium rounded-full ${getStatusColor(ticket.status)}`}>
-                                                {getStatusLabel(ticket.status)}
-                                            </span>
-                                        </td>
-                                        <td className="px-6 py-4 text-sm text-gray-600">
-                                            {ticket.messagesCount}
-                                        </td>
-                                        <td className="px-6 py-4 text-sm text-gray-600">
-                                            {new Date(ticket.createdAt).toLocaleDateString('es-AR')}
-                                        </td>
-                                    </tr>
-                                ))
-                            )}
-                        </tbody>
-                    </table>
+            {/* Tickets Grid */}
+            {tickets.length === 0 ? (
+                <div className="bg-white rounded-xl border border-gray-200 p-12 text-center text-gray-500">
+                    <div className="flex flex-col items-center">
+                        <div className="w-16 h-16 bg-gray-50 rounded-full flex items-center justify-center mb-4">
+                            <MessageSquare className="w-8 h-8 text-gray-300" />
+                        </div>
+                        <h3 className="text-lg font-medium text-gray-900">No tienes tickets</h3>
+                        <p className="mt-1">Crea un nuevo ticket para obtener ayuda con la plataforma.</p>
+                    </div>
                 </div>
-            </div>
+            ) : (
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    {tickets.map((ticket) => (
+                        <div
+                            key={ticket.id}
+                            className="bg-white rounded-xl border border-gray-200 p-5 shadow-sm hover:shadow-md transition-shadow relative group flex flex-col justify-between h-full cursor-pointer"
+                            onClick={() => router.push(`/dashboard/soporte/${ticket.id}`)}
+                        >
+                            <div>
+                                <div className="flex justify-between items-start mb-3">
+                                    <span className={`px-2.5 py-1 text-xs font-semibold rounded-full border ${getStatusColor(ticket.status)} border-transparent bg-opacity-10`} style={{
+                                        // Specific tweak if colors are strictly bg/text classes without border
+                                        // Using the existing helper which returns bg and text classes.
+                                    }}>
+                                        {getStatusLabel(ticket.status)}
+                                    </span>
+                                    <div className="flex items-center gap-2">
+                                        <div className="text-xs font-medium text-gray-500 bg-gray-50 px-2 py-1 rounded-md border border-gray-100">
+                                            {getCategoryLabel(ticket.category)}
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div className="mb-4">
+                                    <h3 className="font-semibold text-gray-900 mb-1 line-clamp-1" title={ticket.title}>{ticket.title}</h3>
+                                    <p className="text-sm text-gray-500 line-clamp-2 min-h-[40px]">{ticket.description}</p>
+                                </div>
+                            </div>
+
+                            <div className="pt-4 border-t border-gray-100 flex items-center justify-between">
+                                <div className="flex items-center gap-4 text-xs text-gray-500">
+                                    <div className="flex items-center gap-1">
+                                        <Clock className="w-3.5 h-3.5" />
+                                        <span>{new Date(ticket.createdAt).toLocaleDateString('es-AR')}</span>
+                                    </div>
+                                    <div className="flex items-center gap-1">
+                                        <MessageSquare className="w-3.5 h-3.5" />
+                                        <span>{ticket.messagesCount}</span>
+                                    </div>
+                                </div>
+
+                                <div className="flex items-center gap-2">
+                                    <button
+                                        onClick={async (e) => {
+                                            e.stopPropagation();
+                                            if (confirm("¿Estás seguro de eliminar este ticket?")) {
+                                                try {
+                                                    await ticketsService.deleteTicket(ticket.id);
+                                                    setTickets(prev => prev.filter(t => t.id !== ticket.id));
+                                                } catch (error) {
+                                                    console.error(error);
+                                                    alert("Error al eliminar");
+                                                }
+                                            }
+                                        }}
+                                        className="p-1.5 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+                                        title="Eliminar"
+                                    >
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-trash-2"><path d="M3 6h18" /><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6" /><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2" /><line x1="10" x2="10" y1="11" y2="17" /><line x1="14" x2="14" y1="11" y2="17" /></svg>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    ))}
+                </div>
+            )}
         </div>
     );
 }

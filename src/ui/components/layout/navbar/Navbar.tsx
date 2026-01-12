@@ -356,12 +356,12 @@ export default function Navbar() {
         <div className="md:hidden mt-3 flex flex-col gap-4 
         bg-white/95 backdrop-blur-xl border-t border-white/20 py-4 px-2 text-sm">
 
-          <Link href="/servicios" className="px-2 py-1 hover:text-black">Servicios</Link>
-          <Link href="/precios" className="px-2 py-1 hover:text-black">Precios</Link>
-          <Link href="/nosotros" className="px-2 py-1 hover:text-black">Nosotros</Link>
-          <Link href="/blog" className="px-2 py-1 hover:text-black">Blog</Link>
-          <Link href="/propiedades" className="px-2 py-1 hover:text-black">Propiedades</Link>
-          <Link href="/contacto" className="px-2 py-1 hover:text-black">Contacto</Link>
+          <Link href="/servicios" className="px-2 py-1 hover:text-black" onClick={() => setOpen(false)}>Servicios</Link>
+          <Link href="/precios" className="px-2 py-1 hover:text-black" onClick={() => setOpen(false)}>Precios</Link>
+          <Link href="/nosotros" className="px-2 py-1 hover:text-black" onClick={() => setOpen(false)}>Nosotros</Link>
+          <Link href="/blog" className="px-2 py-1 hover:text-black" onClick={() => setOpen(false)}>Blog</Link>
+          <Link href="/propiedades" className="px-2 py-1 hover:text-black" onClick={() => setOpen(false)}>Propiedades</Link>
+          <Link href="/contacto" className="px-2 py-1 hover:text-black" onClick={() => setOpen(false)}>Contacto</Link>
 
           <div className="border-t pt-3">
             {!user ? (
@@ -369,12 +369,14 @@ export default function Navbar() {
                 <Link
                   href="/login"
                   className="block w-full border px-4 py-2 rounded-xl mb-2 text-center"
+                  onClick={() => setOpen(false)}
                 >
                   Iniciar sesión
                 </Link>
                 <Link
                   href="/register"
                   className="block w-full bg-black text-white px-4 py-2 rounded-xl text-center"
+                  onClick={() => setOpen(false)}
                 >
                   Comenzar
                 </Link>
@@ -398,6 +400,7 @@ export default function Navbar() {
                 <Link
                   href="/dashboard/propiedades/nueva"
                   className="block w-full bg-indigo-600 text-white px-4 py-2 rounded-xl text-center mb-2"
+                  onClick={() => setOpen(false)}
                 >
                   Publicar
                 </Link>
@@ -405,6 +408,7 @@ export default function Navbar() {
                 <Link
                   href="/dashboard"
                   className="flex items-center gap-2 w-full px-4 py-2 text-gray-700 hover:bg-gray-50 rounded-xl"
+                  onClick={() => setOpen(false)}
                 >
                   <LayoutDashboard size={16} />
                   Dashboard
@@ -412,6 +416,7 @@ export default function Navbar() {
                 <Link
                   href="/dashboard/cuenta"
                   className="flex items-center gap-2 w-full px-4 py-2 text-gray-700 hover:bg-gray-50 rounded-xl"
+                  onClick={() => setOpen(false)}
                 >
                   <Settings size={16} />
                   Modificar datos

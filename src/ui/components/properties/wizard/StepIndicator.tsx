@@ -45,7 +45,7 @@ export default function StepIndicator({ currentStep, totalSteps, steps, onStepCl
                                 {stepNumber}
                             </div>
                             <span
-                                className={`absolute top-12 text-xs font-semibold whitespace-nowrap transition-colors duration-300
+                                className={`absolute top-12 text-xs font-semibold whitespace-nowrap transition-colors duration-300 hidden sm:block
                                 ${isActive ? 'text-indigo-700' : 'text-gray-400'}`}
                             >
                                 {step}
@@ -53,6 +53,13 @@ export default function StepIndicator({ currentStep, totalSteps, steps, onStepCl
                         </div>
                     );
                 })}
+            </div>
+
+            {/* Mobile Active Step Label */}
+            <div className="mt-8 text-center sm:hidden">
+                <span className="text-sm font-bold text-indigo-700">
+                    {steps[currentStep - 1]}
+                </span>
             </div>
         </div>
     );
