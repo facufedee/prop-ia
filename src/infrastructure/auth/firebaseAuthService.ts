@@ -46,6 +46,7 @@ export const saveUserToFirestore = async (user: User, additionalData?: { agencyN
                 photoURL: user.photoURL || "",
                 roleId: defaultRole?.id || null, // Can be null if really failed
                 createdAt: new Date(),
+                emailVerified: user.emailVerified,
             });
 
             // Notify Admins of New User
