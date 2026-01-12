@@ -287,7 +287,7 @@ export default function FirebaseCheckPage() {
             <div className="max-w-3xl mx-auto bg-white rounded-xl shadow-lg overflow-hidden">
                 <div className="bg-indigo-600 p-6 flex justify-between items-center">
                     <div>
-                        <h1 className="text-2xl font-bold text-white">Diagnóstico de Firebase Prop-IA</h1>
+                        <h1 className="text-2xl font-bold text-white">Diagnóstico de Firebase Zeta Prop</h1>
                         <p className="text-indigo-100 mt-2">Verificación de estado y conectividad</p>
                     </div>
                     <div className="text-right">

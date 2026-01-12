@@ -66,7 +66,7 @@ export default function VerticalFlyer({ property, agent }: VerticalFlyerProps) {
                             <p className="text-xs text-gray-500 uppercase font-medium">Cubiertos</p>
                         </div>
                     </div>
-                    {property.bedrooms && property.bedrooms > 0 && (
+                    {property.bedrooms && Number(property.bedrooms) > 0 && (
                         <div className="bg-gray-50 rounded-xl p-4 flex items-center gap-3 border border-gray-100 print:bg-gray-50 print:print-color-adjust-exact">
                             <div className="w-10 h-10 rounded-full bg-white flex items-center justify-center shadow-sm text-amber-600">
                                 <BedDouble size={20} />
@@ -77,7 +77,7 @@ export default function VerticalFlyer({ property, agent }: VerticalFlyerProps) {
                             </div>
                         </div>
                     )}
-                    {property.bathrooms && property.bathrooms > 0 && (
+                    {property.bathrooms && Number(property.bathrooms) > 0 && (
                         <div className="bg-gray-50 rounded-xl p-4 flex items-center gap-3 border border-gray-100 print:bg-gray-50 print:print-color-adjust-exact">
                             <div className="w-10 h-10 rounded-full bg-white flex items-center justify-center shadow-sm text-amber-600">
                                 <Bath size={20} />
@@ -88,7 +88,7 @@ export default function VerticalFlyer({ property, agent }: VerticalFlyerProps) {
                             </div>
                         </div>
                     )}
-                    {property.garages && property.garages > 0 && (
+                    {property.garages && Number(property.garages) > 0 && (
                         <div className="bg-gray-50 rounded-xl p-4 flex items-center gap-3 border border-gray-100 print:bg-gray-50 print:print-color-adjust-exact">
                             <div className="w-10 h-10 rounded-full bg-white flex items-center justify-center shadow-sm text-amber-600">
                                 <Car size={20} />

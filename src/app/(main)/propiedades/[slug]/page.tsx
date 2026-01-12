@@ -4,16 +4,65 @@ import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
 import { PublicProperty, PublicAgency, publicService } from "@/infrastructure/services/publicService";
 import PropertiesGrid from "@/ui/components/properties/public/PropertiesGrid";
-import { Mail, Loader2, Home } from "lucide-react";
+import { Mail, Loader2, Home, MapPin, Filter, Search, RotateCcw, ChevronDown } from "lucide-react";
+
+// Filter Section Component (Enhanced)
+const FilterSection = ({
+    title,
+    children,
+    defaultOpen = true,
+    onClear
+}: {
+    title: string,
+    children: React.ReactNode,
+    defaultOpen?: boolean,
+    onClear?: () => void
+}) => {
+    const [isOpen, setIsOpen] = useState(defaultOpen);
+    return (
+        <div className="border-b border-gray-100 py-4 last:border-0">
+            <div className="flex items-center justify-between mb-2">
+                <button
+                    onClick={() => setIsOpen(!isOpen)}
+                    className="flex items-center gap-2 text-left group flex-1"
+                >
+                    <h3 className="text-sm font-bold text-gray-900 uppercase tracking-wide group-hover:text-indigo-600 transition">{title}</h3>
+                    <ChevronDown size={16} className={`text-gray-400 transition-transform ${isOpen ? 'rotate-180' : ''}`} />
+                </button>
+                {onClear && (
+                    <button
+                        onClick={onClear}
+                        className="text-[10px] uppercase font-bold text-gray-400 hover:text-red-500 transition px-2 py-1 rounded bg-gray-50 hover:bg-red-50"
+                        title="Limpiar esta sección"
+                    >
+                        Borrar
+                    </button>
+                )}
+            </div>
+            {isOpen && <div className="mt-2 animate-in slide-in-from-top-2 duration-200">{children}</div>}
+        </div>
+    );
+};
 
 export default function AgencyPropertiesPage() {
     const params = useParams();
     const slug = params.slug as string;
 
-    const [properties, setProperties] = useState<PublicProperty[]>([]);
+    const [allProperties, setAllProperties] = useState<PublicProperty[]>([]);
+    const [filteredProperties, setFilteredProperties] = useState<PublicProperty[]>([]);
     const [agency, setAgency] = useState<PublicAgency | null>(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(false);
+
+    // Filters
+    const [operationType, setOperationType] = useState<string>("Todos");
+    const [currency, setCurrency] = useState<string>("Todos");
+    const [rooms, setRooms] = useState<string>("Todos");
+    const [bathrooms, setBathrooms] = useState<string>("Todos");
+    const [priceMin, setPriceMin] = useState<string>("");
+    const [priceMax, setPriceMax] = useState<string>("");
+    const [areaMin, setAreaMin] = useState<string>("");
+    const [areaMax, setAreaMax] = useState<string>("");
 
     useEffect(() => {
         const load = async () => {
@@ -22,7 +71,8 @@ export default function AgencyPropertiesPage() {
                 const result = await publicService.getPropertiesByAgencySlug(slug);
                 if (result) {
                     setAgency(result.agency);
-                    setProperties(result.properties);
+                    setAllProperties(result.properties);
+                    setFilteredProperties(result.properties);
                 } else {
                     setError(true);
                 }
@@ -36,32 +86,86 @@ export default function AgencyPropertiesPage() {
         load();
     }, [slug]);
 
+    useEffect(() => {
+        if (!allProperties.length) return;
+
+        let filtered = [...allProperties];
+
+        // Filter by Operation
+        if (operationType !== "Todos") {
+            filtered = filtered.filter(p => p.operation_type === operationType);
+        }
+
+        // Filter by Currency
+        if (currency !== "Todos") {
+            filtered = filtered.filter(p => p.currency === currency);
+        }
+
+        // Filter by Rooms
+        if (rooms !== "Todos") {
+            if (rooms === "4+") {
+                filtered = filtered.filter(p => (p.rooms || 0) >= 4);
+            } else {
+                filtered = filtered.filter(p => (p.rooms || 0) === Number(rooms));
+            }
+        }
+
+        // Filter by Bathrooms
+        if (bathrooms !== "Todos") {
+            if (bathrooms === "3+") {
+                filtered = filtered.filter(p => (p.bathrooms || 0) >= 3);
+            } else {
+                filtered = filtered.filter(p => (p.bathrooms || 0) === Number(bathrooms));
+            }
+        }
+
+        // Filter by Price
+        if (priceMin) {
+            filtered = filtered.filter(p => Number(p.price) >= Number(priceMin));
+        }
+        if (priceMax) {
+            filtered = filtered.filter(p => Number(p.price) <= Number(priceMax));
+        }
+
+        // Filter by Area
+        if (areaMin) {
+            filtered = filtered.filter(p => (p.area_covered || 0) >= Number(areaMin));
+        }
+        if (areaMax) {
+            filtered = filtered.filter(p => (p.area_covered || 0) <= Number(areaMax));
+        }
+
+        setFilteredProperties(filtered);
+    }, [allProperties, operationType, currency, rooms, bathrooms, priceMin, priceMax, areaMin, areaMax]);
+
+    const clearAllFilters = () => {
+        setOperationType("Todos");
+        setCurrency("Todos");
+        setRooms("Todos");
+        setBathrooms("Todos");
+        setPriceMin("");
+        setPriceMax("");
+        setAreaMin("");
+        setAreaMax("");
+    };
+
+    const hasActiveFilters = operationType !== "Todos" || currency !== "Todos" || rooms !== "Todos" || bathrooms !== "Todos" || priceMin || priceMax || areaMin || areaMax;
+
     if (loading) {
-        return (
-            <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-                <Loader2 className="animate-spin text-gray-400 w-8 h-8" />
-            </div>
-        );
+        return <div className="min-h-screen bg-gray-50 flex items-center justify-center"><Loader2 className="animate-spin text-gray-400 w-8 h-8" /></div>;
     }
 
     if (error || !agency) {
-        return (
-            <div className="min-h-screen bg-gray-50 flex flex-col items-center justify-center p-4">
-                <Home className="w-12 h-12 text-gray-300 mb-4" />
-                <h1 className="text-xl font-semibold text-gray-900 mb-2">Inmobiliaria no encontrada</h1>
-                <p className="text-gray-500">No pudimos encontrar la inmobiliaria que estás buscando.</p>
-            </div>
-        );
+        return <div className="min-h-screen bg-gray-50 flex items-center justify-center">Inmobiliaria no encontrada</div>;
     }
 
     return (
-        <div className="min-h-screen bg-gray-50 pb-20 pt-20">
-            {/* Agency Header */}
-            <div className="bg-white border-b shadow-sm">
+        <div className="min-h-screen bg-gray-50 pb-20 pt-24">
+            {/* Agency Banner / Header */}
+            <div className="bg-white border-b border-gray-200 mb-8">
                 <div className="container mx-auto px-4 py-8">
                     <div className="flex flex-col md:flex-row items-center md:items-start gap-6">
-                        {/* Avatar */}
-                        <div className="w-24 h-24 md:w-32 md:h-32 rounded-2xl bg-gray-100 overflow-hidden border-4 border-white shadow-lg shrink-0">
+                        <div className="w-24 h-24 rounded-2xl bg-gray-100 overflow-hidden border-4 border-white shadow-lg shrink-0">
                             {agency.photoURL ? (
                                 <img src={agency.photoURL} alt={agency.displayName} className="w-full h-full object-cover" />
                             ) : (
@@ -70,38 +174,135 @@ export default function AgencyPropertiesPage() {
                                 </div>
                             )}
                         </div>
-
-                        {/* Info */}
-                        <div className="flex-1 text-center md:text-left space-y-2">
-                            <h1 className="text-3xl font-bold text-gray-900">{agency.displayName}</h1>
-
-                            <div className="flex flex-wrap items-center justify-center md:justify-start gap-4 text-gray-600">
-                                {agency.email && (
-                                    <div className="flex items-center gap-1.5 bg-gray-50 px-3 py-1 rounded-full text-sm">
-                                        <Mail className="w-4 h-4" />
-                                        <span>{agency.email}</span>
-                                    </div>
-                                )}
+                        <div className="flex-1 text-center md:text-left">
+                            <h1 className="text-3xl font-bold text-gray-900 mb-2">{agency.displayName}</h1>
+                            <div className="flex flex-wrap items-center justify-center md:justify-start gap-4 text-gray-600 px-4 md:px-0">
+                                {agency.email && <div className="flex items-center gap-1.5"><Mail size={16} /><span>{agency.email}</span></div>}
+                                {agency.phoneNumber && <div className="flex items-center gap-1.5"><span>{agency.phoneNumber}</span></div>}
                             </div>
-                        </div>
-
-                        {/* Stats or Actions */}
-                        <div className="bg-gray-50 rounded-xl p-4 min-w-[150px] text-center">
-                            <p className="text-sm text-gray-500 mb-1">Propiedades</p>
-                            <p className="text-2xl font-bold text-gray-900">{properties.length}</p>
                         </div>
                     </div>
                 </div>
             </div>
 
-            <main className="container mx-auto px-4 py-8">
-                <div className="flex items-center justify-between mb-6">
-                    <h2 className="text-xl font-semibold text-gray-800">
-                        Propiedades en Cartera
-                    </h2>
+            <div className="container mx-auto px-4">
+                <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+
+                    {/* LEFT COLUMN: FILTERS (3 cols) */}
+                    <div className="lg:col-span-3">
+                        <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden sticky top-24 max-h-[calc(100vh-8rem)] flex flex-col">
+                            {/* Header (Fixed) */}
+                            <div className="p-4 bg-gray-50 border-b border-gray-100 flex items-center justify-between shrink-0">
+                                <span className="font-bold text-gray-900 flex items-center gap-2"><Filter size={18} /> Filtros</span>
+                                {hasActiveFilters && (
+                                    <button onClick={clearAllFilters} className="text-xs text-indigo-600 hover:text-indigo-800 font-medium hover:underline flex items-center gap-1">
+                                        <RotateCcw size={12} /> Limpiar Todo
+                                    </button>
+                                )}
+                            </div>
+
+                            {/* Scrollable Content */}
+                            <div className="p-4 overflow-y-auto custom-scrollbar">
+                                <FilterSection
+                                    title="Operación"
+                                    onClear={operationType !== "Todos" ? () => setOperationType("Todos") : undefined}
+                                >
+                                    <div className="space-y-2">
+                                        {['Todos', 'Venta', 'Alquiler', 'Alquiler Temporal'].map(type => (
+                                            <label key={type} className="flex items-center gap-3 cursor-pointer group">
+                                                <div className={`w-4 h-4 rounded-full border flex items-center justify-center transition ${operationType === type ? 'border-indigo-600 bg-indigo-50' : 'border-gray-300 bg-white group-hover:border-indigo-300'}`}>
+                                                    {operationType === type && <div className="w-2 h-2 rounded-full bg-indigo-600" />}
+                                                </div>
+                                                <input type="radio" className="hidden" name="operation" checked={operationType === type} onChange={() => setOperationType(type)} />
+                                                <span className={`text-sm ${operationType === type ? 'font-bold text-indigo-700' : 'text-gray-600 group-hover:text-gray-900'}`}>{type}</span>
+                                            </label>
+                                        ))}
+                                    </div>
+                                </FilterSection>
+
+                                <FilterSection
+                                    title="Moneda"
+                                    onClear={currency !== "Todos" ? () => setCurrency("Todos") : undefined}
+                                >
+                                    <div className="flex bg-gray-100 p-1 rounded-lg">
+                                        {['Todos', 'USD', 'ARS'].map(c => (
+                                            <button
+                                                key={c}
+                                                onClick={() => setCurrency(c)}
+                                                className={`flex-1 py-1.5 text-xs font-bold rounded-md transition ${currency === c ? 'bg-white text-indigo-600 shadow-sm' : 'text-gray-500 hover:text-gray-700'}`}
+                                            >
+                                                {c}
+                                            </button>
+                                        ))}
+                                    </div>
+                                </FilterSection>
+
+                                <FilterSection
+                                    title="Precio"
+                                    onClear={(priceMin || priceMax) ? () => { setPriceMin(""); setPriceMax(""); } : undefined}
+                                >
+                                    <div className="flex gap-2">
+                                        <div className="relative w-full">
+                                            <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-xs">$</span>
+                                            <input type="number" placeholder="Min" value={priceMin} onChange={(e) => setPriceMin(e.target.value)} className="w-full pl-6 pr-3 py-2 bg-gray-50 border border-gray-200 rounded-lg text-sm focus:outline-none focus:border-indigo-500 transition" />
+                                        </div>
+                                        <div className="relative w-full">
+                                            <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-xs">$</span>
+                                            <input type="number" placeholder="Max" value={priceMax} onChange={(e) => setPriceMax(e.target.value)} className="w-full pl-6 pr-3 py-2 bg-gray-50 border border-gray-200 rounded-lg text-sm focus:outline-none focus:border-indigo-500 transition" />
+                                        </div>
+                                    </div>
+                                </FilterSection>
+
+                                <FilterSection
+                                    title="Ambientes"
+                                    onClear={rooms !== "Todos" ? () => setRooms("Todos") : undefined}
+                                >
+                                    <div className="flex flex-wrap gap-2">
+                                        {['Todos', '1', '2', '3', '4+'].map(r => (
+                                            <button key={r} onClick={() => setRooms(r)} className={`w-8 h-8 flex items-center justify-center text-sm rounded-lg border transition ${rooms === r ? 'bg-indigo-600 text-white border-indigo-600 shadow-md shadow-indigo-200' : 'bg-white text-gray-600 border-gray-200 hover:border-gray-300 hover:bg-gray-50'}`}>{r}</button>
+                                        ))}
+                                    </div>
+                                </FilterSection>
+
+                                <FilterSection
+                                    title="Baños"
+                                    onClear={bathrooms !== "Todos" ? () => setBathrooms("Todos") : undefined}
+                                >
+                                    <div className="flex flex-wrap gap-2">
+                                        {['Todos', '1', '2', '3+'].map(b => (
+                                            <button key={b} onClick={() => setBathrooms(b)} className={`w-8 h-8 flex items-center justify-center text-sm rounded-lg border transition ${bathrooms === b ? 'bg-indigo-600 text-white border-indigo-600 shadow-md shadow-indigo-200' : 'bg-white text-gray-600 border-gray-200 hover:border-gray-300 hover:bg-gray-50'}`}>{b}</button>
+                                        ))}
+                                    </div>
+                                </FilterSection>
+
+                                <FilterSection
+                                    title="Superficie (m²)"
+                                    onClear={(areaMin || areaMax) ? () => { setAreaMin(""); setAreaMax(""); } : undefined}
+                                >
+                                    <div className="flex gap-2">
+                                        <input type="number" placeholder="Min" value={areaMin} onChange={(e) => setAreaMin(e.target.value)} className="w-full px-3 py-2 bg-gray-50 border border-gray-200 rounded-lg text-sm focus:outline-none focus:border-indigo-500 transition" />
+                                        <input type="number" placeholder="Max" value={areaMax} onChange={(e) => setAreaMax(e.target.value)} className="w-full px-3 py-2 bg-gray-50 border border-gray-200 rounded-lg text-sm focus:outline-none focus:border-indigo-500 transition" />
+                                    </div>
+                                </FilterSection>
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* RIGHT COLUMN: LISTING (9 cols) */}
+                    <div className="lg:col-span-9">
+                        <div className="flex items-center justify-between mb-6">
+                            <h2 className="text-xl font-bold text-gray-900">{filteredProperties.length} Propiedades Encontradas</h2>
+                            {/* Sorting could go here */}
+                        </div>
+
+                        <PropertiesGrid
+                            properties={filteredProperties}
+                            loading={loading}
+                            className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6"
+                        />
+                    </div>
                 </div>
-                <PropertiesGrid properties={properties} loading={loading} />
-            </main>
+            </div>
         </div>
     );
 }

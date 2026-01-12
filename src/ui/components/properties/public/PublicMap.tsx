@@ -14,12 +14,15 @@ interface PublicMapProps {
     lng: number;
 }
 
+const libraries: ("places" | "drawing" | "geometry" | "visualization")[] = ["places"];
+
 export default function PublicMap({ lat, lng }: PublicMapProps) {
     const apiKey = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY;
 
     const { isLoaded } = useJsApiLoader({
         id: 'google-map-script',
-        googleMapsApiKey: apiKey || ""
+        googleMapsApiKey: apiKey || "",
+        libraries
     });
 
     const center = useMemo(() => ({

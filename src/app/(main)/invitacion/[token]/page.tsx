@@ -205,7 +205,7 @@ export default function InvitationPage({ params }: { params: Promise<{ token: st
         <div className="min-h-screen flex items-center justify-center bg-gray-50 p-4">
             <div className="max-w-md w-full bg-white rounded-xl shadow-lg p-8">
                 <div className="text-center mb-8">
-                    <h1 className="text-2xl font-bold text-gray-900">Bienvenido a Prop-IA</h1>
+                    <h1 className="text-2xl font-bold text-gray-900">Bienvenido a Zeta Prop</h1>
                     <p className="text-gray-600 mt-2">
                         Has sido invitado para unirte al equipo. <br />
                         Configura tu contraseña para continuar.

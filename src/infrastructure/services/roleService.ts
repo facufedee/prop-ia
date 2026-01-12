@@ -25,7 +25,7 @@ export const PERMISSIONS: Permission[] = [
     { id: "/dashboard/agentes", label: "Agentes", description: "Gestión de agentes y comisiones" },
     { id: "/dashboard/leads", label: "Leads / Consultas", description: "Gestión de clientes potenciales" },
     { id: "/dashboard/clientes", label: "Clientes", description: "Base de datos de clientes" },
-    { id: "/dashboard/chat", label: "Chat Prop-IA", description: "Acceso al asistente de IA" },
+    { id: "/dashboard/chat", label: "Chat Zeta Prop", description: "Acceso al asistente de IA" },
     { id: "/dashboard/publicaciones", label: "Publicaciones", description: "Gestión de publicaciones en portales" },
     { id: "/dashboard/finanzas", label: "Finanzas", description: "Módulo financiero" },
     { id: "/dashboard/calendario", label: "Calendario", description: "Agenda y eventos" },

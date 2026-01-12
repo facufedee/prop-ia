@@ -1,7 +1,7 @@
 
 import { Property } from "@/ui/components/tables/PropertiesTable";
 import Link from "next/link";
-import { MapPin, Ruler, BedDouble, Bath, Car, Trash2, Edit, Printer, Share2 } from "lucide-react";
+import { MapPin, Ruler, BedDouble, Bath, Car, Trash2, Edit, Printer, Share2, Eye, LayoutGrid } from "lucide-react";
 
 interface PropertyCardProps {
     property: Property;
@@ -27,9 +27,9 @@ export default function PropertyCard({ property, onDelete }: PropertyCardProps) 
     };
 
     return (
-        <div className="bg-white rounded-xl border border-gray-200 overflow-hidden hover:shadow-lg transition-all duration-200 group flex flex-col h-full">
+        <div className="bg-white rounded-xl border border-gray-200 overflow-hidden hover:shadow-lg transition-all duration-200 group flex flex-col h-full relative">
             {/* Image Header */}
-            <div className="relative h-48 bg-gray-100">
+            <div className="relative h-48 bg-gray-100 group">
                 {property.imageUrls && property.imageUrls.length > 0 ? (
                     <img
                         src={property.imageUrls[0]}
@@ -43,11 +43,21 @@ export default function PropertyCard({ property, onDelete }: PropertyCardProps) 
                     </div>
                 )}
 
-                <div className="absolute top-3 right-3 flex gap-2">
+                {/* Operation Badge - Top Left */}
+                <div className="absolute top-3 left-3 flex gap-2">
                     <span className={`px-2.5 py-1 rounded-full text-xs font-semibold border shadow-sm ${getOperationColor(property.operation_type)}`}>
                         {property.operation_type}
                     </span>
                 </div>
+
+                {/* Delete Button - Top Right (Overlay) */}
+                <button
+                    onClick={() => onDelete(property.id)}
+                    className="absolute top-3 right-3 p-2 bg-white rounded-full text-red-600 hover:bg-red-50 shadow-md transition-all opacity-0 group-hover:opacity-100"
+                    title="Eliminar propiedad"
+                >
+                    <Trash2 className="w-4 h-4" />
+                </button>
             </div>
 
             {/* Content */}
@@ -65,7 +75,11 @@ export default function PropertyCard({ property, onDelete }: PropertyCardProps) 
                     </div>
 
                     <div className="text-xl font-bold text-indigo-600 mb-4">
-                        {property.currency} {property.price?.toLocaleString('es-AR')}
+                        {property.hidePrice ? (
+                            "Consultar Precio"
+                        ) : (
+                            `${property.currency} ${property.price?.toLocaleString('es-AR')}`
+                        )}
                     </div>
 
                     <div className="grid grid-cols-3 gap-2 py-3 border-t border-gray-100 text-xs text-gray-500">
@@ -73,42 +87,70 @@ export default function PropertyCard({ property, onDelete }: PropertyCardProps) 
                             <Ruler className="w-4 h-4" />
                             <span>{property.area_covered}m²</span>
                         </div>
-                        {/* We could add bedrooms/bathrooms here if available in the Property interface later */}
+                        {Number(property.rooms) > 0 && (
+                            <div className="flex items-center gap-1" title="Ambientes">
+                                <LayoutGrid className="w-4 h-4" />
+                                <span>{property.rooms}</span>
+                            </div>
+                        )}
+                        {Number(property.bedrooms) > 0 && (
+                            <div className="flex items-center gap-1" title="Dormitorios">
+                                <BedDouble className="w-4 h-4" />
+                                <span>{property.bedrooms}</span>
+                            </div>
+                        )}
+                        {Number(property.bathrooms) > 0 && (
+                            <div className="flex items-center gap-1" title="Baños">
+                                <Bath className="w-4 h-4" />
+                                <span>{property.bathrooms}</span>
+                            </div>
+                        )}
+                        {Number(property.garages) > 0 && (
+                            <div className="flex items-center gap-1" title="Cocheras">
+                                <Car className="w-4 h-4" />
+                                <span>{property.garages}</span>
+                            </div>
+                        )}
                     </div>
                 </div>
 
-                <div className="pt-4 mt-auto border-t border-gray-100 flex items-center justify-between gap-1">
-                    <div className="flex gap-1">
+                {/* Footer Actions */}
+                <div className="pt-4 mt-auto border-t border-gray-100 flex items-center justify-between gap-3">
+                    {/* Primary Action: Edit */}
+                    <Link
+                        href={`/dashboard/propiedades/editar/${property.id}`}
+                        className="flex-1 text-center px-4 py-2 rounded-lg bg-indigo-50 text-indigo-700 font-bold hover:bg-indigo-100 transition-colors text-sm border border-indigo-100"
+                    >
+                        Editar
+                    </Link>
+
+                    {/* Secondary Actions: Icons */}
+                    <div className="flex items-center gap-1 border-l pl-3 border-gray-100">
+                        <Link
+                            href={`/propiedades/p/${property.id}`}
+                            target="_blank"
+                            className="p-2 rounded-lg text-gray-500 hover:bg-gray-100 hover:text-indigo-600 transition-colors"
+                            title="Ver publicación"
+                        >
+                            <Eye className="w-5 h-5" />
+                        </Link>
                         <Link
                             href={`/print/propiedades/${property.id}?mode=horizontal`}
                             target="_blank"
-                            className="p-2 rounded-lg text-gray-600 hover:bg-gray-100 hover:text-indigo-600 transition-colors"
-                            title="Imprimir Ficha (Cartelera)"
+                            className="p-2 rounded-lg text-gray-500 hover:bg-gray-100 hover:text-purple-600 transition-colors"
+                            title="Imprimir Ficha"
                         >
                             <Printer className="w-5 h-5" />
                         </Link>
                         <Link
                             href={`/print/propiedades/${property.id}?mode=vertical`}
                             target="_blank"
-                            className="p-2 rounded-lg text-gray-600 hover:bg-gray-100 hover:text-green-600 transition-colors"
-                            title="Enviar Ficha (WhatsApp)"
+                            className="p-2 rounded-lg text-gray-500 hover:bg-gray-100 hover:text-green-600 transition-colors"
+                            title="Compartir por WhatsApp"
                         >
                             <Share2 className="w-5 h-5" />
                         </Link>
                     </div>
-                    <Link
-                        href={`/dashboard/propiedades/editar/${property.id}`}
-                        className="flex-1 text-center px-4 py-2 rounded-lg bg-gray-50 text-gray-700 font-medium hover:bg-gray-100 transition-colors text-sm"
-                    >
-                        Editar
-                    </Link>
-                    <button
-                        onClick={() => onDelete(property.id)}
-                        className="p-2 rounded-lg text-red-600 hover:bg-red-50 transition-colors"
-                        title="Eliminar propiedad"
-                    >
-                        <Trash2 className="w-5 h-5" />
-                    </button>
                 </div>
             </div>
         </div>

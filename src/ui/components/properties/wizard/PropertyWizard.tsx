@@ -131,8 +131,15 @@ export interface PropertyData {
     coverImageIndex: number;
     // Additional fields needed for logic
     imageUrls?: string[];
+    hidePrice?: boolean;
+    isRemodeled?: boolean;
+    remodeledYear?: string;
     id?: string;
     branchId?: string;
+    // Multi-operation support
+    operations?: string[];
+    rent_price?: string;
+    rent_currency?: string;
 }
 
 interface PropertyWizardProps {
@@ -145,7 +152,8 @@ export default function PropertyWizard({ initialData, isEditing = false, ...prop
     const router = useRouter();
     const [currentStep, setCurrentStep] = useState(1);
     const [loading, setLoading] = useState(false);
-    const [error, setError] = useState<string | null>(null);
+    const [errors, setErrors] = useState<Record<string, string>>({});
+    // const [error, setError] = useState<string | null>(null); // Removed single error state
 
     const { selectedBranchId } = useBranchContext();
 
@@ -158,7 +166,8 @@ export default function PropertyWizard({ initialData, isEditing = false, ...prop
     const [formData, setFormData] = useState<PropertyData>({
         // Step 1: Operation & Basic Data
         title: initialData?.title || '', // Moved from Step 6
-        operation_type: initialData?.operation_type || 'Venta',
+        operation_type: initialData?.operation_type || 'Venta', // Primary operation for compat
+        operations: initialData?.operations || [initialData?.operation_type || 'Venta'],
         property_type: initialData?.property_type || 'Departamento',
         property_subtype: initialData?.property_subtype || '',
         apto_profesional: initialData?.apto_profesional || false,
@@ -223,6 +232,11 @@ export default function PropertyWizard({ initialData, isEditing = false, ...prop
         // Options
         publishToPortal: initialData?.publishToPortal || false,
         coverImageIndex: initialData?.coverImageIndex || 0,
+        hidePrice: initialData?.hidePrice || false,
+        isRemodeled: initialData?.isRemodeled || false,
+        remodeledYear: initialData?.remodeledYear || '',
+        rent_price: initialData?.rent_price || '',
+        rent_currency: initialData?.rent_currency || 'ARS',
     });
 
     // Step 5: Multimedia State
@@ -245,6 +259,7 @@ export default function PropertyWizard({ initialData, isEditing = false, ...prop
     });
 
     const autocompleteRef = useRef<google.maps.places.Autocomplete | null>(null);
+    const topRef = useRef<HTMLDivElement>(null);
 
     useEffect(() => {
         // Load provincias on mount
@@ -300,13 +315,13 @@ export default function PropertyWizard({ initialData, isEditing = false, ...prop
         // Validation Logic
         if (typeof value === 'string') {
             // 1. Integer Fields (Rooms, Bedrooms, etc, Antiguety)
-            const integerFields = ['rooms', 'bedrooms', 'bathrooms', 'toilettes', 'garages', 'floors', 'antiquity_years'];
+            const integerFields = ['rooms', 'bedrooms', 'bathrooms', 'toilettes', 'garages', 'floors', 'antiquity_years', 'remodeledYear'];
             if (integerFields.includes(field)) {
                 // Remove ANY non-digit character
                 value = value.replace(/\D/g, '');
 
                 // Apply specific length limits
-                if (field === 'antiquity_years') {
+                if (field === 'antiquity_years' || field === 'remodeledYear') {
                     if (value.length > 4) value = value.slice(0, 4);
                 } else {
                     // Rooms, baths, etc max 3 digits (e.g. 999 is plenty)
@@ -356,8 +371,16 @@ export default function PropertyWizard({ initialData, isEditing = false, ...prop
 
         setFormData(prev => ({ ...prev, [field]: value }));
 
-        // Clear error if present
-        if (error) setError(null);
+
+
+        // Clear specific error if present
+        if (errors[field]) {
+            setErrors(prev => {
+                const newErrors = { ...prev };
+                delete newErrors[field];
+                return newErrors;
+            });
+        }
     };
 
     const handleAmenityToggle = (amenity: string) => {
@@ -425,11 +448,66 @@ export default function PropertyWizard({ initialData, isEditing = false, ...prop
         handleChange('localidad', localidad?.nombre || '');
     };
 
+    const handleOperationToggle = (op: string) => {
+        setFormData(prev => {
+            const currentOps = prev.operations || [];
+            let newOps;
+
+            // Toggle logic
+            if (currentOps.includes(op)) {
+                // Don't allow deselecting the last one
+                if (currentOps.length === 1) return prev;
+                newOps = currentOps.filter(o => o !== op);
+            } else {
+                newOps = [...currentOps, op];
+            }
+
+            // Determine primary operation type for compat
+            // Strategies:
+            // 1. If Venta is present, Venta.
+            // 2. Else take the first one.
+            let primaryOp = prev.operation_type;
+            if (newOps.includes('Venta')) {
+                primaryOp = 'Venta';
+            } else if (newOps.length > 0) {
+                primaryOp = newOps[0];
+            }
+
+            return {
+                ...prev,
+                operations: newOps,
+                operation_type: primaryOp
+            };
+        });
+    };
+
     const handleImageSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
         if (e.target.files) {
+            const MAX_IMAGES = 30;
+            const currentCount = previews.length;
+            const remainingSlots = MAX_IMAGES - currentCount;
+
+            if (remainingSlots <= 0) {
+                setErrors(prev => ({ ...prev, images: `Ya alcanzaste el límite de ${MAX_IMAGES} imágenes.` }));
+                return;
+            }
+
             const newFiles = Array.from(e.target.files);
-            setImages(prev => [...prev, ...newFiles]);
-            const newPreviews = newFiles.map(file => URL.createObjectURL(file));
+
+            let filesToAdd = newFiles;
+            if (newFiles.length > remainingSlots) {
+                filesToAdd = newFiles.slice(0, remainingSlots);
+                setErrors(prev => ({ ...prev, images: `Solo se agregaron ${remainingSlots} imágenes para no exceder el límite de ${MAX_IMAGES}.` }));
+            } else {
+                setErrors(prev => {
+                    const newErrors = { ...prev };
+                    delete newErrors.images;
+                    return newErrors;
+                });
+            }
+
+            setImages(prev => [...prev, ...filesToAdd]);
+            const newPreviews = filesToAdd.map(file => URL.createObjectURL(file));
             setPreviews(prev => [...prev, ...newPreviews]);
         }
     };
@@ -463,14 +541,15 @@ export default function PropertyWizard({ initialData, isEditing = false, ...prop
 
         if (currentStep < STEPS.length) {
             setCurrentStep(prev => prev + 1);
-            window.scrollTo(0, 0);
+            // window.scrollTo(0, 0); // Doesn 't work in DashboardShell
+            topRef.current?.scrollIntoView({ behavior: 'smooth' });
         } else {
             handleSubmit();
         }
     };
 
     const validateStep = (step: number) => {
-        setError(null);
+        const newErrors: Record<string, string> = {};
 
         if (step === 3) { // Characteristics Validation
             const {
@@ -479,40 +558,72 @@ export default function PropertyWizard({ initialData, isEditing = false, ...prop
             } = formData;
 
             // 1. Basic Number & Negative checks
-            if (Number(area_total) < 0 || Number(area_covered) < 0 || Number(formData.area_semi_covered) < 0 || Number(formData.area_uncovered) < 0) {
-                setError("Las superficies no pueden ser negativas.");
-                return false;
-            }
-            if (Number(rooms) < 0 || Number(bedrooms) < 0 || Number(bathrooms) < 0 || Number(garages) < 0) {
-                setError("Las cantidades no pueden ser negativas.");
-                return false;
+            if (Number(area_total) < 0) newErrors.area_total = "No puede ser negativo";
+            if (Number(area_covered) < 0) newErrors.area_covered = "No puede ser negativo";
+            if (Number(formData.area_semi_covered) < 0) newErrors.area_semi_covered = "No puede ser negativo";
+            if (Number(formData.area_uncovered) < 0) newErrors.area_uncovered = "No puede ser negativo";
+
+            if (Number(rooms) < 0) newErrors.rooms = "No puede ser negativo";
+            if (Number(bedrooms) < 0) newErrors.bedrooms = "No puede ser negativo";
+            if (Number(bathrooms) < 0) newErrors.bathrooms = "No puede ser negativo";
+            if (Number(garages) < 0) newErrors.garages = "No puede ser negativo";
+
+            // Remodeled Validation
+            if (formData.isRemodeled) {
+                if (!formData.remodeledYear || formData.remodeledYear.length !== 4) {
+                    newErrors.remodeledYear = "Ingresá un año de 4 dígitos.";
+                } else if (formData.antiquity_type === 'Años de antigüedad' && formData.antiquity_years) {
+                    const currentYear = new Date().getFullYear();
+                    const constructionYear = currentYear - Number(formData.antiquity_years);
+                    const remodeledYearNum = Number(formData.remodeledYear);
+
+                    if (remodeledYearNum < constructionYear) {
+                        newErrors.remodeledYear = `No puede ser anterior a la construcción (${constructionYear}).`;
+                    } else if (remodeledYearNum > currentYear) {
+                        newErrors.remodeledYear = `No puede ser futuro (máx ${currentYear}).`;
+                    }
+                }
             }
 
             // 2. Logical Checks
             if (Number(area_covered) > Number(area_total)) {
-                setError("La superficie cubierta no puede ser mayor a la total.");
-                return false;
+                newErrors.area_covered = "La sup. cubierta no puede ser mayor a la total.";
             }
 
             // 3. Reasonable Max Limits
-            if (Number(area_total) > 100000) {
-                setError("La superficie total parece incorrecta (máx 100.000 m²).");
-                return false;
-            }
-            if (Number(rooms) > 50) {
-                setError("La cantidad de ambientes excede el límite permitido (máx 50).");
-                return false;
-            }
-            if (Number(bedrooms) > Number(rooms)) {
-                setError("No puede haber más dormitorios que ambientes totales.");
-                return false;
-            }
-            if (Number(bathrooms) > 20) {
-                setError("La cantidad de baños excede el límite permitido.");
-                return false;
-            }
+            if (Number(area_total) > 100000) newErrors.area_total = "Parece incorrecto (máx 100.000 m²).";
+            if (Number(rooms) > 50) newErrors.rooms = "Excede el límite (máx 50).";
+            if (Number(bedrooms) > Number(rooms)) newErrors.bedrooms = "Más dormitorios que ambientes.";
+            if (Number(bathrooms) > 20) newErrors.bathrooms = "Excede el límite.";
+        }
 
-            // 4. "002" Leading Zero cleanup is handled in handleChange (see below modification)
+        if (step === 4) {
+            const ops = formData.operations || [];
+            if (ops.includes('Venta') && !formData.price) {
+                newErrors.price = "El precio de venta es obligatorio.";
+            }
+            if ((ops.includes('Alquiler') || ops.includes('Temporada')) && !formData.rent_price) {
+                newErrors.rent_price = "El precio de alquiler es obligatorio.";
+            }
+            // Fallback default
+            if (ops.length === 0 && !formData.price) {
+                newErrors.price = "El precio es obligatorio.";
+            }
+        }
+
+        setErrors(newErrors);
+
+        if (Object.keys(newErrors).length > 0) {
+            // Auto-scroll logic
+            const firstField = Object.keys(newErrors)[0];
+            const el = document.getElementById(`input-${firstField}`);
+            if (el) {
+                el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                el.focus();
+            } else {
+                topRef.current?.scrollIntoView({ behavior: 'smooth' });
+            }
+            return false;
         }
 
         return true;
@@ -521,7 +632,8 @@ export default function PropertyWizard({ initialData, isEditing = false, ...prop
     const prevStep = () => {
         if (currentStep > 1) {
             setCurrentStep(prev => prev - 1);
-            window.scrollTo(0, 0);
+            // window.scrollTo(0, 0);
+            topRef.current?.scrollIntoView({ behavior: 'smooth' });
         }
     };
 
@@ -542,14 +654,15 @@ export default function PropertyWizard({ initialData, isEditing = false, ...prop
             } catch (err) {
                 console.error("Error checking limits:", err);
                 // Optional: decide if we block or allow on error. Blocking is safer for business.
-                setError("Error verificando límites del plan.");
+                setErrors({ form: "Error verificando límites del plan." });
                 setLoading(false);
                 return;
             }
         }
 
         setLoading(true);
-        setError(null);
+        setLoading(true);
+        setErrors({});
 
         try {
             let propertyRef;
@@ -639,7 +752,7 @@ export default function PropertyWizard({ initialData, isEditing = false, ...prop
 
         } catch (err: any) {
             console.error(err);
-            setError("Error al guardar: " + err.message);
+            setErrors({ form: "Error al guardar: " + err.message });
             setLoading(false);
         }
     };
@@ -664,6 +777,18 @@ export default function PropertyWizard({ initialData, isEditing = false, ...prop
         // You could also allow jumping forward to any step if all intermediate steps are valid,
         // but that requires more complex validation logic. 
         // For now, next step or back steps.
+    };
+
+    const renderError = (field: keyof PropertyData | string) => {
+        if (errors[field as string]) {
+            return (
+                <p className="text-red-500 text-xs font-semibold mb-1 animate-in slide-in-from-left-1 flex items-center gap-1">
+                    <span className="inline-block w-1 h-1 rounded-full bg-red-500" />
+                    {errors[field as string]}
+                </p>
+            );
+        }
+        return null;
     };
 
     // Render Steps
@@ -725,13 +850,9 @@ export default function PropertyWizard({ initialData, isEditing = false, ...prop
                                 {['Venta', 'Alquiler', 'Temporada'].map(op => (
                                     <button
                                         key={op}
-                                        onClick={() => {
-                                            // Handle special case for currency
-                                            const newCurrency = op === 'Alquiler' ? 'ARS' : 'USD';
-                                            setFormData(prev => ({ ...prev, operation_type: op, currency: newCurrency }));
-                                        }}
-                                        className={`flex-1 py-3 px-4 rounded-xl border transition-all ${formData.operation_type === op
-                                            ? 'border-indigo-600 bg-indigo-50 text-indigo-700 font-medium'
+                                        onClick={() => handleOperationToggle(op)}
+                                        className={`flex-1 py-3 px-4 rounded-xl border transition-all ${(formData.operations || []).includes(op)
+                                            ? 'border-indigo-600 bg-indigo-50 text-indigo-700 font-medium ring-1 ring-indigo-600'
                                             : 'border-gray-200 hover:border-gray-300 text-gray-700'
                                             }`}
                                     >
@@ -1085,42 +1206,50 @@ export default function PropertyWizard({ initialData, isEditing = false, ...prop
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                             <div>
                                 <label className="block text-sm font-medium text-gray-700 mb-2">Ancho del terreno (m)</label>
+                                {renderError('land_width')}
                                 <input
+                                    id="input-land_width"
                                     type="text"
                                     inputMode="decimal"
                                     placeholder="Ej. 8.66"
-                                    className="w-full p-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-gray-900 font-medium"
+                                    className={`w-full p-3 border rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-gray-900 font-medium ${errors.land_width ? 'border-red-500 bg-red-50' : 'border-gray-300'}`}
                                     value={formData.land_width}
                                     onChange={(e) => handleChange('land_width', e.target.value)}
                                 />
                             </div>
                             <div>
                                 <label className="block text-sm font-medium text-gray-700 mb-2">Largo del terreno (m)</label>
+                                {renderError('land_length')}
                                 <input
+                                    id="input-land_length"
                                     type="text"
                                     inputMode="decimal"
                                     placeholder="Ej. 30"
-                                    className="w-full p-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-gray-900 font-medium"
+                                    className={`w-full p-3 border rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-gray-900 font-medium ${errors.land_length ? 'border-red-500 bg-red-50' : 'border-gray-300'}`}
                                     value={formData.land_length}
                                     onChange={(e) => handleChange('land_length', e.target.value)}
                                 />
                             </div>
                             <div>
                                 <label className="block text-sm font-medium text-gray-700 mb-2">Superficie Terreno (m²)</label>
+                                {renderError('area_total')}
                                 <input
+                                    id="input-area_total"
                                     type="text"
                                     inputMode="decimal"
-                                    className="w-full p-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-gray-900 font-medium"
+                                    className={`w-full p-3 border rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-gray-900 font-medium ${errors.area_total ? 'border-red-500 bg-red-50' : 'border-gray-300'}`}
                                     value={formData.area_total}
                                     onChange={(e) => handleChange('area_total', e.target.value)}
                                 />
                             </div>
                             <div>
                                 <label className="block text-sm font-medium text-gray-700 mb-2">Superficie Cubierta (m²)</label>
+                                {renderError('area_covered')}
                                 <input
+                                    id="input-area_covered"
                                     type="text"
                                     inputMode="decimal"
-                                    className="w-full p-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-gray-900 font-medium"
+                                    className={`w-full p-3 border rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-gray-900 font-medium ${errors.area_covered ? 'border-red-500 bg-red-50' : 'border-gray-300'}`}
                                     value={formData.area_covered}
                                     onChange={(e) => handleChange('area_covered', e.target.value)}
                                 />
@@ -1158,10 +1287,12 @@ export default function PropertyWizard({ initialData, isEditing = false, ...prop
                             ].map(item => (
                                 <div key={item.field}>
                                     <label className="block text-sm font-medium text-gray-700 mb-2">{item.label}</label>
+                                    {renderError(item.field)}
                                     <input
+                                        id={`input-${item.field}`}
                                         type="text"
                                         inputMode="numeric"
-                                        className="w-full p-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-gray-900 font-medium"
+                                        className={`w-full p-3 border rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-gray-900 font-medium ${errors[item.field] ? 'border-red-500 bg-red-50' : 'border-gray-300'}`}
                                         value={(formData as any)[item.field]}
                                         onChange={(e) => handleChange(item.field as keyof PropertyData, e.target.value)}
                                     />
@@ -1255,7 +1386,7 @@ export default function PropertyWizard({ initialData, isEditing = false, ...prop
 
                         <div>
                             <label className="block text-sm font-medium text-gray-700 mb-2">Antigüedad</label>
-                            <div className="flex gap-4 mb-4">
+                            <div className="flex gap-4 mb-4 flex-wrap">
                                 {['A estrenar', 'Años de antigüedad', 'En construcción'].map(type => (
                                     <button
                                         key={type}
@@ -1273,11 +1404,45 @@ export default function PropertyWizard({ initialData, isEditing = false, ...prop
                                 <input
                                     type="number"
                                     placeholder="Cantidad de años"
-                                    className="w-full p-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-gray-900"
+                                    className="w-full p-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-gray-900 mb-4"
                                     value={formData.antiquity_years}
                                     onChange={(e) => handleChange('antiquity_years', e.target.value)}
                                 />
                             )}
+
+                            {/* Remodelado Switch/Checkbox */}
+                            <div className="flex items-start gap-3 p-4 bg-gray-50 rounded-xl border border-gray-100">
+                                <input
+                                    type="checkbox"
+                                    id="isRemodeled"
+                                    checked={formData.isRemodeled}
+                                    onChange={(e) => handleChange('isRemodeled', e.target.checked)}
+                                    className="mt-1 h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded"
+                                />
+                                <div className="flex-1">
+                                    <label htmlFor="isRemodeled" className="block text-sm font-medium text-gray-900">
+                                        Propiedad Remodelada / Reciclada
+                                    </label>
+                                    <p className="text-xs text-gray-500 mt-1">
+                                        Indicá si la propiedad fue renovada recientemente
+                                    </p>
+
+                                    {formData.isRemodeled && (
+                                        <div className="mt-3 animate-in fade-in slide-in-from-top-2 duration-200">
+                                            <label className="block text-sm font-medium text-gray-700 mb-1">Año</label>
+                                            {renderError('remodeledYear')}
+                                            <input
+                                                id="input-remodeledYear"
+                                                type="number"
+                                                placeholder="Año de remodelación (ej. 2020)"
+                                                className={`w-full p-2 border rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-sm ${errors.remodeledYear ? 'border-red-500 bg-red-50' : 'border-gray-300'}`}
+                                                value={formData.remodeledYear}
+                                                onChange={(e) => handleChange('remodeledYear', e.target.value)}
+                                            />
+                                        </div>
+                                    )}
+                                </div>
+                            </div>
                         </div>
                     </div>
                 );
@@ -1290,31 +1455,102 @@ export default function PropertyWizard({ initialData, isEditing = false, ...prop
                     <div className="space-y-6 animate-in fade-in slide-in-from-right-4 duration-300">
                         <h2 className="text-xl font-semibold">Valor de la propiedad</h2>
 
-                        <div className="flex gap-4">
-                            <div className="w-32">
-                                <label className="block text-sm font-medium text-gray-700 mb-2">Moneda</label>
-                                <select
-                                    className="w-full p-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-gray-900 font-medium"
-                                    value={formData.currency}
-                                    onChange={(e) => handleChange('currency', e.target.value)}
-                                >
-                                    <option value="USD">USD</option>
-                                    <option value="ARS">ARS</option>
-                                </select>
+                        {/* VENTA Price Section */}
+                        {((formData.operations || []).includes('Venta')) && (
+                            <div className="p-4 bg-gray-50 rounded-xl border border-gray-100">
+                                <h3 className="text-sm font-semibold text-gray-900 mb-4 flex items-center gap-2">
+                                    <span className="w-2 h-2 rounded-full bg-indigo-500"></span>
+                                    Precio de Venta
+                                </h3>
+                                <div className="flex gap-4">
+                                    <div className="w-32">
+                                        <label className="block text-sm font-medium text-gray-700 mb-2">Moneda</label>
+                                        <select
+                                            className="w-full p-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 bg-white"
+                                            value={formData.currency}
+                                            onChange={(e) => handleChange('currency', e.target.value)}
+                                        >
+                                            <option value="USD">USD</option>
+                                            <option value="ARS">ARS</option>
+                                        </select>
+                                    </div>
+                                    <div className="flex-1">
+                                        <label className="block text-sm font-medium text-gray-700 mb-2">Monto</label>
+                                        {renderError('price')}
+                                        <input
+                                            id="input-price"
+                                            type="text"
+                                            inputMode="decimal"
+                                            placeholder="0.00"
+                                            className={`w-full p-3 border rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-gray-900 font-medium ${errors.price ? 'border-red-500 bg-red-50' : 'border-gray-300'}`}
+                                            value={formData.price}
+                                            onChange={(e) => handleChange('price', e.target.value)}
+                                        />
+                                    </div>
+                                </div>
                             </div>
-                            <div className="flex-1">
-                                <label className="block text-sm font-medium text-gray-700 mb-2">
-                                    Precio {formData.operation_type === 'Alquiler' ? '(Mensual)' : ''}
-                                </label>
+                        )}
+
+                        {/* ALQUILER Price Section */}
+                        {((formData.operations || []).includes('Alquiler') || (formData.operations || []).includes('Temporada')) && (
+                            <div className="p-4 bg-gray-50 rounded-xl border border-gray-100">
+                                <h3 className="text-sm font-semibold text-gray-900 mb-4 flex items-center gap-2">
+                                    <span className="w-2 h-2 rounded-full bg-green-500"></span>
+                                    Precio de Alquiler
+                                </h3>
+                                <div className="flex gap-4">
+                                    <div className="w-32">
+                                        <label className="block text-sm font-medium text-gray-700 mb-2">Moneda</label>
+                                        <select
+                                            className="w-full p-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 bg-white"
+                                            value={formData.rent_currency}
+                                            onChange={(e) => handleChange('rent_currency', e.target.value)}
+                                        >
+                                            <option value="ARS">ARS</option>
+                                            <option value="USD">USD</option>
+                                        </select>
+                                    </div>
+                                    <div className="flex-1">
+                                        <label className="block text-sm font-medium text-gray-700 mb-2">Monto Mensual</label>
+                                        {renderError('rent_price')}
+                                        <input
+                                            id="input-rent_price"
+                                            type="text"
+                                            inputMode="decimal"
+                                            placeholder="0.00"
+                                            className={`w-full p-3 border rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-gray-900 font-medium ${errors.rent_price ? 'border-red-500 bg-red-50' : 'border-gray-300'}`}
+                                            value={formData.rent_price}
+                                            onChange={(e) => handleChange('rent_price', e.target.value)}
+                                        />
+                                    </div>
+                                </div>
+                            </div>
+                        )}
+                        {/* Hide Price Option */}
+                        <div className="flex items-center justify-between p-4 bg-gray-50 rounded-xl border border-gray-200">
+                            <div>
+                                <h3 className="font-semibold text-gray-900">Consultar precio</h3>
+                                <p className="text-sm text-gray-500 mt-1">
+                                    Ocultar el precio al público y mostrar "Consultar"
+                                </p>
+                            </div>
+                            <div className="relative inline-block w-12 mr-2 align-middle select-none transition duration-200 ease-in">
                                 <input
-                                    type="number"
-                                    className="w-full p-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-gray-900 font-medium"
-                                    value={formData.price}
-                                    onChange={(e) => handleChange('price', e.target.value)}
+                                    type="checkbox"
+                                    name="hidePrice"
+                                    id="hidePrice"
+                                    className="toggle-checkbox absolute block w-6 h-6 rounded-full bg-white border-4 appearance-none cursor-pointer peer checked:right-0 right-6 transition-all"
+                                    checked={formData.hidePrice}
+                                    onChange={(e) => handleChange('hidePrice', e.target.checked)}
                                 />
+                                <label
+                                    htmlFor="hidePrice"
+                                    className={`toggle-label block overflow-hidden h-6 rounded-full cursor-pointer transition-colors ${formData.hidePrice ? 'bg-indigo-600' : 'bg-gray-300'}`}
+                                ></label>
                             </div>
                         </div>
 
+                        {/* Expenses Option */}
                         <div>
                             <div className="flex items-center gap-2 mb-2">
                                 <input
@@ -1349,14 +1585,18 @@ export default function PropertyWizard({ initialData, isEditing = false, ...prop
                                 </div>
                             )}
                         </div>
-                    </div>
+                    </div >
                 );
 
-            // Operation & Type
             case 5: // Multimedia
                 return (
                     <div className="space-y-6 animate-in fade-in slide-in-from-right-4 duration-300">
-                        <h2 className="text-xl font-semibold">Fotos y Videos</h2>
+                        <div className="flex items-center justify-between">
+                            <h2 className="text-xl font-semibold">Fotos y Videos</h2>
+                            <span className={`text-sm font-medium ${previews.length >= 30 ? 'text-red-600' : 'text-gray-500'}`}>
+                                ({previews.length} / 30)
+                            </span>
+                        </div>
 
                         <div className="border-2 border-dashed border-gray-300 rounded-xl p-8 text-center hover:bg-gray-50 transition-colors cursor-pointer relative">
                             <input
@@ -1435,6 +1675,42 @@ export default function PropertyWizard({ initialData, isEditing = false, ...prop
                                     value={formData.video_url}
                                     onChange={(e) => handleChange('video_url', e.target.value)}
                                 />
+                                {formData.video_url && (
+                                    <div className="mt-4">
+                                        {(() => {
+                                            const getYouTubeId = (url: string) => {
+                                                const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|&v=)([\w-]{11}).*/;
+                                                const match = url.match(regExp);
+                                                return match ? match[2] : null;
+                                            };
+                                            const videoId = getYouTubeId(formData.video_url);
+
+                                            if (videoId) {
+                                                return (
+                                                    <div className="relative aspect-video rounded-xl overflow-hidden bg-gray-100 border border-gray-200 shadow-sm max-w-md mx-auto">
+                                                        <iframe
+                                                            width="100%"
+                                                            height="100%"
+                                                            src={`https://www.youtube-nocookie.com/embed/${videoId}`}
+                                                            title="Vista previa de YouTube"
+                                                            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                                                            referrerPolicy="strict-origin-when-cross-origin"
+                                                            allowFullScreen
+                                                            className="w-full h-full"
+                                                        ></iframe>
+                                                    </div>
+                                                );
+                                            } else if (formData.video_url.length > 10) {
+                                                return (
+                                                    <div className="text-sm text-red-500 mt-2 flex items-center gap-2">
+                                                        <span>⚠️ Enlace de YouTube no válido</span>
+                                                    </div>
+                                                );
+                                            }
+                                            return null;
+                                        })()}
+                                    </div>
+                                )}
                             </div>
                         </div>
                     </div>
@@ -1446,7 +1722,7 @@ export default function PropertyWizard({ initialData, isEditing = false, ...prop
     };
 
     return (
-        <div className="max-w-4xl mx-auto">
+        <div className="max-w-4xl mx-auto" ref={topRef}>
             <LimitReachedModal
                 isOpen={showLimitModal}
                 onClose={() => setShowLimitModal(false)}
@@ -1456,9 +1732,9 @@ export default function PropertyWizard({ initialData, isEditing = false, ...prop
             <StepIndicator currentStep={currentStep} totalSteps={STEPS.length} steps={STEPS} onStepClick={handleStepClick} />
 
             <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-6 md:p-8 mt-6">
-                {error && (
-                    <div className="mb-6 p-4 bg-red-50 text-red-600 rounded-xl text-sm">
-                        {error}
+                {errors.form && (
+                    <div className="mb-6 p-4 bg-red-50 text-red-600 rounded-xl text-sm animate-in fade-in slide-in-from-top-2">
+                        {errors.form}
                     </div>
                 )}
 

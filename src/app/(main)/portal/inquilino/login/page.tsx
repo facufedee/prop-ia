@@ -99,7 +99,7 @@ export default function TenantLoginPage() {
                 </form>
 
                 <div className="mt-6 text-center text-sm text-gray-400">
-                    &copy; 2024 Prop-IA Secure Portal
+                    &copy; 2024 Zeta Prop Secure Portal
                 </div>
             </div>
         </div>

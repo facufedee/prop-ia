@@ -20,6 +20,7 @@ export interface PublicProperty {
     lng?: number;
     expenses?: number;
     video_url?: string;
+    hidePrice?: boolean;
 }
 
 export interface PublicAgency {

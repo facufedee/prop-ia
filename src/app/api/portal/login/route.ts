@@ -66,9 +66,9 @@ export async function POST(request: NextRequest) {
                     branding.agencyName = userData.agencyName || userData.displayName || "Inmobiliaria";
                     branding.logoUrl = userData.logoUrl || "";
                 } else {
-                    // Logic: If NOT Pro, enforce Prop-IA defaults (already set in init)
+                    // Logic: If NOT Pro, enforce Zeta Prop defaults (already set in init)
                     // Explicitly clearing just in case logic changes
-                    branding.agencyName = "Prop-IA (Versión Gratuita)";
+                    branding.agencyName = "Zeta Prop (Versión Gratuita)";
                     branding.logoUrl = ""; // No custom logo
                 }
             }

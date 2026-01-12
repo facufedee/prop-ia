@@ -49,12 +49,12 @@ export const metadata: Metadata = {
     type: 'website',
     locale: 'es_AR',
     url: 'https://zetaprop.com.ar',
-    title: 'Zeta Prop | CRM para Inmobiliarias y Desarrolladoras',
-    description: 'La plataforma definitiva para gestionar propiedades, alquileres, clientes y emprendimientos en un solo lugar.',
+    title: 'Zeta Prop | Tu Red Inmobiliaria de Confianza en Argentina',
+    description: 'Encontrá tu próximo hogar o inversión con Zeta Prop. Miles de propiedades en venta y alquiler en Buenos Aires y todo el país. Tasaciones profesionales y gestión integral.',
     siteName: 'Zeta Prop',
     images: [
       {
-        url: '/assets/img/Logo%20ZetaProp%20Fondo%20Blanco.png',
+        url: '/assets/img/Logo ZetaProp Fondo Blanco 2.png',
         width: 1200,
         height: 630,
         alt: 'Zeta Prop - Fondo Blanco',

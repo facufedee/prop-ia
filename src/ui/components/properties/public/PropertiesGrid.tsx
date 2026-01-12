@@ -6,10 +6,12 @@ interface PropertiesGridProps {
     loading?: boolean;
 }
 
-export default function PropertiesGrid({ properties, loading }: PropertiesGridProps) {
+export default function PropertiesGrid({ properties, loading, className }: PropertiesGridProps & { className?: string }) {
+    const gridClasses = className || "grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6";
+
     if (loading) {
         return (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+            <div className={gridClasses}>
                 {[...Array(8)].map((_, i) => (
                     <div key={i} className="bg-white rounded-2xl border border-gray-100 overflow-hidden h-[380px] animate-pulse">
                         <div className="h-[240px] bg-gray-200" />
@@ -37,7 +39,7 @@ export default function PropertiesGrid({ properties, loading }: PropertiesGridPr
     }
 
     return (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+        <div className={gridClasses}>
             {properties.map((property) => (
                 <PropertyPublicCard key={property.id} property={property} />
             ))}

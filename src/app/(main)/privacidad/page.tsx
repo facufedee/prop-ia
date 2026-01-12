@@ -29,7 +29,7 @@ export default function PrivacyPage() {
                 {/* Introduction */}
                 <div className="bg-white rounded-3xl p-8 shadow-sm border border-gray-100 text-gray-600 leading-relaxed">
                     <p className="mb-4">
-                        En <strong>PROP-IA</strong> ("nosotros", "nuestro"), valoramos profundamente la confianza que deposita en nosotros al utilizar nuestra plataforma. Nos comprometemos a proteger su privacidad y a tratar sus datos personales con la máxima transparencia y seguridad.
+                        En <strong>Zeta Prop</strong> ("nosotros", "nuestro"), valoramos profundamente la confianza que deposita en nosotros al utilizar nuestra plataforma. Nos comprometemos a proteger su privacidad y a tratar sus datos personales con la máxima transparencia y seguridad.
                     </p>
                     <p>
                         Esta Política de Privacidad describe qué información recopilamos, por qué la necesitamos, cómo la utilizamos y cuáles son sus derechos. Al acceder o utilizar nuestros servicios de tasación inmobiliaria con inteligencia artificial y gestión (CRM), usted acepta las prácticas descritas en este documento.
@@ -107,7 +107,7 @@ export default function PrivacyPage() {
                         <ul className="space-y-3 text-gray-600 list-disc list-inside ml-2">
                             <li>Con <strong>proveedores de servicios de confianza</strong> que nos ayudan a operar (por ejemplo, procesamiento de pagos, alojamiento en la nube), bajo estrictos acuerdos de confidencialidad.</li>
                             <li>Para cumplir con una <strong>obligación legal</strong>, orden judicial o requerimiento de una autoridad gubernamental competente.</li>
-                            <li>Para <strong>proteger los derechos</strong>, propiedad o seguridad de PROP-IA, nuestros usuarios o el público en general.</li>
+                            <li>Para <strong>proteger los derechos</strong>, propiedad o seguridad de Zeta Prop, nuestros usuarios o el público en general.</li>
                         </ul>
                     </section>
 

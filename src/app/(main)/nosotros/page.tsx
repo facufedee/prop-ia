@@ -65,15 +65,17 @@ export default function AboutPage() {
                         <div className="bg-white rounded-2xl overflow-hidden shadow-lg border border-gray-100 group hover:-translate-y-1 transition-transform duration-300">
                             <div className="h-32 bg-gradient-to-r from-indigo-500 to-blue-500"></div>
                             <div className="px-8 pb-8 -mt-12 text-center">
-                                <div className="w-24 h-24 bg-white rounded-full p-1 mx-auto shadow-md mb-4 flex items-center justify-center">
-                                    <div className="w-full h-full rounded-full bg-gray-100 flex items-center justify-center text-gray-400 font-bold text-2xl">
-                                        FF
-                                    </div>
+                                <div className="w-24 h-24 bg-white rounded-full p-1 mx-auto shadow-md mb-4 flex items-center justify-center overflow-hidden">
+                                    <img
+                                        src="/assets/img/facundo.jpg"
+                                        alt="Facundo Flores"
+                                        className="w-full h-full rounded-full object-cover"
+                                    />
                                 </div>
                                 <h3 className="text-xl font-bold text-gray-900">Facundo Flores</h3>
                                 <p className="text-indigo-600 font-medium mb-4">CEO & Fundador</p>
                                 <p className="text-gray-500 text-sm mb-6 leading-relaxed">
-                                    Ingeniero en Sistemas apasionado por la innovación. Lidera la estrategia y visión de Prop-IA con el objetivo de transformar la industria.
+                                    Ingeniero en Sistemas apasionado por la innovación. Lidera la estrategia y visión de Zeta Prop con el objetivo de transformar la industria.
                                 </p>
                                 <a
                                     href="https://www.linkedin.com/in/floreszamoranofacundo/"
@@ -91,20 +93,27 @@ export default function AboutPage() {
                         <div className="bg-white rounded-2xl overflow-hidden shadow-lg border border-gray-100 group hover:-translate-y-1 transition-transform duration-300">
                             <div className="h-32 bg-gradient-to-r from-purple-500 to-pink-500"></div>
                             <div className="px-8 pb-8 -mt-12 text-center">
-                                <div className="w-24 h-24 bg-white rounded-full p-1 mx-auto shadow-md mb-4 flex items-center justify-center">
-                                    <div className="w-full h-full rounded-full bg-gray-100 flex items-center justify-center text-gray-400 font-bold text-2xl">
-                                        NS
-                                    </div>
+                                <div className="w-24 h-24 bg-white rounded-full p-1 mx-auto shadow-md mb-4 flex items-center justify-center overflow-hidden">
+                                    <img
+                                        src="/assets/img/nahuel.jpg"
+                                        alt="Nahuel Serrano"
+                                        className="w-full h-full rounded-full object-cover"
+                                    />
                                 </div>
                                 <h3 className="text-xl font-bold text-gray-900">Nahuel Serrano</h3>
                                 <p className="text-purple-600 font-medium mb-4">CTO</p>
                                 <p className="text-gray-500 text-sm mb-6 leading-relaxed">
-                                    El cerebro detrás de nuestra infraestructura tecnológica. Asegura que Prop-IA sea robusto, escalable y seguro para todos nuestros usuarios.
+                                    El cerebro detrás de nuestra infraestructura tecnológica. Asegura que Zeta Prop sea robusto, escalable y seguro para todos nuestros usuarios.
                                 </p>
-                                <div className="inline-flex items-center gap-2 text-gray-400 cursor-default bg-gray-50 px-4 py-2 rounded-full text-sm font-medium">
-                                    <Code2 size={16} />
-                                    Tech Lead
-                                </div>
+                                <a
+                                    href="https://www.linkedin.com/in/nahuelserrano/"
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="inline-flex items-center gap-2 text-gray-600 hover:text-blue-600 transition-colors bg-gray-50 px-4 py-2 rounded-full text-sm font-medium hover:bg-blue-50"
+                                >
+                                    <Linkedin size={16} />
+                                    Ver LinkedIn
+                                </a>
                             </div>
                         </div>
 

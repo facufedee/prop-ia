@@ -69,7 +69,7 @@ export default function HorizontalFlyer({ property, agent }: HorizontalFlyerProp
                             <span className="text-sm uppercase text-slate-400 font-bold tracking-widest mt-1">Cubiertos</span>
                         </div>
 
-                        {(property.bedrooms && property.bedrooms > 0) ? (
+                        {(property.bedrooms && Number(property.bedrooms) > 0) ? (
                             <>
                                 <div className="w-px h-16 bg-slate-200"></div>
                                 <div className="flex flex-col items-center group">
@@ -79,7 +79,7 @@ export default function HorizontalFlyer({ property, agent }: HorizontalFlyerProp
                             </>
                         ) : null}
 
-                        {(property.bathrooms && property.bathrooms > 0) ? (
+                        {(property.bathrooms && Number(property.bathrooms) > 0) ? (
                             <>
                                 <div className="w-px h-16 bg-slate-200"></div>
                                 <div className="flex flex-col items-center group">
@@ -155,7 +155,7 @@ export default function HorizontalFlyer({ property, agent }: HorizontalFlyerProp
             {/* Footer Bar */}
             <div className="absolute bottom-0 w-full bg-slate-100 py-1 px-8 flex justify-between text-[8px] text-slate-400 uppercase tracking-widest border-t border-slate-200 print:print-color-adjust-exact">
                 <span>Documento generado el {new Date().toLocaleDateString()}</span>
-                <span>Prop-IA Management System</span>
+                <span>Zeta Prop Management System</span>
             </div>
         </div>
     );

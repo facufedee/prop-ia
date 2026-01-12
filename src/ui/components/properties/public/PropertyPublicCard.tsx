@@ -45,7 +45,7 @@ export default function PropertyPublicCard({ property }: PropertyPublicCardProps
                                 <img
                                     key={idx}
                                     src={url}
-                                    alt={`${property.title} - ${idx + 1}`}
+                                    alt={`${property.title} ${property.operation_type} en ${property.localidad} - Foto ${idx + 1}`}
                                     className="w-full h-full object-cover flex-shrink-0"
                                 />
                             ))}

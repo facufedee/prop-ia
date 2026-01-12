@@ -143,7 +143,7 @@ export default function AdminMessagesPage() {
                                     )}
 
                                     <a
-                                        href={`mailto:${msg.email}?subject=Re: Consulta PROP-IA`}
+                                        href={`mailto:${msg.email}?subject=Re: Consulta Zeta Prop`}
                                         className="px-4 py-2 bg-indigo-600 text-white text-sm font-medium rounded-lg hover:bg-indigo-700 transition-colors w-full flex items-center justify-center gap-2"
                                     >
                                         <Mail className="w-4 h-4" />

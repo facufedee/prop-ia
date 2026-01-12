@@ -19,7 +19,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     if (!post) return { title: "Artículo no encontrado" };
 
     return {
-        title: `${post.title} - Blog Prop-IA`,
+        title: `${post.title} - Blog Zeta Prop`,
         description: post.excerpt,
         openGraph: {
             title: post.title,
@@ -27,7 +27,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
             images: post.imageUrl ? [post.imageUrl] : [],
             type: "article",
             publishedTime: post.publishedAt instanceof Date ? post.publishedAt.toISOString() : (post.publishedAt as any)?.toDate?.().toISOString(),
-            authors: [post.author?.name || "Prop-IA"],
+            authors: [post.author?.name || "Zeta Prop"],
         }
     };
 }

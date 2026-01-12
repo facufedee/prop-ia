@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import PropertiesTable, { Property } from "@/ui/components/tables/PropertiesTable";
-import { Plus, Building2, Home, Key, Search, Filter, LayoutGrid, List } from "lucide-react";
+import { Plus, Building2, Home, Key, Search, Filter, LayoutGrid, List, Share2 } from "lucide-react";
 import Link from "next/link";
 import { auth, db } from "@/infrastructure/firebase/client";
 import { collection, query, where, getDocs, deleteDoc, doc } from "firebase/firestore";
@@ -130,6 +130,28 @@ export default function PropiedadesPage() {
                 >
                     <Plus className="w-5 h-5" /> Nueva Propiedad
                 </Link>
+            </div>
+
+            {/* Share Portfolio Banner */}
+            <div className="bg-gradient-to-r from-indigo-600 to-purple-600 rounded-xl p-6 text-white shadow-lg relative overflow-hidden">
+                <div className="absolute top-0 right-0 w-64 h-64 bg-white/10 rounded-full -translate-y-1/2 translate-x-1/3 blur-2xl"></div>
+                <div className="relative z-10 flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+                    <div>
+                        <h2 className="text-xl font-bold mb-1">Compartí tu portafolio con clientes</h2>
+                        <p className="text-indigo-100 text-sm md:text-base">Tu link público muestra todas tus propiedades activas de forma profesional.</p>
+                    </div>
+                    <button
+                        onClick={() => {
+                            const url = `${window.location.origin}/propiedades/${user?.uid}`;
+                            navigator.clipboard.writeText(url);
+                            alert("Link copiado al portapapeles!");
+                        }}
+                        className="flex items-center gap-2 bg-white text-indigo-700 px-4 py-2.5 rounded-lg font-bold hover:bg-indigo-50 transition shadow-sm active:scale-95"
+                    >
+                        <Share2 className="w-4 h-4" />
+                        Copiar Link Público
+                    </button>
+                </div>
             </div>
 
             {/* Stats Cards */}

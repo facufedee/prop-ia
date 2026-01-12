@@ -311,7 +311,7 @@ export default function CuentaPage() {
                                     value={agencyData.agencyName}
                                     onChange={(e) => handleAgencyChange('agencyName', e.target.value)}
                                     className="w-full p-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all"
-                                    placeholder="Ej. Inmobiliaria Prop-IA"
+                                    placeholder="Ej. Inmobiliaria Zeta Prop"
                                 />
                             </div>
 

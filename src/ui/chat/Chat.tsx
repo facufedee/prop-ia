@@ -138,7 +138,7 @@ export default function Chat() {
               <Bot className="w-6 h-6" />
             </div>
             <div>
-              <h2 className="font-bold text-gray-900">Asistente Prop-IA</h2>
+              <h2 className="font-bold text-gray-900">Asistente Zeta Prop</h2>
               <div className="flex items-center gap-1.5">
                 <span className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></span>
                 <span className="text-xs text-green-600 font-medium">En línea</span>

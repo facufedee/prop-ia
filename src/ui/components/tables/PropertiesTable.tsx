@@ -16,12 +16,16 @@ export interface Property {
     price: number;
     currency: string;
     operation_type: string;
-    bedrooms?: number;
-    bathrooms?: number;
-    garages?: number;
+    bedrooms?: number | string;
+    bathrooms?: number | string;
+    garages?: number | string;
+    rooms?: number | string;
     imageUrls?: string[];
     userId?: string;
     branchId?: string;
+    hidePrice?: boolean;
+    isRemodeled?: boolean;
+    remodeledYear?: string;
 }
 
 interface PropertiesTableProps {

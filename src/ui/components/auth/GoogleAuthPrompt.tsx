@@ -78,7 +78,7 @@ export default function GoogleAuthPrompt() {
                                 />
                             </svg>
                         </div>
-                        <span className="text-sm font-medium text-gray-200">Acceder a Prop-IA con Google</span>
+                        <span className="text-sm font-medium text-gray-200">Acceder a Zeta Prop con Google</span>
                     </div>
                     <button
                         onClick={handleClose}
@@ -97,7 +97,7 @@ export default function GoogleAuthPrompt() {
                             </svg>
                         </div>
                         <div>
-                            <p className="text-sm font-medium text-white">Inicia sesión en Prop-IA</p>
+                            <p className="text-sm font-medium text-white">Inicia sesión en Zeta Prop</p>
                             <p className="text-xs text-gray-400">Guarda tus búsquedas y favoritos</p>
                         </div>
                     </div>
