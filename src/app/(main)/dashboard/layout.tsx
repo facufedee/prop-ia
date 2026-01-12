@@ -4,6 +4,8 @@ import PermissionGuard from "@/ui/auth/PermissionGuard";
 
 import { BranchProvider } from "@/infrastructure/context/BranchContext";
 
+import OnboardingTour from "@/ui/components/onboarding/OnboardingTour";
+
 export default function DashboardLayout({
   children,
 }: {
@@ -14,7 +16,7 @@ export default function DashboardLayout({
       <PermissionGuard>
         <BranchProvider>
           <DashboardShell>
-
+            <OnboardingTour />
             {children}
           </DashboardShell>
         </BranchProvider>

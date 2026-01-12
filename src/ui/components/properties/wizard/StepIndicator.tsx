@@ -56,10 +56,14 @@ export default function StepIndicator({ currentStep, totalSteps, steps, onStepCl
             </div>
 
             {/* Mobile Active Step Label */}
-            <div className="mt-8 text-center sm:hidden">
-                <span className="text-sm font-bold text-indigo-700">
+            {/* Mobile Active Step Label */}
+            <div className="mt-8 text-center sm:hidden animate-in fade-in slide-in-from-bottom-2 duration-500">
+                <p className="text-xs text-indigo-600 font-bold uppercase tracking-widest mb-1">
+                    Paso {currentStep} de {totalSteps}
+                </p>
+                <h3 className="text-2xl font-black text-gray-900 tracking-tight">
                     {steps[currentStep - 1]}
-                </span>
+                </h3>
             </div>
         </div>
     );

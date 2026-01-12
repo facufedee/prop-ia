@@ -328,6 +328,7 @@ export default function DashboardSidebar({ isOpen = false, onClose }: DashboardS
                   href={locked ? "#" : item.href} // Disable link if locked
                   onClick={(e) => handleItemClick(e, item)}
                   title={collapsed ? item.label : undefined}
+                  id={`nav-item-${item.label.toLowerCase().replace(/\s+/g, '-')}`}
                   className={cn(
                     "flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all duration-200 group relative",
                     isActive

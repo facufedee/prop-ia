@@ -20,6 +20,7 @@
     "clsx": "^2.1.1",
     "date-fns": "^4.1.0",
     "docx": "^9.5.1",
+    "driver.js": "^1.4.0",
     "file-saver": "^2.0.5",
     "firebase": "^11.10.0",
     "firebase-admin": "^13.6.0",
