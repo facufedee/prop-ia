@@ -62,7 +62,8 @@ export default function LoginPage() {
                 return;
             }
             console.error("Google login error:", err);
-            setError("Error al iniciar sesión con Google.");
+            // Show specific error for debugging
+            setError(`Error: ${err.code} - ${err.message}`);
         } finally {
             setLoading(false);
         }
