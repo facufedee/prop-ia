@@ -68,7 +68,7 @@ export default function MaintenanceTab({ incidencias, onUpdateStatus, onCreateIn
                                 <input
                                     type="text"
                                     required
-                                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-gray-900"
                                     placeholder="Ej: Gotera en baño principal"
                                     value={newIncidencia.titulo}
                                     onChange={(e) => setNewIncidencia({ ...newIncidencia, titulo: e.target.value })}
@@ -82,7 +82,7 @@ export default function MaintenanceTab({ incidencias, onUpdateStatus, onCreateIn
                                 <textarea
                                     required
                                     rows={4}
-                                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 resize-none"
+                                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 resize-none text-gray-900"
                                     placeholder="Describa el problema, ubicación exacta, urgencia, etc."
                                     value={newIncidencia.descripcion}
                                     onChange={(e) => setNewIncidencia({ ...newIncidencia, descripcion: e.target.value })}

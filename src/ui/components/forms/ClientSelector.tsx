@@ -144,7 +144,7 @@ export default function ClientSelector({ type, selectedId, onSelect, label }: Cl
                         <input
                             type="text"
                             placeholder={type === 'inquilinos' ? "Buscar inquilino por nombre o DNI..." : "Buscar propietario..."}
-                            className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-shadow"
+                            className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-shadow text-gray-900"
                             value={searchTerm}
                             onChange={(e) => setSearchTerm(e.target.value)}
                             onFocus={() => { if (searchTerm) setShowResults(true); }}

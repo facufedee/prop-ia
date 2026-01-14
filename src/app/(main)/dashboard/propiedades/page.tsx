@@ -5,7 +5,7 @@ import PropertiesTable, { Property } from "@/ui/components/tables/PropertiesTabl
 import { Plus, Building2, Home, Key, Search, Filter, LayoutGrid, List, Share2 } from "lucide-react";
 import Link from "next/link";
 import { auth, db } from "@/infrastructure/firebase/client";
-import { collection, query, where, getDocs, deleteDoc, doc } from "firebase/firestore";
+import { collection, query, where, getDocs, deleteDoc, doc, updateDoc, addDoc, getDoc } from "firebase/firestore";
 import { onAuthStateChanged } from "firebase/auth";
 import { useBranchContext } from "@/infrastructure/context/BranchContext";
 import PropertyCard from "./components/PropertyCard";
@@ -98,6 +98,57 @@ export default function PropiedadesPage() {
         } catch (error) {
             console.error("Error deleting property:", error);
             alert("Error al eliminar la propiedad");
+        }
+    };
+
+    const handleUpdateProperty = async (id: string, data: Partial<Property>) => {
+        try {
+            if (!db) throw new Error("Firestore not initialized");
+            const propertyRef = doc(db, "properties", id);
+            await updateDoc(propertyRef, {
+                ...data,
+                updatedAt: new Date()
+            });
+
+            // Update local state
+            setProperties(prev => prev.map(p => p.id === id ? { ...p, ...data } : p));
+        } catch (error) {
+            console.error("Error updating property:", error);
+            throw error; // Re-throw to be handled by component
+        }
+    };
+
+    const handleDuplicateProperty = async (property: Property) => {
+        if (!confirm(`¿Duplicar la propiedad "${property.title}"?`)) return;
+
+        try {
+            if (!db) throw new Error("Firestore not initialized");
+
+            // Prepare copy data
+            // eslint-disable-next-line @typescript-eslint/no-unused-vars
+            const { id, ...rest } = property;
+            const newPropertyData = {
+                ...rest,
+                title: `${rest.title} (Copia)`,
+                createdAt: new Date(),
+                updatedAt: new Date(),
+                status: 'inactive', // Default to inactive for safety
+                // We reuse image URLs for now. 
+                // Note: Deleting images from one property won't affect the other if they are just URLs,
+                // but deleting the actual file in storage would affect both if we don't copy files.
+                // For MVP: Shared reference is acceptable if clearly understood, or we accept the risk.
+            };
+
+            const docRef = await addDoc(collection(db, "properties"), newPropertyData);
+
+            // Add to local state
+            const newProperty = { id: docRef.id, ...newPropertyData } as Property;
+            setProperties(prev => [newProperty, ...prev]);
+
+            alert("Propiedad duplicada correctamente. Se creó como 'Pausada'.");
+        } catch (error) {
+            console.error("Error duplicating property:", error);
+            alert("Error al duplicar la propiedad");
         }
     };
 
@@ -263,6 +314,8 @@ export default function PropiedadesPage() {
                             <PropertiesTable
                                 properties={filteredProperties}
                                 loading={loading}
+                                onUpdate={handleUpdateProperty}
+                                onDuplicate={handleDuplicateProperty}
                                 onDelete={handleDelete}
                             />
                         </div>

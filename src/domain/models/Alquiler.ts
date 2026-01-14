@@ -96,6 +96,7 @@ export interface Alquiler {
     // Nuevos campos
     nroPartidaInmobiliaria?: string;
     valorDeposito?: number;
+    monedaDeposito?: string; // 'ARS' | 'USD'
 
     honorariosTipo?: 'fijo' | 'porcentaje';
     honorariosValor?: number;
@@ -109,9 +110,14 @@ export interface Alquiler {
     fechaInicio: Date;
     fechaFin: Date;
     montoMensual: number;
+    monedaAlquiler?: string; // 'ARS' | 'USD'
     diaVencimiento: number;
+
     ajusteTipo: 'porcentaje' | 'ICL' | 'IPC' | 'casa_propia' | 'manual';
     ajusteValor: number;
+    ajusteFrecuencia?: number; // Meses (e.g., 3, 4, 6, 12)
+    ajusteMesesPrimer?: number | null; // Meses para el primer ajuste si es diferente (e.g., 4)
+
     estadoInmueble?: string;
     // tasaPunitorios deprecated in favor of punitoriosTipo/Val
 

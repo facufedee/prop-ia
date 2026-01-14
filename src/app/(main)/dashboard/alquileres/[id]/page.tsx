@@ -10,8 +10,10 @@ import PaymentPlanTable from "../components/PaymentPlanTable";
 import MaintenanceTab from "../components/MaintenanceTab";
 
 import { contractDocxService } from "@/infrastructure/services/contractDocxService";
-import { ArrowLeft, FileText, DollarSign, Wrench, Edit, Save, X, Download, Pause, Check, MoreVertical, Trash2, AlertCircle } from "lucide-react";
+import ContractGeneratorPreviewModal from "@/ui/components/modals/ContractGeneratorPreviewModal";
+import { ArrowLeft, FileText, DollarSign, Wrench, Edit, Save, X, Download, Pause, Check, MoreVertical, Trash2, AlertCircle, Printer } from "lucide-react";
 import Link from "next/link";
+import { TextInput, MoneyInput, TextAreaInput } from "@/ui/components/forms";
 
 export default function AlquilerDetailPage() {
     const params = useParams();
@@ -23,7 +25,98 @@ export default function AlquilerDetailPage() {
     const [isEditing, setIsEditing] = useState(false);
     const [editData, setEditData] = useState<Partial<Alquiler>>({});
     const [showContractModal, setShowContractModal] = useState(false);
+    const [showContractPreview, setShowContractPreview] = useState(false);
     const [showMenu, setShowMenu] = useState(false);
+
+    // Form states matching nuevo/page.tsx behavior
+    const [servicios, setServicios] = useState<Record<string, boolean>>({
+        luz: false, gas: false, agua: false, wifi: false, cochera: false, expensas: false
+    });
+    const [otroServicio, setOtroServicio] = useState("");
+    const [isCustomFrequency, setIsCustomFrequency] = useState(false);
+
+    // Sync services when entering edit mode or loading data
+    useEffect(() => {
+        if (isEditing && editData) {
+            // Sync checkboxes based on current editData.serviciosAdicionales
+            // We do a case-insensitive check to be robust
+            const currentServices = editData.serviciosAdicionales || [];
+
+            const isServiceActive = (name: string) => {
+                return currentServices.some(s => s.toLowerCase() === name.toLowerCase());
+            };
+
+            const newServicios = {
+                luz: isServiceActive('Luz'),
+                gas: isServiceActive('Gas'),
+                agua: isServiceActive('Agua'),
+                wifi: isServiceActive('Internet / Wifi') || isServiceActive('Wifi') || isServiceActive('Internet'),
+                cochera: isServiceActive('Cochera'),
+                expensas: isServiceActive('Expensas'),
+            };
+            setServicios(newServicios);
+
+            // Find other services
+            const known = ['luz', 'gas', 'agua', 'internet / wifi', 'wifi', 'internet', 'cochera', 'expensas'];
+            const others = currentServices.filter(s => !known.includes(s.toLowerCase()));
+            setOtroServicio(others.join(', '));
+
+            // Sync Adjustment Frequency custom state
+            const freq = editData.ajusteFrecuencia;
+            if (freq && ![3, 4, 6, 12].includes(freq)) {
+                setIsCustomFrequency(true);
+            } else {
+                setIsCustomFrequency(false);
+            }
+        }
+    }, [isEditing, editData.serviciosAdicionales, editData.ajusteFrecuencia]);
+
+    // Update editData.serviciosAdicionales when checkboxes or text changes
+    useEffect(() => {
+        if (!isEditing) return;
+
+        const activeServices = [
+            servicios.luz && 'Luz',
+            servicios.gas && 'Gas',
+            servicios.agua && 'Agua',
+            servicios.wifi && 'Internet / Wifi',
+            servicios.cochera && 'Cochera',
+            servicios.expensas && 'Expensas',
+            ...otroServicio.split(',').map(s => s.trim()).filter(Boolean)
+        ].filter(Boolean) as string[];
+
+        // Only update if different to avoid infinite loops if generic compare
+        // But simply updating editData might cause re-render loop if included in dependency.
+        // We will do this update in a specific handler or just before save? 
+        // Better to update `editData` via effect might be risky. 
+        // Let's create a specific function to sync back to editData and call it on change of these local states
+        // OR better: Update editData immediately on change of these inputs.
+    }, [servicios, otroServicio, isEditing]);
+
+    const handleServiceChange = (key: string, checked: boolean) => {
+        const newServicios = { ...servicios, [key]: checked };
+        setServicios(newServicios);
+        updateServicesInEditData(newServicios, otroServicio);
+    }
+
+    const handleOtroServicioChange = (val: string) => {
+        setOtroServicio(val);
+        updateServicesInEditData(servicios, val);
+    }
+
+    const updateServicesInEditData = (currentServicios: Record<string, boolean>, currentOtro: string) => {
+        const activeServices = [
+            currentServicios.luz && 'Luz',
+            currentServicios.gas && 'Gas',
+            currentServicios.agua && 'Agua',
+            currentServicios.wifi && 'Internet / Wifi',
+            currentServicios.cochera && 'Cochera',
+            currentServicios.expensas && 'Expensas',
+            ...currentOtro.split(',').map(s => s.trim()).filter(Boolean)
+        ].filter(Boolean) as string[];
+
+        setEditData(prev => ({ ...prev, serviciosAdicionales: activeServices }));
+    }
 
     useEffect(() => {
         const fetchAlquiler = async () => {
@@ -94,6 +187,28 @@ export default function AlquilerDetailPage() {
         } catch (error) {
             console.error("Error updating payment:", error);
             alert("Error al actualizar el pago");
+        }
+    };
+
+    // New handler for bulk updates (e.g. IPC adjustment)
+    const handleUpdateContract = async (updates: Partial<Alquiler>) => {
+        if (!alquiler) return;
+
+        try {
+            await alquileresService.updateAlquiler(alquiler.id, updates);
+            // Optimization: Apply partial updates locally right away
+            if (updates.montoMensual) {
+                // If amount changed, we might have updated history too in the 'updates' object
+            }
+
+            // Re-fetch to be safe and get consistent state
+            const updated = await alquileresService.getAlquilerById(alquiler.id);
+            if (updated) {
+                setAlquiler(updated);
+            }
+        } catch (error) {
+            console.error("Error updating contract:", error);
+            alert("Error al actualizar el contrato");
         }
     };
 
@@ -278,86 +393,65 @@ export default function AlquilerDetailPage() {
                     <p className="text-gray-500">{alquiler.propiedadTipo}</p>
                 </div>
                 <div className="flex items-center gap-2 flex-shrink-0">
-                    {isEditing ? (
-                        <>
-                            <button
-                                onClick={handleCancelEdit}
-                                className="flex items-center gap-2 px-3 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors text-sm font-medium whitespace-nowrap"
-                            >
-                                <X className="w-4 h-4" />
-                                Cancelar
-                            </button>
-                            <button
-                                onClick={handleSaveEdit}
-                                className="flex items-center gap-2 px-3 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors text-sm font-medium whitespace-nowrap"
-                            >
-                                <Save className="w-4 h-4" />
-                                Guardar
-                            </button>
-                        </>
-                    ) : (
-                        <>
-                            <button
-                                onClick={() => { setIsEditing(true); setEditData({ ...alquiler }); }}
-                                className="flex items-center gap-2 px-3 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors text-sm font-medium whitespace-nowrap"
-                            >
-                                <Edit className="w-4 h-4" />
-                                Editar
-                            </button>
+                    <div className="relative">
+                        <button
+                            onClick={() => setShowMenu(!showMenu)}
+                            className="p-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors"
+                            title="Más acciones"
+                        >
+                            <MoreVertical className="w-5 h-5" />
+                        </button>
 
-                            <div className="relative">
+                        {showMenu && (
+                            <div className="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg border border-gray-100 py-1 z-50">
                                 <button
-                                    onClick={() => setShowMenu(!showMenu)}
-                                    className="p-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors"
-                                    title="Más acciones"
+                                    onClick={() => { setShowMenu(false); handleDownloadContract(); }}
+                                    className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 flex items-center gap-2"
                                 >
-                                    <MoreVertical className="w-5 h-5" />
+                                    <Download className="w-4 h-4" />
+                                    Descargar Contrato (.docx)
                                 </button>
 
-                                {showMenu && (
-                                    <div className="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg border border-gray-100 py-1 z-50">
-                                        <button
-                                            onClick={() => { setShowMenu(false); handleDownloadContract(); }}
-                                            className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 flex items-center gap-2"
-                                        >
-                                            <Download className="w-4 h-4" />
-                                            Descargar Contrato
-                                        </button>
+                                <button
+                                    onClick={() => { setShowMenu(false); setShowContractPreview(true); }}
+                                    className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 flex items-center gap-2"
+                                >
+                                    <Printer className="w-4 h-4" />
+                                    Ver Contrato (Modelo)
+                                </button>
 
-                                        {alquiler.estado === 'activo' && (
-                                            <button
-                                                onClick={() => { setShowMenu(false); handleSuspender(); }}
-                                                className="w-full text-left px-4 py-2 text-sm text-orange-700 hover:bg-orange-50 flex items-center gap-2"
-                                            >
-                                                <Pause className="w-4 h-4" />
-                                                Suspender
-                                            </button>
-                                        )}
-
-                                        {alquiler.estado === 'suspendido' && (
-                                            <button
-                                                onClick={() => { setShowMenu(false); handleActivar(); }}
-                                                className="w-full text-left px-4 py-2 text-sm text-green-700 hover:bg-green-50 flex items-center gap-2"
-                                            >
-                                                <Check className="w-4 h-4" />
-                                                Activar
-                                            </button>
-                                        )}
-
-                                        <div className="border-t border-gray-100 my-1"></div>
-
-                                        <button
-                                            onClick={() => { setShowMenu(false); handleFinalizarContrato(); }}
-                                            className="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-red-50 flex items-center gap-2"
-                                        >
-                                            <Trash2 className="w-4 h-4" />
-                                            Finalizar Contrato
-                                        </button>
-                                    </div>
+                                {alquiler.estado === 'activo' && (
+                                    <button
+                                        onClick={() => { setShowMenu(false); handleSuspender(); }}
+                                        className="w-full text-left px-4 py-2 text-sm text-orange-700 hover:bg-orange-50 flex items-center gap-2"
+                                    >
+                                        <Pause className="w-4 h-4" />
+                                        Suspender
+                                    </button>
                                 )}
+
+                                {alquiler.estado === 'suspendido' && (
+                                    <button
+                                        onClick={() => { setShowMenu(false); handleActivar(); }}
+                                        className="w-full text-left px-4 py-2 text-sm text-green-700 hover:bg-green-50 flex items-center gap-2"
+                                    >
+                                        <Check className="w-4 h-4" />
+                                        Activar
+                                    </button>
+                                )}
+
+                                <div className="border-t border-gray-100 my-1"></div>
+
+                                <button
+                                    onClick={() => { setShowMenu(false); handleFinalizarContrato(); }}
+                                    className="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-red-50 flex items-center gap-2"
+                                >
+                                    <Trash2 className="w-4 h-4" />
+                                    Finalizar Contrato
+                                </button>
                             </div>
-                        </>
-                    )}
+                        )}
+                    </div>
 
                     <span className={`px-3 py-1 text-sm font-medium rounded-full whitespace-nowrap ${alquiler.estado === 'activo' ? 'bg-green-100 text-green-700' :
                         alquiler.estado === 'pendiente' ? 'bg-yellow-100 text-yellow-700' :
@@ -396,115 +490,552 @@ export default function AlquilerDetailPage() {
                 {activeTab === 'info' && (
                     <div className="space-y-6">
                         <div className="bg-white rounded-xl border border-gray-200 p-6">
-                            <div className="mb-6">
-                                <h2 className="text-lg font-semibold text-gray-900">Información General</h2>
+                            <div className="mb-6 flex justify-between items-center">
+                                <h2 className="text-lg font-semibold text-gray-900">Información del Contrato</h2>
+                                <div>
+                                    {isEditing ? (
+                                        <div className="flex gap-2">
+                                            <button onClick={handleCancelEdit} className="px-3 py-1.5 text-sm border rounded hover:bg-gray-50 text-gray-700">Cancelar</button>
+                                            <button onClick={handleSaveEdit} className="px-3 py-1.5 text-sm bg-green-600 text-white rounded hover:bg-green-700 flex items-center gap-1">
+                                                <Save size={14} /> Guardar
+                                            </button>
+                                        </div>
+                                    ) : (
+                                        <button
+                                            onClick={() => { setIsEditing(true); setEditData({ ...alquiler }); }}
+                                            className="px-3 py-1.5 text-sm border border-indigo-200 text-indigo-700 bg-indigo-50 rounded hover:bg-indigo-100 flex items-center gap-2"
+                                        >
+                                            <Edit size={14} /> Editar Contrato
+                                        </button>
+                                    )}
+                                </div>
                             </div>
 
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                {/* Datos del Contrato */}
-                                <div>
-                                    <h3 className="text-sm font-medium text-gray-500 mb-3">Datos del Contrato</h3>
-                                    <div className="space-y-2">
-                                        <div className="flex justify-between">
-                                            <span className="text-gray-600">Fecha Inicio:</span>
-                                            {isEditing ? (
-                                                <input
-                                                    type="date"
-                                                    className="px-2 py-1 border rounded"
-                                                    value={editData.fechaInicio ? new Date(editData.fechaInicio).toISOString().split('T')[0] : ''}
-                                                    onChange={(e) => setEditData({ ...editData, fechaInicio: new Date(e.target.value) })}
-                                                />
-                                            ) : (
-                                                <span className="font-medium">{new Date(alquiler.fechaInicio).toLocaleDateString()}</span>
-                                            )}
+                            {isEditing ? (
+                                <div className="space-y-6">
+                                    {/* General */}
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                        <div>
+                                            <label className="block text-sm font-medium text-gray-700 mb-2">
+                                                Fecha de Inicio *
+                                            </label>
+                                            <input
+                                                type="date"
+                                                required
+                                                className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-gray-900"
+                                                value={editData.fechaInicio ? new Date(editData.fechaInicio).toISOString().split('T')[0] : ''}
+                                                onChange={(e) => handleEditChange("fechaInicio", new Date(e.target.value))}
+                                            />
                                         </div>
-                                        <div className="flex justify-between">
-                                            <span className="text-gray-600">Fecha Fin:</span>
-                                            {isEditing ? (
-                                                <input
-                                                    type="date"
-                                                    className="px-2 py-1 border rounded"
-                                                    value={editData.fechaFin ? new Date(editData.fechaFin).toISOString().split('T')[0] : ''}
-                                                    onChange={(e) => setEditData({ ...editData, fechaFin: new Date(e.target.value) })}
-                                                />
-                                            ) : (
-                                                <span className="font-medium">{new Date(alquiler.fechaFin).toLocaleDateString()}</span>
-                                            )}
+
+                                        <div>
+                                            <label className="block text-sm font-medium text-gray-700 mb-2">
+                                                Fecha de Fin *
+                                            </label>
+                                            <input
+                                                type="date"
+                                                required
+                                                className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-gray-900"
+                                                value={editData.fechaFin ? new Date(editData.fechaFin).toISOString().split('T')[0] : ''}
+                                                onChange={(e) => handleEditChange("fechaFin", new Date(e.target.value))}
+                                            />
                                         </div>
-                                        <div className="flex justify-between">
-                                            <span className="text-gray-600">Monto Mensual:</span>
-                                            {isEditing ? (
-                                                <input
-                                                    type="number"
-                                                    className="px-2 py-1 border rounded w-32"
-                                                    value={editData.montoMensual || ''}
-                                                    onChange={(e) => setEditData({ ...editData, montoMensual: parseFloat(e.target.value) })}
-                                                />
-                                            ) : (
-                                                <span className="font-medium text-lg">${alquiler.montoMensual.toLocaleString()}</span>
-                                            )}
+
+                                        <div>
+                                            <div className="flex gap-2 items-end">
+                                                <div className="flex-1">
+                                                    <MoneyInput
+                                                        label="Monto Mensual"
+                                                        value={editData.montoMensual?.toString() || ''}
+                                                        onChange={(val: string) => handleEditChange("montoMensual", parseFloat(val))}
+                                                        required
+                                                        placeholder="0"
+                                                    />
+                                                </div>
+                                                <div className="w-24">
+                                                    <label className="block text-sm font-medium text-gray-700 mb-2">Moneda</label>
+                                                    <select
+                                                        className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-gray-900"
+                                                        value={editData.monedaAlquiler}
+                                                        onChange={(e) => handleEditChange("monedaAlquiler", e.target.value)}
+                                                    >
+                                                        <option value="ARS">ARS</option>
+                                                        <option value="USD">USD</option>
+                                                    </select>
+                                                </div>
+                                            </div>
                                         </div>
-                                        <div className="flex justify-between">
-                                            <span className="text-gray-600">Día Vencimiento:</span>
-                                            {isEditing ? (
-                                                <input
-                                                    type="number"
-                                                    min="1"
-                                                    max="31"
-                                                    className="px-2 py-1 border rounded w-20"
-                                                    value={editData.diaVencimiento || ''}
-                                                    onChange={(e) => setEditData({ ...editData, diaVencimiento: parseInt(e.target.value) })}
-                                                />
-                                            ) : (
-                                                <span className="font-medium">{alquiler.diaVencimiento}</span>
-                                            )}
+
+                                        <div>
+                                            <div className="flex gap-2 items-end">
+                                                <div className="flex-1">
+                                                    <MoneyInput
+                                                        label="Valor de Depósito"
+                                                        value={editData.valorDeposito?.toString() || ''}
+                                                        onChange={(val: string) => handleEditChange("valorDeposito", parseFloat(val))}
+                                                        placeholder="0"
+                                                    />
+                                                </div>
+                                                <div className="w-24">
+                                                    <label className="block text-sm font-medium text-gray-700 mb-2">Moneda</label>
+                                                    <select
+                                                        className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-gray-900"
+                                                        value={editData.monedaDeposito}
+                                                        onChange={(e) => handleEditChange("monedaDeposito", e.target.value)}
+                                                    >
+                                                        <option value="USD">USD</option>
+                                                        <option value="ARS">ARS</option>
+                                                    </select>
+                                                </div>
+                                            </div>
                                         </div>
-                                        <div className="flex justify-between">
-                                            <span className="text-gray-600">Tipo Ajuste:</span>
-                                            <span className="font-medium">{alquiler.ajusteTipo}</span>
+
+                                        <div>
+                                            <label className="block text-sm font-medium text-gray-700 mb-2">
+                                                Día de Vencimiento *
+                                            </label>
+                                            <input
+                                                type="number"
+                                                required
+                                                min="1"
+                                                max="31"
+                                                className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-gray-900"
+                                                value={editData.diaVencimiento}
+                                                onChange={(e) => handleEditChange("diaVencimiento", parseInt(e.target.value))}
+                                            />
+                                        </div>
+
+                                        <div>
+                                            <label className="block text-sm font-medium text-gray-700 mb-2">
+                                                Método de Pago Preferido
+                                            </label>
+                                            <select
+                                                className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-gray-900"
+                                                value={editData.metodoPago || ''}
+                                                onChange={(e) => handleEditChange("metodoPago", e.target.value)}
+                                            >
+                                                <option value="">Seleccionar...</option>
+                                                <option value="transferencia">Transferencia Bancaria</option>
+                                                <option value="efectivo">Efectivo</option>
+                                                <option value="deposito">Depósito Bancario</option>
+                                                <option value="cheque">Cheque</option>
+                                                <option value="debito_automatico">Débito Automático</option>
+                                                <option value="otro">Otro</option>
+                                            </select>
                                         </div>
                                     </div>
-                                </div>
 
-                                {/* Datos del Inquilino - LIVE DATA */}
-                                <div>
-                                    <h3 className="text-sm font-medium text-gray-500 mb-3">Datos del Inquilino</h3>
-                                    <p className="text-xs text-gray-400 mb-4">
-                                        Estos datos se actualizan desde el módulo <Link href="/dashboard/clientes" className="text-indigo-600 hover:underline">Clientes</Link>
-                                    </p>
+                                    {/* Partida */}
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                        <TextInput
+                                            label="Nro de Partida Inmobiliaria"
+                                            value={editData.nroPartidaInmobiliaria || ''}
+                                            onChange={(val: string) => handleEditChange("nroPartidaInmobiliaria", val)}
+                                            required={false}
+                                            showCharCount={false}
+                                        />
+                                    </div>
 
-                                    <div className="space-y-3">
-                                        <div className="flex justify-between items-center border-b border-gray-50 pb-2">
-                                            <span className="text-gray-600 text-sm">Nombre:</span>
-                                            <span className="font-medium text-gray-900">{inquilino?.nombre || alquiler.nombreInquilino}</span>
+                                    {/* Honorarios */}
+                                    <div className="bg-gray-50 p-4 rounded-lg">
+                                        <h3 className="text-sm font-medium text-gray-900 mb-4">Honorarios de Inmobiliaria</h3>
+                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                            <div>
+                                                <label className="block text-sm font-medium text-gray-700 mb-2">
+                                                    Tipo de Honorarios
+                                                </label>
+                                                <select
+                                                    className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-gray-900"
+                                                    value={editData.honorariosTipo || 'fijo'}
+                                                    onChange={(e) => handleEditChange("honorariosTipo", e.target.value)}
+                                                >
+                                                    <option value="fijo">Monto Fijo Mensual</option>
+                                                    <option value="porcentaje">% del Alquiler Mensual</option>
+                                                </select>
+                                            </div>
+                                            <div>
+                                                {editData.honorariosTipo === 'fijo' ? (
+                                                    <MoneyInput
+                                                        label="Monto de Honorarios"
+                                                        value={editData.honorariosValor?.toString() || ''}
+                                                        onChange={(val: string) => handleEditChange("honorariosValor", parseFloat(val))}
+                                                        placeholder="0"
+                                                    />
+                                                ) : (
+                                                    <div>
+                                                        <label className="block text-sm font-medium text-gray-700 mb-2">
+                                                            % Mensual
+                                                        </label>
+                                                        <input
+                                                            type="number"
+                                                            step="0.1"
+                                                            className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-gray-900"
+                                                            value={editData.honorariosValor || ''}
+                                                            onChange={(e) => handleEditChange("honorariosValor", parseFloat(e.target.value))}
+                                                            placeholder="Ej: 4"
+                                                        />
+                                                    </div>
+                                                )}
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    {/* Punitorios */}
+                                    <div className="bg-gray-50 p-4 rounded-lg">
+                                        <h3 className="text-sm font-medium text-gray-900 mb-4">Intereses Punitorios</h3>
+                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                            <div>
+                                                <label className="block text-sm font-medium text-gray-700 mb-2">
+                                                    Tipo de Interés
+                                                </label>
+                                                <select
+                                                    className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-gray-900"
+                                                    value={editData.punitoriosTipo || 'porcentaje'}
+                                                    onChange={(e) => handleEditChange("punitoriosTipo", e.target.value)}
+                                                >
+                                                    <option value="porcentaje">Porcentaje Diario</option>
+                                                    <option value="fijo">Monto Fijo Diario</option>
+                                                </select>
+                                            </div>
+                                            <div>
+                                                {editData.punitoriosTipo === 'fijo' ? (
+                                                    <MoneyInput
+                                                        label="Monto Diario por Mora"
+                                                        value={editData.punitoriosValor?.toString() || ''}
+                                                        onChange={(val: string) => handleEditChange("punitoriosValor", parseFloat(val))}
+                                                        placeholder="0"
+                                                    />
+                                                ) : (
+                                                    <div>
+                                                        <label className="block text-sm font-medium text-gray-700 mb-2">
+                                                            Porcentaje Diario (%)
+                                                        </label>
+                                                        <input
+                                                            type="number"
+                                                            step="0.01"
+                                                            className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-gray-900"
+                                                            value={editData.punitoriosValor || ''}
+                                                            onChange={(e) => handleEditChange("punitoriosValor", parseFloat(e.target.value))}
+                                                            placeholder="Ej: 0.5"
+                                                        />
+                                                    </div>
+                                                )}
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    {/* Ajustes */}
+                                    <div className="bg-gray-50 p-4 rounded-lg">
+                                        <h3 className="text-sm font-medium text-gray-900 mb-4">Actualización / Ajuste</h3>
+                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                            <div>
+                                                <label className="block text-sm font-medium text-gray-700 mb-2">
+                                                    Tipo de Ajuste *
+                                                </label>
+                                                <select
+                                                    required
+                                                    className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-gray-900"
+                                                    value={editData.ajusteTipo}
+                                                    onChange={(e) => handleEditChange("ajusteTipo", e.target.value)}
+                                                >
+                                                    <option value="porcentaje">Porcentaje Fijo</option>
+                                                    <option value="ICL">ICL (Índice Contratos Locación)</option>
+                                                    <option value="IPC">IPC (Índice Precios Consumidor)</option>
+                                                    <option value="casa_propia">Índice Casa Propia</option>
+                                                    <option value="manual">Otro / Manual</option>
+                                                </select>
+                                            </div>
+
+                                            {(editData.ajusteTipo === 'porcentaje' || editData.ajusteTipo === 'manual') && (
+                                                <div>
+                                                    {editData.ajusteTipo === 'manual' ? (
+                                                        <MoneyInput
+                                                            label="Valor / Monto"
+                                                            value={editData.ajusteValor?.toString() || ''}
+                                                            onChange={(val: string) => handleEditChange("ajusteValor", parseFloat(val))}
+                                                            placeholder="0"
+                                                        />
+                                                    ) : (
+                                                        <>
+                                                            <label className="block text-sm font-medium text-gray-700 mb-2">
+                                                                Valor de Ajuste (%)
+                                                            </label>
+                                                            <input
+                                                                type="number"
+                                                                step="0.01"
+                                                                className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-gray-900"
+                                                                value={editData.ajusteValor || ''}
+                                                                onChange={(e) => handleEditChange("ajusteValor", parseFloat(e.target.value))}
+                                                                placeholder="0"
+                                                            />
+                                                        </>
+                                                    )}
+                                                </div>
+                                            )}
+
+                                            <div>
+                                                <label className="block text-sm font-medium text-gray-700 mb-2">
+                                                    Frecuencia de Actualización
+                                                </label>
+                                                <select
+                                                    className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-gray-900"
+                                                    value={isCustomFrequency ? "0" : editData.ajusteFrecuencia?.toString() || "3"}
+                                                    onChange={(e) => {
+                                                        const val = e.target.value;
+                                                        if (val === "0") {
+                                                            setIsCustomFrequency(true);
+                                                        } else {
+                                                            setIsCustomFrequency(false);
+                                                            handleEditChange("ajusteFrecuencia", parseInt(val));
+                                                            handleEditChange("ajusteMesesPrimer", null);
+                                                        }
+                                                    }}
+                                                >
+                                                    <option value="3">Trimestral (3 meses)</option>
+                                                    <option value="4">Cuatrimestral (4 meses)</option>
+                                                    <option value="6">Semestral (6 meses)</option>
+                                                    <option value="12">Anual (12 meses)</option>
+                                                    <option value="0">Personalizado</option>
+                                                </select>
+                                            </div>
+
+                                            {isCustomFrequency && (
+                                                <>
+                                                    <div>
+                                                        <label className="block text-sm font-medium text-gray-700 mb-2">
+                                                            Primer Ajuste (Meses)
+                                                        </label>
+                                                        <input
+                                                            type="number"
+                                                            min="1"
+                                                            className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-gray-900"
+                                                            value={editData.ajusteMesesPrimer || ''}
+                                                            onChange={(e) => handleEditChange("ajusteMesesPrimer", parseInt(e.target.value) || null)}
+                                                            placeholder="Ej: 4"
+                                                        />
+                                                        <p className="text-xs text-gray-500 mt-1">Si difiere del resto.</p>
+                                                    </div>
+                                                    <div>
+                                                        <label className="block text-sm font-medium text-gray-700 mb-2">
+                                                            Ajustes Siguientes (Meses)
+                                                        </label>
+                                                        <input
+                                                            type="number"
+                                                            min="1"
+                                                            className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-gray-900"
+                                                            value={editData.ajusteFrecuencia || ''}
+                                                            onChange={(e) => handleEditChange("ajusteFrecuencia", parseInt(e.target.value))}
+                                                        />
+                                                    </div>
+                                                </>
+                                            )}
+                                        </div>
+                                    </div>
+
+                                    {/* Garantía */}
+                                    <div className="bg-gray-50 p-4 rounded-lg">
+                                        <h3 className="text-sm font-medium text-gray-900 mb-4">Garantía / Aval</h3>
+                                        <div className="grid grid-cols-1 gap-4 mb-4">
+                                            <div>
+                                                <label className="block text-sm font-medium text-gray-700 mb-2">
+                                                    Tipo de Garantía
+                                                </label>
+                                                <select
+                                                    className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-gray-900"
+                                                    value={editData.tipoGarantia || 'garante'}
+                                                    onChange={(e) => handleEditChange("tipoGarantia", e.target.value)}
+                                                >
+                                                    <option value="garante">Garante Personal</option>
+                                                    <option value="seguro_caucion">Seguro de Caución</option>
+                                                </select>
+                                            </div>
                                         </div>
 
-                                        <div className="flex justify-between items-center border-b border-gray-50 pb-2">
-                                            <span className="text-gray-600 text-sm">DNI:</span>
-                                            <span className="font-medium text-gray-900">{inquilino?.dni || '-'}</span>
-                                        </div>
-
-                                        <div className="flex justify-between items-center border-b border-gray-50 pb-2">
-                                            <span className="text-gray-600 text-sm">Teléfono:</span>
-                                            <span className="font-medium text-gray-900">{inquilino?.telefono || alquiler.contactoInquilino}</span>
-                                        </div>
-
-                                        <div className="flex justify-between items-center border-b border-gray-50 pb-2">
-                                            <span className="text-gray-600 text-sm">Email:</span>
-                                            <span className="font-medium text-gray-900">{inquilino?.email || '-'}</span>
-                                        </div>
-
-                                        {inquilino?.whatsapp && (
-                                            <div className="flex justify-between items-center border-b border-gray-50 pb-2">
-                                                <span className="text-gray-600 text-sm">WhatsApp:</span>
-                                                <span className="font-medium text-gray-900">{inquilino.whatsapp}</span>
+                                        {editData.tipoGarantia === 'garante' ? (
+                                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                                <TextInput
+                                                    label="Nombre del Garante"
+                                                    value={editData.garante?.nombre || ''}
+                                                    onChange={(val: string) => handleEditChange("garante", { ...editData.garante, nombre: val })}
+                                                    required={true}
+                                                    showCharCount={false}
+                                                />
+                                                <TextInput
+                                                    label="DNI del Garante"
+                                                    value={editData.garante?.dni || ''}
+                                                    onChange={(val: string) => handleEditChange("garante", { ...editData.garante, dni: val })}
+                                                    required={true}
+                                                    showCharCount={false}
+                                                />
+                                                <TextInput
+                                                    label="Email"
+                                                    value={editData.garante?.email || ''}
+                                                    onChange={(val: string) => handleEditChange("garante", { ...editData.garante, email: val })}
+                                                    required={false}
+                                                    showCharCount={false}
+                                                />
+                                                <TextInput
+                                                    label="Teléfono"
+                                                    value={editData.garante?.telefono || ''}
+                                                    onChange={(val: string) => handleEditChange("garante", { ...editData.garante, telefono: val })}
+                                                    required={false}
+                                                    showCharCount={false}
+                                                />
+                                            </div>
+                                        ) : (
+                                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                                <TextInput
+                                                    label="Compañía Aseguradora"
+                                                    value={editData.seguroCaucion?.compania || ''}
+                                                    onChange={(val: string) => handleEditChange("seguroCaucion", { ...editData.seguroCaucion, compania: val })}
+                                                    required={true}
+                                                    showCharCount={false}
+                                                />
+                                                <TextInput
+                                                    label="Número de Póliza"
+                                                    value={editData.seguroCaucion?.numeroPoliza || ''}
+                                                    onChange={(val: string) => handleEditChange("seguroCaucion", { ...editData.seguroCaucion, numeroPoliza: val })}
+                                                    required={true}
+                                                    showCharCount={false}
+                                                />
                                             </div>
                                         )}
+                                    </div>
 
+                                    {/* Servicios */}
+                                    <div className="bg-gray-50 p-4 rounded-lg">
+                                        <h3 className="text-sm font-medium text-gray-900 mb-4">Servicios y Expensas a Cargo del Inquilino</h3>
+                                        <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+                                            {[
+                                                { key: 'luz', label: 'Luz' },
+                                                { key: 'gas', label: 'Gas' },
+                                                { key: 'agua', label: 'Agua' },
+                                                { key: 'wifi', label: 'Internet / Wifi' },
+                                                { key: 'cochera', label: 'Cochera' },
+                                                { key: 'expensas', label: 'Expensas' },
+                                            ].map((sc) => (
+                                                <label key={sc.key} className="flex items-center gap-3 p-3 bg-white border border-gray-200 rounded-lg cursor-pointer hover:border-indigo-300">
+                                                    <input
+                                                        type="checkbox"
+                                                        className="w-5 h-5 text-indigo-600 rounded focus:ring-indigo-500"
+                                                        checked={servicios[sc.key]}
+                                                        onChange={(e) => handleServiceChange(sc.key, e.target.checked)}
+                                                    />
+                                                    <span className="text-gray-700 font-medium">{sc.label}</span>
+                                                </label>
+                                            ))}
+                                        </div>
+                                        <div className="mt-4">
+                                            <label className="block text-sm font-medium text-gray-700 mb-2">
+                                                Otros Servicios / Observaciones
+                                            </label>
+                                            <input
+                                                type="text"
+                                                className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-gray-900"
+                                                placeholder="Ej: Jardinero, Seguridad Privada, Piletero..."
+                                                value={otroServicio}
+                                                onChange={(e) => handleOtroServicioChange(e.target.value)}
+                                            />
+                                        </div>
+                                    </div>
 
+                                    <div className="grid grid-cols-1">
+                                        <TextAreaInput
+                                            label="Estado del Inmueble / Inventario"
+                                            value={editData.estadoInmueble || ''}
+                                            onChange={(value: string) => handleEditChange("estadoInmueble", value)}
+                                            placeholder="Descripción del estado del inmueble al inicio del contrato, inventario de muebles, electrodomésticos, etc."
+                                            maxLength={500}
+                                            required={false}
+                                            rows={6}
+                                        />
                                     </div>
                                 </div>
-                            </div>
+                            ) : (
+                                /* READ ONLY VIEW */
+                                <div className="space-y-6">
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                                        {/* COLUMN 1 */}
+                                        <div className="space-y-6">
+                                            <div className="pb-4 border-b border-gray-100">
+                                                <h3 className="text-sm font-semibold text-indigo-600 mb-4 uppercase tracking-wider">Detalles Principales</h3>
+                                                <div className="space-y-4 text-sm">
+                                                    <p><span className="text-gray-500">Fecha Inicio:</span> <span className="font-medium text-gray-900 ml-2">{new Date(alquiler.fechaInicio).toLocaleDateString()}</span></p>
+                                                    <p><span className="text-gray-500">Fecha Fin:</span> <span className="font-medium text-gray-900 ml-2">{new Date(alquiler.fechaFin).toLocaleDateString()}</span></p>
+                                                    <p><span className="text-gray-500">Monto Mensual:</span> <span className="font-medium text-gray-900 ml-2">${alquiler.montoMensual?.toLocaleString()} {alquiler.monedaAlquiler}</span></p>
+                                                    <p><span className="text-gray-500">Vencimiento:</span> <span className="font-medium text-gray-900 ml-2">Día {alquiler.diaVencimiento}</span></p>
+                                                    <p><span className="text-gray-500">Ajuste:</span> <span className="font-medium text-gray-900 ml-2">{alquiler.ajusteTipo} {alquiler.ajusteValor ? `(${alquiler.ajusteValor}%)` : ''} ({alquiler.ajusteFrecuencia} meses)</span></p>
+                                                </div>
+                                            </div>
+
+                                            <div className="pb-4 border-b border-gray-100">
+                                                <h3 className="text-sm font-semibold text-indigo-600 mb-4 uppercase tracking-wider">Honorarios y Punitorios</h3>
+                                                <div className="space-y-4 text-sm">
+                                                    <p>
+                                                        <span className="text-gray-500">Honorarios:</span>
+                                                        <span className="font-medium text-gray-900 ml-2">
+                                                            {alquiler.honorariosTipo === 'fijo'
+                                                                ? `$${alquiler.honorariosValor?.toLocaleString()} (Mensual)`
+                                                                : `${alquiler.honorariosValor}% (Mensual)`}
+                                                        </span>
+                                                    </p>
+                                                    <p>
+                                                        <span className="text-gray-500">Punitorios (Mora):</span>
+                                                        <span className="font-medium text-gray-900 ml-2">
+                                                            {alquiler.punitoriosTipo === 'fijo'
+                                                                ? `$${alquiler.punitoriosValor?.toLocaleString()} (Diario)`
+                                                                : `${alquiler.punitoriosValor}% (Diario)`}
+                                                        </span>
+                                                    </p>
+                                                </div>
+                                            </div>
+
+                                            <div>
+                                                <h3 className="text-sm font-semibold text-indigo-600 mb-4 uppercase tracking-wider">Inquilino</h3>
+                                                <div className="bg-gray-50 p-4 rounded-lg space-y-2 text-sm">
+                                                    <p><span className="text-gray-500">Nombre:</span> <span className="font-medium text-gray-900 ml-2">{inquilino?.nombre || alquiler.nombreInquilino}</span></p>
+                                                    <p><span className="text-gray-500">DNI:</span> <span className="font-medium text-gray-900 ml-2">{inquilino?.dni || alquiler.dniInquilino || '-'}</span></p>
+                                                    <p className="text-gray-500 text-xs mt-2 pt-2 border-t border-gray-200">Editar datos en <Link href="/dashboard/clientes" className="text-indigo-600">Clientes</Link></p>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        {/* COLUMN 2 */}
+                                        <div className="space-y-6">
+                                            <div className="pb-4 border-b border-gray-100">
+                                                <h3 className="text-sm font-semibold text-indigo-600 mb-4 uppercase tracking-wider">Garantía</h3>
+                                                <div className="space-y-2 text-sm">
+                                                    <p><span className="text-gray-500">Tipo:</span> <span className="font-medium text-gray-900 capitalize ml-2">{alquiler.tipoGarantia?.replace('_', ' ')}</span></p>
+                                                    {alquiler.tipoGarantia === 'garante' ? (
+                                                        <>
+                                                            <p><span className="text-gray-500">Nombre:</span> <span className="font-medium text-gray-900 ml-2">{alquiler.garante?.nombre}</span></p>
+                                                            <p><span className="text-gray-500">DNI:</span> <span className="font-medium text-gray-900 ml-2">{alquiler.garante?.dni}</span></p>
+                                                        </>
+                                                    ) : (
+                                                        <>
+                                                            <p><span className="text-gray-500">Compañía:</span> <span className="font-medium text-gray-900 ml-2">{alquiler.seguroCaucion?.compania}</span></p>
+                                                            <p><span className="text-gray-500">Póliza:</span> <span className="font-medium text-gray-900 ml-2">{alquiler.seguroCaucion?.numeroPoliza}</span></p>
+                                                        </>
+                                                    )}
+                                                </div>
+                                            </div>
+
+                                            <div className="pb-4 border-b border-gray-100">
+                                                <h3 className="text-sm font-semibold text-indigo-600 mb-4 uppercase tracking-wider">Servicios</h3>
+                                                <div className="flex flex-wrap gap-2">
+                                                    {alquiler.serviciosAdicionales && alquiler.serviciosAdicionales.length > 0 ? (
+                                                        alquiler.serviciosAdicionales.map((s, i) => (
+                                                            <span key={i} className="px-2 py-1 bg-gray-100 text-gray-700 text-xs rounded-full border border-gray-200">
+                                                                {s}
+                                                            </span>
+                                                        ))
+                                                    ) : <span className="text-gray-400 text-sm italic">Sin servicios adicionales</span>}
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            )}
                         </div>
                     </div>
                 )}
@@ -515,6 +1046,7 @@ export default function AlquilerDetailPage() {
                             alquiler={alquiler}
                             inquilino={inquilino}
                             onUpdatePayment={handleUpdatePayment}
+                            onUpdateContract={handleUpdateContract}
                         />
                     </div>
                 )}
@@ -529,6 +1061,13 @@ export default function AlquilerDetailPage() {
                     />
                 )}
             </div>
+            {alquiler && (
+                <ContractGeneratorPreviewModal
+                    isOpen={showContractPreview}
+                    onClose={() => setShowContractPreview(false)}
+                    contract={alquiler}
+                />
+            )}
         </div>
     );
 }

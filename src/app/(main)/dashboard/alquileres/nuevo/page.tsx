@@ -37,9 +37,13 @@ export default function NuevoAlquilerPage() {
         fechaInicio: "",
         fechaFin: "",
         montoMensual: "",
+        monedaAlquiler: "ARS" as 'ARS' | 'USD',
         diaVencimiento: "10",
         ajusteTipo: "porcentaje" as 'porcentaje' | 'ICL' | 'IPC' | 'casa_propia' | 'manual',
         ajusteValor: "0",
+        ajusteFrecuencia: "3", // Default trimestral
+        ajusteMesesPrimer: "", // Optional
+
         // punitorios
         punitoriosTipo: "porcentaje" as 'fijo' | 'porcentaje',
         punitoriosValor: "1",
@@ -47,12 +51,29 @@ export default function NuevoAlquilerPage() {
         // nuevos
         nroPartidaInmobiliaria: "",
         valorDeposito: "",
+        monedaDeposito: "ARS" as 'ARS' | 'USD',
         honorariosTipo: "fijo" as 'fijo' | 'porcentaje',
         honorariosValor: "",
         metodoPago: "",
 
         estadoInmueble: "",
+
+        // garantia
+        tipoGarantia: "garante" as 'garante' | 'seguro_caucion',
+
+        // garantes
+        garanteNombre: "",
+        garanteDni: "",
+        garanteEmail: "",
+        garanteTelefono: "",
+
+        // seguro
+        seguroCompania: "",
+        seguroPoliza: "",
     });
+
+    // UI State for Custom Frequency mode
+    const [isCustomFrequency, setIsCustomFrequency] = useState(false);
 
     const [servicios, setServicios] = useState<{ [key: string]: boolean }>({
         luz: false,
@@ -62,6 +83,7 @@ export default function NuevoAlquilerPage() {
         expensas: false,
         agua: false,
     });
+    const [otroServicio, setOtroServicio] = useState("");
 
     // Check for createdPropertyId param
     useEffect(() => {
@@ -106,6 +128,17 @@ export default function NuevoAlquilerPage() {
         if (!auth?.currentUser || !selectedInquilino || !selectedPropietario) return;
 
         try {
+            // Validations
+            if (new Date(contractData.fechaFin) <= new Date(contractData.fechaInicio)) {
+                alert("La fecha de fin debe ser posterior a la fecha de inicio");
+                return;
+            }
+
+            if (parseFloat(contractData.montoMensual) <= 0) {
+                alert("El monto mensual debe ser mayor a 0");
+                return;
+            }
+
             setLoading(true);
 
             // Use data from selected entities
@@ -158,24 +191,47 @@ export default function NuevoAlquilerPage() {
 
                 nroPartidaInmobiliaria: contractData.nroPartidaInmobiliaria,
                 valorDeposito: parseFloat(contractData.valorDeposito || "0"),
+                monedaDeposito: contractData.monedaDeposito,
                 honorariosTipo: contractData.honorariosTipo,
                 honorariosValor: parseFloat(contractData.honorariosValor || "0"),
                 metodoPago: contractData.metodoPago,
-                serviciosAdicionales: Object.keys(servicios).filter(k => servicios[k]),
+                serviciosAdicionales: [
+                    ...Object.keys(servicios).filter(k => servicios[k]),
+                    ...(otroServicio ? [otroServicio] : [])
+                ],
 
                 fechaInicio: new Date(contractData.fechaInicio),
                 fechaFin: new Date(contractData.fechaFin),
                 montoMensual: parseFloat(contractData.montoMensual),
+                monedaAlquiler: contractData.monedaAlquiler,
                 diaVencimiento: parseInt(contractData.diaVencimiento),
                 // tasaPunitorios deprecated
                 ajusteTipo: contractData.ajusteTipo,
                 ajusteValor: parseFloat(contractData.ajusteValor),
+                ajusteFrecuencia: parseInt(contractData.ajusteFrecuencia),
+                ajusteMesesPrimer: contractData.ajusteMesesPrimer ? parseInt(contractData.ajusteMesesPrimer) : null,
                 estadoInmueble: contractData.estadoInmueble,
                 historialPagos: [],
                 incidencias: [],
                 estado: 'activo',
                 documentos: [],
                 userId: auth.currentUser?.uid || '',
+                // garantia
+                tipoGarantia: contractData.tipoGarantia,
+                garante: contractData.tipoGarantia === 'garante' ? {
+                    nombre: contractData.garanteNombre,
+                    dni: contractData.garanteDni,
+                    email: contractData.garanteEmail,
+                    telefono: contractData.garanteTelefono,
+                } : null,
+                seguroCaucion: contractData.tipoGarantia === 'seguro_caucion' ? {
+                    compania: contractData.seguroCompania,
+                    numeroPoliza: contractData.seguroPoliza,
+                    montoAsegurado: 0, // Default or ask user?
+                    fechaEmision: new Date(),
+                    fechaVencimiento: new Date(contractData.fechaFin),
+                    contactoCompania: "",
+                } : null,
             };
 
             const id = await alquileresService.createAlquiler(alquiler);
@@ -358,7 +414,7 @@ export default function NuevoAlquilerPage() {
                                     <input
                                         type="date"
                                         required
-                                        className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                                        className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-gray-900"
                                         value={contractData.fechaInicio}
                                         onChange={(e) => handleContractChange("fechaInicio", e.target.value)}
                                     />
@@ -371,29 +427,59 @@ export default function NuevoAlquilerPage() {
                                     <input
                                         type="date"
                                         required
-                                        className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                                        className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-gray-900"
                                         value={contractData.fechaFin}
                                         onChange={(e) => handleContractChange("fechaFin", e.target.value)}
                                     />
                                 </div>
 
                                 <div>
-                                    <MoneyInput
-                                        label="Monto Mensual"
-                                        value={contractData.montoMensual}
-                                        onChange={(val) => handleContractChange("montoMensual", val)}
-                                        required
-                                        placeholder="0"
-                                    />
+                                    <div className="flex gap-2 items-end">
+                                        <div className="flex-1">
+                                            <MoneyInput
+                                                label="Monto Mensual"
+                                                value={contractData.montoMensual}
+                                                onChange={(val) => handleContractChange("montoMensual", val)}
+                                                required
+                                                placeholder="0"
+                                            />
+                                        </div>
+                                        <div className="w-24">
+                                            <label className="block text-sm font-medium text-gray-700 mb-2">Moneda</label>
+                                            <select
+                                                className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-gray-900"
+                                                value={contractData.monedaAlquiler}
+                                                onChange={(e) => handleContractChange("monedaAlquiler", e.target.value)}
+                                            >
+                                                <option value="ARS">ARS</option>
+                                                <option value="USD">USD</option>
+                                            </select>
+                                        </div>
+                                    </div>
                                 </div>
 
                                 <div>
-                                    <MoneyInput
-                                        label="Valor de Depósito"
-                                        value={contractData.valorDeposito}
-                                        onChange={(val) => handleContractChange("valorDeposito", val)}
-                                        placeholder="0"
-                                    />
+                                    <div className="flex gap-2 items-end">
+                                        <div className="flex-1">
+                                            <MoneyInput
+                                                label="Valor de Depósito"
+                                                value={contractData.valorDeposito}
+                                                onChange={(val) => handleContractChange("valorDeposito", val)}
+                                                placeholder="0"
+                                            />
+                                        </div>
+                                        <div className="w-24">
+                                            <label className="block text-sm font-medium text-gray-700 mb-2">Moneda</label>
+                                            <select
+                                                className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-gray-900"
+                                                value={contractData.monedaDeposito}
+                                                onChange={(e) => handleContractChange("monedaDeposito", e.target.value)}
+                                            >
+                                                <option value="USD">USD</option>
+                                                <option value="ARS">ARS</option>
+                                            </select>
+                                        </div>
+                                    </div>
                                 </div>
 
                                 <div>
@@ -405,7 +491,7 @@ export default function NuevoAlquilerPage() {
                                         required
                                         min="1"
                                         max="31"
-                                        className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                                        className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-gray-900"
                                         value={contractData.diaVencimiento}
                                         onChange={(e) => handleContractChange("diaVencimiento", e.target.value)}
                                     />
@@ -455,8 +541,8 @@ export default function NuevoAlquilerPage() {
                                             value={contractData.honorariosTipo}
                                             onChange={(e) => handleContractChange("honorariosTipo", e.target.value)}
                                         >
-                                            <option value="fijo">Monto Fijo</option>
-                                            <option value="porcentaje">Porcentaje Total Contrato</option>
+                                            <option value="fijo">Monto Fijo Mensual</option>
+                                            <option value="porcentaje">% del Alquiler Mensual</option>
                                         </select>
                                     </div>
                                     <div>
@@ -470,12 +556,12 @@ export default function NuevoAlquilerPage() {
                                         ) : (
                                             <div>
                                                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                                                    Porcentaje (%)
+                                                    % Mensual
                                                 </label>
                                                 <input
                                                     type="number"
                                                     step="0.1"
-                                                    className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                                                    className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-gray-900"
                                                     value={contractData.honorariosValor}
                                                     onChange={(e) => handleContractChange("honorariosValor", e.target.value)}
                                                     placeholder="Ej: 4"
@@ -519,7 +605,7 @@ export default function NuevoAlquilerPage() {
                                                 <input
                                                     type="number"
                                                     step="0.01"
-                                                    className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                                                    className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-gray-900"
                                                     value={contractData.punitoriosValor}
                                                     onChange={(e) => handleContractChange("punitoriosValor", e.target.value)}
                                                     placeholder="Ej: 0.5"
@@ -569,7 +655,7 @@ export default function NuevoAlquilerPage() {
                                                     <input
                                                         type="number"
                                                         step="0.01"
-                                                        className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                                                        className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-gray-900"
                                                         value={contractData.ajusteValor}
                                                         onChange={(e) => handleContractChange("ajusteValor", e.target.value)}
                                                         placeholder="0"
@@ -578,12 +664,140 @@ export default function NuevoAlquilerPage() {
                                             )}
                                         </div>
                                     )}
+
+                                    <div>
+                                        <label className="block text-sm font-medium text-gray-700 mb-2">
+                                            Frecuencia de Actualización
+                                        </label>
+                                        <select
+                                            className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-gray-900"
+                                            value={isCustomFrequency ? "0" : contractData.ajusteFrecuencia}
+                                            onChange={(e) => {
+                                                const val = e.target.value;
+                                                if (val === "0") {
+                                                    setIsCustomFrequency(true);
+                                                } else {
+                                                    setIsCustomFrequency(false);
+                                                    handleContractChange("ajusteFrecuencia", val);
+                                                    // Reset special first adjustment if switching to standard
+                                                    handleContractChange("ajusteMesesPrimer", "");
+                                                }
+                                            }}
+                                        >
+                                            <option value="3">Trimestral (3 meses)</option>
+                                            <option value="4">Cuatrimestral (4 meses)</option>
+                                            <option value="6">Semestral (6 meses)</option>
+                                            <option value="12">Anual (12 meses)</option>
+                                            <option value="0">Personalizado</option>
+                                        </select>
+                                    </div>
+
+                                    {isCustomFrequency && (
+                                        <>
+                                            <div>
+                                                <label className="block text-sm font-medium text-gray-700 mb-2">
+                                                    Primer Ajuste (Meses)
+                                                </label>
+                                                <input
+                                                    type="number"
+                                                    min="1"
+                                                    className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-gray-900"
+                                                    value={contractData.ajusteMesesPrimer}
+                                                    onChange={(e) => handleContractChange("ajusteMesesPrimer", e.target.value)}
+                                                    placeholder="Ej: 4"
+                                                />
+                                                <p className="text-xs text-gray-500 mt-1">Si difiere del resto.</p>
+                                            </div>
+                                            <div>
+                                                <label className="block text-sm font-medium text-gray-700 mb-2">
+                                                    Ajustes Siguientes (Meses)
+                                                </label>
+                                                <input
+                                                    type="number"
+                                                    min="1"
+                                                    className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-gray-900"
+                                                    value={contractData.ajusteFrecuencia}
+                                                    onChange={(e) => handleContractChange("ajusteFrecuencia", e.target.value)}
+                                                />
+                                            </div>
+                                        </>
+                                    )}
                                     {(contractData.ajusteTipo === 'ICL' || contractData.ajusteTipo === 'IPC' || contractData.ajusteTipo === 'casa_propia') && (
                                         <div className="flex items-center text-sm text-gray-500">
                                             El valor se calculará automáticamente según el índice seleccionado.
                                         </div>
                                     )}
                                 </div>
+                            </div>
+
+                            {/* Garantía */}
+                            <div className="bg-gray-50 p-4 rounded-lg">
+                                <h3 className="text-sm font-medium text-gray-900 mb-4">Garantía / Aval</h3>
+                                <div className="grid grid-cols-1 gap-4 mb-4">
+                                    <div>
+                                        <label className="block text-sm font-medium text-gray-700 mb-2">
+                                            Tipo de Garantía
+                                        </label>
+                                        <select
+                                            className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-gray-900"
+                                            value={contractData.tipoGarantia}
+                                            onChange={(e) => handleContractChange("tipoGarantia", e.target.value)}
+                                        >
+                                            <option value="garante">Garante Personal</option>
+                                            <option value="seguro_caucion">Seguro de Caución</option>
+                                        </select>
+                                    </div>
+                                </div>
+
+                                {contractData.tipoGarantia === 'garante' ? (
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                        <TextInput
+                                            label="Nombre del Garante"
+                                            value={contractData.garanteNombre}
+                                            onChange={(val) => handleContractChange("garanteNombre", val)}
+                                            required={true}
+                                            showCharCount={false}
+                                        />
+                                        <TextInput
+                                            label="DNI del Garante"
+                                            value={contractData.garanteDni}
+                                            onChange={(val) => handleContractChange("garanteDni", val)}
+                                            required={true}
+                                            showCharCount={false}
+                                        />
+                                        <TextInput
+                                            label="Email"
+                                            value={contractData.garanteEmail}
+                                            onChange={(val) => handleContractChange("garanteEmail", val)}
+                                            required={false}
+                                            showCharCount={false}
+                                        />
+                                        <TextInput
+                                            label="Teléfono"
+                                            value={contractData.garanteTelefono}
+                                            onChange={(val) => handleContractChange("garanteTelefono", val)}
+                                            required={false}
+                                            showCharCount={false}
+                                        />
+                                    </div>
+                                ) : (
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                        <TextInput
+                                            label="Compañía Aseguradora"
+                                            value={contractData.seguroCompania}
+                                            onChange={(val) => handleContractChange("seguroCompania", val)}
+                                            required={true}
+                                            showCharCount={false}
+                                        />
+                                        <TextInput
+                                            label="Número de Póliza"
+                                            value={contractData.seguroPoliza}
+                                            onChange={(val) => handleContractChange("seguroPoliza", val)}
+                                            required={true}
+                                            showCharCount={false}
+                                        />
+                                    </div>
+                                )}
                             </div>
 
                             {/* Servicios */}
@@ -609,6 +823,18 @@ export default function NuevoAlquilerPage() {
                                         </label>
                                     ))}
                                 </div>
+                                <div className="mt-4">
+                                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                                        Otros Servicios / Observaciones
+                                    </label>
+                                    <input
+                                        type="text"
+                                        className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-gray-900"
+                                        placeholder="Ej: Jardinero, Seguridad Privada, Piletero..."
+                                        value={otroServicio}
+                                        onChange={(e) => setOtroServicio(e.target.value)}
+                                    />
+                                </div>
                             </div>
 
                             <div className="grid grid-cols-1">
@@ -617,7 +843,7 @@ export default function NuevoAlquilerPage() {
                                     value={contractData.estadoInmueble}
                                     onChange={(value) => handleContractChange("estadoInmueble", value)}
                                     placeholder="Descripción del estado del inmueble al inicio del contrato, inventario de muebles, electrodomésticos, etc."
-                                    maxLength={2000}
+                                    maxLength={500}
                                     required={false}
                                     rows={6}
                                 />

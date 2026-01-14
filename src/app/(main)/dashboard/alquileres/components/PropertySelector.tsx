@@ -99,7 +99,7 @@ export default function PropertySelector({ onSelect, selectedId }: PropertySelec
 
             <select
                 required
-                className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-gray-900"
                 value={selectedId || ""}
                 onChange={handleChange}
             >

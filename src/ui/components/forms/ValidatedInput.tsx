@@ -72,7 +72,7 @@ export default function ValidatedInput({
     };
 
     const getInputClasses = () => {
-        const base = "w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 transition-colors";
+        const base = "w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 transition-colors text-gray-900";
 
         if (!touched || !value) {
             return `${base} border-gray-300 focus:ring-indigo-500 focus:border-indigo-500`;

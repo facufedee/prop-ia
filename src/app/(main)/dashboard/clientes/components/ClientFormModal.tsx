@@ -26,6 +26,24 @@ export default function ClientFormModal({ isOpen, onClose, onSuccess, initialTyp
     const [error, setError] = useState("");
     const [isEditing, setIsEditing] = useState(false);
 
+    // Helpers
+    const handleNameChange = (val: string) => {
+        // Allow letters, spaces, accents. No numbers or special chars (mostly).
+        const filtered = val.replace(/[^a-zA-ZáéíóúÁÉÍÓÚñÑ\s]/g, "");
+        setNombre(filtered);
+    };
+
+    const handlePhoneChange = (val: string) => {
+        // Only numbers
+        const filtered = val.replace(/[^0-9]/g, "");
+        setTelefono(filtered);
+    };
+
+    const handleDniChange = (val: string) => {
+        const filtered = val.replace(/[^0-9]/g, "");
+        setDni(filtered);
+    };
+
     // Limit modal state
     const [showLimitModal, setShowLimitModal] = useState(false);
     const [currentLimit, setCurrentLimit] = useState<number | string>(5);
@@ -38,22 +56,6 @@ export default function ClientFormModal({ isOpen, onClose, onSuccess, initialTyp
     const [dni, setDni] = useState("");
     const [cuit, setCuit] = useState("");
     const [domicilio, setDomicilio] = useState("");
-
-    // Inquilino Specific - Garante
-    const [garante, setGarante] = useState({
-        nombre: "",
-        dni: "",
-        email: "",
-        telefono: "",
-        domicilio: ""
-    });
-
-    // Propietario Specific - Bank
-    const [cuentaBancaria, setCuentaBancaria] = useState({
-        banco: "",
-        cbu: "",
-        alias: ""
-    });
 
     // Lead Specific
     const [leadData, setLeadData] = useState({
@@ -82,22 +84,12 @@ export default function ClientFormModal({ isOpen, onClose, onSuccess, initialTyp
             if (initialType === 'inquilinos') {
                 const inq = initialData as Inquilino;
                 if (inq.datosGarante) {
-                    setGarante({
-                        nombre: inq.datosGarante.nombre || "",
-                        dni: inq.datosGarante.dni || "",
-                        email: inq.datosGarante.email || "",
-                        telefono: inq.datosGarante.telefono || "",
-                        domicilio: inq.datosGarante.domicilio || ""
-                    });
+                    // Legacy or unused in UI
                 }
             } else if (initialType === 'propietarios') {
                 const prop = initialData as Propietario;
                 if (prop.cuentaBancaria) {
-                    setCuentaBancaria({
-                        banco: prop.cuentaBancaria.banco || "",
-                        cbu: prop.cuentaBancaria.cbu || "",
-                        alias: prop.cuentaBancaria.alias || ""
-                    });
+                    // Legacy or unused in UI
                 }
             } else if (initialType === 'leads') {
                 const lead = initialData as Lead;
@@ -122,8 +114,9 @@ export default function ClientFormModal({ isOpen, onClose, onSuccess, initialTyp
         setDni("");
         setCuit("");
         setDomicilio("");
-        setGarante({ nombre: "", dni: "", email: "", telefono: "", domicilio: "" });
-        setCuentaBancaria({ banco: "", cbu: "", alias: "" });
+        setDni("");
+        setCuit("");
+        setDomicilio("");
         setLeadData({ mensaje: "", origen: "manual", estado: "nuevo" });
     };
 
@@ -142,6 +135,23 @@ export default function ClientFormModal({ isOpen, onClose, onSuccess, initialTyp
         setLoading(true);
 
         try {
+            // Validations
+            if (telefono && telefono.length > 20) {
+                setError("El teléfono es muy largo.");
+                setLoading(false);
+                return;
+            }
+            if (dni && dni.length > 15) {
+                setError("El DNI es demasiado largo.");
+                setLoading(false);
+                return;
+            }
+            if (cuit && cuit.length > 15) {
+                setError("El CUIT es demasiado largo.");
+                setLoading(false);
+                return;
+            }
+
             // Check limits only if creating new (not editing)
             if (!isEditing && clientType !== 'leads') {
                 const limitCheck = await subscriptionService.checkUsageLimit(uid, 'clients');
@@ -164,7 +174,7 @@ export default function ClientFormModal({ isOpen, onClose, onSuccess, initialTyp
                     dni,
                     cuit,
                     domicilio,
-                    datosGarante: { ...garante },
+                    // datosGarante: undefined, // Removed from UI
                     documentos: (initialData as Inquilino)?.documentos || [],
                 };
 
@@ -183,7 +193,7 @@ export default function ClientFormModal({ isOpen, onClose, onSuccess, initialTyp
                     dni,
                     cuit,
                     domicilio,
-                    cuentaBancaria: { ...cuentaBancaria },
+                    // cuentaBancaria: undefined, // Removed from UI
                     // Preserve existing relations
                     propiedades: (initialData as Propietario)?.propiedades || [],
                     comision: (initialData as Propietario)?.comision || 0,
@@ -299,92 +309,38 @@ export default function ClientFormModal({ isOpen, onClose, onSuccess, initialTyp
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                     <div className="md:col-span-2">
                                         <label className="block text-sm font-medium text-gray-700 mb-1">Nombre Completo</label>
-                                        <input type="text" required value={nombre} onChange={(e) => setNombre(e.target.value)} className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none" placeholder="Ej: Juan Pérez" />
+                                        <input type="text" required value={nombre} onChange={(e) => handleNameChange(e.target.value)} maxLength={50} className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none text-gray-900" placeholder="Ej: Facundo Flores" />
                                     </div>
 
                                     <div>
                                         <label className="block text-sm font-medium text-gray-700 mb-1">Email</label>
-                                        <input type="email" required value={email} onChange={(e) => setEmail(e.target.value)} className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none" placeholder="juan@email.com" />
+                                        <input type="email" required value={email} onChange={(e) => setEmail(e.target.value)} maxLength={50} className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none text-gray-900" placeholder="facundo@zetaprop.com.ar" />
                                     </div>
                                     <div>
-                                        <label className="block text-sm font-medium text-gray-700 mb-1">Teléfono / WhatsApp</label>
-                                        <input type="tel" required value={telefono} onChange={(e) => setTelefono(e.target.value)} className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none" placeholder="+54 9 11..." />
+                                        <label className="block text-sm font-medium text-gray-700 mb-1">Teléfono (Solo números)</label>
+                                        <input type="tel" required value={telefono} onChange={(e) => handlePhoneChange(e.target.value)} maxLength={20} className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none text-gray-900" placeholder="1112345678" />
                                     </div>
 
                                     {clientType !== 'leads' && (
                                         <>
                                             <div>
-                                                <label className="block text-sm font-medium text-gray-700 mb-1">DNI</label>
-                                                <input type="text" value={dni} onChange={(e) => setDni(e.target.value)} className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none" placeholder="12.345.678" />
+                                                <label className="block text-sm font-medium text-gray-700 mb-1">DNI (Solo números)</label>
+                                                <input type="text" value={dni} onChange={(e) => handleDniChange(e.target.value)} maxLength={10} className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none text-gray-900" placeholder="12345678" />
                                             </div>
                                             <div>
                                                 <label className="block text-sm font-medium text-gray-700 mb-1">CUIT / CUIL</label>
-                                                <input type="text" value={cuit} onChange={(e) => setCuit(e.target.value)} className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none" placeholder="20-12345678-9" />
+                                                <input type="text" value={cuit} onChange={(e) => setCuit(e.target.value)} className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none text-gray-900" placeholder="20-12345678-9" />
                                             </div>
                                             <div className="md:col-span-2">
                                                 <label className="block text-sm font-medium text-gray-700 mb-1">Domicilio Real / Legal</label>
-                                                <input type="text" value={domicilio} onChange={(e) => setDomicilio(e.target.value)} className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none" placeholder="Calle Falsa 123, CABA" />
+                                                <input type="text" value={domicilio} onChange={(e) => setDomicilio(e.target.value)} className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none text-gray-900" placeholder="Dr Monte 800 - Moron" />
                                             </div>
                                         </>
                                     )}
                                 </div>
                             </section>
 
-                            <hr className="border-gray-100" />
 
-                            {/* --- Sección: Datos del Garante (Inquilinos) --- */}
-                            {clientType === 'inquilinos' && (
-                                <section className="space-y-4">
-                                    <h3 className="text-sm font-semibold text-gray-900 flex items-center gap-2 uppercase tracking-wide">
-                                        <Shield className="w-4 h-4" /> Datos del Garante
-                                    </h3>
-                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 p-4 bg-gray-50 rounded-xl border border-gray-100">
-                                        <div className="md:col-span-2">
-                                            <label className="block text-sm font-medium text-gray-700 mb-1">Nombre Garante</label>
-                                            <input type="text" value={garante.nombre || ''} onChange={(e) => setGarante(prev => ({ ...prev, nombre: e.target.value }))} className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none" />
-                                        </div>
-                                        <div>
-                                            <label className="block text-sm font-medium text-gray-700 mb-1">Teléfono</label>
-                                            <input type="text" value={garante.telefono || ''} onChange={(e) => setGarante(prev => ({ ...prev, telefono: e.target.value }))} className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none" />
-                                        </div>
-                                        <div>
-                                            <label className="block text-sm font-medium text-gray-700 mb-1">Email</label>
-                                            <input type="email" value={garante.email || ''} onChange={(e) => setGarante(prev => ({ ...prev, email: e.target.value }))} className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none" />
-                                        </div>
-                                        <div>
-                                            <label className="block text-sm font-medium text-gray-700 mb-1">DNI</label>
-                                            <input type="text" value={garante.dni || ''} onChange={(e) => setGarante(prev => ({ ...prev, dni: e.target.value }))} className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none" />
-                                        </div>
-                                        <div>
-                                            <label className="block text-sm font-medium text-gray-700 mb-1">Domicilio</label>
-                                            <input type="text" value={garante.domicilio || ''} onChange={(e) => setGarante(prev => ({ ...prev, domicilio: e.target.value }))} className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none" />
-                                        </div>
-                                    </div>
-                                </section>
-                            )}
-
-                            {/* --- Sección: Datos Bancarios (Propietarios) --- */}
-                            {clientType === 'propietarios' && (
-                                <section className="space-y-4">
-                                    <h3 className="text-sm font-semibold text-gray-900 flex items-center gap-2 uppercase tracking-wide">
-                                        <CreditCard className="w-4 h-4" /> Datos Bancarios
-                                    </h3>
-                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 p-4 bg-gray-50 rounded-xl border border-gray-100">
-                                        <div>
-                                            <label className="block text-sm font-medium text-gray-700 mb-1">Banco</label>
-                                            <input type="text" value={cuentaBancaria.banco || ''} onChange={(e) => setCuentaBancaria(prev => ({ ...prev, banco: e.target.value }))} className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none" placeholder="Ej. Galicia" />
-                                        </div>
-                                        <div>
-                                            <label className="block text-sm font-medium text-gray-700 mb-1">CBU / CVU</label>
-                                            <input type="text" value={cuentaBancaria.cbu || ''} onChange={(e) => setCuentaBancaria(prev => ({ ...prev, cbu: e.target.value }))} className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none" />
-                                        </div>
-                                        <div className="md:col-span-2">
-                                            <label className="block text-sm font-medium text-gray-700 mb-1">Alias</label>
-                                            <input type="text" value={cuentaBancaria.alias || ''} onChange={(e) => setCuentaBancaria(prev => ({ ...prev, alias: e.target.value }))} className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none" placeholder="ejemplo.alias.banco" />
-                                        </div>
-                                    </div>
-                                </section>
-                            )}
 
                             {/* --- Sección: Lead Details --- */}
                             {clientType === 'leads' && (
@@ -392,7 +348,7 @@ export default function ClientFormModal({ isOpen, onClose, onSuccess, initialTyp
                                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                         <div>
                                             <label className="block text-sm font-medium text-gray-700 mb-1">Estado</label>
-                                            <select value={leadData.estado} onChange={(e) => setLeadData(prev => ({ ...prev, estado: e.target.value }))} className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none bg-white">
+                                            <select value={leadData.estado} onChange={(e) => setLeadData(prev => ({ ...prev, estado: e.target.value }))} className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none bg-white text-gray-900">
                                                 <option value="nuevo">Nuevo</option>
                                                 <option value="contactado">Contactado</option>
                                                 <option value="interesado">Interesado</option>
@@ -403,11 +359,11 @@ export default function ClientFormModal({ isOpen, onClose, onSuccess, initialTyp
                                         </div>
                                         <div>
                                             <label className="block text-sm font-medium text-gray-700 mb-1">Origen</label>
-                                            <input type="text" value={leadData.origen} onChange={(e) => setLeadData(prev => ({ ...prev, origen: e.target.value }))} className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none" />
+                                            <input type="text" value={leadData.origen} onChange={(e) => setLeadData(prev => ({ ...prev, origen: e.target.value }))} className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none text-gray-900" />
                                         </div>
                                         <div className="md:col-span-2">
                                             <label className="block text-sm font-medium text-gray-700 mb-1">Mensaje / Consulta</label>
-                                            <textarea rows={3} value={leadData.mensaje} onChange={(e) => setLeadData(prev => ({ ...prev, mensaje: e.target.value }))} className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none" />
+                                            <textarea rows={3} value={leadData.mensaje} onChange={(e) => setLeadData(prev => ({ ...prev, mensaje: e.target.value }))} className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none text-gray-900" />
                                         </div>
                                     </div>
                                 </section>

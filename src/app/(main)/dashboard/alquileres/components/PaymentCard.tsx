@@ -57,7 +57,8 @@ export const PaymentCard = ({ payment, contract, onUpdate, onMarkPaid, onDownloa
 
     // Total calculado si no hay monto fijo seteado
     // Total calculado si no hay monto fijo seteado
-    const totalCalculado = baseAlquiler + servicios + adicionales + punitorios + honorarios - descuentos;
+    // Honorarios are included in baseAlquiler (Rent), so we don't add them.
+    const totalCalculado = baseAlquiler + servicios + adicionales + punitorios - descuentos;
     // Prefer stored total if Paid, otherwise calculate live (allows dynamic updates for pending)
     const totalFinal = (payment.estado === 'pagado' && payment.monto) ? payment.monto : totalCalculado;
     const saldo = totalFinal - (payment.pagoParcial || 0);
@@ -228,8 +229,8 @@ export const PaymentCard = ({ payment, contract, onUpdate, onMarkPaid, onDownloa
                 {/* Breakdown Summary */}
                 <div className="space-y-1 text-sm text-gray-600 mb-4">
                     <div className="flex justify-between">
-                        <span>Alquiler Puro:</span>
-                        <span>{formatMoney(baseAlquiler)}</span>
+                        <span>Alquiler Neto (Prop.):</span>
+                        <span>{formatMoney(baseAlquiler - honorarios)}</span>
                     </div>
                     {honorarios > 0 && (
                         <div className="flex justify-between text-indigo-800">

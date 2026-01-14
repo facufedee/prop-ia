@@ -217,7 +217,7 @@ export function TextAreaInput({
                 placeholder={placeholder}
                 rows={rows}
                 maxLength={maxLength}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 resize-none"
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 resize-none text-gray-900"
             />
 
             <div className="flex justify-between text-xs text-gray-500">

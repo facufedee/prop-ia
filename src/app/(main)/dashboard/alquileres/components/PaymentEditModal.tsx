@@ -55,7 +55,7 @@ const CurrencyInput = ({
         <div className="w-full">
             <input
                 type="text"
-                className={`${className} ${errorClass}`}
+                className={`${className} ${errorClass} text-gray-900`}
                 value={readOnly && safeValue === 0 ? '$ 0' : displayValue}
                 onChange={handleChange}
                 placeholder={placeholder}
@@ -105,7 +105,7 @@ const DateInput = ({ value, onChange, minDate, maxDate, className = "" }: { valu
         <div className="relative">
             <input
                 type="date"
-                className={className}
+                className={`${className} text-gray-900`}
                 value={dateToString(value)}
                 onChange={handleChange}
                 min={minDate}
@@ -394,25 +394,27 @@ export default function PaymentEditModal({ isOpen, onClose, payment, rental, onS
                         </div>
 
                         {/* Honorarios Input -- ADDED */}
-                        <div>
-                            <label className="block text-xs font-semibold text-gray-700 mb-1">
-                                Honorarios
-                                {rental.honorariosTipo && (
-                                    <span className="ml-2 text-[10px] text-gray-400 font-normal">
-                                        ({rental.honorariosTipo === 'porcentaje' ? `${rental.honorariosValor}%` : 'Fijo'})
-                                    </span>
-                                )}
-                            </label>
-                            <div className="relative">
-                                <span className="absolute left-3 top-2 text-gray-500 text-sm">$</span>
-                                <CurrencyInput
-                                    value={honorarios}
-                                    onChange={setHonorarios}
-                                    className="w-full pl-6 pr-3 py-1.5 border rounded-lg focus:ring-2 focus:ring-indigo-500 text-sm"
-                                    placeholder="0"
-                                />
+                        {honorarios > 0 && (
+                            <div>
+                                <label className="block text-xs font-semibold text-gray-700 mb-1">
+                                    Honorarios
+                                    {rental.honorariosTipo && (
+                                        <span className="ml-2 text-[10px] text-gray-400 font-normal">
+                                            ({rental.honorariosTipo === 'porcentaje' ? `${rental.honorariosValor}%` : 'Fijo'})
+                                        </span>
+                                    )}
+                                </label>
+                                <div className="relative">
+                                    <span className="absolute left-3 top-2 text-gray-500 text-sm">$</span>
+                                    <CurrencyInput
+                                        value={honorarios}
+                                        onChange={setHonorarios}
+                                        className="w-full pl-6 pr-3 py-1.5 border rounded-lg focus:ring-2 focus:ring-indigo-500 text-sm"
+                                        placeholder="0"
+                                    />
+                                </div>
                             </div>
-                        </div>
+                        )}
 
                         <div className="md:col-span-2">
                             <div className="grid grid-cols-2 gap-3">
@@ -452,7 +454,7 @@ export default function PaymentEditModal({ isOpen, onClose, payment, rental, onS
                                                 <input
                                                     type="text"
                                                     placeholder="Nombre servicio"
-                                                    className="w-full px-3 py-1.5 border rounded-lg text-sm"
+                                                    className="w-full px-3 py-1.5 border rounded-lg text-sm text-gray-900"
                                                     value={service.concepto}
                                                     onChange={e => handleServiceNameChange(idx, e.target.value)}
                                                 />
