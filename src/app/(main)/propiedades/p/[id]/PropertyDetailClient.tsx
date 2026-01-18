@@ -14,6 +14,7 @@ const PublicMap = dynamic(() => import("@/ui/components/properties/public/Public
 });
 
 import ContactModal from "@/ui/components/properties/public/ContactModal";
+import PropertyDisclaimer from "@/ui/components/properties/public/PropertyDisclaimer";
 
 function getYouTubeId(url: string) {
     const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|&v=)([\w-]{11}).*/;
@@ -21,9 +22,13 @@ function getYouTubeId(url: string) {
     return match ? match[2] : null;
 }
 
-export default function PropertyDetailPage() {
+interface Props {
+    id?: string;
+}
+
+export default function PropertyDetailPage({ id: propId }: Props) {
     const params = useParams();
-    const id = params.id as string;
+    const id = propId || (params.id as string);
 
     const [property, setProperty] = useState<PublicProperty | null>(null);
     const [similarProperties, setSimilarProperties] = useState<PublicProperty[]>([]);
@@ -119,10 +124,15 @@ export default function PropertyDetailPage() {
                 <div className="flex flex-col md:flex-row justify-between items-start mb-8 gap-4">
                     <div className="md:max-w-[70%]">
                         <div className="flex items-center gap-2 mb-3">
-                            <span className={`px-2.5 py-0.5 rounded-md text-xs font-bold uppercase tracking-wider ${property.operation_type === 'Venta' ? 'bg-green-100 text-green-700' :
-                                property.operation_type === 'Alquiler' ? 'bg-blue-100 text-blue-700' : 'bg-purple-100 text-purple-700'
+                            <span className={`px-2.5 py-0.5 rounded-md text-xs font-bold uppercase tracking-wider border ${property.status === 'sold'
+                                ? 'bg-red-100 text-red-600 border-red-200'
+                                : property.operation_type === 'Venta'
+                                    ? 'bg-green-100 text-green-700 border-green-200'
+                                    : property.operation_type === 'Alquiler'
+                                        ? 'bg-blue-100 text-blue-700 border-blue-200'
+                                        : 'bg-purple-100 text-purple-700 border-purple-200'
                                 }`}>
-                                {property.operation_type}
+                                {property.status === 'sold' ? 'VENDIDA' : property.operation_type}
                             </span>
                             <span className="flex items-center gap-1 text-sm text-gray-500">
                                 <MapPin size={14} /> {property.localidad}, {property.provincia}
@@ -130,6 +140,7 @@ export default function PropertyDetailPage() {
                         </div>
                         <h1 className="text-2xl md:text-3xl font-bold text-gray-900 mb-1">{property.title}</h1>
                         <div className="flex items-center gap-2 text-sm text-gray-500">
+                            {property.code && <span className="font-mono bg-gray-100 px-2 py-0.5 rounded text-xs text-gray-600 mr-2">{property.code}</span>}
                             <span>Publicado hace 3 días</span>
                         </div>
                     </div>
@@ -168,7 +179,7 @@ export default function PropertyDetailPage() {
                                 return (
                                     <>
                                         {/* Main Stage */}
-                                        <div className="relative w-full h-[400px] bg-gray-900 rounded-2xl overflow-hidden group">
+                                        <div className={`relative w-full h-[400px] bg-gray-900 rounded-2xl overflow-hidden group ${property.status === 'sold' ? 'grayscale opacity-90' : ''}`}>
                                             {mediaItems.length > 0 && currentItem ? (
                                                 <>
                                                     {/* Content */}
@@ -433,6 +444,9 @@ export default function PropertyDetailPage() {
                         </div>
                     </div>
                 )}
+
+                {/* Legal Disclaimer */}
+                <PropertyDisclaimer />
             </main>
 
             {/* Gallery Modal */}

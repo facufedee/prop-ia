@@ -54,6 +54,7 @@ const MENU_ITEMS: MenuItem[] = [
   { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
   { href: "/dashboard/tasacion", label: "Tasación IA", icon: Calculator },
   { href: "/dashboard/propiedades", label: "Propiedades", icon: Home },
+  { href: "/dashboard/emprendimientos", label: "Emprendimientos", icon: Building2 },
   { href: "/dashboard/alquileres", label: "Alquileres", icon: Key },
   { href: "/dashboard/clientes", label: "Clientes", icon: Users },
   { href: "/dashboard/chat", label: "Chat Zeta Prop", icon: Bot },
@@ -76,7 +77,7 @@ const MENU_ITEMS: MenuItem[] = [
   { href: "/dashboard/agentes", label: "Agentes", icon: Users },
   { href: "/dashboard/leads", label: "Leads / Consultas", icon: MessageSquare },
   { href: "/dashboard/calendario", label: "Agenda", icon: Calendar },
-  { href: "/dashboard/emprendimientos", label: "Emprendimientos", icon: Building2 },
+
   { href: "/dashboard/sucursales", label: "Multi Sucursal", icon: Building2, permission: "/dashboard/sucursales" },
   { href: "/dashboard/gestion-plataforma", label: "Gestión Plataforma", icon: Shield, permission: "/dashboard/gestion-plataforma" },
 ];
@@ -91,14 +92,8 @@ const LOCKED_FEATURES_INFO: Record<string, { title: string, description: string 
     title: "Central de Leads",
     description: "Centraliza todas las consultas de portales (Zonaprop, Argenprop, etc.) en un solo lugar y automatiza respuestas con IA."
   },
-  "/dashboard/calendario": {
-    title: "Agenda Inteligente",
-    description: "Organiza visitas, tasaciones y llamadas. Sincroniza con Google Calendar para no perder ninguna oportunidad."
-  },
-  "/dashboard/emprendimientos": {
-    title: "Módulo Emprendimientos",
-    description: "Gestiona desarrollos inmobiliarios completos, unidades funcionales, listas de precios y disponibilidad."
-  },
+
+
   "/dashboard/sucursales": {
     title: "Multi Sucursal",
     description: "Administra múltiples oficinas o puntos de venta desde un único panel centralizado de control."

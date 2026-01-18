@@ -203,33 +203,39 @@ export default function PaymentPlanTable({ alquiler, inquilino, onUpdatePayment,
 
     return (
         <div className="space-y-8">
-            <div className="flex justify-between items-center bg-gray-50 p-4 rounded-xl border border-gray-100">
+            <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-6 pb-6 border-b border-gray-100">
                 <div>
-                    <h3 className="font-semibold text-gray-900">Plan de Pagos</h3>
-                    <p className="text-sm text-gray-500">Gestiona los cobros y el historial</p>
+                    <h3 className="text-2xl font-bold text-gray-900 tracking-tight">Plan de Pagos</h3>
+                    <p className="text-gray-500 mt-1 text-sm">Gestiona los cobros y el historial del contrato</p>
                 </div>
-                <button
-                    onClick={handleDownloadReport}
-                    className="flex items-center gap-2 px-4 py-2 bg-white border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors shadow-sm font-medium"
-                >
-                    <FileText size={16} className="text-indigo-600" />
-                    Descargar Informe
-                </button>
-                <button
-                    onClick={() => setShowIPCModal(true)}
-                    className="flex items-center gap-2 px-4 py-2 bg-indigo-50 border border-indigo-200 text-indigo-700 rounded-lg hover:bg-indigo-100 transition-colors shadow-sm font-medium"
-                >
-                    <TrendingUp size={16} />
-                    Aplicar Aumento
-                </button>
+                <div className="grid grid-cols-2 sm:flex gap-3 w-full md:w-auto">
+                    <button
+                        onClick={handleDownloadReport}
+                        className="flex items-center justify-center gap-2 px-4 py-2.5 bg-white border border-gray-200 text-gray-700 rounded-xl hover:bg-gray-50 hover:border-gray-300 transition-all shadow-sm font-medium text-sm active:scale-95"
+                    >
+                        <FileText size={16} className="text-gray-500" />
+                        <span>Informe</span>
+                    </button>
+                    <button
+                        onClick={() => setShowIPCModal(true)}
+                        className="flex items-center justify-center gap-2 px-4 py-2.5 bg-indigo-600 text-white rounded-xl hover:bg-indigo-700 transition-all shadow-md shadow-indigo-100 font-medium text-sm active:scale-95 border border-transparent"
+                    >
+                        <TrendingUp size={16} />
+                        <span>Aumentar</span>
+                    </button>
+                </div>
             </div>
 
             {/* Pending Section */}
             <div>
-                <h4 className="text-lg font-semibold text-gray-800 mb-4 flex items-center gap-2">
-                    <span className="w-2 h-8 bg-amber-500 rounded-full"></span>
-                    Pagos Pendientes
-                </h4>
+                <div className="flex items-center gap-3 mb-6">
+                    <h4 className="text-lg font-bold text-gray-900">
+                        Pagos Pendientes
+                    </h4>
+                    <span className="bg-amber-100 text-amber-700 px-2.5 py-0.5 rounded-full text-xs font-bold">
+                        {pendingPayments.length}
+                    </span>
+                </div>
                 {pendingPayments.length > 0 ? (
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                         {pendingPayments.map((pago) => (
@@ -250,18 +256,22 @@ export default function PaymentPlanTable({ alquiler, inquilino, onUpdatePayment,
                         ))}
                     </div>
                 ) : (
-                    <div className="p-8 text-center bg-gray-50 rounded-xl border border-dashed border-gray-300">
-                        <p className="text-gray-500">No hay pagos pendientes.</p>
+                    <div className="p-8 text-center bg-gray-50 rounded-2xl border border-dashed border-gray-200">
+                        <p className="text-gray-500 text-sm">No hay pagos pendientes por cobrar.</p>
                     </div>
                 )}
             </div>
 
             {/* Paid Section */}
             <div>
-                <h4 className="text-lg font-semibold text-gray-800 mb-4 flex items-center gap-2">
-                    <span className="w-2 h-8 bg-green-500 rounded-full"></span>
-                    Historial de Pagos (Abonados)
-                </h4>
+                <div className="flex items-center gap-3 mb-6">
+                    <h4 className="text-lg font-bold text-gray-900">
+                        Historial
+                    </h4>
+                    <span className="bg-gray-100 text-gray-600 px-2.5 py-0.5 rounded-full text-xs font-bold">
+                        {paidPayments.length}
+                    </span>
+                </div>
                 {paidPayments.length > 0 ? (
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                         {paidPayments.map((pago) => (

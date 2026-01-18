@@ -19,9 +19,25 @@ export async function POST(request: Request) {
         const body = await request.json();
         const { to, type, template } = body;
 
-        // Meta requires clean phone number (no plus, no spaces)
-        // Adjust locally if needed, e.g. strictly numbers
-        // 'to' should include country code, e.g. 54911...
+        // Meta requires clean phone number (no plus, no spaces, no dashes)
+        const cleanTo = to.replace(/\D/g, ''); // Removes everything except digits
+
+
+        // Prepare payload dynamically based on type
+        const payload: any = {
+            messaging_product: 'whatsapp',
+            to: cleanTo,
+            type: type, // 'template' or 'text'
+        };
+
+        if (type === 'template') {
+            payload.template = template;
+        } else if (type === 'text') {
+            // body has { to, type, text: { body: "..." } }
+            // API expects 'text': { 'body': '...' }
+            // The incoming request body likely has `text: { body: message }` already
+            payload.text = body.text;
+        }
 
         const response = await fetch(`https://graph.facebook.com/${API_VERSION}/${PHONE_NUMBER_ID}/messages`, {
             method: 'POST',
@@ -29,12 +45,7 @@ export async function POST(request: Request) {
                 'Authorization': `Bearer ${WHATSAPP_TOKEN}`,
                 'Content-Type': 'application/json',
             },
-            body: JSON.stringify({
-                messaging_product: 'whatsapp',
-                to: to,
-                type: type, // 'template'
-                template: template
-            }),
+            body: JSON.stringify(payload),
         });
 
         const data = await response.json();

@@ -306,6 +306,8 @@ export default function PropiedadesPage() {
                                     key={property.id}
                                     property={property}
                                     onDelete={handleDelete}
+                                    onUpdate={handleUpdateProperty}
+                                    onDuplicate={handleDuplicateProperty}
                                 />
                             ))}
                         </div>

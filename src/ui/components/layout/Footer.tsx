@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { Facebook, Twitter, Instagram, Linkedin, Github, Mail, ArrowRight } from "lucide-react";
+import { WhatsAppIcon } from "@/ui/icons/WhatsAppIcon";
 
 export default function Footer() {
     return (
@@ -26,7 +27,7 @@ export default function Footer() {
                                     <Mail size={16} /> facundo@zetaprop.com.ar
                                 </a>
                                 <a href="https://wa.me/5491124000769" target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 hover:text-white transition">
-                                    <img src="https://upload.wikimedia.org/wikipedia/commons/6/6b/WhatsApp.svg" alt="WhatsApp" className="w-4 h-4 opacity-70 grayscale hover:grayscale-0 hover:opacity-100 transition-all" /> +54 9 11 2400-0769
+                                    <WhatsAppIcon className="w-4 h-4 opacity-70 hover:opacity-100 transition-all text-gray-400 hover:text-green-500" /> +54 9 11 2400-0769
                                 </a>
                             </div>
                         </div>

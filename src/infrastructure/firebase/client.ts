@@ -15,7 +15,7 @@ const firebaseConfig = {
   measurementId: process.env.NEXT_PUBLIC_FIREBASE_MEASUREMENT_ID,
 };
 
-console.log('🔥 Initializing Firebase with project:', firebaseConfig.projectId);
+// console.log('🔥 Initializing Firebase with project:', firebaseConfig.projectId);
 
 // Initialize Firebase
 const app = getApps().length > 0 ? getApp() : initializeApp(firebaseConfig);
@@ -43,10 +43,10 @@ if (process.env.NODE_ENV === 'development' && typeof window !== 'undefined' && p
   // const auth = getAuth(app);
   // connectAuthEmulator(auth, "http://127.0.0.1:9099");
 } else if (process.env.NODE_ENV === 'development') {
-  console.log('ℹ️ [FIREBASE] Using production Firestore (Emulator disabled). Set NEXT_PUBLIC_USE_EMULATORS=true to enable.');
+  // console.log('ℹ️ [FIREBASE] Using production Firestore (Emulator disabled). Set NEXT_PUBLIC_USE_EMULATORS=true to enable.');
 }
 
-console.log('✅ Firebase initialized successfully');
+// console.log('✅ Firebase initialized successfully');
 
 const storage = getStorage(app);
 const auth = typeof window !== "undefined" ? getAuth(app) : undefined;

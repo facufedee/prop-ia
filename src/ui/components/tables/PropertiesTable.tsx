@@ -28,6 +28,7 @@ export interface Property {
     status?: 'active' | 'inactive' | 'reserved' | 'sold';
     calle?: string;
     altura?: string;
+    code?: string;
 }
 
 interface PropertiesTableProps {

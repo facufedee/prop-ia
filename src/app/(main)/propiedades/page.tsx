@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { PublicProperty, publicService } from "@/infrastructure/services/publicService";
 import PropertiesGrid from "@/ui/components/properties/public/PropertiesGrid";
-import { Loader2, Filter, ChevronDown, RotateCcw } from "lucide-react";
+import { Loader2, Filter, ChevronDown, RotateCcw, Search } from "lucide-react";
 
 // Filter Section Component (Enhanced)
 const FilterSection = ({
@@ -57,6 +57,7 @@ export default function PublicPropertiesPage() {
     const [priceMax, setPriceMax] = useState<string>("");
     const [areaMin, setAreaMin] = useState<string>("");
     const [areaMax, setAreaMax] = useState<string>("");
+    const [searchQuery, setSearchQuery] = useState("");
 
     useEffect(() => {
         const load = async () => {
@@ -122,8 +123,17 @@ export default function PublicPropertiesPage() {
             filtered = filtered.filter(p => (p.area_covered || 0) <= Number(areaMax));
         }
 
+        // Filter by Search Query (Title or Code)
+        if (searchQuery) {
+            const query = searchQuery.toLowerCase();
+            filtered = filtered.filter(p =>
+                p.title.toLowerCase().includes(query) ||
+                (p.code && p.code.toLowerCase().includes(query))
+            );
+        }
+
         setFilteredProperties(filtered);
-    }, [allProperties, operationType, currency, rooms, bathrooms, priceMin, priceMax, areaMin, areaMax]);
+    }, [allProperties, operationType, currency, rooms, bathrooms, priceMin, priceMax, areaMin, areaMax, searchQuery]);
 
     const clearAllFilters = () => {
         setOperationType("Todos");
@@ -134,9 +144,10 @@ export default function PublicPropertiesPage() {
         setPriceMax("");
         setAreaMin("");
         setAreaMax("");
+        setSearchQuery("");
     };
 
-    const hasActiveFilters = operationType !== "Todos" || currency !== "Todos" || rooms !== "Todos" || bathrooms !== "Todos" || priceMin || priceMax || areaMin || areaMax;
+    const hasActiveFilters = operationType !== "Todos" || currency !== "Todos" || rooms !== "Todos" || bathrooms !== "Todos" || priceMin || priceMax || areaMin || areaMax || searchQuery;
 
     return (
         <div className="min-h-screen bg-gray-50 pb-20 pt-28">
@@ -159,6 +170,21 @@ export default function PublicPropertiesPage() {
 
                             {/* Scrollable Content */}
                             <div className="p-4 overflow-y-auto custom-scrollbar">
+                                {/* Search Input */}
+                                <div className="mb-6">
+                                    <label className="text-xs font-bold text-gray-500 uppercase mb-2 block">Buscar</label>
+                                    <div className="relative">
+                                        <input
+                                            type="text"
+                                            placeholder="Cód. Propiedad o Título..."
+                                            value={searchQuery}
+                                            onChange={(e) => setSearchQuery(e.target.value)}
+                                            className="w-full pl-9 pr-3 py-2 bg-gray-50 border border-gray-200 rounded-lg text-sm focus:outline-none focus:border-indigo-500 transition"
+                                        />
+                                        <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 w-4 h-4" />
+                                    </div>
+                                </div>
+
                                 <FilterSection
                                     title="Operación"
                                     onClear={operationType !== "Todos" ? () => setOperationType("Todos") : undefined}

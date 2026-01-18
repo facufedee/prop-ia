@@ -41,6 +41,7 @@ export const PERMISSIONS: Permission[] = [
     { id: "/dashboard/sucursales", label: "Sucursales", description: "Gestión de sucursales (Multisucursal)" },
     { id: "/dashboard/blog", label: "Gestión Blog", description: "Gestión de noticias y blog (Admin)" }, // Renaming old /dashboard/blog permission to avoid confusion if needed, or keep as is. The user said "Novedades" for clients.
     { id: "/dashboard/novedades", label: "Novedades Zeta", description: "Acceso a noticias y actualizaciones para clientes" },
+    { id: "/dashboard/emprendimientos", label: "Emprendimientos", description: "Gestión de emprendimientos y desarrollos" },
 ];
 
 const ROLES_COLLECTION = "roles";
@@ -236,7 +237,8 @@ export const roleService = {
                     "/dashboard/cuenta",
                     "/dashboard/cuenta",
                     "/dashboard/configuracion",
-                    "/dashboard/novedades"
+                    "/dashboard/novedades",
+                    "/dashboard/emprendimientos"
                 ],
                 isSystem: false
             });
@@ -262,7 +264,8 @@ export const roleService = {
                     "/dashboard/sucursales", // Pro Feature
                     "/dashboard/blog",
                     "/dashboard/cuenta",
-                    "/dashboard/novedades"
+                    "/dashboard/novedades",
+                    "/dashboard/emprendimientos"
                 ],
                 isSystem: false
             });

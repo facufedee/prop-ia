@@ -87,7 +87,13 @@ export default async function BlogPostPage({ params }: Props) {
                     <div className="flex items-center justify-center gap-6 text-gray-300 text-sm md:text-base">
                         <div className="flex items-center gap-2">
                             {post.author?.photo ? (
-                                <img src={post.author.photo} alt={post.author.name} className="w-8 h-8 rounded-full border border-gray-500" />
+                                <Image
+                                    src={post.author.photo}
+                                    alt={post.author.name}
+                                    width={32}
+                                    height={32}
+                                    className="rounded-full border border-gray-500 object-cover"
+                                />
                             ) : (
                                 <div className="w-8 h-8 rounded-full bg-gray-700 flex items-center justify-center">
                                     <User size={14} />

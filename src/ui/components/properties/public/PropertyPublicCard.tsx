@@ -46,7 +46,7 @@ export default function PropertyPublicCard({ property }: PropertyPublicCardProps
                                     key={idx}
                                     src={url}
                                     alt={`${property.title} ${property.operation_type} en ${property.localidad} - Foto ${idx + 1}`}
-                                    className="w-full h-full object-cover flex-shrink-0"
+                                    className={`w-full h-full object-cover flex-shrink-0 ${property.status === 'sold' ? 'grayscale opacity-90' : ''}`}
                                 />
                             ))}
                         </div>
@@ -87,10 +87,15 @@ export default function PropertyPublicCard({ property }: PropertyPublicCardProps
                 )}
 
                 {/* Operation Tag */}
-                <span className={`absolute top-3 left-3 px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider shadow-sm z-10 ${property.operation_type === 'Venta' ? 'bg-green-500 text-white' :
-                    property.operation_type === 'Alquiler' ? 'bg-blue-600 text-white' : 'bg-purple-600 text-white'
+                <span className={`absolute top-3 left-3 px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider shadow-sm z-10 ${property.status === 'sold'
+                    ? 'bg-red-100 text-red-600 border border-red-200'
+                    : property.operation_type === 'Venta'
+                        ? 'bg-green-500 text-white'
+                        : property.operation_type === 'Alquiler'
+                            ? 'bg-blue-600 text-white'
+                            : 'bg-purple-600 text-white'
                     }`}>
-                    {property.operation_type}
+                    {property.status === 'sold' ? 'VENDIDA' : property.operation_type}
                 </span>
 
                 {/* Price Tag */}
@@ -125,9 +130,14 @@ export default function PropertyPublicCard({ property }: PropertyPublicCardProps
                     {property.title}
                 </h3>
 
-                <div className="flex items-center gap-1 text-gray-500 text-sm mb-4">
+                <div className="flex items-center gap-2 text-gray-500 text-sm mb-4">
                     <MapPin className="w-3.5 h-3.5" />
                     <span className="truncate">{property.localidad}, {property.provincia}</span>
+                    {property.code && (
+                        <span className="ml-auto text-xs bg-gray-100 text-gray-500 px-2 py-0.5 rounded font-mono">
+                            {property.code}
+                        </span>
+                    )}
                 </div>
 
                 {/* Specs Grid - Only show populated fields */}

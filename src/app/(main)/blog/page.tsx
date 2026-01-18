@@ -90,7 +90,13 @@ export default async function BlogPage() {
                                     <div className="mt-auto flex items-center justify-between pt-6 border-t border-gray-50">
                                         <div className="flex items-center gap-2">
                                             {post.author?.photo ? (
-                                                <img src={post.author.photo} alt={post.author.name} className="w-8 h-8 rounded-full object-cover" />
+                                                <Image
+                                                    src={post.author.photo}
+                                                    alt={post.author.name}
+                                                    width={32}
+                                                    height={32}
+                                                    className="rounded-full object-cover"
+                                                />
                                             ) : (
                                                 <div className="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center">
                                                     <User size={14} className="text-gray-500" />

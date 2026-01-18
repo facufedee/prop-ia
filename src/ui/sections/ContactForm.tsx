@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { Mail, Building, MessageSquare, Send, CheckCircle, AlertCircle } from "lucide-react";
 import { contactService } from "@/infrastructure/services/contactService";
+import { WhatsAppIcon } from "@/ui/icons/WhatsAppIcon";
 
 export default function ContactForm() {
     const [formData, setFormData] = useState({
@@ -151,7 +152,7 @@ export default function ContactForm() {
 
                             <div className="flex items-start gap-4">
                                 <div className="w-12 h-12 bg-gradient-to-r from-green-500 to-emerald-500 rounded-xl flex items-center justify-center flex-shrink-0">
-                                    <img src="https://upload.wikimedia.org/wikipedia/commons/6/6b/WhatsApp.svg" alt="WhatsApp" className="w-6 h-6 invert brightness-0" />
+                                    <WhatsAppIcon className="w-6 h-6 text-white" />
                                 </div>
                                 <div>
                                     <h4 className="font-semibold text-gray-900 mb-1">WhatsApp</h4>

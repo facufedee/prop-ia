@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
-import { Plus, Search, Edit, Trash2, Eye, FileText } from "lucide-react";
+import { Plus, Search, Edit, Trash2, Eye, FileText, Share2 } from "lucide-react";
 import { blogService, BlogPost } from "@/infrastructure/services/blogService";
 import { useRouter } from "next/navigation";
 
@@ -150,6 +150,14 @@ export default function BlogListPage() {
                                         </td>
                                         <td className="px-6 py-4 text-right">
                                             <div className="flex items-center justify-end gap-2">
+                                                <Link
+                                                    href={`/social/blog/${post.id}`}
+                                                    className="p-2 text-gray-400 hover:text-pink-600 hover:bg-pink-50 rounded-lg transition-colors"
+                                                    title="Generar para RRSS"
+                                                    target="_blank"
+                                                >
+                                                    <Share2 size={18} />
+                                                </Link>
                                                 <Link
                                                     href={`/dashboard/blog/${post.id}`}
                                                     className="p-2 text-gray-400 hover:text-indigo-600 hover:bg-indigo-50 rounded-lg transition-colors"

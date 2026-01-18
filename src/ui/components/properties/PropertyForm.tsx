@@ -181,6 +181,9 @@ export default function PropertyForm() {
 
             setUploading(false);
 
+            // Generate Property Code (ZP-XXXXXX)
+            const generatedCode = `ZP-${Math.random().toString(36).substring(2, 8).toUpperCase()}`;
+
             // Create property document
             const propertyData = {
                 ...form,
@@ -189,7 +192,8 @@ export default function PropertyForm() {
                 createdAt: new Date(),
                 status: 'active',
                 branchId: branchId || null,
-                imageUrls
+                imageUrls,
+                code: generatedCode
             };
 
             await addDoc(collection(db, "properties"), propertyData);

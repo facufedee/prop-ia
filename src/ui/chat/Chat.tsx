@@ -88,8 +88,8 @@ export default function Chat() {
 
   return (
     <div className="flex h-[calc(100vh-140px)] w-full bg-white border rounded-2xl shadow-sm overflow-hidden">
-      {/* Sidebar */}
-      <div className="w-80 border-r bg-gray-50 flex flex-col">
+      {/* Sidebar - Hidden on mobile, visible on desktop */}
+      <div className="w-80 border-r bg-gray-50 hidden md:flex flex-col">
         <div className="p-4 border-b">
           <button className="w-full bg-black text-white flex items-center justify-center gap-2 py-3 rounded-xl hover:bg-gray-800 transition font-medium">
             <Plus className="w-5 h-5" /> Nuevo Chat

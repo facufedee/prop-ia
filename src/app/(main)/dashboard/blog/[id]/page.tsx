@@ -4,7 +4,7 @@ import { useEffect, useState, use } from "react";
 import { BlogPost, blogService } from "@/infrastructure/services/blogService";
 import BlogForm from "../components/BlogForm";
 import Link from "next/link";
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft, Share2 } from "lucide-react";
 
 export default function EditPostPage({ params }: { params: Promise<{ id: string }> }) {
     // Unwrap params in Next.js 15+ (if applicable, ensuring safety)
@@ -48,17 +48,27 @@ export default function EditPostPage({ params }: { params: Promise<{ id: string 
 
     return (
         <div className="space-y-6">
-            <div className="flex items-center gap-4">
-                <Link
-                    href="/dashboard/blog"
-                    className="p-2 hover:bg-gray-100 rounded-lg text-gray-600 transition-colors"
-                >
-                    <ArrowLeft size={20} />
-                </Link>
-                <div>
-                    <h1 className="text-2xl font-bold text-gray-900">Editar Artículo</h1>
-                    <p className="text-gray-500">Modificando: {post.title}</p>
+            <div className="flex items-center justify-between gap-4">
+                <div className="flex items-center gap-4">
+                    <Link
+                        href="/dashboard/blog"
+                        className="p-2 hover:bg-gray-100 rounded-lg text-gray-600 transition-colors"
+                    >
+                        <ArrowLeft size={20} />
+                    </Link>
+                    <div>
+                        <h1 className="text-2xl font-bold text-gray-900">Editar Artículo</h1>
+                        <p className="text-gray-500">Modificando: {post.title}</p>
+                    </div>
                 </div>
+                <Link
+                    href={`/social/blog/${post.id}`}
+                    className="flex items-center gap-2 bg-pink-50 text-pink-700 hover:bg-pink-100 px-4 py-2 rounded-lg font-medium transition-colors border border-pink-200"
+                    target="_blank"
+                >
+                    <Share2 size={18} />
+                    <span>Generar RRSS</span>
+                </Link>
             </div>
 
             <BlogForm initialData={post} isEditing />

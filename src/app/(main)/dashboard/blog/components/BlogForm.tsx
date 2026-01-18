@@ -198,7 +198,7 @@ export default function BlogForm({ initialData, isEditing = false }: BlogFormPro
                                 value={formData.title}
                                 onChange={handleChange}
                                 placeholder="Ej: Nueva Ley de Alquileres 2025"
-                                className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-indigo-500 font-bold text-lg"
+                                className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-indigo-500 font-bold text-lg text-gray-900"
                                 required
                             />
                         </div>
@@ -224,7 +224,7 @@ export default function BlogForm({ initialData, isEditing = false }: BlogFormPro
                             onChange={handleChange}
                             rows={15}
                             placeholder="Escribe el contenido de tu post aquí..."
-                            className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-indigo-500 resize-y"
+                            className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-indigo-500 resize-y text-gray-900"
                             required
                         />
                         <p className="text-xs text-gray-500 text-right">Se recomienda usar Markdown o HTML simple.</p>
@@ -239,7 +239,7 @@ export default function BlogForm({ initialData, isEditing = false }: BlogFormPro
                             onChange={handleChange}
                             rows={3}
                             placeholder="Breve descripción que aparecerá en el listado..."
-                            className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-indigo-500"
+                            className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-indigo-500 text-gray-900"
                         />
                     </div>
 
@@ -280,7 +280,7 @@ export default function BlogForm({ initialData, isEditing = false }: BlogFormPro
                                         name="publishedAt"
                                         value={formatDateForInput(formData.publishedAt)}
                                         onChange={handleDateChange}
-                                        className="w-full pl-10 pr-4 py-2 text-sm border border-gray-200 rounded-lg focus:ring-2 focus:ring-indigo-500"
+                                        className="w-full pl-10 pr-4 py-2 text-sm border border-gray-200 rounded-lg focus:ring-2 focus:ring-indigo-500 text-gray-900"
                                     />
                                 </div>
                             </div>
@@ -294,7 +294,7 @@ export default function BlogForm({ initialData, isEditing = false }: BlogFormPro
                                         name="expiresAt"
                                         value={formatDateForInput(formData.expiresAt)}
                                         onChange={handleDateChange}
-                                        className="w-full pl-10 pr-4 py-2 text-sm border border-gray-200 rounded-lg focus:ring-2 focus:ring-indigo-500"
+                                        className="w-full pl-10 pr-4 py-2 text-sm border border-gray-200 rounded-lg focus:ring-2 focus:ring-indigo-500 text-gray-900"
                                     />
                                 </div>
                             </div>
@@ -334,7 +334,7 @@ export default function BlogForm({ initialData, isEditing = false }: BlogFormPro
                                 value={formData.author?.name || ""}
                                 onChange={handleAuthorChange}
                                 placeholder="Nombre del autor"
-                                className="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg"
+                                className="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg text-gray-900"
                             />
                         </div>
                     </div>
@@ -399,7 +399,7 @@ export default function BlogForm({ initialData, isEditing = false }: BlogFormPro
                             <input
                                 type="text"
                                 placeholder="Añadir etiqueta..."
-                                className="flex-1 px-3 py-2 text-sm border border-gray-200 rounded-lg focus:ring-2 focus:ring-indigo-500"
+                                className="flex-1 px-3 py-2 text-sm border border-gray-200 rounded-lg focus:ring-2 focus:ring-indigo-500 text-gray-900"
                                 onKeyDown={(e) => {
                                     if (e.key === 'Enter') {
                                         e.preventDefault();

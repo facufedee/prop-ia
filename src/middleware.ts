@@ -64,7 +64,7 @@ export async function middleware(request: NextRequest) {
     default-src 'self';
     script-src 'self' 'unsafe-eval' 'unsafe-inline' https://apis.google.com https://*.firebaseapp.com https://*.googleapis.com https://maps.googleapis.com https://maps.gstatic.com https://sdk.mercadopago.com https://www.mercadopago.com https://*.mlstatic.com;
     style-src 'self' 'unsafe-inline' https://fonts.googleapis.com;
-    img-src 'self' blob: data: https://*.googleusercontent.com https://*.googleapis.com https://maps.gstatic.com https://maps.googleapis.com https://http2.mlstatic.com https://*.mercadolibre.com https://*.mercadolivre.com;
+    img-src 'self' blob: data: https://*.googleusercontent.com https://*.googleapis.com https://maps.gstatic.com https://maps.googleapis.com https://http2.mlstatic.com https://*.mercadolibre.com https://*.mercadolivre.com https://upload.wikimedia.org;
     font-src 'self' https://fonts.gstatic.com https://*.mlstatic.com;
     connect-src 'self' https://*.googleapis.com https://*.firebaseio.com https://*.cloudfunctions.net https://apis.datos.gob.ar https://api.mercadopago.com https://*.mercadolibre.com https://*.mercadolivre.com https://*.mlstatic.com;
     frame-src 'self' https://*.firebaseapp.com https://www.mercadopago.com https://*.mercadolibre.com https://*.mercadolivre.com;

@@ -21,6 +21,8 @@ export interface PublicProperty {
     expenses?: number;
     video_url?: string;
     hidePrice?: boolean;
+    status?: 'active' | 'inactive' | 'reserved' | 'sold';
+    code?: string;
 }
 
 export interface PublicAgency {

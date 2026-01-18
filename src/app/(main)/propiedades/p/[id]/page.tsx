@@ -48,5 +48,6 @@ export async function generateMetadata(
 }
 
 export default async function Page({ params }: Props) {
-    return <PropertyDetailClient />
+    const { id } = await params;
+    return <PropertyDetailClient id={id} />
 }
