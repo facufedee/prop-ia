@@ -302,6 +302,40 @@ export const subscriptionService = {
                 });
             }
 
+            // 7.5 Update User Role based on Plan
+            // Ensure we import roleService dynamically or move logic to avoid circular deps if needed
+            // Ideally, plan names map to Role Names.
+            // "Plan Profesional" -> "Cliente Pro"
+            // "Plan Enterprise" -> "Cliente Enterprise"
+
+            try {
+                const { roleService } = await import("./roleService");
+                const roles = await roleService.getRoles();
+
+                let targetRoleName = "Cliente Free";
+                // Safe check for string methods on tier
+                const tier = String(plan.tier || '').toLowerCase();
+                const name = String(plan.name || '').toLowerCase();
+
+                if (tier === 'pro' || name.includes('pro')) {
+                    targetRoleName = "Cliente Pro";
+                } else if (tier === 'enterprise' || name.includes('enterprise')) {
+                    targetRoleName = "Cliente Enterprise";
+                }
+
+                if (targetRoleName !== "Cliente Free") {
+                    const targetRole = roles.find((r: any) => r.name === targetRoleName);
+                    if (targetRole) {
+                        console.log(`[Webhook] Upgrading user ${userId} to role: ${targetRoleName}`);
+                        await roleService.assignRoleToUser(userId, targetRole.id);
+                    } else {
+                        console.warn(`[Webhook] Target role ${targetRoleName} not found for upgrade.`);
+                    }
+                }
+            } catch (error) {
+                console.error("[Webhook] Error updating user role:", error);
+            }
+
             // 8. Update payment record
             await updateDoc(doc(db, PAYMENTS_COLLECTION, pendingPayment.id), {
                 status: 'completed',

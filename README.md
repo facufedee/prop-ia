@@ -1,6 +1,6 @@
-# Prop-IA: Asistente Inmobiliario Inteligente
+# Zeta Prop: Asistente Inmobiliario Inteligente
 
-**Prop-IA** es una plataforma integral diseñada para potenciar la gestión inmobiliaria moderna. Combina herramientas de gestión clásicas (CRM, propiedades, alquileres) con el poder de la Inteligencia Artificial Generativa para automatizar tareas, tasar propiedades y asistir a los agentes en tiempo real.
+**Zeta Prop* es una plataforma integral diseñada para potenciar la gestión inmobiliaria moderna. Combina herramientas de gestión clásicas (CRM, propiedades, alquileres) con el poder de la Inteligencia Artificial Generativa para automatizar tareas, tasar propiedades y asistir a los agentes en tiempo real.
 
 ![Next.js](https://img.shields.io/badge/Next.js-16-black) ![React](https://img.shields.io/badge/React-19-blue) ![Tailwind CSS](https://img.shields.io/badge/Tailwind-4-38B2AC) ![Firebase](https://img.shields.io/badge/Firebase-Auth%20%7C%20Firestore-orange) ![AI](https://img.shields.io/badge/AI-Generative-purple)
 

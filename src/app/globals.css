@@ -40,3 +40,28 @@ body {
   background: #000000 !important;
   z-index: 1031 !important;
 }
+
+/* Custom Animations */
+@keyframes border-flow {
+  0% { transform: translateX(-100%); }
+  100% { transform: translateX(100%); }
+}
+
+@keyframes gradient-xy {
+  0%, 100% {
+    background-size: 400% 400%;
+    background-position: left center;
+  }
+  50% {
+    background-size: 200% 200%;
+    background-position: right center;
+  }
+}
+
+.animate-border-flow {
+  animation: border-flow 3s linear infinite;
+}
+
+.animate-gradient-xy {
+  animation: gradient-xy 6s ease infinite;
+}

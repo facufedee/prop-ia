@@ -23,13 +23,13 @@ import {
   DollarSign,
   Calendar,
   Headphones,
-  ClipboardList,
+  Sparkles,
   BookOpen,
   Mail,
   Shield,
   UserCog,
   Package,
-  Sparkles
+  Crown
 } from "lucide-react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
@@ -49,37 +49,40 @@ type MenuItem = {
   permission?: string;
 };
 
-// Menu Configuration - Flat list of all menu items
+// Menu Configuration - Flat list
 const MENU_ITEMS: MenuItem[] = [
   { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
-  { href: "/dashboard/tasacion", label: "Tasación IA", icon: Calculator },
+
+  // Core Business (User requested order: Propiedades, Alquileres, Clientes, Finanzas, Noticias, Soporte)
   { href: "/dashboard/propiedades", label: "Propiedades", icon: Home },
-  { href: "/dashboard/emprendimientos", label: "Emprendimientos", icon: Building2 },
   { href: "/dashboard/alquileres", label: "Alquileres", icon: Key },
   { href: "/dashboard/clientes", label: "Clientes", icon: Users },
+  { href: "/dashboard/finanzas", label: "Finanzas", icon: DollarSign },
+  { href: "/dashboard/novedades", label: "Noticias", icon: Sparkles }, // Renamed from Novedades Zeta
+
+  // Other Tools
+  { href: "/dashboard/tasacion", label: "Tasación IA", icon: Calculator },
+  { href: "/dashboard/emprendimientos", label: "Emprendimientos", icon: Building2 },
   { href: "/dashboard/chat", label: "Chat Zeta Prop", icon: Bot },
   { href: "/dashboard/publicaciones", label: "Publicaciones", icon: Megaphone },
   { href: "/dashboard/blog", label: "Blog / Novedades", icon: FileText },
-  { href: "/dashboard/finanzas", label: "Finanzas", icon: DollarSign },
   { href: "/dashboard/mensajes", label: "Mensajes", icon: Mail },
-  { href: "/dashboard/soporte", label: "Soporte", icon: Headphones },
-  { href: "/dashboard/novedades", label: "Novedades Zeta", icon: Sparkles },
-  { href: "/dashboard/configuracion", label: "Config Tasador", icon: Settings },
+  { href: "/dashboard/calendario", label: "Agenda", icon: Calendar },
 
-  // Admin Only
+  // Pro Tools
+  { href: "/dashboard/agentes", label: "Agentes", icon: Users },
+  { href: "/dashboard/leads", label: "Leads / Consultas", icon: MessageSquare },
+  { href: "/dashboard/sucursales", label: "Multi Sucursal", icon: Building2, permission: "/dashboard/sucursales" },
+  { href: "/dashboard/gestion-plataforma", label: "Gestión Plataforma", icon: Shield, permission: "/dashboard/gestion-plataforma" },
+
+  // Support & Admin
+  { href: "/dashboard/soporte", label: "Soporte", icon: Headphones },
   { href: "/dashboard/soporte/ticketera", label: "Ticketera", icon: Ticket, adminOnly: true },
   { href: "/dashboard/bitacora", label: "Bitácora", icon: BookOpen, adminOnly: true },
   { href: "/dashboard/configuracion/roles", label: "Roles y Permisos", icon: UserCog, adminOnly: true },
   { href: "/dashboard/configuracion/suscripciones", label: "Planes y Suscripciones", icon: Package, adminOnly: true },
   { href: "/dashboard/configuracion/backup", label: "Backup", icon: Database, adminOnly: true },
-
-  // Locked / Pro Features (Strictly at bottom)
-  { href: "/dashboard/agentes", label: "Agentes", icon: Users },
-  { href: "/dashboard/leads", label: "Leads / Consultas", icon: MessageSquare },
-  { href: "/dashboard/calendario", label: "Agenda", icon: Calendar },
-
-  { href: "/dashboard/sucursales", label: "Multi Sucursal", icon: Building2, permission: "/dashboard/sucursales" },
-  { href: "/dashboard/gestion-plataforma", label: "Gestión Plataforma", icon: Shield, permission: "/dashboard/gestion-plataforma" },
+  { href: "/dashboard/configuracion", label: "Configuración", icon: Settings },
 ];
 
 // Features that are locked for Free users with Custom Info
@@ -92,8 +95,6 @@ const LOCKED_FEATURES_INFO: Record<string, { title: string, description: string 
     title: "Central de Leads",
     description: "Centraliza todas las consultas de portales (Zonaprop, Argenprop, etc.) en un solo lugar y automatiza respuestas con IA."
   },
-
-
   "/dashboard/sucursales": {
     title: "Multi Sucursal",
     description: "Administra múltiples oficinas o puntos de venta desde un único panel centralizado de control."
@@ -173,21 +174,27 @@ export default function DashboardSidebar({ isOpen = false, onClose }: DashboardS
   };
 
   const hasPermission = (item: MenuItem) => {
-    // If it's a locked item for free users, we WANT to show it (so return true)
-    // ONLY if it's not explicitly adminOnly (we don't show admin stuff to free users)
-    if (isFreeUser && LOCKED_FOR_FREE.includes(item.href) && !item.adminOnly) {
-      return true;
+    // If it's a locked item for free users, user requested NOT to show them grayed out in the list.
+    // So we effectively HIDE them if they are locked and user is free.
+    if (isFreeUser && LOCKED_FOR_FREE.includes(item.href)) {
+      return false; // Hide completely
+    }
+
+    if (isFreeUser) {
+      // STRICT CHECK: check if href is in userPermissions
+      return userPermissions.includes(item.href);
     }
 
     // First check if it's admin only
-    if (item.adminOnly && userRole?.name !== "Administrador" && userRole?.name !== "Super Admin") return false;
+    // Logic update request by user: Strictly follow permissions.
+    // If permission system is robust, we don't need this hardcoded bypass.
+    // But we must ensure Admin/Super Admin HAVE the permissions in the DB.
 
     // Then check if user has permission for this specific route
-    // If item has a specific permission field, use that, otherwise use the href
     const requiredPermission = item.permission || item.href;
 
     // Check if user's permissions include this route
-    if (!userPermissions.includes(requiredPermission)) return false;
+    if (userPermissions.length > 0 && !userPermissions.includes(requiredPermission)) return false;
 
     return true;
   };
@@ -311,64 +318,106 @@ export default function DashboardSidebar({ isOpen = false, onClose }: DashboardS
         </div>
 
         {/* Content */}
-        <div className="flex-1 overflow-y-auto py-4 px-3 scrollbar-none">
-          <div className="space-y-1">
-            {MENU_ITEMS.filter(hasPermission).map((item) => {
-              const isActive = pathname === item.href;
-              const locked = isItemLocked(item.href);
+        <div className="flex-1 overflow-y-auto py-4 px-3 scrollbar-none space-y-1">
+          {MENU_ITEMS.filter(hasPermission).map((item) => {
+            const isActive = pathname === item.href;
+            const locked = isItemLocked(item.href);
 
-              return (
-                <Link
-                  key={item.href}
-                  href={locked ? "#" : item.href} // Disable link if locked
-                  onClick={(e) => handleItemClick(e, item)}
-                  title={collapsed ? item.label : undefined}
-                  id={`nav-item-${item.label.toLowerCase().replace(/\s+/g, '-')}`}
+            return (
+              <Link
+                key={item.href}
+                href={locked ? "#" : item.href}
+                onClick={(e) => handleItemClick(e, item)}
+                title={collapsed ? item.label : undefined}
+                id={`nav-item-${item.label.toLowerCase().replace(/\s+/g, '-')}`}
+                className={cn(
+                  "flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all duration-200 group relative",
+                  isActive
+                    ? "bg-indigo-50 text-indigo-700 font-medium"
+                    : "text-gray-600 hover:bg-white hover:text-gray-900",
+                  locked ? "opacity-60" : "",
+                  collapsed ? "justify-center px-0" : ""
+                )}
+              >
+                <item.icon
+                  size={20}
                   className={cn(
-                    "flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all duration-200 group relative",
-                    isActive
-                      ? "bg-indigo-50 text-indigo-700 font-medium"
-                      : "text-gray-600 hover:bg-white hover:text-gray-900",
-                    locked ? "opacity-60" : "", // Removed cursor-not-allowed and hover-bg-transparent
-                    collapsed ? "justify-center px-0" : ""
+                    "transition-colors flex-shrink-0",
+                    isActive ? "text-indigo-600" : "text-gray-500 group-hover:text-gray-700",
+                    locked ? "text-gray-400" : ""
                   )}
-                >
-                  <item.icon
-                    size={20}
-                    className={cn(
-                      "transition-colors flex-shrink-0",
-                      isActive ? "text-indigo-600" : "text-gray-500 group-hover:text-gray-700",
-                      locked ? "text-gray-400" : ""
+                />
+                {!collapsed && (
+                  <div className="flex flex-1 items-center justify-between min-w-0">
+                    <span className="truncate">{item.label}</span>
+                    {locked && (
+                      <span className="text-[10px] font-bold uppercase bg-gray-100 text-gray-500 px-1.5 py-0.5 rounded border border-gray-200 ml-2">PRO</span>
                     )}
-                  />
-                  {!collapsed && (
-                    <div className="flex flex-1 items-center justify-between min-w-0">
-                      <span className="truncate">{item.label}</span>
-                      {locked && (
-                        <span className="text-[10px] font-bold uppercase bg-gray-100 text-gray-500 px-1.5 py-0.5 rounded border border-gray-200 ml-2">PRO</span>
-                      )}
 
-                      {!locked && !isActive && item.href === '/dashboard/leads' && unreadCount > 0 && (
-                        <span className="bg-red-500 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full min-w-[20px] text-center ml-2 shadow-sm animate-pulse">
-                          {unreadCount}
-                        </span>
-                      )}
+                    {!locked && !isActive && item.href === '/dashboard/leads' && unreadCount > 0 && (
+                      <span className="bg-red-500 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full min-w-[20px] text-center ml-2 shadow-sm animate-pulse">
+                        {unreadCount}
+                      </span>
+                    )}
 
-                      {!locked && !isActive && item.href === '/dashboard/soporte/ticketera' && ticketCount > 0 && (
-                        <span className="bg-red-500 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full min-w-[20px] text-center ml-2 shadow-sm animate-pulse">
-                          {ticketCount}
-                        </span>
-                      )}
-                    </div>
-                  )}
-                </Link>
-              );
-            })}
-          </div>
+                    {!locked && !isActive && item.href === '/dashboard/soporte/ticketera' && ticketCount > 0 && (
+                      <span className="bg-red-500 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full min-w-[20px] text-center ml-2 shadow-sm animate-pulse">
+                        {ticketCount}
+                      </span>
+                    )}
+                  </div>
+                )}
+              </Link>
+            );
+          })}
         </div>
 
-        {/* Footer */}
-        <div className="p-4 border-t border-gray-100">
+        {/* Footer Actions */}
+        <div className="p-4 border-t border-gray-100 space-y-2">
+          {/* Upgrade CTA for Free Users */}
+          {isFreeUser && !collapsed && (
+            <div className="relative group rounded-xl p-[1px] overflow-hidden mb-2 shadow-lg hover:shadow-indigo-500/25 transition-shadow">
+              {/* Animated Gradient Border */}
+              <div className="absolute inset-0 bg-gradient-to-r from-transparent via-indigo-500 to-transparent opacity-75 group-hover:opacity-100 animate-border-flow" style={{ backgroundSize: '200% 100%' }}></div>
+              <div className="absolute inset-0 bg-gradient-to-r from-violet-600 via-indigo-600 to-violet-600 animate-gradient-xy opacity-50"></div>
+
+              <div className="relative bg-gray-900 rounded-xl p-4 text-white overflow-hidden h-full">
+                <div className="absolute top-0 right-0 p-2 opacity-10">
+                  <Crown size={60} />
+                </div>
+                <div className="relative z-10">
+                  <h4 className="font-bold text-sm mb-1 text-indigo-200 flex items-center gap-2">
+                    Plan Gratuito
+                    <span className="flex h-2 w-2 relative">
+                      <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-indigo-400 opacity-75"></span>
+                      <span className="relative inline-flex rounded-full h-2 w-2 bg-indigo-500"></span>
+                    </span>
+                  </h4>
+                  <p className="text-xs text-gray-300 mb-3 leading-relaxed">
+                    Desbloqueá todas las funciones PRO hoy mismo.
+                  </p>
+                  <button
+                    onClick={() => router.push('/precios')}
+                    className="w-full bg-white text-gray-900 text-xs font-bold py-2 rounded-lg hover:bg-gray-100 transition shadow-sm flex items-center justify-center gap-1 group-hover:scale-[1.02] transform duration-200"
+                  >
+                    <Sparkles size={12} className="text-indigo-600 animate-pulse" />
+                    Mejorar Plan
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {isFreeUser && collapsed && (
+            <button
+              onClick={() => router.push('/precios')}
+              className="w-full flex justify-center mb-2 p-2 bg-gray-900 rounded-xl text-white hover:bg-black transition"
+              title="Mejorar a PRO"
+            >
+              <Crown size={20} className="text-amber-400" />
+            </button>
+          )}
+
           <button
             onClick={handleLogout}
             className={cn(

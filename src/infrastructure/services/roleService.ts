@@ -279,9 +279,10 @@ export const roleService = {
                 permissions: [
                     "/dashboard",
                     "/dashboard/propiedades",
-                    "/dashboard/cuenta",
-                    "/dashboard/blog",
-                    "/dashboard/novedades"
+                    "/dashboard/alquileres",
+                    "/dashboard/clientes",
+                    "/dashboard/finanzas",
+                    "/dashboard/soporte"
                 ],
                 isSystem: false
             });

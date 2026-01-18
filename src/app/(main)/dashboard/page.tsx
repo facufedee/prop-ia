@@ -8,33 +8,34 @@ import { leadsService } from "@/infrastructure/services/leadsService";
 import { auditLogService } from "@/infrastructure/services/auditLogService";
 import { alquileresService } from "@/infrastructure/services/alquileresService";
 import { AuditLog } from "@/domain/models/AuditLog";
-import { Alquiler } from "@/domain/models/Alquiler";
-import { isSameMonth, parseISO } from "date-fns";
+import { isSameMonth, format } from "date-fns";
+import { es } from "date-fns/locale";
 import {
     Home,
     TrendingUp,
     Users,
     DollarSign,
     ArrowUpRight,
-    ArrowDownRight,
     Building2,
     Calendar,
-    Eye,
-    MessageSquare,
     BarChart3,
     Plus,
-    Sparkles
+    Sparkles,
+    Search,
+    Bell,
+    CheckCircle2,
+    ArrowRight
 } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/ui/context/AuthContext";
-
 import { useBranchContext } from "@/infrastructure/context/BranchContext";
 import OnboardingOverlay from "@/ui/components/onboarding/OnboardingOverlay";
+import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 
 export default function DashboardPage() {
     const router = useRouter();
-    const { userRole } = useAuth();
+    const { userRole, userPermissions } = useAuth();
     const [user, setUser] = useState<any>(null);
     const { selectedBranchId } = useBranchContext();
     const [stats, setStats] = useState({
@@ -49,11 +50,9 @@ export default function DashboardPage() {
     const [showOnboarding, setShowOnboarding] = useState(false);
 
     useEffect(() => {
-        // Check if onboarding should show
         if (!loading && stats.totalProperties === 0) {
             const hasSeenOnboarding = localStorage.getItem("hasSeenPropertyOnboarding");
             if (!hasSeenOnboarding) {
-                // Short delay to allow UI to settle
                 setTimeout(() => setShowOnboarding(true), 1000);
             }
         }
@@ -83,23 +82,18 @@ export default function DashboardPage() {
     useEffect(() => {
         if (user) {
             fetchStats(user.uid, selectedBranchId);
-        } else if (!auth?.currentUser && !loading) {
-            // Handle case where user isn't set yet but might be effectively logged out or loading
         }
-        // When user is set, we fetch. selectedBranchId change also triggers fetch.
     }, [user, selectedBranchId]);
 
     const fetchStats = async (userId: string, branchId: string) => {
         if (!db) return;
 
         try {
-            // 1. Properties Query - Filter by branch if needed
             let propsQuery = query(collection(db, "properties"), where("userId", "==", userId));
             if (branchId !== 'all') {
                 propsQuery = query(propsQuery, where("branchId", "==", branchId));
             }
 
-            // Run all queries
             const [propsSnapshot, leads, recentLogsData, alquileres] = await Promise.all([
                 getDocs(propsQuery),
                 leadsService.getLeads(userId),
@@ -107,43 +101,31 @@ export default function DashboardPage() {
                 alquileresService.getAlquileres(userId)
             ]);
 
-            // Capture valid Property IDs for this branch
             const propertyIds = new Set(propsSnapshot.docs.map(d => d.id));
 
-            // 2. Leads - Filter by Property ownership
             const filteredLeads = branchId === 'all'
                 ? leads
                 : leads.filter(l => l.propertyId && propertyIds.has(l.propertyId));
 
-            // 3. Alquileres - Filter by Property ownership
             const filteredAlquileres = branchId === 'all'
                 ? alquileres
                 : alquileres.filter(a => propertyIds.has(a.propiedadId));
 
-
-            // Calculate Alquileres Stats (using filtered list)
             const activeRentals = filteredAlquileres.filter(a => a.estado === 'activo').length;
 
-            // Calculate Honorarios for Current Month (using filtered list)
             const now = new Date();
             let honorariosMonth = 0;
 
             filteredAlquileres.forEach(alquiler => {
                 alquiler.historialPagos.forEach(pago => {
-                    // Check if paid in current month
                     const fechaPago = pago.fechaPago ? new Date(pago.fechaPago) : null;
                     if (pago.estado === 'pagado' && fechaPago && isSameMonth(fechaPago, now)) {
-
-                        // Priority 1: Desglose explícito
                         if (pago.desglose?.honorarios) {
                             honorariosMonth += pago.desglose.honorarios;
-                        }
-                        // Priority 2: Fallback calculation
-                        else {
+                        } else {
                             if (alquiler.honorariosTipo === 'fijo' && alquiler.honorariosValor) {
                                 honorariosMonth += alquiler.honorariosValor;
                             } else if (alquiler.honorariosTipo === 'porcentaje' && alquiler.honorariosValor) {
-                                // Default to applying % on base rent if total breakdown missing, or total amount
                                 const baseAmount = pago.montoAlquiler || pago.monto;
                                 honorariosMonth += baseAmount * (alquiler.honorariosValor / 100);
                             }
@@ -160,7 +142,7 @@ export default function DashboardPage() {
                 honorariosMonth,
                 recentActivity: recentLogsData.logs
             });
-            setLoading(false); // Ensure loading is off after fetch
+            setLoading(false);
         } catch (error) {
             console.error("Error fetching dashboard stats:", error);
             setLoading(false);
@@ -171,72 +153,85 @@ export default function DashboardPage() {
         return new Intl.NumberFormat('es-AR', { style: 'currency', currency: 'ARS', maximumFractionDigits: 0 }).format(value);
     };
 
+    // Chart Data (Mocking trend for visual appeal or processing logs)
+    const chartData = [
+        { name: 'Lun', value: 400 },
+        { name: 'Mar', value: 300 },
+        { name: 'Mie', value: 550 },
+        { name: 'Jue', value: 450 },
+        { name: 'Vie', value: 650 },
+        { name: 'Sab', value: 400 },
+        { name: 'Dom', value: 300 },
+    ];
+
     if (loading) {
         return (
-            <div className="fixed inset-0 bg-white z-50 flex items-center justify-center">
-                <div className="text-center space-y-6">
-                    {/* Custom loading image */}
-                    <div className="flex justify-center mb-8">
-                        <div className="relative">
-                            <div className="absolute inset-0 bg-gradient-to-r from-indigo-600 via-purple-600 to-cyan-500 rounded-2xl blur-3xl opacity-30 animate-pulse" />
-                            <img
-                                src="/assets/img/loading.png"
-                                alt="Cargando Zeta Prop"
-                                className="relative h-20 w-auto animate-pulse"
-                            />
-                        </div>
-                    </div>
-
-                    {/* Loading dots animation */}
-                    <div className="flex justify-center gap-2">
-                        <div className="w-3 h-3 bg-indigo-600 rounded-full animate-bounce" style={{ animationDelay: '0ms' }} />
-                        <div className="w-3 h-3 bg-purple-600 rounded-full animate-bounce" style={{ animationDelay: '150ms' }} />
-                        <div className="w-3 h-3 bg-cyan-500 rounded-full animate-bounce" style={{ animationDelay: '300ms' }} />
-                    </div>
-
-                    <p className="text-sm text-gray-500 font-medium">Cargando dashboard...</p>
+            <div className="fixed inset-0 bg-gray-50 z-50 flex items-center justify-center">
+                <div className="flex flex-col items-center">
+                    <div className="w-12 h-12 border-4 border-indigo-600 border-t-transparent rounded-full animate-spin mb-4"></div>
+                    <p className="text-gray-500 font-medium">Cargando tu inmobiliaria...</p>
                 </div>
             </div>
         );
     }
 
     return (
-        <div className="p-8 max-w-7xl mx-auto">
-            {/* Header */}
-            <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
+        <div className="min-h-screen bg-gray-50/50 p-6 md:p-8 max-w-7xl mx-auto space-y-8">
+            {/* Professional Header */}
+            <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
                 <div>
-                    <h1 className="text-2xl font-bold text-gray-900">
-                        Hola, {user?.displayName?.split(' ')[0] || 'Agente'} 👋
+                    <h1 className="text-3xl font-bold text-gray-900 tracking-tight">
+                        Hola, {user?.displayName?.split(' ')[0] || 'Colega'}
                     </h1>
-                    <p className="text-gray-500 mt-1">
-                        Aquí está el resumen de tu inmobiliaria hoy
+                    <p className="text-gray-500 mt-1 first-letter:capitalize">
+                        {format(new Date(), "EEEE, d 'de' MMMM", { locale: es })}
                     </p>
                 </div>
-                <div className="flex gap-3">
+                <div className="flex items-center gap-3">
+                    <div className="hidden md:flex items-center bg-white border border-gray-200 rounded-xl px-3 py-2 shadow-sm">
+                        <Search size={18} className="text-gray-400 mr-2" />
+                        <input type="text" placeholder="Buscar..." className="text-sm bg-transparent outline-none text-gray-600 w-40" />
+                    </div>
+                    <button className="p-2.5 bg-white border border-gray-200 rounded-xl text-gray-500 hover:text-indigo-600 hover:border-indigo-100 transition shadow-sm relative">
+                        <Bell size={20} />
+                        <span className="absolute top-2 right-2.5 w-2 h-2 bg-red-500 rounded-full border-2 border-white"></span>
+                    </button>
                     <Link
                         id="new-property-btn"
                         href="/dashboard/propiedades/nueva"
-                        className="flex items-center gap-2 px-4 py-2 bg-indigo-600 text-white rounded-xl hover:bg-indigo-700 transition-colors text-sm font-medium shadow-sm hover:shadow-md"
+                        className="flex items-center gap-2 px-5 py-2.5 bg-gray-900 text-white rounded-xl hover:bg-black transition-all shadow-lg hover:shadow-gray-900/20 font-medium"
                     >
-                        <Plus size={16} />
-                        Nueva Propiedad
+                        <Plus size={18} />
+                        <span className="hidden sm:inline">Nueva Propiedad</span>
                     </Link>
                 </div>
             </div>
 
-            {/* Free Plan Alert */}
+            {/* Premium Status Banner */}
             {userRole?.name === "Cliente Free" && (
-                <div className="mb-8 p-4 bg-emerald-50 border border-emerald-100 rounded-xl flex items-start gap-4 shadow-sm animate-in fade-in slide-in-from-top-4 duration-500">
-                    <div className="p-2 bg-emerald-100 rounded-lg text-emerald-600 flex-shrink-0">
-                        <Sparkles size={20} />
-                    </div>
-                    <div>
-                        <h3 className="text-emerald-900 font-bold mb-1">¡Estás en el Plan Free!</h3>
-                        <p className="text-emerald-700 text-sm leading-relaxed">
-                            Tu plan actual incluye hasta <strong>10 Propiedades</strong>, gestión de <strong>Alquileres</strong> y <strong>Clientes</strong>.
-                            <br />
-                            ¿Necesitas más poder? <Link href="/precios" className="underline font-bold hover:text-emerald-800 transition-colors">Pásate a la versión PRO</Link> para desbloquear límites y acceder a herramientas exclusivas.
-                        </p>
+                <div className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-indigo-900 to-violet-900 text-white shadow-xl">
+                    <div className="absolute top-0 right-0 w-64 h-64 bg-white/5 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2"></div>
+                    <div className="relative z-10 p-6 md:p-8 flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
+                        <div>
+                            <div className="flex items-center gap-2 mb-2">
+                                <span className="px-2.5 py-0.5 rounded-md bg-indigo-500/30 border border-indigo-400/30 text-indigo-100 text-xs font-bold uppercase tracking-wide">
+                                    Plan Gratuito
+                                </span>
+                            </div>
+                            <h3 className="text-xl md:text-2xl font-bold text-white mb-1">
+                                Lleva tu inmobiliaria al siguiente nivel
+                            </h3>
+                            <p className="text-indigo-100 max-w-xl text-sm leading-relaxed">
+                                Desbloquea gestión ilimitada, automatización de leads con IA y herramientas avanzadas de marketing.
+                            </p>
+                        </div>
+                        <Link
+                            href="/precios"
+                            className="flex-shrink-0 px-6 py-3 bg-white text-indigo-900 rounded-xl font-bold hover:bg-indigo-50 transition-colors shadow-lg flex items-center gap-2"
+                        >
+                            <Sparkles size={18} className="text-indigo-600" />
+                            Ver Planes PRO
+                        </Link>
                     </div>
                 </div>
             )}
@@ -247,135 +242,260 @@ export default function DashboardPage() {
                 onDismiss={handleOnboardingDismiss}
             />
 
-            {/* Stats Grid */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-                <Link href="/dashboard/propiedades" className="group">
-                    <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 hover:shadow-md transition-all md:hover:scale-[1.02] cursor-pointer h-full">
-                        <div className="flex justify-between items-start mb-4">
-                            <div className="p-3 bg-blue-50 rounded-xl text-blue-600 group-hover:bg-blue-100 transition-colors">
-                                <Building2 size={20} />
+            {/* Stats Overview */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                {userPermissions.includes('/dashboard/propiedades') ? (
+                    <Link href="/dashboard/propiedades" className="group">
+                        <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 hover:shadow-md transition-all md:hover:scale-[1.02] cursor-pointer h-full relative overflow-hidden">
+                            <div className="flex justify-between items-start mb-4 relative z-10">
+                                <div className="p-3 bg-blue-50 rounded-xl text-blue-600 group-hover:bg-blue-100 transition-colors">
+                                    <Building2 size={28} />
+                                </div>
+                                {userRole?.name === "Cliente Free" ? (
+                                    <span className={`flex items-center text-xs font-bold px-3 py-1.5 rounded-full ${stats.totalProperties >= 10 ? 'bg-red-50 text-red-600' : 'bg-indigo-50 text-indigo-600'}`}>
+                                        Plan Gratuito
+                                    </span>
+                                ) : (
+                                    <span className="flex items-center text-xs font-medium text-green-600 bg-green-50 px-2 py-1 rounded-full">
+                                        <ArrowUpRight size={12} className="mr-1" /> Activas
+                                    </span>
+                                )}
                             </div>
-                            <span className="flex items-center text-xs font-medium text-green-600 bg-green-50 px-2 py-1 rounded-full">
-                                <ArrowUpRight size={12} className="mr-1" /> +12%
-                            </span>
-                        </div>
-                        <h3 className="text-2xl font-bold text-gray-900">{stats.totalProperties}</h3>
-                        <p className="text-sm text-gray-500 mt-1">Propiedades Totales</p>
-                        <p className="text-xs text-gray-400 mt-2">0 activas</p>
-                    </div>
-                </Link>
 
-                <Link href="/dashboard/alquileres" className="group">
-                    <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 hover:shadow-md transition-all md:hover:scale-[1.02] cursor-pointer h-full">
-                        <div className="flex justify-between items-start mb-4">
-                            <div className="p-3 bg-green-50 rounded-xl text-green-600 group-hover:bg-green-100 transition-colors">
-                                <Home size={20} />
+                            <div className="relative z-10">
+                                <div className="flex items-baseline gap-2">
+                                    <h3 className="text-4xl md:text-5xl font-extrabold text-gray-900 tracking-tight">
+                                        {stats.totalProperties}
+                                    </h3>
+                                    {userRole?.name === "Cliente Free" && (
+                                        <span className="text-xl text-gray-400 font-medium">/ 10</span>
+                                    )}
+                                </div>
+                                <p className="text-sm text-gray-500 mt-2 font-medium">Propiedades Totales</p>
+
+                                {userRole?.name === "Cliente Free" && (
+                                    <div className="mt-4 w-full bg-gray-100 rounded-full h-2 overflow-hidden">
+                                        <div
+                                            className={`h-full rounded-full transition-all duration-500 ${stats.totalProperties >= 10 ? 'bg-red-500' : 'bg-indigo-500'}`}
+                                            style={{ width: `${Math.min((stats.totalProperties / 10) * 100, 100)}%` }}
+                                        />
+                                    </div>
+                                )}
                             </div>
-                            <span className="flex items-center text-xs font-medium text-green-600 bg-green-50 px-2 py-1 rounded-full">
-                                <ArrowUpRight size={12} className="mr-1" /> Activos
-                            </span>
+                        </div>
+                    </Link>
+                ) : (
+                    <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 h-full opacity-75">
+                        <div className="flex justify-between items-start mb-4">
+                            <div className="p-3 bg-gray-50 rounded-xl text-gray-400">
+                                <Building2 size={24} />
+                            </div>
+                        </div>
+                        <h3 className="text-4xl font-bold text-gray-900">{stats.totalProperties}</h3>
+                        <p className="text-sm text-gray-500 mt-1">Propiedades Totales</p>
+                    </div>
+                )}
+
+                {userPermissions.includes('/dashboard/alquileres') ? (
+                    <Link href="/dashboard/alquileres" className="group">
+                        <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 hover:shadow-md transition-all md:hover:scale-[1.02] cursor-pointer h-full">
+                            <div className="flex justify-between items-start mb-4">
+                                <div className="p-3 bg-indigo-50 text-indigo-600 rounded-xl group-hover:bg-indigo-100 transition-colors">
+                                    <Users size={24} />
+                                </div>
+                                <span className="flex items-center text-xs font-medium text-green-600 bg-green-50 px-2 py-1 rounded-full">
+                                    <ArrowUpRight size={12} className="mr-1" /> Activos
+                                </span>
+                            </div>
+                            <div className="flex items-baseline gap-2">
+                                <h3 className="text-3xl font-bold text-gray-900">{stats.activeRentals}</h3>
+                                <span className="text-sm text-gray-400">/ {stats.totalAlquileres}</span>
+                            </div>
+                            <p className="text-sm text-gray-500 mt-1">Alquileres</p>
+                            <p className="text-xs text-gray-400 mt-2">En curso</p>
+                        </div>
+                    </Link>
+                ) : (
+                    <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 h-full opacity-75">
+                        <div className="flex justify-between items-start mb-4">
+                            <div className="p-3 bg-gray-50 rounded-xl text-gray-400">
+                                <Users size={24} />
+                            </div>
                         </div>
                         <div className="flex items-baseline gap-2">
-                            <h3 className="text-2xl font-bold text-gray-900">{stats.activeRentals}</h3>
+                            <h3 className="text-3xl font-bold text-gray-900">{stats.activeRentals}</h3>
                             <span className="text-sm text-gray-400">/ {stats.totalAlquileres}</span>
                         </div>
                         <p className="text-sm text-gray-500 mt-1">Alquileres</p>
-                        <p className="text-xs text-gray-400 mt-2">En curso</p>
                     </div>
-                </Link>
+                )}
 
-                <Link href="/dashboard/finanzas" className="group">
-                    <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 hover:shadow-md transition-all md:hover:scale-[1.02] cursor-pointer h-full">
-                        <div className="flex justify-between items-start mb-4">
-                            <div className="p-3 bg-indigo-50 rounded-xl text-indigo-600 group-hover:bg-indigo-100 transition-colors">
-                                <DollarSign size={20} />
+                {userPermissions.includes('/dashboard/finanzas') ? (
+                    <Link href="/dashboard/finanzas" className="group">
+                        <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 hover:shadow-md transition-all md:hover:scale-[1.02] cursor-pointer h-full">
+                            <div className="flex justify-between items-start mb-4">
+                                <div className="p-3 bg-emerald-50 rounded-xl text-emerald-600 group-hover:bg-emerald-100 transition-colors">
+                                    <DollarSign size={24} />
+                                </div>
+                                <span className="flex items-center text-xs font-medium text-green-600 bg-green-50 px-2 py-1 rounded-full">
+                                    <TrendingUp size={12} className="mr-1" /> Mes actual
+                                </span>
                             </div>
-                            <span className="flex items-center text-xs font-medium text-green-600 bg-green-50 px-2 py-1 rounded-full">
-                                <TrendingUp size={12} className="mr-1" /> Mes actual
-                            </span>
+                            <h3 className="text-3xl font-bold text-gray-900">{formatCurrency(stats.honorariosMonth)}</h3>
+                            <p className="text-sm text-gray-500 mt-1">Ingresos Honorarios</p>
+                            <div className="flex items-center gap-1 mt-2 text-xs text-indigo-600 font-medium opacity-0 group-hover:opacity-100 transition-opacity">
+                                Ver detalles <ArrowUpRight size={12} />
+                            </div>
                         </div>
-                        <h3 className="text-2xl font-bold text-gray-900">{formatCurrency(stats.honorariosMonth)}</h3>
+                    </Link>
+                ) : (
+                    <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 h-full opacity-75">
+                        <div className="flex justify-between items-start mb-4">
+                            <div className="p-3 bg-gray-50 rounded-xl text-gray-400">
+                                <DollarSign size={24} />
+                            </div>
+                        </div>
+                        <h3 className="text-3xl font-bold text-gray-900">{formatCurrency(stats.honorariosMonth)}</h3>
                         <p className="text-sm text-gray-500 mt-1">Ingresos Honorarios</p>
-                        <div className="flex items-center gap-1 mt-2 text-xs text-indigo-600 font-medium opacity-0 group-hover:opacity-100 transition-opacity">
-                            Ver detalles <ArrowUpRight size={12} />
+                    </div>
+                )}
+            </div>
+
+            {/* Main Content Grid */}
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                {/* Left Column: Chart & Activity */}
+                <div className="lg:col-span-2 space-y-8">
+                    {/* Activity Chart or Welcome Banner */}
+                    {stats.totalProperties === 0 ? (
+                        <div className="bg-gradient-to-br from-indigo-900 via-indigo-800 to-indigo-900 rounded-2xl shadow-lg p-8 text-white relative overflow-hidden ring-1 ring-white/10">
+                            <div className="absolute top-0 right-0 w-96 h-96 bg-white/5 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2"></div>
+                            <div className="absolute bottom-0 left-0 w-64 h-64 bg-indigo-500/20 rounded-full blur-3xl translate-y-1/3 -translate-x-1/3"></div>
+
+                            <div className="relative z-10">
+                                <h2 className="text-2xl font-bold mb-3">¡Bienvenido a tu Dashboard! 🚀</h2>
+                                <p className="text-indigo-100 mb-6 max-w-lg leading-relaxed text-sm md:text-base">
+                                    Aquí verás métricas clave sobre el rendimiento de tu inmobiliaria.
+                                    Para comenzar a ver datos interesantes, cargá tu primera propiedad y empezá a gestionar tu cartera.
+                                </p>
+                                <div className="flex flex-wrap gap-4">
+                                    <Link href="/dashboard/propiedades/nueva" className="px-5 py-2.5 bg-white text-indigo-900 rounded-xl font-bold hover:bg-indigo-50 transition-all shadow-md flex items-center gap-2 text-sm">
+                                        <Plus size={18} />
+                                        Cargar Propiedad
+                                    </Link>
+                                    <Link href="/dashboard/tutoriales" className="px-5 py-2.5 bg-white/10 text-white border border-white/20 rounded-xl font-medium hover:bg-white/20 transition-all flex items-center gap-2 text-sm backdrop-blur-sm">
+                                        <Search size={18} />
+                                        Ver Tutoriales
+                                    </Link>
+                                </div>
+                            </div>
                         </div>
-                    </div>
-                </Link>
-            </div>
+                    ) : (
+                        <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
+                            <div className="flex justify-between items-center mb-6">
+                                <h2 className="text-lg font-bold text-gray-900">Rendimiento</h2>
+                                <button className="text-sm text-indigo-600 font-medium hover:underline">Ver reporte</button>
+                            </div>
+                            <div className="h-[300px] w-full flex flex-col items-center justify-center text-gray-400 border border-dashed border-gray-200 rounded-xl bg-gray-50/50">
+                                <BarChart3 size={48} className="mb-3 opacity-20" />
+                                <p className="text-sm font-medium">Recopilando datos de actividad...</p>
+                                <p className="text-xs text-center max-w-xs mt-1 opacity-70">
+                                    Las métricas de rendimiento estarán disponibles pronto basado en tus leads y visitas.
+                                </p>
+                            </div>
+                        </div>
+                    )}
 
-            {/* Quick Actions */}
-            <h2 className="text-lg font-bold text-gray-900 mb-4">Acciones Rápidas</h2>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
-                <Link href="/dashboard/propiedades/nueva" className="p-4 bg-indigo-50 rounded-xl border border-indigo-100 hover:bg-indigo-100 transition-colors flex flex-col items-center justify-center text-center gap-2 group">
-                    <div className="p-2 bg-white rounded-lg text-indigo-600 group-hover:scale-110 transition-transform">
-                        <Plus size={20} />
-                    </div>
-                    <span className="text-sm font-medium text-indigo-900">Nueva Propiedad</span>
-                </Link>
-                <Link href="/dashboard/alquileres/nuevo" className="p-4 bg-green-50 rounded-xl border border-green-100 hover:bg-green-100 transition-colors flex flex-col items-center justify-center text-center gap-2 group">
-                    <div className="p-2 bg-white rounded-lg text-green-600 group-hover:scale-110 transition-transform">
-                        <Home size={20} />
-                    </div>
-                    <span className="text-sm font-medium text-green-900">Nuevo Alquiler</span>
-                </Link>
-                <Link href="/dashboard/tasacion" className="p-4 bg-purple-50 rounded-xl border border-purple-100 hover:bg-purple-100 transition-colors flex flex-col items-center justify-center text-center gap-2 group">
-                    <div className="p-2 bg-white rounded-lg text-purple-600 group-hover:scale-110 transition-transform">
-                        <BarChart3 size={20} />
-                    </div>
-                    <span className="text-sm font-medium text-purple-900">Tasar Propiedad</span>
-                </Link>
-            </div>
+                    {/* Quick Actions Grid */}
+                    <div>
+                        <h2 className="text-lg font-bold text-gray-900 mb-4">Accesos Directos</h2>
+                        <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+                            {userPermissions.includes('/dashboard/propiedades') && (
+                                <Link href="/dashboard/propiedades/nueva" className="p-4 bg-white border border-gray-200 rounded-xl hover:border-indigo-300 hover:shadow-md transition-all group group text-center flex flex-col items-center justify-center gap-3">
+                                    <div className="p-3 bg-indigo-50 text-indigo-600 rounded-full group-hover:scale-110 transition-transform">
+                                        <Home size={20} />
+                                    </div>
+                                    <span className="text-sm font-medium text-gray-700">Crear Propiedad</span>
+                                </Link>
+                            )}
 
-            {/* Recent Activity & Upcoming */}
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-                <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
-                    <div className="flex justify-between items-center mb-6">
-                        <h2 className="text-lg font-bold text-gray-900">Actividad del Mes</h2>
-                        <select className="text-sm border-gray-200 rounded-lg text-gray-500">
-                            <option>Últimos 30 días</option>
-                            <option>Este año</option>
-                        </select>
-                    </div>
-                    <div className="h-64 flex items-center justify-center text-gray-400 text-sm">
-                        <div className="text-center">
-                            <p>Gráfico de actividad</p>
-                            <p className="text-xs mt-1">Propiedades y tasaciones</p>
+                            {userPermissions.includes('/dashboard/alquileres') && (
+                                <Link href="/dashboard/alquileres" className="p-4 bg-white border border-gray-200 rounded-xl hover:border-indigo-300 hover:shadow-md transition-all group text-center flex flex-col items-center justify-center gap-3">
+                                    <div className="p-3 bg-emerald-50 text-emerald-600 rounded-full group-hover:scale-110 transition-transform">
+                                        <DollarSign size={20} />
+                                    </div>
+                                    <span className="text-sm font-medium text-gray-700">Registrar Cobro</span>
+                                </Link>
+                            )}
+
+                            {userPermissions.includes('/dashboard/tasacion') && (
+                                <Link href="/dashboard/tasacion" className="p-4 bg-white border border-gray-200 rounded-xl hover:border-indigo-300 hover:shadow-md transition-all group text-center flex flex-col items-center justify-center gap-3">
+                                    <div className="p-3 bg-purple-50 text-purple-600 rounded-full group-hover:scale-110 transition-transform">
+                                        <BarChart3 size={20} />
+                                    </div>
+                                    <span className="text-sm font-medium text-gray-700">Nueva Tasación</span>
+                                </Link>
+                            )}
+
+                            {userPermissions.includes('/dashboard/clientes') && (
+                                <Link href="/dashboard/clientes" className="p-4 bg-white border border-gray-200 rounded-xl hover:border-indigo-300 hover:shadow-md transition-all group text-center flex flex-col items-center justify-center gap-3">
+                                    <div className="p-3 bg-orange-50 text-orange-600 rounded-full group-hover:scale-110 transition-transform">
+                                        <Users size={20} />
+                                    </div>
+                                    <span className="text-sm font-medium text-gray-700">Alta Cliente</span>
+                                </Link>
+                            )}
                         </div>
                     </div>
                 </div>
 
-                <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
-                    <h2 className="text-lg font-bold text-gray-900 mb-6">Actividad Reciente</h2>
-                    <div className="space-y-6">
-                        {stats.recentActivity.length === 0 ? (
-                            <p className="text-sm text-gray-500 text-center py-4">No hay actividad reciente.</p>
-                        ) : (
-                            stats.recentActivity.map((log) => (
-                                <div key={log.id} className="flex gap-4">
-                                    <div className={`w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0
-                                        ${log.level === 'error' ? 'bg-red-100 text-red-600' :
-                                            log.level === 'warning' ? 'bg-orange-100 text-orange-600' :
-                                                log.level === 'success' ? 'bg-green-100 text-green-600' : 'bg-blue-100 text-blue-600'}`}>
-                                        {/* Simple icon logic based on module */}
-                                        {log.module === 'Propiedades' ? <Home size={18} /> :
-                                            log.module === 'Alquileres' ? <Building2 size={18} /> :
-                                                log.module === 'Tasaciones' ? <BarChart3 size={18} /> :
-                                                    log.module === 'Visitas' ? <Calendar size={18} /> :
-                                                        <TrendingUp size={18} />}
-                                    </div>
-                                    <div>
-                                        <p className="text-sm font-medium text-gray-900">{log.description}</p>
-                                        <div className="flex items-center gap-2 mt-1">
-                                            <span className="text-xs text-gray-500 capitalize">{log.module.toLowerCase()}</span>
-                                            <span className="text-gray-300">•</span>
-                                            <span className="text-xs text-gray-400">
-                                                {new Date(log.timestamp).toLocaleDateString()} {new Date(log.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                {/* Right Column: Recent Activity */}
+                <div className="lg:col-span-1">
+                    <div className="bg-white rounded-2xl shadow-sm border border-gray-100 h-full">
+                        <div className="p-6 border-b border-gray-100">
+                            <h2 className="text-lg font-bold text-gray-900">Actividad Reciente</h2>
+                        </div>
+                        <div className="p-6 space-y-6">
+                            {stats.recentActivity.length > 0 ? (
+                                stats.recentActivity.map((log, i) => (
+                                    <div key={log.id} className="relative pl-6 pb-6 last:pb-0">
+                                        {/* Timeline line */}
+                                        {i !== stats.recentActivity.length - 1 && (
+                                            <div className="absolute left-[11px] top-2 bottom-0 w-0.5 bg-gray-100"></div>
+                                        )}
+                                        {/* Timeline dot */}
+                                        <div className={`absolute left-0 top-1 w-6 h-6 rounded-full border-2 border-white shadow-sm flex items-center justify-center z-10
+                                            ${log.level === 'error' ? 'bg-red-100' :
+                                                log.level === 'warning' ? 'bg-orange-100' :
+                                                    'bg-indigo-100'}`}>
+                                            <div className={`w-2 h-2 rounded-full ${log.level === 'error' ? 'bg-red-500' :
+                                                log.level === 'warning' ? 'bg-orange-500' :
+                                                    'bg-indigo-500'
+                                                }`}></div>
+                                        </div>
+
+                                        <div>
+                                            <p className="text-sm text-gray-900 font-medium leading-none mb-1.5">{log.action}</p>
+                                            <p className="text-xs text-gray-500 leading-snug mb-2">{log.description}</p>
+                                            <span className="text-[10px] text-gray-400 font-medium uppercase tracking-wide bg-gray-50 px-1.5 py-0.5 rounded">
+                                                {format(new Date(log.timestamp), 'HH:mm')} • {log.module}
                                             </span>
                                         </div>
                                     </div>
+                                ))
+                            ) : (
+                                <div className="text-center py-10">
+                                    <div className="inline-flex justify-center items-center w-12 h-12 rounded-full bg-gray-50 text-gray-400 mb-3">
+                                        <CheckCircle2 size={24} />
+                                    </div>
+                                    <p className="text-sm text-gray-500">No hay actividad reciente.</p>
                                 </div>
-                            ))
-                        )}
+                            )}
+                        </div>
+                        <div className="p-4 border-t border-gray-100">
+                            <Link href="/dashboard/bitacora" className="flex items-center justify-center gap-2 text-sm font-medium text-indigo-600 hover:text-indigo-700 w-full py-2 hover:bg-indigo-50 rounded-lg transition-colors">
+                                Ver historial completo <ArrowRight size={16} />
+                            </Link>
+                        </div>
                     </div>
                 </div>
             </div>

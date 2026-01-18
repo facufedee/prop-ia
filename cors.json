@@ -2,8 +2,6 @@
     {
         "origin": [
             "http://localhost:3000",
-            "https://prop-ia.com",
-            "https://prop-ia.vercel.app",
             "https://zetaprop.com.ar"
         ],
         "method": [
