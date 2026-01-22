@@ -1,260 +1,159 @@
-# PROP-IA
+# Zeta Prop: Documentación Técnica & Arquitectura
 
-Asistente Inmobiliario Inteligente - Una plataforma IA para profesionales inmobiliarios en Argentina con tasación automática de propiedades.
+> **Versión**: 1.0.0
+> **Estado**: En Desarrollo / Producción
+> **Fecha de Actualización**: Enero 2026
 
-## 🚀 Características
+## 1. Visión General del Proyecto
 
-- **🤖 Tasación IA Avanzada**: Modelo de Machine Learning entrenado con datos reales de Properati
-- **📍 Ubicaciones Argentinas**: Soporte completo para barrios, ciudades y provincias
-- **🔐 Autenticación Firebase**: Sistema seguro de login con Google y email
-- **📊 Dashboard Interactivo**: Panel de control con estadísticas y gestión de propiedades
-- **🏗️ Arquitectura Clean**: Código organizado con separación de capas (Domain, Use Cases, Infrastructure)
-- **🎨 UI Moderna**: Interfaz construida con Next.js 16, React 19, Tailwind CSS y Lucide Icons
-- **☁️ Serverless**: API Python desplegada en Vercel para predicciones en tiempo real
+**Zeta Prop** es una plataforma SaaS ("Software as a Service") integral diseñada para la gestión inmobiliaria moderna. Su objetivo es centralizar la operativa diaria de una inmobiliaria (o red de sucursales) y potenciarla mediante Inteligencia Artificial Generativa.
 
-## 🛠️ Tecnologías
+### Objetivos Clave
+*   **Centralización**: Unificar CRM, gestión de propiedades, administración de alquileres y finanzas/caja en un solo sistema.
+*   **Automatización**: Reducir carga administrativa (generación de contratos, recibos, recordatorios de vencimiento).
+*   **Inteligencia**: Asistir en la tasación de propiedades y gestión de leads mediante modelos de IA.
+*   **Accesibilidad**: Proveer portales específicos para Agentes, Administradores e Inquilinos.
 
-### Frontend
-- **Next.js 16** - Framework React con App Router
-- **React 19** - Biblioteca UI
-- **TypeScript** - Tipado estático
-- **Tailwind CSS** - Framework CSS utility-first
-- **Lucide React** - Iconos modernos
+---
 
-### Backend & IA
-- **Python 3.9+** - Lenguaje para modelos IA
-- **TensorFlow 2.13+** - Framework de Machine Learning
-- **scikit-learn** - Preprocesamiento y pipelines
-- **Flask** - Framework web para APIs
-- **Vercel Serverless** - Despliegue de funciones Python
+## 2. Pila Tecnológica (Tech Stack)
 
-### Servicios
-- **Firebase Auth** - Autenticación
-- **Recharts** - Gráficos interactivos
-- **js-cookie** - Gestión de cookies
+El proyecto está construido sobre una arquitectura moderna, escalable y serverless.
 
-## 📦 Instalación
+### Frontend (Cliente)
+*   **Core**: [Next.js 16](https://nextjs.org/) (App Router)
+*   **Lenguaje**: TypeScript
+*   **UI Framework**: React 19
+*   **Estilos**: Tailwind CSS v4 + Lucide React (Iconos)
+*   **Mapas**: Leaflet / React-Leaflet
+*   **Estado Global**: React Context API (`AuthContext`, `BranchContext`)
 
-### Prerrequisitos
-- **Node.js 18+**
-- **Python 3.9+** (para desarrollo local del modelo IA)
-- **Cuenta Firebase** (para autenticación)
+### Backend & Servicios (Serverless)
+*   **Plataforma**: Firebase (Google Cloud Platform)
+*   **Base de Datos**: Firestore (NoSQL, Escalabilidad horizontal)
+*   **Autenticación**: Firebase Auth (Email/Password, Google OAuth)
+*   **Almacenamiento**: Firebase Storage (Imágenes, Documentos)
+*   **Funciones**: Vercel Server Actions / Firebase Functions
 
-### Instalación
+### Integraciones Externas
+*   **Pagos**: MercadoPago SDK
+*   **IA**: Google Generative AI (Gemini Flash 1.5)
+*   **Documentos**: `docx` (Generación dinámica de contratos)
 
-1. **Clona el repositorio:**
-```bash
-git clone https://github.com/facufedee/prop-ia.git
-cd prop-ia
-```
+---
 
-2. **Instala dependencias de Node.js:**
-```bash
-npm install
-```
+## 3. Arquitectura del Sistema
 
-3. **Configura Firebase:**
-   - Crea un proyecto en [Firebase Console](https://console.firebase.google.com/)
-   - Habilita Authentication con Google y Email/Password
-   - Crea un archivo `.env.local`:
-```env
-NEXT_PUBLIC_FIREBASE_API_KEY=your_api_key
-NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN=your_project.firebaseapp.com
-NEXT_PUBLIC_FIREBASE_PROJECT_ID=your_project_id
-```
+El proyecto sigue una arquitectura modular basada en **Capas de Servicios**.
 
-4. **Instala dependencias de Python (opcional, para desarrollo local):**
-```bash
-pip install -r api/requirements.txt
-```
+### Estructura de Directorios (`src/`)
 
-5. **Ejecuta el servidor de desarrollo:**
-```bash
-npm run dev
-```
-
-6. **Abre [http://localhost:3000](http://localhost:3000) en tu navegador**
-
-## 🏗️ Arquitectura del Proyecto
-
-```
+```text
 src/
-├── app/                    # Next.js App Router
-│   ├── api/               # APIs de Next.js (desarrollo local)
-│   │   └── predict/       # Endpoint de predicción IA
-│   ├── dashboard/         # Rutas protegidas del dashboard
-│   │   ├── tasacion/     # Página de tasación IA
-│   ├── login/            # Página de login
-│   └── registro/         # Página de registro
-├── domain/               # Lógica de negocio (Clean Architecture)
-│   ├── entities/        # Interfaces y tipos
-│   └── repositories/    # Interfaces de repositorios
-├── infrastructure/      # Capa de infraestructura
-│   ├── auth/           # Servicios de autenticación
-│   ├── firebase/       # Configuración Firebase
-│   └── repositories/   # Implementaciones de repositorios
-├── ui/                  # Capa de presentación
-│   ├── components/     # Componentes reutilizables
-│   │   ├── tasacion/   # Componentes de tasación
-│   ├── context/        # Contextos React
-│   └── sections/       # Secciones de página
-└── usecases/           # Casos de uso
-
-api/                      # Vercel Serverless Functions
-├── models/              # Modelos IA y preprocesadores
-│   ├── preprocessor.joblib
-│   ├── vectorizer.joblib
-│   ├── medianas.json
-│   └── modelo_precios_tfjs/
-├── predict.py           # API de predicción Python
-└── requirements.txt     # Dependencias Python
-
-public/models/           # Configuraciones del modelo
-├── tasacion_propiedades/
-│   ├── preprocessor_config.json
-│   ├── vectorizer_config.json
-│   └── medianas.json
+├── app/                  # Rutas de Next.js (App Router)
+│   ├── (auth)/           # Rutas públicas de autenticación (login, register)
+│   ├── (main)/           # Panel de Administración (requiere Auth)
+│   ├── (tenant)/         # Portal de Inquilinos (acceso limitado)
+│   └── api/              # Endpoints API (Webhooks, etc.)
+├── domain/               # Entidades y Modelos de Datos (Interfaces TS)
+│   ├── models/           # Definiciones: Alquiler, Propiedad, Usuario...
+├── infrastructure/       # Implementación técnica y acceso a datos
+│   ├── firebase/         # Configuración del cliente Firebase
+│   ├── services/         # Lógica de Negocio (Service Layer)
+│   │   ├── alquileresService.ts
+│   │   ├── propiedadesService.ts
+│   │   └── notificationService.ts
+├── ui/                   # Componentes Visuales Reutilizables
+│   ├── components/       # Átomos y Moléculas (Botones, Inputs, Tablas)
+│   ├── forms/            # Formularios complejos
+│   ├── layout/           # Sidebar, Header, Wrappers
+├── lib/                  # Utilidades generales (formateo fechas, cálculo montos)
 ```
 
-## 🔐 Autenticación
+### Patrones de Diseño Implementados
 
-El sistema utiliza Firebase Authentication con:
-- Login con Google
-- Registro e inicio de sesión con email/contraseña
-- Middleware de Next.js para protección de rutas
-- Gestión de estado con React Context
+1.  **Service Layer Pattern**: La lógica de negocio no reside en los componentes de React, sino en servicios dedicados (`infrastructure/services/`). Los componentes solo llaman a estos servicios.
+2.  **Repository Pattern (Implícito)**: Los servicios actúan como repositorios que abstraen la lógica de Firestore.
+3.  **Context API**: Manejo de estado global para Sesión de Usuario (`AuthContext.tsx`) y Selección de Sucursal (`BranchContext.tsx`).
+4.  **Observer Pattern**: Implementado en el sistema de Notificaciones (`notificationService`), donde los eventos (nuevo lead, ticket) disparan alertas a los roles suscritos.
 
-## 📊 Funcionalidades
+---
 
-### Dashboard
-- Estadísticas generales (propiedades, tasaciones, etc.)
-- Gráficos de evolución de tasaciones
-- Accesos rápidos a funciones principales
+## 4. Módulos Principales
 
-### 🤖 Tasación Inteligente IA
-- **Modelo Entrenado**: Red neuronal con datos reales de Properati
-- **Variables Consideradas**:
-  - Metros cuadrados totales y cubiertos
-  - Cantidad de ambientes, dormitorios y baños
-  - Tipo de propiedad (Departamento, Casa, etc.)
-  - Ubicación completa (barrio, ciudad, provincia)
-  - Antigüedad del inmueble
-  - Características adicionales (pileta, cochera, etc.)
-- **Precisión**: Modelo validado con datos reales
-- **Tiempo Real**: Predicciones instantáneas via API serverless
+### 4.1. Gestión de Propiedades
+*   **Funcionalidad**: CRUD completo de inmuebles.
+*   **Características**: Carga múltiple de imágenes, geolocalización, asignación a sucursales y agentes.
+*   **Modelo de Datos**: Colección `properties`.
 
-### Formulario de Tasación
-- **Campos Inteligentes**: Dropdowns con ubicaciones reales de Argentina
-- **Validación**: Campos requeridos y formatos correctos
-- **Ejemplo Precargado**: Datos de ejemplo para testing rápido
-- **Resultados**: Valor estimado en USD con formato profesional
+### 4.2. Administración de Alquileres
+*   **Funcionalidad**: Gestión de contratos locativos.
+*   **Características**:
+    *   Generación automática de períodos de pago.
+    *   Cálculo de ajustes (IPC, ICL) y punitorios por mora.
+    *   Generación de contratos en Word (.docx) usando plantillas dinámicas.
+*   **Modelo de Datos**: Colección `alquileres`.
 
-### Gestión de Propiedades
-- Listado de propiedades
-- Estadísticas y reportes
-- Historial de tasaciones
+### 4.3. Portal de Inquilinos
+*   **Ruta**: `/inquilino/[id]`
+*   **Seguridad**: Acceso mediante Código Único de Alquiler + DNI (sin usuario/contraseña tradicional).
+*   **Funcionalidad**: Visualización de estado de cuenta, historial de pagos y próximos vencimientos.
+*   **Prevención**: Validación de sesión con `sessionStorage` para evitar acceso directo por URL.
 
-### API de Predicción
-- **Endpoint**: `POST /api/predict`
-- **Formato**: JSON con datos de propiedad
-- **Respuesta**: Valor estimado en USD
-- **Serverless**: Desplegado en Vercel para alta disponibilidad
+### 4.4. CRM & Leads
+*   **Funcionalidad**: Pipeline de ventas y seguimiento.
+*   **Características**: Tablero Kanban para estados de leads (Nuevo, Contactado, Visita, Reservado).
+*   **IA**: Clasificación automática de leads entrantes.
 
-## 🧠 Modelo de Inteligencia Artificial
+---
 
-### Arquitectura del Modelo
-- **Tipo**: Red Neuronal Artificial (ANN)
-- **Framework**: TensorFlow 2.13+
-- **Entrenamiento**: Datos de Properati (Argentina)
-- **Variables**: 15+ características de propiedades
-- **Métricas**: Validación cruzada con datos reales
+## 5. Guía para Desarrolladores
 
-### Preprocesamiento
-- **Escalado**: StandardScaler para variables numéricas
-- **Codificación**: OneHotEncoder para variables categóricas
-- **Texto**: TF-IDF para características adicionales
-- **Imputación**: Valores medianos para datos faltantes
+### Requisitos Previos
+*   **Node.js**: v18.17 o superior.
+*   **NPM**: v9 o superior.
 
-### Variables Consideradas
-- **Numéricas**: Metros cuadrados, ambientes, baños, antigüedad, piso, expensas
-- **Categóricas**: Tipo de propiedad, barrio, ciudad, provincia
-- **Texto**: Descripción y características adicionales
+### Instalación Local
 
-### Ejemplo de Uso
-```python
-# Datos de entrada
-propiedad = {
-    'rooms': 3,
-    'bathrooms': 2,
-    'surface_total': 150,
-    'surface_covered': 120,
-    'property_type': 'Departamento',
-    'location': 'Palermo, Capital Federal',
-    'description': 'pileta, sum, cochera'
-}
+1.  **Clonar repositorio**:
+    ```bash
+    git clone <repo-url>
+    ```
+2.  **Instalar dependencias**:
+    ```bash
+    npm install
+    ```
+3.  **Configurar Variables de Entorno**:
+    Crear archivo `.env.local` con credenciales de Firebase y APIs.
+    ```env
+    NEXT_PUBLIC_FIREBASE_API_KEY=...
+    NEXT_PUBLIC_FIREBASE_PROJECT_ID=...
+    gemini_api_key=...
+    ```
+4.  **Iniciar Servidor de Desarrollo**:
+    ```bash
+    npm run dev
+    ```
 
-# Predicción: $414,644.75 USD
-```
+### Despliegue
 
-## 🚀 Despliegue
+El proyecto está optimizado para desplegarse en **Vercel**:
+1.  Conectar repositorio de GitHub a Vercel.
+2.  Configurar las mismas variables de entorno del `.env.local` en el panel de Vercel.
+3.  Vercel detectará automáticamente Next.js y configurará el build.
 
-### Vercel (Recomendado)
-Vercel soporta tanto Next.js como funciones serverless de Python.
+---
 
-1. **Conecta tu repositorio:**
-   - Importa el proyecto en [Vercel](https://vercel.com)
-   - Conecta tu repositorio de GitHub
+## 6. Seguridad
 
-2. **Configuración automática:**
-   - Vercel detectará automáticamente:
-     - `package.json` para el frontend
-     - `api/requirements.txt` para las funciones Python
-     - `api/predict.py` como función serverless
+*   **Frontend**: Rutas protegidas mediante HOCs (Higher Order Components) o checks en `layout.tsx` que verifican `UserRole`.
+*   **Backend**: Reglas de Seguridad de Firestore (`firestore.rules`) para validar lectura/escritura según el `auth.uid` y el rol del usuario en la colección `users`.
+*   **Tenant Portal**: Rate limiting en el login para prevenir fuerza bruta.
 
-3. **Variables de entorno:**
-   ```env
-   NEXT_PUBLIC_FIREBASE_API_KEY=your_api_key
-   NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN=your_project.firebaseapp.com
-   NEXT_PUBLIC_FIREBASE_PROJECT_ID=your_project_id
-   ```
+---
 
-4. **Deploy:**
-   ```bash
-   git push origin main
-   ```
-   Vercel desplegará automáticamente.
+## 7. Próximos Pasos & Roadmap
 
-### Desarrollo Local
-```bash
-npm run dev  # Frontend
-# La API usa predicciones mock en desarrollo
-```
-
-### Producción
-- **Frontend**: Next.js optimizado
-- **API IA**: Python serverless en Vercel
-- **Modelo**: TensorFlow cargado en memoria
-- **Escalabilidad**: Auto-scaling según demanda
-
-## 📝 Scripts Disponibles
-
-- `npm run dev` - Servidor de desarrollo
-- `npm run build` - Construir para producción
-- `npm run start` - Servidor de producción
-- `npm run lint` - Ejecutar ESLint
-
-## 🤝 Contribuir
-
-1. Fork el proyecto
-2. Crea una rama para tu feature (`git checkout -b feature/AmazingFeature`)
-3. Commit tus cambios (`git commit -m 'Add some AmazingFeature'`)
-4. Push a la rama (`git push origin feature/AmazingFeature`)
-5. Abre un Pull Request
-
-## 📄 Licencia
-
-Este proyecto está bajo la Licencia MIT - ver el archivo [LICENSE](LICENSE) para más detalles.
-
-## 📞 Contacto
-
-Proyecto desarrollado para la comunidad inmobiliaria argentina.
+*   [ ] Implementar Tests E2E (Playwright/Cypress).
+*   [ ] Migrar a PostgreSQL + Prisma para mayor integridad relacional (Planificado).
+*   [ ] App Móvil Nativa (React Native) reutilizando la lógica de servicios.

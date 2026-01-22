@@ -1,0 +1,16 @@
+[
+    {
+        "origin": [
+            "http://localhost:3000",
+            "https://zetaprop.com.ar"
+        ],
+        "method": [
+            "GET",
+            "PUT",
+            "POST",
+            "DELETE",
+            "HEAD"
+        ],
+        "maxAgeSeconds": 3600
+    }
+]

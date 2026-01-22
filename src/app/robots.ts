@@ -5,8 +5,15 @@ export default function robots(): MetadataRoute.Robots {
         rules: {
             userAgent: '*',
             allow: '/',
-            disallow: '/dashboard/',
+            disallow: [
+                '/dashboard/',
+                '/admin/',
+                '/api/',
+                '/print/',
+                '/_next/',
+                '/private/'
+            ],
         },
-        sitemap: 'https://prop-ia.com/sitemap.xml',
+        sitemap: 'https://zetaprop.com.ar/sitemap.xml',
     };
 }

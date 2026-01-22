@@ -1,115 +1,154 @@
 "use client";
 
-import { ArrowRight, CheckCircle, LineChart, Home, FileText, Sparkles } from "lucide-react";
 import Link from "next/link";
+import Image from "next/image";
+import { ArrowRight, Sparkles, TrendingUp, Zap, Clock, ShieldCheck } from "lucide-react";
+import { useRouter } from "next/navigation";
 
 export default function Hero() {
+  const router = useRouter();
+
   return (
-    <section className="relative pt-16 md:pt-24 pb-20 md:pb-32 px-4 md:px-6 overflow-hidden bg-gradient-to-br from-gray-950 via-gray-900 to-black">
-      {/* Animated Grid Background */}
-      <div className="absolute inset-0 opacity-20">
-        <div className="absolute inset-0" style={{
-          backgroundImage: `
-            linear-gradient(rgba(59, 130, 246, 0.1) 1px, transparent 1px),
-            linear-gradient(90deg, rgba(59, 130, 246, 0.1) 1px, transparent 1px)
-          `,
-          backgroundSize: '50px 50px'
-        }}></div>
-      </div>
-
-      {/* Animated Floating Elements */}
+    <section className="relative min-h-screen flex items-center overflow-hidden bg-white pt-20 lg:pt-0">
+      {/* Modern Background Gradients */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        {/* Gradient Orbs */}
-        <div className="absolute top-20 left-10 w-72 h-72 bg-blue-600/20 rounded-full blur-[100px] animate-pulse"></div>
-        <div className="absolute bottom-20 right-10 w-96 h-96 bg-purple-600/20 rounded-full blur-[120px] animate-pulse" style={{ animationDelay: '1s' }}></div>
-
-        {/* Floating Data Points */}
-        <div className="absolute top-40 left-1/4 w-2 h-2 bg-blue-400 rounded-full animate-ping"></div>
-        <div className="absolute top-60 right-1/3 w-2 h-2 bg-purple-400 rounded-full animate-ping" style={{ animationDelay: '0.5s' }}></div>
-        <div className="absolute bottom-40 left-1/3 w-2 h-2 bg-cyan-400 rounded-full animate-ping" style={{ animationDelay: '1s' }}></div>
+        <div className="absolute top-[-10%] right-[-5%] w-[60%] h-[60%] bg-indigo-100/40 rounded-full blur-[120px]" />
+        <div className="absolute bottom-[-10%] left-[-10%] w-[50%] h-[50%] bg-purple-100/40 rounded-full blur-[100px]" />
       </div>
 
-      <div className="relative max-w-6xl mx-auto text-center flex flex-col items-center">
-        {/* Tech Badge */}
-        <div className="inline-flex items-center gap-2 px-3 md:px-4 py-1.5 md:py-2 rounded-full bg-white/5 backdrop-blur-sm border border-white/10 text-xs md:text-sm font-medium text-white mb-6 md:mb-8 animate-fade-in">
-          <Sparkles className="w-3 h-3 md:w-4 md:h-4 text-blue-400" />
-          <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-purple-400">
-            Powered by Deep Learning
-          </span>
+      <div className="relative max-w-7xl mx-auto px-6 w-full z-10">
+        <div className="grid lg:grid-cols-2 gap-12 lg:gap-8 items-center">
+
+          {/* Left Column: Text & CTA */}
+          <div className="text-center lg:text-left pt-8 lg:pt-0">
+
+            {/* Badge */}
+            <div className="inline-flex items-center gap-2 px-4 py-1.5 bg-white border border-indigo-100 rounded-full shadow-sm mb-6 animate-fade-in hover:scale-105 transition-transform cursor-default mx-auto lg:mx-0">
+              <Sparkles className="w-4 h-4 text-indigo-600" />
+              <span className="text-xs sm:text-sm font-medium text-gray-800">
+                La revolución del Real Estate en Argentina 🇦🇷
+              </span>
+            </div>
+
+            {/* Main Headline */}
+            <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold text-gray-900 mb-6 leading-[1.1] animate-fade-in-up tracking-tight">
+              Gestioná tus Alquileres <br />
+              <span className="bg-gradient-to-r from-indigo-600 via-purple-600 to-indigo-600 bg-clip-text text-transparent bg-[length:200%_auto] animate-gradient">
+                en tiempo récord
+              </span>
+            </h1>
+
+            {/* Subheadline (SEO & Persuasion) */}
+            <p className="text-lg text-gray-600 mb-8 max-w-2xl mx-auto lg:mx-0 leading-relaxed animate-fade-in-up animation-delay-200">
+              Automatizá tu inmobiliaria en tan solo <span className="font-semibold text-gray-900">10 minutos</span>. Carga propiedades, inquilinos y propietarios una sola vez y ahorrá horas de trabajo.
+              <br className="hidden sm:block mt-2" />
+              Cobranzas en un click, portal de inquilinos, informes profesionales y aumentos automáticos. Todo en una sola plataforma.
+            </p>
+
+            {/* CTA Buttons */}
+            <div className="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start items-center mb-10 animate-fade-in-up animation-delay-400">
+              <button
+                onClick={() => router.push('/register')}
+                className="group w-full sm:w-auto px-8 py-4 bg-gray-900 text-white rounded-2xl font-semibold text-lg hover:bg-black hover:shadow-xl hover:-translate-y-1 active:scale-95 transition-all duration-300 flex items-center justify-center gap-3"
+                aria-label="Comenzar Gratis - Registro"
+              >
+                Comenzar Gratis
+                <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform text-indigo-400" />
+              </button>
+
+              <button
+                onClick={() => router.push('/login')}
+                className="group w-full sm:w-auto px-8 py-4 bg-white text-gray-900 rounded-2xl font-semibold text-lg border border-gray-200 hover:border-indigo-200 hover:bg-indigo-50/50 hover:shadow-lg hover:-translate-y-1 active:scale-95 transition-all duration-300"
+                aria-label="Iniciar Sesión"
+              >
+                Iniciar Sesión
+              </button>
+            </div>
+
+            {/* Feature Pills */}
+            <div className="flex flex-wrap justify-center lg:justify-start gap-3 sm:gap-4 text-sm font-medium text-gray-600 animate-fade-in-up animation-delay-600">
+              <div className="flex items-center gap-2 px-3 py-1.5 bg-gray-50/80 backdrop-blur-sm rounded-lg border border-gray-100">
+                <Clock className="w-4 h-4 text-indigo-500" />
+                <span>Ahorrá +20hs semanales</span>
+              </div>
+              <div className="flex items-center gap-2 px-3 py-1.5 bg-gray-50/80 backdrop-blur-sm rounded-lg border border-gray-100">
+                <ShieldCheck className="w-4 h-4 text-green-500" />
+                <span>Cobranza Segura</span>
+              </div>
+            </div>
+          </div>
+
+          {/* Right Column: Tablet Mockup */}
+          <div className="relative flex justify-center lg:justify-end animate-fade-in-up animation-delay-600 pb-16 lg:pb-0 perspective-1000">
+            {/* Floating Container */}
+            <div className="relative w-full max-w-[500px] lg:max-w-[600px] transform hover:scale-[1.02] transition-transform duration-700 ease-in-out">
+              {/* Glow Effect behind Tablet */}
+              <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[90%] h-[90%] bg-indigo-500/20 blur-[60px] rounded-full -z-10 animate-pulse-slow"></div>
+
+              {/* Tablet Image with Floating Animation */}
+              <div className="animate-float">
+                <img
+                  src="/assets/img/tablet_mockup_zetaprop.png?v=updated"
+                  alt="ZetaProp Dashboard en Tablet"
+                  width={800}
+                  height={600}
+                  className="drop-shadow-2xl rounded-[2rem] object-contain w-full h-auto"
+                />
+              </div>
+            </div>
+          </div>
+
         </div>
-
-        {/* Title */}
-        <h1 className="text-4xl sm:text-5xl md:text-7xl font-bold text-white leading-tight max-w-4xl px-2">
-          Inteligencia Inmobiliaria en{" "}
-          <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 via-cyan-400 to-purple-400 animate-gradient">
-            tiempo real
-          </span>
-        </h1>
-
-        {/* Subtitle */}
-        <p className="text-gray-300 text-base md:text-lg lg:text-xl mt-4 md:mt-6 max-w-3xl leading-relaxed px-2">
-          Un <strong className="text-white">Asistente Inmobiliario IA</strong> entrenado con datos reales de Argentina.
-          Análisis precisos, precios de mercado, oferta disponible, tendencias y
-          recomendaciones inteligentes para cada operación.
-        </p>
-
-        {/* CTA */}
-        <div className="flex flex-col sm:flex-row gap-3 md:gap-4 mt-8 md:mt-10 w-full sm:w-auto px-4 sm:px-0">
-          <Link
-            href="/dashboard"
-            className="group px-6 md:px-8 py-3 md:py-4 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-xl text-base md:text-lg font-medium hover:from-blue-500 hover:to-purple-500 transition inline-flex items-center justify-center gap-2 shadow-lg shadow-blue-500/50"
-          >
-            Comenzá GRATIS!
-            <ArrowRight size={18} className="md:w-5 md:h-5 group-hover:translate-x-1 transition-transform" />
-          </Link>
-
-          <a
-            href="#como-funciona"
-            className="px-6 md:px-8 py-3 md:py-4 bg-white/5 backdrop-blur-sm border border-white/10 text-white rounded-xl text-base md:text-lg font-medium hover:bg-white/10 transition text-center"
-          >
-            Ver cómo funciona
-          </a>
-        </div>
-
-        {/* Feature icons */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3 md:gap-6 mt-12 md:mt-16 text-left max-w-3xl w-full px-4 sm:px-0">
-          <div className="flex items-center gap-3 p-4 rounded-xl bg-white/5 backdrop-blur-sm border border-white/10 hover:bg-white/10 transition group">
-            <CheckCircle className="text-blue-400 w-6 h-6 group-hover:scale-110 transition-transform" />
-            <span className="text-white text-sm font-medium">Tasaciones precisas</span>
-          </div>
-          <div className="flex items-center gap-3 p-4 rounded-xl bg-white/5 backdrop-blur-sm border border-white/10 hover:bg-white/10 transition group">
-            <LineChart className="text-cyan-400 w-6 h-6 group-hover:scale-110 transition-transform" />
-            <span className="text-white text-sm font-medium">Análisis del mercado</span>
-          </div>
-          <div className="flex items-center gap-3 p-4 rounded-xl bg-white/5 backdrop-blur-sm border border-white/10 hover:bg-white/10 transition group">
-            <Home className="text-purple-400 w-6 h-6 group-hover:scale-110 transition-transform" />
-            <span className="text-white text-sm font-medium">Precios óptimos</span>
-          </div>
-          <div className="flex items-center gap-3 p-4 rounded-xl bg-white/5 backdrop-blur-sm border border-white/10 hover:bg-white/10 transition group">
-            <FileText className="text-pink-400 w-6 h-6 group-hover:scale-110 transition-transform" />
-            <span className="text-white text-sm font-medium">Contratos automáticos</span>
-          </div>
-        </div>
-
       </div>
 
-      {/* Add custom animation styles */}
       <style jsx>{`
+        .perspective-1000 {
+            perspective: 1000px;
+        }
         @keyframes gradient {
-          0%, 100% { background-position: 0% 50%; }
+          0% { background-position: 0% 50%; }
           50% { background-position: 100% 50%; }
+          100% { background-position: 0% 50%; }
         }
         .animate-gradient {
-          background-size: 200% 200%;
-          animation: gradient 3s ease infinite;
+          animation: gradient 6s ease infinite;
         }
-        @keyframes fade-in {
-          from { opacity: 0; transform: translateY(-10px); }
-          to { opacity: 1; transform: translateY(0); }
+        @keyframes fade-in-up {
+          from {
+            opacity: 0;
+            transform: translateY(30px);
+          }
+          to {
+            opacity: 1;
+            transform: translateY(0);
+          }
+        }
+        .animate-fade-in-up {
+          animation: fade-in-up 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+          opacity: 0; /* Helper to ensure delay works */
         }
         .animate-fade-in {
-          animation: fade-in 0.8s ease-out;
+             animation: fade-in 1s ease-out forwards;
         }
+         @keyframes fade-in {
+          from { opacity: 0; }
+          to { opacity: 1; }
+        }
+        @keyframes float {
+            0% { transform: translateY(0px); }
+            50% { transform: translateY(-15px); }
+            100% { transform: translateY(0px); }
+        }
+        .animate-float {
+            animation: float 6s ease-in-out infinite;
+        }
+        .animate-pulse-slow {
+             animation: pulse 4s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+        }
+        .animation-delay-200 { animation-delay: 0.2s; }
+        .animation-delay-400 { animation-delay: 0.3s; }
+        .animation-delay-600 { animation-delay: 0.5s; }
+        .animation-delay-800 { animation-delay: 0.7s; }
       `}</style>
     </section>
   );

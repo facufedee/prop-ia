@@ -2,33 +2,27 @@
 
 import { useState } from "react";
 import DashboardSidebar from "./DashboardSidebar";
-import Footer from "./Footer";
-import { Menu } from "lucide-react";
+import DashboardHeader from "./DashboardHeader";
+import DashboardFooter from "./DashboardFooter";
 
 export default function DashboardShell({ children }: { children: React.ReactNode }) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
   return (
-    <div className="flex flex-col min-h-[calc(100vh-65px)] bg-gray-50">
-      <div className="flex flex-1 relative">
-        {/* Mobile Header Toggle */}
-        <div className="md:hidden absolute top-4 left-4 z-30">
-          <button
-            onClick={() => setSidebarOpen(true)}
-            className="p-2 bg-white rounded-lg shadow-sm border border-gray-200 text-gray-700 hover:bg-gray-50"
-          >
-            <Menu className="w-6 h-6" />
-          </button>
-        </div>
+    <div className="flex h-screen bg-gray-50 overflow-hidden">
+      <DashboardSidebar isOpen={sidebarOpen} onClose={() => setSidebarOpen(false)} />
 
-        <DashboardSidebar isOpen={sidebarOpen} onClose={() => setSidebarOpen(false)} />
+      <div className="flex flex-col flex-1 overflow-hidden">
 
-        <main className="flex-1 p-4 md:p-6 w-full overflow-x-hidden">
-          <div className="md:hidden h-12 mb-4" /> {/* Spacer for mobile toggle */}
+        {/* New Header (replaces old mobile toggle and adds user menu) */}
+        <DashboardHeader onMobileMenuClick={() => setSidebarOpen(true)} />
+
+        <main className="flex-1 overflow-y-auto p-4 md:p-6 bg-gray-50">
           {children}
         </main>
+
+        <DashboardFooter />
       </div>
-      <Footer />
     </div>
   );
 }

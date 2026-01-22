@@ -1,62 +1,138 @@
 "use client";
 
 import {
-  Calculator,
+  BarChart3,
   Building2,
-  LineChart,
-  Clock,
-  Send,
   Users,
-  Search,
+  Megaphone,
+  Bot,
+  Calendar,
+  DollarSign,
+  Shield,
+  Zap,
+  TrendingUp,
+  MessageSquare,
+  FileText,
+  Receipt
 } from "lucide-react";
 
 export default function Features() {
-  const items = [
+  const features = [
     {
-      icon: <Calculator className="w-7 h-7 text-black" />,
-      title: "Tasación Inteligente",
-      desc: "Calculá el valor estimado de cualquier inmueble usando IA.",
-    },
-    {
-      icon: <Building2 className="w-7 h-7 text-black" />,
+      icon: Building2,
       title: "Gestión de Propiedades",
-      desc: "Administrá tu cartera inmobiliaria desde un solo lugar.",
+      description: "Centraliza todo tu inventario en un solo lugar. Fichas técnicas completas, fotos, videos y estados en tiempo real.",
+      color: "from-blue-500 to-cyan-500",
+      benefits: ["Catálogo digital", "Historial de cambios", "Fichas PDF automáticas"]
     },
     {
-      icon: <LineChart className="w-7 h-7 text-black" />,
-      title: "Estadísticas y Reportes",
-      desc: "Visualizá datos que te ayudan a tomar mejores decisiones.",
+      icon: Users,
+      title: "CRM de Clientes",
+      description: "No pierdas ni una venta. Seguimiento automático de leads, perfiles de búsqueda y embudo de conversión.",
+      color: "from-green-500 to-emerald-500",
+      benefits: ["Pipeline visual", "Scoring de clientes", "Alertas de matching"]
     },
     {
-      icon: <Clock className="w-7 h-7 text-black" />,
-      title: "Automatización de Tareas",
-      desc: "Programá recordatorios, seguimientos y tareas repetitivas.",
+      icon: Receipt,
+      title: "Gestión de Alquileres",
+      description: "Automatiza la administración. Emisión de recibos, cálculo de punitorios, liquidaciones a propietarios y control de caja.",
+      color: "from-purple-500 to-indigo-500",
+      benefits: ["Recibos automáticos", "Cálculo de punitorios", "Liq. a propietarios"]
     },
     {
-      icon: <Users className="w-7 h-7 text-black" />,
-      title: "CRM Integrado",
-      desc: "Gestioná leads, consultas y clientes con un CRM inmobiliario.",
+      icon: Calendar,
+      title: "Agenda Inteligente",
+      description: "Coordina visitas sin solapamientos. Sincronización automática con Google Calendar y recordatorios push.",
+      color: "from-pink-500 to-rose-500",
+      benefits: ["Recordatorios x WhatsApp", "Rutas optimizadas", "Vista de equipo"]
     },
     {
-      icon: <Search className="w-7 h-7 text-black" />,
-      title: "Comparador de Mercado (IA)",
-      desc: "Obtené comparables reales y analizá el mercado al instante.",
+      icon: DollarSign,
+      title: "Gestión Financiera",
+      description: "Control total de tu caja. Seguimiento de comisiones, gastos operativos y facturación electrónica.",
+      color: "from-yellow-500 to-amber-500",
+      benefits: ["Cálculo de comisiones", "Reportes de caja", "Alertas de cobro"]
+    },
+    {
+      icon: FileText,
+      title: "Contratos Digitales",
+      description: "Generación automática de contratos de alquiler y venta. El sistema los crea listos para descargar e imprimir.",
+      color: "from-teal-500 to-cyan-500",
+      benefits: ["Sin firma digital", "Plantillas legales", "Descarga PDF inmediata"]
+    },
+    {
+      icon: TrendingUp,
+      title: "Analytics Avanzado",
+      description: "Toma decisiones basadas en datos. Métricas de rendimiento de agentes, propiedades más vistas y tiempos de venta.",
+      color: "from-violet-500 to-purple-500",
+      benefits: ["Dashboards en vivo", "Exportación a Excel", "ROI por portal"]
+    },
+    {
+      icon: Shield, // Using Shield as LifeBuoy/HelpCircle alternative if needed, but let's import proper HelpCircle if possible or use Shield for now as "Support" often implies security/safety net. Actually let's use Shield or swap for HelpCircle if available. Let's check imports.
+      title: "Mesa de Ayuda",
+      description: "Soporte técnico prioritario siempre que lo necesites. Base de conocimientos y tickets de resolución rápida.",
+      color: "from-red-500 to-orange-500",
+      benefits: ["Soporte 24/7", "Video tutoriales", "Gestor de cuenta"]
     },
   ];
 
   return (
-    <section className="py-12 md:py-20 bg-gray-50 px-4 md:px-6">
-      <div className="max-w-5xl mx-auto grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6 md:gap-12">
-        {items.map((f, i) => (
-          <div
-            key={i}
-            className="bg-white p-6 md:p-8 rounded-2xl border shadow-sm text-center"
-          >
-            <div className="flex justify-center mb-4">{f.icon}</div>
-            <h3 className="text-lg md:text-xl font-semibold text-gray-900">{f.title}</h3>
-            <p className="text-sm md:text-base text-gray-600 mt-2">{f.desc}</p>
-          </div>
-        ))}
+    <section id="features" className="py-24 bg-white">
+      <div className="max-w-7xl mx-auto px-6">
+        {/* Header */}
+        <div className="text-center mb-16">
+          <span className="inline-block px-4 py-2 bg-indigo-100 text-indigo-700 rounded-full text-sm font-semibold mb-4">
+            CARACTERÍSTICAS
+          </span>
+          <h2 className="text-4xl md:text-5xl font-bold text-gray-900 mb-6">
+            Todo lo que necesitas para
+            <span className="block bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent">
+              hacer crecer tu inmobiliaria en Argentina
+            </span>
+          </h2>
+          <p className="text-xl text-gray-600 max-w-3xl mx-auto">
+            Una plataforma completa con todas las herramientas que necesitas.
+            Sin integraciones complicadas, sin costos ocultos.
+          </p>
+        </div>
+
+        {/* Features Grid */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+          {features.map((feature, idx) => {
+            const Icon = feature.icon;
+            return (
+              <div
+                key={idx}
+                className="group bg-white rounded-2xl border border-gray-100 p-8 hover:shadow-xl hover:border-indigo-100 transition-all duration-300 hover:-translate-y-1"
+              >
+                {/* Icon */}
+                <div className={`w-14 h-14 bg-gradient-to-r ${feature.color} rounded-xl flex items-center justify-center mb-6 shadow-sm group-hover:scale-105 transition-transform duration-300`}>
+                  <Icon className="w-7 h-7 text-white" />
+                </div>
+
+                {/* Content */}
+                <h3 className="text-xl font-bold text-gray-900 mb-3 group-hover:text-indigo-600 transition-colors">
+                  {feature.title}
+                </h3>
+                <p className="text-gray-600 mb-4 leading-relaxed">
+                  {feature.description}
+                </p>
+
+                {/* Benefits */}
+                <ul className="space-y-2">
+                  {feature.benefits.map((benefit, i) => (
+                    <li key={i} className="flex items-center gap-2 text-sm text-gray-500">
+                      <div className={`w-1.5 h-1.5 rounded-full bg-gradient-to-r ${feature.color}`}></div>
+                      {benefit}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            );
+          })}
+        </div>
+
+
       </div>
     </section>
   );

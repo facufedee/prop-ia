@@ -24,7 +24,7 @@ export function HowItWorks() {
         <section id="como-funciona" className="py-24 bg-gray-50 px-6 scroll-mt-20">
             <div className="max-w-6xl mx-auto">
                 <div className="text-center mb-16">
-                    <h2 className="text-4xl font-bold text-gray-900 mb-4">¿Cómo funciona PROP-IA?</h2>
+                    <h2 className="text-4xl font-bold text-gray-900 mb-4">¿Cómo funciona Zeta Prop?</h2>
                     <p className="text-xl text-gray-600 max-w-2xl mx-auto">
                         Combinamos Big Data con Inteligencia Artificial avanzada para ofrecerte las tasaciones más precisas del mercado.
                     </p>
