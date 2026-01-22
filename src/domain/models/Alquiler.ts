@@ -62,7 +62,8 @@ export interface Alquiler {
     propiedadId: string;
     propiedadTipo: string;
     direccion: string;
-    contractCode?: string; // Unique code for tenant portal login
+    contractCode?: never; // Deprecated
+    codigoAlquiler?: string; // Unique code for tenant portal login (e.g. ROJAS-207)
     // Datos del Inquilino
     inquilinoId: string;
     nombreInquilino: string;

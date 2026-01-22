@@ -395,13 +395,50 @@ export default function AlquilerDetailPage() {
                                 {alquiler.direccion}
                             </h1>
                             <span className={`px-2.5 py-1 text-[11px] font-bold rounded-lg uppercase tracking-wider border ${alquiler.estado === 'activo' ? 'bg-emerald-50 text-emerald-700 border-emerald-100' :
-                                    alquiler.estado === 'pendiente' ? 'bg-amber-50 text-amber-700 border-amber-100' :
-                                        alquiler.estado === 'suspendido' ? 'bg-orange-50 text-orange-700 border-orange-100' :
-                                            'bg-gray-50 text-gray-600 border-gray-200'
+                                alquiler.estado === 'pendiente' ? 'bg-amber-50 text-amber-700 border-amber-100' :
+                                    alquiler.estado === 'suspendido' ? 'bg-orange-50 text-orange-700 border-orange-100' :
+                                        'bg-gray-50 text-gray-600 border-gray-200'
                                 }`}>
                                 {alquiler.estado}
                             </span>
                         </div>
+                        {/* Rental Code Display */}
+                        {alquiler.codigoAlquiler ? (
+                            <div className="mt-1.5 flex flex-wrap items-center gap-2">
+                                <p className="text-gray-500 font-mono text-sm tracking-wide uppercase select-all bg-gray-50 px-2 py-0.5 rounded border border-gray-100">
+                                    {alquiler.codigoAlquiler}
+                                </p>
+                                <button
+                                    onClick={() => {
+                                        const domain = window.location.origin;
+                                        const text = `Hola! Podés ver el estado de tu alquiler en: ${domain}/inquilino\n\nTu código de acceso es: *${alquiler.codigoAlquiler}*\nTu usuario es tu DNI.`;
+                                        const url = `https://wa.me/?text=${encodeURIComponent(text)}`;
+                                        window.open(url, '_blank');
+                                    }}
+                                    className="flex items-center gap-1 pl-2 pr-3 py-1 bg-green-50 text-green-700 text-[10px] font-bold uppercase tracking-wider rounded-full hover:bg-green-100 transition-colors border border-green-200/50"
+                                    title="Enviar por WhatsApp"
+                                >
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="w-3 h-3"><path d="M3 21l1.65-3.8a9 9 0 1 1 3.4 2.9L3 21" /><path d="M9 10a.5.5 0 0 0 1 0V9a.5.5 0 0 0 1 0v1a5 5 0 0 0 5 5h1a.5.5 0 0 0 0-1h-1a.5.5 0 0 0 0 1" /></svg>
+                                    Compartir
+                                </button>
+                            </div>
+                        ) : (
+                            <button
+                                onClick={async () => {
+                                    if (confirm('¿Generar código de acceso para inquilino?')) {
+                                        try {
+                                            await alquileresService.generateCodeForExistingAlquiler(alquiler.id);
+                                            // Refresh
+                                            const updated = await alquileresService.getAlquilerById(alquiler.id);
+                                            if (updated) setAlquiler(updated);
+                                        } catch (e) { console.error(e); alert('Error al generar'); }
+                                    }
+                                }}
+                                className="mt-1 text-xs bg-indigo-50 text-indigo-600 px-2 py-1 rounded border border-indigo-200 hover:bg-indigo-100 transition-colors"
+                            >
+                                Generar Código Inquilino
+                            </button>
+                        )}
                         <p className="text-gray-500 font-medium mt-1 flex items-center gap-2 text-sm">
                             <span className="w-1.5 h-1.5 rounded-full bg-gray-300"></span>
                             {alquiler.propiedadTipo}

@@ -1,6 +1,6 @@
-# Patrones de Diseño para Escalar Prop-IA
+# Patrones de Diseño para Escalar ZETA PROP
 
-Para escalar una aplicación como **Prop-IA**, que combina gestión compleja (CRM, Propiedades) con servicios externos (IA, Pagos) y reglas de negocio cambiantes, recomiendo implementar los siguientes patrones clave.
+Para escalar una aplicación como **ZETA PROP**, que combina gestión compleja (CRM, Propiedades) con servicios externos (IA, Pagos) y reglas de negocio cambiantes, recomiendo implementar los siguientes patrones clave.
 
 ## 1. Strategy Pattern (Estrategia)
 **Dónde usarlo:** Tasación de Propiedades y Cálculo de Comisiones.

@@ -104,6 +104,8 @@ const initialExampleProperty: ExampleProperty = {
     all_features: "pileta, sum, seguridad, cochera, balcon"
 };
 
+import PortalesTab from "./components/PortalesTab";
+
 export default function ConfiguracionPage() {
     const [activeTab, setActiveTab] = useState("tasaciones");
     const [config, setConfig] = useState<AdjustmentConfig>(initialConfig);

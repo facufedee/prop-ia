@@ -1,98 +1,159 @@
-# Zeta Prop: Asistente Inmobiliario Inteligente
+# Zeta Prop: Documentación Técnica & Arquitectura
 
-**Zeta Prop* es una plataforma integral diseñada para potenciar la gestión inmobiliaria moderna. Combina herramientas de gestión clásicas (CRM, propiedades, alquileres) con el poder de la Inteligencia Artificial Generativa para automatizar tareas, tasar propiedades y asistir a los agentes en tiempo real.
+> **Versión**: 1.0.0
+> **Estado**: En Desarrollo / Producción
+> **Fecha de Actualización**: Enero 2026
 
-![Next.js](https://img.shields.io/badge/Next.js-16-black) ![React](https://img.shields.io/badge/React-19-blue) ![Tailwind CSS](https://img.shields.io/badge/Tailwind-4-38B2AC) ![Firebase](https://img.shields.io/badge/Firebase-Auth%20%7C%20Firestore-orange) ![AI](https://img.shields.io/badge/AI-Generative-purple)
+## 1. Visión General del Proyecto
 
-## 🚀 Características Principales
+**Zeta Prop** es una plataforma SaaS ("Software as a Service") integral diseñada para la gestión inmobiliaria moderna. Su objetivo es centralizar la operativa diaria de una inmobiliaria (o red de sucursales) y potenciarla mediante Inteligencia Artificial Generativa.
 
-### 🧠 Inteligencia Artificial
-*   **Tasación Automática (AVM)**: Estimación de precios de mercado en tiempo real utilizando modelos de Machine Learning entrenados con datos locales.
-*   **Generador de Descripciones**: Creación automática de descripciones atractivas para publicaciones inmobiliarias.
-*   **Chat Inteligente**: Asistente virtual capaz de responder consultas sobre inventario y procesos internos.
+### Objetivos Clave
+*   **Centralización**: Unificar CRM, gestión de propiedades, administración de alquileres y finanzas/caja en un solo sistema.
+*   **Automatización**: Reducir carga administrativa (generación de contratos, recibos, recordatorios de vencimiento).
+*   **Inteligencia**: Asistir en la tasación de propiedades y gestión de leads mediante modelos de IA.
+*   **Accesibilidad**: Proveer portales específicos para Agentes, Administradores e Inquilinos.
 
-### 🏢 Gestión Inmobiliaria
-*   **Gestión de Propiedades**: ABM completo de inmuebles (Venta/Alquiler) con carga de imágenes y documentos.
-*   **CRM de Clientes**: Seguimiento de propietarios, inquilinos e interesados (Leads).
-*   **Administración de Alquileres**: Control de contratos, vencimientos, ajustes y generación de recibos.
-*   **Panel de Agentes**: Herramientas para coordinar equipos de ventas.
+---
 
-### 🛠️ Herramientas Operativas
-*   **Dashboard Financiero**: Visualización de ingresos, egresos y métricas clave.
-*   **Calendario**: Agenda integrada para visitas y recordatorios.
-*   **Soporte**: Sistema de tickets para resolución de incidencias.
+## 2. Pila Tecnológica (Tech Stack)
 
+El proyecto está construido sobre una arquitectura moderna, escalable y serverless.
 
-## 🛠️ Stack Tecnológico
+### Frontend (Cliente)
+*   **Core**: [Next.js 16](https://nextjs.org/) (App Router)
+*   **Lenguaje**: TypeScript
+*   **UI Framework**: React 19
+*   **Estilos**: Tailwind CSS v4 + Lucide React (Iconos)
+*   **Mapas**: Leaflet / React-Leaflet
+*   **Estado Global**: React Context API (`AuthContext`, `BranchContext`)
 
-### Frontend
-*   **Framework**: Next.js 16 (App Router)
-*   **UI Library**: React 19
-*   **Estilos**: Tailwind CSS v4
-*   **Iconos**: Lucide React
-*   **Mapas**: Leaflet / Google Maps API
+### Backend & Servicios (Serverless)
+*   **Plataforma**: Firebase (Google Cloud Platform)
+*   **Base de Datos**: Firestore (NoSQL, Escalabilidad horizontal)
+*   **Autenticación**: Firebase Auth (Email/Password, Google OAuth)
+*   **Almacenamiento**: Firebase Storage (Imágenes, Documentos)
+*   **Funciones**: Vercel Server Actions / Firebase Functions
 
-### Backend & Servicios
-*   **Base de Datos**: Firebase Firestore (NoSQL)
-*   **Autenticación**: Firebase Auth (Google & Email)
-*   **Serverless**: Funciones Python (Vercel) para inferencia de modelos IA.
-*   **Pagos**: Integración con MercadoPago.
+### Integraciones Externas
+*   **Pagos**: MercadoPago SDK
+*   **IA**: Google Generative AI (Gemini Flash 1.5)
+*   **Documentos**: `docx` (Generación dinámica de contratos)
 
-### Inteligencia Artificial
-*   **Modelos**: TensorFlow (Python/JS) y Google Generative AI (Gemini).
-*   **Vector Search**: Implementación para búsqueda semántica.
+---
 
-## 📦 Instalación y Configuración
+## 3. Arquitectura del Sistema
 
-### Prerrequisitos
-*   Node.js 18+
-*   Python 3.9+ (opcional, para desarrollo de modelos)
-*   Cuenta de Firebase activa
+El proyecto sigue una arquitectura modular basada en **Capas de Servicios**.
 
-### Pasos
+### Estructura de Directorios (`src/`)
 
-1.  **Clonar el repositorio:**
+```text
+src/
+├── app/                  # Rutas de Next.js (App Router)
+│   ├── (auth)/           # Rutas públicas de autenticación (login, register)
+│   ├── (main)/           # Panel de Administración (requiere Auth)
+│   ├── (tenant)/         # Portal de Inquilinos (acceso limitado)
+│   └── api/              # Endpoints API (Webhooks, etc.)
+├── domain/               # Entidades y Modelos de Datos (Interfaces TS)
+│   ├── models/           # Definiciones: Alquiler, Propiedad, Usuario...
+├── infrastructure/       # Implementación técnica y acceso a datos
+│   ├── firebase/         # Configuración del cliente Firebase
+│   ├── services/         # Lógica de Negocio (Service Layer)
+│   │   ├── alquileresService.ts
+│   │   ├── propiedadesService.ts
+│   │   └── notificationService.ts
+├── ui/                   # Componentes Visuales Reutilizables
+│   ├── components/       # Átomos y Moléculas (Botones, Inputs, Tablas)
+│   ├── forms/            # Formularios complejos
+│   ├── layout/           # Sidebar, Header, Wrappers
+├── lib/                  # Utilidades generales (formateo fechas, cálculo montos)
+```
+
+### Patrones de Diseño Implementados
+
+1.  **Service Layer Pattern**: La lógica de negocio no reside en los componentes de React, sino en servicios dedicados (`infrastructure/services/`). Los componentes solo llaman a estos servicios.
+2.  **Repository Pattern (Implícito)**: Los servicios actúan como repositorios que abstraen la lógica de Firestore.
+3.  **Context API**: Manejo de estado global para Sesión de Usuario (`AuthContext.tsx`) y Selección de Sucursal (`BranchContext.tsx`).
+4.  **Observer Pattern**: Implementado en el sistema de Notificaciones (`notificationService`), donde los eventos (nuevo lead, ticket) disparan alertas a los roles suscritos.
+
+---
+
+## 4. Módulos Principales
+
+### 4.1. Gestión de Propiedades
+*   **Funcionalidad**: CRUD completo de inmuebles.
+*   **Características**: Carga múltiple de imágenes, geolocalización, asignación a sucursales y agentes.
+*   **Modelo de Datos**: Colección `properties`.
+
+### 4.2. Administración de Alquileres
+*   **Funcionalidad**: Gestión de contratos locativos.
+*   **Características**:
+    *   Generación automática de períodos de pago.
+    *   Cálculo de ajustes (IPC, ICL) y punitorios por mora.
+    *   Generación de contratos en Word (.docx) usando plantillas dinámicas.
+*   **Modelo de Datos**: Colección `alquileres`.
+
+### 4.3. Portal de Inquilinos
+*   **Ruta**: `/inquilino/[id]`
+*   **Seguridad**: Acceso mediante Código Único de Alquiler + DNI (sin usuario/contraseña tradicional).
+*   **Funcionalidad**: Visualización de estado de cuenta, historial de pagos y próximos vencimientos.
+*   **Prevención**: Validación de sesión con `sessionStorage` para evitar acceso directo por URL.
+
+### 4.4. CRM & Leads
+*   **Funcionalidad**: Pipeline de ventas y seguimiento.
+*   **Características**: Tablero Kanban para estados de leads (Nuevo, Contactado, Visita, Reservado).
+*   **IA**: Clasificación automática de leads entrantes.
+
+---
+
+## 5. Guía para Desarrolladores
+
+### Requisitos Previos
+*   **Node.js**: v18.17 o superior.
+*   **NPM**: v9 o superior.
+
+### Instalación Local
+
+1.  **Clonar repositorio**:
     ```bash
-    git clone https://github.com/facufedee/prop-ia.git
-    cd prop-ia
+    git clone <repo-url>
     ```
-
-2.  **Instalar dependencias:**
+2.  **Instalar dependencias**:
     ```bash
     npm install
     ```
-
-3.  **Configurar Variables de Entorno:**
-    Crea un archivo `.env.local` en la raíz basado en `env.template` (si existe) o con las siguientes variables:
-
+3.  **Configurar Variables de Entorno**:
+    Crear archivo `.env.local` con credenciales de Firebase y APIs.
     ```env
-    # Firebase
     NEXT_PUBLIC_FIREBASE_API_KEY=...
-    NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN=...
     NEXT_PUBLIC_FIREBASE_PROJECT_ID=...
-    NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET=...
-    NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID=...
-    NEXT_PUBLIC_FIREBASE_APP_ID=...
-
-    # APIs Externas
-    NEXT_PUBLIC_GOOGLE_MAPS_KEY=...
     gemini_api_key=...
     ```
-
-4.  **Ejecutar en desarrollo:**
+4.  **Iniciar Servidor de Desarrollo**:
     ```bash
     npm run dev
     ```
-    La aplicación estará disponible en `http://localhost:3000`.
 
-## 🤝 Contribución
+### Despliegue
 
-1.  Haz un Fork del proyecto.
-2.  Crea una rama para tu feature (`git checkout -b feature/NuevaFeature`).
-3.  Commit de tus cambios (`git commit -m 'Agrega nueva feature'`).
-4.  Push a la rama (`git push origin feature/NuevaFeature`).
-5.  Abre un Pull Request.
+El proyecto está optimizado para desplegarse en **Vercel**:
+1.  Conectar repositorio de GitHub a Vercel.
+2.  Configurar las mismas variables de entorno del `.env.local` en el panel de Vercel.
+3.  Vercel detectará automáticamente Next.js y configurará el build.
 
-## 📄 Licencia
+---
 
-Este proyecto está bajo la Licencia MIT.
+## 6. Seguridad
+
+*   **Frontend**: Rutas protegidas mediante HOCs (Higher Order Components) o checks en `layout.tsx` que verifican `UserRole`.
+*   **Backend**: Reglas de Seguridad de Firestore (`firestore.rules`) para validar lectura/escritura según el `auth.uid` y el rol del usuario en la colección `users`.
+*   **Tenant Portal**: Rate limiting en el login para prevenir fuerza bruta.
+
+---
+
+## 7. Próximos Pasos & Roadmap
+
+*   [ ] Implementar Tests E2E (Playwright/Cypress).
+*   [ ] Migrar a PostgreSQL + Prisma para mayor integridad relacional (Planificado).
+*   [ ] App Móvil Nativa (React Native) reutilizando la lógica de servicios.

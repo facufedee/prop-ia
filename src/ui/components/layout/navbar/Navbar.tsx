@@ -89,45 +89,55 @@ export default function Navbar() {
     }
   };
 
+  // Scroll detection
+  const [scrolled, setScrolled] = useState(false);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      setScrolled(window.scrollY > 20);
+    };
+    window.addEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
+
   return (
     <nav
-      className="
-        fixed top-0 left-0 w-full z-50 
-        fixed top-0 left-0 w-full z-50 
-        bg-white shadow-sm
-        border-b border-gray-100 
-        px-6 py-4 
-      "
+      className={`
+        fixed top-0 left-0 w-full z-50 transition-all duration-300
+        ${scrolled
+          ? "bg-white/80 backdrop-blur-md shadow-sm border-b border-gray-100/50 py-3"
+          : "bg-transparent border-b border-transparent py-5"}
+      `}
     >
-      <div className="flex items-center justify-between max-w-7xl mx-auto">
+      <div className="flex items-center justify-between max-w-7xl mx-auto px-6">
 
         {/* Logo */}
-        <Link href="/" className="flex items-center gap-2 hover:opacity-80">
+        <Link href="/" className="flex items-center gap-2 hover:opacity-80 transition-opacity">
           <img
             src="/assets/img/logo_web_ZetaProp.png"
             alt="Zeta Prop Logo"
-            className="h-8 w-auto"
+            className={`h-8 w-auto transition-transform duration-300 ${scrolled ? 'scale-95' : 'scale-100'}`}
           />
         </Link>
 
         {/* Desktop menu */}
-        <div className="hidden md:flex items-center gap-6 text-sm font-medium text-gray-600">
-          <Link href="/servicios" className="flex items-center gap-2 hover:text-indigo-600 transition-colors">
+        <div className="hidden md:flex items-center gap-8 text-lg font-medium text-gray-700">
+          <Link href="/servicios" className="hover:text-indigo-600 transition-colors">
             Servicios
           </Link>
-          <Link href="/precios" className="flex items-center gap-2 hover:text-indigo-600 transition-colors">
+          <Link href="/precios" className="hover:text-indigo-600 transition-colors">
             Precios
           </Link>
-          <Link href="/nosotros" className="flex items-center gap-2 hover:text-indigo-600 transition-colors">
+          <Link href="/nosotros" className="hover:text-indigo-600 transition-colors">
             Nosotros
           </Link>
-          <Link href="/blog" className="flex items-center gap-2 hover:text-indigo-600 transition-colors">
+          <Link href="/blog" className="hover:text-indigo-600 transition-colors">
             Blog
           </Link>
-          <Link href="/propiedades" className="flex items-center gap-2 hover:text-indigo-600 transition-colors">
+          <Link href="/propiedades" className="hover:text-indigo-600 transition-colors">
             Propiedades
           </Link>
-          <Link href="/contacto" className="flex items-center gap-2 hover:text-indigo-600 transition-colors">
+          <Link href="/contacto" className="hover:text-indigo-600 transition-colors">
             Contacto
           </Link>
         </div>
@@ -138,13 +148,13 @@ export default function Navbar() {
             <>
               <Link
                 href="/login"
-                className="px-4 py-2 border border-black text-black rounded-xl text-sm hover:bg-gray-100 transition"
+                className={`px-5 py-2.5 border rounded-xl text-sm font-medium transition-all ${scrolled ? 'border-gray-200 text-gray-700 hover:bg-gray-50' : 'border-gray-300/50 text-gray-800 bg-white/50 hover:bg-white'}`}
               >
                 Iniciar sesión
               </Link>
               <Link
                 href="/register"
-                className="px-4 py-2 bg-black text-white rounded-xl text-sm hover:bg-gray-800 transition"
+                className="px-5 py-2.5 bg-black text-white rounded-xl text-sm font-medium hover:bg-gray-800 transition shadow-lg shadow-gray-900/10"
               >
                 Comenzar
               </Link>
@@ -321,7 +331,7 @@ export default function Navbar() {
                       </Link>
                       <Link
                         href="/dashboard/cuenta"
-                        className="flex items-center gap-2 px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
+                        className="flex items-center gap-2 px-4 py-2 text-gray-700 hover:bg-gray-50 transition-colors"
                         onClick={() => setProfileOpen(false)}
                       >
                         <Settings size={16} />
@@ -346,86 +356,89 @@ export default function Navbar() {
         </div>
 
         {/* Mobile Toggle */}
-        <button className="md:hidden" onClick={() => setOpen(!open)}>
-          {open ? <X size={24} /> : <Menu size={24} />}
+        <button className="md:hidden p-2 text-gray-700" onClick={() => setOpen(!open)}>
+          {open ? <X size={26} /> : <Menu size={26} />}
         </button>
       </div>
 
       {/* Mobile Menu */}
       {open && (
-        <div className="md:hidden mt-3 flex flex-col gap-4 
-        bg-white/95 backdrop-blur-xl border-t border-white/20 py-4 px-2 text-sm">
+        <div className="md:hidden mt-2 p-4 flex flex-col gap-4 
+        bg-white/90 backdrop-blur-xl border-t border-gray-100 shadow-xl rounded-b-2xl animate-in slide-in-from-top-2">
 
-          <Link href="/servicios" className="px-2 py-1 hover:text-black" onClick={() => setOpen(false)}>Servicios</Link>
-          <Link href="/precios" className="px-2 py-1 hover:text-black" onClick={() => setOpen(false)}>Precios</Link>
-          <Link href="/nosotros" className="px-2 py-1 hover:text-black" onClick={() => setOpen(false)}>Nosotros</Link>
-          <Link href="/blog" className="px-2 py-1 hover:text-black" onClick={() => setOpen(false)}>Blog</Link>
-          <Link href="/propiedades" className="px-2 py-1 hover:text-black" onClick={() => setOpen(false)}>Propiedades</Link>
-          <Link href="/contacto" className="px-2 py-1 hover:text-black" onClick={() => setOpen(false)}>Contacto</Link>
+          <Link href="/servicios" className="p-3 bg-gray-50/50 rounded-xl hover:bg-gray-100 font-medium" onClick={() => setOpen(false)}>Servicios</Link>
+          <Link href="/precios" className="p-3 bg-gray-50/50 rounded-xl hover:bg-gray-100 font-medium" onClick={() => setOpen(false)}>Precios</Link>
+          <Link href="/nosotros" className="p-3 bg-gray-50/50 rounded-xl hover:bg-gray-100 font-medium" onClick={() => setOpen(false)}>Nosotros</Link>
+          <Link href="/blog" className="p-3 bg-gray-50/50 rounded-xl hover:bg-gray-100 font-medium" onClick={() => setOpen(false)}>Blog</Link>
+          <Link href="/propiedades" className="p-3 bg-gray-50/50 rounded-xl hover:bg-gray-100 font-medium" onClick={() => setOpen(false)}>Propiedades</Link>
+          <Link href="/contacto" className="p-3 bg-gray-50/50 rounded-xl hover:bg-gray-100 font-medium" onClick={() => setOpen(false)}>Contacto</Link>
 
-          <div className="border-t pt-3">
+          <div className="border-t border-gray-200 pt-4">
             {!user ? (
-              <>
+              <div className="flex flex-col gap-3">
                 <Link
                   href="/login"
-                  className="block w-full border px-4 py-2 rounded-xl mb-2 text-center"
+                  className="block w-full border border-gray-300 px-4 py-3 rounded-xl text-center font-semibold text-gray-700"
                   onClick={() => setOpen(false)}
                 >
                   Iniciar sesión
                 </Link>
                 <Link
                   href="/register"
-                  className="block w-full bg-black text-white px-4 py-2 rounded-xl text-center"
+                  className="block w-full bg-black text-white px-4 py-3 rounded-xl text-center font-semibold shadow-lg"
                   onClick={() => setOpen(false)}
                 >
                   Comenzar
                 </Link>
-              </>
+              </div>
             ) : (
               <>
                 <div className="flex items-center gap-3 px-2 mb-4">
-                  <div className="w-10 h-10 rounded-full bg-indigo-100 flex items-center justify-center text-indigo-600">
+                  <div className="w-12 h-12 rounded-full bg-indigo-100 flex items-center justify-center text-indigo-600">
                     {user.photoURL ? (
-                      <img src={user.photoURL} alt="Profile" className="w-10 h-10 rounded-full object-cover" />
+                      <img src={user.photoURL} alt="Profile" className="w-12 h-12 rounded-full object-cover" />
                     ) : (
-                      <UserIcon size={20} />
+                      <UserIcon size={24} />
                     )}
                   </div>
                   <div>
-                    <p className="font-medium text-gray-900">{user.displayName || "Usuario"}</p>
+                    <p className="font-bold text-gray-900">{user.displayName || "Usuario"}</p>
                     <p className="text-xs text-gray-500">{user.email}</p>
                   </div>
                 </div>
 
                 <Link
                   href="/dashboard/propiedades/nueva"
-                  className="block w-full bg-indigo-600 text-white px-4 py-2 rounded-xl text-center mb-2"
+                  className="block w-full bg-indigo-600 text-white px-4 py-3 rounded-xl text-center mb-3 font-semibold shadow-md"
                   onClick={() => setOpen(false)}
                 >
-                  Publicar
+                  Publicar Propiedad
                 </Link>
 
-                <Link
-                  href="/dashboard"
-                  className="flex items-center gap-2 w-full px-4 py-2 text-gray-700 hover:bg-gray-50 rounded-xl"
-                  onClick={() => setOpen(false)}
-                >
-                  <LayoutDashboard size={16} />
-                  Dashboard
-                </Link>
-                <Link
-                  href="/dashboard/cuenta"
-                  className="flex items-center gap-2 w-full px-4 py-2 text-gray-700 hover:bg-gray-50 rounded-xl"
-                  onClick={() => setOpen(false)}
-                >
-                  <Settings size={16} />
-                  Modificar datos
-                </Link>
+                <div className="grid grid-cols-2 gap-3">
+                  <Link
+                    href="/dashboard"
+                    className="flex flex-col items-center justify-center gap-2 p-3 bg-gray-50 rounded-xl hover:bg-gray-100 border border-gray-100"
+                    onClick={() => setOpen(false)}
+                  >
+                    <LayoutDashboard size={20} className="text-gray-600" />
+                    <span className="text-xs font-medium">Dashboard</span>
+                  </Link>
+                  <Link
+                    href="/dashboard/cuenta"
+                    className="flex flex-col items-center justify-center gap-2 p-3 bg-gray-50 rounded-xl hover:bg-gray-100 border border-gray-100"
+                    onClick={() => setOpen(false)}
+                  >
+                    <Settings size={20} className="text-gray-600" />
+                    <span className="text-xs font-medium">Cuenta</span>
+                  </Link>
+                </div>
+
                 <button
                   onClick={() => { if (auth) signOut(auth); }}
-                  className="flex items-center gap-2 w-full px-4 py-2 text-red-600 hover:bg-red-50 rounded-xl mt-2"
+                  className="w-full flex items-center justify-center gap-2 px-4 py-3 text-red-600 hover:bg-red-50 rounded-xl mt-3 font-medium border border-red-100"
                 >
-                  <LogOut size={16} />
+                  <LogOut size={18} />
                   Cerrar sesión
                 </button>
               </>

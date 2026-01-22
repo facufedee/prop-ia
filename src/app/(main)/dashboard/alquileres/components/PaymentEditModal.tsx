@@ -14,7 +14,7 @@ interface PaymentEditModalProps {
     onSave: (payment: Pago) => void;
 }
 
-const PRESET_SERVICES = ['Agua', 'Luz', 'Gas', 'Impuesto Municipal'];
+const PRESET_SERVICES = ['Expensas', 'Agua', 'Luz', 'Gas', 'Impuesto Municipal', 'Reparaciones'];
 const MAX_VALUE = 999999999;
 const DEFAULT_PENALTY_RATE = 1; // 1% per day
 

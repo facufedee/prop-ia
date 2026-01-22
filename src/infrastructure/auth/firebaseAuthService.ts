@@ -76,6 +76,9 @@ export const loginWithGoogle = async () => {
     if (!auth) throw new Error('Auth not available');
 
     const provider = new GoogleAuthProvider();
+    provider.setCustomParameters({
+        prompt: "select_account"
+    });
     const result = await signInWithPopup(auth, provider);
 
     // Await this to ensure role is assigned before UI redirects

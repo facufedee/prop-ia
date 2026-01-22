@@ -32,36 +32,37 @@ export default function CookieBanner() {
     if (!isVisible) return null;
 
     return (
-        <div className="fixed bottom-0 left-0 right-0 z-50 p-4 md:p-6 animate-slide-up">
-            <div className="max-w-7xl mx-auto bg-white/95 backdrop-blur-md border border-gray-200 shadow-2xl rounded-2xl p-6 md:flex md:items-center md:justify-between gap-6">
-
-                <div className="flex gap-4 items-start md:items-center flex-1">
-                    <div className="bg-blue-100 p-3 rounded-full hidden sm:block">
-                        <Cookie className="w-6 h-6 text-blue-600" />
-                    </div>
-                    <div>
-                        <h3 className="text-lg font-semibold text-gray-900 mb-1">
-                            Valoramos tu privacidad
-                        </h3>
-                        <p className="text-gray-600 text-sm leading-relaxed">
-                            Utilizamos cookies propias y de terceros para mejorar tu experiencia, analizar el tráfico y personalizar contenido.
-                            Puedes leer nuestra <Link href="/cookies" className="text-blue-600 hover:underline font-medium">Política de Cookies</Link>.
-                        </p>
-                    </div>
+        <div className="fixed bottom-4 right-4 z-50 p-0 animate-slide-up max-w-[400px] w-full">
+            <div className="bg-white/95 backdrop-blur-md border border-gray-200 shadow-2xl rounded-xl p-5">
+                <div className="flex items-start justify-between mb-3">
+                    <h3 className="font-bold text-gray-900 flex items-center gap-2">
+                        <Cookie className="w-5 h-5 text-blue-600" />
+                        Configuración de Cookies
+                    </h3>
+                    <button onClick={() => setIsVisible(false)} className="text-gray-400 hover:text-gray-600">
+                        <X className="w-4 h-4" />
+                    </button>
                 </div>
 
-                <div className="mt-6 md:mt-0 flex flex-col sm:flex-row gap-3 min-w-fit">
+                <p className="text-gray-600 text-xs leading-relaxed mb-5">
+                    Utilizamos cookies propias y de terceros para mejorar tu experiencia y analizar el tráfico.
+                    <Link href="/cookies" className="text-blue-600 hover:underline font-medium ml-1">
+                        Ver Política
+                    </Link>.
+                </p>
+
+                <div className="flex gap-2 justify-end">
                     <button
                         onClick={handleReject}
-                        className="px-6 py-2.5 rounded-xl border border-gray-300 text-gray-700 font-medium hover:bg-gray-50 transition-colors focus:outline-none focus:ring-2 focus:ring-gray-200"
+                        className="px-4 py-2 rounded-lg text-xs font-semibold text-gray-600 hover:bg-gray-100 hover:text-gray-900 transition-colors"
                     >
-                        Rechazar Todo
+                        Rechazar
                     </button>
                     <button
                         onClick={handleAccept}
-                        className="px-6 py-2.5 rounded-xl bg-blue-600 text-white font-medium hover:bg-blue-700 shadow-lg shadow-blue-600/20 transition-all focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+                        className="px-4 py-2 rounded-lg bg-blue-600 text-white text-xs font-bold hover:bg-blue-700 shadow-sm transition-all"
                     >
-                        Aceptar Todo
+                        Aceptar todo
                     </button>
                 </div>
             </div>

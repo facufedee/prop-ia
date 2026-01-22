@@ -1,6 +1,6 @@
 {
-    "name": "PROP-IA",
-    "short_name": "PROP-IA",
+    "name": "Zeta Prop",
+    "short_name": "Zeta Prop",
     "description": "Plataforma de gestión inmobiliaria con Inteligencia Artificial",
     "start_url": "/",
     "display": "standalone",

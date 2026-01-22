@@ -74,8 +74,38 @@ export const alquileresService = {
     // Create new contract
     createAlquiler: async (alquiler: Omit<Alquiler, "id" | "createdAt" | "updatedAt">): Promise<string> => {
         if (!db) throw new Error("Firestore not initialized");
+
+        // Generate unique rental code
+        const generateCode = async (direccion: string): Promise<string> => {
+            // Normalize: Upper, no accents, no specials (keep nums), spaces to dashes
+            const raw = direccion.toUpperCase()
+                .normalize("NFD").replace(/[\u0300-\u036f]/g, "") // Remove accents
+                .replace(/[^A-Z0-9\s]/g, "") // Remove special chars
+                .trim()
+                .replace(/\s+/g, "-"); // Spaces to dashes
+
+            const baseCode = raw;
+            let finalCode = baseCode;
+            let counter = 1;
+
+            // Check for duplicates
+            // Note: This loop might be dangerous if there are MANY duplicates, but for addresses it's unlikely to be > 5
+            while (true) {
+                const q = query(collection(db!, COLLECTION), where("codigoAlquiler", "==", finalCode));
+                const snap = await getDocs(q);
+                if (snap.empty) break;
+
+                finalCode = `${baseCode}-${counter}`;
+                counter++;
+            }
+            return finalCode;
+        };
+
+        const codigoAlquiler = await generateCode(alquiler.direccion);
+
         const docRef = await addDoc(collection(db, COLLECTION), {
             ...alquiler,
+            codigoAlquiler,
             fechaInicio: Timestamp.fromDate(new Date(alquiler.fechaInicio)),
             fechaFin: Timestamp.fromDate(new Date(alquiler.fechaFin)),
             createdAt: Timestamp.now(),
@@ -229,4 +259,72 @@ export const alquileresService = {
         // ICL would require external API call
         return montoActual;
     },
+
+    // Verify Tenant Access
+    verifyTenantAccess: async (code: string, dni: string): Promise<{ valid: boolean; alquilerId?: string; error?: string }> => {
+        if (!db) throw new Error("Firestore not initialized");
+
+        // Normalize
+        const normalizedCode = code.toUpperCase().trim();
+
+        // 1. Find rental by code
+        const q = query(collection(db, COLLECTION), where("codigoAlquiler", "==", normalizedCode));
+        const snapshot = await getDocs(q);
+
+        if (snapshot.empty) {
+            // Delay to prevent timing attacks (simulated)
+            await new Promise(resolve => setTimeout(resolve, 1000));
+            return { valid: false, error: "Datos incorrectos" };
+        }
+
+        const rentalDoc = snapshot.docs[0];
+        const rentalData = rentalDoc.data();
+
+        // 2. Check DNI
+        // Ensure we check against tenant DNI
+        if (rentalData.dniInquilino !== dni) {
+            await new Promise(resolve => setTimeout(resolve, 1000));
+            return { valid: false, error: "Datos incorrectos" };
+        }
+
+        // Return ID if valid
+        return { valid: true, alquilerId: rentalDoc.id };
+    },
+
+    // Migration helper: Generate code for existing rental
+    generateCodeForExistingAlquiler: async (id: string): Promise<string> => {
+        if (!db) throw new Error("Firestore not initialized");
+
+        const alquiler = await alquileresService.getAlquilerById(id);
+        if (!alquiler) throw new Error("Alquiler no encontrado");
+        if (alquiler.codigoAlquiler) return alquiler.codigoAlquiler;
+
+        // Code Generation Logic (Duplicated for availability but isolated)
+        // TODO: Refactor into shared private helper if needed heavily
+        const generateCode = async (direccion: string): Promise<string> => {
+            const raw = direccion.toUpperCase()
+                .normalize("NFD").replace(/[\u0300-\u036f]/g, "")
+                .replace(/[^A-Z0-9\s]/g, "")
+                .trim()
+                .replace(/\s+/g, "-");
+
+            const baseCode = raw;
+            let finalCode = baseCode;
+            let counter = 1;
+
+            while (true) {
+                const q = query(collection(db!, COLLECTION), where("codigoAlquiler", "==", finalCode));
+                const snap = await getDocs(q);
+                if (snap.empty) break;
+
+                finalCode = `${baseCode}-${counter}`;
+                counter++;
+            }
+            return finalCode;
+        };
+
+        const newCode = await generateCode(alquiler.direccion);
+        await alquileresService.updateAlquiler(id, { codigoAlquiler: newCode });
+        return newCode;
+    }
 };

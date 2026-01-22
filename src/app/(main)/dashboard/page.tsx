@@ -30,7 +30,6 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/ui/context/AuthContext";
 import { useBranchContext } from "@/infrastructure/context/BranchContext";
-import OnboardingOverlay from "@/ui/components/onboarding/OnboardingOverlay";
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 
 export default function DashboardPage() {
@@ -47,21 +46,7 @@ export default function DashboardPage() {
         recentActivity: [] as AuditLog[]
     });
     const [loading, setLoading] = useState(true);
-    const [showOnboarding, setShowOnboarding] = useState(false);
 
-    useEffect(() => {
-        if (!loading && stats.totalProperties === 0) {
-            const hasSeenOnboarding = localStorage.getItem("hasSeenPropertyOnboarding");
-            if (!hasSeenOnboarding) {
-                setTimeout(() => setShowOnboarding(true), 1000);
-            }
-        }
-    }, [loading, stats.totalProperties]);
-
-    const handleOnboardingDismiss = () => {
-        setShowOnboarding(false);
-        localStorage.setItem("hasSeenPropertyOnboarding", "true");
-    };
 
     useEffect(() => {
         if (!auth) {
@@ -235,12 +220,6 @@ export default function DashboardPage() {
                     </div>
                 </div>
             )}
-
-            <OnboardingOverlay
-                targetId="new-property-btn"
-                show={showOnboarding}
-                onDismiss={handleOnboardingDismiss}
-            />
 
             {/* Stats Overview */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">

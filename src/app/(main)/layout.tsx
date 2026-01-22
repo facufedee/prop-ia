@@ -126,46 +126,67 @@ export default function RootLayout({
           <FloatingChatWidget />
         </ClientLayout>
 
-        {/* Structured Data - Organization */}
+        {/* Structured Data - Organization & SoftwareApplication */}
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{
-            __html: JSON.stringify({
-              '@context': 'https://schema.org',
-              '@type': 'Organization',
-              name: 'Zeta Prop',
-              url: 'https://zetaprop.com.ar',
-              logo: 'https://zetaprop.com.ar/assets/img/Logo%20ZetaProp%20Fondo%20Blanco.png',
-              description: 'CRM Inmobiliario moderno adaptado a Argentina con IA y Automatización',
-              address: {
-                '@type': 'PostalAddress',
-                addressCountry: 'AR',
-                addressLocality: 'Buenos Aires',
+            __html: JSON.stringify([
+              {
+                '@context': 'https://schema.org',
+                '@type': 'Organization',
+                name: 'Zeta Prop',
+                url: 'https://zetaprop.com.ar',
+                logo: 'https://zetaprop.com.ar/assets/img/Logo%20ZetaProp%20Fondo%20Blanco.png',
+                description: 'CRM Inmobiliario moderno adaptado a Argentina con IA y Automatización',
+                contactPoint: {
+                  '@type': 'ContactPoint',
+                  telephone: '+54 9 11 2400-0769',
+                  contactType: 'customer service',
+                  areaServed: 'AR',
+                  availableLanguage: 'Spanish'
+                },
+                address: {
+                  '@type': 'PostalAddress',
+                  addressCountry: 'AR',
+                  addressLocality: 'Buenos Aires',
+                },
+                sameAs: [
+                  'https://twitter.com/zetaprop',
+                  'https://linkedin.com/company/zetaprop',
+                  'https://facebook.com/zetaprop',
+                  'https://instagram.com/zetaprop'
+                ],
               },
-              sameAs: [
-                'https://twitter.com/zetaprop',
-                'https://linkedin.com/company/zetaprop',
-                'https://facebook.com/zetaprop',
-              ],
-            }),
-          }}
-        />
-
-        {/* Structured Data - WebSite */}
-        <script
-          type="application/ld+json"
-          dangerouslySetInnerHTML={{
-            __html: JSON.stringify({
-              '@context': 'https://schema.org',
-              '@type': 'WebSite',
-              name: 'Zeta Prop',
-              url: 'https://zetaprop.com.ar',
-              potentialAction: {
-                '@type': 'SearchAction',
-                target: 'https://zetaprop.com.ar/buscar?q={search_term_string}',
-                'query-input': 'required name=search_term_string',
+              {
+                '@context': 'https://schema.org',
+                '@type': 'SoftwareApplication',
+                name: 'Zeta Prop',
+                operatingSystem: 'Web Browser, Android, iOS',
+                applicationCategory: 'BusinessApplication',
+                aggregateRating: {
+                  '@type': 'AggregateRating',
+                  ratingValue: '4.8',
+                  ratingCount: '124'
+                },
+                offers: {
+                  '@type': 'Offer',
+                  price: '0',
+                  priceCurrency: 'ARS',
+                  description: 'Plan Gratuito disponible para hasta 10 propiedades.'
+                }
               },
-            }),
+              {
+                '@context': 'https://schema.org',
+                '@type': 'WebSite',
+                name: 'Zeta Prop',
+                url: 'https://zetaprop.com.ar',
+                potentialAction: {
+                  '@type': 'SearchAction',
+                  target: 'https://zetaprop.com.ar/buscar?q={search_term_string}',
+                  'query-input': 'required name=search_term_string',
+                },
+              }
+            ]),
           }}
         />
       </body>
