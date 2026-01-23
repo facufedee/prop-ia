@@ -23,6 +23,8 @@ export interface PublicProperty {
     hidePrice?: boolean;
     status?: 'active' | 'inactive' | 'reserved' | 'sold';
     code?: string;
+    type?: string;
+    address?: string;
 }
 
 export interface PublicAgency {

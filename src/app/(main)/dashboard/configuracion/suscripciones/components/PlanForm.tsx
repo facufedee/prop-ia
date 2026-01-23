@@ -134,17 +134,17 @@ export default function PlanForm({ initialData, onSave, onCancel }: PlanFormProp
                         <label className="block text-sm font-medium text-gray-700 mb-1">Nombre</label>
                         <input
                             {...register("name")}
-                            className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none"
+                            className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none text-gray-900"
                             placeholder="Ej. Profesional, Enterprise..."
                         />
                         {errors.name && <span className="text-red-500 text-xs">{errors.name.message}</span>}
                     </div>
                     <div>
                         <label className="block text-sm font-medium text-gray-700 mb-1">Nivel (Tier)</label>
-                        <select {...register("tier")} className="w-full px-3 py-2 border rounded-lg bg-white focus:ring-2 focus:ring-indigo-500 outline-none">
-                            <option value="free">Gratis (Free)</option>
-                            <option value="professional">Profesional</option>
-                            <option value="enterprise">Empresarial</option>
+                        <select {...register("tier")} className="w-full px-3 py-2 border rounded-lg bg-white focus:ring-2 focus:ring-indigo-500 outline-none text-gray-900">
+                            <option value="free">Plan Básico</option>
+                            <option value="professional">Plan Profesional</option>
+                            <option value="enterprise">Plan Empresarial</option>
                         </select>
                     </div>
                 </div>
@@ -154,7 +154,7 @@ export default function PlanForm({ initialData, onSave, onCancel }: PlanFormProp
                     <textarea
                         {...register("description")}
                         rows={2}
-                        className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none resize-none"
+                        className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none resize-none text-gray-900"
                         placeholder="La mejor opción para inmobiliarias en crecimiento..."
                     />
                     {errors.description && <span className="text-red-500 text-xs">{errors.description.message}</span>}
@@ -165,7 +165,7 @@ export default function PlanForm({ initialData, onSave, onCancel }: PlanFormProp
                         <label className="block text-sm font-medium text-gray-700 mb-1">Icono (Lucide React)</label>
                         <input
                             {...register("icon")}
-                            className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none"
+                            className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none text-gray-900"
                             placeholder="Zap, Building, Rocket..."
                         />
                     </div>
@@ -177,7 +177,7 @@ export default function PlanForm({ initialData, onSave, onCancel }: PlanFormProp
                                 <input
                                     type="number"
                                     {...register("price.monthly", { valueAsNumber: true })}
-                                    className="w-full pl-7 pr-3 py-2 border rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none"
+                                    className="w-full pl-7 pr-3 py-2 border rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none text-gray-900"
                                 />
                             </div>
                         </div>
@@ -188,7 +188,7 @@ export default function PlanForm({ initialData, onSave, onCancel }: PlanFormProp
                                 <input
                                     type="number"
                                     {...register("price.yearly", { valueAsNumber: true })}
-                                    className="w-full pl-7 pr-3 py-2 border rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none"
+                                    className="w-full pl-7 pr-3 py-2 border rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none text-gray-900"
                                 />
                             </div>
                         </div>
@@ -216,7 +216,7 @@ export default function PlanForm({ initialData, onSave, onCancel }: PlanFormProp
                         </label>
                         <input
                             {...register("limits.storage")}
-                            className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none bg-white"
+                            className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none bg-white text-gray-900"
                             placeholder="Ej. 10GB, 1TB..."
                         />
                     </div>
@@ -298,7 +298,7 @@ function ResourceLimitInput({ label, name, control, icon }: { label: string, nam
                     min="0"
                     value={isUnlimited ? '' : field.value}
                     onChange={(e) => handleNumberChange(e.target.value)}
-                    className={`flex-1 px-3 py-2 border rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none transition-colors ${isUnlimited ? 'bg-white/50 text-gray-400 cursor-not-allowed border-indigo-100' : 'bg-white'}`}
+                    className={`flex-1 px-3 py-2 border rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none transition-colors ${isUnlimited ? 'bg-white/50 text-gray-400 cursor-not-allowed border-indigo-100' : 'bg-white text-gray-900'}`}
                 />
 
                 <div className="flex items-center gap-2">

@@ -19,7 +19,7 @@ const libraries: ("places" | "drawing" | "geometry" | "visualization")[] = ["pla
 export default function PublicMap({ lat, lng }: PublicMapProps) {
     const apiKey = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY;
 
-    const { isLoaded } = useJsApiLoader({
+    const { isLoaded, loadError } = useJsApiLoader({
         id: 'google-map-script',
         googleMapsApiKey: apiKey || "",
         libraries
@@ -30,8 +30,9 @@ export default function PublicMap({ lat, lng }: PublicMapProps) {
         lng: Number(lng)
     }), [lat, lng]);
 
-    // Fallback if no API Key is provided
-    if (!apiKey) {
+    // Fallback if no API Key is provided OR if there is a Load Error (e.g. RefererNotAllowed)
+    if (!apiKey || loadError) {
+        if (loadError) console.warn("Google Maps Load Error (Referer/Key?):", loadError);
         return (
             <iframe
                 width="100%"

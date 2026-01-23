@@ -2,7 +2,7 @@
 
 :root {
   --background: #ffffff;
-  --foreground: #fff;
+  --foreground: #171717;
 }
 
 @theme inline {
@@ -43,15 +43,23 @@ body {
 
 /* Custom Animations */
 @keyframes border-flow {
-  0% { transform: translateX(-100%); }
-  100% { transform: translateX(100%); }
+  0% {
+    transform: translateX(-100%);
+  }
+
+  100% {
+    transform: translateX(100%);
+  }
 }
 
 @keyframes gradient-xy {
-  0%, 100% {
+
+  0%,
+  100% {
     background-size: 400% 400%;
     background-position: left center;
   }
+
   50% {
     background-size: 200% 200%;
     background-position: right center;
