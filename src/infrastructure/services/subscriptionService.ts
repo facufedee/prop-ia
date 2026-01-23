@@ -81,6 +81,27 @@ export const subscriptionService = {
         } as Subscription;
     },
 
+    getAllSubscriptions: async (): Promise<Subscription[]> => {
+        if (!db) throw new Error("Firestore not initialized");
+        const q = query(
+            collection(db, SUBSCRIPTIONS_COLLECTION),
+            orderBy("createdAt", "desc")
+        );
+        const snapshot = await getDocs(q);
+        return snapshot.docs.map(doc => ({
+            id: doc.id,
+            ...doc.data(),
+            startDate: doc.data().startDate?.toDate() || new Date(),
+            endDate: doc.data().endDate?.toDate() || new Date(),
+            trialEndDate: doc.data().trialEndDate?.toDate(),
+            cancelledAt: doc.data().cancelledAt?.toDate(),
+            lastPaymentDate: doc.data().lastPaymentDate?.toDate(),
+            nextPaymentDate: doc.data().nextPaymentDate?.toDate(),
+            createdAt: doc.data().createdAt?.toDate() || new Date(),
+            updatedAt: doc.data().updatedAt?.toDate() || new Date(),
+        })) as Subscription[];
+    },
+
     createSubscription: async (data: Omit<Subscription, "id" | "createdAt" | "updatedAt">): Promise<string> => {
         if (!db) throw new Error("Firestore not initialized");
         const docRef = await addDoc(collection(db, SUBSCRIPTIONS_COLLECTION), {
