@@ -105,6 +105,7 @@ const initialExampleProperty: ExampleProperty = {
 };
 
 import PortalesTab from "./components/PortalesTab";
+import MercadoPagoTab from "./components/MercadoPagoTab";
 
 export default function ConfiguracionPage() {
     const [activeTab, setActiveTab] = useState("tasaciones");
@@ -277,156 +278,175 @@ export default function ConfiguracionPage() {
                 >
                     Tasaciones Inteligentes
                 </button>
+                <button
+                    className={`px-4 py-2 font-medium ${activeTab === "mercadopago" ? "border-b-2 border-black text-black" : "text-gray-500"}`}
+                    onClick={() => setActiveTab("mercadopago")}
+                >
+                    Medios de Pago
+                </button>
             </div>
 
             {activeTab === "tasaciones" && (
                 <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-                    {/* Left Column: Configuration Form */}
-                    <div className="lg:col-span-2 bg-white p-6 rounded-xl shadow-sm border">
-                        <div className="flex justify-between items-center mb-6">
-                            <div>
-                                <h2 className="text-lg font-semibold text-gray-900">Ajustes de Valoración</h2>
-                                <p className="text-sm text-gray-500">Configure porcentajes de ajuste manual.</p>
-                            </div>
-                            <div className="flex gap-2">
-                                <button onClick={handleReset} className="flex items-center gap-2 px-3 py-2 text-sm text-gray-600 hover:bg-gray-100 rounded-lg">
-                                    <RotateCcw className="w-4 h-4" />
-                                </button>
-                                <button onClick={handleSave} className="flex items-center gap-2 px-4 py-2 bg-black text-white rounded-lg hover:bg-gray-800 text-sm font-medium">
-                                    <Save className="w-4 h-4" /> {saved ? "Guardado!" : "Guardar"}
-                                </button>
-                            </div>
-                        </div>
-
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-2">
-                            <div>
-                                <h3 className="text-sm font-medium mb-3 text-gray-900 border-b pb-1">Variables Principales</h3>
-                                <div className="space-y-2">
-                                    {["area_total", "area_covered", "rooms", "bedrooms", "bathrooms", "floor", "construction_year", "expenses"].map((field) => (
-                                        <div key={field} className="flex items-center justify-between py-1">
-                                            <label className="text-sm text-gray-600">{fieldLabels[field]}</label>
-                                            <div className="flex items-center gap-1">
-                                                <input
-                                                    type="number"
-                                                    name={field}
-                                                    value={config[field as keyof AdjustmentConfig]}
-                                                    onChange={handleChange}
-                                                    className="w-16 p-1 text-sm border rounded text-right focus:ring-1 focus:ring-black outline-none"
-                                                />
-                                                <span className="text-xs text-gray-400 w-3">%</span>
-                                            </div>
-                                        </div>
-                                    ))}
+                    {/* Left Column: Config Form */}
+                    <div className="lg:col-span-2">
+                        <div className="bg-white p-8 rounded-xl shadow-sm border border-gray-200">
+                            {/* Header & Actions */}
+                            <div className="flex justify-between items-start mb-8">
+                                <div>
+                                    <h2 className="text-xl font-bold text-gray-900">Ajustes de Valoración</h2>
+                                    <p className="text-sm text-gray-500 mt-1">Configure porcentajes de ajuste manual.</p>
+                                </div>
+                                <div className="flex items-center gap-3">
+                                    <button
+                                        onClick={handleReset}
+                                        className="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-lg transition-colors"
+                                        title="Resetear valores"
+                                    >
+                                        <RotateCcw className="w-5 h-5" />
+                                    </button>
+                                    <button
+                                        onClick={handleSave}
+                                        className={`px-6 py-2 bg-black text-white text-sm font-medium rounded-lg hover:bg-gray-800 transition-all flex items-center gap-2 ${saved ? 'bg-green-600 hover:bg-green-700' : ''}`}
+                                    >
+                                        {saved ? <Check className="w-4 h-4" /> : <Save className="w-4 h-4" />}
+                                        {saved ? 'Guardado' : 'Guardar'}
+                                    </button>
                                 </div>
                             </div>
 
-                            <div>
-                                <h3 className="text-sm font-medium mb-3 text-gray-900 border-b pb-1">Características Adicionales</h3>
-                                <div className="space-y-2">
-                                    {["pileta", "sum", "seguridad", "cochera", "balcon", "terraza", "jardin", "gimnasio", "laundry", "calefaccion"].map((field) => {
-                                        const isActive = exampleProperty.all_features.toLowerCase().includes(field);
-                                        return (
-                                            <div key={field} className={`flex items-center justify-between py-1 ${isActive ? '' : 'opacity-50'}`} title={isActive ? '' : 'Esta característica no está presente en la propiedad de ejemplo'}>
-                                                <div className="flex items-center gap-2">
-                                                    <label className={`text-sm ${isActive ? 'text-gray-900 font-medium' : 'text-gray-500'}`}>
-                                                        {fieldLabels[field]}
-                                                    </label>
-                                                    {isActive && <div className="w-1.5 h-1.5 rounded-full bg-green-500"></div>}
-                                                </div>
-                                                <div className="flex items-center gap-1">
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
+                                {/* Variables Principales */}
+                                <div>
+                                    <h3 className="text-sm font-semibold text-gray-900 border-b border-gray-200 pb-2 mb-6">Variables Principales</h3>
+                                    <div className="space-y-4">
+                                        {["area_total", "area_covered", "rooms", "bedrooms", "bathrooms", "floor", "construction_year", "expenses"].map((field) => (
+                                            <div key={field} className="flex items-center justify-between group">
+                                                <label className="text-sm text-gray-600 font-medium group-hover:text-gray-900 transition-colors">
+                                                    {fieldLabels[field]}
+                                                </label>
+                                                <div className="relative w-24">
                                                     <input
                                                         type="number"
                                                         name={field}
                                                         value={config[field as keyof AdjustmentConfig]}
                                                         onChange={handleChange}
-                                                        className={`w-16 p-1 text-sm border rounded text-right focus:ring-1 focus:ring-black outline-none ${isActive ? 'bg-white' : 'bg-gray-50'}`}
+                                                        className="w-full text-right pr-6 py-1.5 border border-gray-300 rounded-md focus:ring-1 focus:ring-black focus:border-black outline-none text-sm transition-all"
+                                                        placeholder="0"
                                                     />
-                                                    <span className="text-xs text-gray-400 w-3">%</span>
-                                                </div>
-                                            </div>
-                                        );
-                                    })}
-                                </div>
-                                <p className="text-xs text-gray-400 mt-4 italic">
-                                    * Los porcentajes atenuados no afectan el precio porque la propiedad de ejemplo no tiene esas características.
-                                </p>
-                            </div>
-                        </div>
-                    </div>
-
-                    {/* Right Column: Live Preview */}
-                    <div className="bg-gray-50 p-6 rounded-xl border h-fit sticky top-6">
-                        <h3 className="font-semibold text-gray-900 mb-4 flex items-center gap-2">
-                            <Home className="w-4 h-4" /> Vista Previa
-                        </h3>
-
-                        {/* Editable Property Card */}
-                        <div
-                            onClick={openEditModal}
-                            className="bg-white p-4 rounded-lg border shadow-sm mb-6 cursor-pointer hover:border-black transition-colors group relative"
-                        >
-                            <div className="absolute top-2 right-2 text-gray-400 group-hover:text-black">
-                                <Edit2 className="w-4 h-4" />
-                            </div>
-                            <div className="text-sm text-gray-500 mb-1">Propiedad Ejemplo (Click para editar)</div>
-                            <div className="font-medium text-gray-900">{exampleProperty.property_type} en {exampleProperty.barrio}</div>
-                            <div className="text-xs text-gray-500 mt-1">
-                                {exampleProperty.area_total}m² • {exampleProperty.rooms} Amb • {exampleProperty.bedrooms} Dorm
-                            </div>
-                            <div className="text-xs text-gray-400 mt-1 truncate">
-                                {exampleProperty.all_features}
-                            </div>
-                        </div>
-
-                        {/* Detailed Breakdown */}
-                        <div className="space-y-4">
-                            <div>
-                                <h4 className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">Desglose de Ajustes</h4>
-                                {impacts.length === 0 ? (
-                                    <div className="text-sm text-gray-400 italic">Sin ajustes configurados</div>
-                                ) : (
-                                    <div className="space-y-2">
-                                        {impacts.map((item, idx) => (
-                                            <div key={idx} className="flex justify-between items-center text-sm">
-                                                <div className="flex items-center gap-2">
-                                                    <span className="text-gray-600">{item.label}</span>
-                                                    <span className="text-xs text-gray-400">({item.value})</span>
-                                                </div>
-                                                <div className={`font-medium ${item.impact >= 0 ? 'text-green-600' : 'text-red-600'}`}>
-                                                    {item.impact > 0 ? '+' : ''}{item.impact.toLocaleString('es-AR', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 })}
-                                                    <span className="text-xs ml-1 opacity-75">({item.percent}%)</span>
+                                                    <span className="absolute right-2 top-1.5 text-gray-400 text-sm pointer-events-none">%</span>
                                                 </div>
                                             </div>
                                         ))}
                                     </div>
-                                )}
+                                </div>
+
+                                {/* Características Adicionales */}
+                                <div>
+                                    <h3 className="text-sm font-semibold text-gray-900 border-b border-gray-200 pb-2 mb-6">Características Adicionales</h3>
+                                    <div className="space-y-4">
+                                        {["pileta", "sum", "seguridad", "cochera", "balcon", "terraza", "jardin", "gimnasio", "laundry", "calefaccion"].map((field) => {
+                                            const isActive = exampleProperty.all_features.toLowerCase().includes(field);
+                                            return (
+                                                <div key={field} className={`flex items-center justify-between group ${!isActive ? 'opacity-50' : ''}`}>
+                                                    <div className="flex items-center gap-2">
+                                                        <label className={`text-sm font-medium transition-colors ${isActive ? 'text-gray-900' : 'text-gray-500'}`}>
+                                                            {fieldLabels[field]}
+                                                        </label>
+                                                        {isActive && <div className="w-1.5 h-1.5 rounded-full bg-green-500"></div>}
+                                                    </div>
+                                                    <div className="relative w-24">
+                                                        <input
+                                                            type="number"
+                                                            name={field}
+                                                            value={config[field as keyof AdjustmentConfig]}
+                                                            onChange={handleChange}
+                                                            className={`w-full text-right pr-6 py-1.5 border border-gray-300 rounded-md focus:ring-1 focus:ring-black focus:border-black outline-none text-sm transition-all ${!isActive ? 'bg-gray-50' : ''}`}
+                                                            placeholder="0"
+                                                        />
+                                                        <span className="absolute right-2 top-1.5 text-gray-400 text-sm pointer-events-none">%</span>
+                                                    </div>
+                                                </div>
+                                            );
+                                        })}
+                                    </div>
+                                </div>
                             </div>
 
-                            <div className="border-t pt-4 space-y-2">
-                                <div className="flex justify-between items-center text-sm">
-                                    <span className="text-gray-500">Precio Base (IA):</span>
-                                    <span className="font-medium text-gray-900">
-                                        {basePrice ? basePrice.toLocaleString('es-AR', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 }) : 'Calculando...'}
-                                    </span>
-                                </div>
+                            <p className="mt-8 text-xs text-gray-400 italic border-t pt-4">
+                                * Los porcentajes atenuados no afectan el precio porque la propiedad de ejemplo no tiene esas características.
+                            </p>
+                        </div>
+                    </div>
 
-                                <div className="flex justify-between items-center text-sm">
-                                    <span className="text-gray-500">Total Ajustes:</span>
-                                    <span className={`font-medium ${totalImpact >= 0 ? 'text-green-600' : 'text-red-600'}`}>
-                                        {totalImpact > 0 ? '+' : ''}{totalImpact.toLocaleString('es-AR', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 })}
-                                    </span>
-                                </div>
+                    {/* Right Column: Preview */}
+                    <div className="lg:col-span-1">
+                        <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 sticky top-6">
+                            <h2 className="text-base font-semibold text-gray-900 mb-6 flex items-center gap-2">
+                                <Home className="w-4 h-4 text-gray-500" /> Vista Previa
+                            </h2>
 
-                                <div className="pt-2 border-t flex justify-between items-center">
-                                    <span className="font-semibold text-gray-900">Precio Final:</span>
-                                    <span className="text-xl font-bold text-black">
-                                        {finalPrice ? finalPrice.toLocaleString('es-AR', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 }) : '...'}
-                                    </span>
+                            {/* Property Card */}
+                            <div
+                                onClick={openEditModal}
+                                className="bg-white border border-gray-300 rounded-lg p-4 mb-6 cursor-pointer hover:border-gray-400 transition-all group relative"
+                            >
+                                <Edit2 className="w-4 h-4 text-gray-300 absolute top-3 right-3 group-hover:text-gray-500" />
+                                <div className="text-xs text-gray-500 mb-1">Propiedad Ejemplo (Click para editar)</div>
+                                <div className="font-semibold text-gray-900 text-sm mb-1">
+                                    {exampleProperty.property_type} en {exampleProperty.barrio}
                                 </div>
+                                <div className="text-xs text-gray-500 mb-2">
+                                    {exampleProperty.area_total}m² • {exampleProperty.rooms} Amb • {exampleProperty.bedrooms} Dorm
+                                </div>
+                                <div className="text-xs text-gray-400 truncate">
+                                    {exampleProperty.all_features}
+                                </div>
+                            </div>
+
+                            {/* Breakdown */}
+                            <div className="mb-6">
+                                <h3 className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-3">Desglose de Ajustes</h3>
+                                <div className="space-y-2">
+                                    {impacts.length > 0 ? (
+                                        impacts.map((item, idx) => (
+                                            <div key={idx} className="flex justify-between text-sm">
+                                                <span className="text-gray-600">{item.label} <span className={`text-xs ${item.percent > 0 ? 'text-green-600' : 'text-red-500'}`}>({item.percent > 0 ? '+' : ''}{item.percent}%)</span></span>
+                                                <span className={`font-medium ${item.impact > 0 ? 'text-green-600' : 'text-red-600'}`}>
+                                                    {item.impact > 0 ? '+' : ''}{item.impact.toLocaleString('es-AR', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 })}
+                                                </span>
+                                            </div>
+                                        ))
+                                    ) : (
+                                        <p className="text-sm text-gray-400 italic">Sin ajustes configurados</p>
+                                    )}
+                                </div>
+                            </div>
+
+                            <div className="border-t border-gray-200 pt-4 space-y-2">
+                                <div className="flex justify-between text-sm text-gray-500">
+                                    <span>Precio Base (IA):</span>
+                                    <span>{basePrice ? basePrice.toLocaleString('es-AR', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 }) : '...'}</span>
+                                </div>
+                                <div className="flex justify-between text-sm text-green-600 font-medium">
+                                    <span>Total Ajustes:</span>
+                                    <span>{totalImpact > 0 ? '+' : ''}{totalImpact.toLocaleString('es-AR', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 })}</span>
+                                </div>
+                            </div>
+
+                            <div className="border-t border-gray-200 mt-4 pt-4 flex justify-between items-end">
+                                <span className="text-base font-bold text-gray-900">Precio Final:</span>
+                                <span className="text-xl font-bold text-gray-900">
+                                    {finalPrice ? finalPrice.toLocaleString('es-AR', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 }) : '-'}
+                                </span>
                             </div>
                         </div>
                     </div>
                 </div>
+            )}
+
+            {activeTab === "mercadopago" && (
+                <MercadoPagoTab />
             )}
 
             {/* Edit Modal */}

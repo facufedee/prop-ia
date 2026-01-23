@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
-import { mpPreference } from "@/lib/mercadopago";
+import { MercadoPagoConfig, Preference } from 'mercadopago';
+import { configService } from "@/infrastructure/services/configService";
 import { subscriptionService } from "@/infrastructure/services/subscriptionService";
 import { db } from "@/infrastructure/firebase/client";
 import { collection, addDoc, Timestamp } from "firebase/firestore";
@@ -9,6 +10,7 @@ export async function POST(request: Request) {
         // Parse request body to get plan information
         const body = await request.json();
         const { planId, billing, userId } = body;
+        console.log(`📡 API: Request received for userId: ${userId}, planId: ${planId}, billing: ${billing}`);
 
         if (!planId || !billing) {
             return NextResponse.json(
@@ -34,6 +36,32 @@ export async function POST(request: Request) {
             );
         }
 
+        // Dynamically fetch the Active Access Token from Firestore via configService.
+        const mpConfig = await configService.getMercadoPagoConfig(true); // Decrypt keys
+        if (!mpConfig) {
+            return NextResponse.json(
+                { error: "Mercado Pago configuration not found." },
+                { status: 500 }
+            );
+        }
+
+        const activeEnv = mpConfig.activeMode;
+        const activeMPConfig = mpConfig[activeEnv];
+
+        if (!activeMPConfig.publicKey || !activeMPConfig.accessToken) {
+            return NextResponse.json(
+                { error: `Active Mercado Pago ${activeEnv} keys are missing.` },
+                { status: 500 }
+            );
+        }
+
+        const sdkClient = new MercadoPagoConfig({
+            accessToken: activeMPConfig.accessToken,
+            options: { timeout: 5000 }
+        });
+
+        const mpPreference = new Preference(sdkClient);
+
         // Calculate price based on billing period
         const price = billing === 'monthly' ? plan.price.monthly : plan.price.yearly;
         const billingLabel = billing === 'monthly' ? 'Mensual' : 'Anual';
@@ -41,37 +69,45 @@ export async function POST(request: Request) {
         // Base URL for redirects
         const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000';
 
-        console.log(`Creating preference for ${plan.name} - ${billingLabel} - $${price}`);
+        // Mercado Pago rejects the request with a 403 if notification_url is not HTTPS or is localhost
+        const isLocal = baseUrl.includes('localhost');
+        const notificationUrl = isLocal ? undefined : `${baseUrl}/api/webhooks/mercadopago`;
+
+        console.log(`📦 API: Found plan "${plan.name}" at price $${price} using ${activeEnv} mode`);
+        console.log(`🔑 Token check: Prefix is ${activeMPConfig.accessToken.substring(0, 8)}...`);
 
         // Create Mercado Pago preference with real plan data
+        const preferenceBody: any = {
+            items: [
+                {
+                    id: planId,
+                    title: `${plan.name} - ${billingLabel}`,
+                    description: plan.description,
+                    quantity: 1,
+                    unit_price: price,
+                    currency_id: 'ARS'
+                }
+            ],
+            back_urls: {
+                success: `${baseUrl}/checkout/success`,
+                failure: `${baseUrl}/checkout/failure`,
+                pending: `${baseUrl}/checkout/pending`
+            },
+            metadata: {
+                plan_id: planId,
+                billing_period: billing,
+                plan_name: plan.name,
+                user_id: userId
+            },
+            statement_descriptor: "Zeta Prop"
+        };
+
+        if (notificationUrl) {
+            preferenceBody.notification_url = notificationUrl;
+        }
+
         const result = await mpPreference.create({
-            body: {
-                items: [
-                    {
-                        id: planId,
-                        title: `${plan.name} - ${billingLabel}`,
-                        description: plan.description,
-                        quantity: 1,
-                        unit_price: price,
-                        currency_id: 'ARS'
-                    }
-                ],
-                back_urls: {
-                    success: `${baseUrl}/checkout/success`,
-                    failure: `${baseUrl}/checkout/failure`,
-                    pending: `${baseUrl}/checkout/pending`
-                },
-                // Metadata to identify the subscription when webhook is received
-                metadata: {
-                    plan_id: planId,
-                    billing_period: billing,
-                    plan_name: plan.name
-                },
-                // Notification URL for webhooks
-                notification_url: `${baseUrl}/api/webhooks/mercadopago`,
-                // Statement descriptor (what appears on credit card statement)
-                statement_descriptor: "Zeta Prop"
-            }
+            body: preferenceBody
         });
 
         // Validate that result has an ID

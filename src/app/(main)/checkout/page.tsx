@@ -2,7 +2,7 @@
 
 import { useEffect, useState, Suspense, useRef } from "react";
 import { useSearchParams } from "next/navigation";
-import PaymentWallet from "@/ui/components/pricing/PaymentWallet";
+import PaymentBrick from "@/ui/components/pricing/PaymentBrick";
 import { Loader2, CreditCard, Building2, Check } from "lucide-react";
 import Link from "next/link";
 import { auth } from "@/infrastructure/firebase/client";
@@ -21,6 +21,23 @@ function CheckoutContent() {
     const [planData, setPlanData] = useState<any>(null);
     const [paymentMethod, setPaymentMethod] = useState<'mercadopago' | 'transfer'>('mercadopago');
     const [billing, setBilling] = useState<'monthly' | 'yearly'>(billingParam as 'monthly' | 'yearly' || 'monthly');
+    const [isPaymentModalOpen, setIsPaymentModalOpen] = useState(false);
+    const [mpConfig, setMpConfig] = useState<{ publicKey: string | null; activeMode: string | null }>({
+        publicKey: null,
+        activeMode: null
+    });
+
+    // Fetch public MP config
+    useEffect(() => {
+        fetch('/api/config/mercadopago/public')
+            .then(res => res.json())
+            .then(data => {
+                if (data && !data.error) {
+                    setMpConfig(data);
+                }
+            })
+            .catch(err => console.error("Error loading public MP config:", err));
+    }, []);
 
     // Cache for Mercado Pago preferences to avoid re-fetching
     const preferenceCache = useRef<Record<string, string>>({});
@@ -65,8 +82,12 @@ function CheckoutContent() {
 
         if (!currentUser?.uid) {
             setError("Debes iniciar sesión para continuar");
+            setLoading(false); // Fix: clear loading even on error
+            console.log("❌ Checkout: No user found, stopping preference creation.");
             return;
         }
+
+        console.log(`🚀 Checkout: Initializing MP preference for ${planId} (${billing})...`);
 
         const cacheKey = `${planId}-${billing}-${currentUser.uid}`;
         if (preferenceCache.current[cacheKey]) {
@@ -95,8 +116,12 @@ function CheckoutContent() {
 
                 const data = await response.json();
                 if (data.preference_id) {
+                    console.log("✅ Checkout: Preference received:", data.preference_id);
                     setPreferenceId(data.preference_id);
                     preferenceCache.current[cacheKey] = data.preference_id;
+                } else if (data.error) {
+                    console.error("❌ Checkout: API Error details:", data);
+                    setError(data.error);
                 }
             } catch (err) {
                 console.error(err);
@@ -202,9 +227,11 @@ function CheckoutContent() {
                                 <section className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
                                     <div className="flex items-center justify-between mb-4">
                                         <h2 className="text-lg font-semibold text-gray-900">Tus Datos</h2>
-                                        <div className="bg-green-100 text-green-700 px-2 py-0.5 rounded text-xs font-bold uppercase tracking-wider">
-                                            Verificado
-                                        </div>
+                                        {currentUser && (
+                                            <div className="bg-green-100 text-green-700 px-2 py-0.5 rounded text-xs font-bold uppercase tracking-wider">
+                                                Verificado
+                                            </div>
+                                        )}
                                     </div>
 
                                     <div className="flex items-center gap-4 p-3 bg-gray-50 rounded-xl border border-gray-200">
@@ -373,22 +400,33 @@ function CheckoutContent() {
                                             </div>
                                         </div>
 
-                                        {/* 4. Payment Action Area */}
                                         <div className="pt-2 border-t border-gray-100">
                                             {paymentMethod === 'mercadopago' ? (
                                                 <div className="mt-4">
                                                     {loading ? (
-                                                        <button disabled className="w-full py-4 bg-gray-100 text-gray-400 rounded-xl font-bold flex items-center justify-center gap-2">
-                                                            <Loader2 className="w-5 h-5 animate-spin" />
-                                                            Cargando...
-                                                        </button>
+                                                        <div className="flex flex-col items-center justify-center p-8 bg-gray-50 rounded-xl border border-gray-100">
+                                                            <Loader2 className="w-6 h-6 animate-spin text-indigo-600 mb-2" />
+                                                            <p className="text-sm text-gray-500">Preparando pago seguro...</p>
+                                                        </div>
                                                     ) : error ? (
                                                         <div className="text-center p-3 bg-red-50 text-red-600 rounded-xl text-sm border border-red-100">
                                                             {error}
                                                         </div>
-                                                    ) : preferenceId ? (
-                                                        <div className="animate-in fade-in zoom-in-95 duration-300">
-                                                            <PaymentWallet preferenceId={preferenceId} />
+                                                    ) : (preferenceId && mpConfig.publicKey) ? (
+                                                        <div className="animate-in fade-in zoom-in-95 duration-500">
+                                                            <PaymentBrick
+                                                                amount={getPrice()}
+                                                                preferenceId={preferenceId}
+                                                                publicKey={mpConfig.publicKey}
+                                                                email={currentUser?.email || undefined}
+                                                                onPaymentResult={(result) => {
+                                                                    console.log("Payment Result:", result);
+                                                                    if (result.status === 'approved') {
+                                                                        // Redirect to success page with payment ID
+                                                                        window.location.href = `/checkout/success?payment_id=${result.id}&status=${result.status}`;
+                                                                    }
+                                                                }}
+                                                            />
                                                         </div>
                                                     ) : null}
                                                 </div>
