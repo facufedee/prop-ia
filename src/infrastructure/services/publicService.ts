@@ -53,7 +53,7 @@ export const publicService = {
         if (!db) return [];
         try {
             // In a real app, strict rules should apply (e.g., status == 'published')
-            const q = query(collection(db, PROPERTIES_COLLECTION), where("publishToPortal", "==", true), limit(20)); // Removed orderBy for now to avoid index requirements
+            const q = query(collection(db, PROPERTIES_COLLECTION), where("publishToPortal", "==", true), limit(1000)); // Increased limit for Sitemap coverage
             const snapshot = await getDocs(q);
 
             const properties = snapshot.docs.map(doc => ({

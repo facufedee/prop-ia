@@ -41,7 +41,9 @@ export default function LandingPage() {
                         "offers": {
                             "@type": "Offer",
                             "price": "0",
-                            "priceCurrency": "ARS"
+                            "priceCurrency": "ARS",
+                            "priceValidUntil": "2026-12-31",
+                            "availability": "https://schema.org/InStock"
                         },
                         "description": "CRM Inmobiliario integral para gestión de propiedades y alquileres en Argentina.",
                         "aggregateRating": {

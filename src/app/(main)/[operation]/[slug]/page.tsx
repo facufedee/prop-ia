@@ -52,20 +52,36 @@ export async function generateMetadata(
     const price = property.currency + ' ' + property.price.toLocaleString('es-AR');
 
     // Schema Markups
+    const getType = (t: string = '') => {
+        const lower = t.toLowerCase();
+        if (lower.includes('casa')) return 'SingleFamilyResidence';
+        if (lower.includes('departamento') || lower.includes('depto')) return 'Apartment';
+        if (lower.includes('terreno') || lower.includes('lote')) return 'Landform';
+        if (lower.includes('oficina')) return 'Office';
+        return 'RealEstateListing';
+    };
+
+    const schemaType = getType(property.type || property.title);
+
     const schema = {
         '@context': 'https://schema.org',
-        '@type': 'RealEstateListing',
+        '@type': schemaType,
         'name': property.title,
         'image': property.imageUrls || [],
         'description': property.description,
         'url': `https://zetaprop.com.ar/${operation}/${slug}`,
-        'price': property.price,
-        'priceCurrency': property.currency,
         'address': {
             '@type': 'PostalAddress',
             'addressLocality': property.localidad,
             'addressRegion': property.provincia,
             'addressCountry': 'AR'
+        },
+        'offers': {
+            '@type': 'Offer',
+            'price': property.price,
+            'priceCurrency': property.currency,
+            'priceValidUntil': new Date(new Date().setMonth(new Date().getMonth() + 3)).toISOString().split('T')[0],
+            'availability': 'https://schema.org/InStock'
         }
     };
 
@@ -110,23 +126,7 @@ export default async function Page({ params }: Props) {
     return (
         <>
             {/* Inject JSON-LD Schema explicitly in body if metadata injection fails or for rich snippets */}
-            <script
-                type="application/ld+json"
-                dangerouslySetInnerHTML={{
-                    __html: JSON.stringify({
-                        '@context': 'https://schema.org',
-                        '@type': 'Product', // or SingleFamilyResidence
-                        'name': property.title,
-                        'description': property.description,
-                        'image': property.imageUrls?.[0],
-                        'offers': {
-                            '@type': 'Offer',
-                            'priceCurrency': property.currency,
-                            'price': property.price
-                        }
-                    })
-                }}
-            />
+            {/* Structured data now handled entirely in generateMetadata */}
             <PropertyDetailClient id={id} />
         </>
     )

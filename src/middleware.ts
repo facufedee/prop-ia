@@ -84,6 +84,15 @@ export async function middleware(request: NextRequest) {
         contentSecurityPolicyHeaderValue
     );
 
+    // 7. Canonical Header (Help Google normalize URLs)
+    const url = request.nextUrl.clone();
+    // Ensure we are pointing to the canonical domain
+    if (url.hostname !== 'zetaprop.com.ar' && process.env.NODE_ENV === 'production') {
+        // logic to redirect could go here, but for now we just set the header if possible
+        // Actually, setting the Link header is good practice
+        response.headers.set('Link', `<https://zetaprop.com.ar${url.pathname}>; rel="canonical"`);
+    }
+
     return response;
 }
 
