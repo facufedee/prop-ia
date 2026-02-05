@@ -20,7 +20,7 @@ export default function SocialGeneratorPage() {
 
     // Customization State
     const [customTitle, setCustomTitle] = useState("");
-    const [showEdit, setShowEdit] = useState(false);
+
 
     // Canvas Ref
     const canvasRef = useRef<HTMLDivElement>(null);
@@ -53,18 +53,17 @@ export default function SocialGeneratorPage() {
         try {
             toast.loading("Generando imagen...", { id: "generating" });
 
-            // Wait a bit for images to be fully ready or fonts to load (safer)
+            // Wait a bit for images to be fully ready
             await new Promise(resolve => setTimeout(resolve, 1000));
 
             const canvas = await html2canvas(canvasRef.current, {
-                useCORS: true, // Critical for external images (Firebase Storage)
-                scale: 2, // Retinal quality
+                useCORS: true,
+                scale: 2,
                 backgroundColor: null,
             });
 
             const image = canvas.toDataURL("image/png");
 
-            // Create download link
             const link = document.createElement("a");
             link.href = image;
             link.download = `ZetaProp_${platform}_${post?.slug || "social"}.png`;
@@ -77,18 +76,7 @@ export default function SocialGeneratorPage() {
         }
     };
 
-    const generateMagicCopy = () => {
-        // Mock AI Generation logic requested in specs
-        if (!post) return;
 
-        if (platform === "instagram") {
-            setCustomTitle(post.title.length > 50 ? post.title.substring(0, 47) + "..." : post.title);
-            toast.success("Título optimizado para Instagram");
-        } else {
-            setCustomTitle(post.title); // LinkedIn usually keeps full professional title
-            toast.success("Título optimizado para LinkedIn");
-        }
-    };
 
     if (loading) {
         return (
@@ -144,12 +132,7 @@ export default function SocialGeneratorPage() {
                     <div className="space-y-3">
                         <div className="flex justify-between items-center">
                             <label className="text-sm font-semibold text-gray-900 uppercase tracking-wide">Personalización</label>
-                            <button
-                                onClick={generateMagicCopy}
-                                className="text-xs text-indigo-600 font-medium hover:underline flex items-center gap-1"
-                            >
-                                <SparklesIcon /> Auto-Generar
-                            </button>
+
                         </div>
 
                         <div className="bg-gray-50 rounded-xl p-4 border border-gray-200 space-y-3">
@@ -172,19 +155,96 @@ export default function SocialGeneratorPage() {
 
                     {/* Copy Helper */}
                     <div className="bg-indigo-50 border border-indigo-100 rounded-xl p-4">
-                        <h4 className="text-xs font-bold text-indigo-800 uppercase mb-2">Copy Sugerido ({platform === 'instagram' ? 'IG' : 'LI'})</h4>
-                        <p className="text-sm text-indigo-900 leading-relaxed font-mono bg-white/50 p-2 rounded border border-indigo-100/50">
-                            {platform === "instagram"
-                                ? `🔥 ${post.title}\n\n${post.excerpt || post.content.substring(0, 100) + "..."}\n\n👇 Leé más en el link de la bio.\n\n#Inmobiliaria #RealEstate #Propiedades #${post.category || "Novedades"}`
-                                : `📢 ${post.title}\n\n${post.excerpt || post.content.substring(0, 150) + "..."}\n\nCompartimos nuestro último análisis sobre el sector. Conocé los detalles en el artículo completo 👇\n\n#RealEstate #MercadoInmobiliario #Negocio`
-                            }
+                        <div className="flex justify-between items-center mb-2">
+                            <h4 className="text-xs font-bold text-indigo-800 uppercase">Copy Sugerido ({platform === 'instagram' ? 'IG' : 'LI'})</h4>
+                        </div>
+
+                        <p className="text-sm text-indigo-900 leading-relaxed font-mono bg-white/50 p-2 rounded border border-indigo-100/50 whitespace-pre-wrap min-h-[100px]">
+                            {(() => {
+                                const hashtags = "#zetaprop #crmInmobiliario #gestiondealquileres #gestiondeemprendimientos #desarrollosinmobiliarios";
+
+                                // Robust Text Splitting Logic
+                                const cleanContent = post.content.replace(/<[^>]*>?/gm, '').trim();
+
+                                // Strategy 1: Split by double newlines (paragraphs)
+                                let paragraphs = cleanContent.split(/\n\n+/).map(p => p.trim()).filter(p => p.length > 50);
+
+                                // Strategy 2: If few paragraphs, split by single newlines
+                                if (paragraphs.length < 2) {
+                                    paragraphs = cleanContent.split(/\n/).map(p => p.trim()).filter(p => p.length > 50);
+                                }
+
+                                let p1 = post.excerpt && post.excerpt.length > 50 ? post.excerpt : paragraphs[0];
+
+                                // Fallback if p1 is still undefined or too short
+                                if (!p1 || p1.length < 20) {
+                                    p1 = cleanContent.substring(0, 160) + "...";
+                                }
+
+                                let p2 = "";
+                                if (paragraphs.length > 1) {
+                                    // Find the first paragraph that is NOT substantially similar to p1
+                                    const distinctP = paragraphs.find(p => !p.includes(p1.substring(0, 20)) && !p1.includes(p.substring(0, 20)));
+                                    if (distinctP) {
+                                        p2 = distinctP;
+                                    }
+                                }
+
+                                // Fallback: If still no p2, slice the content after p1
+                                if (!p2) {
+                                    const remainder = cleanContent.replace(p1.replace("...", ""), "").trim();
+                                    if (remainder.length > 50) {
+                                        p2 = remainder.substring(0, 160) + "...";
+                                    } else {
+                                        p2 = "Leé la nota completa en nuestro blog para enterarte de todos los detalles.";
+                                    }
+                                }
+
+                                // Truncate final strings
+                                const summary1 = p1.length > 200 ? p1.substring(0, 200) + "..." : p1;
+                                const summary2 = p2.length > 200 ? p2.substring(0, 200) + "..." : p2;
+
+                                const cta = "Más info en nuestro blog zetaprop.com.ar/blog";
+
+                                return `🔥 ${post.title}\n\n${summary1}\n\n${summary2}\n\n${cta}\n\n${hashtags}`;
+                            })()}
                         </p>
                         <button
                             className="mt-2 text-xs text-indigo-600 font-bold hover:text-indigo-800 flex items-center gap-1"
                             onClick={() => {
-                                const text = platform === "instagram"
-                                    ? `🔥 ${post.title}\n\n${post.excerpt || post.content.substring(0, 100) + "..."}\n\n👇 Leé más en el link de la bio.\n\n#Inmobiliaria #RealEstate #Propiedades #${post.category || "Novedades"}`
-                                    : `📢 ${post.title}\n\n${post.excerpt || post.content.substring(0, 150) + "..."}\n\nCompartimos nuestro último análisis sobre el sector. Conocé los detalles en el artículo completo 👇\n\n#RealEstate #MercadoInmobiliario #Negocio`;
+                                const hashtags = "#zetaprop #crmInmobiliario #gestiondealquileres #gestiondeemprendimientos #desarrollosinmobiliarios";
+
+                                const cleanContent = post.content.replace(/<[^>]*>?/gm, '').trim();
+                                let paragraphs = cleanContent.split(/\n\n+/).map(p => p.trim()).filter(p => p.length > 50);
+                                if (paragraphs.length < 2) {
+                                    paragraphs = cleanContent.split(/\n/).map(p => p.trim()).filter(p => p.length > 50);
+                                }
+
+                                let p1 = post.excerpt && post.excerpt.length > 50 ? post.excerpt : paragraphs[0];
+                                if (!p1 || p1.length < 20) {
+                                    p1 = cleanContent.substring(0, 160) + "...";
+                                }
+
+                                let p2 = "";
+                                if (paragraphs.length > 1) {
+                                    const distinctP = paragraphs.find(p => !p.includes(p1.substring(0, 20)) && !p1.includes(p.substring(0, 20)));
+                                    if (distinctP) p2 = distinctP;
+                                }
+                                if (!p2) {
+                                    const remainder = cleanContent.replace(p1.replace("...", ""), "").trim();
+                                    if (remainder.length > 50) {
+                                        p2 = remainder.substring(0, 160) + "...";
+                                    } else {
+                                        p2 = "Leé la nota completa en nuestro blog para enterarte de todos los detalles.";
+                                    }
+                                }
+
+                                const summary1 = p1.length > 200 ? p1.substring(0, 200) + "..." : p1;
+                                const summary2 = p2.length > 200 ? p2.substring(0, 200) + "..." : p2;
+
+                                const cta = "Más info en nuestro blog zetaprop.com.ar/blog";
+                                const text = `🔥 ${post.title}\n\n${summary1}\n\n${summary2}\n\n${cta}\n\n${hashtags}`;
+
                                 navigator.clipboard.writeText(text);
                                 toast.success("Copy copiado al portapapeles");
                             }}

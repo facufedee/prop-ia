@@ -387,7 +387,7 @@ export default function DashboardSidebar({ isOpen = false, onClose }: DashboardS
                 </div>
                 <div className="relative z-10">
                   <h4 className="font-bold text-sm mb-1 text-indigo-200 flex items-center gap-2">
-                    Plan Gratuito
+                    Plan Básico
                     <span className="flex h-2 w-2 relative">
                       <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-indigo-400 opacity-75"></span>
                       <span className="relative inline-flex rounded-full h-2 w-2 bg-indigo-500"></span>

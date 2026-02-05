@@ -127,7 +127,7 @@ export default function PropertyPublicCard({ property }: PropertyPublicCardProps
                 )}
 
                 <h3 className="font-semibold text-gray-900 mb-1 line-clamp-1 group-hover:text-indigo-600 transition-colors">
-                    {property.title}
+                    {property.calle ? `${property.calle} ${property.altura || ''}` : property.title}
                 </h3>
 
                 <div className="flex items-center gap-2 text-gray-500 text-sm mb-4">

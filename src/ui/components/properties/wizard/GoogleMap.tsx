@@ -1,7 +1,7 @@
 "use client";
 
 import { GoogleMap, useJsApiLoader, MarkerF } from '@react-google-maps/api';
-import { useState, useCallback, useEffect } from 'react';
+import { useState, useCallback, useMemo } from 'react';
 import { Loader2 } from 'lucide-react';
 
 const containerStyle = {
@@ -9,10 +9,7 @@ const containerStyle = {
     height: '100%'
 };
 
-const defaultCenter = {
-    lat: -34.6037,
-    lng: -58.3816
-};
+const libraries: ("places" | "drawing" | "geometry" | "visualization")[] = ["places"];
 
 interface MapProps {
     lat: number;
@@ -22,6 +19,12 @@ interface MapProps {
 
 export default function GoogleMapComponent({ lat, lng, onLocationSelect }: MapProps) {
     const [map, setMap] = useState<google.maps.Map | null>(null);
+
+    const { isLoaded } = useJsApiLoader({
+        id: 'google-map-script',
+        googleMapsApiKey: process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY || "",
+        libraries
+    });
 
     const onLoad = useCallback(function callback(map: google.maps.Map) {
         setMap(map);
@@ -40,10 +43,18 @@ export default function GoogleMapComponent({ lat, lng, onLocationSelect }: MapPr
     };
 
     // Ensure valid coordinates
-    const center = {
+    const center = useMemo(() => ({
         lat: Number(lat) || -34.6037,
         lng: Number(lng) || -58.3816
-    };
+    }), [lat, lng]);
+
+    if (!isLoaded) {
+        return (
+            <div className="w-full h-full flex items-center justify-center bg-gray-50">
+                <Loader2 className="w-8 h-8 text-indigo-600 animate-spin" />
+            </div>
+        );
+    }
 
     return (
         <GoogleMap

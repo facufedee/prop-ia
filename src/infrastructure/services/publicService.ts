@@ -25,6 +25,8 @@ export interface PublicProperty {
     code?: string;
     type?: string;
     address?: string;
+    calle?: string;
+    altura?: string;
 }
 
 export interface PublicAgency {

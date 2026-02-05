@@ -39,6 +39,13 @@ export default function PermissionGuard({ children }: { children: React.ReactNod
                 return;
             }
 
+            // Public/Common Dashboard Routes that all authenticated users should access
+            if (pathname === '/dashboard/cuenta' || pathname === '/dashboard/novedades') {
+                setAuthorized(true);
+                setChecking(false);
+                return;
+            }
+
             // Find the most specific permission matching the current path
             const sortedPermissions = [...PERMISSIONS].sort((a, b) => b.id.length - a.id.length);
             const matchingPermission = sortedPermissions.find(p => pathname.startsWith(p.id));

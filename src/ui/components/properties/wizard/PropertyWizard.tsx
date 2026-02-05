@@ -517,6 +517,14 @@ export default function PropertyWizard({ initialData, isEditing = false, ...prop
         // Ideally we should track deleted existing images to remove them from Storage/Firestore on save
         // For now, we just remove from the UI list
 
+        // Update Cover Index if needed
+        const currentCover = (formData as any).coverImageIndex || 0;
+        if (index === currentCover) {
+            handleChange('coverImageIndex', 0); // Reset to first if cover is deleted
+        } else if (index < currentCover) {
+            handleChange('coverImageIndex', currentCover - 1); // Shift left
+        }
+
         if (index < (initialData?.imageUrls?.length || 0) && images.length === 0) {
             // Removing an existing image when no new images added yet
             // This logic is tricky because 'images' array only holds NEW files
@@ -675,9 +683,14 @@ export default function PropertyWizard({ initialData, isEditing = false, ...prop
             if (isEditing && initialData?.id) {
                 // Update existing document
                 if (!db) throw new Error("Firestore not initialized");
+
+                // Auto-generate title if missing (using address)
+                const generatedTitle = formData.title || `${formData.operation_type} - ${formData.property_type} en ${formData.calle} ${formData.altura}, ${formData.localidad}`;
+
                 propertyRef = doc(db, "properties", initialData.id);
                 await updateDoc(propertyRef, {
                     ...formData,
+                    title: generatedTitle,
                     updatedAt: new Date(),
                     imageUrls: imageUrls, // Will be updated with new ones below
                     branchId: selectedBranchId !== 'all' ? selectedBranchId : (initialData?.branchId || null)
@@ -685,8 +698,13 @@ export default function PropertyWizard({ initialData, isEditing = false, ...prop
             } else {
                 // Create new document
                 if (!db) throw new Error("Firestore not initialized");
+
+                // Auto-generate title if missing (using address)
+                const generatedTitle = formData.title || `${formData.operation_type} - ${formData.property_type} en ${formData.calle} ${formData.altura}, ${formData.localidad}`;
+
                 const docRef = await addDoc(collection(db, "properties"), {
                     ...formData,
+                    title: generatedTitle,
                     userId: auth.currentUser?.uid,
                     createdAt: new Date(),
                     status: 'active',
@@ -712,10 +730,22 @@ export default function PropertyWizard({ initialData, isEditing = false, ...prop
             }
 
             // Combine existing (kept) and new images
-            const finalImageUrls = [...imageUrls, ...newImageUrls];
+            let finalImageUrls = [...imageUrls, ...newImageUrls];
+
+            // Handle Cover Image Reordering
+            // Move the selected cover image to index 0 so it shows as main image everywhere
+            const coverIndex = (formData as any).coverImageIndex;
+            if (typeof coverIndex === 'number' && coverIndex > 0 && coverIndex < finalImageUrls.length) {
+                const coverUrl = finalImageUrls[coverIndex];
+                finalImageUrls.splice(coverIndex, 1);
+                finalImageUrls.unshift(coverUrl);
+            }
 
             // Update Document with final image list
-            await updateDoc(propertyRef, { imageUrls: finalImageUrls });
+            await updateDoc(propertyRef, {
+                imageUrls: finalImageUrls,
+                coverImageIndex: 0 // Always reset to 0 since we reordered it to front
+            });
 
             // Create Audit Log
             try {
@@ -762,21 +792,27 @@ export default function PropertyWizard({ initialData, isEditing = false, ...prop
         // Allow going back always
         if (step < currentStep) {
             setCurrentStep(step);
-            window.scrollTo(0, 0);
+            // window.scrollTo(0, 0);
+            topRef.current?.scrollIntoView({ behavior: 'smooth' });
             return;
         }
 
-        // Allow going forward only one step at a time and if current is valid
+        // If Editing, allow free navigation (assuming data is mostly valid or user wants to jump check)
+        // User specifically complained about this blockage
+        if (isEditing) {
+            setCurrentStep(step);
+            topRef.current?.scrollIntoView({ behavior: 'smooth' });
+            return;
+        }
+
+        // Standard Creation Flow: Allow going forward only one step at a time
+        // Or strictly enforce validation of current step before moving
         if (step === currentStep + 1) {
             if (validateStep(currentStep)) {
                 setCurrentStep(step);
-                window.scrollTo(0, 0);
+                topRef.current?.scrollIntoView({ behavior: 'smooth' });
             }
         }
-
-        // You could also allow jumping forward to any step if all intermediate steps are valid,
-        // but that requires more complex validation logic. 
-        // For now, next step or back steps.
     };
 
     const renderError = (field: keyof PropertyData | string) => {
@@ -833,16 +869,7 @@ export default function PropertyWizard({ initialData, isEditing = false, ...prop
                             </div>
                         </div>
 
-                        <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-2">Título de la publicación <span className="text-gray-400 font-normal">(Opcional)</span></label>
-                            <input
-                                type="text"
-                                className="w-full p-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 placeholder-gray-400 text-gray-900 font-medium"
-                                placeholder="Ej. Hermoso departamento en Recoleta con balcón aterrazado"
-                                value={formData.title}
-                                onChange={(e) => handleChange('title', e.target.value)}
-                            />
-                        </div>
+
 
                         <div>
                             <label className="block text-sm font-medium text-gray-700 mb-2">Tipo de operación</label>

@@ -66,8 +66,7 @@ export default function SimilarPropertyCard({ property }: SimilarPropertyCardPro
 
                 {/* Address */}
                 <p className="text-sm font-medium text-gray-900 truncate mb-0.5">
-                    {/* Mock address since we don't have street in public model usually, using title fallback */}
-                    {property.title}
+                    {property.calle ? `${property.calle} ${property.altura || ''}` : property.title}
                 </p>
 
                 {/* Location */}

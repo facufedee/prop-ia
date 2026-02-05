@@ -1,4 +1,4 @@
-export type PlanTier = 'free' | 'professional' | 'enterprise';
+export type PlanTier = 'basic' | 'professional' | 'enterprise';
 export type BillingPeriod = 'monthly' | 'yearly';
 export type SubscriptionStatus = 'active' | 'cancelled' | 'expired' | 'trial';
 

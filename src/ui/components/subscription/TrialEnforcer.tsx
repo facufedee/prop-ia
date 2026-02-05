@@ -15,8 +15,31 @@ export default function TrialEnforcer() {
         const checkTrialStatus = async () => {
             if (loading || !user || !userRole) return;
 
-            // Check if user is on the Free plan
-            const isFreeUser = userRole.name === "Cliente Free";
+            // Fetch subscription status directly to ensure we have the latest data
+            let planTier = 'basic';
+            try {
+                // Dynamically import to avoid server/client mismatch issues if any, though likely safe here
+                const { collection, query, where, getDocs } = await import("firebase/firestore");
+                const { db } = await import("@/infrastructure/firebase/client");
+
+                if (db && user.uid) {
+                    const q = query(collection(db, "subscriptions"), where("userId", "==", user.uid));
+                    const snapshot = await getDocs(q);
+                    if (!snapshot.empty) {
+                        const subData = snapshot.docs[0].data();
+                        planTier = subData.planTier || 'basic';
+                    }
+                }
+            } catch (err) {
+                console.error("Error fetching subscription in TrialEnforcer:", err);
+            }
+
+            // Check if user is on the Free/Basic plan logic
+            const hasPaidPlan = planTier === 'professional' || planTier === 'enterprise';
+
+            if (hasPaidPlan) return;
+
+            const isFreeUser = userRole.name === "Cliente Free" || planTier === 'basic';
 
             if (isFreeUser && user.metadata.creationTime) {
                 const signupDate = new Date(user.metadata.creationTime);

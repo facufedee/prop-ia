@@ -308,6 +308,18 @@ export default function Navbar() {
                         <p className="text-xs text-gray-500 truncate">
                           {user.email}
                         </p>
+                        <p className="text-[10px] text-indigo-600 font-bold uppercase mt-0.5">
+                          {/* Since user object might not have subscription joined, showing simple 'Plan Básico' if free, or rely on future role update.
+                                For now, let's assuming if they are logged in they are at least Basic.
+                                Better: Show nothing or fetch subscription.
+                                Given the user request is specifically about the 'Cliente Free' label which usually comes from role,
+                                and we want to change that visual.
+                            */}
+                          {(user as any)?.subscription?.planTier === 'basic' ? 'Plan Básico' :
+                            (user as any)?.subscription?.planTier === 'professional' ? 'Profesional' :
+                              (user as any)?.subscription?.planTier === 'enterprise' ? 'Empresarial' :
+                                'Gestión Inteligente' /* Fallback friendly name */}
+                        </p>
                       </div>
                     </div>
 

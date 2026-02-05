@@ -111,7 +111,7 @@ export default function PlatformAdminPage() {
                     <div>
                         <p className="text-sm font-medium text-gray-500">Usuarios Free</p>
                         <p className="text-3xl font-bold text-gray-900 mt-1">
-                            {users.filter(u => !u.subscription || u.subscription.planId === 'free').length}
+                            {users.filter(u => !u.subscription || u.subscription.planId === 'basic').length}
                         </p>
                     </div>
                     <div className="w-12 h-12 bg-gray-100 rounded-xl flex items-center justify-center text-gray-600">
@@ -177,7 +177,7 @@ export default function PlatformAdminPage() {
                                         </td>
                                         <td className="px-6 py-4 whitespace-nowrap">
                                             <div className="text-sm text-gray-900 capitalize">
-                                                {user.subscription?.planId || 'Free'}
+                                                {user.subscription?.planId || 'Basic'}
                                             </div>
                                             <div className="text-xs text-gray-500">
                                                 {user.subscription?.billingPeriod ? `${user.subscription.billingPeriod}` : ''}
@@ -185,7 +185,7 @@ export default function PlatformAdminPage() {
                                         </td>
                                         <td className="px-6 py-4 whitespace-nowrap">
                                             <span className={`px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full ${getStatusColor(user.subscription?.status)}`}>
-                                                {user.subscription?.status ? user.subscription.status.toUpperCase() : 'FREE'}
+                                                {user.subscription?.status ? user.subscription.status.toUpperCase() : 'BASIC'}
                                             </span>
                                         </td>
                                         <td className="px-6 py-4 whitespace-nowrap text-sm">

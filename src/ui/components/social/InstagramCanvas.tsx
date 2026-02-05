@@ -55,11 +55,7 @@ const InstagramCanvas = forwardRef<HTMLDivElement, InstagramCanvasProps>(({ post
 
             </div>
 
-            {/* Top Right Decoration (Optional) */}
-            <div className="absolute top-12 right-12 px-6 py-2 rounded-full text-2xl font-bold backdrop-blur-sm"
-                style={{ backgroundColor: 'rgba(79, 70, 229, 0.9)', color: '#ffffff' }}>
-                BLOG ZETA PROP
-            </div>
+
         </div>
     );
 });

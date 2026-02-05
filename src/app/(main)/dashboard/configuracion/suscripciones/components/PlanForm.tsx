@@ -41,7 +41,7 @@ export default function PlanForm({ initialData, onSave, onCancel }: PlanFormProp
     // Transform initialData to match schema if needed
     const defaultValues: PlanFormData = initialData ? {
         name: initialData.name,
-        tier: initialData.tier as "free" | "professional" | "enterprise",
+        tier: initialData.tier as "basic" | "professional" | "enterprise",
         description: initialData.description,
         icon: initialData.icon || "Zap",
         popular: initialData.popular || false,
@@ -142,7 +142,7 @@ export default function PlanForm({ initialData, onSave, onCancel }: PlanFormProp
                     <div>
                         <label className="block text-sm font-medium text-gray-700 mb-1">Nivel (Tier)</label>
                         <select {...register("tier")} className="w-full px-3 py-2 border rounded-lg bg-white focus:ring-2 focus:ring-indigo-500 outline-none text-gray-900">
-                            <option value="free">Plan Básico</option>
+                            <option value="basic">Plan Básico</option>
                             <option value="professional">Plan Profesional</option>
                             <option value="enterprise">Plan Empresarial</option>
                         </select>

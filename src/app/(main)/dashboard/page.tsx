@@ -200,7 +200,7 @@ export default function DashboardPage() {
                         <div>
                             <div className="flex items-center gap-2 mb-2">
                                 <span className="px-2.5 py-0.5 rounded-md bg-indigo-500/30 border border-indigo-400/30 text-indigo-100 text-xs font-bold uppercase tracking-wide">
-                                    Plan Gratuito
+                                    Plan Básico
                                 </span>
                             </div>
                             <h3 className="text-xl md:text-2xl font-bold text-white mb-1">
@@ -232,7 +232,7 @@ export default function DashboardPage() {
                                 </div>
                                 {userRole?.name === "Cliente Free" ? (
                                     <span className={`flex items-center text-xs font-bold px-3 py-1.5 rounded-full ${stats.totalProperties >= 10 ? 'bg-red-50 text-red-600' : 'bg-indigo-50 text-indigo-600'}`}>
-                                        Plan Gratuito
+                                        Plan Básico
                                     </span>
                                 ) : (
                                     <span className="flex items-center text-xs font-medium text-green-600 bg-green-50 px-2 py-1 rounded-full">
@@ -247,7 +247,7 @@ export default function DashboardPage() {
                                         {stats.totalProperties}
                                     </h3>
                                     {userRole?.name === "Cliente Free" && (
-                                        <span className="text-xl text-gray-400 font-medium">/ 10</span>
+                                        <span className="text-xl text-gray-400 font-medium">/ 50</span>
                                     )}
                                 </div>
                                 <p className="text-sm text-gray-500 mt-2 font-medium">Propiedades Totales</p>
@@ -255,8 +255,8 @@ export default function DashboardPage() {
                                 {userRole?.name === "Cliente Free" && (
                                     <div className="mt-4 w-full bg-gray-100 rounded-full h-2 overflow-hidden">
                                         <div
-                                            className={`h-full rounded-full transition-all duration-500 ${stats.totalProperties >= 10 ? 'bg-red-500' : 'bg-indigo-500'}`}
-                                            style={{ width: `${Math.min((stats.totalProperties / 10) * 100, 100)}%` }}
+                                            className={`h-full rounded-full transition-all duration-500 ${stats.totalProperties >= 50 ? 'bg-red-500' : 'bg-indigo-500'}`}
+                                            style={{ width: `${Math.min((stats.totalProperties / 50) * 100, 100)}%` }}
                                         />
                                     </div>
                                 )}
@@ -288,7 +288,7 @@ export default function DashboardPage() {
                             </div>
                             <div className="flex items-baseline gap-2">
                                 <h3 className="text-3xl font-bold text-gray-900">{stats.activeRentals}</h3>
-                                <span className="text-sm text-gray-400">/ {stats.totalAlquileres}</span>
+                                <span className="text-sm text-gray-400">/ 50</span>
                             </div>
                             <p className="text-sm text-gray-500 mt-1">Alquileres</p>
                             <p className="text-xs text-gray-400 mt-2">En curso</p>

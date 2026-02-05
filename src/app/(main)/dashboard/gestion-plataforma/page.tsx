@@ -6,8 +6,9 @@ import { User } from "@/domain/models/User";
 import { RoleProtection } from "@/ui/components/auth/RoleProtection";
 import { format } from "date-fns";
 import { es } from "date-fns/locale";
-import { Shield, User as UserIcon, Calendar, Mail, Search, Trash2, Ban, CheckCircle } from "lucide-react";
+import { Shield, User as UserIcon, Calendar, Mail, Search, Trash2, Ban, CheckCircle, Clock } from "lucide-react";
 import { toast } from "sonner";
+import { PlanTier } from "@/domain/models/Subscription";
 
 export default function PlatformManagementPage() {
     const [users, setUsers] = useState<User[]>([]);
@@ -65,6 +66,35 @@ export default function PlatformManagementPage() {
         }
     };
 
+    const handleUpdatePlan = async (uid: string, newPlan: string) => {
+        // Optimistic update
+        const previousUsers = [...users];
+        setUsers(prev => prev.map(u => {
+            if (u.uid === uid) {
+                return {
+                    ...u,
+                    subscription: {
+                        ...u.subscription,
+                        planId: newPlan,
+                        planTier: newPlan as PlanTier,
+                        status: u.subscription?.status || 'active',
+                        billingPeriod: u.subscription?.billingPeriod || 'monthly'
+                    }
+                };
+            }
+            return u;
+        }));
+
+        try {
+            await adminService.updateUserPlan(uid, newPlan as PlanTier);
+            toast.success("Plan actualizado correctamente");
+        } catch (error) {
+            console.error("Error updating plan:", error);
+            setUsers(previousUsers); // Rollback
+            toast.error("Error al actualizar el plan");
+        }
+    };
+
     const filteredUsers = users.filter(user =>
         user.displayName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
         user.email?.toLowerCase().includes(searchTerm.toLowerCase())
@@ -109,7 +139,9 @@ export default function PlatformManagementPage() {
                                 <tr>
                                     <th className="px-6 py-4 font-semibold text-gray-900">Usuario</th>
                                     <th className="px-6 py-4 font-semibold text-gray-900">Rol</th>
-                                    <th className="px-6 py-4 font-semibold text-gray-900">Fecha Registro</th>
+                                    <th className="px-6 py-4 font-semibold text-gray-900">Plan</th>
+                                    <th className="px-6 py-4 font-semibold text-gray-900">Registro</th>
+                                    <th className="px-6 py-4 font-semibold text-gray-900">Último Acceso</th>
                                     <th className="px-6 py-4 font-semibold text-gray-900">Estado</th>
                                     <th className="px-6 py-4 font-semibold text-gray-900 text-right">Acciones</th>
                                 </tr>
@@ -117,13 +149,13 @@ export default function PlatformManagementPage() {
                             <tbody className="divide-y divide-gray-100">
                                 {loading ? (
                                     <tr>
-                                        <td colSpan={5} className="px-6 py-8 text-center text-gray-500">
+                                        <td colSpan={7} className="px-6 py-8 text-center text-gray-500">
                                             Cargando usuarios...
                                         </td>
                                     </tr>
                                 ) : filteredUsers.length === 0 ? (
                                     <tr>
-                                        <td colSpan={5} className="px-6 py-8 text-center text-gray-500">
+                                        <td colSpan={7} className="px-6 py-8 text-center text-gray-500">
                                             No se encontraron usuarios
                                         </td>
                                     </tr>
@@ -157,6 +189,20 @@ export default function PlatformManagementPage() {
                                                 </span>
                                             </td>
                                             <td className="px-6 py-4">
+                                                <select
+                                                    value={user.subscription?.planTier || 'basic'}
+                                                    onChange={(e) => handleUpdatePlan(user.uid, e.target.value)}
+                                                    className="px-2 py-1 bg-white border border-gray-200 rounded text-xs font-medium text-gray-700 focus:outline-none focus:ring-1 focus:ring-indigo-500"
+                                                >
+                                                    <option value="basic">Plan Básico</option>
+                                                    <option value="professional">Professional</option>
+                                                    <option value="enterprise">Enterprise</option>
+                                                </select>
+                                                <div className="text-[10px] text-gray-400 mt-1 uppercase">
+                                                    {user.subscription?.planTier || "Basic"}
+                                                </div>
+                                            </td>
+                                            <td className="px-6 py-4">
                                                 <div className="flex items-center gap-2 text-gray-500">
                                                     <Calendar size={14} />
                                                     {user.createdAt ? (
@@ -167,9 +213,19 @@ export default function PlatformManagementPage() {
                                                 </div>
                                             </td>
                                             <td className="px-6 py-4">
+                                                <div className="flex items-center gap-2 text-gray-500">
+                                                    <Clock size={14} />
+                                                    {user.lastLogin ? (
+                                                        format(new Date(user.lastLogin), "dd MMM yyyy HH:mm", { locale: es })
+                                                    ) : (
+                                                        "N/A"
+                                                    )}
+                                                </div>
+                                            </td>
+                                            <td className="px-6 py-4">
                                                 <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${user.disabled
-                                                        ? "bg-red-100 text-red-800"
-                                                        : "bg-green-100 text-green-800"
+                                                    ? "bg-red-100 text-red-800"
+                                                    : "bg-green-100 text-green-800"
                                                     }`}>
                                                     {user.disabled ? "Inhabilitado" : "Activo"}
                                                 </span>
@@ -179,8 +235,8 @@ export default function PlatformManagementPage() {
                                                     <button
                                                         onClick={() => handleToggleStatus(user.uid, user.disabled)}
                                                         className={`p-2 rounded-lg transition-colors ${user.disabled
-                                                                ? "text-green-600 hover:bg-green-50"
-                                                                : "text-amber-600 hover:bg-amber-50"
+                                                            ? "text-green-600 hover:bg-green-50"
+                                                            : "text-amber-600 hover:bg-amber-50"
                                                             }`}
                                                         title={user.disabled ? "Habilitar Acceso" : "Inhabilitar Acceso"}
                                                     >

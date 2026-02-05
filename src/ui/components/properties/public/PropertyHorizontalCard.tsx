@@ -72,7 +72,7 @@ export default function PropertyHorizontalCard({ property }: PropertyHorizontalC
                 {/* Tags */}
                 <div className="absolute top-3 left-3 flex gap-2">
                     <span className={`px-2.5 py-1 rounded-md text-xs font-bold uppercase tracking-wide backdrop-blur-md ${property.operation_type === 'Venta' ? 'bg-green-500/90 text-white' :
-                            property.operation_type === 'Alquiler' ? 'bg-blue-600/90 text-white' : 'bg-purple-600/90 text-white'
+                        property.operation_type === 'Alquiler' ? 'bg-blue-600/90 text-white' : 'bg-purple-600/90 text-white'
                         }`}>
                         {property.operation_type}
                     </span>
@@ -93,7 +93,7 @@ export default function PropertyHorizontalCard({ property }: PropertyHorizontalC
                         {property.type || "Propiedad"} en {property.localidad}
                     </p>
                     <h3 className="text-lg lg:text-xl font-bold text-gray-900 group-hover:text-indigo-600 transition-colors line-clamp-1 mb-2">
-                        {property.title}
+                        {property.calle ? `${property.calle} ${property.altura || ''}` : property.title}
                     </h3>
                     <div className="flex items-center gap-1 text-gray-500 text-sm mb-4">
                         <MapPin className="w-4 h-4 text-indigo-500" />

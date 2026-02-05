@@ -1,7 +1,7 @@
 import { db } from "@/infrastructure/firebase/client";
-import { collection, getDocs, query, orderBy, where, getDoc, doc, deleteDoc, updateDoc } from "firebase/firestore";
+import { collection, getDocs, query, orderBy, where, getDoc, doc, deleteDoc, updateDoc, setDoc } from "firebase/firestore";
 import { User } from "@/domain/models/User";
-import { Subscription } from "@/domain/models/Subscription";
+import { Subscription, PlanTier } from "@/domain/models/Subscription";
 
 const USERS_COLLECTION = "users";
 const SUBSCRIPTIONS_COLLECTION = "subscriptions";
@@ -38,9 +38,11 @@ export const adminService = {
                 photoURL: userData.photoURL,
                 roleId: userData.roleId,
                 createdAt: userData.createdAt?.toDate(),
+                lastLogin: userData.lastLogin?.toDate(),
                 organizationId: userData.organizationId,
                 subscription: sub ? {
-                    planId: sub.planTier, // Using tier as ID for display
+                    planId: sub.planId, // Use actual planId
+                    planTier: sub.planTier,
                     status: sub.status,
                     billingPeriod: sub.billingPeriod
                 } : undefined,
@@ -106,5 +108,47 @@ export const adminService = {
         if (!db) throw new Error("Firestore not initialized");
         const userRef = doc(db, USERS_COLLECTION, uid);
         await updateDoc(userRef, { disabled });
+    },
+
+    // Actualizar plan de usuario manualmente
+    updateUserPlan: async (uid: string, planTier: PlanTier) => {
+        if (!db) throw new Error("Firestore not initialized");
+
+        // Buscar suscripción existente
+        const q = query(collection(db, SUBSCRIPTIONS_COLLECTION), where("userId", "==", uid));
+        const querySnapshot = await getDocs(q);
+
+        if (querySnapshot.empty) {
+            // Crear nueva suscripción si no existe
+            const newSubRef = doc(collection(db, SUBSCRIPTIONS_COLLECTION));
+            await setDoc(newSubRef, {
+                userId: uid,
+                planTier: planTier,
+                planId: planTier, // Simplificado
+                status: 'active',
+                billingPeriod: 'monthly',
+                createdAt: new Date(),
+                updatedAt: new Date(),
+                amount: 0,
+                currency: 'ARS',
+                startDate: new Date(),
+                endDate: new Date(new Date().setFullYear(new Date().getFullYear() + 1)), // 1 año por defecto
+                usage: {
+                    properties: 0,
+                    users: 0,
+                    clients: 0,
+                    tasaciones: 0,
+                    aiCredits: 0
+                }
+            });
+        } else {
+            // Actualizar existente
+            const subDoc = querySnapshot.docs[0];
+            await updateDoc(subDoc.ref, {
+                planTier: planTier,
+                planId: planTier,
+                updatedAt: new Date()
+            });
+        }
     }
 };

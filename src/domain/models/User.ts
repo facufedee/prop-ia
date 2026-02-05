@@ -1,3 +1,5 @@
+import { PlanTier } from "./Subscription";
+
 export interface User {
     uid: string;
     email: string | null;
@@ -11,6 +13,7 @@ export interface User {
     // Subscription info (optional, joined from Subscription collection)
     subscription?: {
         planId: string;
+        planTier: PlanTier;
         status: string;
         billingPeriod: string;
     };

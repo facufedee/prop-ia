@@ -78,9 +78,10 @@ export default function PropertyDetailPage({ id: propId }: Props) {
     };
 
     const handleShare = async () => {
+        const title = property?.calle ? `${property.calle} ${property.altura || ''}` : property?.title;
         const shareData = {
-            title: property?.title,
-            text: `Mira esta propiedad en Zeta Prop: ${property?.title}`,
+            title: title,
+            text: `Mira esta propiedad en Zeta Prop: ${title}`,
             url: window.location.href
         };
 
@@ -99,7 +100,8 @@ export default function PropertyDetailPage({ id: propId }: Props) {
     const handleContact = () => {
         const phoneNumber = property?.agency?.phoneNumber || "5491112345678"; // Fallback to generic if missing
         const cleanPhone = phoneNumber.replace(/\D/g, '');
-        const message = `Hola, estoy interesado en la propiedad "${property?.title}" que vi en Zeta Prop.`;
+        const title = property?.calle ? `${property.calle} ${property.altura || ''}` : property?.title;
+        const message = `Hola, estoy interesado en la propiedad "${title}" que vi en Zeta Prop.`;
         const waLink = `https://wa.me/${cleanPhone}?text=${encodeURIComponent(message)}`;
         window.open(waLink, '_blank');
     };
@@ -138,7 +140,9 @@ export default function PropertyDetailPage({ id: propId }: Props) {
                                 <MapPin size={14} /> {property.localidad}, {property.provincia}
                             </span>
                         </div>
-                        <h1 className="text-2xl md:text-3xl font-bold text-gray-900 mb-1">{property.title}</h1>
+                        <h1 className="text-2xl md:text-3xl font-bold text-gray-900 mb-1">
+                            {property.calle ? `${property.calle} ${property.altura || ''}` : property.title}
+                        </h1>
                         <div className="flex items-center gap-2 text-sm text-gray-500">
                             {property.code && <span className="font-mono bg-gray-100 px-2 py-0.5 rounded text-xs text-gray-600 mr-2">{property.code}</span>}
                             <span>Publicado hace 3 días</span>
@@ -513,7 +517,7 @@ export default function PropertyDetailPage({ id: propId }: Props) {
                 isOpen={showContactModal}
                 onClose={() => setShowContactModal(false)}
                 propertyId={property.id}
-                propertyTitle={property.title}
+                propertyTitle={property.calle ? `${property.calle} ${property.altura || ''}` : property.title}
                 ownerId={property.userId}
                 agencyId={property.agency?.uid}
             />
