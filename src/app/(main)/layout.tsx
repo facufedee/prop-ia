@@ -8,6 +8,7 @@ import CookieBanner from '@/ui/components/consent/CookieBanner';
 // import BubbleChat from '@/ui/components/chat/BubbleChat';
 
 import FloatingChatWidget from '@/ui/components/FloatingChatWidget';
+import Script from 'next/script';
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -189,6 +190,19 @@ export default function RootLayout({
             ]),
           }}
         />
+        <Script
+          src="https://www.googletagmanager.com/gtag/js?id=AW-17943485669"
+          strategy="afterInteractive"
+        />
+        <Script id="google-ads-tag" strategy="afterInteractive">
+          {`
+            window.dataLayer = window.dataLayer || [];
+            function gtag(){dataLayer.push(arguments);}
+            gtag('js', new Date());
+
+            gtag('config', 'AW-17943485669');
+          `}
+        </Script>
       </body>
     </html>
   );

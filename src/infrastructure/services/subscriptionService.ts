@@ -12,6 +12,7 @@ import {
     Timestamp
 } from "firebase/firestore";
 import { Plan, Subscription, Payment, Addon } from "@/domain/models/Subscription";
+import { PLANS } from "@/infrastructure/data/plans";
 
 const PLANS_COLLECTION = "plans";
 const SUBSCRIPTIONS_COLLECTION = "subscriptions";
@@ -22,27 +23,16 @@ export const subscriptionService = {
     // ========== PLANS ==========
 
     getAllPlans: async (): Promise<Plan[]> => {
-        if (!db) throw new Error("Firestore not initialized");
-        const snapshot = await getDocs(collection(db, PLANS_COLLECTION));
-        return snapshot.docs.map(doc => ({
-            id: doc.id,
-            ...doc.data(),
-            createdAt: doc.data().createdAt?.toDate() || new Date(),
-            updatedAt: doc.data().updatedAt?.toDate() || new Date(),
-        } as unknown as Plan)) as Plan[];
+        // Return hardcoded plans
+        // @ts-ignore - UIPlan is compatible with Plan
+        return PLANS as Plan[];
     },
 
     getPlanById: async (id: string): Promise<Plan | null> => {
-        if (!db) throw new Error("Firestore not initialized");
-        const docSnap = await getDoc(doc(db, PLANS_COLLECTION, id));
-        if (!docSnap.exists()) return null;
-
-        return {
-            id: docSnap.id,
-            ...docSnap.data(),
-            createdAt: docSnap.data().createdAt?.toDate() || new Date(),
-            updatedAt: docSnap.data().updatedAt?.toDate() || new Date(),
-        } as unknown as Plan;
+        const plan = PLANS.find(p => p.id === id);
+        if (!plan) return null;
+        // @ts-ignore
+        return plan as Plan;
     },
 
     deletePlan: async (id: string): Promise<void> => {

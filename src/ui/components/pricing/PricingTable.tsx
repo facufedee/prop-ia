@@ -185,23 +185,34 @@ export default function PricingTable() {
                                             <div className="grid grid-cols-2 gap-y-3 gap-x-2 mb-6 text-sm">
                                                 <LimitItem label="Propiedades" value={plan.limits.properties} />
                                                 <LimitItem label="Usuarios" value={plan.limits.users} />
-                                                <LimitItem label="Clientes" value={plan.limits.clients} />
-                                                <LimitItem label="Tasaciones" value={plan.limits.tasaciones} />
                                             </div>
                                         </div>
 
                                         {/* Features List */}
                                         <ul className="space-y-3 mt-auto">
-                                            {Object.entries(plan.features || {}).map(([key, included]) => (
-                                                <li key={key} className={`flex items-start gap-3 ${!included ? 'opacity-40 grayscale' : ''}`}>
-                                                    <div className={`mt-0.5 w-5 h-5 rounded-full flex items-center justify-center flex-shrink-0 ${included ? 'bg-green-100 text-green-600' : 'bg-gray-100 text-gray-300'}`}>
-                                                        {included ? <Check className="w-3 h-3" /> : <X className="w-3 h-3" />}
-                                                    </div>
-                                                    <span className={`text-sm ${included ? 'text-gray-700 font-medium' : 'text-gray-400'}`}>
-                                                        {FEATURE_LABELS[key] || key}
-                                                    </span>
-                                                </li>
-                                            ))}
+                                            {(plan.featuresList && plan.featuresList.length > 0) ? (
+                                                plan.featuresList.map((feature: string, index: number) => (
+                                                    <li key={index} className="flex items-start gap-3">
+                                                        <div className="mt-0.5 w-5 h-5 rounded-full flex items-center justify-center flex-shrink-0 bg-green-100 text-green-600">
+                                                            <Check className="w-3 h-3" />
+                                                        </div>
+                                                        <span className="text-sm text-gray-700 font-medium text-left">
+                                                            {feature}
+                                                        </span>
+                                                    </li>
+                                                ))
+                                            ) : (
+                                                Object.entries(plan.features || {}).map(([key, included]) => (
+                                                    <li key={key} className={`flex items-start gap-3 ${!included ? 'opacity-40 grayscale' : ''}`}>
+                                                        <div className={`mt-0.5 w-5 h-5 rounded-full flex items-center justify-center flex-shrink-0 ${included ? 'bg-green-100 text-green-600' : 'bg-gray-100 text-gray-300'}`}>
+                                                            {included ? <Check className="w-3 h-3" /> : <X className="w-3 h-3" />}
+                                                        </div>
+                                                        <span className={`text-sm ${included ? 'text-gray-700 font-medium' : 'text-gray-400'}`}>
+                                                            {FEATURE_LABELS[key] || key}
+                                                        </span>
+                                                    </li>
+                                                ))
+                                            )}
                                         </ul>
                                     </div>
                                 </div>
