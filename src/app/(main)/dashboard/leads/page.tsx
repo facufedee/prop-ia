@@ -4,16 +4,17 @@ import { useEffect, useState } from "react";
 import { Info, MessageSquare, Phone, Mail, Loader2, Calendar, Search, Filter } from "lucide-react";
 import { auth } from "@/infrastructure/firebase/client";
 import { leadsService } from "@/infrastructure/services/leadsService";
-import { Lead } from "@/domain/models/Lead";
+import { Lead, LeadEstado } from "@/domain/models/Lead";
 import { useAuth } from "@/ui/context/AuthContext";
 import LeadCard from "./components/LeadCard";
+import { toast } from "sonner"; // Assuming Sonner is used for toasts based on layout.tsx
 
 export default function LeadsPage() {
     const [leads, setLeads] = useState<Lead[]>([]);
     const [loading, setLoading] = useState(true);
     const { userRole } = useAuth();
     const [searchTerm, setSearchTerm] = useState("");
-    const [filter, setFilter] = useState<'Todos' | 'nuevo' | 'contactado'>('Todos');
+    const [filter, setFilter] = useState<'Todos' | LeadEstado>('Todos');
     const [filteredLeads, setFilteredLeads] = useState<Lead[]>([]);
 
     useEffect(() => {
@@ -104,7 +105,7 @@ export default function LeadsPage() {
                 <div className="flex items-center gap-2 overflow-x-auto w-full md:w-auto pb-1 md:pb-0">
                     <Filter className="w-5 h-5 text-gray-400 shrink-0 hidden md:block" />
                     <div className="flex p-1 bg-gray-100 rounded-lg">
-                        {(['Todos', 'nuevo', 'contactado'] as const).map((f) => (
+                        {(['Todos', 'nuevo', 'contactado', 'leido', 'respondido', 'finalizado'] as const).map((f) => (
                             <button
                                 key={f}
                                 onClick={() => setFilter(f)}
@@ -130,7 +131,34 @@ export default function LeadsPage() {
             ) : (
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                     {filteredLeads.map((lead) => (
-                        <LeadCard key={lead.id} lead={lead} />
+                        <LeadCard
+                            key={lead.id}
+                            lead={lead}
+                            onStatusChange={async (id, newStatus) => {
+                                // Optimistic update
+                                setLeads(prev => prev.map(l => l.id === id ? { ...l, estado: newStatus } : l));
+                                try {
+                                    await leadsService.updateLead(id, { estado: newStatus });
+                                    toast.success('Estado actualizado');
+                                } catch (error) {
+                                    console.error('Failed to update status', error);
+                                    fetchLeads(); // Revert on error
+                                    toast.error('Error al actualizar estado');
+                                }
+                            }}
+                            onDelete={async (id) => {
+                                // Optimistic update
+                                setLeads(prev => prev.filter(l => l.id !== id));
+                                try {
+                                    await leadsService.deleteLead(id);
+                                    toast.success('Consulta eliminada');
+                                } catch (error) {
+                                    console.error('Failed to delete lead', error);
+                                    fetchLeads(); // Revert on error
+                                    toast.error('Error al eliminar consulta');
+                                }
+                            }}
+                        />
                     ))}
                 </div>
             )}

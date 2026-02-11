@@ -5,6 +5,7 @@ import { Pago, Alquiler } from "@/domain/models/Alquiler";
 import { X, Plus, Trash2, AlertTriangle, Calendar, Calculator } from "lucide-react";
 import { parseISO, startOfMonth, endOfMonth, format, isValid, parse, differenceInDays } from "date-fns";
 import { es } from "date-fns/locale";
+import { calculateCurrentRent } from "@/lib/financial/rentAdjustment";
 
 interface PaymentEditModalProps {
     isOpen: boolean;
@@ -141,6 +142,19 @@ export default function PaymentEditModal({ isOpen, onClose, payment, rental, onS
 
     const [services, setServices] = useState<{ concepto: string; monto: number }[]>([]);
 
+    // IPC Indices state
+    const [ipcIndices, setIpcIndices] = useState<any>(null); // Optimization: could be context or prop
+
+    // Load Indices if needed
+    useEffect(() => {
+        if (rental.ajusteTipo === 'IPC') {
+            fetch('/api/config/indices')
+                .then(res => res.json())
+                .then(data => setIpcIndices(data))
+                .catch(console.error);
+        }
+    }, [rental.ajusteTipo]);
+
     // Honorarios Logic -- ADDED
     const [honorarios, setHonorarios] = useState<number>(0);
 
@@ -156,8 +170,23 @@ export default function PaymentEditModal({ isOpen, onClose, payment, rental, onS
             setForm({
                 ...payment,
                 fechaVencimiento: toDate(payment.fechaVencimiento),
-                fechaPago: toDate(payment.fechaPago)
+                fechaPago: toDate(payment.fechaPago),
+                montoAlquiler: payment.montoAlquiler || rental.montoMensual // Default to static value initially
             });
+
+            // If it's a new payment (no ID) and IPC is enabled, calculate the updated rent
+            if (!payment.id && rental.ajusteTipo === 'IPC' && ipcIndices) {
+                // Calculate based on the payment month (e.g. "2026-04")
+                const paymentDate = payment.mes ? parseISO(`${payment.mes}-01`) : new Date();
+                const { currentRent } = calculateCurrentRent(rental, ipcIndices, paymentDate);
+                if (currentRent !== rental.montoMensual) {
+                    setForm(prev => ({ ...prev, montoAlquiler: currentRent }));
+                }
+            } else if (!payment.id && !payment.montoAlquiler) {
+                // Should already be handled by default but being explicit
+                setForm(prev => ({ ...prev, montoAlquiler: rental.montoMensual }));
+            }
+
             setDiscountInputValue(payment.montoDescuento || 0);
             setDiscountType('amount');
 
@@ -200,7 +229,7 @@ export default function PaymentEditModal({ isOpen, onClose, payment, rental, onS
 
             setServices(mergedServices);
         }
-    }, [isOpen, payment, rental]);
+    }, [isOpen, payment, rental, ipcIndices]); // Added ipcIndices dependency to re-run if they load late
 
     const calculatePenalty = (currentForm: Partial<Pago>) => {
         if (!currentForm.fechaVencimiento || !currentForm.montoAlquiler) return;
@@ -271,8 +300,8 @@ export default function PaymentEditModal({ isOpen, onClose, payment, rental, onS
         const alquilerVal = Number(form.montoAlquiler) || 0;
         const punitorios = Number(form.montoPunitorios) || 0;
         const servicesTotal = services.reduce((sum, s) => sum + (Number(s.monto) || 0), 0);
-        const honorariosVal = Number(honorarios) || 0; // -- ADDED
-        return alquilerVal + servicesTotal + punitorios + honorariosVal;
+        // const honorariosVal = Number(honorarios) || 0; // -- REMOVED FROM TOTAL
+        return alquilerVal + servicesTotal + punitorios; // + honorariosVal;
     }
 
     const calculateDiscountAmount = () => {
@@ -293,6 +322,34 @@ export default function PaymentEditModal({ isOpen, onClose, payment, rental, onS
         setForm(prev => ({ ...prev, montoDescuento: discount }));
     }, [discountInputValue, discountType, services, form.montoPunitorios, form.montoAlquiler, honorarios]); // Added honorarios
 
+
+    const handleRoundTotal = () => {
+        // Calculate current total excluding rounding item FIRST
+        const currentServicesExcludingRounding = services.filter(s => s.concepto !== 'Redondeo' && s.concepto !== ' Ajuste Redondeo');
+        const servicesTotal = currentServicesExcludingRounding.reduce((sum, s) => sum + (Number(s.monto) || 0), 0);
+
+        const alquilerVal = Number(form.montoAlquiler) || 0;
+        const punitorios = Number(form.montoPunitorios) || 0;
+        // Total base without rounding
+        const baseTotal = alquilerVal + servicesTotal + punitorios;
+
+        // Target: Round up to nearest 1000 or 100
+        // Logic: if < 1000 total, nearest 100. If > 1000, nearest 1000.
+        // Or simpler: always nearest 1000 if amount is large enough.
+
+        // Let's use nearest 1000 as per example (653.925 -> 654.000)
+        const roundTo = 1000;
+        const remainder = baseTotal % roundTo;
+
+        if (remainder === 0) return; // Already rounded
+
+        const diff = roundTo - remainder;
+
+        // Add/Update rounding service
+        const newServices = [...currentServicesExcludingRounding, { concepto: 'Redondeo', monto: diff }];
+        setServices(newServices);
+        updateServicesTotal(newServices);
+    };
 
     const handleServiceChange = (index: number, val: number) => {
         const newServices = [...services];
@@ -588,8 +645,17 @@ export default function PaymentEditModal({ isOpen, onClose, payment, rental, onS
                 <div className="p-4 border-t bg-gray-50 flex flex-col sm:flex-row justify-between items-center gap-3 rounded-b-xl shrink-0">
                     <div className="flex flex-col min-w-0 max-w-full text-center sm:text-left">
                         <div className="flex items-center gap-4">
-                            <div>
-                                <div className="text-gray-600 text-xs uppercase tracking-wide">Total</div>
+                            <div className="flex flex-col gap-1 items-start">
+                                <div className="flex items-center gap-2">
+                                    <div className="text-gray-500 text-xs uppercase tracking-wide">Total</div>
+                                    <button
+                                        onClick={handleRoundTotal}
+                                        className="text-[10px] bg-indigo-50 text-indigo-600 px-1.5 py-0.5 rounded border border-indigo-100 font-medium hover:bg-indigo-100"
+                                        title="Redondear al próximo 1000"
+                                    >
+                                        Redondear
+                                    </button>
+                                </div>
                                 <div className="font-bold text-xl text-indigo-600">
                                     ${calculateTotal().toLocaleString('es-AR')}
                                 </div>

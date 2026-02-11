@@ -102,6 +102,36 @@ export const ticketsService = {
             );
         }
 
+        // Trigger Email Notification (Email)
+        const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://zetaprop.com.ar';
+        fetch(`${baseUrl}/api/notifications/trigger`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                event: 'newTicket',
+                data: {
+                    ticketId: docRef.id,
+                    title: data.title,
+                    description: data.description,
+                    userEmail: auth?.currentUser?.email || 'Unknown',
+                    userId: auth?.currentUser?.uid || 'Unknown'
+                },
+                subject: `[Soporte] Nuevo Ticket: ${data.title}`,
+                message: `
+                    <h2>Nuevo Ticket de Soporte</h2>
+                    <p><strong>Usuario:</strong> ${auth?.currentUser?.email || 'Unknown'}</p>
+                    <p><strong>Asunto:</strong> ${data.title}</p>
+                    <hr />
+                    <h3>Mensaje:</h3>
+                    <p style="background-color: #f3f4f6; padding: 12px; border-radius: 6px; font-style: italic;">"${data.description}"</p>
+                    <br />
+                    <a href="${baseUrl}/dashboard/soporte/${docRef.id}" style="background-color: #4f46e5; color: white; padding: 10px 20px; text-decoration: none; border-radius: 6px; display: inline-block;">
+                        Ver Ticket y Responder
+                    </a>
+                `
+            })
+        }).catch(err => console.error("Failed to trigger email notification:", err));
+
         return docRef.id;
     },
 

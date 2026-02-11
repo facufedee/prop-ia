@@ -29,7 +29,8 @@ import {
   Shield,
   UserCog,
   Package,
-  Crown
+  Crown,
+  GraduationCap
 } from "lucide-react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
@@ -82,6 +83,7 @@ const MENU_ITEMS: MenuItem[] = [
   { href: "/dashboard/configuracion/roles", label: "Roles y Permisos", icon: UserCog, adminOnly: true },
   { href: "/dashboard/configuracion/suscripciones", label: "Planes y Suscripciones", icon: Package, adminOnly: true },
   { href: "/dashboard/configuracion/backup", label: "Backup", icon: Database, adminOnly: true },
+  { href: "/dashboard/tutoriales", label: "Tutoriales", icon: GraduationCap },
   { href: "/dashboard/configuracion", label: "Configuración", icon: Settings },
 ];
 
@@ -179,6 +181,9 @@ export default function DashboardSidebar({ isOpen = false, onClose }: DashboardS
     if (isFreeUser && LOCKED_FOR_FREE.includes(item.href)) {
       return false; // Hide completely
     }
+
+    // Always allow Tutorials
+    if (item.href === "/dashboard/tutoriales") return true;
 
     if (isFreeUser) {
       // STRICT CHECK: check if href is in userPermissions

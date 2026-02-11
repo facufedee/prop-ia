@@ -57,6 +57,19 @@ export const leadsService = {
             createdAt: Timestamp.now(),
             updatedAt: Timestamp.now(),
         });
+
+        // Trigger Email Notification (Fire and forget)
+        fetch('/api/notifications/trigger', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                event: 'newLead',
+                data: { ...data, id: docRef.id },
+                subject: `Nueva Consulta de ${data.nombre}`,
+                message: `Has recibido una nueva consulta de <strong>${data.nombre}</strong> para la propiedad <strong>${data.propertyTitle || 'N/A'}</strong>.`
+            })
+        }).catch(err => console.error("Failed to trigger notification:", err));
+
         return docRef.id;
     },
 

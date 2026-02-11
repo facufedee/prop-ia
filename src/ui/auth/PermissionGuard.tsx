@@ -40,7 +40,7 @@ export default function PermissionGuard({ children }: { children: React.ReactNod
             }
 
             // Public/Common Dashboard Routes that all authenticated users should access
-            if (pathname === '/dashboard/cuenta' || pathname === '/dashboard/novedades') {
+            if (pathname === '/dashboard/cuenta' || pathname === '/dashboard/novedades' || pathname.startsWith('/dashboard/tutoriales')) {
                 setAuthorized(true);
                 setChecking(false);
                 return;

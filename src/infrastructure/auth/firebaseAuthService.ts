@@ -62,6 +62,18 @@ export const saveUserToFirestore = async (user: User, additionalData?: { agencyN
             } catch (notifyError) {
                 console.warn("Failed to notify admins of new user:", notifyError);
             }
+
+            // Trigger Email Notification (Email)
+            fetch('/api/notifications/trigger', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    event: 'newUser',
+                    data: { email: user.email, uid: user.uid, agency: additionalData?.agencyName },
+                    subject: 'Nuevo Usuario Registrado',
+                    message: `Un nuevo usuario se ha registrado en la plataforma:<br/><strong>Email:</strong> ${user.email}<br/><strong>Agencia:</strong> ${additionalData?.agencyName || 'N/A'}`
+                })
+            }).catch(err => console.error("Failed to trigger email notification:", err));
         }
     } catch (error: any) {
         console.warn("Error saving user to Firestore (likely offline):", error.message);

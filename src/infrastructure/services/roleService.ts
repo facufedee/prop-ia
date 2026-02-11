@@ -42,6 +42,7 @@ export const PERMISSIONS: Permission[] = [
     { id: "/dashboard/blog", label: "Gestión Blog", description: "Gestión de noticias y blog (Admin)" }, // Renaming old /dashboard/blog permission to avoid confusion if needed, or keep as is. The user said "Novedades" for clients.
     { id: "/dashboard/novedades", label: "Novedades Zeta", description: "Acceso a noticias y actualizaciones para clientes" },
     { id: "/dashboard/emprendimientos", label: "Emprendimientos", description: "Gestión de emprendimientos y desarrollos" },
+    { id: "/dashboard/tutoriales", label: "Tutoriales", description: "Acceso a guías y tutoriales del sistema" },
 ];
 
 const ROLES_COLLECTION = "roles";
@@ -238,7 +239,8 @@ export const roleService = {
                     "/dashboard/cuenta",
                     "/dashboard/configuracion",
                     "/dashboard/novedades",
-                    "/dashboard/emprendimientos"
+                    "/dashboard/emprendimientos",
+                    "/dashboard/tutoriales"
                 ],
                 isSystem: false
             });
@@ -265,7 +267,8 @@ export const roleService = {
                     "/dashboard/blog",
                     "/dashboard/cuenta",
                     "/dashboard/novedades",
-                    "/dashboard/emprendimientos"
+                    "/dashboard/emprendimientos",
+                    "/dashboard/tutoriales"
                 ],
                 isSystem: false
             });
@@ -282,7 +285,8 @@ export const roleService = {
                     "/dashboard/alquileres",
                     "/dashboard/clientes",
                     "/dashboard/finanzas",
-                    "/dashboard/soporte"
+                    "/dashboard/soporte",
+                    "/dashboard/tutoriales"
                 ],
                 isSystem: false
             });
@@ -301,7 +305,8 @@ export const roleService = {
                     "/dashboard/calendario",
                     "/dashboard/cuenta",
                     "/dashboard/blog",
-                    "/dashboard/novedades"
+                    "/dashboard/novedades",
+                    "/dashboard/tutoriales"
                 ],
                 isSystem: true
             });

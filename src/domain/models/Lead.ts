@@ -1,5 +1,5 @@
 export type LeadTipo = 'compra' | 'venta' | 'alquiler' | 'consulta';
-export type LeadEstado = 'nuevo' | 'contactado' | 'calificado' | 'convertido' | 'descartado';
+export type LeadEstado = 'nuevo' | 'contactado' | 'leido' | 'respondido' | 'finalizado' | 'descartado' | 'calificado' | 'convertido';
 export type LeadOrigen = 'web' | 'telefono' | 'email' | 'referido' | 'otro';
 
 export interface Lead {

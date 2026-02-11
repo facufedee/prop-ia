@@ -14,16 +14,22 @@ interface LeadsTableProps {
 const ESTADO_LABELS: Record<LeadEstado, string> = {
     nuevo: 'Nuevo',
     contactado: 'Contactado',
+    leido: 'Leído',
+    respondido: 'Respondido',
     calificado: 'Calificado',
     convertido: 'Convertido',
+    finalizado: 'Finalizado',
     descartado: 'Descartado',
 };
 
 const ESTADO_COLORS: Record<LeadEstado, string> = {
     nuevo: 'bg-blue-100 text-blue-700',
     contactado: 'bg-yellow-100 text-yellow-700',
+    leido: 'bg-blue-50 text-blue-600',
+    respondido: 'bg-indigo-100 text-indigo-700',
     calificado: 'bg-purple-100 text-purple-700',
     convertido: 'bg-green-100 text-green-700',
+    finalizado: 'bg-gray-200 text-gray-800',
     descartado: 'bg-gray-100 text-gray-700',
 };
 

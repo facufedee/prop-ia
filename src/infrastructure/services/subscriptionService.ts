@@ -128,6 +128,19 @@ export const subscriptionService = {
             cancelledAt: Timestamp.now(),
             updatedAt: Timestamp.now(),
         });
+
+        // Trigger Email Notification (Email)
+        const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://zetaprop.com.ar';
+        fetch(`${baseUrl}/api/notifications/trigger`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                event: 'subscriptionCancelled',
+                data: { subscriptionId: id },
+                subject: 'Suscripción Cancelada',
+                message: `Una suscripción ha sido cancelada.<br/><strong>ID Suscripción:</strong> ${id}`
+            })
+        }).catch(err => console.error("Failed to trigger email notification:", err));
     },
 
     // ========== PAYMENTS ==========
@@ -379,6 +392,29 @@ export const subscriptionService = {
             } catch (error) {
                 console.error("[Webhook] Error sending notifications:", error);
             }
+
+            // Trigger Email Notification (Email)
+            const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://zetaprop.com.ar'; // Better than nothing
+            fetch(`${baseUrl}/api/notifications/trigger`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    event: 'newPayment',
+                    data: {
+                        userId,
+                        plan: plan.name,
+                        amount: price,
+                        period: billingPeriod,
+                        paymentId
+                    },
+                    subject: 'Nuevo Pago Recibido',
+                    message: `Se ha procesado un pago exitoso:<br/>
+                              <strong>Usuario:</strong> ${userId}<br/>
+                              <strong>Plan:</strong> ${plan.name} (${billingPeriod})<br/>
+                              <strong>Monto:</strong> $${price}<br/>
+                              <strong>Ref:</strong> ${paymentId}`
+                })
+            }).catch(err => console.error("Failed to trigger email notification:", err));
 
             console.log(`✅ [Webhook] Subscription activated successfully for user: ${userId}`);
             return { success: true, message: "Subscription activated successfully" };
