@@ -9,7 +9,7 @@ export const metadata: Metadata = {
     openGraph: {
         title: "Zeta Prop | Tu CRM Inmobiliario Integral",
         description: "La plataforma definitiva para gestionar propiedades, alquileres, clientes y emprendimientos.",
-        images: ["/assets/img/logo_web_ZetaProp_fondonegro.png"],
+        images: ["/assets/img/Logo%20ZetaProp%20Fondo%20Blanco%202.png"],
     },
 };
 

@@ -1,5 +1,6 @@
 import { useState } from "react";
 import Link from "next/link";
+import NextImage from "next/image";
 import { PublicProperty } from "@/infrastructure/services/publicService";
 import { MapPin, Bath, Bed, Maximize, Home, ChevronLeft, ChevronRight } from "lucide-react";
 
@@ -42,12 +43,16 @@ export default function PropertyPublicCard({ property }: PropertyPublicCardProps
                             style={{ transform: `translateX(-${currentImageIndex * 100}%)` }}
                         >
                             {property.imageUrls.map((url, idx) => (
-                                <img
-                                    key={idx}
-                                    src={url}
-                                    alt={`${property.title} ${property.operation_type} en ${property.localidad} - Foto ${idx + 1}`}
-                                    className={`w-full h-full object-cover flex-shrink-0 ${property.status === 'sold' ? 'grayscale opacity-90' : ''}`}
-                                />
+                                <div key={idx} className="relative w-full h-full flex-shrink-0">
+                                    <NextImage
+                                        src={url}
+                                        alt={`${property.title} ${property.operation_type} en ${property.localidad} - Foto ${idx + 1}`}
+                                        fill
+                                        className={`object-cover ${property.status === 'sold' ? 'grayscale opacity-90' : ''}`}
+                                        sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
+                                        priority={idx === 0}
+                                    />
+                                </div>
                             ))}
                         </div>
 

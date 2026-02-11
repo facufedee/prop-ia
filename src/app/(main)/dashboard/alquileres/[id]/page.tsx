@@ -11,7 +11,7 @@ import MaintenanceTab from "../components/MaintenanceTab";
 
 import { contractDocxService } from "@/infrastructure/services/contractDocxService";
 import ContractGeneratorPreviewModal from "@/ui/components/modals/ContractGeneratorPreviewModal";
-import { ArrowLeft, FileText, DollarSign, Wrench, Edit, Save, X, Download, Pause, Check, MoreVertical, Trash2, AlertCircle, Printer } from "lucide-react";
+import { ArrowLeft, FileText, DollarSign, Wrench, Edit, Save, X, Download, Pause, Check, MoreVertical, Trash2, AlertCircle, Printer, Calendar, User, Shield, Zap, Percent, Clock, ExternalLink, TrendingUp } from "lucide-react";
 import Link from "next/link";
 import { TextInput, MoneyInput, TextAreaInput } from "@/ui/components/forms";
 
@@ -999,84 +999,165 @@ export default function AlquilerDetailPage() {
                                     </div>
                                 </div>
                             ) : (
-                                /* READ ONLY VIEW */
-                                <div className="space-y-6">
-                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                                        {/* COLUMN 1 */}
-                                        <div className="space-y-6">
-                                            <div className="pb-4 border-b border-gray-100">
-                                                <h3 className="text-sm font-semibold text-indigo-600 mb-4 uppercase tracking-wider">Detalles Principales</h3>
-                                                <div className="space-y-4 text-sm">
-                                                    <p><span className="text-gray-500">Fecha Inicio:</span> <span className="font-medium text-gray-900 ml-2">{new Date(alquiler.fechaInicio).toLocaleDateString()}</span></p>
-                                                    <p><span className="text-gray-500">Fecha Fin:</span> <span className="font-medium text-gray-900 ml-2">{new Date(alquiler.fechaFin).toLocaleDateString()}</span></p>
-                                                    <p><span className="text-gray-500">Monto Mensual:</span> <span className="font-medium text-gray-900 ml-2">${alquiler.montoMensual?.toLocaleString()} {alquiler.monedaAlquiler}</span></p>
-                                                    <p><span className="text-gray-500">Vencimiento:</span> <span className="font-medium text-gray-900 ml-2">Día {alquiler.diaVencimiento}</span></p>
-                                                    <p><span className="text-gray-500">Ajuste:</span> <span className="font-medium text-gray-900 ml-2">{alquiler.ajusteTipo} {alquiler.ajusteValor ? `(${alquiler.ajusteValor}%)` : ''} ({alquiler.ajusteFrecuencia} meses)</span></p>
+                                <div className="animate-in fade-in duration-300 space-y-8">
+                                    {/* Key Metrics */}
+                                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                                        <div className="bg-indigo-50/50 p-4 rounded-xl border border-indigo-100 flex flex-col justify-between group hover:border-indigo-200 transition-colors">
+                                            <div className="flex items-center gap-3 mb-2">
+                                                <div className="p-2 bg-white rounded-lg shadow-sm text-indigo-600 group-hover:scale-110 transition-transform">
+                                                    <DollarSign size={18} />
                                                 </div>
+                                                <span className="text-xs font-bold uppercase text-indigo-400 tracking-wider">Monto Mensual</span>
                                             </div>
-
-                                            <div className="pb-4 border-b border-gray-100">
-                                                <h3 className="text-sm font-semibold text-indigo-600 mb-4 uppercase tracking-wider">Honorarios y Punitorios</h3>
-                                                <div className="space-y-4 text-sm">
-                                                    <p>
-                                                        <span className="text-gray-500">Honorarios:</span>
-                                                        <span className="font-medium text-gray-900 ml-2">
-                                                            {alquiler.honorariosTipo === 'fijo'
-                                                                ? `$${alquiler.honorariosValor?.toLocaleString()} (Mensual)`
-                                                                : `${alquiler.honorariosValor}% (Mensual)`}
-                                                        </span>
-                                                    </p>
-                                                    <p>
-                                                        <span className="text-gray-500">Punitorios (Mora):</span>
-                                                        <span className="font-medium text-gray-900 ml-2">
-                                                            {alquiler.punitoriosTipo === 'fijo'
-                                                                ? `$${alquiler.punitoriosValor?.toLocaleString()} (Diario)`
-                                                                : `${alquiler.punitoriosValor}% (Diario)`}
-                                                        </span>
-                                                    </p>
-                                                </div>
-                                            </div>
-
                                             <div>
-                                                <h3 className="text-sm font-semibold text-indigo-600 mb-4 uppercase tracking-wider">Inquilino</h3>
-                                                <div className="bg-gray-50 p-4 rounded-lg space-y-2 text-sm">
-                                                    <p><span className="text-gray-500">Nombre:</span> <span className="font-medium text-gray-900 ml-2">{inquilino?.nombre || alquiler.nombreInquilino}</span></p>
-                                                    <p><span className="text-gray-500">DNI:</span> <span className="font-medium text-gray-900 ml-2">{inquilino?.dni || alquiler.dniInquilino || '-'}</span></p>
-                                                    <p className="text-gray-500 text-xs mt-2 pt-2 border-t border-gray-200">Editar datos en <Link href="/dashboard/clientes" className="text-indigo-600">Clientes</Link></p>
-                                                </div>
+                                                <p className="text-2xl font-bold text-gray-900 tracking-tight">${alquiler.montoMensual?.toLocaleString()}</p>
+                                                <p className="text-xs text-gray-500 font-medium mt-1">{alquiler.monedaAlquiler}</p>
                                             </div>
                                         </div>
 
-                                        {/* COLUMN 2 */}
-                                        <div className="space-y-6">
-                                            <div className="pb-4 border-b border-gray-100">
-                                                <h3 className="text-sm font-semibold text-indigo-600 mb-4 uppercase tracking-wider">Garantía</h3>
-                                                <div className="space-y-2 text-sm">
-                                                    <p><span className="text-gray-500">Tipo:</span> <span className="font-medium text-gray-900 capitalize ml-2">{alquiler.tipoGarantia?.replace('_', ' ')}</span></p>
+                                        <div className="bg-blue-50/50 p-4 rounded-xl border border-blue-100 flex flex-col justify-between group hover:border-blue-200 transition-colors">
+                                            <div className="flex items-center gap-3 mb-2">
+                                                <div className="p-2 bg-white rounded-lg shadow-sm text-blue-600 group-hover:scale-110 transition-transform">
+                                                    <Calendar size={18} />
+                                                </div>
+                                                <span className="text-xs font-bold uppercase text-blue-400 tracking-wider">Vencimiento</span>
+                                            </div>
+                                            <div>
+                                                <p className="text-2xl font-bold text-gray-900 tracking-tight">Día {alquiler.diaVencimiento}</p>
+                                                <p className="text-xs text-gray-500 font-medium mt-1">de cada mes</p>
+                                            </div>
+                                        </div>
+
+                                        <div className="bg-emerald-50/50 p-4 rounded-xl border border-emerald-100 flex flex-col justify-between group hover:border-emerald-200 transition-colors">
+                                            <div className="flex items-center gap-3 mb-2">
+                                                <div className="p-2 bg-white rounded-lg shadow-sm text-emerald-600 group-hover:scale-110 transition-transform">
+                                                    <TrendingUp size={18} />
+                                                </div>
+                                                <span className="text-xs font-bold uppercase text-emerald-400 tracking-wider">Ajuste</span>
+                                            </div>
+                                            <div>
+                                                <p className="text-lg font-bold text-gray-900 tracking-tight leading-tight">
+                                                    {alquiler.ajusteTipo === 'ICL' ? 'ICL' : alquiler.ajusteTipo === 'IPC' ? 'IPC' : alquiler.ajusteValor ? `${alquiler.ajusteValor}%` : alquiler.ajusteTipo}
+                                                </p>
+                                                <p className="text-xs text-gray-500 font-medium mt-1">Cada {alquiler.ajusteFrecuencia} meses</p>
+                                            </div>
+                                        </div>
+
+                                        <div className="bg-purple-50/50 p-4 rounded-xl border border-purple-100 flex flex-col justify-between group hover:border-purple-200 transition-colors">
+                                            <div className="flex items-center gap-3 mb-2">
+                                                <div className="p-2 bg-white rounded-lg shadow-sm text-purple-600 group-hover:scale-110 transition-transform">
+                                                    <Clock size={18} />
+                                                </div>
+                                                <span className="text-xs font-bold uppercase text-purple-400 tracking-wider">Vigencia</span>
+                                            </div>
+                                            <div>
+                                                <p className="text-sm font-semibold text-gray-900">{new Date(alquiler.fechaFin).toLocaleDateString()}</p>
+                                                <p className="text-xs text-gray-500 font-medium mt-1">Finaliza contrato</p>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                                        {/* Involucrados */}
+                                        <div className="space-y-4">
+                                            <h3 className="flex items-center gap-2 text-sm font-bold text-gray-900 uppercase tracking-widest pl-1">
+                                                <User size={16} className="text-gray-400" />
+                                                Involucrados
+                                            </h3>
+
+                                            {/* Inquilino Card */}
+                                            <div className="bg-white border border-gray-100 shadow-sm rounded-xl p-4 flex items-center gap-4 hover:shadow-md transition-shadow">
+                                                <div className="w-12 h-12 rounded-full bg-gray-100 flex items-center justify-center text-gray-500 font-bold text-lg border-2 border-white shadow-sm ring-1 ring-gray-100">
+                                                    {inquilino?.nombre.charAt(0) || alquiler.nombreInquilino?.charAt(0) || "I"}
+                                                </div>
+                                                <div className="flex-1 min-w-0">
+                                                    <p className="text-[10px] text-indigo-500 font-bold uppercase tracking-wider mb-0.5">Inquilino</p>
+                                                    <p className="font-semibold text-gray-900 truncate">{inquilino?.nombre || alquiler.nombreInquilino}</p>
+                                                    <p className="text-sm text-gray-500 font-mono">{inquilino?.dni || alquiler.dniInquilino || '-'}</p>
+                                                </div>
+                                                <Link href="/dashboard/clientes" className="p-2 text-gray-400 hover:text-indigo-600 hover:bg-gray-50 rounded-lg transition-colors" title="Ver perfil">
+                                                    <ExternalLink size={18} />
+                                                </Link>
+                                            </div>
+
+                                            {/* Garantía Card */}
+                                            <div className="bg-white border border-gray-100 shadow-sm rounded-xl p-4 flex items-center gap-4 hover:shadow-md transition-shadow">
+                                                <div className="w-12 h-12 rounded-full bg-orange-50 flex items-center justify-center text-orange-500 font-bold border-2 border-white shadow-sm ring-1 ring-orange-50">
+                                                    <Shield size={20} />
+                                                </div>
+                                                <div className="flex-1 min-w-0">
+                                                    <p className="text-[10px] text-orange-500 font-bold uppercase tracking-wider mb-0.5">
+                                                        {alquiler.tipoGarantia === 'seguro_caucion' ? 'Seguro de Caución' : 'Garante'}
+                                                    </p>
                                                     {alquiler.tipoGarantia === 'garante' ? (
                                                         <>
-                                                            <p><span className="text-gray-500">Nombre:</span> <span className="font-medium text-gray-900 ml-2">{alquiler.garante?.nombre}</span></p>
-                                                            <p><span className="text-gray-500">DNI:</span> <span className="font-medium text-gray-900 ml-2">{alquiler.garante?.dni}</span></p>
+                                                            <p className="font-semibold text-gray-900 truncate">{alquiler.garante?.nombre || 'Sin nombre'}</p>
+                                                            <p className="text-sm text-gray-500 font-mono">{alquiler.garante?.dni || '-'}</p>
                                                         </>
                                                     ) : (
                                                         <>
-                                                            <p><span className="text-gray-500">Compañía:</span> <span className="font-medium text-gray-900 ml-2">{alquiler.seguroCaucion?.compania}</span></p>
-                                                            <p><span className="text-gray-500">Póliza:</span> <span className="font-medium text-gray-900 ml-2">{alquiler.seguroCaucion?.numeroPoliza}</span></p>
+                                                            <p className="font-semibold text-gray-900 truncate">{alquiler.seguroCaucion?.compania || 'Sin compañía'}</p>
+                                                            <p className="text-sm text-gray-500">Póliza: {alquiler.seguroCaucion?.numeroPoliza || '-'}</p>
                                                         </>
                                                     )}
                                                 </div>
                                             </div>
+                                        </div>
 
-                                            <div className="pb-4 border-b border-gray-100">
-                                                <h3 className="text-sm font-semibold text-indigo-600 mb-4 uppercase tracking-wider">Servicios</h3>
-                                                <div className="flex flex-wrap gap-2">
-                                                    {alquiler.serviciosAdicionales && alquiler.serviciosAdicionales.length > 0 ? (
-                                                        alquiler.serviciosAdicionales.map((s, i) => (
-                                                            <span key={i} className="px-2 py-1 bg-gray-100 text-gray-700 text-xs rounded-full border border-gray-200">
-                                                                {s}
-                                                            </span>
-                                                        ))
-                                                    ) : <span className="text-gray-400 text-sm italic">Sin servicios adicionales</span>}
+                                        {/* Financial & Services */}
+                                        <div className="space-y-4">
+                                            <h3 className="flex items-center gap-2 text-sm font-bold text-gray-900 uppercase tracking-widest pl-1">
+                                                <FileText size={16} className="text-gray-400" />
+                                                Condiciones y Servicios
+                                            </h3>
+
+                                            <div className="bg-gray-50/50 rounded-xl p-5 border border-gray-100 space-y-4">
+                                                {/* Honorarios */}
+                                                <div className="flex justify-between items-center pb-3 border-b border-gray-200/60 last:border-0 last:pb-0">
+                                                    <div className="flex items-center gap-3">
+                                                        <div className="p-1.5 bg-white rounded text-gray-500 shadow-sm">
+                                                            <Percent size={14} />
+                                                        </div>
+                                                        <span className="text-sm text-gray-600 font-medium">Honorarios</span>
+                                                    </div>
+                                                    <span className="text-sm font-semibold text-gray-900">
+                                                        {alquiler.honorariosTipo === 'fijo'
+                                                            ? `$${alquiler.honorariosValor?.toLocaleString()}`
+                                                            : `${alquiler.honorariosValor}%`}
+                                                        <span className="text-xs text-gray-400 font-normal ml-1">/ mes</span>
+                                                    </span>
+                                                </div>
+
+                                                {/* Punitorios */}
+                                                <div className="flex justify-between items-center pb-3 border-b border-gray-200/60 last:border-0 last:pb-0">
+                                                    <div className="flex items-center gap-3">
+                                                        <div className="p-1.5 bg-white rounded text-gray-500 shadow-sm">
+                                                            <AlertCircle size={14} />
+                                                        </div>
+                                                        <span className="text-sm text-gray-600 font-medium">Punitorios (Diario)</span>
+                                                    </div>
+                                                    <span className="text-sm font-semibold text-gray-900">
+                                                        {alquiler.punitoriosTipo === 'fijo'
+                                                            ? `$${alquiler.punitoriosValor?.toLocaleString()}`
+                                                            : `${alquiler.punitoriosValor}%`}
+                                                    </span>
+                                                </div>
+
+                                                {/* Servicios */}
+                                                <div className="pt-2">
+                                                    <span className="text-xs font-semibold text-gray-400 uppercase tracking-wider block mb-3">Servicios Incluidos</span>
+                                                    <div className="flex flex-wrap gap-2">
+                                                        {alquiler.serviciosAdicionales && alquiler.serviciosAdicionales.length > 0 ? (
+                                                            alquiler.serviciosAdicionales.map((s, i) => (
+                                                                <span key={i} className="inline-flex items-center gap-1.5 px-3 py-1 bg-white text-gray-700 text-xs font-medium rounded-full border border-gray-200 shadow-sm">
+                                                                    <Zap size={10} className="text-yellow-500 fill-yellow-500" />
+                                                                    {s}
+                                                                </span>
+                                                            ))
+                                                        ) : (
+                                                            <span className="text-xs text-gray-400 italic">No hay servicios adicionales especificados.</span>
+                                                        )}
+                                                    </div>
                                                 </div>
                                             </div>
                                         </div>

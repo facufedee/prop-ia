@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { PublicProperty } from "@/infrastructure/services/publicService";
 import { MapPin, Bath, Bed, Maximize, Heart, Share2, ChevronLeft, ChevronRight, MessageCircle } from "lucide-react";
 
@@ -35,10 +36,13 @@ export default function PropertyHorizontalCard({ property }: PropertyHorizontalC
                 {property.imageUrls && property.imageUrls.length > 0 ? (
                     <>
                         <div className="absolute inset-0">
-                            <img
+                            <Image
                                 src={property.imageUrls[currentImageIndex]}
                                 alt={property.title}
-                                className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                                fill
+                                className="object-cover transition-transform duration-500 group-hover:scale-105"
+                                sizes="(max-width: 640px) 100vw, (max-width: 1024px) 320px, 360px"
+                                priority={currentImageIndex === 0}
                             />
                         </div>
 

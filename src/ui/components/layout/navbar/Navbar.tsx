@@ -3,6 +3,7 @@
 import { app, auth } from "@/infrastructure/firebase/client";
 import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { Menu, X, ChevronDown, User as UserIcon, LogOut, LayoutDashboard, Settings, Bot, Home, Bell, Check, ExternalLink } from "lucide-react";
 import { onAuthStateChanged, signOut, type User, type Auth } from "firebase/auth";
 import { notificationService, type AppNotification } from "@/infrastructure/services/notificationService";
@@ -113,11 +114,15 @@ export default function Navbar() {
 
         {/* Logo */}
         <Link href="/" className="flex items-center gap-2 hover:opacity-80 transition-opacity">
-          <img
-            src="/assets/img/logo_web_ZetaProp.png"
-            alt="Zeta Prop Logo"
-            className={`h-8 w-auto transition-transform duration-300 ${scrolled ? 'scale-95' : 'scale-100'}`}
-          />
+          <div className={`relative h-8 w-40 transition-transform duration-300 ${scrolled ? 'scale-95' : 'scale-100'}`}>
+            <Image
+              src="/assets/img/logo_web_ZetaProp.png"
+              alt="Zeta Prop Logo"
+              fill
+              className="object-contain object-left"
+              priority
+            />
+          </div>
         </Link>
 
         {/* Desktop menu */}
@@ -278,9 +283,15 @@ export default function Navbar() {
                   onClick={() => setProfileOpen(!profileOpen)}
                   className="flex items-center gap-2 px-3 py-2 rounded-xl hover:bg-gray-100 transition"
                 >
-                  <div className="w-8 h-8 rounded-full bg-indigo-100 flex items-center justify-center text-indigo-600">
+                  <div className="w-8 h-8 rounded-full bg-indigo-100 flex items-center justify-center text-indigo-600 relative overflow-hidden">
                     {user.photoURL ? (
-                      <img src={user.photoURL} alt="Profile" className="w-8 h-8 rounded-full object-cover" />
+                      <Image
+                        src={user.photoURL}
+                        alt="Profile"
+                        fill
+                        className="object-cover"
+                        sizes="32px"
+                      />
                     ) : (
                       <UserIcon size={18} />
                     )}
@@ -294,9 +305,15 @@ export default function Navbar() {
                 {profileOpen && (
                   <div className="absolute right-0 mt-2 w-64 bg-white rounded-xl shadow-lg border border-gray-100 py-2 animate-in fade-in zoom-in-95 duration-200">
                     <div className="px-4 py-3 border-b border-gray-50 flex items-center gap-3">
-                      <div className="w-10 h-10 rounded-full bg-indigo-100 flex items-center justify-center text-indigo-600 flex-shrink-0">
+                      <div className="w-10 h-10 rounded-full bg-indigo-100 flex items-center justify-center text-indigo-600 flex-shrink-0 relative overflow-hidden">
                         {user.photoURL ? (
-                          <img src={user.photoURL} alt="Profile" className="w-10 h-10 rounded-full object-cover" />
+                          <Image
+                            src={user.photoURL}
+                            alt="Profile"
+                            fill
+                            className="object-cover"
+                            sizes="40px"
+                          />
                         ) : (
                           <span className="font-bold text-lg">{user.displayName?.charAt(0).toUpperCase() || user.email?.charAt(0).toUpperCase()}</span>
                         )}
@@ -309,16 +326,10 @@ export default function Navbar() {
                           {user.email}
                         </p>
                         <p className="text-[10px] text-indigo-600 font-bold uppercase mt-0.5">
-                          {/* Since user object might not have subscription joined, showing simple 'Plan Básico' if free, or rely on future role update.
-                                For now, let's assuming if they are logged in they are at least Basic.
-                                Better: Show nothing or fetch subscription.
-                                Given the user request is specifically about the 'Cliente Free' label which usually comes from role,
-                                and we want to change that visual.
-                            */}
                           {(user as any)?.subscription?.planTier === 'basic' ? 'Plan Básico' :
                             (user as any)?.subscription?.planTier === 'professional' ? 'Profesional' :
                               (user as any)?.subscription?.planTier === 'enterprise' ? 'Empresarial' :
-                                'Gestión Inteligente' /* Fallback friendly name */}
+                                'Gestión Inteligente'}
                         </p>
                       </div>
                     </div>
@@ -329,7 +340,7 @@ export default function Navbar() {
                         className="flex items-center gap-2 px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
                         onClick={() => setProfileOpen(false)}
                       >
-                        <Home size={16} /> {/* Note: Need to import Home if not already, or use ArrowLeft/House */}
+                        <Home size={16} />
                         Volver al inicio
                       </Link>
 
@@ -406,9 +417,15 @@ export default function Navbar() {
             ) : (
               <>
                 <div className="flex items-center gap-3 px-2 mb-4">
-                  <div className="w-12 h-12 rounded-full bg-indigo-100 flex items-center justify-center text-indigo-600">
+                  <div className="w-12 h-12 rounded-full bg-indigo-100 flex items-center justify-center text-indigo-600 relative overflow-hidden">
                     {user.photoURL ? (
-                      <img src={user.photoURL} alt="Profile" className="w-12 h-12 rounded-full object-cover" />
+                      <Image
+                        src={user.photoURL}
+                        alt="Profile"
+                        fill
+                        className="object-cover"
+                        sizes="48px"
+                      />
                     ) : (
                       <UserIcon size={24} />
                     )}

@@ -12,7 +12,7 @@ interface PaymentEditModalProps {
     onClose: () => void;
     payment: Partial<Pago>;
     rental: Alquiler;
-    onSave: (payment: Pago) => void;
+    onSave: (payment: Pago, applyToFuture?: boolean) => void;
 }
 
 const PRESET_SERVICES = ['Expensas', 'Agua', 'Luz', 'Gas', 'Impuesto Municipal', 'Reparaciones'];
@@ -164,6 +164,8 @@ export default function PaymentEditModal({ isOpen, onClose, payment, rental, onS
 
     // Penalty Logic
     const [penaltyInfo, setPenaltyInfo] = useState<{ days: number, suggested: number }>({ days: 0, suggested: 0 });
+
+    const [applyToFuture, setApplyToFuture] = useState(false);
 
     useEffect(() => {
         if (isOpen) {
@@ -366,6 +368,7 @@ export default function PaymentEditModal({ isOpen, onClose, payment, rental, onS
 
     const updateServicesTotal = (srvs: { concepto: string; monto: number }[]) => {
         const total = srvs.reduce((sum, s) => sum + (Number(s.monto) || 0), 0);
+        // We update the form state for visual feedback, but THE SOURCE OF TRUTH IS 'services' array
         setForm(prev => ({ ...prev, montoServicios: total }));
     };
 
@@ -384,20 +387,34 @@ export default function PaymentEditModal({ isOpen, onClose, payment, rental, onS
 
     const handleSave = () => {
         if (!form.id) return;
-        const total = calculateTotal();
+
+        // Recalculate Total from components to be sure
+        const alquilerVal = Number(form.montoAlquiler) || 0;
+        const punitoriosVal = Number(form.montoPunitorios) || 0;
+        const discountVal = calculateDiscountAmount();
+        const servicesTotal = services.reduce((sum, s) => sum + (Number(s.monto) || 0), 0);
+
+        // Honorarios is separate, usually subtracted from owner or handled in desglose, 
+        // but for TOTAL TO PAY by tenant, it depends if tenant pays honorarios.
+        // In this system, it seems 'monto' (Total) includes Rent + Services + Punitorios - Discount.
+        // Honorarios are stored in desglose but NOT added to the Total usually (Owner pays).
+        // BUT wait, user disabled 'Honorarios' from total previously.
+        const total = alquilerVal + servicesTotal + punitoriosVal - discountVal;
+
         const finalPayment: Pago = {
             ...form as Pago,
             detalleServicios: services,
+            montoServicios: servicesTotal, // Explicitly set this to match detail, avoiding duplication in PaymentCard if it sums both
             monto: total,
-            montoDescuento: calculateDiscountAmount(),
+            montoDescuento: discountVal,
             desglose: {
-                ...payment.desglose, // keep existing Breakdown generic fields if any
-                alquilerPuro: Number(form.montoAlquiler) || 0,
-                servicios: services.reduce((sum, s) => sum + (Number(s.monto) || 0), 0),
-                honorarios: honorarios, // -- ADDED
+                ...payment.desglose,
+                alquilerPuro: alquilerVal,
+                servicios: servicesTotal,
+                honorarios: honorarios,
             }
         };
-        onSave(finalPayment);
+        onSave(finalPayment, applyToFuture);
         onClose();
     };
 
@@ -659,6 +676,17 @@ export default function PaymentEditModal({ isOpen, onClose, payment, rental, onS
                                 <div className="font-bold text-xl text-indigo-600">
                                     ${calculateTotal().toLocaleString('es-AR')}
                                 </div>
+                                {services.some(s => s.concepto === 'Redondeo') && (
+                                    <label className="flex items-center gap-2 mt-1 text-[10px] text-gray-500 cursor-pointer select-none">
+                                        <input
+                                            type="checkbox"
+                                            checked={applyToFuture}
+                                            onChange={e => setApplyToFuture(e.target.checked)}
+                                            className="rounded border-gray-300 text-indigo-600 focus:ring-indigo-500 w-3 h-3"
+                                        />
+                                        Aplicar redondeo a futuros pagos
+                                    </label>
+                                )}
                             </div>
                             <div className="h-8 w-px bg-gray-300 mx-2"></div>
                             <div>

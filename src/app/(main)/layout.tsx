@@ -55,7 +55,7 @@ export const metadata: Metadata = {
     siteName: 'Zeta Prop',
     images: [
       {
-        url: '/assets/img/Logo ZetaProp Fondo Blanco 2.png',
+        url: '/assets/img/Logo%20ZetaProp%20Fondo%20Blanco%202.png',
         width: 1200,
         height: 630,
         alt: 'Zeta Prop - Fondo Blanco',
@@ -72,7 +72,7 @@ export const metadata: Metadata = {
     card: 'summary_large_image',
     title: 'Zeta Prop | El CRM de las Inmobiliarias Modernas',
     description: 'Gestioná propiedades, alquileres y clientes de forma eficiente.',
-    images: ['/assets/img/Logo%20ZetaProp%20Fondo%20Blanco.png'],
+    images: ['/assets/img/Logo%20ZetaProp%20Fondo%20Blanco%202.png'],
     creator: '@zetaprop',
     site: '@zetaprop',
   },

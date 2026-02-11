@@ -36,7 +36,9 @@ export const PaymentCard = ({ payment, contract, onUpdate, onMarkPaid, onDownloa
     // Calcular totales
     // Calcular totales
     const baseAlquiler = payment.montoAlquiler || 0;
-    const servicios = (payment.detalleServicios || []).reduce((acc, s) => acc + (s.monto || 0), 0) + (payment.montoServicios || 0);
+    const servicios = (payment.detalleServicios && payment.detalleServicios.length > 0)
+        ? payment.detalleServicios.reduce((acc, s) => acc + (s.monto || 0), 0)
+        : (payment.montoServicios || 0);
     const adicionales = (payment.cargosAdicionales || []).reduce((acc, c) => acc + (c.monto || 0), 0);
     const punitorios = payment.montoPunitorios || 0;
 

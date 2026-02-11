@@ -170,7 +170,9 @@ export default function PaymentPlanTable({ alquiler, inquilino, onUpdatePayment,
 
         const rent = pago.montoAlquiler || alquiler.montoMensual;
         const punitorios = pago.montoPunitorios || 0;
-        const servicios = (pago.detalleServicios || []).reduce((acc, s) => acc + (s.monto || 0), 0) + (pago.montoServicios || 0);
+        const servicios = (pago.detalleServicios && pago.detalleServicios.length > 0)
+            ? pago.detalleServicios.reduce((acc, s) => acc + (s.monto || 0), 0)
+            : (pago.montoServicios || 0);
         const cargosAdicionales = (pago.cargosAdicionales || []).reduce((acc, s) => acc + (s.monto || 0), 0);
         const otros = pago.desglose?.otros || 0;
         const descuentos = pago.montoDescuento || 0;
@@ -338,8 +340,73 @@ export default function PaymentPlanTable({ alquiler, inquilino, onUpdatePayment,
                     onClose={() => setSelectedPayment(null)}
                     payment={selectedPayment}
                     rental={alquiler}
-                    onSave={(updated) => {
-                        onUpdatePayment(updated);
+                    onSave={(updated, applyToFuture) => {
+                        if (applyToFuture && onUpdateContract) {
+                            // BULK UPDATE STRATEGY to avoid race conditions
+                            const monthToMatch = updated.mes;
+
+                            // 1. Start with existing history
+                            let newHistory = [...alquiler.historialPagos];
+
+                            // 2. Remove the "old" version of the current payment if it exists
+                            // Match by Month as it is the key
+                            const existingIndex = newHistory.findIndex(p => p.mes === monthToMatch);
+
+                            if (existingIndex >= 0) {
+                                newHistory[existingIndex] = updated;
+                            } else {
+                                newHistory.push(updated);
+                            }
+
+                            // 3. Find rounding service to propagate
+                            const roundingService = updated.detalleServicios?.find(s => s.concepto === 'Redondeo');
+                            if (roundingService) {
+                                // 4. Update FUTURE pending payments in the history
+                                newHistory = newHistory.map(p => {
+                                    // Skip the one we just updated (checked by month)
+                                    if (p.mes === monthToMatch) return p;
+
+                                    if (p.estado === 'pendiente' && p.mes > monthToMatch) {
+                                        const currentServices = p.detalleServicios || [];
+                                        const hasRounding = currentServices.some(s => s.concepto === 'Redondeo');
+
+                                        if (!hasRounding) {
+                                            const newServices = [...currentServices, { concepto: 'Redondeo', monto: roundingService.monto }];
+                                            // Recalculate Logic
+                                            const servicesTotal = (newServices && newServices.length > 0)
+                                                ? newServices.reduce((acc, s) => acc + (Number(s.monto) || 0), 0)
+                                                : 0;
+
+                                            const rent = p.montoAlquiler || alquiler.montoMensual;
+                                            const punitorios = p.montoPunitorios || 0;
+                                            const discount = p.montoDescuento || 0;
+                                            // Priority logic for services total
+                                            const total = rent + servicesTotal + punitorios - discount;
+
+                                            // Ensure we update both detail and total
+                                            return {
+                                                ...p,
+                                                detalleServicios: newServices,
+                                                montoServicios: servicesTotal,
+                                                monto: total,
+                                                desglose: {
+                                                    ...p.desglose,
+                                                    servicios: servicesTotal
+                                                }
+                                            } as Pago;
+                                        }
+                                    }
+                                    return p;
+                                });
+                            }
+
+                            // 5. Save EVERYTHING in one go
+                            onUpdateContract({ historialPagos: newHistory });
+
+                        } else {
+                            // Standard single update
+                            onUpdatePayment(updated);
+                        }
                         setSelectedPayment(null);
                     }}
                 />

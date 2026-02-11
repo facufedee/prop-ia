@@ -2,6 +2,7 @@
 import { useState } from "react";
 import { Property } from "@/ui/components/tables/PropertiesTable";
 import Link from "next/link";
+import Image from "next/image";
 import { MapPin, Ruler, BedDouble, Bath, Car, Trash2, Edit, Printer, Share2, Eye, LayoutGrid, Check, X, MoreVertical, Copy, Power, DollarSign } from "lucide-react";
 
 interface PropertyCardProps {
@@ -56,11 +57,13 @@ export default function PropertyCard({ property, onDelete, onUpdate, onDuplicate
             {/* Image Header */}
             <div className="relative h-48 bg-gray-100 group">
                 {property.imageUrls && property.imageUrls.length > 0 ? (
-                    <img
+                    <Image
                         src={property.imageUrls[0]}
                         alt={property.title}
-                        className={`w-full h-full object-cover transition-all ${property.status === 'sold' ? 'grayscale' : ''}`}
-                        loading="lazy"
+                        fill
+                        className={`object-cover transition-all ${property.status === 'sold' ? 'grayscale' : ''}`}
+                        sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                        priority={false}
                     />
                 ) : (
                     <div className="w-full h-full flex items-center justify-center text-gray-400">
