@@ -6,7 +6,7 @@ import { User } from "@/domain/models/User";
 import { RoleProtection } from "@/ui/components/auth/RoleProtection";
 import { format } from "date-fns";
 import { es } from "date-fns/locale";
-import { Shield, User as UserIcon, Calendar, Mail, Search, Trash2, Ban, CheckCircle, Clock } from "lucide-react";
+import { Shield, User as UserIcon, Calendar, Mail, Search, Trash2, Ban, CheckCircle, Clock, Send } from "lucide-react";
 import { toast } from "sonner";
 import { PlanTier } from "@/domain/models/Subscription";
 
@@ -92,6 +92,35 @@ export default function PlatformManagementPage() {
             console.error("Error updating plan:", error);
             setUsers(previousUsers); // Rollback
             toast.error("Error al actualizar el plan");
+        }
+    };
+
+    const handleSendWelcomeEmail = async (user: User) => {
+        if (!confirm(`¿Enviar email de bienvenida a ${user.email}?`)) return;
+
+        try {
+            const response = await fetch('/api/notifications/trigger', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    event: 'welcomeEmail',
+                    data: {
+                        email: user.email,
+                        name: user.displayName || user.email
+                    }
+                })
+            });
+
+            const result = await response.json();
+
+            if (result.success) {
+                toast.success("Email enviado correctamente");
+            } else {
+                toast.error("Error al enviar email: " + (result.error || "Desconocido"));
+            }
+        } catch (error) {
+            console.error("Error sending welcome email:", error);
+            toast.error("Error de conexión al enviar email");
         }
     };
 
@@ -232,6 +261,13 @@ export default function PlatformManagementPage() {
                                             </td>
                                             <td className="px-6 py-4 text-right">
                                                 <div className="flex items-center justify-end gap-2">
+                                                    <button
+                                                        onClick={() => handleSendWelcomeEmail(user)}
+                                                        className="p-2 text-indigo-600 hover:bg-indigo-50 rounded-lg transition-colors"
+                                                        title="Enviar Bienvenida"
+                                                    >
+                                                        <Send size={18} />
+                                                    </button>
                                                     <button
                                                         onClick={() => handleToggleStatus(user.uid, user.disabled)}
                                                         className={`p-2 rounded-lg transition-colors ${user.disabled

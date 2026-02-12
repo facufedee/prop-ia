@@ -8,6 +8,7 @@ export interface User {
     roleId?: string;
     createdAt?: Date;
     lastLogin?: Date;
+    loginCount?: number;
     organizationId?: string;
     branchId?: string; // The branch this user belongs to (if agent) or currently managing (if admin context)
     // Subscription info (optional, joined from Subscription collection)

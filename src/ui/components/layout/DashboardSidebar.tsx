@@ -54,12 +54,16 @@ type MenuItem = {
 const MENU_ITEMS: MenuItem[] = [
   { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
 
-  // Core Business (User requested order: Propiedades, Alquileres, Clientes, Finanzas, Noticias, Soporte)
-  { href: "/dashboard/propiedades", label: "Propiedades", icon: Home },
+  // Core Business (User requested order: Alquileres, Propiedades, Clientes, Finanzas, Noticias, Tutoriales, Soporte)
   { href: "/dashboard/alquileres", label: "Alquileres", icon: Key },
+  { href: "/dashboard/propiedades", label: "Propiedades", icon: Home },
   { href: "/dashboard/clientes", label: "Clientes", icon: Users },
   { href: "/dashboard/finanzas", label: "Finanzas", icon: DollarSign },
-  { href: "/dashboard/novedades", label: "Noticias", icon: Sparkles }, // Renamed from Novedades Zeta
+  { href: "/dashboard/novedades", label: "Noticias", icon: Sparkles },
+
+  // Support & Education (Prioritized)
+  { href: "/dashboard/tutoriales", label: "Tutoriales", icon: GraduationCap },
+  { href: "/dashboard/soporte", label: "Soporte", icon: Headphones },
 
   // Other Tools
   { href: "/dashboard/tasacion", label: "Tasación IA", icon: Calculator },
@@ -76,14 +80,12 @@ const MENU_ITEMS: MenuItem[] = [
   { href: "/dashboard/sucursales", label: "Multi Sucursal", icon: Building2, permission: "/dashboard/sucursales" },
   { href: "/dashboard/gestion-plataforma", label: "Gestión Plataforma", icon: Shield, permission: "/dashboard/gestion-plataforma" },
 
-  // Support & Admin
-  { href: "/dashboard/soporte", label: "Soporte", icon: Headphones },
+  // Admin & Config
   { href: "/dashboard/soporte/ticketera", label: "Ticketera", icon: Ticket, adminOnly: true },
   { href: "/dashboard/bitacora", label: "Bitácora", icon: BookOpen, adminOnly: true },
   { href: "/dashboard/configuracion/roles", label: "Roles y Permisos", icon: UserCog, adminOnly: true },
   { href: "/dashboard/configuracion/suscripciones", label: "Planes y Suscripciones", icon: Package, adminOnly: true },
   { href: "/dashboard/configuracion/backup", label: "Backup", icon: Database, adminOnly: true },
-  { href: "/dashboard/tutoriales", label: "Tutoriales", icon: GraduationCap },
   { href: "/dashboard/configuracion", label: "Configuración", icon: Settings },
 ];
 

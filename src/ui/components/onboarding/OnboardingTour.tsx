@@ -4,7 +4,8 @@ import { useEffect, useState, useCallback } from "react";
 import { createPortal } from "react-dom";
 import { X, ArrowRight, ArrowLeft } from "lucide-react";
 
-const TOUR_STORAGE_KEY = "zeta_prop_onboarding_views";
+import { useAuth } from "@/ui/context/AuthContext";
+
 const MAX_VIEWS = 3;
 
 interface TourStep {
@@ -22,15 +23,21 @@ const STEPS: TourStep[] = [
         // No targetId -> Centered Modal
     },
     {
-        targetId: "nav-item-propiedades",
-        title: "Propiedades",
-        description: "Aquí es donde cargas y gestionas todo tu inventario. Podrás agregar nuevas propiedades, editarlas y compartirlas.",
-        position: "right"
-    },
-    {
         targetId: "nav-item-alquileres",
         title: "Alquileres",
         description: "Administra contratos, vencimientos y actualizaciones de tus alquileres activos.",
+        position: "right"
+    },
+    {
+        targetId: "nav-item-propiedades",
+        title: "Propiedades",
+        description: "Aquí es donde cargas y gestionas todo tu inventario. Podés agregar nuevas propiedades, editarlas y compartirlas.",
+        position: "right"
+    },
+    {
+        targetId: "nav-item-clientes",
+        title: "Clientes",
+        description: "Gestiona inquilinos, propietarios y garantes. Centraliza toda la información de tus contactos.",
         position: "right"
     },
     {
@@ -40,39 +47,47 @@ const STEPS: TourStep[] = [
         position: "right"
     },
     {
-        targetId: "nav-item-soporte",
-        title: "Soporte",
-        description: "¿Necesitás ayuda? Acá podrás crear tickets de soporte y ver el estado de tus consultas.",
+        targetId: "nav-item-novedades",
+        title: "Noticias",
+        description: "Enterate de las últimas actualizaciones y mejoras que agregamos a Zeta Prop.",
         position: "right"
     },
     {
-        targetId: "nav-item-novedades-zeta",
-        title: "Novedades",
-        description: "Enterate de las últimas actualizaciones y mejoras que agregamos a Zeta Prop.",
+        targetId: "nav-item-tutoriales",
+        title: "Tutoriales",
+        description: "¿Tenés dudas? Mirá nuestros videos paso a paso para dominar la plataforma.",
+        position: "right"
+    },
+    {
+        targetId: "nav-item-soporte",
+        title: "Soporte",
+        description: "¿Necesitás ayuda? Acá podrás crear tickets de soporte y ver el estado de tus consultas.",
         position: "right"
     }
 ];
 
 export default function OnboardingTour() {
+    const { userData } = useAuth();
     const [currentStepIndex, setCurrentStepIndex] = useState(-1);
     const [active, setActive] = useState(false);
     const [targetRect, setTargetRect] = useState<DOMRect | null>(null);
     const [windowSize, setWindowSize] = useState({ width: 0, height: 0 });
 
     useEffect(() => {
-        // Init check
-        const views = parseInt(localStorage.getItem(TOUR_STORAGE_KEY) || "0", 10);
-        if (views < MAX_VIEWS) {
-            // Delay start
-            const timer = setTimeout(() => {
-                setActive(true);
-                setCurrentStepIndex(0);
-                // Increment view count immediately
-                localStorage.setItem(TOUR_STORAGE_KEY, (views + 1).toString());
-            }, 1000);
-            return () => clearTimeout(timer);
+        // Check login count
+        if (userData && (userData.loginCount || 0) <= MAX_VIEWS) {
+            // Check session storage to avoid showing again in same session if dismissed/completed
+            const hasSeenSession = sessionStorage.getItem("hasSeenOnboardingSession");
+            if (!hasSeenSession) {
+                // Delay start
+                const timer = setTimeout(() => {
+                    setActive(true);
+                    setCurrentStepIndex(0);
+                }, 1500);
+                return () => clearTimeout(timer);
+            }
         }
-    }, []);
+    }, [userData]);
 
     const updateTargetRect = useCallback(() => {
         setWindowSize({ width: window.innerWidth, height: window.innerHeight });
@@ -129,6 +144,7 @@ export default function OnboardingTour() {
     const handleDismiss = () => {
         setActive(false);
         setCurrentStepIndex(-1);
+        sessionStorage.setItem("hasSeenOnboardingSession", "true");
     };
 
     if (!active || currentStepIndex === -1) return null;

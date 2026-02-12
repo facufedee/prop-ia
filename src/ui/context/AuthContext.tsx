@@ -12,6 +12,7 @@ interface AuthContextType {
   loading: boolean;
   userRole: Role | null;
   userPermissions: string[];
+  userData: any | null;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -20,6 +21,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
   const [userRole, setUserRole] = useState<Role | null>(null);
+  const [userData, setUserData] = useState<any | null>(null);
 
   useEffect(() => {
     if (!auth) {
@@ -34,6 +36,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       } else {
         Cookies.remove("authToken");
         setUserRole(null);
+        setUserData(null);
         setLoading(false); // If no user, stop loading
       }
     });
@@ -48,15 +51,17 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     const userRef = doc(db, "users", user.uid);
     const unsubSnapshot = onSnapshot(userRef, async (docSnap) => {
       if (docSnap.exists()) {
-        const userData = docSnap.data();
-        if (userData.roleId) {
+        const data = docSnap.data();
+        setUserData(data);
+
+        if (data.roleId) {
           try {
-            const role = await roleService.getRoleById(userData.roleId);
+            const role = await roleService.getRoleById(data.roleId);
             // Optional: Merge logoUrl if stored in user doc
-            if (userData.logoUrl && role) {
+            if (data.logoUrl && role) {
               // We cast to any to attach logoUrl if Role type doesn't support it native yet, 
               // or we expect Role to generally match what we need.
-              (role as any).logoUrl = userData.logoUrl;
+              (role as any).logoUrl = data.logoUrl;
             }
             setUserRole(role);
           } catch (error) {
@@ -76,7 +81,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const userPermissions = userRole?.permissions || [];
 
   return (
-    <AuthContext.Provider value={{ user, loading, userRole, userPermissions }}>
+    <AuthContext.Provider value={{ user, loading, userRole, userPermissions, userData }}>
       {children}
     </AuthContext.Provider>
   );

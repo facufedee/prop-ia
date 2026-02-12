@@ -108,5 +108,68 @@ export const emailNotificationService = {
             console.error("Test email failed:", e);
             return false;
         }
+    },
+
+    sendWelcomeEmail: async (to: string, name: string): Promise<{ success: boolean; error?: any }> => {
+        console.log(`[Service] Attempting to send welcome email to ${to}`);
+        if (!postmarkClient) {
+            const msg = "[Service] Postmark client not configured for welcome email";
+            console.warn(msg);
+            return { success: false, error: msg };
+        }
+
+        const firstName = name ? name.split(' ')[0] : 'Hola';
+
+        try {
+            await postmarkClient.sendEmail({
+                "From": "facundo@zetaprop.com.ar",
+                "To": to,
+                "Subject": "Bienvenido/a a Zeta Prop 🚀 | Cargá tu primer alquiler hoy",
+                "HtmlBody": `
+                    <div style="font-family: Arial, sans-serif; color: #333; line-height: 1.6;">
+                        <p>Hola ${firstName},</p>
+                        
+                        <p>Gracias por registrarte en Zeta Prop.</p>
+                        
+                        <p>Ya podés comenzar a organizar tu gestión desde hoy mismo.</p>
+                        
+                        <p>Para empezar, te recomiendo estos pasos simples:</p>
+                        
+                        <ol>
+                            <li>Cargar una propiedad</li>
+                            <li>Agregar el propietario</li>
+                            <li>Incorporar el inquilino</li>
+                            <li>Registrar el contrato (aunque ya esté avanzado)</li>
+                            <li>Cargar pagos y vencimientos</li>
+                        </ol>
+                        
+                        <p>No importa si el alquiler ya está en curso. Podés ingresar contratos vigentes y continuar la gestión desde el punto en el que estás hoy.</p>
+                        
+                        <p>La idea es que tengas todo centralizado: propiedades, contratos, aumentos y cobranzas en un solo lugar.</p>
+                        
+                        <p>Si en algún momento necesitás ayuda o querés sugerir mejoras, podés escribirme directamente a este mail.</p>
+                        
+                        <p>Estoy para ayudarte.</p>
+                        
+                        <p><strong>Facundo</strong><br>
+                        Zeta Prop<br>
+                        <a href="https://zetaprop.com.ar">https://zetaprop.com.ar</a></p>
+                        
+                        <hr style="border: 0; border-top: 1px solid #eee; margin: 20px 0;">
+                        
+                        <p style="color: #666; font-size: 0.9em;">
+                            👉 <strong>Consejo:</strong> empezá cargando solo un alquiler. En menos de 10 minutos vas a ver cómo funciona todo el sistema.
+                        </p>
+                    </div>
+                `,
+                "TextBody": `Hola ${firstName},\n\nGracias por registrarte en Zeta Prop.\n\nYa podés comenzar a organizar tu gestión desde hoy mismo.\n\nPara empezar, te recomiendo estos pasos simples:\n1. Cargar una propiedad\n2. Agregar el propietario\n3. Incorporar el inquilino\n4. Registrar el contrato (aunque ya esté avanzado)\n5. Cargar pagos y vencimientos\n\nNo importa si el alquiler ya está en curso. Podés ingresar contratos vigentes y continuar la gestión desde el punto en el que estás hoy.\n\nLa idea es que tengas todo centralizado: propiedades, contratos, aumentos y cobranzas en un solo lugar.\n\nSi en algún momento necesitás ayuda o querés sugerir mejoras, podés escribirme directamente a este mail.\n\nEstoy para ayudarte.\n\nFacundo\nZeta Prop\nhttps://zetaprop.com.ar\n\nConsejo: empezá cargando solo un alquiler. En menos de 10 minutos vas a ver cómo funciona todo el sistema.`
+            });
+            console.log(`Welcome email sent to ${to}`);
+            return { success: true };
+        } catch (e: any) {
+            console.error("Welcome email failed:", e);
+            // Return specific error message
+            return { success: false, error: e.message || JSON.stringify(e) };
+        }
     }
 };

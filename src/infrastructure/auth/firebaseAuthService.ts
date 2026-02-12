@@ -46,6 +46,8 @@ export const saveUserToFirestore = async (user: User, additionalData?: { agencyN
                 photoURL: user.photoURL || "",
                 roleId: defaultRole?.id || null, // Can be null if really failed
                 createdAt: new Date(),
+                lastLogin: new Date(),
+                loginCount: 1,
                 emailVerified: user.emailVerified,
             });
 
@@ -63,7 +65,7 @@ export const saveUserToFirestore = async (user: User, additionalData?: { agencyN
                 console.warn("Failed to notify admins of new user:", notifyError);
             }
 
-            // Trigger Email Notification (Email)
+            // Trigger Email Notification (Email to Admin)
             fetch('/api/notifications/trigger', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
@@ -73,7 +75,32 @@ export const saveUserToFirestore = async (user: User, additionalData?: { agencyN
                     subject: 'Nuevo Usuario Registrado',
                     message: `Un nuevo usuario se ha registrado en la plataforma:<br/><strong>Email:</strong> ${user.email}<br/><strong>Agencia:</strong> ${additionalData?.agencyName || 'N/A'}`
                 })
-            }).catch(err => console.error("Failed to trigger email notification:", err));
+            }).catch(err => console.error("Failed to trigger admin email notification:", err));
+
+            // Trigger Welcome Email (to User)
+            fetch('/api/notifications/trigger', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    event: 'welcomeEmail',
+                    data: {
+                        email: user.email,
+                        name: user.displayName || additionalData?.agencyName || user.email
+                    }
+                })
+            }).catch(err => console.error("Failed to trigger welcome email:", err));
+        } else {
+            // User exists: Update login stats
+            // We want to increment loginCount. To avoid race conditions, we could use increment field value, 
+            // but for simple login stats, reading and updating is acceptable or using setDoc with merge.
+            // Let's use simple merge for now as we already read the doc.
+
+            const currentCount = userSnap.data().loginCount || 0;
+
+            await setDoc(userRef, {
+                lastLogin: new Date(),
+                loginCount: currentCount + 1
+            }, { merge: true });
         }
     } catch (error: any) {
         console.warn("Error saving user to Firestore (likely offline):", error.message);
