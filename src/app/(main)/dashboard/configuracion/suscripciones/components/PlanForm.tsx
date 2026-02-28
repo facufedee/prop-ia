@@ -7,7 +7,7 @@ import { Loader2 } from "lucide-react";
 import { Plan } from "@/domain/models/Subscription";
 import { planSchema, PlanFormData, defaultPlan } from "../schema";
 import { toast } from "sonner";
-import { doc, updateDoc, collection, addDoc } from "firebase/firestore";
+import { doc, updateDoc, collection, addDoc, setDoc } from "firebase/firestore";
 import { db } from "@/infrastructure/firebase/client";
 
 import {
@@ -82,10 +82,12 @@ export default function PlanForm({ initialData, onSave, onCancel }: PlanFormProp
             if (initialData?.id) {
                 console.log("Updating existing plan: ", initialData.id); // DEBUG
                 const planRef = doc(db, "plans", initialData.id);
-                await updateDoc(planRef, {
+                // Use setDoc with merge: true to handle cases where the document might not exist yet
+                // (e.g. standard plans loaded from static config but not yet in DB)
+                await setDoc(planRef, {
                     ...data,
                     updatedAt: new Date()
-                });
+                }, { merge: true });
                 toast.success("Plan actualizado correctamente");
             } else {
                 console.log("Creating new plan"); // DEBUG

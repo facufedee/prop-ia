@@ -8,6 +8,7 @@ import { inquilinosService } from "@/infrastructure/services/inquilinosService";
 import { Inquilino } from "@/domain/models/Inquilino";
 import PaymentPlanTable from "../components/PaymentPlanTable";
 import MaintenanceTab from "../components/MaintenanceTab";
+import LiquidacionesTab from "./components/LiquidacionesTab";
 
 import { contractDocxService } from "@/infrastructure/services/contractDocxService";
 import ContractGeneratorPreviewModal from "@/ui/components/modals/ContractGeneratorPreviewModal";
@@ -21,7 +22,7 @@ export default function AlquilerDetailPage() {
     const [alquiler, setAlquiler] = useState<Alquiler | null>(null);
     const [inquilino, setInquilino] = useState<Inquilino | null>(null);
     const [loading, setLoading] = useState(true);
-    const [activeTab, setActiveTab] = useState<'info' | 'pagos' | 'documentos' | 'mantenimiento'>('pagos');
+    const [activeTab, setActiveTab] = useState<'info' | 'pagos' | 'liquidaciones' | 'documentos' | 'mantenimiento'>('pagos');
     const [isEditing, setIsEditing] = useState(false);
     const [editData, setEditData] = useState<Partial<Alquiler>>({});
     const [showContractModal, setShowContractModal] = useState(false);
@@ -150,6 +151,9 @@ export default function AlquilerDetailPage() {
         if (!alquiler) return;
 
         // Find if payment exists in history
+        const isCurrentlyPending = alquiler.historialPagos.find(p => p.id === updatedPayment.id)?.estado !== 'pagado';
+        const isNowPaid = updatedPayment.estado === 'pagado';
+
         const message = updatedPayment.estado === 'pagado' ? "Pago registrado" : "Pago actualizado";
 
         // Remove old entry if exists and add new one (or just update)
@@ -183,7 +187,12 @@ export default function AlquilerDetailPage() {
             if (updated) {
                 setAlquiler(updated);
             }
-            // alert(message); // Optional
+            // Check if we just marked a payment as paid and we're not already on the liquidaciones tab
+            if (isCurrentlyPending && isNowPaid && activeTab !== 'liquidaciones') {
+                if (window.confirm("El cobro se ha registrado correctamente. ¿Deseas ir ahora a la pestaña de Liquidaciones para generar el pago al propietario?")) {
+                    setActiveTab('liquidaciones');
+                }
+            }
         } catch (error) {
             console.error("Error updating payment:", error);
             alert("Error al actualizar el pago");
@@ -374,6 +383,7 @@ export default function AlquilerDetailPage() {
 
     const tabs = [
         { id: 'pagos', label: 'Pagos', icon: DollarSign },
+        { id: 'liquidaciones', label: 'Liquidaciones', icon: FileText },
         { id: 'mantenimiento', label: 'Mantenimiento', icon: Wrench },
         { id: 'info', label: 'Información', icon: FileText },
     ] as const;
@@ -1175,6 +1185,17 @@ export default function AlquilerDetailPage() {
                             inquilino={inquilino}
                             onUpdatePayment={handleUpdatePayment}
                             onUpdateContract={handleUpdateContract}
+                        />
+                    </div>
+                )}
+
+                {activeTab === 'liquidaciones' && alquiler && (
+                    <div className="space-y-6">
+                        <LiquidacionesTab
+                            alquiler={alquiler}
+                            onUpdateAlquiler={async (updates) => {
+                                await handleUpdateContract(updates);
+                            }}
                         />
                     </div>
                 )}

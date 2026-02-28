@@ -153,7 +153,12 @@ export default function PaymentPlanTable({ alquiler, inquilino, onUpdatePayment,
         setConfirmingPayment(pago);
     };
 
-    const handleConfirmPayment = (pago: Pago, date: Date, isHistorical: boolean) => {
+    const handleConfirmPayment = (
+        pago: Pago,
+        date: Date,
+        isHistorical: boolean,
+        methodData?: { metodoPago: 'efectivo' | 'transferencia', fechaTransferencia?: string, nroComprobante?: string }
+    ) => {
 
         // Ensure we save the breakdown logic permanently
         let honorarios = pago.desglose?.honorarios;
@@ -187,6 +192,7 @@ export default function PaymentPlanTable({ alquiler, inquilino, onUpdatePayment,
             estado: 'pagado',
             fechaPago: date,
             monto: totalCalculado, // lock in the total
+            ...(methodData || {}),
             desglose: {
                 alquilerPuro: rent,
                 servicios: servicios,

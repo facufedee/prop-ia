@@ -230,7 +230,7 @@ export default function PropertyWizard({ initialData, isEditing = false, ...prop
         description: initialData?.description || '',
 
         // Options
-        publishToPortal: initialData?.publishToPortal || false,
+        publishToPortal: initialData?.publishToPortal ?? true,
         coverImageIndex: initialData?.coverImageIndex || 0,
         hidePrice: initialData?.hidePrice || false,
         isRemodeled: initialData?.isRemodeled || false,

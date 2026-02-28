@@ -11,18 +11,27 @@ interface PaymentHistoryModalProps {
     onClose: () => void;
     payment: Pago;
     rental: Alquiler;
-    onConfirm: (payment: Pago, date: Date, isHistorical: boolean) => void;
+    onConfirm: (payment: Pago, date: Date, isHistorical: boolean, methodData?: { metodoPago: 'efectivo' | 'transferencia'; fechaTransferencia?: string; nroComprobante?: string }) => void;
 }
 
 export default function PaymentHistoryModal({ isOpen, onClose, payment, rental, onConfirm }: PaymentHistoryModalProps) {
     const [isHistorical, setIsHistorical] = useState(false);
     const [paymentDate, setPaymentDate] = useState(format(new Date(), 'yyyy-MM-dd'));
 
+    // Default method to efectivo for simplicity, or nothing if we want to force selection
+    const [metodoPago, setMetodoPago] = useState<'efectivo' | 'transferencia'>('efectivo');
+    const [fechaTransferencia, setFechaTransferencia] = useState(format(new Date(), 'yyyy-MM-dd'));
+    const [nroComprobante, setNroComprobante] = useState("");
+
     if (!isOpen) return null;
 
     const handleConfirm = () => {
         const date = new Date(paymentDate + 'T12:00:00'); // Ensure midday to avoid timezone shifts
-        onConfirm(payment, date, isHistorical);
+
+        onConfirm(payment, date, isHistorical, {
+            metodoPago,
+            ...(metodoPago === 'transferencia' ? { fechaTransferencia, nroComprobante } : {})
+        });
     };
 
     return (
@@ -83,6 +92,55 @@ export default function PaymentHistoryModal({ isOpen, onClose, payment, rental, 
                                 Se registrará con fecha de hoy: <strong>{format(new Date(), "d 'de' MMMM, yyyy", { locale: es })}</strong>
                             </p>
                         )}
+
+                        <div className="pt-4 border-t border-gray-100">
+                            <label className="block text-sm font-medium text-gray-700 mb-2">
+                                Método de Pago
+                            </label>
+                            <div className="grid grid-cols-2 gap-3 mb-4">
+                                <button
+                                    onClick={() => setMetodoPago('efectivo')}
+                                    className={`py-2 px-4 rounded-xl text-sm font-medium border transition-colors ${metodoPago === 'efectivo' ? 'bg-indigo-50 border-indigo-200 text-indigo-700' : 'bg-white border-gray-200 text-gray-600 hover:bg-gray-50'}`}
+                                >
+                                    Efectivo
+                                </button>
+                                <button
+                                    onClick={() => setMetodoPago('transferencia')}
+                                    className={`py-2 px-4 rounded-xl text-sm font-medium border transition-colors ${metodoPago === 'transferencia' ? 'bg-indigo-50 border-indigo-200 text-indigo-700' : 'bg-white border-gray-200 text-gray-600 hover:bg-gray-50'}`}
+                                >
+                                    Transferencia
+                                </button>
+                            </div>
+
+                            {metodoPago === 'transferencia' && (
+                                <div className="space-y-3 animate-in slide-in-from-top-2 duration-200 bg-gray-50 p-3 rounded-xl border border-gray-100">
+                                    <div>
+                                        <label className="block text-xs font-medium text-gray-600 mb-1">
+                                            Fecha de Transferencia
+                                        </label>
+                                        <input
+                                            type="date"
+                                            value={fechaTransferencia}
+                                            onChange={(e) => setFechaTransferencia(e.target.value)}
+                                            max={format(new Date(), 'yyyy-MM-dd')}
+                                            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none text-gray-900 text-sm"
+                                        />
+                                    </div>
+                                    <div>
+                                        <label className="block text-xs font-medium text-gray-600 mb-1">
+                                            Número de Comprobante
+                                        </label>
+                                        <input
+                                            type="text"
+                                            value={nroComprobante}
+                                            onChange={(e) => setNroComprobante(e.target.value)}
+                                            placeholder="Ej. TRF-982374"
+                                            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none text-gray-900 text-sm"
+                                        />
+                                    </div>
+                                </div>
+                            )}
+                        </div>
                     </div>
                 </div>
 

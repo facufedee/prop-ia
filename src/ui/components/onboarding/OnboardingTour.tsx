@@ -5,6 +5,8 @@ import { createPortal } from "react-dom";
 import { X, ArrowRight, ArrowLeft } from "lucide-react";
 
 import { useAuth } from "@/ui/context/AuthContext";
+import { db } from "@/infrastructure/firebase/client";
+import { doc, updateDoc } from "firebase/firestore";
 
 const MAX_VIEWS = 3;
 
@@ -67,7 +69,7 @@ const STEPS: TourStep[] = [
 ];
 
 export default function OnboardingTour() {
-    const { userData } = useAuth();
+    const { userData, user } = useAuth();
     const [currentStepIndex, setCurrentStepIndex] = useState(-1);
     const [active, setActive] = useState(false);
     const [targetRect, setTargetRect] = useState<DOMRect | null>(null);
@@ -145,6 +147,21 @@ export default function OnboardingTour() {
         setActive(false);
         setCurrentStepIndex(-1);
         sessionStorage.setItem("hasSeenOnboardingSession", "true");
+    };
+
+    const handlePermanentDismiss = async () => {
+        handleDismiss(); // Close immediately
+        if (user && db) {
+            try {
+                const userRef = doc(db, "users", user.uid);
+                // Set loginCount to MAX_VIEWS + 1 to prevent showing again
+                await updateDoc(userRef, {
+                    loginCount: MAX_VIEWS + 1
+                });
+            } catch (error) {
+                console.error("Error updating login count:", error);
+            }
+        }
     };
 
     if (!active || currentStepIndex === -1) return null;
@@ -237,8 +254,20 @@ export default function OnboardingTour() {
                         {currentStepIndex !== STEPS.length - 1 && <ArrowRight size={16} />}
                     </button>
                 </div>
+
+                {/* Don't show again button */}
+                <div className="mt-4 text-center">
+                    <button
+                        onClick={handlePermanentDismiss}
+                        className="text-xs text-gray-400 hover:text-gray-600 underline"
+                    >
+                        No volver a mostrar
+                    </button>
+                </div>
             </div>
         </div>,
         document.body
     );
 }
+
+

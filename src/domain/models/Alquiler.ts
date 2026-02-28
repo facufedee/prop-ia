@@ -40,7 +40,9 @@ export interface Pago {
     fechaPago?: Date;
     fechaVencimiento: Date;
     estado: 'pendiente' | 'pagado' | 'vencido' | 'parcial';
-    metodoPago?: string;
+    metodoPago?: 'efectivo' | 'transferencia' | string;
+    fechaTransferencia?: string; // YYYY-MM-DD
+    nroComprobante?: string;
     comprobante?: string;
     moneda?: string;
     nota?: string;
@@ -55,6 +57,22 @@ export interface Incidencia {
     fechaResolucion?: Date;
     comentarios: string[];
     imagenes?: string[];
+}
+export interface Liquidacion {
+    id: string;
+    mes: string; // "2024-01"
+    fechaEmision: Date;
+    TotalCobradoInquilino: number;
+    honorariosA: number; // Monto de honorarios descontados
+    netoAPagar: number; // Lo que se le paga al propietario
+    detalles: {
+        concepto: string;
+        monto: number;
+        tipo: 'ingreso' | 'egreso';
+    }[];
+    estado: 'pendiente' | 'pagado';
+    fechaPago?: Date;
+    comprobante?: string;
 }
 
 export interface Alquiler {
@@ -123,6 +141,7 @@ export interface Alquiler {
     // tasaPunitorios deprecated in favor of punitoriosTipo/Val
 
     historialPagos: Pago[];
+    historialLiquidaciones?: Liquidacion[];
     incidencias: Incidencia[];
     estado: 'activo' | 'pendiente' | 'finalizado' | 'suspendido';
     documentos: string[];
