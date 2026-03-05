@@ -156,8 +156,8 @@ export default function ContactForm() {
                                 </div>
                                 <div>
                                     <h4 className="font-semibold text-gray-900 mb-1">WhatsApp</h4>
-                                    <a href="https://wa.me/5491124000769" target="_blank" rel="noopener noreferrer" className="text-gray-600 hover:text-green-600 transition-colors">
-                                        +54 9 11 2400-0769
+                                    <a href="https://wa.me/5491123889745" target="_blank" rel="noopener noreferrer" className="text-gray-600 hover:text-green-600 transition-colors">
+                                        +54 9 11 2388-9745
                                     </a>
                                     <p className="text-sm text-gray-500">Facundo</p>
                                 </div>

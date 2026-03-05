@@ -9,6 +9,7 @@ import CookieBanner from '@/ui/components/consent/CookieBanner';
 
 import FloatingChatWidget from '@/ui/components/FloatingChatWidget';
 import Script from 'next/script';
+import WhatsappButton from '@/ui/components/ui/WhatsappButton';
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -124,7 +125,8 @@ export default function RootLayout({
         <ClientLayout>
           {children}
           <CookieBanner />
-          <FloatingChatWidget />
+          {/* <FloatingChatWidget /> */}
+          <WhatsappButton />
         </ClientLayout>
 
         {/* Structured Data - Organization & SoftwareApplication */}
@@ -141,7 +143,7 @@ export default function RootLayout({
                 description: 'CRM Inmobiliario moderno adaptado a Argentina con IA y Automatización',
                 contactPoint: {
                   '@type': 'ContactPoint',
-                  telephone: '+54 9 11 2400-0769',
+                  telephone: '+54 9 11 2388-9745',
                   contactType: 'customer service',
                   areaServed: 'AR',
                   availableLanguage: 'Spanish'

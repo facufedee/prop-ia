@@ -5,6 +5,7 @@ import { Subscription, PlanTier } from "@/domain/models/Subscription";
 
 const USERS_COLLECTION = "users";
 const SUBSCRIPTIONS_COLLECTION = "subscriptions";
+const RENTALS_COLLECTION = "alquileres";
 
 export const adminService = {
     // Obtener todos los usuarios con su suscripción
@@ -20,16 +21,30 @@ export const adminService = {
         const subsQuery = query(collection(db, SUBSCRIPTIONS_COLLECTION));
         const subsSnapshot = await getDocs(subsQuery);
 
+        // 3. Fetch Rentals
+        const rentalsQuery = query(collection(db, RENTALS_COLLECTION));
+        const rentalsSnapshot = await getDocs(rentalsQuery);
+
         const subscriptionsMap = new Map<string, Subscription>();
         subsSnapshot.docs.forEach(doc => {
             const sub = { id: doc.id, ...doc.data() } as Subscription;
             subscriptionsMap.set(sub.userId, sub);
         });
 
-        // 3. Merge data
+        const rentalsCountMap = new Map<string, number>();
+        rentalsSnapshot.docs.forEach(doc => {
+            const rental = doc.data();
+            const userId = rental.userId;
+            if (userId) {
+                rentalsCountMap.set(userId, (rentalsCountMap.get(userId) || 0) + 1);
+            }
+        });
+
+        // 4. Merge data
         const users: User[] = usersSnapshot.docs.map(doc => {
             const userData = doc.data();
             const sub = subscriptionsMap.get(doc.id);
+            const alquileresCount = rentalsCountMap.get(doc.id) || 0;
 
             return {
                 uid: doc.id,
@@ -40,6 +55,7 @@ export const adminService = {
                 createdAt: userData.createdAt?.toDate(),
                 lastLogin: userData.lastLogin?.toDate(),
                 organizationId: userData.organizationId,
+                alquileresCount,
                 subscription: sub ? {
                     planId: sub.planId, // Use actual planId
                     planTier: sub.planTier,

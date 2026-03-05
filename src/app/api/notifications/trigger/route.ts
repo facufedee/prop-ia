@@ -29,6 +29,22 @@ export async function POST(request: Request) {
             }
         }
 
+        if (event === 'marketingEmail') {
+            const { email, name, templateKey } = data;
+            console.log(`[API] Processing marketingEmail (${templateKey}) for: ${email}`);
+            if (!email || !templateKey) {
+                console.error('[API] Missing email or templateKey for marketingEmail');
+                return NextResponse.json({ error: 'Missing email or templateKey' }, { status: 400 });
+            }
+            const result = await emailNotificationService.sendMarketingEmail(email, name || '', templateKey);
+            console.log(`[API] sendMarketingEmail result:`, result);
+            if (result.success) {
+                return NextResponse.json({ success: true });
+            } else {
+                return NextResponse.json({ success: false, error: result.error }, { status: 400 });
+            }
+        }
+
         if (!event || !subject || !message) {
             return NextResponse.json({ error: 'Missing required fields' }, { status: 400 });
         }

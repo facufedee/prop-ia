@@ -11,6 +11,7 @@ export interface User {
     loginCount?: number;
     organizationId?: string;
     branchId?: string; // The branch this user belongs to (if agent) or currently managing (if admin context)
+    alquileresCount?: number;
     // Subscription info (optional, joined from Subscription collection)
     subscription?: {
         planId: string;

@@ -95,18 +95,19 @@ export default function PlatformManagementPage() {
         }
     };
 
-    const handleSendWelcomeEmail = async (user: User) => {
-        if (!confirm(`¿Enviar email de bienvenida a ${user.email}?`)) return;
+    const handleSendMarketingEmail = async (user: User, templateKey: string, templateName: string) => {
+        if (!confirm(`¿Enviar email "${templateName}" a ${user.email}?`)) return;
 
         try {
             const response = await fetch('/api/notifications/trigger', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
-                    event: 'welcomeEmail',
+                    event: 'marketingEmail',
                     data: {
                         email: user.email,
-                        name: user.displayName || user.email
+                        name: user.displayName || user.email,
+                        templateKey
                     }
                 })
             });
@@ -119,7 +120,7 @@ export default function PlatformManagementPage() {
                 toast.error("Error al enviar email: " + (result.error || "Desconocido"));
             }
         } catch (error) {
-            console.error("Error sending welcome email:", error);
+            console.error("Error sending marketing email:", error);
             toast.error("Error de conexión al enviar email");
         }
     };
@@ -171,6 +172,7 @@ export default function PlatformManagementPage() {
                                     <th className="px-6 py-4 font-semibold text-gray-900">Plan</th>
                                     <th className="px-6 py-4 font-semibold text-gray-900">Registro</th>
                                     <th className="px-6 py-4 font-semibold text-gray-900">Último Acceso</th>
+                                    <th className="px-6 py-4 font-semibold text-gray-900">Alquileres</th>
                                     <th className="px-6 py-4 font-semibold text-gray-900">Estado</th>
                                     <th className="px-6 py-4 font-semibold text-gray-900 text-right">Acciones</th>
                                 </tr>
@@ -178,13 +180,13 @@ export default function PlatformManagementPage() {
                             <tbody className="divide-y divide-gray-100">
                                 {loading ? (
                                     <tr>
-                                        <td colSpan={7} className="px-6 py-8 text-center text-gray-500">
+                                        <td colSpan={8} className="px-6 py-8 text-center text-gray-500">
                                             Cargando usuarios...
                                         </td>
                                     </tr>
                                 ) : filteredUsers.length === 0 ? (
                                     <tr>
-                                        <td colSpan={7} className="px-6 py-8 text-center text-gray-500">
+                                        <td colSpan={8} className="px-6 py-8 text-center text-gray-500">
                                             No se encontraron usuarios
                                         </td>
                                     </tr>
@@ -251,6 +253,11 @@ export default function PlatformManagementPage() {
                                                     )}
                                                 </div>
                                             </td>
+                                            <td className="px-6 py-4 text-center">
+                                                <div className="inline-flex items-center justify-center min-w-[2rem] h-8 px-2 rounded-full bg-indigo-50 text-indigo-700 font-semibold text-sm">
+                                                    {user.alquileresCount || 0}
+                                                </div>
+                                            </td>
                                             <td className="px-6 py-4">
                                                 <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${user.disabled
                                                     ? "bg-red-100 text-red-800"
@@ -261,13 +268,26 @@ export default function PlatformManagementPage() {
                                             </td>
                                             <td className="px-6 py-4 text-right">
                                                 <div className="flex items-center justify-end gap-2">
-                                                    <button
-                                                        onClick={() => handleSendWelcomeEmail(user)}
-                                                        className="p-2 text-indigo-600 hover:bg-indigo-50 rounded-lg transition-colors"
-                                                        title="Enviar Bienvenida"
+                                                    <select
+                                                        className="px-2 py-1 bg-white border border-gray-200 rounded text-xs font-medium text-gray-700 focus:outline-none focus:ring-1 focus:ring-indigo-500 max-w-[130px] cursor-pointer"
+                                                        onChange={(e) => {
+                                                            const val = e.target.value;
+                                                            if (val) {
+                                                                const text = e.target.options[e.target.selectedIndex].text;
+                                                                handleSendMarketingEmail(user, val, text);
+                                                                e.target.value = ""; // reset selection
+                                                            }
+                                                        }}
+                                                        defaultValue=""
+                                                        title="Enviar Email de Marketing"
                                                     >
-                                                        <Send size={18} />
-                                                    </button>
+                                                        <option value="" disabled>📨 Enviar Mail...</option>
+                                                        <option value="welcome">1. Bienvenida</option>
+                                                        <option value="activation">2. Activación</option>
+                                                        <option value="value">3. Valor (Liquidaciones)</option>
+                                                        <option value="social">4. Prueba Social</option>
+                                                        <option value="conversion">5. Conversión</option>
+                                                    </select>
                                                     <button
                                                         onClick={() => handleToggleStatus(user.uid, user.disabled)}
                                                         className={`p-2 rounded-lg transition-colors ${user.disabled
