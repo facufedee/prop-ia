@@ -26,8 +26,8 @@ export default function Footer() {
                                 <a href="mailto:facundo@zetaprop.com.ar" className="flex items-center gap-2 hover:text-white transition">
                                     <Mail size={16} /> facundo@zetaprop.com.ar
                                 </a>
-                                <a href="https://wa.me/5491124000769" target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 hover:text-white transition">
-                                    <WhatsAppIcon className="w-4 h-4 opacity-70 hover:opacity-100 transition-all text-gray-400 hover:text-green-500" /> +54 9 11 2400-0769
+                                <a href="https://wa.me/5491123889745" target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 hover:text-white transition">
+                                    <WhatsAppIcon className="w-4 h-4 opacity-70 hover:opacity-100 transition-all text-gray-400 hover:text-green-500" /> +54 9 11 2388-9745
                                 </a>
                             </div>
                         </div>

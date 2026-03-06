@@ -30,15 +30,15 @@ export default function Hero() {
 
             {/* Main Headline */}
             <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold text-gray-900 mb-6 leading-[1.1] animate-fade-in-up tracking-tight">
-              La forma más clara de <br />
+              La forma más simple de <br />
               <span className="bg-gradient-to-r from-indigo-600 via-purple-600 to-indigo-600 bg-clip-text text-transparent bg-[length:200%_auto] animate-gradient">
-                gestionar tus alquileres
+                administrar alquileres
               </span>
             </h1>
 
             {/* Subheadline */}
             <p className="text-lg text-gray-600 mb-8 max-w-2xl mx-auto lg:mx-0 leading-relaxed animate-fade-in-up animation-delay-200">
-              Organizá contratos, vencimientos y cobranzas en un solo sistema. Trabajá con información actualizada y evitá errores en la gestión diaria.
+              Gestionar alquileres implica contratos, vencimientos, cobros, consultas y liquidaciones mensuales. Cuando todo se hace con planillas o procesos manuales, los errores y el desorden aparecen rápido. Zeta Prop organiza toda esa gestión en un solo sistema claro y fácil de usar.
             </p>
 
             {/* CTA Buttons */}

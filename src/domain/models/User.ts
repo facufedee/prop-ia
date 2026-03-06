@@ -26,4 +26,8 @@ export interface User {
     identityDocument?: string; // URL to document or business domain
     logoUrl?: string; // URL to agency logo
     disabled?: boolean;
+    // Manual Payment Flow Flags
+    pendingPaymentApproval?: boolean;
+    showPaymentWelcome?: boolean;
+    hasRequestedExtension?: boolean;
 }

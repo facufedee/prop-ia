@@ -583,4 +583,14 @@ export const subscriptionService = {
             limit,
         };
     },
+
+    // ========== MANUAL PAYMENT FLOW ==========
+    setPendingPaymentApproval: async (userId: string, isPending: boolean): Promise<void> => {
+        if (!db) throw new Error("Firestore not initialized");
+
+        const userRef = doc(db, "users", userId);
+        await updateDoc(userRef, {
+            pendingPaymentApproval: isPending
+        });
+    }
 };

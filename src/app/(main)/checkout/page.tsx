@@ -1,25 +1,29 @@
 "use client";
 
 import { useEffect, useState, Suspense, useRef } from "react";
-import { useSearchParams } from "next/navigation";
+import { useSearchParams, useRouter } from "next/navigation";
 import PaymentBrick from "@/ui/components/pricing/PaymentBrick";
 import { Loader2, CreditCard, Building2, Check } from "lucide-react";
 import Link from "next/link";
-import { auth } from "@/infrastructure/firebase/client";
+import { auth, db } from "@/infrastructure/firebase/client";
 import { onAuthStateChanged } from "firebase/auth";
+import { doc, getDoc } from "firebase/firestore";
 
 function CheckoutContent() {
     const searchParams = useSearchParams();
+    const router = useRouter();
     const planId = searchParams.get("plan");
     const billingParam = searchParams.get("billing"); // monthly | yearly
     const [currentUser, setCurrentUser] = useState<any>(null);
     const [authLoading, setAuthLoading] = useState(true);
+    const [isPendingPayment, setIsPendingPayment] = useState(false);
+    const [submittingPayment, setSubmittingPayment] = useState(false);
 
     const [preferenceId, setPreferenceId] = useState<string | null>(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
     const [planData, setPlanData] = useState<any>(null);
-    const [paymentMethod, setPaymentMethod] = useState<'mercadopago' | 'transfer'>('mercadopago');
+    const [paymentMethod, setPaymentMethod] = useState<'transfer'>('transfer');
     const [billing, setBilling] = useState<'monthly' | 'yearly'>(billingParam as 'monthly' | 'yearly' || 'monthly');
     const [isPaymentModalOpen, setIsPaymentModalOpen] = useState(false);
     const [mpConfig, setMpConfig] = useState<{ publicKey: string | null; activeMode: string | null }>({
@@ -42,15 +46,25 @@ function CheckoutContent() {
     // Cache for Mercado Pago preferences to avoid re-fetching
     const preferenceCache = useRef<Record<string, string>>({});
 
-    // Listen to auth state
+    // Listen to auth state and fetch user details
     useEffect(() => {
         if (!auth) {
             setAuthLoading(false);
             return;
         }
 
-        const unsubscribe = onAuthStateChanged(auth, (user) => {
+        const unsubscribe = onAuthStateChanged(auth, async (user) => {
             setCurrentUser(user);
+            if (user) {
+                try {
+                    const userDoc = await getDoc(doc(db, "users", user.uid));
+                    if (userDoc.exists() && userDoc.data().pendingPaymentApproval) {
+                        setIsPendingPayment(true);
+                    }
+                } catch (error) {
+                    console.error("Error fetching user data:", error);
+                }
+            }
             setAuthLoading(false);
         });
         return () => unsubscribe();
@@ -73,107 +87,7 @@ function CheckoutContent() {
         fetchPlanData();
     }, [planId]);
 
-    // Create Mercado Pago preference (Current selection)
-    useEffect(() => {
-        if (!planId || paymentMethod !== 'mercadopago') return;
-
-        // Wait for auth to initialize
-        if (authLoading) return;
-
-        if (!currentUser?.uid) {
-            setError("Debes iniciar sesión para continuar");
-            setLoading(false); // Fix: clear loading even on error
-            console.log("❌ Checkout: No user found, stopping preference creation.");
-            return;
-        }
-
-        console.log(`🚀 Checkout: Initializing MP preference for ${planId} (${billing})...`);
-
-        const cacheKey = `${planId}-${billing}-${currentUser.uid}`;
-        if (preferenceCache.current[cacheKey]) {
-            setPreferenceId(preferenceCache.current[cacheKey]);
-            setLoading(false);
-            return;
-        }
-
-        setLoading(true);
-        const createPreference = async () => {
-            try {
-                // Clear any previous errors
-                setError(null);
-
-                const response = await fetch("/api/payments/create-preference", {
-                    method: "POST",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({
-                        planId,
-                        billing,
-                        userId: currentUser.uid
-                    })
-                });
-
-                if (!response.ok) throw new Error("Error creating payment preference");
-
-                const data = await response.json();
-                if (data.preference_id) {
-                    console.log("✅ Checkout: Preference received:", data.preference_id);
-                    setPreferenceId(data.preference_id);
-                    preferenceCache.current[cacheKey] = data.preference_id;
-                } else if (data.error) {
-                    console.error("❌ Checkout: API Error details:", data);
-                    setError(data.error);
-                }
-            } catch (err) {
-                console.error(err);
-                setError("No se pudo iniciar el pago. Intenta nuevamente.");
-            } finally {
-                setLoading(false);
-            }
-        };
-
-        createPreference();
-    }, [planId, billing, paymentMethod, authLoading, currentUser]);
-
-    // Prefetch alternate billing cycle preference
-    useEffect(() => {
-        if (!planId || !currentUser?.uid || authLoading) return;
-
-        const prefetchAlternate = async () => {
-            const alternateBilling = billing === 'monthly' ? 'yearly' : 'monthly';
-            const cacheKey = `${planId}-${alternateBilling}-${currentUser.uid}`;
-
-            // If already cached, skip
-            if (preferenceCache.current[cacheKey]) return;
-
-            try {
-                const response = await fetch("/api/payments/create-preference", {
-                    method: "POST",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({
-                        planId,
-                        billing: alternateBilling,
-                        userId: currentUser.uid
-                    })
-                });
-
-                if (response.ok) {
-                    const data = await response.json();
-                    if (data.preference_id) {
-                        // Store in cache silently
-                        preferenceCache.current[cacheKey] = data.preference_id;
-                        console.log(`Prefetched ${alternateBilling} preference`);
-                    }
-                }
-            } catch (err) {
-                // Silently fail prefetch
-                console.warn("Prefetch failed", err);
-            }
-        };
-
-        // Small delay to prioritize main fetch
-        const timer = setTimeout(prefetchAlternate, 1000);
-        return () => clearTimeout(timer);
-    }, [planId, billing, currentUser, authLoading]);
+    // MP disabled: direct transfer only
 
     // Format price
     const formatPrice = (price: number) => {
@@ -322,7 +236,24 @@ function CheckoutContent() {
 
                     {/* RIGHT COLUMN - CONTROL CENTER (Sticky) */}
                     <div className="lg:col-span-5">
-                        {planData && (
+                        {isPendingPayment ? (
+                            <div className="sticky top-8 space-y-4">
+                                <div className="bg-green-50 rounded-2xl shadow-xl border border-green-200 overflow-hidden">
+                                    <div className="p-8 space-y-6 text-center">
+                                        <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                                            <Check className="w-8 h-8 text-green-600" />
+                                        </div>
+                                        <h3 className="text-2xl font-bold text-green-900">Pago en verificación</h3>
+                                        <p className="text-green-800 font-medium">
+                                            Estamos trabajando para habilitarle el sistema con las características solicitadas.
+                                        </p>
+                                        <p className="text-sm text-green-700">
+                                            Le avisaremos por aquí y por WhatsApp una vez que esté finalizado (como mucho en 10 minutos ya podrá volver a acceder y usar el sistema).
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+                        ) : planData && (
                             <div className="sticky top-8 space-y-4">
                                 <div className="bg-white rounded-2xl shadow-xl border border-gray-100 overflow-hidden">
                                     <div className="p-6 space-y-6">
@@ -372,97 +303,59 @@ function CheckoutContent() {
                                             )}
                                         </div>
 
-                                        {/* 3. Payment Method Selector */}
-                                        <div>
-                                            <p className="text-sm font-semibold text-gray-700 mb-3">Tu método de pago</p>
-                                            <div className="grid grid-cols-2 gap-3">
-                                                <button
-                                                    onClick={() => setPaymentMethod('mercadopago')}
-                                                    className={`p-3 rounded-xl border-2 transition-all flex flex-col items-center gap-2 text-center ${paymentMethod === 'mercadopago'
-                                                        ? 'border-indigo-600 bg-indigo-50 text-indigo-700'
-                                                        : 'border-gray-200 hover:border-gray-300 text-gray-600'
-                                                        }`}
-                                                >
-                                                    <CreditCard className="w-5 h-5 mb-1" />
-                                                    <span className="text-xs font-bold">Mercado Pago</span>
-                                                </button>
-
-                                                <button
-                                                    onClick={() => setPaymentMethod('transfer')}
-                                                    className={`p-3 rounded-xl border-2 transition-all flex flex-col items-center gap-2 text-center ${paymentMethod === 'transfer'
-                                                        ? 'border-indigo-600 bg-indigo-50 text-indigo-700'
-                                                        : 'border-gray-200 hover:border-gray-300 text-gray-600'
-                                                        }`}
-                                                >
-                                                    <Building2 className="w-5 h-5 mb-1" />
-                                                    <span className="text-xs font-bold">Transferencia</span>
-                                                </button>
-                                            </div>
-                                        </div>
-
+                                        {/* 3. Payment Method (Transfer Only) */}
                                         <div className="pt-2 border-t border-gray-100">
-                                            {paymentMethod === 'mercadopago' ? (
-                                                <div className="mt-4">
-                                                    {loading ? (
-                                                        <div className="flex flex-col items-center justify-center p-8 bg-gray-50 rounded-xl border border-gray-100">
-                                                            <Loader2 className="w-6 h-6 animate-spin text-indigo-600 mb-2" />
-                                                            <p className="text-sm text-gray-500">Preparando pago seguro...</p>
+                                            <div className="mt-4 space-y-4">
+                                                <div className="bg-blue-50 p-4 rounded-xl border border-blue-100 text-sm">
+                                                    <p className="font-semibold text-blue-900 mb-2">Datos para transferir:</p>
+                                                    <div className="space-y-1 text-gray-700">
+                                                        <div className="flex justify-between">
+                                                            <span>CUIL:</span>
+                                                            <span className="font-mono font-medium">20-35163401-5</span>
                                                         </div>
-                                                    ) : error ? (
-                                                        <div className="text-center p-3 bg-red-50 text-red-600 rounded-xl text-sm border border-red-100">
-                                                            {error}
-                                                        </div>
-                                                    ) : (preferenceId && mpConfig.publicKey) ? (
-                                                        <div className="animate-in fade-in zoom-in-95 duration-500">
-                                                            <PaymentBrick
-                                                                amount={getPrice()}
-                                                                preferenceId={preferenceId}
-                                                                publicKey={mpConfig.publicKey}
-                                                                email={currentUser?.email || undefined}
-                                                                planId={planId || undefined}
-                                                                userId={currentUser?.uid || undefined}
-                                                                billing={billing}
-                                                                onPaymentResult={(result) => {
-                                                                    console.log("Payment Result:", result);
-                                                                    if (result.status === 'approved') {
-                                                                        // Redirect to success page with payment ID
-                                                                        window.location.href = `/checkout/success?payment_id=${result.id}&status=${result.status}`;
-                                                                    }
-                                                                }}
-                                                            />
-                                                        </div>
-                                                    ) : null}
-                                                </div>
-                                            ) : (
-                                                <div className="mt-4 space-y-4">
-                                                    <div className="bg-blue-50 p-4 rounded-xl border border-blue-100 text-sm">
-                                                        <p className="font-semibold text-blue-900 mb-2">Datos para transferir:</p>
-                                                        <div className="space-y-1 text-gray-700">
-                                                            <div className="flex justify-between">
-                                                                <span>CBU:</span>
-                                                                <span className="font-mono font-medium">0720086188000037816940</span>
-                                                            </div>
-                                                            <div className="flex justify-between">
-                                                                <span>Alias:</span>
-                                                                <span className="font-bold text-indigo-600">FACU.FEDE.ROJO</span>
-                                                            </div>
-                                                            <div className="flex justify-between mt-2 pt-2 border-t border-blue-100">
-                                                                <span>Banco:</span>
-                                                                <span>Santander</span>
-                                                            </div>
+                                                        <div className="flex justify-between">
+                                                            <span>Alias:</span>
+                                                            <span className="font-bold text-indigo-600">ZETAPROP</span>
                                                         </div>
                                                     </div>
-
-                                                    <a
-                                                        href="https://wa.me/5491124000769?text=Hola!%20Realicé%20una%20transferencia%20para%20el%20plan%20de%20suscripción.%20Adjunto%20el%20comprobante."
-                                                        target="_blank"
-                                                        rel="noopener noreferrer"
-                                                        className="w-full py-3 bg-green-600 hover:bg-green-700 text-white rounded-xl font-bold flex items-center justify-center gap-2 transition-colors shadow-sm"
-                                                    >
-                                                        <span>Enviar Comprobante</span>
-                                                    </a>
                                                 </div>
-                                            )}
+
+                                                <p className="text-sm text-gray-600 font-medium text-center">
+                                                    Recordá enviar el comprobante de pago para habilitar tu cuenta.
+                                                </p>
+
+                                                <button
+                                                    onClick={async () => {
+                                                        if (!currentUser?.uid) return;
+                                                        try {
+                                                            setSubmittingPayment(true);
+                                                            const { subscriptionService } = await import("@/infrastructure/services/subscriptionService");
+                                                            await subscriptionService.setPendingPaymentApproval(currentUser.uid, true);
+
+                                                            const { notificationService } = await import("@/infrastructure/services/notificationService");
+                                                            await notificationService.createNotification(
+                                                                "Nuevo Comprobante de Pago",
+                                                                `El usuario ${currentUser.email || 'desconocido'} ha enviado un comprobante y aguarda aprobación.`,
+                                                                "warning",
+                                                                "Administrador",
+                                                                `/dashboard/gestion-plataforma/${currentUser.uid}`
+                                                            );
+
+                                                            setIsPendingPayment(true);
+                                                            window.open("https://wa.me/5491123889745?text=Hola!%20Realicé%20una%20transferencia%20para%20el%20plan%20de%20suscripción.%20Adjunto%20el%20comprobante.", "_blank");
+                                                            router.push("/dashboard");
+                                                        } catch (error) {
+                                                            console.error("Error setting pending payment:", error);
+                                                        } finally {
+                                                            setSubmittingPayment(false);
+                                                        }
+                                                    }}
+                                                    disabled={submittingPayment}
+                                                    className="w-full py-3 bg-green-600 hover:bg-green-700 text-white rounded-xl font-bold flex items-center justify-center gap-2 transition-colors shadow-sm disabled:opacity-50"
+                                                >
+                                                    {submittingPayment ? <Loader2 className="w-5 h-5 animate-spin" /> : <span>Enviar Comprobante</span>}
+                                                </button>
+                                            </div>
                                         </div>
 
                                         {/* Security Footer */}

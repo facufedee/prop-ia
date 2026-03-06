@@ -7,6 +7,7 @@ import { BranchProvider } from "@/infrastructure/context/BranchContext";
 
 import TrialEnforcer from "@/ui/components/subscription/TrialEnforcer";
 import AccountLockEnforcer from "@/ui/components/subscription/AccountLockEnforcer";
+import PaymentWelcomeListener from "@/ui/components/subscription/PaymentWelcomeListener";
 
 export default function DashboardLayout({
   children,
@@ -19,6 +20,7 @@ export default function DashboardLayout({
         <BranchProvider>
           <DashboardShell>
             <TrialBanner />
+            <PaymentWelcomeListener />
             <TrialEnforcer />
             <AccountLockEnforcer />
             {children}

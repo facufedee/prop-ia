@@ -3,9 +3,10 @@
 import { useEffect, useState } from "react";
 import { useAuth } from "@/ui/context/AuthContext";
 import { useRouter } from "next/navigation";
-import { Crown, Lock, LogOut } from "lucide-react";
+import { Crown, Lock, LogOut, Check } from "lucide-react";
 import { signOut } from "firebase/auth";
-import { auth } from "@/infrastructure/firebase/client";
+import { auth, db } from "@/infrastructure/firebase/client";
+import { doc, updateDoc } from "firebase/firestore";
 import { toast } from "sonner";
 import { notificationService } from "@/infrastructure/services/notificationService";
 
@@ -34,6 +35,11 @@ export default function AccountLockEnforcer() {
                 "Administrador",
                 `/dashboard/gestion-plataforma/${user.uid}`
             );
+
+            // Mark as requested in Firestore
+            const userRef = doc(db, "users", user.uid);
+            await updateDoc(userRef, { hasRequestedExtension: true });
+
         } catch (error) {
             console.error("Error creating notification", error);
         }
@@ -89,6 +95,39 @@ export default function AccountLockEnforcer() {
 
     if (!isLocked) return null;
 
+    if (userData?.pendingPaymentApproval) {
+        return (
+            <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-gray-900/40 backdrop-blur-sm">
+                <div className="bg-white rounded-2xl shadow-2xl max-w-md w-full p-8 relative overflow-hidden animate-in zoom-in-95 duration-300 border border-green-100">
+                    <div className="absolute top-0 left-0 w-full h-2 bg-gradient-to-r from-green-400 to-green-600"></div>
+                    <div className="flex flex-col items-center text-center space-y-6 relative z-10">
+                        <div className="w-20 h-20 bg-green-50 rounded-full flex items-center justify-center shadow-inner">
+                            <Check className="w-10 h-10 text-green-600" />
+                        </div>
+                        <div className="space-y-3">
+                            <h2 className="text-2xl font-bold text-gray-900">Pago en verificación</h2>
+                            <p className="text-gray-600 leading-relaxed text-sm">
+                                Estamos trabajando para habilitarle el sistema con las características solicitadas. Le avisaremos por aquí y por WhatsApp una vez que esté finalizado (como mucho en 10 minutos ya podrá volver a acceder y usar el sistema).
+                            </p>
+                        </div>
+                        <div className="w-full pt-4 space-y-3">
+                            <button
+                                onClick={async () => {
+                                    if (auth) await signOut(auth);
+                                    router.push('/login');
+                                }}
+                                className="w-full py-3 px-6 rounded-xl bg-gray-50 text-gray-700 font-medium border border-gray-200 hover:bg-gray-100 transition-colors flex items-center justify-center gap-2"
+                            >
+                                <LogOut className="w-4 h-4" />
+                                Cerrar Sesión
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        );
+    }
+
     return (
         <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-gray-900/40 backdrop-blur-sm">
             <div className="bg-white rounded-2xl shadow-2xl max-w-md w-full p-8 relative overflow-hidden animate-in zoom-in-95 duration-300 border border-gray-100">
@@ -121,7 +160,7 @@ export default function AccountLockEnforcer() {
                             {lockReason === 'expired' ? 'Renovar Plan' : 'Contactar Soporte'}
                         </button>
 
-                        {lockReason === 'expired' && (
+                        {lockReason === 'expired' && !userData?.hasRequestedExtension && (
                             <button
                                 onClick={handleRequestExtension}
                                 disabled={requestingExtension || requested}

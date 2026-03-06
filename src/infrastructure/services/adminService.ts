@@ -219,7 +219,9 @@ export const adminService = {
         // 5. Payments History
         const paymentsQuery = query(collection(db, "payments"), where("userId", "==", uid), orderBy("createdAt", "desc"));
         const paymentsSnapshot = await getDocs(paymentsQuery);
-        const payments = paymentsSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+        const payments = paymentsSnapshot.docs
+            .map(doc => ({ id: doc.id, ...doc.data() }))
+            .filter((p: any) => ['completed', 'approved', 'refunded'].includes(p.status) || p.isManual);
 
         // 6. Sent Emails History
         const emailsQuery = query(collection(db, "sent_emails"), where("to", "==", userData.email || ""), orderBy("sentAt", "desc"));
@@ -272,6 +274,13 @@ export const adminService = {
                 updatedAt: new Date()
             });
         }
+
+        // Clear any pending payment flags and set the welcome flag for the user
+        const userRef = doc(db, USERS_COLLECTION, uid);
+        await updateDoc(userRef, {
+            pendingPaymentApproval: false,
+            showPaymentWelcome: true
+        });
     },
 
     registerManualPayment: async (uid: string, paymentData: { amount: number; paymentMethod: string; description: string; date: Date }) => {
