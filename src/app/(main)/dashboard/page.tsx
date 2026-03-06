@@ -8,7 +8,7 @@ import { leadsService } from "@/infrastructure/services/leadsService";
 import { auditLogService } from "@/infrastructure/services/auditLogService";
 import { alquileresService } from "@/infrastructure/services/alquileresService";
 import { AuditLog } from "@/domain/models/AuditLog";
-import { isSameMonth, format } from "date-fns";
+import { isSameMonth, format, addDays } from "date-fns";
 import { es } from "date-fns/locale";
 import {
     Home,
@@ -176,11 +176,15 @@ export default function DashboardPage() {
                         <p className="text-indigo-600 font-semibold text-sm capitalize flex items-center gap-1.5">
                             Plan {stats.subscription?.planTier || "Básico"}
                         </p>
-                        {stats.subscription?.endDate && stats.subscription?.planTier !== 'basic' && (
+                        {stats.subscription?.endDate ? (
                             <p className="text-xs font-medium text-gray-500 bg-gray-100 px-2.5 py-1 rounded w-fit">
                                 Vence: {new Date(stats.subscription.endDate.seconds * 1000).toLocaleDateString('es-AR')}
                             </p>
-                        )}
+                        ) : user?.metadata?.creationTime ? (
+                            <p className="text-xs font-medium text-gray-500 bg-gray-100 px-2.5 py-1 rounded w-fit">
+                                Vence: {format(addDays(new Date(user.metadata.creationTime), 14), 'dd/MM/yyyy')}
+                            </p>
+                        ) : null}
                     </div>
                 </div>
                 <div className="flex items-center gap-3">
@@ -203,7 +207,7 @@ export default function DashboardPage() {
                 </div>
             </div>
 
-            {/* Premium Status Banner */}
+            {/* Premium Status Banner 
             {userRole?.name === "Cliente Free" && (
                 <div className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-indigo-900 to-violet-900 text-white shadow-xl">
                     <div className="absolute top-0 right-0 w-64 h-64 bg-white/5 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2"></div>
@@ -231,7 +235,7 @@ export default function DashboardPage() {
                     </div>
                 </div>
             )}
-
+*/}
             {/* Stats Overview */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                 {userPermissions.includes('/dashboard/propiedades') ? (

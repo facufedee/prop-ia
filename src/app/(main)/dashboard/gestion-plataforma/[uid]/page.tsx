@@ -146,6 +146,38 @@ export default function AdminUserProfilePage() {
         }
     };
 
+    const handleSendMarketingEmail = async (templateKey: string, templateName: string) => {
+        if (!user || !user.email) return;
+        if (!confirm(`¿Enviar email "${templateName}" a ${user.email}?`)) return;
+
+        try {
+            const response = await fetch('/api/notifications/trigger', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    event: 'marketingEmail',
+                    data: {
+                        email: user.email,
+                        name: user.displayName || user.email,
+                        templateKey
+                    }
+                })
+            });
+
+            const result = await response.json();
+
+            if (result.success) {
+                toast.success("Email enviado correctamente");
+                loadData(); // Reload to see the new email in the list
+            } else {
+                toast.error("Error al enviar email: " + (result.error || "Desconocido"));
+            }
+        } catch (error) {
+            console.error("Error sending marketing email:", error);
+            toast.error("Error de conexión al enviar email");
+        }
+    };
+
     if (loading) {
         return (
             <div className="flex justify-center items-center py-20">
@@ -224,6 +256,12 @@ export default function AdminUserProfilePage() {
                                 Suspender Manualmente
                             </button>
                         </>
+                    )}
+
+                    {user.unsubscribedMarketing && (
+                        <span className="inline-flex items-center px-3 py-1 bg-gray-100 text-gray-800 rounded-full text-sm font-medium gap-1">
+                            <Mail className="w-4 h-4 opacity-70" /> Baja de Marketing
+                        </span>
                     )}
 
                     <span className="text-gray-200">|</span>
@@ -555,8 +593,34 @@ export default function AdminUserProfilePage() {
             {/* Tab: Correos */}
             {activeTab === 'correos' && (
                 <div className="bg-white rounded-2xl border border-gray-200 overflow-hidden shadow-sm">
-                    <div className="p-6 border-b border-gray-200">
+                    <div className="p-6 border-b border-gray-200 flex flex-col md:flex-row justify-between items-center gap-4">
                         <h3 className="text-lg font-semibold text-gray-900">Correos Enviados a {user.email}</h3>
+
+                        <div className="flex items-center gap-2">
+                            <span className="text-xs font-medium text-gray-500 uppercase">Enviar Nuevo:</span>
+                            <select
+                                className={`px-3 py-2 border border-gray-200 rounded-xl text-sm font-medium focus:outline-none transition-all outline-none ${user.unsubscribedMarketing ? 'bg-gray-50 text-gray-400 cursor-not-allowed border-gray-200' : 'bg-white text-gray-700 cursor-pointer hover:border-indigo-300 shadow-sm focus:ring-2 focus:ring-indigo-500'}`}
+                                onChange={(e) => {
+                                    const val = e.target.value;
+                                    if (val) {
+                                        const text = e.target.options[e.target.selectedIndex].text;
+                                        handleSendMarketingEmail(val, text);
+                                        e.target.value = ""; // reset selection
+                                    }
+                                }}
+                                disabled={user.unsubscribedMarketing}
+                                defaultValue=""
+                            >
+                                <option value="" disabled>{user.unsubscribedMarketing ? "No mails (Baja)" : "Seleccionar Plantilla..."}</option>
+                                <option value="welcome">1. Bienvenida</option>
+                                <option value="activation">2. Activación</option>
+                                <option value="value">3. Valor (Liquidaciones)</option>
+                                <option value="social">4. Prueba Social</option>
+                                <option value="conversion">5. Conversión</option>
+                                <option value="promotion">6. Promocional (Old)</option>
+                                <option value="crm_portal">7. CRM + Portal</option>
+                            </select>
+                        </div>
                     </div>
 
                     {sentEmails.length === 0 ? (

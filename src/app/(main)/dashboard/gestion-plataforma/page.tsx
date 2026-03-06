@@ -280,6 +280,11 @@ export default function PlatformManagementPage() {
                                                             Activo
                                                         </span>
                                                     )}
+                                                    {user.unsubscribedMarketing && (
+                                                        <span className="ml-2 inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800 border border-gray-200" title="Usuario se dio de baja de los correos de marketing">
+                                                            📪 No mails
+                                                        </span>
+                                                    )}
                                                 </td>
                                                 <td className="px-6 py-4 text-right">
                                                     <div className="flex items-center justify-end gap-2">
@@ -291,7 +296,7 @@ export default function PlatformManagementPage() {
                                                             <Eye size={18} />
                                                         </button>
                                                         <select
-                                                            className="px-2 py-1 bg-white border border-gray-200 rounded text-xs font-medium text-gray-700 focus:outline-none focus:ring-1 focus:ring-indigo-500 max-w-[130px] cursor-pointer"
+                                                            className={`px-2 py-1 border border-gray-200 rounded text-xs font-medium focus:outline-none focus:ring-1 focus:ring-indigo-500 max-w-[130px] transition-all ${user.unsubscribedMarketing ? 'opacity-50 cursor-not-allowed bg-gray-50 text-gray-400' : 'bg-white text-gray-700 cursor-pointer'}`}
                                                             onChange={(e) => {
                                                                 const val = e.target.value;
                                                                 if (val) {
@@ -300,16 +305,18 @@ export default function PlatformManagementPage() {
                                                                     e.target.value = ""; // reset selection
                                                                 }
                                                             }}
+                                                            disabled={user.unsubscribedMarketing}
                                                             defaultValue=""
-                                                            title="Enviar Email de Marketing"
+                                                            title={user.unsubscribedMarketing ? "El usuario se dio de baja de marketing" : "Enviar Email de Marketing"}
                                                         >
-                                                            <option value="" disabled>📨 Enviar Mail...</option>
+                                                            <option value="" disabled>📨 {user.unsubscribedMarketing ? "Sin suscrip." : "Enviar Mail..."}</option>
                                                             <option value="welcome">1. Bienvenida</option>
                                                             <option value="activation">2. Activación</option>
                                                             <option value="value">3. Valor (Liquidaciones)</option>
                                                             <option value="social">4. Prueba Social</option>
                                                             <option value="conversion">5. Conversión</option>
-                                                            <option value="promotion">6. Promocional (CRM + Portal)</option>
+                                                            <option value="promotion">6. Promocional (Old)</option>
+                                                            <option value="crm_portal">7. CRM + Portal</option>
                                                         </select>
                                                         <button
                                                             onClick={() => handleToggleStatus(user.uid, user.disabled)}

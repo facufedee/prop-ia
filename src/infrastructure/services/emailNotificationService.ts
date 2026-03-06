@@ -1,5 +1,5 @@
 import { db } from "@/infrastructure/firebase/client";
-import { doc, getDoc, setDoc, collection, addDoc } from "firebase/firestore";
+import { doc, getDoc, setDoc, collection, addDoc, query, where, getDocs, limit } from "firebase/firestore";
 
 const logSentEmail = async (to: string, subject: string, templateKey: string, status: 'success' | 'error', errorMsg?: string) => {
     if (!db) return;
@@ -14,6 +14,20 @@ const logSentEmail = async (to: string, subject: string, templateKey: string, st
         });
     } catch (e) {
         console.error("Failed to log email to Firestore", e);
+    }
+};
+
+const isUnsubscribed = async (email: string): Promise<boolean> => {
+    if (!db) return false;
+    try {
+        const q = query(collection(db, "users"), where("email", "==", email), limit(1));
+        const querySnapshot = await getDocs(q);
+        if (querySnapshot.empty) return false;
+        const userData = querySnapshot.docs[0].data();
+        return userData.unsubscribedMarketing === true;
+    } catch (e) {
+        console.error("Error checking unsubscribe status:", e);
+        return false;
     }
 };
 import { postmarkClient } from "@/lib/email";
@@ -138,6 +152,13 @@ export const emailNotificationService = {
 
         const firstName = name ? name.split(' ')[0] : 'Hola';
 
+        // Check if user is unsubscribed
+        const unsubscribed = await isUnsubscribed(to);
+        if (unsubscribed) {
+            console.log(`[Service] User ${to} is unsubscribed. Skipping welcome marketing email.`);
+            return { success: true };
+        }
+
         try {
             await postmarkClient.sendEmail({
                 "From": "Facundo Zeta <facundo@zetaprop.com.ar>",
@@ -172,7 +193,15 @@ export const emailNotificationService = {
                         
                         <p><strong>Facundo</strong><br>
                         Zeta Prop<br>
-                        <a href="https://zetaprop.com.ar">https://zetaprop.com.ar</a></p>
+                        <a href="https://zetaprop.com.ar">zetaprop.com.ar</a></p>
+                        
+                        <p style="font-size: 0.9em; color: #666;">
+                            Ingresá al portal: <a href="https://zetaprop.com.ar/login">zetaprop.com.ar/login</a>
+                        </p>
+                        
+                        <p style="font-size: 0.8em; color: #999; margin-top: 10px;">
+                            ¿No querés recibir más estos correos? <a href="https://zetaprop.com.ar/unsubscribe?email=${to}">Darse de baja</a>
+                        </p>
                         
                         <hr style="border: 0; border-top: 1px solid #eee; margin: 20px 0;">
                         
@@ -181,7 +210,7 @@ export const emailNotificationService = {
                         </p>
                     </div>
                 `,
-                "TextBody": `Hola ${firstName},\n\nGracias por registrarte en Zeta Prop.\n\nYa podés comenzar a organizar tu gestión desde hoy mismo.\n\nPara empezar, te recomiendo estos pasos simples:\n1. Cargar una propiedad\n2. Agregar el propietario\n3. Incorporar el inquilino\n4. Registrar el contrato (aunque ya esté avanzado)\n5. Cargar pagos y vencimientos\n\nNo importa si el alquiler ya está en curso. Podés ingresar contratos vigentes y continuar la gestión desde el punto en el que estás hoy.\n\nLa idea es que tengas todo centralizado: propiedades, contratos, aumentos y cobranzas en un solo lugar.\n\nSi en algún momento necesitás ayuda o querés sugerir mejoras, podés escribirme directamente a este mail.\n\nEstoy para ayudarte.\n\nFacundo\nZeta Prop\nhttps://zetaprop.com.ar\n\nConsejo: empezá cargando solo un alquiler. En menos de 10 minutos vas a ver cómo funciona todo el sistema.`
+                "TextBody": `Hola ${firstName},\n\nGracias por registrarte en Zeta Prop.\n\nYa podés comenzar a organizar tu gestión desde hoy mismo.\n\nPara empezar, te recomiendo estos pasos simples:\n1. Cargar una propiedad\n2. Agregar el propietario\n3. Incorporar el inquilino\n4. Registrar el contrato (aunque ya esté avanzado)\n5. Cargar pagos y vencimientos\n\nNo importa si el alquiler ya está en curso. Podés ingresar contratos vigentes y continuar la gestión desde el punto en el que estás hoy.\n\nLa idea es que tengas todo centralizado: propiedades, contratos, aumentos y cobranzas en un solo lugar.\n\nSi en algún momento necesitás ayuda o querés sugerir mejoras, podés escribirme directamente a este mail.\n\nEstoy para ayudarte.\n\nFacundo\nZeta Prop\nzetaprop.com.ar\n\nIngresá al portal: zetaprop.com.ar/login\n\nConsejo: empezá cargando solo un alquiler. En menos de 10 minutos vas a ver cómo funciona todo el sistema.`
             });
             console.log(`Welcome email sent to ${to}`);
             await logSentEmail(to, "Bienvenido/a a Zeta Prop 🚀 | Cargá tu primer alquiler hoy", "welcome", "success");
@@ -200,6 +229,13 @@ export const emailNotificationService = {
             const msg = "[Service] Postmark client not configured for marketing email";
             console.warn(msg);
             return { success: false, error: msg };
+        }
+
+        // Check if user is unsubscribed
+        const unsubscribed = await isUnsubscribed(to);
+        if (unsubscribed) {
+            console.log(`[Service] User ${to} is unsubscribed. Skipping marketing email.`);
+            return { success: false, error: "USER_UNSUBSCRIBED" };
         }
 
         const firstName = name ? name.split(' ')[0] : 'Hola';
@@ -224,9 +260,15 @@ export const emailNotificationService = {
                         <p>Entrar a Zeta Prop:<br><a href="https://zetaprop.com.ar">https://zetaprop.com.ar</a></p>
                         <p>Si necesitás ayuda para empezar, podés escribirme directamente.</p>
                         <p>Saludos,<br><strong>Facundo</strong><br>Zeta Prop</p>
+                        <p style="font-size: 0.85em; color: #666; margin-top: 20px; border-top: 1px solid #eee; pt-4;">
+                            Ingresá al portal: <a href="https://zetaprop.com.ar/login">zetaprop.com.ar/login</a>
+                        </p>
+                        <p style="font-size: 0.75em; color: #999; margin-top: 10px;">
+                            ¿No querés recibir más correos de este tipo? <a href="https://zetaprop.com.ar/unsubscribe?email=${to}">Darse de baja</a>
+                        </p>
                     </div>
                 `,
-                textBody: `Hola ${firstName},\n\nGracias por registrarte en Zeta Prop.\n\nLa plataforma está pensada para que puedas administrar tus alquileres de forma simple y tener propiedades, contratos, aumentos y cobranzas en un solo lugar.\n\nPara empezar, te recomiendo estos pasos:\n- Cargar una propiedad\n- Agregar el propietario\n- Incorporar el inquilino\n- Registrar el contrato\n\nCon solo un contrato ya podés comenzar a gestionar todo desde el sistema.\n\nEntrar a Zeta Prop:\nhttps://zetaprop.com.ar\n\nSi necesitás ayuda para empezar, podés escribirme directamente.\n\nSaludos,\nFacundo\nZeta Prop`
+                textBody: `Hola ${firstName},\n\nGracias por registrarte en Zeta Prop.\n\nLa plataforma está pensada para que puedas administrar tus alquileres de forma simple y tener propiedades, contratos, aumentos y cobranzas en un solo lugar.\n\nPara empezar, te recomiendo estos pasos:\n- Cargar una propiedad\n- Agregar el propietario\n- Incorporar el inquilino\n- Registrar el contrato\n\nCon solo un contrato ya podés comenzar a gestionar todo desde el sistema.\n\nIngresá al portal: zetaprop.com.ar/login\n\nSi no querés recibir más estos correos: https://zetaprop.com.ar/unsubscribe?email=${to}\n\nSi necesitás ayuda para empezar, podés escribirme directamente.\n\nSaludos,\nFacundo\nZeta Prop`
             },
             'activation': {
                 subject: 'Un consejo para empezar: cargá solo un alquiler',
@@ -248,12 +290,18 @@ export const emailNotificationService = {
                             <li>ver la cuenta corriente del alquiler</li>
                             <li>generar liquidaciones</li>
                         </ul>
-                        <p>Podés ingresar y hacer la prueba desde acá:<br><a href="https://zetaprop.com.ar">https://zetaprop.com.ar</a></p>
+                        <p>Podés ingresar y hacer la prueba desde acá:<br><a href="https://zetaprop.com.ar/login">zetaprop.com.ar/login</a></p>
                         <p>Si querés, avisame y te ayudo a cargar el primer contrato.</p>
                         <p>Saludos,<br><strong>Facundo</strong></p>
+                        <p style="font-size: 0.85em; color: #666; margin-top: 20px; border-top: 1px solid #eee; pt-4;">
+                            Ingresá al portal: <a href="https://zetaprop.com.ar/login">zetaprop.com.ar/login</a>
+                        </p>
+                        <p style="font-size: 0.75em; color: #999; margin-top: 10px;">
+                            ¿No querés recibir más correos de este tipo? <a href="https://zetaprop.com.ar/unsubscribe?email=${to}">Darse de baja</a>
+                        </p>
                     </div>
                 `,
-                textBody: `Hola ${firstName},\n\nMuchos usuarios comienzan usando Zeta Prop con un solo alquiler.\n\nNo hace falta cargar toda la cartera de propiedades de golpe. Con estos datos ya podés empezar:\n- Una propiedad\n- Un propietario\n- Un inquilino\n- El contrato\n\nA partir de ahí el sistema ya te permite:\n- registrar pagos\n- controlar vencimientos automáticamente\n- ver la cuenta corriente del alquiler\n- generar liquidaciones\n\nPodés ingresar y hacer la prueba desde acá:\nhttps://zetaprop.com.ar\n\nSi querés, avisame y te ayudo a cargar el primer contrato.\n\nSaludos,\nFacundo`
+                textBody: `Hola ${firstName},\n\nMuchos usuarios comienzan usando Zeta Prop con un solo alquiler.\n\nNo hace falta cargar toda la cartera de propiedades de golpe. Con estos datos ya podés empezar:\n- Una propiedad\n- Un propietario\n- Un inquilino\n- El contrato\n\nA partir de ahí el sistema ya te permite:\n- registrar pagos\n- controlar vencimientos automáticamente\n- ver la cuenta corriente del alquiler\n- generar liquidaciones\n\nIngresá al portal: zetaprop.com.ar/login\n\nSi no querés recibir más estos correos: https://zetaprop.com.ar/unsubscribe?email=${to}\n\nSi querés, avisame y te ayudo a cargar el primer contrato.\n\nSaludos,\nFacundo`
             },
             'value': {
                 subject: 'Cómo generar la liquidación del alquiler en segundos',
@@ -278,11 +326,17 @@ export const emailNotificationService = {
                         </ul>
                         <p>De esta forma evitás preparar liquidaciones manuales en Word o Excel.</p>
                         <p>Todo queda ordenado, registrado y listo para enviar.</p>
-                        <p>Podés probarlo entrando acá:<br><a href="https://zetaprop.com.ar">https://zetaprop.com.ar</a></p>
+                        <p>Podés probarlo entrando acá:<br><a href="https://zetaprop.com.ar/login">zetaprop.com.ar/login</a></p>
                         <p>Saludos,<br><strong>Facundo</strong></p>
+                        <p style="font-size: 0.85em; color: #666; margin-top: 20px; border-top: 1px solid #eee; pt-4;">
+                            Ingresá al portal: <a href="https://zetaprop.com.ar/login">zetaprop.com.ar/login</a>
+                        </p>
+                        <p style="font-size: 0.75em; color: #999; margin-top: 10px;">
+                            ¿No querés recibir más correos de este tipo? <a href="https://zetaprop.com.ar/unsubscribe?email=${to}">Darse de baja</a>
+                        </p>
                     </div>
                 `,
-                textBody: `Hola ${firstName},\n\nUna de las funciones que más valoran las inmobiliarias que usan Zeta Prop es la generación automática de liquidaciones.\n\nUna vez cargado el contrato y los pagos, el sistema puede generar:\n\nLiquidación para el propietario\n- alquiler cobrado\n- comisión inmobiliaria\n- gastos o descuentos\n- monto a transferir\n\nLiquidación para el inquilino\n- alquiler del período\n- aumentos aplicados\n- expensas u otros cargos\n- total a pagar\n\nDe esta forma evitás preparar liquidaciones manuales en Word o Excel.\nTodo queda ordenado, registrado y listo para enviar.\n\nPodés probarlo entrando acá:\nhttps://zetaprop.com.ar\n\nSaludos,\nFacundo`
+                textBody: `Hola ${firstName},\n\nUna de las funciones que más valoran las inmobiliarias que usan Zeta Prop es la generación automática de liquidaciones.\n\nUna vez cargado el contrato y los pagos, el sistema puede generar:\n\nLiquidación para el propietario\n- alquiler cobrado\n- comisión inmobiliaria\n- gastos o descuentos\n- monto a transferir\n\nLiquidación para el inquilino\n- alquiler del período\n- aumentos aplicados\n- expensas u otros cargos\n- total a pagar\n\nDe esta forma evitás preparar liquidaciones manuales en Word o Excel.\nTodo queda ordenado, registrado y listo para enviar.\n\nIngresá al portal: zetaprop.com.ar/login\n\nSi no querés recibir más estos correos: https://zetaprop.com.ar/unsubscribe?email=${to}\n\nSaludos,\nFacundo`
             },
             'social': {
                 subject: 'Cómo están usando Zeta Prop otras inmobiliarias',
@@ -299,11 +353,17 @@ export const emailNotificationService = {
                         </ul>
                         <p>Esto evita trabajar con múltiples planillas o documentos sueltos.</p>
                         <p>La idea de Zeta Prop es simplificar la gestión diaria y ahorrar tiempo en tareas administrativas.</p>
-                        <p>Si todavía no cargaste tu primer contrato, podés hacerlo acá:<br><a href="https://zetaprop.com.ar">https://zetaprop.com.ar</a></p>
+                        <p>Si todavía no cargaste tu primer contrato, podés hacerlo acá:<br><a href="https://zetaprop.com.ar/login">zetaprop.com.ar/login</a></p>
                         <p>Saludos,<br><strong>Facundo</strong></p>
+                        <p style="font-size: 0.85em; color: #666; margin-top: 20px; border-top: 1px solid #eee; pt-4;">
+                            Ingresá al portal: <a href="https://zetaprop.com.ar/login">zetaprop.com.ar/login</a>
+                        </p>
+                        <p style="font-size: 0.75em; color: #999; margin-top: 10px;">
+                            ¿No querés recibir más correos de este tipo? <a href="https://zetaprop.com.ar/unsubscribe?email=${to}">Darse de baja</a>
+                        </p>
                     </div>
                 `,
-                textBody: `Hola ${firstName},\n\nMuchas inmobiliarias utilizan Zeta Prop para simplificar la administración de alquileres.\n\nLo que más valoran es:\n- tener todas las propiedades en un solo sistema\n- controlar vencimientos automáticamente\n- registrar pagos y cuentas corrientes\n- generar liquidaciones para propietarios en segundos\n\nEsto evita trabajar con múltiples planillas o documentos sueltos.\n\nLa idea de Zeta Prop es simplificar la gestión diaria y ahorrar tiempo en tareas administrativas.\n\nSi todavía no cargaste tu primer contrato, podés hacerlo acá:\nhttps://zetaprop.com.ar\n\nSaludos,\nFacundo`
+                textBody: `Hola ${firstName},\n\nMuchas inmobiliarias utilizan Zeta Prop para simplificar la administración de alquileres.\n\nLo que más valoran es:\n- tener todas las propiedades en un solo sistema\n- controlar vencimientos automáticamente\n- registrar pagos y cuentas corrientes\n- generar liquidaciones para propietarios en segundos\n\nEsto evita trabajar con múltiples planillas o documentos sueltos.\n\nLa idea de Zeta Prop es simplificar la gestión diaria y ahorrar tiempo en tareas administrativas.\n\nIngresá al portal: zetaprop.com.ar/login\n\nSi no querés recibir más estos correos: https://zetaprop.com.ar/unsubscribe?email=${to}\n\nSaludos,\nFacundo`
             },
             'conversion': {
                 subject: 'Seguí usando Zeta Prop para administrar tus alquileres',
@@ -323,9 +383,15 @@ export const emailNotificationService = {
                         <p>Entrar a Zeta Prop:<br><a href="https://zetaprop.com.ar">https://zetaprop.com.ar</a></p>
                         <p>Si tenés dudas o sugerencias, podés escribirme directamente.</p>
                         <p>Saludos,<br><strong>Facundo</strong><br>Zeta Prop</p>
+                        <p style="font-size: 0.85em; color: #666; margin-top: 20px; border-top: 1px solid #eee; pt-4;">
+                            Ingresá al portal: <a href="https://zetaprop.com.ar/login">zetaprop.com.ar/login</a>
+                        </p>
+                        <p style="font-size: 0.75em; color: #999; margin-top: 10px;">
+                            ¿No querés recibir más correos de este tipo? <a href="https://zetaprop.com.ar/unsubscribe?email=${to}">Darse de baja</a>
+                        </p>
                     </div>
                 `,
-                textBody: `Hola ${firstName},\n\nEspero que hayas podido probar Zeta Prop durante estos días.\n\nLa idea del sistema es que puedas gestionar de forma simple:\n- propiedades\n- contratos\n- vencimientos\n- pagos\n- liquidaciones\n\nSi la plataforma te resulta útil para organizar la administración de tus alquileres, podés continuar utilizándola de forma completa desde tu cuenta.\n\nEntrar a Zeta Prop:\nhttps://zetaprop.com.ar\n\nSi tenés dudas o sugerencias, podés escribirme directamente.\n\nSaludos,\nFacundo\nZeta Prop`
+                textBody: `Hola ${firstName},\n\nEspero que hayas podido probar Zeta Prop durante estos días.\n\nLa idea del sistema es que puedas gestionar de forma simple:\n- propiedades\n- contratos\n- vencimientos\n- pagos\n- liquidaciones\n\nSi la plataforma te resulta útil para organizar la administración de tus alquileres, podés continuar utilizándola de forma completa desde tu cuenta.\n\nIngresá al portal: zetaprop.com.ar/login\n\nSi no querés recibir más estos correos: https://zetaprop.com.ar/unsubscribe?email=${to}\n\nSi tenés dudas o sugerencias, podés escribirme directamente.\n\nSaludos,\nFacundo\nZeta Prop`
             },
             'promotion': {
                 subject: 'Publicá tus propiedades y ahorrá con nuestro CRM moderno',
@@ -339,9 +405,54 @@ export const emailNotificationService = {
                         <p><a href="https://zetaprop.com.ar" style="display:inline-block; padding:10px 20px; background-color:#4F46E5; color:white; text-decoration:none; border-radius:5px; margin-top:10px;">Descubrir Zeta Prop</a></p>
                         <p>Cualquier consulta o duda, podés escribirme directamente a este mail.</p>
                         <p>Saludos,<br><strong>Facundo</strong><br>Zeta Prop</p>
+                        <p style="font-size: 0.85em; color: #666; margin-top: 20px; border-top: 1px solid #eee; pt-4;">
+                            Ingresá al portal: <a href="https://zetaprop.com.ar/login">zetaprop.com.ar/login</a>
+                        </p>
+                        <p style="font-size: 0.75em; color: #999; margin-top: 10px;">
+                            ¿No querés recibir más correos de este tipo? <a href="https://zetaprop.com.ar/unsubscribe?email=${to}">Darse de baja</a>
+                        </p>
                     </div>
                 `,
-                textBody: `Hola ${firstName},\n\nEn Zeta Prop sumamos nuevas herramientas para ayudarte a hacer crecer tu inmobiliaria sin pagar de más.\n\nAhora podés publicar tus propiedades y mostrarlas a tus clientes, obtener nuevos contactos y realizar un seguimiento inteligente de cada consulta.\n\nTodo esto integrado en un CRM mucho más moderno, ágil y fácil de usar que las alternativas robustas del mercado actual, pero a un costo infinitamente más bajo en comparación a las grandes plataformas.\n\nAnimate a llevar tu gestión al próximo nivel ingresando a:\nhttps://zetaprop.com.ar\n\nCualquier consulta o duda, podés escribirme directamente a este mail.\n\nSaludos,\nFacundo\nZeta Prop`
+                textBody: `Hola ${firstName},\n\nEn Zeta Prop sumamos nuevas herramientas para ayudarte a hacer crecer tu inmobiliaria sin pagar de más.\n\nAhora podés publicar tus propiedades y mostrarlas a tus clientes, obtener nuevos contactos y realizar un seguimiento inteligente de cada consulta.\n\nTodo esto integrado en un CRM mucho más moderno, ágil y fácil de usar que las alternativas robustas del mercado actual, pero a un costo infinitamente más bajo en comparación a las grandes plataformas.\n\nAnimate a llevar tu gestión al próximo nivel ingresando a:\nzetaprop.com.ar/login\n\nSi no querés recibir más estos correos: https://zetaprop.com.ar/unsubscribe?email=${to}\n\nCualquier consulta o duda, podés escribirme directamente a este mail.\n\nSaludos,\nFacundo\nZeta Prop`
+            },
+            'crm_portal': {
+                subject: 'Zeta Prop: CRM + Portal para tu Inmobiliaria 🏡',
+                htmlBody: `
+                    <div style="font-family: Arial, sans-serif; color: #333; line-height: 1.6;">
+                        <p>Hola ${firstName},</p>
+                        
+                        <p>Queríamos contarte que en Zeta Prop no solo podés administrar alquileres y contratos.</p>
+                        
+                        <p>También podés <strong>publicar tus propiedades en venta o alquiler</strong> dentro de la plataforma y mostrarlas a tus clientes.</p>
+                        
+                        <p>Cada inmobiliaria tiene su propio espacio donde puede:</p>
+                        
+                        <ul>
+                            <li>Publicar propiedades</li>
+                            <li>Mostrar toda su cartera en una sola página</li>
+                            <li>Compartir propiedades con clientes mediante un enlace</li>
+                            <li>Mostrar fichas completas con fotos, descripción y ubicación</li>
+                        </ul>
+                        
+                        <p>De esta forma, Zeta Prop funciona también como un <strong>portal inmobiliario</strong>, permitiéndote promocionar tus propiedades de manera simple y económica.</p>
+                        
+                        <p>Podés empezar a publicar tus propiedades directamente desde tu panel.</p>
+                        
+                        <p>Cualquier duda o sugerencia estamos para ayudarte.</p>
+                        
+                        <p>Saludos,<br>
+                        <strong>Facundo</strong><br>
+                        Zeta Prop</p>
+                        
+                        <p style="font-size: 0.85em; color: #666; margin-top: 20px; border-top: 1px solid #eee; pt-4;">
+                            Ingresá al portal: <a href="https://zetaprop.com.ar/login">zetaprop.com.ar/login</a>
+                        </p>
+                        <p style="font-size: 0.75em; color: #999; margin-top: 10px;">
+                            ¿No querés recibir más correos de este tipo? <a href="https://zetaprop.com.ar/unsubscribe?email=${to}">Darse de baja</a>
+                        </p>
+                    </div>
+                `,
+                textBody: `Hola ${firstName},\n\nQueríamos contarte que en Zeta Prop no solo podés administrar alquileres y contratos.\n\nTambién podés publicar tus propiedades en venta o alquiler dentro de la plataforma y mostrarlas a tus clientes.\n\nCada inmobiliaria tiene su propio espacio donde puede:\n• Publicar propiedades\n• Mostrar toda su cartera en una sola página\n• Compartir propiedades con clientes mediante un enlace\n• Mostrar fichas completas con fotos, descripción y ubicación\n\nDe esta forma, Zeta Prop funciona también como un portal inmobiliario, permitiéndote promocionar tus propiedades de manera simple y económica.\n\nPodés empezar a publicar tus propiedades directamente desde tu panel.\n\nIngresá al portal: zetaprop.com.ar/login\n\nSi no querés recibir más estos correos: https://zetaprop.com.ar/unsubscribe?email=${to}\n\nCualquier duda o sugerencia estamos para ayudarte.\n\nSaludos,\nFacundo\nZeta Prop`
             }
         };
 

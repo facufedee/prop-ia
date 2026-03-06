@@ -32,7 +32,9 @@ export interface PublicProperty {
 export interface PublicAgency {
     uid: string;
     displayName: string;
+    agencyName?: string;
     photoURL?: string;
+    logoUrl?: string;
     email?: string;
     phoneNumber?: string;
     slug?: string; // Derived or stored
@@ -139,7 +141,9 @@ export const publicService = {
                 return {
                     uid: userDoc.id,
                     displayName: data.displayName || "Inmobiliaria",
+                    agencyName: data.agencyName,
                     photoURL: data.photoURL,
+                    logoUrl: data.logoUrl,
                     email: data.email,
                     phoneNumber: data.phoneNumber,
                     slug: publicService.slugify(data.displayName || "agency")
@@ -172,7 +176,9 @@ export const publicService = {
                 return {
                     uid: match.id,
                     displayName: data.displayName || "Inmobiliaria",
+                    agencyName: data.agencyName,
                     photoURL: data.photoURL,
+                    logoUrl: data.logoUrl,
                     email: data.email,
                     slug: publicService.slugify(data.displayName || "agency")
                 };

@@ -39,6 +39,7 @@ import { auth } from "@/infrastructure/firebase/client";
 import { signOut } from "firebase/auth";
 import { useState, useEffect } from "react";
 import { useAuth } from "@/ui/context/AuthContext";
+import { addDays, format } from "date-fns";
 
 
 // Types
@@ -115,7 +116,7 @@ interface DashboardSidebarProps {
 export default function DashboardSidebar({ isOpen = false, onClose }: DashboardSidebarProps) {
   const pathname = usePathname();
   const router = useRouter();
-  const { userRole, userPermissions } = useAuth();
+  const { userRole, userPermissions, user } = useAuth();
   const [collapsed, setCollapsed] = useState(false);
   const [unreadCount, setUnreadCount] = useState(0); // State for unread messages badge
   const [ticketCount, setTicketCount] = useState(0); // Tickets badge
@@ -394,15 +395,16 @@ export default function DashboardSidebar({ isOpen = false, onClose }: DashboardS
                 </div>
                 <div className="relative z-10">
                   <h4 className="font-bold text-sm mb-1 text-indigo-200 flex items-center gap-2">
-                    Plan Básico
+                    Mejorá tu Plan
                     <span className="flex h-2 w-2 relative">
                       <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-indigo-400 opacity-75"></span>
                       <span className="relative inline-flex rounded-full h-2 w-2 bg-indigo-500"></span>
                     </span>
                   </h4>
                   <p className="text-xs text-gray-300 mb-3 leading-relaxed">
-                    Desbloqueá todas las funciones PRO hoy mismo.
+                    Desbloqueá todas las funciones
                   </p>
+
                   <button
                     onClick={() => router.push('/precios')}
                     className="w-full bg-white text-gray-900 text-xs font-bold py-2 rounded-lg hover:bg-gray-100 transition shadow-sm flex items-center justify-center gap-1 group-hover:scale-[1.02] transform duration-200"

@@ -166,16 +166,18 @@ export default function AgencyPropertiesPage() {
                 <div className="container mx-auto px-4 py-8">
                     <div className="flex flex-col md:flex-row items-center md:items-start gap-6">
                         <div className="w-24 h-24 rounded-2xl bg-gray-100 overflow-hidden border-4 border-white shadow-lg shrink-0">
-                            {agency.photoURL ? (
+                            {agency.logoUrl ? (
+                                <img src={agency.logoUrl} alt={agency.agencyName || agency.displayName} className="w-full h-full object-cover" />
+                            ) : agency.photoURL ? (
                                 <img src={agency.photoURL} alt={agency.displayName} className="w-full h-full object-cover" />
                             ) : (
                                 <div className="w-full h-full bg-indigo-100 flex items-center justify-center text-3xl font-bold text-indigo-600">
-                                    {agency.displayName.substring(0, 2).toUpperCase()}
+                                    {(agency.agencyName || agency.displayName).substring(0, 2).toUpperCase()}
                                 </div>
                             )}
                         </div>
                         <div className="flex-1 text-center md:text-left">
-                            <h1 className="text-3xl font-bold text-gray-900 mb-2">{agency.displayName}</h1>
+                            <h1 className="text-3xl font-bold text-gray-900 mb-2">{agency.agencyName || agency.displayName}</h1>
                             <div className="flex flex-wrap items-center justify-center md:justify-start gap-4 text-gray-600 px-4 md:px-0">
                                 {agency.email && <div className="flex items-center gap-1.5"><Mail size={16} /><span>{agency.email}</span></div>}
                                 {agency.phoneNumber && <div className="flex items-center gap-1.5"><span>{agency.phoneNumber}</span></div>}

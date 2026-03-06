@@ -30,4 +30,5 @@ export interface User {
     pendingPaymentApproval?: boolean;
     showPaymentWelcome?: boolean;
     hasRequestedExtension?: boolean;
+    unsubscribedMarketing?: boolean;
 }
