@@ -7,8 +7,8 @@ export const planSchema = z.object({
     icon: z.string().optional(),
     popular: z.boolean().optional(),
     price: z.object({
-        monthly: z.coerce.number().min(0, "El precio mensual debe ser 0 o mayor"),
-        yearly: z.coerce.number().min(0, "El precio anual debe ser 0 o mayor"),
+        monthly: z.number().min(0, "El precio mensual debe ser 0 o mayor").catch(0),
+        yearly: z.number().min(0, "El precio anual debe ser 0 o mayor").catch(0),
     }),
     features: z.object({
         rentals_management: z.boolean(),
