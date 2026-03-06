@@ -326,6 +326,22 @@ export const emailNotificationService = {
                     </div>
                 `,
                 textBody: `Hola ${firstName},\n\nEspero que hayas podido probar Zeta Prop durante estos días.\n\nLa idea del sistema es que puedas gestionar de forma simple:\n- propiedades\n- contratos\n- vencimientos\n- pagos\n- liquidaciones\n\nSi la plataforma te resulta útil para organizar la administración de tus alquileres, podés continuar utilizándola de forma completa desde tu cuenta.\n\nEntrar a Zeta Prop:\nhttps://zetaprop.com.ar\n\nSi tenés dudas o sugerencias, podés escribirme directamente.\n\nSaludos,\nFacundo\nZeta Prop`
+            },
+            'promotion': {
+                subject: 'Publicá tus propiedades y ahorrá con nuestro CRM moderno',
+                htmlBody: `
+                    <div style="font-family: Arial, sans-serif; color: #333; line-height: 1.6;">
+                        <p>Hola ${firstName},</p>
+                        <p>En Zeta Prop sumamos nuevas herramientas para ayudarte a hacer crecer tu inmobiliaria sin pagar de más.</p>
+                        <p>Ahora podés <strong>publicar tus propiedades y mostrarlas a tus clientes</strong>, obtener nuevos contactos y realizar un seguimiento inteligente de cada consulta.</p>
+                        <p>Todo esto integrado en un <strong>CRM mucho más moderno, ágil y fácil de usar</strong> que las alternativas robustas del mercado actual, pero a un <strong>costo infinitamente más bajo</strong> en comparación a las grandes plataformas.</p>
+                        <p>Animate a llevar tu gestión al próximo nivel:</p>
+                        <p><a href="https://zetaprop.com.ar" style="display:inline-block; padding:10px 20px; background-color:#4F46E5; color:white; text-decoration:none; border-radius:5px; margin-top:10px;">Descubrir Zeta Prop</a></p>
+                        <p>Cualquier consulta o duda, podés escribirme directamente a este mail.</p>
+                        <p>Saludos,<br><strong>Facundo</strong><br>Zeta Prop</p>
+                    </div>
+                `,
+                textBody: `Hola ${firstName},\n\nEn Zeta Prop sumamos nuevas herramientas para ayudarte a hacer crecer tu inmobiliaria sin pagar de más.\n\nAhora podés publicar tus propiedades y mostrarlas a tus clientes, obtener nuevos contactos y realizar un seguimiento inteligente de cada consulta.\n\nTodo esto integrado en un CRM mucho más moderno, ágil y fácil de usar que las alternativas robustas del mercado actual, pero a un costo infinitamente más bajo en comparación a las grandes plataformas.\n\nAnimate a llevar tu gestión al próximo nivel ingresando a:\nhttps://zetaprop.com.ar\n\nCualquier consulta o duda, podés escribirme directamente a este mail.\n\nSaludos,\nFacundo\nZeta Prop`
             }
         };
 

@@ -9,7 +9,8 @@ import {
     query,
     where,
     orderBy,
-    Timestamp
+    Timestamp,
+    setDoc
 } from "firebase/firestore";
 import { Plan, Subscription, Payment, Addon } from "@/domain/models/Subscription";
 import { PLANS } from "@/infrastructure/data/plans";
@@ -23,16 +24,47 @@ export const subscriptionService = {
     // ========== PLANS ==========
 
     getAllPlans: async (): Promise<Plan[]> => {
-        // Return hardcoded plans
-        // @ts-ignore - UIPlan is compatible with Plan
-        return PLANS as Plan[];
+        if (!db) throw new Error("Firestore not initialized");
+        const snapshot = await getDocs(collection(db, PLANS_COLLECTION));
+
+        if (snapshot.empty) {
+            // Seed DB with hardcoded PLANS if empty
+            const seedPromises = PLANS.map((plan: any) => {
+                const planData = {
+                    ...plan,
+                    createdAt: Timestamp.now(),
+                    updatedAt: Timestamp.now()
+                };
+                if ('id' in planData) delete planData.id;
+                return setDoc(doc(db, PLANS_COLLECTION, plan.id), planData);
+            });
+            await Promise.all(seedPromises);
+
+            // Return them formatted
+            return PLANS as Plan[];
+        }
+
+        return snapshot.docs.map(doc => ({
+            id: doc.id,
+            ...doc.data(),
+            createdAt: doc.data().createdAt?.toDate() || new Date(),
+            updatedAt: doc.data().updatedAt?.toDate() || new Date(),
+        })) as Plan[];
     },
 
     getPlanById: async (id: string): Promise<Plan | null> => {
-        const plan = PLANS.find(p => p.id === id);
-        if (!plan) return null;
-        // @ts-ignore
-        return plan as Plan;
+        if (!db) throw new Error("Firestore not initialized");
+        const docRef = doc(db, PLANS_COLLECTION, id);
+        const docSnap = await getDoc(docRef);
+
+        if (!docSnap.exists()) return null;
+
+        return {
+            id: docSnap.id,
+            ...docSnap.data(),
+            createdAt: docSnap.data().createdAt?.toDate() || new Date(),
+            updatedAt: docSnap.data().updatedAt?.toDate() || new Date(),
+        } as Plan;
     },
 
     deletePlan: async (id: string): Promise<void> => {
@@ -143,6 +175,12 @@ export const subscriptionService = {
         }).catch(err => console.error("Failed to trigger email notification:", err));
     },
 
+    deleteSubscription: async (id: string): Promise<void> => {
+        if (!db) throw new Error("Firestore not initialized");
+        const { deleteDoc } = await import("firebase/firestore");
+        await deleteDoc(doc(db, SUBSCRIPTIONS_COLLECTION, id));
+    },
+
     // ========== PAYMENTS ==========
 
     getUserPayments: async (userId: string): Promise<Payment[]> => {
@@ -198,12 +236,24 @@ export const subscriptionService = {
     processPaymentWebhook: async (paymentId: string): Promise<{ success: boolean; message: string }> => {
         console.log(`[Webhook] Processing payment ${paymentId}...`);
 
-        // 1. Fetch payment details from Mercado Pago
-        const mpAccessToken = process.env.MP_ACCESS_TOKEN;
-        if (!mpAccessToken) {
-            console.error("[Webhook] MP_ACCESS_TOKEN not configured");
+        // 1. Fetch active MP access token from Firestore (dynamic, supports sandbox/production switch)
+        const { configService } = await import("./configService");
+        const mpConfig = await configService.getMercadoPagoConfig(true);
+
+        if (!mpConfig) {
+            console.error("[Webhook] Mercado Pago configuration not found in Firestore");
             return { success: false, message: "Payment provider not configured" };
         }
+
+        const activeEnv = mpConfig.activeMode;
+        const mpAccessToken = mpConfig[activeEnv]?.accessToken;
+
+        if (!mpAccessToken) {
+            console.error(`[Webhook] MP_ACCESS_TOKEN not configured for mode: ${activeEnv}`);
+            return { success: false, message: "Payment provider token not configured" };
+        }
+
+        console.log(`[Webhook] Using ${activeEnv} mode with token prefix: ${mpAccessToken.substring(0, 8)}...`);
 
         let paymentData: any;
         try {

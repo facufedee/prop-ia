@@ -5,11 +5,40 @@ import { useAuth } from "@/ui/context/AuthContext";
 import { differenceInDays } from "date-fns";
 import { useRouter } from "next/navigation";
 import { Crown, Sparkles, Lock } from "lucide-react";
+import { toast } from "sonner";
+import { notificationService } from "@/infrastructure/services/notificationService";
 
 export default function TrialEnforcer() {
     const { user, userRole, loading } = useAuth();
     const [isExpired, setIsExpired] = useState(false);
+    const [requestingExtension, setRequestingExtension] = useState(false);
+    const [requested, setRequested] = useState(false);
     const router = useRouter();
+
+    const handleRequestExtension = async () => {
+        if (!user) return;
+        setRequestingExtension(true);
+        const phoneNumber = "5491123889745"; // Using the standard support number
+        const message = `Hola Facundo, queria solicitarte una prorroga para continuar utilizando la plataforma por 7 dias..\nMi mail es: ${user.email || 'desconocido'}`;
+        const whatsappUrl = `https://wa.me/${phoneNumber}?text=${encodeURIComponent(message)}`;
+
+        window.open(whatsappUrl, '_blank');
+
+        try {
+            await notificationService.createNotification(
+                "Solicitud de Prórroga",
+                `El usuario ${user.email} ha solicitado una prórroga de 7 días mediante WhatsApp.`,
+                "warning",
+                "Administrador",
+                `/dashboard/gestion-plataforma/${user.uid}`
+            );
+        } catch (error) {
+            console.error("Error creating notification", error);
+        }
+
+        setRequested(true);
+        setRequestingExtension(false);
+    };
 
     useEffect(() => {
         const checkTrialStatus = async () => {
@@ -28,6 +57,11 @@ export default function TrialEnforcer() {
                     if (!snapshot.empty) {
                         const subData = snapshot.docs[0].data();
                         planTier = subData.planTier || 'basic';
+
+                        // If admin set a specific endDate, skip this trial enforcer (AccountLockEnforcer handles it)
+                        if (subData.endDate) {
+                            return;
+                        }
                     }
                 }
             } catch (err) {
@@ -46,8 +80,8 @@ export default function TrialEnforcer() {
                 const today = new Date();
                 const daysSinceSignup = differenceInDays(today, signupDate);
 
-                // 7 Days Trial Check
-                if (daysSinceSignup >= 7) {
+                // 14 Days Trial Check
+                if (daysSinceSignup >= 14) {
                     try {
                         // Dynamically import service to avoid build issues if mixed env
                         const { subscriptionService } = await import("@/infrastructure/services/subscriptionService");
@@ -89,10 +123,10 @@ export default function TrialEnforcer() {
                             Tu prueba gratuita ha finalizado
                         </h2>
                         <p className="text-gray-600 leading-relaxed">
-                            Esperamos que hayas disfrutado de tus 7 días de prueba en el <span className="font-semibold text-indigo-600">Plan Básico</span>.
+                            Esperamos que hayas disfrutado de tus 14 días de prueba en el <span className="font-semibold text-indigo-600">Plan Básico</span>.
                         </p>
                         <p className="text-sm text-gray-500">
-                            Para continuar gestionando tus propiedades y acceder a todas las funcionalidades, por favor selecciona un plan.
+                            Para continuar gestionando tus propiedades y acceder a todas las funcionalidades, por favor selecciona un plan o comunicate con soporte si querés seguir probando.
                         </p>
                     </div>
 
@@ -103,6 +137,17 @@ export default function TrialEnforcer() {
                         >
                             <Crown className="w-5 h-5" />
                             Ver Planes y Suscribirme
+                        </button>
+
+                        <button
+                            onClick={handleRequestExtension}
+                            disabled={requestingExtension || requested}
+                            className="w-full py-3 px-6 rounded-xl bg-indigo-50 text-indigo-700 font-semibold border border-indigo-100 hover:bg-indigo-100 transition-colors flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+                        >
+                            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                                <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.888-.788-1.489-1.761-1.663-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51a12.8 12.8 0 0 0-.57-.01c-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 0 1-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 0 1-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 0 1 2.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0 0 12.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 0 0 5.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 0 0-3.48-8.413Z" />
+                            </svg>
+                            {requested ? "¡Solicitud Enviada!" : requestingExtension ? "Enviando..." : "Solicitar Prórroga de 7 días"}
                         </button>
 
                         {/* 

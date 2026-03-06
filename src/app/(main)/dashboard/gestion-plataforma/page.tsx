@@ -4,13 +4,15 @@ import { useEffect, useState } from "react";
 import { adminService } from "@/infrastructure/services/adminService";
 import { User } from "@/domain/models/User";
 import { RoleProtection } from "@/ui/components/auth/RoleProtection";
-import { format } from "date-fns";
+import { format, addDays } from "date-fns";
 import { es } from "date-fns/locale";
-import { Shield, User as UserIcon, Calendar, Mail, Search, Trash2, Ban, CheckCircle, Clock, Send } from "lucide-react";
+import { Shield, User as UserIcon, Calendar, Mail, Search, Trash2, Ban, CheckCircle, Clock, Send, Eye, AlertCircle } from "lucide-react";
 import { toast } from "sonner";
 import { PlanTier } from "@/domain/models/Subscription";
+import { useRouter } from "next/navigation";
 
 export default function PlatformManagementPage() {
+    const router = useRouter();
     const [users, setUsers] = useState<User[]>([]);
     const [loading, setLoading] = useState(true);
     const [searchTerm, setSearchTerm] = useState("");
@@ -168,7 +170,6 @@ export default function PlatformManagementPage() {
                             <thead className="bg-gray-50 border-b border-gray-100">
                                 <tr>
                                     <th className="px-6 py-4 font-semibold text-gray-900">Usuario</th>
-                                    <th className="px-6 py-4 font-semibold text-gray-900">Rol</th>
                                     <th className="px-6 py-4 font-semibold text-gray-900">Plan</th>
                                     <th className="px-6 py-4 font-semibold text-gray-900">Registro</th>
                                     <th className="px-6 py-4 font-semibold text-gray-900">Último Acceso</th>
@@ -180,135 +181,158 @@ export default function PlatformManagementPage() {
                             <tbody className="divide-y divide-gray-100">
                                 {loading ? (
                                     <tr>
-                                        <td colSpan={8} className="px-6 py-8 text-center text-gray-500">
+                                        <td colSpan={7} className="px-6 py-8 text-center text-gray-500">
                                             Cargando usuarios...
                                         </td>
                                     </tr>
                                 ) : filteredUsers.length === 0 ? (
                                     <tr>
-                                        <td colSpan={8} className="px-6 py-8 text-center text-gray-500">
+                                        <td colSpan={7} className="px-6 py-8 text-center text-gray-500">
                                             No se encontraron usuarios
                                         </td>
                                     </tr>
                                 ) : (
-                                    filteredUsers.map((user) => (
-                                        <tr key={user.uid} className={`hover:bg-gray-50 transition-colors ${user.disabled ? 'bg-gray-50 opacity-75' : ''}`}>
-                                            <td className="px-6 py-4">
-                                                <div className="flex items-center gap-3">
-                                                    <div className={`w-10 h-10 rounded-full flex items-center justify-center overflow-hidden ${user.disabled ? 'bg-gray-200 text-gray-400' : 'bg-indigo-100 text-indigo-600'}`}>
-                                                        {user.photoURL ? (
-                                                            <img src={user.photoURL} alt={user.displayName || "User"} className="w-full h-full object-cover" />
+                                    filteredUsers.map((user) => {
+                                        const isExpired = (() => {
+                                            if (user.disabled) return false;
+                                            const now = new Date();
+                                            if (user.subscription?.endDate) {
+                                                return now > new Date(user.subscription.endDate);
+                                            } else if (user.createdAt) {
+                                                return now > addDays(new Date(user.createdAt), 14);
+                                            }
+                                            return false;
+                                        })();
+
+                                        return (
+                                            <tr key={user.uid} className={`hover:bg-gray-50 transition-colors ${user.disabled ? 'bg-gray-50 opacity-75' : ''}`}>
+                                                <td className="px-6 py-4">
+                                                    <div className="flex items-center gap-3">
+                                                        <div className={`w-10 h-10 rounded-full flex items-center justify-center overflow-hidden ${user.disabled ? 'bg-gray-200 text-gray-400' : 'bg-indigo-100 text-indigo-600'}`}>
+                                                            {user.photoURL ? (
+                                                                <img src={user.photoURL} alt={user.displayName || "User"} className="w-full h-full object-cover" />
+                                                            ) : (
+                                                                <UserIcon size={20} />
+                                                            )}
+                                                        </div>
+                                                        <div>
+                                                            <div className="font-medium text-gray-900">
+                                                                {user.displayName || "Sin nombre"}
+                                                                {user.disabled && <span className="ml-2 text-xs text-red-500 font-medium">(Inhabilitado)</span>}
+                                                            </div>
+                                                            <div className="text-xs text-gray-500 flex items-center gap-1">
+                                                                <Mail size={12} />
+                                                                {user.email}
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </td>
+                                                <td className="px-6 py-4">
+                                                    <select
+                                                        value={user.subscription?.planTier || 'basic'}
+                                                        onChange={(e) => handleUpdatePlan(user.uid, e.target.value)}
+                                                        className="px-2 py-1 bg-white border border-gray-200 rounded text-xs font-medium text-gray-700 focus:outline-none focus:ring-1 focus:ring-indigo-500"
+                                                    >
+                                                        <option value="basic">Plan Básico</option>
+                                                        <option value="professional">Professional</option>
+                                                        <option value="enterprise">Enterprise</option>
+                                                    </select>
+                                                    <div className="text-[10px] text-gray-400 mt-1 uppercase">
+                                                        {user.subscription?.planTier || "Basic"}
+                                                    </div>
+                                                </td>
+                                                <td className="px-6 py-4">
+                                                    <div className="flex items-center gap-2 text-gray-500">
+                                                        <Calendar size={14} />
+                                                        {user.createdAt ? (
+                                                            format(new Date(user.createdAt), "dd MMM yyyy", { locale: es })
                                                         ) : (
-                                                            <UserIcon size={20} />
+                                                            "N/A"
                                                         )}
                                                     </div>
-                                                    <div>
-                                                        <div className="font-medium text-gray-900">
-                                                            {user.displayName || "Sin nombre"}
-                                                            {user.disabled && <span className="ml-2 text-xs text-red-500 font-medium">(Inhabilitado)</span>}
-                                                        </div>
-                                                        <div className="text-xs text-gray-500 flex items-center gap-1">
-                                                            <Mail size={12} />
-                                                            {user.email}
-                                                        </div>
+                                                </td>
+                                                <td className="px-6 py-4">
+                                                    <div className="flex items-center gap-2 text-gray-500">
+                                                        <Clock size={14} />
+                                                        {user.lastLogin ? (
+                                                            format(new Date(user.lastLogin), "dd MMM yyyy HH:mm", { locale: es })
+                                                        ) : (
+                                                            "N/A"
+                                                        )}
                                                     </div>
-                                                </div>
-                                            </td>
-                                            <td className="px-6 py-4">
-                                                <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
-                                                    {user.roleId || "Sin Rol"}
-                                                </span>
-                                            </td>
-                                            <td className="px-6 py-4">
-                                                <select
-                                                    value={user.subscription?.planTier || 'basic'}
-                                                    onChange={(e) => handleUpdatePlan(user.uid, e.target.value)}
-                                                    className="px-2 py-1 bg-white border border-gray-200 rounded text-xs font-medium text-gray-700 focus:outline-none focus:ring-1 focus:ring-indigo-500"
-                                                >
-                                                    <option value="basic">Plan Básico</option>
-                                                    <option value="professional">Professional</option>
-                                                    <option value="enterprise">Enterprise</option>
-                                                </select>
-                                                <div className="text-[10px] text-gray-400 mt-1 uppercase">
-                                                    {user.subscription?.planTier || "Basic"}
-                                                </div>
-                                            </td>
-                                            <td className="px-6 py-4">
-                                                <div className="flex items-center gap-2 text-gray-500">
-                                                    <Calendar size={14} />
-                                                    {user.createdAt ? (
-                                                        format(new Date(user.createdAt), "dd MMM yyyy", { locale: es })
+                                                </td>
+                                                <td className="px-6 py-4 text-center">
+                                                    <div className="inline-flex items-center justify-center min-w-[2rem] h-8 px-2 rounded-full bg-indigo-50 text-indigo-700 font-semibold text-sm">
+                                                        {user.alquileresCount || 0}
+                                                    </div>
+                                                </td>
+                                                <td className="px-6 py-4">
+                                                    {user.disabled ? (
+                                                        <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800">
+                                                            Inhabilitado
+                                                        </span>
+                                                    ) : isExpired ? (
+                                                        <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-medium bg-orange-100 text-orange-800">
+                                                            <AlertCircle size={12} /> Vencido
+                                                        </span>
                                                     ) : (
-                                                        "N/A"
+                                                        <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                                                            Activo
+                                                        </span>
                                                     )}
-                                                </div>
-                                            </td>
-                                            <td className="px-6 py-4">
-                                                <div className="flex items-center gap-2 text-gray-500">
-                                                    <Clock size={14} />
-                                                    {user.lastLogin ? (
-                                                        format(new Date(user.lastLogin), "dd MMM yyyy HH:mm", { locale: es })
-                                                    ) : (
-                                                        "N/A"
-                                                    )}
-                                                </div>
-                                            </td>
-                                            <td className="px-6 py-4 text-center">
-                                                <div className="inline-flex items-center justify-center min-w-[2rem] h-8 px-2 rounded-full bg-indigo-50 text-indigo-700 font-semibold text-sm">
-                                                    {user.alquileresCount || 0}
-                                                </div>
-                                            </td>
-                                            <td className="px-6 py-4">
-                                                <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${user.disabled
-                                                    ? "bg-red-100 text-red-800"
-                                                    : "bg-green-100 text-green-800"
-                                                    }`}>
-                                                    {user.disabled ? "Inhabilitado" : "Activo"}
-                                                </span>
-                                            </td>
-                                            <td className="px-6 py-4 text-right">
-                                                <div className="flex items-center justify-end gap-2">
-                                                    <select
-                                                        className="px-2 py-1 bg-white border border-gray-200 rounded text-xs font-medium text-gray-700 focus:outline-none focus:ring-1 focus:ring-indigo-500 max-w-[130px] cursor-pointer"
-                                                        onChange={(e) => {
-                                                            const val = e.target.value;
-                                                            if (val) {
-                                                                const text = e.target.options[e.target.selectedIndex].text;
-                                                                handleSendMarketingEmail(user, val, text);
-                                                                e.target.value = ""; // reset selection
-                                                            }
-                                                        }}
-                                                        defaultValue=""
-                                                        title="Enviar Email de Marketing"
-                                                    >
-                                                        <option value="" disabled>📨 Enviar Mail...</option>
-                                                        <option value="welcome">1. Bienvenida</option>
-                                                        <option value="activation">2. Activación</option>
-                                                        <option value="value">3. Valor (Liquidaciones)</option>
-                                                        <option value="social">4. Prueba Social</option>
-                                                        <option value="conversion">5. Conversión</option>
-                                                    </select>
-                                                    <button
-                                                        onClick={() => handleToggleStatus(user.uid, user.disabled)}
-                                                        className={`p-2 rounded-lg transition-colors ${user.disabled
-                                                            ? "text-green-600 hover:bg-green-50"
-                                                            : "text-amber-600 hover:bg-amber-50"
-                                                            }`}
-                                                        title={user.disabled ? "Habilitar Acceso" : "Inhabilitar Acceso"}
-                                                    >
-                                                        {user.disabled ? <CheckCircle size={18} /> : <Ban size={18} />}
-                                                    </button>
-                                                    <button
-                                                        onClick={() => handleDelete(user.uid)}
-                                                        className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors"
-                                                        title="Eliminar Usuario Permanentemente"
-                                                    >
-                                                        <Trash2 size={18} />
-                                                    </button>
-                                                </div>
-                                            </td>
-                                        </tr>
-                                    ))
+                                                </td>
+                                                <td className="px-6 py-4 text-right">
+                                                    <div className="flex items-center justify-end gap-2">
+                                                        <button
+                                                            onClick={() => router.push(`/dashboard/gestion-plataforma/${user.uid}`)}
+                                                            className="p-2 text-indigo-600 hover:bg-indigo-50 rounded-lg transition-colors"
+                                                            title="Ver Perfil Detallado"
+                                                        >
+                                                            <Eye size={18} />
+                                                        </button>
+                                                        <select
+                                                            className="px-2 py-1 bg-white border border-gray-200 rounded text-xs font-medium text-gray-700 focus:outline-none focus:ring-1 focus:ring-indigo-500 max-w-[130px] cursor-pointer"
+                                                            onChange={(e) => {
+                                                                const val = e.target.value;
+                                                                if (val) {
+                                                                    const text = e.target.options[e.target.selectedIndex].text;
+                                                                    handleSendMarketingEmail(user, val, text);
+                                                                    e.target.value = ""; // reset selection
+                                                                }
+                                                            }}
+                                                            defaultValue=""
+                                                            title="Enviar Email de Marketing"
+                                                        >
+                                                            <option value="" disabled>📨 Enviar Mail...</option>
+                                                            <option value="welcome">1. Bienvenida</option>
+                                                            <option value="activation">2. Activación</option>
+                                                            <option value="value">3. Valor (Liquidaciones)</option>
+                                                            <option value="social">4. Prueba Social</option>
+                                                            <option value="conversion">5. Conversión</option>
+                                                            <option value="promotion">6. Promocional (CRM + Portal)</option>
+                                                        </select>
+                                                        <button
+                                                            onClick={() => handleToggleStatus(user.uid, user.disabled)}
+                                                            className={`p-2 rounded-lg transition-colors ${user.disabled
+                                                                ? "text-green-600 hover:bg-green-50"
+                                                                : "text-amber-600 hover:bg-amber-50"
+                                                                }`}
+                                                            title={user.disabled ? "Habilitar Acceso" : "Inhabilitar Acceso"}
+                                                        >
+                                                            {user.disabled ? <CheckCircle size={18} /> : <Ban size={18} />}
+                                                        </button>
+                                                        <button
+                                                            onClick={() => handleDelete(user.uid)}
+                                                            className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+                                                            title="Eliminar Usuario Permanentemente"
+                                                        >
+                                                            <Trash2 size={18} />
+                                                        </button>
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                        );
+                                    })
                                 )}
                             </tbody>
                         </table>

@@ -18,6 +18,7 @@ export interface User {
         planTier: PlanTier;
         status: string;
         billingPeriod: string;
+        endDate?: Date;
     };
     // Identity & Verification
     isVerified?: boolean;

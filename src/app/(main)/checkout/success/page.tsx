@@ -1,17 +1,27 @@
 "use client";
 
-import { useEffect } from "react";
-import { useRouter } from "next/navigation";
-import { CheckCircle } from "lucide-react";
+import { useEffect, Suspense } from "react";
+import { useSearchParams } from "next/navigation";
+import { CheckCircle, Loader2 } from "lucide-react";
 import Link from "next/link";
 
-export default function CheckoutSuccessPage() {
-    const router = useRouter();
+function CheckoutSuccessContent() {
+    const searchParams = useSearchParams();
+    const paymentId = searchParams.get("payment_id");
 
     useEffect(() => {
-        // Optional: Track successful payment
-        console.log("✅ Payment successful!");
-    }, []);
+        // Ping webhook manually in case of localhost or delayed MP Webhooks
+        if (paymentId) {
+            console.log("Verifying payment directly...", paymentId);
+            fetch('/api/webhooks/mercadopago', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ type: 'payment', data: { id: paymentId } })
+            }).then(res => res.json())
+                .then(data => console.log("Direct Validation Result:", data))
+                .catch(e => console.error("Error verifying payment sync", e));
+        }
+    }, [paymentId]);
 
     return (
         <div className="min-h-screen bg-gradient-to-br from-green-50 to-emerald-50 flex items-center justify-center p-4">
@@ -49,5 +59,13 @@ export default function CheckoutSuccessPage() {
                 </p>
             </div>
         </div>
+    );
+}
+
+export default function CheckoutSuccessPage() {
+    return (
+        <Suspense fallback={<div className="min-h-screen flex items-center justify-center bg-green-50"><Loader2 className="animate-spin text-green-600" /></div>}>
+            <CheckoutSuccessContent />
+        </Suspense>
     );
 }

@@ -3,11 +3,11 @@
 import { useState } from "react";
 import { useForm, useController, Control } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Loader2 } from "lucide-react";
+import { Loader2, Check, Shield, Star, DollarSign, Activity } from "lucide-react";
 import { Plan } from "@/domain/models/Subscription";
 import { planSchema, PlanFormData, defaultPlan } from "../schema";
 import { toast } from "sonner";
-import { doc, updateDoc, collection, addDoc, setDoc } from "firebase/firestore";
+import { doc, collection, addDoc, setDoc } from "firebase/firestore";
 import { db } from "@/infrastructure/firebase/client";
 
 import {
@@ -28,24 +28,22 @@ interface PlanFormProps {
 export default function PlanForm({ initialData, onSave, onCancel }: PlanFormProps) {
     const [saving, setSaving] = useState(false);
 
-    // Helper to transform legacy features array to object if needed
     const getFeatures = (initialFeatures: any) => {
-        if (Array.isArray(initialFeatures)) {
-            // Legacy format detected: Map known names or default to false
-            const defaults = { ...defaultPlan.features };
-            return defaults;
+        const defaults = { ...defaultPlan.features };
+        if (Array.isArray(initialFeatures)) return defaults;
+        if (typeof initialFeatures === 'object' && initialFeatures !== null) {
+            return { ...defaults, ...initialFeatures };
         }
-        return initialFeatures || defaultPlan.features;
+        return defaults;
     };
 
-    // Transform initialData to match schema if needed
     const defaultValues: PlanFormData = initialData ? {
         name: initialData.name,
         tier: initialData.tier as "basic" | "professional" | "enterprise",
         description: initialData.description,
         icon: initialData.icon || "Zap",
         popular: initialData.popular || false,
-        price: initialData.price,
+        price: initialData.price || { monthly: 0, yearly: 0 },
         features: getFeatures(initialData.features),
         limits: {
             properties: initialData.limits?.properties ?? 0,
@@ -61,8 +59,6 @@ export default function PlanForm({ initialData, onSave, onCancel }: PlanFormProp
         register,
         control,
         handleSubmit,
-        watch,
-        setValue,
         formState: { errors }
     } = useForm<PlanFormData>({
         resolver: zodResolver(planSchema),
@@ -70,27 +66,18 @@ export default function PlanForm({ initialData, onSave, onCancel }: PlanFormProp
     });
 
     const onSubmit = async (data: PlanFormData) => {
-        console.log("Submitting form data:", data); // DEBUG
         setSaving(true);
         try {
-            console.log("Form data valid, proceeding to save..."); // DEBUG
-            if (!db) {
-                console.error("Firestore DB is undefined"); // DEBUG
-                throw new Error("Firestore no inicializado");
-            }
+            if (!db) throw new Error("Firestore no inicializado");
 
             if (initialData?.id) {
-                console.log("Updating existing plan: ", initialData.id); // DEBUG
                 const planRef = doc(db, "plans", initialData.id);
-                // Use setDoc with merge: true to handle cases where the document might not exist yet
-                // (e.g. standard plans loaded from static config but not yet in DB)
                 await setDoc(planRef, {
                     ...data,
                     updatedAt: new Date()
                 }, { merge: true });
                 toast.success("Plan actualizado correctamente");
             } else {
-                console.log("Creating new plan"); // DEBUG
                 const plansRef = collection(db, "plans");
                 await addDoc(plansRef, {
                     ...data,
@@ -108,126 +95,147 @@ export default function PlanForm({ initialData, onSave, onCancel }: PlanFormProp
         }
     };
 
-    const onError = (errors: any) => {
-        // Only show error if there are actual errors
-        const hasErrors = Object.keys(errors).length > 0;
-        if (hasErrors) {
-            console.error("Form validation errors:", errors);
-            toast.error("Hay errores en el formulario, revisa los campos.");
-        }
-        // Fix applied: prevent showing errors when object is empty
+    const onError = (formErrors: any) => {
+        // Deep stringify to catch hidden Zod errors or Proxy objects
+        const stringifiedErrors = JSON.stringify(formErrors, (key, value) => {
+            if (value !== null && typeof value === 'object' && value.type) {
+                return `${value.type} - ${value.message}`;
+            }
+            return value;
+        }, 2);
+
+        console.error("Validation Errors Details:", stringifiedErrors);
+        toast.error("Hay errores de validación. Revisa los campos marcados en rojo.");
     };
 
     return (
-        <form onSubmit={handleSubmit(onSubmit, onError)} className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 space-y-8">
+        <form onSubmit={handleSubmit(onSubmit, onError)} className="bg-white rounded-2xl shadow-xl border border-gray-100 p-8 max-w-5xl mx-auto space-y-12">
 
-            {/* BLOCK 1: Plan Info */}
-            <div className="space-y-4">
-                <div className="flex items-center justify-between border-b pb-2">
-                    <h3 className="text-lg font-semibold text-gray-900 border-l-4 border-indigo-500 pl-3">1. Información del Plan</h3>
-                    <div className="flex items-center gap-2">
-                        <input type="checkbox" {...register("popular")} id="popular" className="w-4 h-4 text-indigo-600 rounded" />
-                        <label htmlFor="popular" className="text-sm font-medium text-gray-700 select-none">Más Popular</label>
-                    </div>
-                </div>
-
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">Nombre</label>
-                        <input
-                            {...register("name")}
-                            className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none text-gray-900"
-                            placeholder="Ej. Profesional, Enterprise..."
-                        />
-                        {errors.name && <span className="text-red-500 text-xs">{errors.name.message}</span>}
-                    </div>
-                    <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">Nivel (Tier)</label>
-                        <select {...register("tier")} className="w-full px-3 py-2 border rounded-lg bg-white focus:ring-2 focus:ring-indigo-500 outline-none text-gray-900">
-                            <option value="basic">Plan Básico</option>
-                            <option value="professional">Plan Profesional</option>
-                            <option value="enterprise">Plan Empresarial</option>
-                        </select>
-                    </div>
-                </div>
-
+            <div className="flex flex-wrap gap-4 items-center justify-between pb-6 border-b border-gray-100">
                 <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">Descripción (Marketing Copy)</label>
-                    <textarea
-                        {...register("description")}
-                        rows={2}
-                        className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none resize-none text-gray-900"
-                        placeholder="La mejor opción para inmobiliarias en crecimiento..."
-                    />
-                    {errors.description && <span className="text-red-500 text-xs">{errors.description.message}</span>}
+                    <h2 className="text-2xl font-extrabold text-gray-900 tracking-tight">Configuración de Plan</h2>
+                    <p className="text-sm text-gray-500 mt-1">Define las características, precios y límites de este plan de suscripción.</p>
                 </div>
-
-                <div className="grid grid-cols-2 gap-6">
-                    <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">Icono (Lucide React)</label>
-                        <input
-                            {...register("icon")}
-                            className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none text-gray-900"
-                            placeholder="Zap, Building, Rocket..."
-                        />
-                    </div>
-                    <div className="grid grid-cols-2 gap-4">
-                        <div>
-                            <label className="block text-xs font-semibold text-gray-500 mb-1 uppercase tracking-wide">Mensual</label>
-                            <div className="relative">
-                                <span className="absolute left-3 top-2 text-gray-500">$</span>
-                                <input
-                                    type="number"
-                                    {...register("price.monthly", { valueAsNumber: true })}
-                                    className="w-full pl-7 pr-3 py-2 border rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none text-gray-900"
-                                />
-                            </div>
-                        </div>
-                        <div>
-                            <label className="block text-xs font-semibold text-gray-500 mb-1 uppercase tracking-wide">Anual</label>
-                            <div className="relative">
-                                <span className="absolute left-3 top-2 text-gray-500">$</span>
-                                <input
-                                    type="number"
-                                    {...register("price.yearly", { valueAsNumber: true })}
-                                    className="w-full pl-7 pr-3 py-2 border rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none text-gray-900"
-                                />
-                            </div>
-                        </div>
-                    </div>
-                </div>
+                {/* Popular Toggle */}
+                <label className="flex items-center gap-3 cursor-pointer bg-amber-50 px-4 py-2 rounded-full border border-amber-200 hover:bg-amber-100 transition-colors">
+                    <input type="checkbox" {...register("popular")} className="sr-only peer" />
+                    <div className="w-10 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-amber-500 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-amber-500 relative"></div>
+                    <span className="text-sm font-bold text-amber-900 flex items-center gap-1"><Star className="w-4 h-4 text-amber-500 fill-amber-500" /> Plan Popular</span>
+                </label>
             </div>
 
-            {/* BLOCK 2: Limits */}
-            <div className="space-y-4">
-                <div className="flex items-center gap-2 border-b pb-2 border-l-4 border-blue-500 pl-3">
-                    <h3 className="text-lg font-semibold text-gray-900">2. Límites Cuantitativos</h3>
-                    <span className="text-xs text-gray-500 font-normal ml-auto">Marca "Ilimitado" para desactivar el input numérico</span>
+            {/* BLOCK 1: General Info */}
+            <section className="space-y-6">
+                <div className="flex items-center gap-2 text-indigo-600 mb-2">
+                    <Shield className="w-5 h-5" />
+                    <h3 className="text-lg font-bold text-gray-900">1. Información General</h3>
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                    <ResourceLimitInput label="Propiedades Activas" name="limits.properties" control={control} icon={<HomeIcon className="w-4 h-4" />} />
-                    <ResourceLimitInput label="Usuarios / Agentes" name="limits.users" control={control} icon={<UsersIcon className="w-4 h-4" />} />
-                    <ResourceLimitInput label="Clientes (CRM)" name="limits.clients" control={control} icon={<BriefcaseIcon className="w-4 h-4" />} />
-                    <ResourceLimitInput label="Tasaciones / Mes" name="limits.tasaciones" control={control} icon={<CalculatorIcon className="w-4 h-4" />} />
-                    <ResourceLimitInput label="Créditos IA / Mes" name="limits.aiCredits" control={control} icon={<BotIcon className="w-4 h-4" />} />
+                    <div className="col-span-1 lg:col-span-2 relative">
+                        <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">Nombre del Plan</label>
+                        <input
+                            {...register("name")}
+                            className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:bg-white outline-none transition-all text-gray-900 font-medium"
+                            placeholder="Ej. Plan Profesional"
+                        />
+                        {errors.name && <p className="text-red-500 text-xs mt-1 absolute">{errors.name.message}</p>}
+                    </div>
+                    <div>
+                        <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">Nivel (Tier)</label>
+                        <select {...register("tier")} className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:bg-white outline-none transition-all text-gray-900 font-medium appearance-none">
+                            <option value="basic">⭐ Básico</option>
+                            <option value="professional">🌟 Profesional</option>
+                            <option value="enterprise">🚀 Empresarial</option>
+                        </select>
+                    </div>
+                    <div className="col-span-1 lg:col-span-3 relative">
+                        <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">Descripción (Marketing)</label>
+                        <textarea
+                            {...register("description")}
+                            rows={2}
+                            className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:bg-white outline-none transition-all resize-none text-gray-900 font-medium"
+                            placeholder="Breve descripción que verán los usuarios..."
+                        />
+                        {errors.description && <p className="text-red-500 text-xs mt-1 absolute">{errors.description.message}</p>}
+                    </div>
+                </div>
+            </section>
 
-                    <div className="bg-gray-50 p-4 rounded-lg border border-gray-200">
-                        <label className="block text-sm font-medium text-gray-700 mb-2 flex items-center gap-2">
-                            <DatabaseIcon className="w-4 h-4 text-indigo-500" /> Almacenamiento
-                        </label>
+            {/* BLOCK 2: Pricing */}
+            <section className="space-y-6">
+                <div className="flex items-center gap-2 text-emerald-600 mb-2">
+                    <DollarSign className="w-5 h-5" />
+                    <h3 className="text-lg font-bold text-gray-900">2. Precios</h3>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 bg-emerald-50/50 p-6 rounded-2xl border border-emerald-100">
+                    <div>
+                        <label className="block text-xs font-bold text-emerald-800 uppercase tracking-wider mb-2">Precio Mensual (ARS)</label>
+                        <div className="relative">
+                            <span className="absolute left-4 top-3.5 text-emerald-600 font-bold">$</span>
+                            <input
+                                type="number"
+                                {...register("price.monthly", { valueAsNumber: true })}
+                                className="w-full pl-8 pr-4 py-3 bg-white border border-emerald-200 rounded-xl focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500 outline-none transition-all text-gray-900 font-bold text-lg shadow-sm"
+                            />
+                        </div>
+                        {errors.price?.monthly && <p className="text-red-500 text-xs mt-1">{errors.price.monthly.message}</p>}
+                    </div>
+                    <div>
+                        <label className="block text-xs font-bold text-emerald-800 uppercase tracking-wider mb-2">Precio Anual (ARS)</label>
+                        <div className="relative">
+                            <span className="absolute left-4 top-3.5 text-emerald-600 font-bold">$</span>
+                            <input
+                                type="number"
+                                {...register("price.yearly", { valueAsNumber: true })}
+                                className="w-full pl-8 pr-4 py-3 bg-white border border-emerald-200 rounded-xl focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500 outline-none transition-all text-gray-900 font-bold text-lg shadow-sm"
+                            />
+                        </div>
+                        {errors.price?.yearly && <p className="text-red-500 text-xs mt-1">{errors.price.yearly.message}</p>}
+                    </div>
+                </div>
+            </section>
+
+            {/* BLOCK 3: Limits */}
+            <section className="space-y-6">
+                <div className="flex items-center justify-between mb-2">
+                    <div className="flex items-center gap-2 text-blue-600">
+                        <Activity className="w-5 h-5" />
+                        <h3 className="text-lg font-bold text-gray-900">3. Límites del Sistema</h3>
+                    </div>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+                    <ResourceLimitInput label="Propiedades Activas" name="limits.properties" control={control} icon={<HomeIcon className="w-4 h-4" />} />
+                    <ResourceLimitInput label="Usuarios Extras" name="limits.users" control={control} icon={<UsersIcon className="w-4 h-4" />} />
+                    <ResourceLimitInput label="Fichas de Clientes" name="limits.clients" control={control} icon={<BriefcaseIcon className="w-4 h-4" />} />
+                    <ResourceLimitInput label="Tasaciones Online / Mes" name="limits.tasaciones" control={control} icon={<CalculatorIcon className="w-4 h-4" />} />
+                    <ResourceLimitInput label="Créditos Inteligencia Artificial" name="limits.aiCredits" control={control} icon={<BotIcon className="w-4 h-4" />} />
+
+                    {/* Storage specifically is string based */}
+                    <div className="p-5 rounded-xl border border-gray-200 bg-white shadow-sm hover:border-blue-300 hover:shadow-md transition-all flex flex-col justify-between">
+                        <div className="flex items-center gap-2 mb-4">
+                            <div className="p-2 rounded-lg bg-gray-100 text-gray-500">
+                                <DatabaseIcon className="w-4 h-4" />
+                            </div>
+                            <span className="text-sm font-bold text-gray-800">Almacenamiento Total</span>
+                        </div>
                         <input
                             {...register("limits.storage")}
-                            className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none bg-white text-gray-900"
-                            placeholder="Ej. 10GB, 1TB..."
+                            className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 outline-none bg-gray-50 focus:bg-white border-gray-200 focus:border-blue-500 text-gray-900 font-bold text-lg transition-colors"
+                            placeholder="Ej. 1GB, 10GB, Ilimitado..."
                         />
                     </div>
                 </div>
-            </div>
+            </section>
 
-            {/* BLOCK 3: Feature Flags */}
-            <div className="space-y-4">
-                <h3 className="text-lg font-semibold text-gray-900 border-b pb-2 border-l-4 border-purple-500 pl-3">3. Funcionalidades (Feature Flags)</h3>
+            {/* BLOCK 4: Features */}
+            <section className="space-y-6">
+                <div className="flex items-center gap-2 text-purple-600 mb-2">
+                    <Check className="w-5 h-5" />
+                    <h3 className="text-lg font-bold text-gray-900">4. Funcionalidades (Feature Flags)</h3>
+                </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                     <FeatureSwitch label="Gestión de Alquileres" name="features.rentals_management" register={register} />
@@ -240,24 +248,24 @@ export default function PlanForm({ initialData, onSave, onCancel }: PlanFormProp
                     <FeatureSwitch label="Marca Blanca / Branding" name="features.custom_branding" register={register} />
                     <FeatureSwitch label="Multi-Sucursal" name="features.multi_branch" register={register} />
                 </div>
-            </div>
+            </section>
 
             {/* Actions */}
-            <div className="flex justify-end gap-3 pt-6 border-t bg-gray-50 -mx-6 -mb-6 p-6 rounded-b-xl">
+            <div className="flex items-center justify-end gap-4 pt-8 border-t border-gray-100">
                 <button
                     type="button"
                     onClick={onCancel}
-                    className="px-6 py-2 text-gray-700 bg-white border border-gray-300 hover:bg-gray-50 rounded-lg transition-colors font-medium shadow-sm hover:text-gray-900"
+                    className="px-6 py-3 text-gray-600 hover:text-gray-900 font-bold transition-colors hover:bg-gray-100 rounded-xl"
                 >
                     Cancelar
                 </button>
                 <button
                     type="submit"
                     disabled={saving}
-                    className="px-6 py-2 bg-indigo-600 text-white hover:bg-indigo-700 rounded-lg transition-colors font-medium flex items-center gap-2 disabled:opacity-50 shadow-md hover:shadow-lg transform active:scale-95 duration-200"
+                    className="px-8 py-3 bg-gradient-to-r from-indigo-600 to-violet-600 text-white hover:from-indigo-700 hover:to-violet-700 rounded-xl font-bold transition-all shadow-lg hover:shadow-indigo-500/30 flex items-center gap-2 disabled:opacity-50 transform active:scale-95"
                 >
-                    {saving && <Loader2 className="w-4 h-4 animate-spin" />}
-                    {saving ? "Guardando..." : "Guardar Configuración"}
+                    {saving ? <Loader2 className="w-5 h-5 animate-spin" /> : <Check className="w-5 h-5" />}
+                    {saving ? "Guardando..." : "Guardar Plan"}
                 </button>
             </div>
         </form>
@@ -265,60 +273,49 @@ export default function PlanForm({ initialData, onSave, onCancel }: PlanFormProp
 }
 
 function ResourceLimitInput({ label, name, control, icon }: { label: string, name: string, control: Control<any>, icon?: any }) {
-    const { field } = useController({
-        name,
-        control
-    });
-
-    // Check if current value is strictly "unlimited" string
+    const { field } = useController({ name, control });
     const isUnlimited = field.value === 'unlimited';
 
-    // Helper to safely handle number conversion
     const handleNumberChange = (value: string) => {
-        if (value === "") {
-            field.onChange(0); // Default to 0 if empty
-            return;
-        }
+        if (value === "") { field.onChange(0); return; }
         const num = parseFloat(value);
-        if (!isNaN(num)) {
-            field.onChange(num);
-        }
+        if (!isNaN(num)) field.onChange(num);
     };
 
     return (
-        <div className={`p-4 rounded-lg border transition-colors ${isUnlimited ? 'bg-indigo-50 border-indigo-200' : 'bg-gray-50 border-gray-200 hover:border-blue-300'}`}>
-            <div className="flex items-center gap-2 mb-3">
-                {icon && <div className={`${isUnlimited ? 'text-indigo-600' : 'text-gray-500'}`}>{icon}</div>}
-                <span className={`text-sm font-medium ${isUnlimited ? 'text-indigo-800' : 'text-gray-700'}`}>{label}</span>
-            </div>
+        <div className={`p-5 rounded-xl border shadow-sm transition-all duration-200 ${isUnlimited ? 'bg-indigo-50/50 border-indigo-200 shadow-indigo-100/50' : 'bg-white border-gray-200 hover:border-blue-300 hover:shadow-md'}`}>
+            <div className="flex flex-col gap-4">
+                <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                        <div className={`p-2 rounded-lg ${isUnlimited ? 'bg-indigo-100 text-indigo-600' : 'bg-gray-100 text-gray-500'}`}>
+                            {icon}
+                        </div>
+                        <span className={`text-sm font-bold ${isUnlimited ? 'text-indigo-900' : 'text-gray-800'}`}>{label}</span>
+                    </div>
+                </div>
 
-            <div className="flex items-center gap-3">
-                <input
-                    type="number"
-                    disabled={isUnlimited}
-                    placeholder="0"
-                    min="0"
-                    value={isUnlimited ? '' : field.value}
-                    onChange={(e) => handleNumberChange(e.target.value)}
-                    className={`flex-1 px-3 py-2 border rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none transition-colors ${isUnlimited ? 'bg-white/50 text-gray-400 cursor-not-allowed border-indigo-100' : 'bg-white text-gray-900'}`}
-                />
-
-                <div className="flex items-center gap-2">
+                <div className="flex items-center gap-3">
                     <input
-                        type="checkbox"
-                        checked={isUnlimited}
-                        onChange={(e) => {
-                            if (e.target.checked) {
-                                field.onChange('unlimited');
-                            } else {
-                                field.onChange(0); // Reset to 0 when unchecking unlimited
-                            }
-                        }}
-                        id={`semilimit-${name}`}
-                        className="w-5 h-5 text-indigo-600 rounded border-gray-300 focus:ring-indigo-500 cursor-pointer"
+                        type="number"
+                        disabled={isUnlimited}
+                        value={isUnlimited ? '' : field.value}
+                        onChange={(e) => handleNumberChange(e.target.value)}
+                        className={`w-full px-4 py-2 border rounded-lg outline-none font-bold text-lg transition-colors ${isUnlimited ? 'bg-indigo-50/30 border-transparent text-indigo-300 cursor-not-allowed placeholder-transparent' : 'bg-gray-50 focus:bg-white border-gray-200 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 text-gray-900'}`}
+                        placeholder={isUnlimited ? "∞" : "0"}
                     />
-                    <label htmlFor={`semilimit-${name}`} className="text-sm text-gray-600 cursor-pointer select-none">
-                        Ilimitado
+
+                    <label className="flex items-center cursor-pointer shrinks-0 gap-2 p-2 rounded-lg hover:bg-gray-50 transition-colors border border-transparent hover:border-gray-200">
+                        <div className="relative">
+                            <input
+                                type="checkbox"
+                                className="sr-only"
+                                checked={isUnlimited}
+                                onChange={(e) => field.onChange(e.target.checked ? 'unlimited' : 0)}
+                            />
+                            <div className={`block w-10 h-6 rounded-full transition-colors ${isUnlimited ? 'bg-indigo-500' : 'bg-gray-300'}`}></div>
+                            <div className={`dot absolute left-1 top-1 bg-white w-4 h-4 rounded-full transition-transform ${isUnlimited ? 'transform translate-x-4' : ''}`}></div>
+                        </div>
+                        <span className="text-[11px] font-extrabold uppercase text-gray-500">Ilimitado</span>
                     </label>
                 </div>
             </div>
@@ -328,13 +325,15 @@ function ResourceLimitInput({ label, name, control, icon }: { label: string, nam
 
 function FeatureSwitch({ label, name, register }: any) {
     return (
-        <label className="flex items-center justify-between p-4 bg-white border border-gray-200 rounded-lg cursor-pointer hover:border-purple-300 transition-all shadow-sm group hover:shadow-md">
-            <span className="text-sm font-medium text-gray-700 select-none group-hover:text-gray-900">{label}</span>
-            <input
-                type="checkbox"
-                {...register(name)}
-                className="w-5 h-5 text-indigo-600 rounded focus:ring-indigo-500"
-            />
+        <label className="flex items-center justify-between p-4 bg-white border border-gray-200 rounded-xl cursor-pointer hover:border-purple-300 transition-all shadow-sm group hover:shadow-md has-[:checked]:border-purple-500 has-[:checked]:bg-purple-50/50 has-[:checked]:shadow-purple-100">
+            <span className="text-sm font-bold text-gray-700 select-none group-has-[:checked]:text-purple-900">{label}</span>
+            <div className="relative flex items-center">
+                <input
+                    type="checkbox"
+                    {...register(name)}
+                    className="w-5 h-5 text-purple-600 rounded border-gray-300 focus:ring-purple-500 transition-colors shadow-sm cursor-pointer"
+                />
+            </div>
         </label>
     );
 }

@@ -1,11 +1,12 @@
 import { NextResponse } from "next/server";
 import { MercadoPagoConfig, Payment } from "mercadopago";
 import { configService } from "@/infrastructure/services/configService";
+import { subscriptionService } from "@/infrastructure/services/subscriptionService";
 
 export async function POST(req: Request) {
     try {
         const body = await req.json();
-        const { formData, transaction_amount, activeMode } = body;
+        const { formData, transaction_amount, planId, userId, billing } = body;
 
         // 1. Get the ACTIVE Access Token (dynamically, like we do for public key)
         const mpConfig = await configService.getMercadoPagoConfig(true); // Decrypted
@@ -31,7 +32,7 @@ export async function POST(req: Request) {
 
         const payment = new Payment(client);
 
-        // 3. Create the payment
+        // 3. Create the payment with full metadata to allow webhook activation
         console.log(`🚀 Process Payment: Creating payment for $${transaction_amount} in ${mpConfig.activeMode} mode...`);
 
         const result = await payment.create({
@@ -49,12 +50,23 @@ export async function POST(req: Request) {
                         number: formData.payer.identification.number
                     }
                 },
-                // Additional data if needed
-                // notification_url: ...
+                // Metadata so webhook / direct processing can link to user and plan
+                metadata: {
+                    plan_id: planId,
+                    billing_period: billing,
+                    user_id: userId
+                }
             }
         });
 
         console.log("✅ Process Payment: Payment created:", result.id, result.status);
+
+        // 4. If payment was approved immediately (e.g. debit card), activate subscription directly
+        if (result.status === 'approved' && result.id) {
+            console.log("✅ Payment approved immediately, triggering subscription activation...");
+            const activationResult = await subscriptionService.processPaymentWebhook(String(result.id));
+            console.log(`[Direct Activation] Result:`, activationResult.message);
+        }
 
         return NextResponse.json({
             id: result.id,

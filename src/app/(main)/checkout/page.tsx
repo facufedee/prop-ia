@@ -419,6 +419,9 @@ function CheckoutContent() {
                                                                 preferenceId={preferenceId}
                                                                 publicKey={mpConfig.publicKey}
                                                                 email={currentUser?.email || undefined}
+                                                                planId={planId || undefined}
+                                                                userId={currentUser?.uid || undefined}
+                                                                billing={billing}
                                                                 onPaymentResult={(result) => {
                                                                     console.log("Payment Result:", result);
                                                                     if (result.status === 'approved') {

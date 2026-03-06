@@ -17,7 +17,7 @@ import {
 } from "lucide-react";
 import { auth, db } from "@/infrastructure/firebase/client";
 import { onAuthStateChanged, signOut, User as FirebaseUser } from "firebase/auth";
-import { doc, onSnapshot } from "firebase/firestore";
+import { doc, onSnapshot, collection, query, where } from "firebase/firestore";
 import { roleService, Role } from "@/infrastructure/services/roleService";
 import { notificationService, AppNotification } from "@/infrastructure/services/notificationService";
 import { useBranchContext } from "@/infrastructure/context/BranchContext";
@@ -29,6 +29,7 @@ interface DashboardHeaderProps {
 export default function DashboardHeader({ onMobileMenuClick }: DashboardHeaderProps) {
     const [user, setUser] = useState<FirebaseUser | null>(null);
     const [userRole, setUserRole] = useState<Role | null>(null);
+    const [subscription, setSubscription] = useState<any>(null);
     const [profileOpen, setProfileOpen] = useState(false);
     const profileRef = useRef<HTMLDivElement>(null);
 
@@ -69,7 +70,21 @@ export default function DashboardHeader({ onMobileMenuClick }: DashboardHeaderPr
                 }
             }
         });
-        return () => unsubscribe();
+
+        // Setup subscription listener
+        const subQuery = query(collection(db, "subscriptions"), where("userId", "==", user.uid));
+        const unsubscribeSub = onSnapshot(subQuery, (snap) => {
+            if (!snap.empty) {
+                setSubscription(snap.docs[0].data());
+            } else {
+                setSubscription(null);
+            }
+        });
+
+        return () => {
+            unsubscribe();
+            unsubscribeSub();
+        };
     }, [user]);
 
     // Admin Notifications Listener

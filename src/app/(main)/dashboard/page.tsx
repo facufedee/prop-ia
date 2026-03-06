@@ -43,7 +43,8 @@ export default function DashboardPage() {
         activeRentals: 0,
         totalLeads: 0,
         honorariosMonth: 0,
-        recentActivity: [] as AuditLog[]
+        recentActivity: [] as AuditLog[],
+        subscription: null as any
     });
     const [loading, setLoading] = useState(true);
 
@@ -79,11 +80,13 @@ export default function DashboardPage() {
                 propsQuery = query(propsQuery, where("branchId", "==", branchId));
             }
 
-            const [propsSnapshot, leads, recentLogsData, alquileres] = await Promise.all([
+            const subQuery = query(collection(db, "subscriptions"), where("userId", "==", userId));
+            const [propsSnapshot, leads, recentLogsData, alquileres, subSnapshot] = await Promise.all([
                 getDocs(propsQuery),
                 leadsService.getLeads(userId),
                 auditLogService.getLogs("default-org-id", { userId }, 10),
-                alquileresService.getAlquileres(userId)
+                alquileresService.getAlquileres(userId),
+                getDocs(subQuery)
             ]);
 
             const propertyIds = new Set(propsSnapshot.docs.map(d => d.id));
@@ -125,7 +128,8 @@ export default function DashboardPage() {
                 activeRentals,
                 totalLeads: filteredLeads.length,
                 honorariosMonth,
-                recentActivity: recentLogsData.logs
+                recentActivity: recentLogsData.logs,
+                subscription: !subSnapshot.empty ? subSnapshot.docs[0].data() : null
             });
             setLoading(false);
         } catch (error) {
@@ -168,9 +172,16 @@ export default function DashboardPage() {
                     <h1 className="text-3xl font-bold text-gray-900 tracking-tight">
                         Hola, {user?.displayName?.split(' ')[0] || 'Colega'}
                     </h1>
-                    <p className="text-gray-500 mt-1 first-letter:capitalize">
-                        {format(new Date(), "EEEE, d 'de' MMMM", { locale: es })}
-                    </p>
+                    <div className="flex flex-col mt-2 space-y-1">
+                        <p className="text-indigo-600 font-semibold text-sm capitalize flex items-center gap-1.5">
+                            Plan {stats.subscription?.planTier || "Básico"}
+                        </p>
+                        {stats.subscription?.endDate && stats.subscription?.planTier !== 'basic' && (
+                            <p className="text-xs font-medium text-gray-500 bg-gray-100 px-2.5 py-1 rounded w-fit">
+                                Vence: {new Date(stats.subscription.endDate.seconds * 1000).toLocaleDateString('es-AR')}
+                            </p>
+                        )}
+                    </div>
                 </div>
                 <div className="flex items-center gap-3">
                     <div className="hidden md:flex items-center bg-white border border-gray-200 rounded-xl px-3 py-2 shadow-sm">

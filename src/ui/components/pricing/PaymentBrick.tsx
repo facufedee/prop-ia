@@ -9,10 +9,13 @@ interface PaymentBrickProps {
     amount: number;       // Required for Card Payment
     publicKey: string;
     email?: string;       // Pre-fill user email
+    planId?: string;      // Plan to activate on success
+    userId?: string;      // User to activate plan for
+    billing?: string;     // 'monthly' | 'yearly'
     onPaymentResult?: (result: any) => void;
 }
 
-export default function PaymentBrick({ preferenceId, amount, publicKey, email, onPaymentResult }: PaymentBrickProps) {
+export default function PaymentBrick({ preferenceId, amount, publicKey, email, planId, userId, billing, onPaymentResult }: PaymentBrickProps) {
     const [sdkReady, setSdkReady] = useState(false);
     const [error, setError] = useState<string | null>(null);
 
@@ -62,7 +65,10 @@ export default function PaymentBrick({ preferenceId, amount, publicKey, email, o
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({
                     formData,
-                    transaction_amount: amount
+                    transaction_amount: amount,
+                    planId,
+                    userId,
+                    billing
                 }),
             })
                 .then((res) => res.json())

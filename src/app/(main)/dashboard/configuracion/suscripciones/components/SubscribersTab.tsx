@@ -1,13 +1,16 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Loader2, Calendar, CreditCard, Clock, User, CheckCircle, XCircle, AlertCircle, RefreshCw, TrendingUp, Bell } from "lucide-react";
+import { Loader2, Calendar, CreditCard, Clock, User, CheckCircle, XCircle, AlertCircle, RefreshCw, TrendingUp, Bell, Trash2 } from "lucide-react";
 import { subscriptionService } from "@/infrastructure/services/subscriptionService";
+import { adminService } from "@/infrastructure/services/adminService";
 import { Subscription } from "@/domain/models/Subscription";
 
 interface SubscriberWithPlan extends Subscription {
     planName?: string;
     planTierDisplay?: string;
+    userName?: string;
+    userEmail?: string;
 }
 
 export default function SubscribersTab() {
@@ -17,15 +20,25 @@ export default function SubscribersTab() {
     useEffect(() => {
         const loadSubscriptions = async () => {
             try {
-                const subs = await subscriptionService.getAllSubscriptions();
-                const plans = await subscriptionService.getAllPlans();
-                const planMap = new Map(plans.map(p => [p.id, p]));
+                const [subs, plans, users] = await Promise.all([
+                    subscriptionService.getAllSubscriptions(),
+                    subscriptionService.getAllPlans(),
+                    adminService.getAllUsers()
+                ]);
 
-                const enrichedSubs = subs.map(sub => ({
-                    ...sub,
-                    planName: planMap.get(sub.planId)?.name || "Plan Desconocido",
-                    planTierDisplay: planMap.get(sub.planId)?.tier || sub.planTier,
-                }));
+                const planMap = new Map(plans.map(p => [p.id, p]));
+                const userMap = new Map(users.map(u => [u.uid, u]));
+
+                const enrichedSubs = subs.map(sub => {
+                    const matchedUser = userMap.get(sub.userId);
+                    return {
+                        ...sub,
+                        userName: matchedUser?.displayName || "Sin nombre",
+                        userEmail: matchedUser?.email || "Sin email",
+                        planName: planMap.get(sub.planId)?.name || "Plan Desconocido",
+                        planTierDisplay: planMap.get(sub.planId)?.tier || sub.planTier,
+                    };
+                });
 
                 setSubscriptions(enrichedSubs);
             } catch (error) {
@@ -37,6 +50,22 @@ export default function SubscribersTab() {
 
         loadSubscriptions();
     }, []);
+
+    const handleDeleteSubscription = async (id: string) => {
+        if (!confirm("¿Estás seguro de eliminar esta suscripción? El usuario perderá el acceso a las funciones del plan.")) {
+            return;
+        }
+
+        try {
+            setLoading(true);
+            await subscriptionService.deleteSubscription(id);
+            setSubscriptions(prev => prev.filter(s => s.id !== id));
+        } catch (error) {
+            console.error("Error deleting subscription:", error);
+            alert("Hubo un error al eliminar la suscripción.");
+            setLoading(false);
+        }
+    };
 
     const getStatusBadge = (status: string) => {
         switch (status) {
@@ -191,16 +220,27 @@ export default function SubscribersTab() {
                             <div className="flex items-start justify-between mb-4">
                                 <div className="flex items-center gap-3">
                                     <div className="w-10 h-10 rounded-full bg-indigo-100 flex items-center justify-center text-indigo-600 font-bold">
-                                        {sub.userId.slice(0, 2).toUpperCase()}
+                                        {(sub.userName && sub.userName !== "Sin nombre") ? sub.userName.slice(0, 2).toUpperCase() : (sub.userEmail && sub.userEmail !== "Sin email" ? sub.userEmail.slice(0, 2).toUpperCase() : sub.userId.slice(0, 2).toUpperCase())}
                                     </div>
                                     <div>
-                                        <p className="font-medium text-gray-900 text-sm truncate max-w-[150px]" title={sub.userId}>
-                                            {sub.userId.slice(0, 12)}...
+                                        <p className="font-medium text-gray-900 text-sm truncate max-w-[150px]" title={sub.userEmail && sub.userEmail !== "Sin email" ? sub.userEmail : sub.userId}>
+                                            {sub.userEmail && sub.userEmail !== "Sin email" ? sub.userEmail : sub.userId.slice(0, 12) + "..."}
                                         </p>
-                                        <p className="text-xs text-gray-500">{sub.planName}</p>
+                                        <p className="text-xs text-gray-500 truncate max-w-[150px]">
+                                            {sub.planName} • {sub.userName && sub.userName !== "Sin nombre" ? sub.userName : "Usuario"}
+                                        </p>
                                     </div>
                                 </div>
-                                {getStatusBadge(sub.status)}
+                                <div className="flex flex-col items-end gap-2">
+                                    {getStatusBadge(sub.status)}
+                                    <button
+                                        onClick={() => handleDeleteSubscription(sub.id)}
+                                        className="text-xs text-red-500 hover:text-red-700 flex items-center gap-1 mt-1 transition-colors"
+                                        title="Eliminar suscripción del sistema"
+                                    >
+                                        <Trash2 size={12} /> Eliminar
+                                    </button>
+                                </div>
                             </div>
 
                             {/* KPIs Grid */}

@@ -5,8 +5,8 @@ import PermissionGuard from "@/ui/auth/PermissionGuard";
 
 import { BranchProvider } from "@/infrastructure/context/BranchContext";
 
-import OnboardingTour from "@/ui/components/onboarding/OnboardingTour";
 import TrialEnforcer from "@/ui/components/subscription/TrialEnforcer";
+import AccountLockEnforcer from "@/ui/components/subscription/AccountLockEnforcer";
 
 export default function DashboardLayout({
   children,
@@ -19,8 +19,8 @@ export default function DashboardLayout({
         <BranchProvider>
           <DashboardShell>
             <TrialBanner />
-            <OnboardingTour />
             <TrialEnforcer />
+            <AccountLockEnforcer />
             {children}
           </DashboardShell>
         </BranchProvider>
