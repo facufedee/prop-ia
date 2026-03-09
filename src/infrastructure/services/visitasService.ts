@@ -169,6 +169,28 @@ export const visitasService = {
         })) as Visita[];
     },
 
+    // Get visitas by lead
+    getVisitasByLead: async (userId: string, leadId: string): Promise<Visita[]> => {
+        if (!db) throw new Error("Firestore not initialized");
+        const q = query(
+            collection(db, COLLECTION_NAME),
+            where("userId", "==", userId),
+            where("leadId", "==", leadId),
+            orderBy("fechaHora", "desc")
+        );
+        const snapshot = await getDocs(q);
+
+        return snapshot.docs.map(doc => ({
+            id: doc.id,
+            ...doc.data(),
+            fechaHora: doc.data().fechaHora?.toDate() || new Date(),
+            checkInHora: doc.data().checkInHora?.toDate(),
+            checkOutHora: doc.data().checkOutHora?.toDate(),
+            createdAt: doc.data().createdAt?.toDate() || new Date(),
+            updatedAt: doc.data().updatedAt?.toDate() || new Date(),
+        })) as Visita[];
+    },
+
     // Get visitas by estado
     getVisitasByEstado: async (userId: string, estado: VisitaEstado): Promise<Visita[]> => {
         if (!db) throw new Error("Firestore not initialized");

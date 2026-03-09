@@ -12,10 +12,10 @@ import { inquilinosService } from "@/infrastructure/services/inquilinosService";
 import { propietariosService } from "@/infrastructure/services/propietariosService";
 import { leadsService } from "@/infrastructure/services/leadsService";
 import { publicService, PublicProperty } from "@/infrastructure/services/publicService";
-
 import { Inquilino } from "@/domain/models/Inquilino";
 import { Propietario } from "@/domain/models/Propietario";
 import { Lead } from "@/domain/models/Lead";
+import LeadAgendaSidebar from "../../components/LeadAgendaSidebar";
 
 import { toast } from "sonner"; // Assuming sonner is used
 
@@ -90,7 +90,6 @@ export default function ClientDetailClient({ type, id }: ClientDetailClientProps
             setLoading(false);
         }
     };
-
     const handleAddNote = async () => {
         if (!newNote.trim()) return;
         setIsSavingNote(true);
@@ -111,6 +110,23 @@ export default function ClientDetailClient({ type, id }: ClientDetailClientProps
             toast.error("Error al guardar la nota");
         } finally {
             setIsSavingNote(false);
+        }
+    };
+
+    const handleVisitCreated = async (fechaHora: Date, propiedadInfo: string) => {
+        if (type !== 'leads' || !data) return;
+        try {
+            const dateStr = format(new Date(), 'dd/MM/yyyy HH:mm', { locale: es });
+            const userFriendlyVisitDate = format(fechaHora, "dd/MM/yyyy HH:mm");
+            const noteEntry = `[Visita Programada] ${dateStr} - Se agendó una visita para la propiedad ${propiedadInfo} el día ${userFriendlyVisitDate}`;
+
+            const lead = data as Lead;
+            const updatedNotas = [noteEntry, ...(lead.notas || [])];
+            await leadsService.updateLead(id, { notas: updatedNotas });
+            setData({ ...lead, notas: updatedNotas });
+
+        } catch (error) {
+            console.error("Error al agregar nota de visita:", error);
         }
     };
 
@@ -729,6 +745,17 @@ export default function ClientDetailClient({ type, id }: ClientDetailClientProps
 
                 </div>
             </div>
+
+            {/* RIGHT SIDEBAR: Agenda (Only for leads) */}
+            {type === 'leads' && leadData && (
+                <div className="hidden lg:block z-10 w-80 flex-shrink-0 bg-white h-screen sticky top-0">
+                    <LeadAgendaSidebar
+                        lead={leadData}
+                        onVisitCreated={handleVisitCreated}
+                    />
+                </div>
+            )}
+            {/* Mobile Agenda toggle (optional future feature, usually leads agenda is okay hidden on very small mobile, but we can make it accessible) */}
         </div>
     );
 }
