@@ -1,4 +1,5 @@
 import Link from "next/link";
+import Image from "next/image";
 import { Heart, MapPin, Maximize, Bed, Bath } from "lucide-react";
 import { PublicProperty } from "@/infrastructure/services/publicService";
 
@@ -21,10 +22,12 @@ export default function SimilarPropertyCard({ property }: SimilarPropertyCardPro
         <Link href={`/propiedades/p/${property.id}`} className="block min-w-[280px] w-[280px] bg-white rounded-xl overflow-hidden border border-gray-100 hover:shadow-lg transition-all duration-300 group" >
             {/* Image Section */}
             < div className="relative aspect-[4/3] bg-gray-100" >
-                <img
+                <Image
                     src={property.imageUrls?.[0] || 'https://placehold.co/400x300?text=Sin+Imagen'}
                     alt={property.title}
-                    className="w-full h-full object-cover"
+                    fill
+                    className="object-cover"
+                    sizes="(max-width: 768px) 100vw, 280px"
                 />
 
                 {/* Heart Icon */}
@@ -46,7 +49,7 @@ export default function SimilarPropertyCard({ property }: SimilarPropertyCardPro
                 {
                     property.agency?.photoURL && (
                         <div className="absolute bottom-2 right-2 w-8 h-8 rounded-md bg-white p-0.5 shadow-sm overflow-hidden">
-                            <img src={property.agency.photoURL} alt={property.agency.displayName} className="w-full h-full object-contain" />
+                            <Image src={property.agency.photoURL} alt={property.agency.displayName} fill className="object-contain p-0.5" sizes="32px" />
                         </div>
                     )
                 }

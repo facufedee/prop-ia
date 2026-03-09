@@ -16,11 +16,11 @@ export default function ServicesPage() {
                     Nuestros Servicios
                 </div>
                 <h1 className="text-4xl md:text-6xl font-extrabold text-gray-900 mb-6 leading-tight">
-                    Una plataforma integral impulsada por <br />
-                    <span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-600 to-purple-600">Inteligencia Artificial</span>
+                    El software de gestión definitivo para <br />
+                    <span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-600 to-purple-600">tu Inmobiliaria</span>
                 </h1>
                 <p className="text-xl text-gray-600 mb-10 max-w-3xl mx-auto">
-                    Desde la tasación automática hasta la gestión de contratos y la publicación en red. Todo lo que tu inmobiliaria necesita para escalar en 2025.
+                    Desde la gestión de clientes y seguimiento de contactos, hasta la administración de contratos de alquiler. Todo lo que necesitas para escalar tus ventas.
                 </p>
 
                 <div className="flex justify-center gap-4">
@@ -30,50 +30,53 @@ export default function ServicesPage() {
                 </div>
             </header>
 
-            {/* Feature 1: AI */}
+            {/* Feature 1: CRM */}
             <section className="py-20 px-6">
                 <div className="max-w-7xl mx-auto grid md:grid-cols-2 gap-12 items-center">
                     <div className="relative order-2 md:order-1">
                         <div className="absolute inset-0 bg-gradient-to-tr from-indigo-100 to-purple-100 rounded-3xl transform rotate-3 scale-95 opacity-70"></div>
-                        <div className="relative bg-gray-900 rounded-3xl p-8 shadow-2xl border border-gray-800">
+                        <div className="relative bg-white rounded-3xl p-8 shadow-xl border border-gray-100">
                             {/* Mock UI */}
-                            <div className="flex items-center gap-3 mb-6 border-b border-gray-800 pb-4">
-                                <div className="w-3 h-3 rounded-full bg-red-500"></div>
-                                <div className="w-3 h-3 rounded-full bg-yellow-500"></div>
-                                <div className="w-3 h-3 rounded-full bg-green-500"></div>
-                                <span className="text-xs text-gray-500 ml-2">Tasación.exe</span>
+                            <div className="flex items-center gap-3 mb-6 border-b border-gray-100 pb-4">
+                                <div className="w-8 h-8 rounded-full bg-indigo-100 flex items-center justify-center text-indigo-600 font-bold text-xs">FL</div>
+                                <div>
+                                    <div className="text-sm font-bold text-gray-900">Federico Lupupi</div>
+                                    <div className="text-xs text-gray-500">Lead Potencial</div>
+                                </div>
+                                <span className="ml-auto px-2 py-1 bg-green-100 text-green-700 rounded-lg text-xs font-bold">CALIENTE</span>
                             </div>
-                            <div className="space-y-4 font-mono text-sm">
-                                <div className="text-green-400">$ Analizando mercado...</div>
-                                <div className="text-gray-400"> Comparables encontrados: 1,245</div>
-                                <div className="text-gray-400"> Ajustando por inflación y zona...</div>
-                                <div className="text-white bg-gray-800 p-3 rounded border-l-2 border-green-500">
-                                    Valor estimado: <span className="text-green-400 font-bold">USD 145,000</span>
-                                    <div className="text-xs text-gray-500 mt-1">Confianza: 98.5%</div>
+                            <div className="space-y-4">
+                                <div className="bg-gray-50 p-3 rounded-lg border-l-4 border-indigo-500">
+                                    <div className="text-xs text-indigo-600 font-bold mb-1">Visita Programada</div>
+                                    <div className="text-sm text-gray-700">Mañana a las 15:30hs en Cabildo 2040</div>
+                                </div>
+                                <div className="bg-gray-50 p-3 rounded-lg border-l-4 border-gray-300">
+                                    <div className="text-xs text-gray-500 font-bold mb-1">Nota Interna</div>
+                                    <div className="text-sm text-gray-700">Busca departamento 3 amb con balcón...</div>
                                 </div>
                             </div>
                         </div>
                     </div>
                     <div className="order-1 md:order-2">
                         <div className="w-14 h-14 bg-indigo-100 rounded-xl flex items-center justify-center text-indigo-600 mb-6">
-                            <BrainCircuit size={32} />
+                            <Users size={32} />
                         </div>
-                        <h2 className="text-3xl md:text-4xl font-bold mb-6">Tasaciones Precisas en Segundos</h2>
+                        <h2 className="text-3xl md:text-4xl font-bold mb-6">CRM Especializado</h2>
                         <p className="text-lg text-gray-600 mb-6 leading-relaxed">
-                            No pierdas días analizando comparables manualmente. Nuestro algoritmo de IA procesa miles de datos del mercado argentino en tiempo real para darte una valuación justa y competitiva al instante.
+                            Centraliza toda la información de tus clientes y propiedades. Nuestro tablero Kanban te permite dar seguimiento a los leads, agendar visitas y llevar un historial detallado de cada contacto.
                         </p>
                         <ul className="space-y-3">
                             <li className="flex items-center text-gray-700">
-                                <CheckCircle className="w-5 h-5 text-green-500 mr-3" />
-                                Análisis de tendencias de zona
+                                <CheckCircle className="w-5 h-5 text-indigo-500 mr-3" />
+                                Historial completo de interacciones
                             </li>
                             <li className="flex items-center text-gray-700">
-                                <CheckCircle className="w-5 h-5 text-green-500 mr-3" />
-                                Ajuste por amenidades y estado
+                                <CheckCircle className="w-5 h-5 text-indigo-500 mr-3" />
+                                Embudos de ventas visuales
                             </li>
                             <li className="flex items-center text-gray-700">
-                                <CheckCircle className="w-5 h-5 text-green-500 mr-3" />
-                                Reportes PDF profesionales con tu marca
+                                <CheckCircle className="w-5 h-5 text-indigo-500 mr-3" />
+                                Agenda integrada y notificaciones
                             </li>
                         </ul>
                     </div>

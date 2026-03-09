@@ -11,7 +11,7 @@ import {
     where,
     Timestamp
 } from "firebase/firestore";
-import { Lead, LeadEstado } from "@/domain/models/Lead";
+import { Lead, LeadEstado, LeadInteraccion } from "@/domain/models/Lead";
 
 const COLLECTION_NAME = "leads";
 
@@ -155,6 +155,7 @@ export const leadsService = {
         const docRef = doc(db, COLLECTION_NAME, id);
         const updateData: any = {
             ...data,
+            ultimaActividad: Timestamp.now(),
             updatedAt: Timestamp.now(),
         };
 
@@ -202,6 +203,29 @@ export const leadsService = {
 
     // Convert lead to client (mark as converted)
     convertLead: async (id: string): Promise<void> => {
-        await leadsService.updateLead(id, { estado: 'convertido' });
+        await leadsService.updateLead(id, { estado: 'cerrado' });
+    },
+
+    // Add interaction to history
+    addInteraccion: async (id: string, interaccion: Omit<LeadInteraccion, 'fecha'>): Promise<void> => {
+        if (!db) throw new Error("Firestore not initialized");
+        const lead = await leadsService.getLeadById(id);
+        if (!lead) return;
+
+        const nuevaInteraccion: LeadInteraccion = {
+            ...interaccion,
+            fecha: new Date(),
+        };
+
+        const interacciones = [
+            ...(lead.interacciones || []),
+            nuevaInteraccion,
+        ];
+
+        await updateDoc(doc(db, COLLECTION_NAME, id), {
+            interacciones,
+            ultimaActividad: Timestamp.now(),
+            updatedAt: Timestamp.now(),
+        });
     },
 };

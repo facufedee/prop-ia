@@ -73,11 +73,11 @@ export default function Hero() {
               {/* Tablet Image */}
               <div className="animate-float">
                 <Image
-                  src="/assets/img/tablet_mockup_zetaprop.png"
+                  src="/assets/img/tablet_mockup_zetaprop1.png"
                   alt="ZetaProp Dashboard en Tablet"
                   width={800}
                   height={600}
-                  className="drop-shadow-2xl rounded-[2rem] object-contain w-full h-auto"
+                  className="object-contain w-full h-auto"
                   priority
                 />
               </div>

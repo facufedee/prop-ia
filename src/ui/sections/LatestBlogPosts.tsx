@@ -122,9 +122,9 @@ export default function LatestBlogPosts() {
                                     </p>
 
                                     <div className="flex items-center gap-2 pt-4 border-t border-gray-50 mt-auto">
-                                        <div className="w-6 h-6 rounded-full bg-gray-200 overflow-hidden">
+                                        <div className="relative w-6 h-6 rounded-full bg-gray-200 overflow-hidden">
                                             {post.author?.photo ? (
-                                                <img src={post.author.photo} alt={post.author.name} className="w-full h-full object-cover" />
+                                                <Image src={post.author.photo} alt={post.author.name} fill className="object-cover" sizes="24px" />
                                             ) : (
                                                 <div className="w-full h-full bg-indigo-100" />
                                             )}

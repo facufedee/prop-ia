@@ -15,7 +15,9 @@ import {
     Search,
     Settings,
     Trash2,
-    X
+    X,
+    ChevronLeft,
+    ChevronRight
 } from "lucide-react";
 import { notificationService, AppNotification } from "@/infrastructure/services/notificationService";
 import { roleService } from "@/infrastructure/services/roleService";
@@ -26,6 +28,11 @@ export default function NotificationsPage() {
     const [loading, setLoading] = useState(true);
     const [notifications, setNotifications] = useState<AppNotification[]>([]);
     const [filter, setFilter] = useState<'all' | 'unread'>('all');
+
+    // Pagination state
+    const [currentPage, setCurrentPage] = useState(1);
+    const [itemsPerPage, setItemsPerPage] = useState(10);
+
     const router = useRouter();
 
     // 1. Auth & Role Check
@@ -92,6 +99,18 @@ export default function NotificationsPage() {
         }
         return true;
     });
+
+    // Reset page to 1 if filter or itemsPerPage changes
+    useEffect(() => {
+        setCurrentPage(1);
+    }, [filter, itemsPerPage]);
+
+    // Pagination Calculation
+    const totalPages = Math.ceil(filteredNotifications.length / itemsPerPage);
+    const paginatedNotifications = filteredNotifications.slice(
+        (currentPage - 1) * itemsPerPage,
+        currentPage * itemsPerPage
+    );
 
     const unreadCount = notifications.filter(n => !n.readBy.includes(user?.uid || '')).length;
 
@@ -180,7 +199,7 @@ export default function NotificationsPage() {
                                 </p>
                             </div>
                         ) : (
-                            filteredNotifications.map((notif) => {
+                            paginatedNotifications.map((notif) => {
                                 const isUnread = !notif.readBy.includes(user?.uid || '');
                                 return (
                                     <div
@@ -226,6 +245,49 @@ export default function NotificationsPage() {
                             })
                         )}
                     </div>
+
+                    {/* Pagination Controls */}
+                    {filteredNotifications.length > 0 && (
+                        <div className="flex flex-col sm:flex-row items-center justify-between gap-4 p-4 border-t border-gray-100 bg-gray-50/50">
+                            <div className="flex items-center gap-2">
+                                <span className="text-sm text-gray-500">Mostrar:</span>
+                                <select
+                                    value={itemsPerPage}
+                                    onChange={(e) => setItemsPerPage(Number(e.target.value))}
+                                    className="border border-gray-300 rounded-md text-sm py-1 px-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none"
+                                >
+                                    <option value={5}>5</option>
+                                    <option value={10}>10</option>
+                                    <option value={20}>20</option>
+                                </select>
+                                <span className="text-sm text-gray-500 ml-2">
+                                    {((currentPage - 1) * itemsPerPage) + 1} - {Math.min(currentPage * itemsPerPage, filteredNotifications.length)} de {filteredNotifications.length}
+                                </span>
+                            </div>
+
+                            <div className="flex items-center gap-2">
+                                <button
+                                    onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
+                                    disabled={currentPage === 1}
+                                    className="p-1.5 rounded-md border border-gray-300 text-gray-500 hover:bg-white disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                                    title="Página anterior"
+                                >
+                                    <ChevronLeft className="w-5 h-5" />
+                                </button>
+                                <span className="text-sm font-medium text-gray-700 mx-2">
+                                    Página {currentPage} de {Math.max(1, totalPages)}
+                                </span>
+                                <button
+                                    onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
+                                    disabled={currentPage === totalPages || totalPages === 0}
+                                    className="p-1.5 rounded-md border border-gray-300 text-gray-500 hover:bg-white disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                                    title="Siguiente página"
+                                >
+                                    <ChevronRight className="w-5 h-5" />
+                                </button>
+                            </div>
+                        </div>
+                    )}
                 </div>
             </div>
         </div>

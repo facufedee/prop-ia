@@ -13,8 +13,14 @@ interface LeadsTableProps {
 
 const ESTADO_LABELS: Record<LeadEstado, string> = {
     nuevo: 'Nuevo',
-    pendiente: 'Pendiente',
     contactado: 'Contactado',
+    seguimiento: 'En Seguimiento',
+    visita_programada: 'Visita Programada',
+    negociacion: 'Negociación',
+    cerrado: 'Cerrado',
+    perdido: 'Perdido',
+    // Legacy
+    pendiente: 'Pendiente',
     leido: 'Leído',
     respondido: 'Respondido',
     calificado: 'Calificado',
@@ -24,13 +30,19 @@ const ESTADO_LABELS: Record<LeadEstado, string> = {
 };
 
 const ESTADO_COLORS: Record<LeadEstado, string> = {
-    nuevo: 'bg-blue-100 text-blue-700',
+    nuevo: 'bg-indigo-100 text-indigo-700',
+    contactado: 'bg-blue-100 text-blue-700',
+    seguimiento: 'bg-amber-100 text-amber-700',
+    visita_programada: 'bg-teal-100 text-teal-700',
+    negociacion: 'bg-purple-100 text-purple-700',
+    cerrado: 'bg-emerald-100 text-emerald-700',
+    perdido: 'bg-gray-200 text-gray-600',
+    // Legacy
     pendiente: 'bg-orange-100 text-orange-700',
-    contactado: 'bg-yellow-100 text-yellow-700',
     leido: 'bg-blue-50 text-blue-600',
     respondido: 'bg-indigo-100 text-indigo-700',
     calificado: 'bg-purple-100 text-purple-700',
-    convertido: 'bg-green-100 text-green-700',
+    convertido: 'bg-emerald-100 text-emerald-700',
     finalizado: 'bg-gray-200 text-gray-800',
     descartado: 'bg-gray-100 text-gray-700',
 };

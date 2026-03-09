@@ -37,7 +37,8 @@ export const notificationService = {
         message: string,
         type: AppNotification['type'] = 'info',
         targetRole?: string,
-        link?: string
+        link?: string,
+        targetUserId?: string
     ) => {
         if (!db) throw new Error("Firestore not initialized");
 
@@ -45,10 +46,11 @@ export const notificationService = {
             title,
             message,
             type,
-            targetRole,
+            targetRole: targetRole || null,
+            targetUserId: targetUserId || null,
             readBy: [],
             createdAt: Timestamp.now(),
-            link
+            link: link || null
         });
     },
 

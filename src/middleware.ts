@@ -62,7 +62,7 @@ export async function middleware(request: NextRequest) {
     // IMPORTANT: For production, you might need to refine 'img-src' etc depending on where user content comes from.
     const cspHeader = `
     default-src 'self';
-    script-src 'self' 'unsafe-eval' 'unsafe-inline' https://apis.google.com https://*.firebaseapp.com https://*.googleapis.com https://maps.googleapis.com https://maps.gstatic.com https://sdk.mercadopago.com https://*.mercadopago.com https://*.mercadopago.com.ar https://www.mercadopago.com https://www.mercadopago.com.ar https://*.mlstatic.com;
+    script-src 'self' 'unsafe-eval' 'unsafe-inline' https://www.googletagmanager.com https://www.google-analytics.com https://apis.google.com https://*.firebaseapp.com https://*.googleapis.com https://maps.googleapis.com https://maps.gstatic.com https://sdk.mercadopago.com https://*.mercadopago.com https://*.mercadopago.com.ar https://www.mercadopago.com https://www.mercadopago.com.ar https://*.mlstatic.com;
     style-src 'self' 'unsafe-inline' https://fonts.googleapis.com;
     img-src 'self' blob: data: https://*.googleusercontent.com https://*.googleapis.com https://maps.gstatic.com https://maps.googleapis.com https://http2.mlstatic.com https://*.mercadolibre.com https://mercadolibre.com https://*.mercadolivre.com https://mercadolivre.com https://*.mlstatic.com;
     font-src 'self' https://fonts.gstatic.com https://*.mlstatic.com;

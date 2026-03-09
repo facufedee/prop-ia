@@ -9,10 +9,10 @@ export default function DashboardShell({ children }: { children: React.ReactNode
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
   return (
-    <div className="flex h-screen bg-gray-50 overflow-hidden">
+    <div className="flex h-screen bg-gray-50">
       <DashboardSidebar isOpen={sidebarOpen} onClose={() => setSidebarOpen(false)} />
 
-      <div className="flex flex-col flex-1 overflow-hidden">
+      <div className="flex flex-col flex-1 overflow-hidden min-w-0">
 
         {/* New Header (replaces old mobile toggle and adds user menu) */}
         <DashboardHeader onMobileMenuClick={() => setSidebarOpen(true)} />

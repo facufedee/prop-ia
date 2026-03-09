@@ -354,7 +354,7 @@ export default function DashboardSidebar({ isOpen = false, onClose }: DashboardS
         </div>
 
         {/* Content */}
-        <div className="flex-1 overflow-y-auto overflow-x-hidden py-4 px-3 scrollbar-none space-y-1 relative pb-20">
+        <div className="flex-1 overflow-y-auto overflow-x-visible py-4 px-3 scrollbar-none space-y-1 relative pb-20">
           {MENU_ITEMS.filter(hasPermission).map((item) => {
             if (item.isDivider) {
               return <div key={item.href} className="my-3 mx-2 border-t border-gray-200"></div>;
@@ -412,20 +412,7 @@ export default function DashboardSidebar({ isOpen = false, onClose }: DashboardS
                     </div>
                   )}
 
-                  {/* Tooltip on Hover */}
-                  {collapsed && item.description && (
-                    <div className="absolute left-full top-1/2 -translate-y-1/2 ml-3 w-48 px-3 py-2 bg-gray-900 border border-gray-700 text-white text-xs rounded-lg shadow-xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all z-[100] pointer-events-none">
-                      <div className="absolute top-1/2 -translate-y-1/2 -left-1.5 w-3 h-3 bg-gray-900 border-l border-b border-gray-700 rotate-45"></div>
-                      <div className="font-bold mb-0.5 text-gray-100 relative z-10">{item.label}</div>
-                      <div className="text-gray-300 relative z-10 font-normal leading-relaxed">{item.description}</div>
-                    </div>
-                  )}
-                  {!collapsed && item.description && !item.subItems && (
-                    <div className="absolute left-full top-1/2 -translate-y-1/2 ml-4 w-48 px-3 py-2 bg-gray-900 border border-gray-700 text-white text-xs rounded-lg shadow-xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all z-[100] pointer-events-none">
-                      <div className="absolute top-1/2 -translate-y-1/2 -left-1.5 w-3 h-3 bg-gray-900 border-l border-b border-gray-700 rotate-45"></div>
-                      <div className="text-gray-200 relative z-10 font-normal leading-relaxed">{item.description}</div>
-                    </div>
-                  )}
+                  {/* Tooltips removed */}
                 </Link>
 
                 {/* Submenu Items */}

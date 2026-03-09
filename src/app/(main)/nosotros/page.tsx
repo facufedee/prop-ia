@@ -1,5 +1,6 @@
 import { Metadata } from 'next';
 import Link from 'next/link';
+import Image from 'next/image';
 import { Linkedin, Code2, Target, Lightbulb } from 'lucide-react';
 
 export const metadata: Metadata = {
@@ -65,11 +66,14 @@ export default function AboutPage() {
                         <div className="bg-white rounded-2xl overflow-hidden shadow-lg border border-gray-100 group hover:-translate-y-1 transition-transform duration-300">
                             <div className="h-32 bg-gradient-to-r from-indigo-500 to-blue-500"></div>
                             <div className="px-8 pb-8 -mt-12 text-center">
-                                <div className="w-24 h-24 bg-white rounded-full p-1 mx-auto shadow-md mb-4 flex items-center justify-center overflow-hidden">
-                                    <img
+                                <div className="w-24 h-24 relative bg-white rounded-full p-1 mx-auto shadow-md mb-4 flex items-center justify-center overflow-hidden">
+                                    <Image
                                         src="/assets/img/facundo.jpg"
                                         alt="Facundo Flores"
-                                        className="w-full h-full rounded-full object-cover"
+                                        fill
+                                        className="rounded-full object-cover p-1"
+                                        sizes="96px"
+                                        loading="lazy"
                                     />
                                 </div>
                                 <h3 className="text-xl font-bold text-gray-900">Facundo Flores</h3>
@@ -93,11 +97,14 @@ export default function AboutPage() {
                         <div className="bg-white rounded-2xl overflow-hidden shadow-lg border border-gray-100 group hover:-translate-y-1 transition-transform duration-300">
                             <div className="h-32 bg-gradient-to-r from-purple-500 to-pink-500"></div>
                             <div className="px-8 pb-8 -mt-12 text-center">
-                                <div className="w-24 h-24 bg-white rounded-full p-1 mx-auto shadow-md mb-4 flex items-center justify-center overflow-hidden">
-                                    <img
+                                <div className="w-24 h-24 relative bg-white rounded-full p-1 mx-auto shadow-md mb-4 flex items-center justify-center overflow-hidden">
+                                    <Image
                                         src="/assets/img/nahuel.jpg"
                                         alt="Nahuel Serrano"
-                                        className="w-full h-full rounded-full object-cover"
+                                        fill
+                                        className="rounded-full object-cover p-1"
+                                        sizes="96px"
+                                        loading="lazy"
                                     />
                                 </div>
                                 <h3 className="text-xl font-bold text-gray-900">Nahuel Serrano</h3>

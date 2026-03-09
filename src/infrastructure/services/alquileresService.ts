@@ -231,6 +231,24 @@ export const alquileresService = {
         } as Alquiler));
     },
 
+    // Get all active contracts across all users (for CRON jobs)
+    getAllActiveAlquileres: async (): Promise<Alquiler[]> => {
+        if (!db) throw new Error("Firestore not initialized");
+        const q = query(
+            collection(db, COLLECTION),
+            where("estado", "==", "activo")
+        );
+        const snapshot = await getDocs(q);
+        return snapshot.docs.map(doc => ({
+            id: doc.id,
+            ...doc.data(),
+            fechaInicio: doc.data().fechaInicio?.toDate(),
+            fechaFin: doc.data().fechaFin?.toDate(),
+            createdAt: doc.data().createdAt?.toDate(),
+            updatedAt: doc.data().updatedAt?.toDate(),
+        } as Alquiler));
+    },
+
     // Calculate if payment is due
     calcularVencimiento: (alquiler: Alquiler): { vencido: boolean; diasRestantes: number } => {
         const hoy = new Date();

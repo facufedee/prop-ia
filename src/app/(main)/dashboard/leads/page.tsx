@@ -2,17 +2,30 @@
 
 import { useEffect, useState, useCallback } from "react";
 import { DragDropContext, DropResult } from "@hello-pangea/dnd";
-import { Loader2, Search, Inbox, MessageSquare, CheckCircle2, Archive, LayoutGrid, List, Plus } from "lucide-react";
+import {
+    Loader2, Search, MessageSquare, CheckCircle2, LayoutGrid, List, Plus,
+    Inbox, PhoneCall, Eye, Scale, Trophy, XCircle, BarChart2
+} from "lucide-react";
 import { auth } from "@/infrastructure/firebase/client";
 import { leadsService } from "@/infrastructure/services/leadsService";
-import { Lead, LeadEstado } from "@/domain/models/Lead";
+import { Lead, LeadEstado, normalizarEstado, LeadOrigen, LeadPrioridad } from "@/domain/models/Lead";
 import { useAuth } from "@/ui/context/AuthContext";
 import KanbanColumn from "./components/KanbanColumn";
 import LeadCard from "./components/LeadCard";
+import PipelineMetrics from "./components/PipelineMetrics";
+import NewLeadModal from "./components/NewLeadModal";
 import { toast } from "sonner";
 
-// ─── Column Definitions ──────────────────────────────────────────────────────
-type ColumnKey = "nuevas" | "respondidas" | "finalizadas";
+// ─── Column Definitions ───────────────────────────────────────────────────────
+
+type ColumnKey =
+    | "nuevo"
+    | "contactado"
+    | "seguimiento"
+    | "visita_programada"
+    | "negociacion"
+    | "cerrado"
+    | "perdido";
 
 const COLUMNS: {
     id: ColumnKey;
@@ -23,13 +36,12 @@ const COLUMNS: {
     headerBg: string;
     columnBg: string;
     states: LeadEstado[];
-    // When a card is dropped here, set this estado
     targetEstado: LeadEstado;
 }[] = [
         {
-            id: "nuevas",
-            title: "Nueva Consulta",
-            subtitle: "Leads sin responder",
+            id: "nuevo",
+            title: "Nuevos Leads",
+            subtitle: "Sin respuesta",
             icon: Inbox,
             color: "bg-indigo-100 text-indigo-600",
             headerBg: "bg-indigo-50/60",
@@ -38,46 +50,109 @@ const COLUMNS: {
             targetEstado: "nuevo",
         },
         {
-            id: "respondidas",
-            title: "Respondida / Seguir",
-            subtitle: "En contacto o negociación",
-            icon: MessageSquare,
+            id: "contactado",
+            title: "Contactado",
+            subtitle: "Ya respondiste",
+            icon: PhoneCall,
+            color: "bg-blue-100 text-blue-600",
+            headerBg: "bg-blue-50/60",
+            columnBg: "bg-gray-50/70",
+            states: ["contactado"],
+            targetEstado: "contactado",
+        },
+        {
+            id: "seguimiento",
+            title: "En Seguimiento",
+            subtitle: "Mostró interés",
+            icon: Eye,
             color: "bg-amber-100 text-amber-600",
             headerBg: "bg-amber-50/60",
             columnBg: "bg-gray-50/70",
-            states: ["contactado", "respondido", "calificado"],
-            targetEstado: "respondido",
+            states: ["seguimiento", "respondido", "pendiente"],
+            targetEstado: "seguimiento",
         },
         {
-            id: "finalizadas",
-            title: "Finalizadas",
-            subtitle: "Cerradas, convertidas o descartadas",
+            id: "visita_programada",
+            title: "Visita Programada",
+            subtitle: "Coordinó visita",
             icon: CheckCircle2,
+            color: "bg-teal-100 text-teal-600",
+            headerBg: "bg-teal-50/60",
+            columnBg: "bg-gray-50/70",
+            states: ["visita_programada"],
+            targetEstado: "visita_programada",
+        },
+        {
+            id: "negociacion",
+            title: "Negociación",
+            subtitle: "Tratando condiciones",
+            icon: Scale,
+            color: "bg-purple-100 text-purple-600",
+            headerBg: "bg-purple-50/60",
+            columnBg: "bg-gray-50/70",
+            states: ["negociacion", "calificado"],
+            targetEstado: "negociacion",
+        },
+        {
+            id: "cerrado",
+            title: "Cerrado ✓",
+            subtitle: "Operación concretada",
+            icon: Trophy,
             color: "bg-emerald-100 text-emerald-600",
             headerBg: "bg-emerald-50/60",
             columnBg: "bg-gray-50/70",
-            states: ["convertido", "finalizado", "descartado"],
-            targetEstado: "finalizado",
+            states: ["cerrado", "convertido", "finalizado"],
+            targetEstado: "cerrado",
+        },
+        {
+            id: "perdido",
+            title: "Perdido",
+            subtitle: "Sin actividad",
+            icon: XCircle,
+            color: "bg-gray-200 text-gray-500",
+            headerBg: "bg-gray-100/60",
+            columnBg: "bg-gray-50/70",
+            states: ["perdido", "descartado"],
+            targetEstado: "perdido",
         },
     ];
 
-// ─── Helpers ─────────────────────────────────────────────────────────────────
+// ─── Helpers ──────────────────────────────────────────────────────────────────
+
 const getColumnForLead = (lead: Lead): ColumnKey => {
+    const normalizedEstado = normalizarEstado(lead.estado);
     for (const col of COLUMNS) {
-        if (col.states.includes(lead.estado)) return col.id;
+        if (col.states.includes(normalizedEstado) || col.states.includes(lead.estado)) {
+            return col.id;
+        }
     }
-    return "nuevas";
+    return "nuevo";
 };
 
-// ─── Page ────────────────────────────────────────────────────────────────────
+const ORIGEN_OPTIONS: { value: LeadOrigen | 'all'; label: string }[] = [
+    { value: 'all', label: 'Todas las fuentes' },
+    { value: 'web', label: '🌐 Web' },
+    { value: 'whatsapp', label: '💬 WhatsApp' },
+    { value: 'instagram', label: '📷 Instagram' },
+    { value: 'facebook', label: '📘 Facebook' },
+    { value: 'portal', label: '🏠 Portal' },
+    { value: 'referido', label: '🤝 Referido' },
+    { value: 'telefono', label: '📞 Teléfono' },
+];
+
+// ─── Page ─────────────────────────────────────────────────────────────────────
+
 export default function LeadsPage() {
     const [leads, setLeads] = useState<Lead[]>([]);
     const [loading, setLoading] = useState(true);
     const [searchTerm, setSearchTerm] = useState("");
     const [viewMode, setViewMode] = useState<"kanban" | "list">("kanban");
-    const { userRole } = useAuth();
+    const [filterOrigen, setFilterOrigen] = useState<LeadOrigen | 'all'>('all');
+    const [filterPrioridad, setFilterPrioridad] = useState<LeadPrioridad | 'all'>('all');
+    const [showNewLeadModal, setShowNewLeadModal] = useState(false);
+    const { userRole, user } = useAuth();
 
-    // ── Fetch ────────────────────────────────────────────────────────────────
+    // ── Fetch ─────────────────────────────────────────────────────────────────
     const fetchLeads = useCallback(async () => {
         if (!auth?.currentUser) return;
         try {
@@ -86,7 +161,12 @@ export default function LeadsPage() {
                 userRole?.name === "Super Admin"
                     ? await leadsService.getLeads("SYSTEM_ZETA_PROP")
                     : await leadsService.getLeads(auth.currentUser.uid);
-            data = data.sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime());
+            data = data.sort((a, b) => {
+                const toMs = (d: any) => (d instanceof Date ? d : new Date(d?.toDate?.() ?? d ?? 0)).getTime();
+                const aMs = toMs(a.ultimaActividad ?? a.createdAt);
+                const bMs = toMs(b.ultimaActividad ?? b.createdAt);
+                return bMs - aMs;
+            });
             setLeads(data);
         } catch (error) {
             console.error(error);
@@ -97,23 +177,26 @@ export default function LeadsPage() {
 
     useEffect(() => { fetchLeads(); }, [fetchLeads]);
 
-    // ── Search Filter ────────────────────────────────────────────────────────
+    // ── Filter ────────────────────────────────────────────────────────────────
     const filteredLeads = leads.filter((l) => {
-        if (!searchTerm.trim()) return true;
-        const term = searchTerm.toLowerCase();
-        return (
-            (l.nombre && l.nombre.toLowerCase().includes(term)) ||
-            (l.email && l.email.toLowerCase().includes(term)) ||
-            (l.propertyTitle && l.propertyTitle.toLowerCase().includes(term)) ||
-            (l.telefono && l.telefono.includes(term))
-        );
+        if (searchTerm.trim()) {
+            const term = searchTerm.toLowerCase();
+            const matchesSearch =
+                (l.nombre && l.nombre.toLowerCase().includes(term)) ||
+                (l.email && l.email.toLowerCase().includes(term)) ||
+                (l.propertyTitle && l.propertyTitle.toLowerCase().includes(term)) ||
+                (l.telefono && l.telefono.includes(term));
+            if (!matchesSearch) return false;
+        }
+        if (filterOrigen !== 'all' && l.origen !== filterOrigen) return false;
+        if (filterPrioridad !== 'all' && l.prioridad !== filterPrioridad) return false;
+        return true;
     });
 
-    // ── Split leads into columns ─────────────────────────────────────────────
     const columnLeads = (colId: ColumnKey) =>
         filteredLeads.filter((l) => getColumnForLead(l) === colId);
 
-    // ── Drag & Drop ──────────────────────────────────────────────────────────
+    // ── Drag & Drop ───────────────────────────────────────────────────────────
     const handleDragEnd = async (result: DropResult) => {
         const { draggableId, destination, source } = result;
         if (!destination) return;
@@ -123,23 +206,25 @@ export default function LeadsPage() {
         if (!destCol) return;
 
         const newEstado = destCol.targetEstado;
-
-        // Optimistic update
         setLeads((prev) =>
-            prev.map((l) => (l.id === draggableId ? { ...l, estado: newEstado } : l))
+            prev.map((l) => (l.id === draggableId ? { ...l, estado: newEstado, ultimaActividad: new Date() } : l))
         );
 
         try {
             await leadsService.updateLead(draggableId, { estado: newEstado });
+            await leadsService.addInteraccion(draggableId, {
+                tipo: 'estado',
+                descripcion: `Movido a "${destCol.title}"`,
+            });
             toast.success(`Movido a "${destCol.title}"`);
         } catch (err) {
             console.error(err);
             toast.error("Error al mover la consulta");
-            fetchLeads(); // Revert
+            fetchLeads();
         }
     };
 
-    // ── Status / Delete helpers ───────────────────────────────────────────────
+    // ── Helpers ───────────────────────────────────────────────────────────────
     const handleStatusChange = async (id: string, newStatus: LeadEstado) => {
         setLeads((prev) => prev.map((l) => (l.id === id ? { ...l, estado: newStatus } : l)));
         try {
@@ -162,12 +247,16 @@ export default function LeadsPage() {
         }
     };
 
+    const handleLeadCreated = (lead: Lead) => {
+        setLeads(prev => [lead, ...prev]);
+    };
+
     // ── Render ────────────────────────────────────────────────────────────────
     if (loading) {
         return (
             <div className="flex items-center justify-center min-h-[400px]">
                 <div className="text-gray-500 flex items-center gap-2">
-                    <Loader2 className="animate-spin" /> Cargando consultas...
+                    <Loader2 className="animate-spin" /> Cargando pipeline...
                 </div>
             </div>
         );
@@ -176,16 +265,19 @@ export default function LeadsPage() {
     return (
         <div className="flex flex-col h-full gap-0">
             {/* ── Header ── */}
-            <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
+            <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-5">
                 <div>
-                    <h1 className="text-2xl font-bold text-gray-900">Leads y Consultas</h1>
-                    <p className="text-gray-500 text-sm">
-                        {leads.length} consultas en total &middot; Arrastrá las tarjetas para cambiar el estado
+                    <h1 className="text-2xl font-bold text-gray-900 flex items-center gap-2">
+                        <BarChart2 className="text-indigo-500" size={22} />
+                        Pipeline Comercial
+                    </h1>
+                    <p className="text-gray-500 text-sm mt-0.5">
+                        {leads.length} leads · {COLUMNS.filter(c => c.id !== 'perdido').map(c => columnLeads(c.id).length).reduce((a, b) => a + b, 0)} activos
                     </p>
                 </div>
 
-                {/* View toggle */}
                 <div className="flex items-center gap-2">
+                    {/* View toggle */}
                     <div className="flex items-center bg-gray-100 rounded-xl p-1 gap-1">
                         <button
                             onClick={() => setViewMode("kanban")}
@@ -200,36 +292,56 @@ export default function LeadsPage() {
                             <List size={14} /> Lista
                         </button>
                     </div>
+
+                    {/* New lead button */}
+                    <button
+                        onClick={() => setShowNewLeadModal(true)}
+                        className="flex items-center gap-2 px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-sm font-semibold transition shadow-sm active:scale-95"
+                    >
+                        <Plus size={16} /> Nuevo Lead
+                    </button>
                 </div>
             </div>
 
-            {/* ── Search Bar ── */}
-            <div className="bg-white rounded-xl border border-gray-200 p-3 mb-5 shadow-sm flex items-center gap-3">
+            {/* ── Metrics ── */}
+            <PipelineMetrics leads={leads} />
+
+            {/* ── Controls Bar ── */}
+            <div className="bg-white rounded-xl border border-gray-200 p-3 mb-5 shadow-sm flex flex-wrap items-center gap-3">
                 <Search className="w-4 h-4 text-gray-400 flex-shrink-0 ml-1" />
                 <input
                     type="text"
                     placeholder="Buscar por nombre, email, teléfono o propiedad..."
-                    className="flex-1 bg-transparent text-sm outline-none text-gray-700 placeholder-gray-400"
+                    className="flex-1 bg-transparent text-sm outline-none text-gray-700 placeholder-gray-400 min-w-[180px]"
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
                 />
-                {searchTerm && (
+                {/* Filters */}
+                <select
+                    value={filterOrigen}
+                    onChange={e => setFilterOrigen(e.target.value as any)}
+                    className="text-xs border border-gray-200 rounded-lg px-2.5 py-1.5 bg-white text-gray-600 focus:outline-none focus:ring-1 focus:ring-indigo-500"
+                >
+                    {ORIGEN_OPTIONS.map(o => <option key={o.value} value={o.value}>{o.label}</option>)}
+                </select>
+                <select
+                    value={filterPrioridad}
+                    onChange={e => setFilterPrioridad(e.target.value as any)}
+                    className="text-xs border border-gray-200 rounded-lg px-2.5 py-1.5 bg-white text-gray-600 focus:outline-none focus:ring-1 focus:ring-indigo-500"
+                >
+                    <option value="all">Todas las prioridades</option>
+                    <option value="alta">🔴 Alta</option>
+                    <option value="media">🟡 Media</option>
+                    <option value="baja">🟢 Baja</option>
+                </select>
+                {(searchTerm || filterOrigen !== 'all' || filterPrioridad !== 'all') && (
                     <button
-                        onClick={() => setSearchTerm("")}
+                        onClick={() => { setSearchTerm(""); setFilterOrigen('all'); setFilterPrioridad('all'); }}
                         className="text-xs text-gray-400 hover:text-gray-600 px-2 py-1 rounded-lg hover:bg-gray-100"
                     >
-                        Limpiar
+                        Limpiar filtros
                     </button>
                 )}
-                {/* Stats pills */}
-                <div className="hidden md:flex items-center gap-2">
-                    {COLUMNS.map((col) => (
-                        <div key={col.id} className={`flex items-center gap-1.5 text-xs font-semibold px-2.5 py-1 rounded-full ${col.color}`}>
-                            <col.icon size={11} />
-                            {columnLeads(col.id).length}
-                        </div>
-                    ))}
-                </div>
             </div>
 
             {/* ── Kanban Board ── */}
@@ -254,15 +366,21 @@ export default function LeadsPage() {
                     </div>
                 </DragDropContext>
             ) : (
-                /* ── List View (kept as fallback) ── */
+                /* ── List View ── */
                 <>
                     {filteredLeads.length === 0 ? (
                         <div className="text-center py-16 bg-gray-50 rounded-xl border border-gray-200 border-dashed">
                             <MessageSquare className="w-12 h-12 text-gray-300 mx-auto mb-4" />
                             <p className="text-gray-500 text-lg">No se encontraron consultas</p>
+                            <button
+                                onClick={() => setShowNewLeadModal(true)}
+                                className="mt-4 px-4 py-2 bg-indigo-600 text-white rounded-xl text-sm font-semibold hover:bg-indigo-700 transition"
+                            >
+                                + Nuevo Lead
+                            </button>
                         </div>
                     ) : (
-                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                             {filteredLeads.map((lead) => (
                                 <LeadCard
                                     key={lead.id}
@@ -274,6 +392,15 @@ export default function LeadsPage() {
                         </div>
                     )}
                 </>
+            )}
+
+            {/* ── New Lead Modal ── */}
+            {showNewLeadModal && user && (
+                <NewLeadModal
+                    userId={user.uid}
+                    onClose={() => setShowNewLeadModal(false)}
+                    onCreated={handleLeadCreated}
+                />
             )}
         </div>
     );

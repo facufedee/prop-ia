@@ -5,6 +5,7 @@ import { useParams } from "next/navigation";
 import { PublicProperty, PublicAgency, publicService } from "@/infrastructure/services/publicService";
 import { MapPin, Bath, Bed, Maximize, Home, ChevronLeft, ChevronRight, Share2, Heart, ArrowRight, PlayCircle } from "lucide-react";
 import Link from "next/link";
+import Image from "next/image";
 import dynamic from 'next/dynamic';
 import SimilarPropertyCard from "@/ui/components/properties/public/SimilarPropertyCard";
 
@@ -203,18 +204,22 @@ export default function PropertyDetailPage({ id: propId }: Props) {
                                                         <>
                                                             {/* Blurred Background */}
                                                             <div className="absolute inset-0">
-                                                                <img
+                                                                <Image
                                                                     src={currentItem.url}
-                                                                    className="w-full h-full object-cover blur-2xl opacity-50 scale-110"
+                                                                    fill
+                                                                    className="object-cover blur-2xl opacity-50 scale-110"
+                                                                    sizes="(max-width: 1024px) 100vw, 66vw"
                                                                     alt="Fondo borroso"
                                                                 />
                                                             </div>
                                                             {/* Main Image */}
                                                             <div className="absolute inset-0 flex items-center justify-center p-2">
-                                                                <img
+                                                                <Image
                                                                     src={currentItem.url}
+                                                                    fill
                                                                     alt="Vista Principal"
-                                                                    className="max-w-full max-h-full object-contain cursor-pointer shadow-lg rounded-lg"
+                                                                    className="object-contain cursor-pointer shadow-lg rounded-lg"
+                                                                    sizes="(max-width: 1024px) 100vw, 66vw"
                                                                     onClick={() => setShowGalleryModal(true)}
                                                                 />
                                                             </div>
@@ -270,10 +275,12 @@ export default function PropertyDetailPage({ id: propId }: Props) {
                                                             : 'opacity-60 hover:opacity-100 grayscale hover:grayscale-0'
                                                             }`}
                                                     >
-                                                        <img
+                                                        <Image
                                                             src={item.type === 'video' ? item.thumbnail : item.url}
                                                             alt={`Thumbnail ${idx}`}
-                                                            className="w-full h-full object-cover"
+                                                            fill
+                                                            sizes="96px"
+                                                            className="object-cover"
                                                         />
                                                         {item.type === 'video' && (
                                                             <div className="absolute inset-0 flex items-center justify-center bg-black/30 group-hover:bg-black/10 transition-colors">
@@ -391,7 +398,7 @@ export default function PropertyDetailPage({ id: propId }: Props) {
                                     <div className="flex items-center gap-4 mb-8">
                                         <div className="w-20 h-20 rounded-full bg-gray-100 overflow-hidden shrink-0 border border-gray-200 p-0.5">
                                             {property.agency.photoURL ? (
-                                                <img src={property.agency.photoURL} alt={property.agency.displayName} className="w-full h-full object-cover rounded-full" />
+                                                <Image src={property.agency.photoURL} alt={property.agency.displayName} fill sizes="80px" className="object-cover rounded-full p-0.5" />
                                             ) : (
                                                 <div className="w-full h-full flex items-center justify-center font-bold text-indigo-600 text-2xl bg-indigo-50 rounded-full">
                                                     {property.agency.displayName.substring(0, 2).toUpperCase()}
@@ -473,10 +480,12 @@ export default function PropertyDetailPage({ id: propId }: Props) {
 
                         {/* Main Image */}
                         <div className="flex-1 relative flex items-center justify-center bg-zinc-900 overflow-hidden">
-                            <img
+                            <Image
                                 src={property.imageUrls[currentImageIndex]}
                                 alt={`Imagen ${currentImageIndex + 1}`}
-                                className="w-full h-full object-contain"
+                                fill
+                                sizes="100vw"
+                                className="object-contain"
                             />
 
                             {/* Navigation Arrows */}
@@ -505,7 +514,7 @@ export default function PropertyDetailPage({ id: propId }: Props) {
                                         : 'border-transparent opacity-40 hover:opacity-80'
                                         }`}
                                 >
-                                    <img src={url} alt={`Thumbnail ${idx}`} className="w-full h-full object-cover" />
+                                    <Image src={url} alt={`Thumbnail ${idx}`} fill sizes="120px" className="object-cover" />
                                 </button>
                             ))}
                         </div>
