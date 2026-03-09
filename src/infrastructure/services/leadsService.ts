@@ -48,29 +48,105 @@ export const leadsService = {
         } as Lead;
     },
 
-    // Create new lead
+    // Create new lead (with Unification Logic)
     createLead: async (data: Omit<Lead, "id" | "createdAt" | "updatedAt">): Promise<string> => {
         if (!db) throw new Error("Firestore not initialized");
-        const docRef = await addDoc(collection(db, COLLECTION_NAME), {
-            ...data,
-            fechaContacto: data.fechaContacto ? Timestamp.fromDate(data.fechaContacto) : null,
-            createdAt: Timestamp.now(),
-            updatedAt: Timestamp.now(),
-        });
+        const leadsRef = collection(db, COLLECTION_NAME);
 
-        // Trigger Email Notification (Fire and forget)
-        fetch('/api/notifications/trigger', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-                event: 'newLead',
-                data: { ...data, id: docRef.id },
-                subject: `Nueva Consulta de ${data.nombre}`,
-                message: `Has recibido una nueva consulta de <strong>${data.nombre}</strong> para la propiedad <strong>${data.propertyTitle || 'N/A'}</strong>.`
-            })
-        }).catch(err => console.error("Failed to trigger notification:", err));
+        let existingLeadDoc = null;
 
-        return docRef.id;
+        // Try find by Email
+        if (data.email) {
+            const qEmail = query(leadsRef, where("userId", "==", data.userId), where("email", "==", data.email));
+            const snapEmail = await getDocs(qEmail);
+            if (!snapEmail.empty) {
+                existingLeadDoc = snapEmail.docs[0];
+            }
+        }
+
+        // Try find by Phone
+        if (!existingLeadDoc && data.telefono) {
+            const qPhone = query(leadsRef, where("userId", "==", data.userId), where("telefono", "==", data.telefono));
+            const snapPhone = await getDocs(qPhone);
+            if (!snapPhone.empty) {
+                existingLeadDoc = snapPhone.docs[0];
+            }
+        }
+
+        const nuevaConsulta = {
+            propertyId: data.propertyId || null,
+            propertyTitle: data.propertyTitle || null,
+            mensaje: data.mensaje || '',
+            fecha: data.fechaContacto || new Date(),
+            origen: data.origen || 'web'
+        };
+
+        if (existingLeadDoc) {
+            // Unify with existing lead
+            const existingData = existingLeadDoc.data();
+            const consultasAnteriores = existingData.consultas || [];
+
+            if (consultasAnteriores.length === 0 && existingData.mensaje) {
+                consultasAnteriores.push({
+                    propertyId: existingData.propertyId || null,
+                    propertyTitle: existingData.propertyTitle || null,
+                    mensaje: existingData.mensaje,
+                    fecha: existingData.createdAt?.toDate() || new Date(),
+                    origen: existingData.origen || 'web'
+                });
+            }
+
+            consultasAnteriores.push(nuevaConsulta);
+
+            await updateDoc(doc(db, COLLECTION_NAME, existingLeadDoc.id), {
+                consultas: consultasAnteriores,
+                estado: 'nuevo',
+                updatedAt: Timestamp.now(),
+                mensaje: data.mensaje || existingData.mensaje,
+                propertyId: data.propertyId || existingData.propertyId,
+                propertyTitle: data.propertyTitle || existingData.propertyTitle,
+            });
+
+            // Trigger Email Notification (merged lead)
+            fetch('/api/notifications/trigger', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    event: 'newLead',
+                    data: { ...existingData, id: existingLeadDoc.id, isMerged: true },
+                    subject: `Nueva Consulta de ${data.nombre} (Contacto Existente)`,
+                    message: `Has recibido una nueva consulta de un contacto que ya tenías guardado: <strong>${data.nombre}</strong>.`
+                })
+            }).catch(err => console.error("Failed to trigger notification:", err));
+
+            return existingLeadDoc.id;
+
+        } else {
+            // Create brand new
+            const leadData = {
+                ...data,
+                consultas: [nuevaConsulta],
+                fechaContacto: data.fechaContacto ? Timestamp.fromDate(data.fechaContacto) : null,
+                createdAt: Timestamp.now(),
+                updatedAt: Timestamp.now(),
+            };
+
+            const docRef = await addDoc(leadsRef, leadData);
+
+            // Trigger Email Notification (Fire and forget)
+            fetch('/api/notifications/trigger', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    event: 'newLead',
+                    data: { ...data, id: docRef.id },
+                    subject: `Nueva Consulta de ${data.nombre}`,
+                    message: `Has recibido una nueva consulta de <strong>${data.nombre}</strong> para la propiedad <strong>${data.propertyTitle || 'N/A'}</strong>.`
+                })
+            }).catch(err => console.error("Failed to trigger notification:", err));
+
+            return docRef.id;
+        }
     },
 
     // Update lead

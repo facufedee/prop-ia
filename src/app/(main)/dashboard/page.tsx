@@ -8,6 +8,7 @@ import { leadsService } from "@/infrastructure/services/leadsService";
 import { auditLogService } from "@/infrastructure/services/auditLogService";
 import { alquileresService } from "@/infrastructure/services/alquileresService";
 import { AuditLog } from "@/domain/models/AuditLog";
+import { Lead } from "@/domain/models/Lead";
 import { isSameMonth, format, addDays } from "date-fns";
 import { es } from "date-fns/locale";
 import {
@@ -44,6 +45,7 @@ export default function DashboardPage() {
         totalLeads: 0,
         honorariosMonth: 0,
         recentActivity: [] as AuditLog[],
+        recentLeads: [] as Lead[],
         subscription: null as any
     });
     const [loading, setLoading] = useState(true);
@@ -129,6 +131,11 @@ export default function DashboardPage() {
                 totalLeads: filteredLeads.length,
                 honorariosMonth,
                 recentActivity: recentLogsData.logs,
+                recentLeads: filteredLeads.sort((a, b) => {
+                    const dateA = a.createdAt instanceof Date ? a.createdAt.getTime() : (a.createdAt as any)?.seconds * 1000;
+                    const dateB = b.createdAt instanceof Date ? b.createdAt.getTime() : (b.createdAt as any)?.seconds * 1000;
+                    return dateB - dateA;
+                }).slice(0, 5), // Only keep the 5 most recent leads
                 subscription: !subSnapshot.empty ? subSnapshot.docs[0].data() : null
             });
             setLoading(false);
@@ -442,52 +449,45 @@ export default function DashboardPage() {
                     </div>
                 </div>
 
-                {/* Right Column: Recent Activity */}
+                {/* Right Column: Recent Leads */}
                 <div className="lg:col-span-1">
                     <div className="bg-white rounded-2xl shadow-sm border border-gray-100 h-full">
                         <div className="p-6 border-b border-gray-100">
-                            <h2 className="text-lg font-bold text-gray-900">Actividad Reciente</h2>
+                            <h2 className="text-lg font-bold text-gray-900">Últimas Consultas</h2>
                         </div>
-                        <div className="p-6 space-y-6">
-                            {stats.recentActivity.length > 0 ? (
-                                stats.recentActivity.map((log, i) => (
-                                    <div key={log.id} className="relative pl-6 pb-6 last:pb-0">
-                                        {/* Timeline line */}
-                                        {i !== stats.recentActivity.length - 1 && (
-                                            <div className="absolute left-[11px] top-2 bottom-0 w-0.5 bg-gray-100"></div>
-                                        )}
-                                        {/* Timeline dot */}
-                                        <div className={`absolute left-0 top-1 w-6 h-6 rounded-full border-2 border-white shadow-sm flex items-center justify-center z-10
-                                            ${log.level === 'error' ? 'bg-red-100' :
-                                                log.level === 'warning' ? 'bg-orange-100' :
-                                                    'bg-indigo-100'}`}>
-                                            <div className={`w-2 h-2 rounded-full ${log.level === 'error' ? 'bg-red-500' :
-                                                log.level === 'warning' ? 'bg-orange-500' :
-                                                    'bg-indigo-500'
-                                                }`}></div>
-                                        </div>
-
-                                        <div>
-                                            <p className="text-sm text-gray-900 font-medium leading-none mb-1.5">{log.action}</p>
-                                            <p className="text-xs text-gray-500 leading-snug mb-2">{log.description}</p>
-                                            <span className="text-[10px] text-gray-400 font-medium uppercase tracking-wide bg-gray-50 px-1.5 py-0.5 rounded">
-                                                {format(new Date(log.timestamp), 'HH:mm')} • {log.module}
+                        <div className="p-6 space-y-4">
+                            {stats.recentLeads && stats.recentLeads.length > 0 ? (
+                                stats.recentLeads.map((lead: any) => (
+                                    <div key={lead.id} className="p-3 bg-gray-50 rounded-xl border border-gray-100 hover:border-indigo-200 transition-colors">
+                                        <div className="flex justify-between items-start mb-2">
+                                            <p className="text-sm font-bold text-gray-900">{lead.nombre}</p>
+                                            <span className={`text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full ${lead.estado === 'nuevo' ? 'bg-green-100 text-green-700' :
+                                                lead.estado === 'contactado' ? 'bg-blue-100 text-blue-700' :
+                                                    lead.estado === 'leido' ? 'bg-indigo-100 text-indigo-700' :
+                                                        'bg-gray-200 text-gray-700'
+                                                }`}>
+                                                {lead.estado}
                                             </span>
+                                        </div>
+                                        <p className="text-xs text-gray-600 line-clamp-2 mb-2 italic">"{lead.mensaje || 'Sin mensaje'}"</p>
+                                        <div className="flex items-center justify-between text-[10px] text-gray-400 font-medium">
+                                            <span>{lead.propertyTitle ? `Por: ${lead.propertyTitle}` : 'Consulta General'}</span>
+                                            <span>{format(new Date(lead.createdAt.seconds ? lead.createdAt.seconds * 1000 : lead.createdAt), 'dd/MM HH:mm')}</span>
                                         </div>
                                     </div>
                                 ))
                             ) : (
                                 <div className="text-center py-10">
-                                    <div className="inline-flex justify-center items-center w-12 h-12 rounded-full bg-gray-50 text-gray-400 mb-3">
-                                        <CheckCircle2 size={24} />
+                                    <div className="inline-flex justify-center items-center w-12 h-12 rounded-full bg-indigo-50 text-indigo-400 mb-3">
+                                        <Users size={24} />
                                     </div>
-                                    <p className="text-sm text-gray-500">No hay actividad reciente.</p>
+                                    <p className="text-sm text-gray-500">No hay consultas recientes.</p>
                                 </div>
                             )}
                         </div>
                         <div className="p-4 border-t border-gray-100">
-                            <Link href="/dashboard/bitacora" className="flex items-center justify-center gap-2 text-sm font-medium text-indigo-600 hover:text-indigo-700 w-full py-2 hover:bg-indigo-50 rounded-lg transition-colors">
-                                Ver historial completo <ArrowRight size={16} />
+                            <Link href="/dashboard/leads" className="flex items-center justify-center gap-2 text-sm font-medium text-indigo-600 hover:text-indigo-700 w-full py-2 hover:bg-indigo-50 rounded-lg transition-colors">
+                                Ver todas las consultas <ArrowRight size={16} />
                             </Link>
                         </div>
                     </div>

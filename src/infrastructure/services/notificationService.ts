@@ -10,7 +10,8 @@ import {
     updateDoc,
     doc,
     arrayUnion,
-    limit
+    limit,
+    or
 } from "firebase/firestore";
 
 export interface AppNotification {
@@ -79,22 +80,61 @@ export const notificationService = {
         // Strategy: Fetch recent relevant notifications and filter 'readBy' in client for simplicity and realtime speed on small datasets.
         // Logic: targetRole == userRole
 
-        const q = query(
+        // To avoid Firebase composite index requirements for OR + orderBy queries,
+        // we perform two separate queries and combine the results in memory.
+        let roleNotifications: AppNotification[] = [];
+        let userNotifications: AppNotification[] = [];
+
+        const emitCombined = () => {
+            const combinedMap = new Map<string, AppNotification>();
+            roleNotifications.forEach(n => combinedMap.set(n.id, n));
+            userNotifications.forEach(n => combinedMap.set(n.id, n));
+
+            const combinedArray = Array.from(combinedMap.values());
+            combinedArray.sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime());
+
+            callback(combinedArray.slice(0, 50));
+        };
+
+        const qRole = query(
             collection(db, NOTIFICATIONS_COLLECTION),
             where("targetRole", "==", userRole),
             orderBy("createdAt", "desc"),
             limit(50)
         );
 
-        return onSnapshot(q, (snapshot) => {
-            const notifications = snapshot.docs
-                .map(doc => ({
-                    id: doc.id,
-                    ...doc.data(),
-                    createdAt: doc.data().createdAt?.toDate()
-                })) as AppNotification[];
+        const qUser = query(
+            collection(db, NOTIFICATIONS_COLLECTION),
+            where("targetUserId", "==", userId),
+            orderBy("createdAt", "desc"),
+            limit(50)
+        );
 
-            callback(notifications);
+        const unsubRole = onSnapshot(qRole, (snapshot) => {
+            roleNotifications = snapshot.docs.map(doc => ({
+                id: doc.id,
+                ...doc.data(),
+                createdAt: doc.data().createdAt?.toDate() || new Date()
+            })) as AppNotification[];
+            emitCombined();
+        }, (error) => {
+            console.error("Error fetching role notifications:", error);
         });
+
+        const unsubUser = onSnapshot(qUser, (snapshot) => {
+            userNotifications = snapshot.docs.map(doc => ({
+                id: doc.id,
+                ...doc.data(),
+                createdAt: doc.data().createdAt?.toDate() || new Date()
+            })) as AppNotification[];
+            emitCombined();
+        }, (error) => {
+            console.error("Error fetching user notifications:", error);
+        });
+
+        return () => {
+            unsubRole();
+            unsubUser();
+        };
     }
 };

@@ -195,7 +195,7 @@ export const TUTORIALS: Tutorial[] = [
             },
             {
                 title: "Gastos Comunes",
-                description: "Utiliza el módulo de Finanzas para registrar expensas y gastos comunes asociados al edificio."
+                description: "Utiliza el módulo de Reportes para registrar expensas y gastos comunes asociados al edificio."
             }
         ]
     },

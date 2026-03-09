@@ -13,10 +13,12 @@ import PropietariosTable from "./components/PropietariosTable";
 import LeadsTable from "./components/LeadsTable";
 import ClientFormModal from "./components/ClientFormModal";
 import { Users, Building2, UserPlus, Plus, Search } from "lucide-react";
+import { useRouter } from "next/navigation";
 
 type TabType = 'inquilinos' | 'propietarios' | 'leads';
 
 export default function ClientesPage() {
+    const router = useRouter();
     const [activeTab, setActiveTab] = useState<TabType>('inquilinos');
     const [loading, setLoading] = useState(true);
     const [searchTerm, setSearchTerm] = useState("");
@@ -103,8 +105,7 @@ export default function ClientesPage() {
     };
 
     const handleViewInquilinoDetail = (inquilino: Inquilino) => {
-        // Reuse edit for view detail for now, or just log
-        handleEditInquilino(inquilino);
+        router.push(`/dashboard/clientes/inquilinos/${inquilino.id}`);
     };
 
     // --- Propietarios Handlers ---
@@ -126,7 +127,7 @@ export default function ClientesPage() {
     };
 
     const handleViewPropietarioDetail = (propietario: Propietario) => {
-        handleEditPropietario(propietario);
+        router.push(`/dashboard/clientes/propietarios/${propietario.id}`);
     };
 
     // --- Leads Handlers ---
@@ -148,7 +149,7 @@ export default function ClientesPage() {
     };
 
     const handleViewLeadDetail = (lead: Lead) => {
-        handleEditLead(lead);
+        router.push(`/dashboard/clientes/leads/${lead.id}`);
     };
 
     const handleConvertLead = async (id: string) => {

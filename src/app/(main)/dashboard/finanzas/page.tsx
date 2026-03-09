@@ -232,7 +232,7 @@ export default function FinanzasPage() {
                         <ArrowLeft className="text-gray-600" />
                     </Link>
                     <div>
-                        <h1 className="text-2xl font-bold text-gray-900">Finanzas e Ingresos</h1>
+                        <h1 className="text-2xl font-bold text-gray-900">Reportes</h1>
                         <p className="text-gray-500">Reporte de honorarios y recaudación</p>
                     </div>
                 </div>

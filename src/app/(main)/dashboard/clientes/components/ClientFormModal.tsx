@@ -345,6 +345,18 @@ export default function ClientFormModal({ isOpen, onClose, onSuccess, initialTyp
                             {/* --- Sección: Lead Details --- */}
                             {clientType === 'leads' && (
                                 <section className="space-y-4">
+                                    {isEditing && (initialData as Lead)?.propertyTitle && (
+                                        <div className="bg-indigo-50 p-4 rounded-xl border border-indigo-100 flex flex-col gap-1">
+                                            <label className="text-xs font-bold text-indigo-500 uppercase tracking-wide">Propiedad Consultada</label>
+                                            {(initialData as Lead)?.propertyId ? (
+                                                <a href={`/propiedades/p/${(initialData as Lead).propertyId}`} target="_blank" rel="noopener noreferrer" className="text-sm font-semibold text-indigo-700 hover:text-indigo-900 hover:underline inline-flex items-center gap-1">
+                                                    {(initialData as Lead).propertyTitle}
+                                                </a>
+                                            ) : (
+                                                <p className="text-sm font-semibold text-indigo-900">{(initialData as Lead).propertyTitle}</p>
+                                            )}
+                                        </div>
+                                    )}
                                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                         <div>
                                             <label className="block text-sm font-medium text-gray-700 mb-1">Estado</label>

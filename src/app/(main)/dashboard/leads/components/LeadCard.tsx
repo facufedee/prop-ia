@@ -1,7 +1,9 @@
 
 import { Lead, LeadEstado } from "@/domain/models/Lead";
-import { Mail, MessageSquare, Phone, Calendar, User, Clock, Trash2, MoreVertical, CheckCircle2, XCircle, AlertCircle } from "lucide-react";
-import { useState } from "react";
+import { Mail, MessageSquare, Phone, Calendar, User, Clock, Trash2, MoreVertical, CheckCircle2, XCircle, AlertCircle, ArrowRight } from "lucide-react";
+import Link from 'next/link';
+import { useState, useEffect } from "react";
+import { publicService, PublicProperty } from "@/infrastructure/services/publicService";
 
 interface LeadCardProps {
     lead: Lead;
@@ -11,6 +13,15 @@ interface LeadCardProps {
 
 export default function LeadCard({ lead, onStatusChange, onDelete }: LeadCardProps) {
     const [isMenuOpen, setIsMenuOpen] = useState(false);
+    const [propertyDetails, setPropertyDetails] = useState<PublicProperty | null>(null);
+
+    useEffect(() => {
+        if (lead.propertyId) {
+            publicService.getPropertyById(lead.propertyId).then(prop => {
+                if (prop) setPropertyDetails(prop);
+            }).catch(console.error);
+        }
+    }, [lead.propertyId]);
 
     const timeAgo = (date: Date) => {
         const seconds = Math.floor((new Date().getTime() - new Date(date).getTime()) / 1000);
@@ -60,20 +71,21 @@ export default function LeadCard({ lead, onStatusChange, onDelete }: LeadCardPro
 
             {/* Header */}
             <div className="p-5 border-b border-gray-50 flex items-start justify-between gap-4">
-                <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-full bg-gradient-to-br from-indigo-50 to-blue-50 text-indigo-600 flex items-center justify-center font-bold text-lg border border-indigo-100 shadow-inner">
+                <Link href={`/dashboard/clientes/leads/${lead.id}`} className="flex items-center gap-3 group">
+                    <div className="w-10 h-10 rounded-full bg-gradient-to-br from-indigo-50 to-blue-50 text-indigo-600 flex items-center justify-center font-bold text-lg border border-indigo-100 shadow-inner group-hover:scale-105 transition-transform">
                         {(lead.nombre || "?").charAt(0).toUpperCase()}
                     </div>
                     <div>
-                        <h3 className="font-bold text-gray-900 leading-tight line-clamp-1 group-hover:text-indigo-600 transition-colors">
+                        <h3 className="font-bold text-gray-900 leading-tight line-clamp-1 group-hover:text-indigo-600 transition-colors flex items-center gap-1">
                             {lead.nombre}
+                            <ArrowRight size={14} className="opacity-0 group-hover:opacity-100 -ml-2 group-hover:ml-0 transition-all text-indigo-500" />
                         </h3>
                         <p className="text-xs text-gray-400 mt-0.5 flex items-center gap-1">
                             <Clock size={10} />
                             Hace {timeAgo(lead.createdAt)}
                         </p>
                     </div>
-                </div>
+                </Link>
             </div>
 
             {/* Status Bar */}
@@ -89,7 +101,7 @@ export default function LeadCard({ lead, onStatusChange, onDelete }: LeadCardPro
                     <div className="flex items-center gap-1">
                         {lead.estado === 'nuevo' && (
                             <button
-                                onClick={() => onStatusChange(lead.id, 'leido')}
+                                onClick={() => onStatusChange?.(lead.id, 'leido')}
                                 className="text-[10px] font-medium text-indigo-600 hover:underline hover:text-indigo-800"
                             >
                                 Marcar leído
@@ -97,7 +109,7 @@ export default function LeadCard({ lead, onStatusChange, onDelete }: LeadCardPro
                         )}
                         {(lead.estado === 'leido' || lead.estado === 'contactado') && (
                             <button
-                                onClick={() => onStatusChange(lead.id, 'respondido')}
+                                onClick={() => onStatusChange?.(lead.id, 'respondido')}
                                 className="text-[10px] font-medium text-purple-600 hover:underline hover:text-purple-800"
                             >
                                 Marcar respondido
@@ -105,7 +117,7 @@ export default function LeadCard({ lead, onStatusChange, onDelete }: LeadCardPro
                         )}
                         {lead.estado === 'respondido' && (
                             <button
-                                onClick={() => onStatusChange(lead.id, 'finalizado')}
+                                onClick={() => onStatusChange?.(lead.id, 'finalizado')}
                                 className="text-[10px] font-medium text-gray-600 hover:underline hover:text-gray-800"
                             >
                                 Finalizar
@@ -118,11 +130,31 @@ export default function LeadCard({ lead, onStatusChange, onDelete }: LeadCardPro
             {/* Content */}
             <div className="p-5 flex-1 flex flex-col gap-4">
                 {lead.propertyTitle && (
-                    <div className="bg-indigo-50/50 rounded-lg p-3 border border-indigo-100/50">
-                        <p className="text-[10px] uppercase tracking-wide text-indigo-400 font-bold mb-1">Interesado en</p>
-                        <p className="text-sm font-semibold text-indigo-900 line-clamp-1">
-                            {lead.propertyTitle}
-                        </p>
+                    <div className="bg-indigo-50/50 rounded-lg p-3 border border-indigo-100/50 flex gap-3 items-center">
+                        {propertyDetails?.imageUrls?.[0] && (
+                            <img
+                                src={propertyDetails.imageUrls[0]}
+                                alt={lead.propertyTitle}
+                                className="w-12 h-12 rounded-md object-cover flex-shrink-0"
+                            />
+                        )}
+                        <div className="flex-1 min-w-0">
+                            <p className="text-[10px] uppercase tracking-wide text-indigo-400 font-bold mb-0.5">Interesado en</p>
+                            {propertyDetails ? (
+                                <a
+                                    href={`/propiedades/p/${propertyDetails.id}`}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="text-sm font-semibold text-indigo-600 hover:text-indigo-800 line-clamp-1 hover:underline flex items-center gap-1"
+                                >
+                                    {lead.propertyTitle}
+                                </a>
+                            ) : (
+                                <p className="text-sm font-semibold text-indigo-900 line-clamp-1">
+                                    {lead.propertyTitle}
+                                </p>
+                            )}
+                        </div>
                     </div>
                 )}
 
@@ -138,7 +170,8 @@ export default function LeadCard({ lead, onStatusChange, onDelete }: LeadCardPro
             <div className="p-4 pt-0 mt-auto grid grid-cols-2 gap-3">
                 {lead.telefono ? (
                     <a
-                        href={`https://wa.me/${lead.telefono.replace(/\D/g, '')}`}
+                        id={`wa-${lead.id}`}
+                        href={`https://wa.me/${lead.telefono.replace(/\D/g, '')}?text=${encodeURIComponent(`Hola ${lead.nombre || ''}, me comunico desde Zeta Prop por tu consulta sobre ${lead.propertyTitle ? `la propiedad ${lead.propertyTitle}` : 'una propiedad'}. ¿En qué te puedo ayudar?`)}`}
                         target="_blank"
                         rel="noopener noreferrer"
                         className="flex items-center justify-center gap-2 px-3 py-2.5 bg-green-500 hover:bg-green-600 text-white rounded-xl text-xs font-bold transition shadow-sm hover:shadow active:scale-95"
@@ -154,7 +187,8 @@ export default function LeadCard({ lead, onStatusChange, onDelete }: LeadCardPro
 
                 {lead.email ? (
                     <a
-                        href={`mailto:${lead.email}`}
+                        id={`email-${lead.id}`}
+                        href={`mailto:${lead.email}?subject=${encodeURIComponent(`Respuesta a tu consulta en Zeta Prop`)}&body=${encodeURIComponent(`Hola ${lead.nombre || ''},\n\nMe comunico desde Zeta Prop por tu consulta sobre ${lead.propertyTitle ? `la propiedad ${lead.propertyTitle}` : 'una propiedad'}.\n\n¿En qué te puedo ayudar?\n\nSaludos,\nEl equipo de Zeta Prop`)}`}
                         className="flex items-center justify-center gap-2 px-3 py-2.5 bg-gray-900 hover:bg-black text-white rounded-xl text-xs font-bold transition shadow-sm hover:shadow active:scale-95"
                         onClick={() => onStatusChange && lead.estado === 'nuevo' && onStatusChange(lead.id, 'contactado')}
                     >

@@ -44,8 +44,8 @@ const STEPS: TourStep[] = [
     },
     {
         targetId: "nav-item-finanzas",
-        title: "Finanzas",
-        description: "Lleva el control de ingresos, egresos y comisiones de tu inmobiliaria.",
+        title: "Reportes",
+        description: "Analiza el rendimiento de tus alquileres y gestiona honorarios y cobros de forma automatizada.",
         position: "right"
     },
     {

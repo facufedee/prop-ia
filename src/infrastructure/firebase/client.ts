@@ -1,4 +1,5 @@
 import { initializeApp, getApps, getApp } from "firebase/app";
+import { getPerformance } from "firebase/performance";
 import { getAuth, connectAuthEmulator } from "firebase/auth";
 import { getFirestore, initializeFirestore, connectFirestoreEmulator, memoryLocalCache } from "firebase/firestore";
 import { getStorage } from "firebase/storage";
@@ -51,4 +52,10 @@ if (process.env.NODE_ENV === 'development' && typeof window !== 'undefined' && p
 const storage = getStorage(app);
 const auth = typeof window !== "undefined" ? getAuth(app) : undefined;
 
-export { app, auth, db, storage };
+// Initialize Performance Monitoring
+let perf: any = null;
+if (typeof window !== "undefined") {
+  perf = getPerformance(app);
+}
+
+export { app, auth, db, storage, perf };

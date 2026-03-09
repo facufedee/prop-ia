@@ -30,7 +30,10 @@ import {
   UserCog,
   Package,
   Crown,
-  GraduationCap
+  GraduationCap,
+  PieChart,
+  ChevronDown,
+  UserPlus
 } from "lucide-react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
@@ -49,45 +52,60 @@ type MenuItem = {
   icon: any;
   adminOnly?: boolean;
   permission?: string;
+  description?: string;
+  isDivider?: boolean;
+  subItems?: MenuItem[];
 };
 
-// Menu Configuration - Flat list
+// Menu Configuration - Main list
 const MENU_ITEMS: MenuItem[] = [
-  { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
+  { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard, description: "Resumen general de tu inmobiliaria" },
 
-  // Core Business (User requested order: Alquileres, Propiedades, Clientes, Finanzas, Noticias, Tutoriales, Soporte)
-  { href: "/dashboard/alquileres", label: "Alquileres", icon: Key },
-  { href: "/dashboard/propiedades", label: "Propiedades", icon: Home },
-  { href: "/dashboard/clientes", label: "Clientes", icon: Users },
-  { href: "/dashboard/finanzas", label: "Finanzas", icon: DollarSign },
-  { href: "/dashboard/novedades", label: "Noticias", icon: Sparkles },
+  { href: "/dashboard/alquileres", label: "Alquileres", icon: Key, description: "Administra contratos, cuotas y renovaciones" },
+  { href: "/dashboard/propiedades", label: "Propiedades", icon: Home, description: "Gestión de tu catálogo de inmuebles" },
+  {
+    href: "/dashboard/clientes",
+    label: "Clientes",
+    icon: Users,
+    description: "Directorio de tus contactos",
+    subItems: [
+      { href: "/dashboard/clientes?tab=inquilinos", label: "Inquilinos", icon: Users, description: "Lista de Inquilinos" },
+      { href: "/dashboard/clientes?tab=propietarios", label: "Propietarios", icon: Building2, description: "Lista de Propietarios" },
+      { href: "/dashboard/clientes?tab=leads", label: "Leads", icon: UserPlus, description: "Lista de Leads" }
+    ]
+  },
+  { href: "/dashboard/leads", label: "Consultas", icon: MessageSquare, description: "Central de consultas y mensajes (Leads)" },
+  { href: "/dashboard/finanzas", label: "Reportes", icon: PieChart, description: "Reportes financieros, honorarios y cajas" },
+  { href: "/dashboard/calendario", label: "Agenda", icon: Calendar, description: "Calendario de citas y eventos" },
 
-  // Support & Education (Prioritized)
-  { href: "/dashboard/tutoriales", label: "Tutoriales", icon: GraduationCap },
-  { href: "/dashboard/soporte", label: "Soporte", icon: Headphones },
+  // Divider
+  { href: "divider-1", label: "", icon: LayoutDashboard, isDivider: true },
 
-  // Other Tools
-  { href: "/dashboard/tasacion", label: "Tasación IA", icon: Calculator },
-  { href: "/dashboard/emprendimientos", label: "Emprendimientos", icon: Building2 },
-  { href: "/dashboard/chat", label: "Chat Zeta Prop", icon: Bot },
-  { href: "/dashboard/publicaciones", label: "Publicaciones", icon: Megaphone },
-  { href: "/dashboard/blog", label: "Blog / Novedades", icon: FileText },
-  { href: "/dashboard/mensajes", label: "Mensajes", icon: Mail },
-  { href: "/dashboard/calendario", label: "Agenda", icon: Calendar },
+  { href: "/dashboard/novedades", label: "Noticias", icon: Sparkles, description: "Novedades y actualizaciones del rubro" },
+  { href: "/dashboard/tutoriales", label: "Tutoriales", icon: GraduationCap, description: "Aprende a usar la plataforma al máximo" },
+  { href: "/dashboard/soporte", label: "Soporte", icon: Headphones, description: "Mesa de ayuda y contacto directo" },
+
+  // Other Tools (Hidden in standard flow or kept for Pro admins, but grouped below)
+  { href: "divider-2", label: "", icon: LayoutDashboard, isDivider: true, adminOnly: true },
+  { href: "/dashboard/tasacion", label: "Tasación IA", icon: Calculator, description: "Herramienta de tasación inteligente" },
+  { href: "/dashboard/emprendimientos", label: "Emprendimientos", icon: Building2, description: "Proyectos en pozo o desarrollo" },
+  { href: "/dashboard/chat", label: "Chat Zeta Prop", icon: Bot, description: "Asistente virtual inmobiliario" },
+  { href: "/dashboard/publicaciones", label: "Publicaciones", icon: Megaphone, description: "Distribución en portales" },
+  { href: "/dashboard/blog", label: "Blog / Novedades", icon: FileText, description: "Artículos y notas" },
+  { href: "/dashboard/mensajes", label: "Mensajes", icon: Mail, description: "Mensajería interna" },
 
   // Pro Tools
-  { href: "/dashboard/agentes", label: "Agentes", icon: Users },
-  { href: "/dashboard/leads", label: "Leads / Consultas", icon: MessageSquare },
-  { href: "/dashboard/sucursales", label: "Multi Sucursal", icon: Building2, permission: "/dashboard/sucursales" },
-  { href: "/dashboard/gestion-plataforma", label: "Gestión Plataforma", icon: Shield, permission: "/dashboard/gestion-plataforma" },
+  { href: "/dashboard/agentes", label: "Agentes", icon: Users, description: "Gestión de equipo de ventas", adminOnly: true },
+  { href: "/dashboard/sucursales", label: "Multi Sucursal", icon: Building2, permission: "/dashboard/sucursales", description: "Manejo de múltiples oficinas" },
+  { href: "/dashboard/gestion-plataforma", label: "Gestión Plataforma", icon: Shield, permission: "/dashboard/gestion-plataforma", description: "Control total (SuperAdmin)" },
 
   // Admin & Config
-  { href: "/dashboard/soporte/ticketera", label: "Ticketera", icon: Ticket, adminOnly: true },
-  { href: "/dashboard/bitacora", label: "Bitácora", icon: BookOpen, adminOnly: true },
-  { href: "/dashboard/configuracion/roles", label: "Roles y Permisos", icon: UserCog, adminOnly: true },
-  { href: "/dashboard/configuracion/suscripciones", label: "Planes y Suscripciones", icon: Package, adminOnly: true },
-  { href: "/dashboard/configuracion/backup", label: "Backup", icon: Database, adminOnly: true },
-  { href: "/dashboard/configuracion", label: "Configuración", icon: Settings },
+  { href: "/dashboard/soporte/ticketera", label: "Ticketera", icon: Ticket, adminOnly: true, description: "Sistema de tickets" },
+  { href: "/dashboard/bitacora", label: "Bitácora", icon: BookOpen, adminOnly: true, description: "Historial de acciones del sistema" },
+  { href: "/dashboard/configuracion/roles", label: "Roles y Permisos", icon: UserCog, adminOnly: true, description: "Gestión de roles" },
+  { href: "/dashboard/configuracion/suscripciones", label: "Suscripciones", icon: Package, adminOnly: true, description: "Planes activos" },
+  { href: "/dashboard/configuracion/backup", label: "Backup", icon: Database, adminOnly: true, description: "Respaldo y seguridad" },
+  { href: "/dashboard/configuracion", label: "Configuración", icon: Settings, description: "Ajustes de la inmobiliaria" },
 ];
 
 // Features that are locked for Free users with Custom Info
@@ -118,6 +136,7 @@ export default function DashboardSidebar({ isOpen = false, onClose }: DashboardS
   const router = useRouter();
   const { userRole, userPermissions, user } = useAuth();
   const [collapsed, setCollapsed] = useState(false);
+  const [expandedMenus, setExpandedMenus] = useState<string[]>([]);
   const [unreadCount, setUnreadCount] = useState(0); // State for unread messages badge
   const [ticketCount, setTicketCount] = useState(0); // Tickets badge
 
@@ -167,6 +186,15 @@ export default function DashboardSidebar({ isOpen = false, onClose }: DashboardS
   };
 
   const handleItemClick = (e: React.MouseEvent, item: MenuItem) => {
+    if (item.subItems) {
+      e.preventDefault();
+      setExpandedMenus(prev =>
+        prev.includes(item.href) ? prev.filter(h => h !== item.href) : [...prev, item.href]
+      );
+      if (collapsed) setCollapsed(false); // Auto-expand sidebar if collapsed
+      return;
+    }
+
     if (isItemLocked(item.href)) {
       e.preventDefault();
       e.stopPropagation();
@@ -326,56 +354,106 @@ export default function DashboardSidebar({ isOpen = false, onClose }: DashboardS
         </div>
 
         {/* Content */}
-        <div className="flex-1 overflow-y-auto py-4 px-3 scrollbar-none space-y-1">
+        <div className="flex-1 overflow-y-auto overflow-x-hidden py-4 px-3 scrollbar-none space-y-1 relative pb-20">
           {MENU_ITEMS.filter(hasPermission).map((item) => {
-            const isActive = pathname === item.href;
+            if (item.isDivider) {
+              return <div key={item.href} className="my-3 mx-2 border-t border-gray-200"></div>;
+            }
+
+            const isActive = pathname === item.href || (item.subItems && pathname.startsWith(item.href));
             const locked = isItemLocked(item.href);
+            const isExpanded = expandedMenus.includes(item.href);
 
             return (
-              <Link
-                key={item.href}
-                href={locked ? "#" : item.href}
-                onClick={(e) => handleItemClick(e, item)}
-                title={collapsed ? item.label : undefined}
-                id={`nav-item-${item.label.toLowerCase().replace(/\s+/g, '-')}`}
-                className={cn(
-                  "flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all duration-200 group relative",
-                  isActive
-                    ? "bg-indigo-50 text-indigo-700 font-medium"
-                    : "text-gray-600 hover:bg-white hover:text-gray-900",
-                  locked ? "opacity-60" : "",
-                  collapsed ? "justify-center px-0" : ""
-                )}
-              >
-                <item.icon
-                  size={20}
+              <div key={item.href} className="flex flex-col relative group">
+                <Link
+                  href={locked || item.subItems ? "#" : item.href}
+                  onClick={(e) => handleItemClick(e, item)}
                   className={cn(
-                    "transition-colors flex-shrink-0",
-                    isActive ? "text-indigo-600" : "text-gray-500 group-hover:text-gray-700",
-                    locked ? "text-gray-400" : ""
+                    "flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all duration-200 w-full",
+                    isActive && !item.subItems
+                      ? "bg-indigo-50 text-indigo-700 font-medium"
+                      : "text-gray-600 hover:bg-white hover:text-gray-900",
+                    locked ? "opacity-60" : "",
+                    collapsed ? "justify-center px-0" : ""
                   )}
-                />
-                {!collapsed && (
-                  <div className="flex flex-1 items-center justify-between min-w-0">
-                    <span className="truncate">{item.label}</span>
-                    {locked && (
-                      <span className="text-[10px] font-bold uppercase bg-gray-100 text-gray-500 px-1.5 py-0.5 rounded border border-gray-200 ml-2">PRO</span>
+                >
+                  <item.icon
+                    size={20}
+                    className={cn(
+                      "transition-colors flex-shrink-0",
+                      isActive && !item.subItems ? "text-indigo-600" : "text-gray-500 group-hover:text-gray-700",
+                      locked ? "text-gray-400" : ""
                     )}
+                  />
+                  {!collapsed && (
+                    <div className="flex flex-1 items-center justify-between min-w-0">
+                      <span className="truncate">{item.label}</span>
 
-                    {!locked && !isActive && item.href === '/dashboard/leads' && unreadCount > 0 && (
-                      <span className="bg-red-500 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full min-w-[20px] text-center ml-2 shadow-sm animate-pulse">
-                        {unreadCount}
-                      </span>
-                    )}
+                      {item.subItems && (
+                        <ChevronDown size={16} className={cn("transition-transform text-gray-400 font-normal", isExpanded && "rotate-180")} />
+                      )}
 
-                    {!locked && !isActive && item.href === '/dashboard/soporte/ticketera' && ticketCount > 0 && (
-                      <span className="bg-red-500 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full min-w-[20px] text-center ml-2 shadow-sm animate-pulse">
-                        {ticketCount}
-                      </span>
-                    )}
+                      {locked && (
+                        <span className="text-[10px] font-bold uppercase bg-gray-100 text-gray-500 px-1.5 py-0.5 rounded border border-gray-200 ml-2">PRO</span>
+                      )}
+
+                      {!locked && item.href === '/dashboard/leads' && unreadCount > 0 && (
+                        <span className="bg-red-500 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full min-w-[20px] text-center ml-2 shadow-sm animate-pulse">
+                          {unreadCount}
+                        </span>
+                      )}
+
+                      {!locked && !isActive && item.href === '/dashboard/soporte/ticketera' && ticketCount > 0 && (
+                        <span className="bg-red-500 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full min-w-[20px] text-center ml-2 shadow-sm animate-pulse">
+                          {ticketCount}
+                        </span>
+                      )}
+                    </div>
+                  )}
+
+                  {/* Tooltip on Hover */}
+                  {collapsed && item.description && (
+                    <div className="absolute left-full top-1/2 -translate-y-1/2 ml-3 w-48 px-3 py-2 bg-gray-900 border border-gray-700 text-white text-xs rounded-lg shadow-xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all z-[100] pointer-events-none">
+                      <div className="absolute top-1/2 -translate-y-1/2 -left-1.5 w-3 h-3 bg-gray-900 border-l border-b border-gray-700 rotate-45"></div>
+                      <div className="font-bold mb-0.5 text-gray-100 relative z-10">{item.label}</div>
+                      <div className="text-gray-300 relative z-10 font-normal leading-relaxed">{item.description}</div>
+                    </div>
+                  )}
+                  {!collapsed && item.description && !item.subItems && (
+                    <div className="absolute left-full top-1/2 -translate-y-1/2 ml-4 w-48 px-3 py-2 bg-gray-900 border border-gray-700 text-white text-xs rounded-lg shadow-xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all z-[100] pointer-events-none">
+                      <div className="absolute top-1/2 -translate-y-1/2 -left-1.5 w-3 h-3 bg-gray-900 border-l border-b border-gray-700 rotate-45"></div>
+                      <div className="text-gray-200 relative z-10 font-normal leading-relaxed">{item.description}</div>
+                    </div>
+                  )}
+                </Link>
+
+                {/* Submenu Items */}
+                {item.subItems && isExpanded && !collapsed && (
+                  <div className="pl-10 pr-3 py-1 space-y-1 mt-1 bg-gray-100/30 rounded-xl relative border-l-2 border-indigo-100 mx-3">
+                    {item.subItems.map(sub => (
+                      <Link
+                        key={sub.href}
+                        href={sub.href}
+                        onClick={() => onClose && onClose()}
+                        className={cn(
+                          "flex items-center gap-2 py-2 px-3 rounded-lg text-sm text-gray-500 hover:text-indigo-600 hover:bg-white transition-all w-full relative group/sub"
+                        )}
+                      >
+                        <sub.icon size={14} className="opacity-70 group-hover/sub:opacity-100 group-hover/sub:text-indigo-600" />
+                        <span className="font-medium">{sub.label}</span>
+
+                        {sub.description && (
+                          <div className="absolute left-full top-1/2 -translate-y-1/2 ml-4 w-40 px-3 py-2 bg-gray-900 border border-gray-700 text-white text-[11px] rounded-lg shadow-xl opacity-0 invisible group-hover/sub:opacity-100 group-hover/sub:visible transition-all z-[100] pointer-events-none">
+                            <div className="font-bold mb-0.5 text-gray-100 leading-tight">{sub.label}</div>
+                            <div className="text-gray-300 font-normal leading-snug">{sub.description}</div>
+                          </div>
+                        )}
+                      </Link>
+                    ))}
                   </div>
                 )}
-              </Link>
+              </div>
             );
           })}
         </div>

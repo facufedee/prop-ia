@@ -34,7 +34,7 @@ export default function ContactModal({ isOpen, onClose, propertyId, propertyTitl
         nombre: "",
         email: "",
         telefono: "",
-        mensaje: `Hola, estoy interesado en la propiedad "${propertyTitle}" que vi en PropIA.`
+        mensaje: `Hola, estoy interesado en la propiedad "${propertyTitle}" que vi en Zeta Prop.`
     });
     const [loading, setLoading] = useState(false);
     const [success, setSuccess] = useState(false);

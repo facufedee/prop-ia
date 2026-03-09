@@ -54,8 +54,13 @@ export default function PropertyCard({ property, onDelete, onUpdate, onDuplicate
 
     return (
         <div className={`bg-white rounded-xl border overflow-hidden hover:shadow-lg transition-all duration-200 group flex flex-col h-full relative ${property.status === 'sold' ? 'opacity-75' : ''} ${property.status === 'inactive' ? 'border-gray-300 bg-gray-50' : 'border-gray-200'}`}>
+            {/* Clickable Area for whole card */}
+            {!isEditing && (
+                <Link href={`/dashboard/propiedades/editar/${property.id}`} className="absolute inset-0 z-0" title="Editar propiedad" />
+            )}
+
             {/* Image Header */}
-            <div className="relative h-48 bg-gray-100 group">
+            <div className="relative h-48 bg-gray-100 group z-10 pointer-events-none">
                 {property.imageUrls && property.imageUrls.length > 0 ? (
                     <Image
                         src={property.imageUrls[0]}
@@ -96,32 +101,32 @@ export default function PropertyCard({ property, onDelete, onUpdate, onDuplicate
                 </div>
 
                 {/* Menu Button - Top Right */}
-                <div className="absolute top-3 right-3 z-30">
+                <div className="absolute top-3 right-3 z-30 pointer-events-auto">
                     <button
-                        onClick={() => setShowMenu(!showMenu)}
+                        onClick={(e) => { e.preventDefault(); e.stopPropagation(); setShowMenu(!showMenu); }}
                         className="p-2 bg-white/90 hover:bg-white rounded-full text-gray-700 shadow-md transition-all"
                     >
                         <MoreVertical size={16} />
                     </button>
                     {showMenu && (
                         <>
-                            <div className="fixed inset-0 z-10" onClick={() => setShowMenu(false)} />
-                            <div className="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-xl border border-gray-100 z-50 py-1 overflow-hidden animate-in fade-in zoom-in-95">
+                            <div className="fixed inset-0 z-10" onClick={(e) => { e.preventDefault(); e.stopPropagation(); setShowMenu(false); }} />
+                            <div className="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-xl border border-gray-100 z-50 py-1 overflow-hidden animate-in fade-in zoom-in-95 pointer-events-auto">
                                 <button
-                                    onClick={() => { setIsEditing(true); setShowMenu(false); }}
+                                    onClick={(e) => { e.preventDefault(); e.stopPropagation(); setIsEditing(true); setShowMenu(false); }}
                                     className="w-full text-left px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 flex items-center gap-2"
                                 >
                                     <Edit size={14} /> Edición rápida
                                 </button>
                                 <button
-                                    onClick={() => { if (onDuplicate) onDuplicate(property); setShowMenu(false); }}
+                                    onClick={(e) => { e.preventDefault(); e.stopPropagation(); if (onDuplicate) onDuplicate(property); setShowMenu(false); }}
                                     className="w-full text-left px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 flex items-center gap-2"
                                 >
                                     <Copy size={14} /> Duplicar
                                 </button>
                                 {property.status !== 'sold' && (
                                     <button
-                                        onClick={markAsSold}
+                                        onClick={(e) => { e.preventDefault(); e.stopPropagation(); markAsSold(); }}
                                         className="w-full text-left px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 flex items-center gap-2"
                                     >
                                         <DollarSign size={14} /> Marcar Vendida
@@ -129,7 +134,7 @@ export default function PropertyCard({ property, onDelete, onUpdate, onDuplicate
                                 )}
                                 <div className="h-px bg-gray-100 my-1" />
                                 <button
-                                    onClick={() => onDelete(property.id)}
+                                    onClick={(e) => { e.preventDefault(); e.stopPropagation(); onDelete(property.id); }}
                                     className="w-full text-left px-4 py-2.5 text-sm text-red-600 hover:bg-red-50 flex items-center gap-2"
                                 >
                                     <Trash2 size={14} /> Eliminar
@@ -199,7 +204,7 @@ export default function PropertyCard({ property, onDelete, onUpdate, onDuplicate
                         </div>
                     </div>
                 ) : (
-                    <div className="flex-1">
+                    <div className="flex-1 z-10 pointer-events-none">
                         <div className="flex items-start justify-between mb-2">
                             <h3 className="font-bold text-gray-900 line-clamp-1 text-lg mb-1" title={property.title}>
                                 {property.title || "Sin título"}
@@ -242,10 +247,10 @@ export default function PropertyCard({ property, onDelete, onUpdate, onDuplicate
 
                 {/* Footer Actions */}
                 {!isEditing && (
-                    <div className="pt-4 mt-auto border-t border-gray-100 flex items-center justify-between gap-3">
+                    <div className="pt-4 mt-auto border-t border-gray-100 flex items-center justify-between gap-3 z-10 pointer-events-auto relative">
                         {property.status === 'active' ? (
                             <button
-                                onClick={toggleStatus}
+                                onClick={(e) => { e.preventDefault(); e.stopPropagation(); toggleStatus(); }}
                                 className="flex-1 flex items-center justify-center gap-1.5 px-3 py-2 rounded-lg bg-gray-100 text-gray-700 font-bold hover:bg-gray-200 transition-colors text-xs border border-gray-200"
                                 title="Pausar publicación"
                             >
@@ -253,7 +258,7 @@ export default function PropertyCard({ property, onDelete, onUpdate, onDuplicate
                             </button>
                         ) : property.status === 'inactive' ? (
                             <button
-                                onClick={toggleStatus}
+                                onClick={(e) => { e.preventDefault(); e.stopPropagation(); toggleStatus(); }}
                                 className="flex-1 flex items-center justify-center gap-1.5 px-3 py-2 rounded-lg bg-green-50 text-green-700 font-bold hover:bg-green-100 transition-colors text-xs border border-green-200"
                                 title="Activar publicación"
                             >
@@ -265,10 +270,11 @@ export default function PropertyCard({ property, onDelete, onUpdate, onDuplicate
                             </div>
                         )}
 
-                        <div className="flex items-center gap-1 border-l pl-3 border-gray-100">
+                        <div className="flex items-center gap-1 border-l pl-3 border-gray-100 pointer-events-auto">
                             <Link
                                 href={`/print/propiedades/${property.id}`}
                                 target="_blank"
+                                onClick={(e) => e.stopPropagation()}
                                 className="p-2 rounded-lg text-gray-500 hover:bg-gray-100 hover:text-indigo-600 transition-colors"
                                 title="Imprimir Ficha"
                             >
@@ -276,6 +282,7 @@ export default function PropertyCard({ property, onDelete, onUpdate, onDuplicate
                             </Link>
                             <Link
                                 href={`/dashboard/propiedades/editar/${property.id}`}
+                                onClick={(e) => e.stopPropagation()}
                                 className="p-2 rounded-lg text-gray-500 hover:bg-gray-100 hover:text-indigo-600 transition-colors"
                                 title="Edición completa"
                             >
@@ -284,6 +291,7 @@ export default function PropertyCard({ property, onDelete, onUpdate, onDuplicate
                             <Link
                                 href={`/propiedades/p/${property.id}`}
                                 target="_blank"
+                                onClick={(e) => e.stopPropagation()}
                                 className="p-2 rounded-lg text-gray-500 hover:bg-gray-100 hover:text-indigo-600 transition-colors"
                                 title="Ver publicación"
                             >

@@ -283,7 +283,7 @@ export const auditLogService = {
             userEmail,
             userName,
             action,
-            'Finanzas',
+            'Reportes',
             descriptions[action],
             organizationId,
             { transactionId, amount, ...metadata },

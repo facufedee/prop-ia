@@ -10,6 +10,7 @@ import CookieBanner from '@/ui/components/consent/CookieBanner';
 import FloatingChatWidget from '@/ui/components/FloatingChatWidget';
 import Script from 'next/script';
 import WhatsappButton from '@/ui/components/ui/WhatsappButton';
+import '@/infrastructure/firebase/client'; // Import to ensure Firebase (and Performance) initializes early
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -117,6 +118,13 @@ export default function RootLayout({
 
         {/* DNS Prefetch */}
         <link rel="dns-prefetch" href="https://www.googletagmanager.com" />
+
+        {/* FID Polyfill for Firebase Performance Monitoring */}
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `!function(n,e){var t,o,i,c=[],f={passive:!0,capture:!0},r=new Date,a="pointerup",u="pointercancel";function p(n,c){t||(t=c,o=n,i=new Date,w(e),s())}function s(){o>=0&&o<i-r&&(c.forEach(function(n){n(o,t)}),c=[])}function l(t){if(t.cancelable){var o=(t.timeStamp>1e12?new Date:performance.now())-t.timeStamp;"pointerdown"==t.type?function(t,o){function i(){p(t,o),r()}function c(){r()}function r(){e(a,i,f),e(u,c,f)}n(a,i,f),n(u,c,f)}(p,o):p(o,t)}}function w(n){["click","mousedown","keydown","touchstart","pointerdown"].forEach(function(e){n(e,l,f)})}w(n),self.perfMetrics=self.perfMetrics||{},self.perfMetrics.onFirstInputDelay=function(n){c.push(n),s()}}(addEventListener,removeEventListener);`
+          }}
+        />
       </head>
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased bg-gray-50 text-gray-900`}

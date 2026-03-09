@@ -13,6 +13,7 @@ interface LeadsTableProps {
 
 const ESTADO_LABELS: Record<LeadEstado, string> = {
     nuevo: 'Nuevo',
+    pendiente: 'Pendiente',
     contactado: 'Contactado',
     leido: 'Leído',
     respondido: 'Respondido',
@@ -24,6 +25,7 @@ const ESTADO_LABELS: Record<LeadEstado, string> = {
 
 const ESTADO_COLORS: Record<LeadEstado, string> = {
     nuevo: 'bg-blue-100 text-blue-700',
+    pendiente: 'bg-orange-100 text-orange-700',
     contactado: 'bg-yellow-100 text-yellow-700',
     leido: 'bg-blue-50 text-blue-600',
     respondido: 'bg-indigo-100 text-indigo-700',

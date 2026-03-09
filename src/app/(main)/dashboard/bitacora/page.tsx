@@ -275,7 +275,7 @@ export default function BitacoraPage() {
                                 <option value="Agentes">Agentes</option>
                                 <option value="Alquileres">Alquileres</option>
                                 <option value="Visitas">Visitas</option>
-                                <option value="Finanzas">Finanzas</option>
+                                <option value="Reportes">Reportes</option>
                                 <option value="Configuración">Configuración</option>
                             </select>
                         </div>

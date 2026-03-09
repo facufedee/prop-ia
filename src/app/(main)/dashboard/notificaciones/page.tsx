@@ -22,6 +22,7 @@ import { roleService } from "@/infrastructure/services/roleService";
 
 export default function NotificationsPage() {
     const [user, setUser] = useState<User | null>(null);
+    const [userRole, setUserRole] = useState<string>('Usuario');
     const [loading, setLoading] = useState(true);
     const [notifications, setNotifications] = useState<AppNotification[]>([]);
     const [filter, setFilter] = useState<'all' | 'unread'>('all');
@@ -32,19 +33,18 @@ export default function NotificationsPage() {
         if (!auth) return;
         const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
             if (!currentUser) {
-                router.push("/login?redirect=/dashboard/administrador/notificaciones");
+                router.push("/login?redirect=/dashboard/notificaciones");
                 return;
             }
 
-            // Check role
+            // Get role for subscription
             const userDoc = await getDoc(doc(db, "users", currentUser.uid));
             if (userDoc.exists()) {
                 const userData = userDoc.data();
                 if (userData.roleId) {
                     const role = await roleService.getRoleById(userData.roleId);
-                    if (role?.name !== 'Administrador') {
-                        router.push("/dashboard");
-                        return;
+                    if (role?.name) {
+                        setUserRole(role.name);
                     }
                 }
             }
@@ -60,13 +60,14 @@ export default function NotificationsPage() {
     useEffect(() => {
         if (!user) return;
 
-        // We subscribe as 'Administrador'
-        const unsubscribe = notificationService.subscribeToNotifications(user.uid, 'Administrador', (data) => {
+        const roleToSubscribe = userRole === 'Super Admin' ? 'Administrador' : userRole;
+
+        const unsubscribe = notificationService.subscribeToNotifications(user.uid, roleToSubscribe, (data) => {
             setNotifications(data);
         });
 
         return () => unsubscribe();
-    }, [user]);
+    }, [user, userRole]);
 
     const handleMarkAllRead = async () => {
         if (!user) return;
@@ -137,8 +138,8 @@ export default function NotificationsPage() {
                         <button
                             onClick={() => setFilter('all')}
                             className={`px-6 py-4 text-sm font-medium border-b-2 transition-colors flex items-center gap-2 ${filter === 'all'
-                                    ? 'border-indigo-600 text-indigo-600 bg-indigo-50/50'
-                                    : 'border-transparent text-gray-500 hover:text-gray-700 hover:bg-gray-50'
+                                ? 'border-indigo-600 text-indigo-600 bg-indigo-50/50'
+                                : 'border-transparent text-gray-500 hover:text-gray-700 hover:bg-gray-50'
                                 }`}
                         >
                             Todas
@@ -149,8 +150,8 @@ export default function NotificationsPage() {
                         <button
                             onClick={() => setFilter('unread')}
                             className={`px-6 py-4 text-sm font-medium border-b-2 transition-colors flex items-center gap-2 ${filter === 'unread'
-                                    ? 'border-indigo-600 text-indigo-600 bg-indigo-50/50'
-                                    : 'border-transparent text-gray-500 hover:text-gray-700 hover:bg-gray-50'
+                                ? 'border-indigo-600 text-indigo-600 bg-indigo-50/50'
+                                : 'border-transparent text-gray-500 hover:text-gray-700 hover:bg-gray-50'
                                 }`}
                         >
                             No leídas
@@ -190,8 +191,8 @@ export default function NotificationsPage() {
                                     >
                                         {/* Icon */}
                                         <div className={`shrink-0 w-12 h-12 rounded-full flex items-center justify-center ${notif.type === 'success' ? 'bg-green-100 text-green-600' :
-                                                notif.type === 'warning' ? 'bg-orange-100 text-orange-600' :
-                                                    notif.type === 'error' ? 'bg-red-100 text-red-600' : 'bg-blue-100 text-blue-600'
+                                            notif.type === 'warning' ? 'bg-orange-100 text-orange-600' :
+                                                notif.type === 'error' ? 'bg-red-100 text-red-600' : 'bg-blue-100 text-blue-600'
                                             }`}>
                                             {notif.type === 'success' ? <Check className="w-6 h-6" /> :
                                                 notif.type === 'warning' ? <LogOut className="w-6 h-6" /> :
