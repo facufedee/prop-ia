@@ -8,18 +8,18 @@ export default function Hero() {
   const router = useRouter();
 
   return (
-    <section className="relative min-h-screen flex items-center overflow-hidden bg-white pt-20 lg:pt-0">
+    <section className="relative flex items-center overflow-hidden bg-white" style={{ minHeight: 'clamp(480px, 85vh, 780px)', paddingTop: 'clamp(72px, 10vh, 120px)', paddingBottom: 'clamp(40px, 6vh, 80px)' }}>
       {/* Background Gradients */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
         <div className="absolute top-[-10%] right-[-5%] w-[60%] h-[60%] bg-indigo-100/40 rounded-full blur-[120px]" />
         <div className="absolute bottom-[-10%] left-[-10%] w-[50%] h-[50%] bg-purple-100/40 rounded-full blur-[100px]" />
       </div>
 
-      <div className="relative max-w-7xl mx-auto px-6 w-full z-10">
-        <div className="grid lg:grid-cols-2 gap-12 lg:gap-8 items-center">
+      <div className="relative max-w-5xl mx-auto px-8 lg:px-12 w-full z-10">
+        <div className="grid lg:grid-cols-2 gap-6 lg:gap-4 items-center">
 
           {/* Left Column: Text & CTA */}
-          <div className="text-center lg:text-left pt-8 lg:pt-0">
+          <div className="text-center lg:text-left">
             {/* Badge */}
             <div className="inline-flex items-center gap-2 px-4 py-1.5 bg-white border border-gray-100 rounded-full shadow-sm mb-6 animate-fade-in hover:scale-105 transition-transform cursor-default mx-auto lg:mx-0">
               <Sparkles className="w-4 h-4 text-indigo-600" />
@@ -29,7 +29,7 @@ export default function Hero() {
             </div>
 
             {/* Main Headline */}
-            <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold text-gray-900 mb-6 leading-[1.1] animate-fade-in-up tracking-tight">
+            <h1 className="text-3xl sm:text-4xl lg:text-4xl xl:text-5xl font-bold text-gray-900 mb-5 leading-[1.15] animate-fade-in-up tracking-tight">
               La forma más simple de <br />
               <span className="bg-gradient-to-r from-indigo-600 via-purple-600 to-indigo-600 bg-clip-text text-transparent bg-[length:200%_auto] animate-gradient">
                 administrar alquileres
@@ -37,7 +37,7 @@ export default function Hero() {
             </h1>
 
             {/* Subheadline */}
-            <p className="text-lg text-gray-600 mb-8 max-w-2xl mx-auto lg:mx-0 leading-relaxed animate-fade-in-up animation-delay-200">
+            <p className="text-base text-gray-600 mb-7 max-w-xl mx-auto lg:mx-0 leading-relaxed animate-fade-in-up animation-delay-200">
               Gestionar alquileres implica contratos, vencimientos, cobros, consultas y liquidaciones mensuales. Cuando todo se hace con planillas o procesos manuales, los errores y el desorden aparecen rápido. Zeta Prop organiza toda esa gestión en un solo sistema claro y fácil de usar.
             </p>
 
@@ -66,8 +66,8 @@ export default function Hero() {
           </div>
 
           {/* Right Column: Visual */}
-          <div className="relative flex justify-center lg:justify-end animate-fade-in-up animation-delay-600 pb-16 lg:pb-0 perspective-1000">
-            <div className="relative w-full max-w-[340px] lg:max-w-[420px] transform hover:scale-[1.02] transition-transform duration-700 ease-in-out">
+          <div className="relative flex justify-center lg:justify-end animate-fade-in-up animation-delay-600 lg:pb-0 perspective-1000">
+            <div className="relative w-full max-w-[260px] lg:max-w-[340px] xl:max-w-[380px] transform hover:scale-[1.02] transition-transform duration-700 ease-in-out">
               {/* Glow Effect */}
               <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[90%] h-[90%] bg-indigo-500/20 blur-[60px] rounded-full -z-10 animate-pulse-slow"></div>
               {/* Tablet Image */}
@@ -78,6 +78,7 @@ export default function Hero() {
                   width={800}
                   height={600}
                   className="object-contain w-full h-auto"
+                  style={{ mixBlendMode: 'multiply' }}
                   priority
                 />
               </div>
