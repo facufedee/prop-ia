@@ -1,3 +1,4 @@
+import Script from "next/script";
 import TrialBanner from "@/ui/components/subscription/TrialBanner";
 import DashboardShell from "@/ui/components/layout/DashboardShell";
 import AuthGuard from "@/ui/auth/AuthGuard";
@@ -15,18 +16,35 @@ export default function DashboardLayout({
   children: React.ReactNode;
 }) {
   return (
-    <AuthGuard>
-      <PermissionGuard>
-        <BranchProvider>
-          <DashboardShell>
-            <TrialBanner />
-            <PaymentWelcomeListener />
-            <TrialEnforcer />
-            <AccountLockEnforcer />
-            {children}
-          </DashboardShell>
-        </BranchProvider>
-      </PermissionGuard>
-    </AuthGuard>
+    <>
+      {/* Google Ads — Conversión de Registro */}
+      <Script
+        id="google-ads-conversion"
+        strategy="afterInteractive"
+        dangerouslySetInnerHTML={{
+          __html: `
+            gtag('event', 'conversion', {
+              'send_to': 'AW-17943485669/LYk7CMaLx4UcEOW5j-xC',
+              'value': 1.0,
+              'currency': 'ARS'
+            });
+          `,
+        }}
+      />
+
+      <AuthGuard>
+        <PermissionGuard>
+          <BranchProvider>
+            <DashboardShell>
+              <TrialBanner />
+              <PaymentWelcomeListener />
+              <TrialEnforcer />
+              <AccountLockEnforcer />
+              {children}
+            </DashboardShell>
+          </BranchProvider>
+        </PermissionGuard>
+      </AuthGuard>
+    </>
   );
 }

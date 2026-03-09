@@ -67,7 +67,7 @@ export default function Hero() {
 
           {/* Right Column: Visual */}
           <div className="relative flex justify-center lg:justify-end animate-fade-in-up animation-delay-600 pb-16 lg:pb-0 perspective-1000">
-            <div className="relative w-full max-w-[500px] lg:max-w-[600px] transform hover:scale-[1.02] transition-transform duration-700 ease-in-out">
+            <div className="relative w-full max-w-[340px] lg:max-w-[420px] transform hover:scale-[1.02] transition-transform duration-700 ease-in-out">
               {/* Glow Effect */}
               <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[90%] h-[90%] bg-indigo-500/20 blur-[60px] rounded-full -z-10 animate-pulse-slow"></div>
               {/* Tablet Image */}
