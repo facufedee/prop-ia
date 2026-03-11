@@ -307,8 +307,8 @@ export default function DashboardHeader({ onMobileMenuClick }: DashboardHeaderPr
                             <div className="hidden md:flex flex-col items-start pr-2">
                                 <span className="text-sm font-semibold text-gray-800 leading-none">{user.displayName?.split(' ')[0] || "Usuario"}</span>
                                 <span className="text-xs text-gray-500 mt-1 max-w-[120px] truncate">
-                                    {subscription?.planTier?.toLowerCase() === 'professional' || subscription?.planTier?.toLowerCase() === 'premium'
-                                        ? 'Plan ' + (subscription?.planTier?.charAt(0).toUpperCase() + subscription?.planTier?.slice(1))
+                                    {subscription?.planTier
+                                        ? `Plan ${subscription.planTier.charAt(0).toUpperCase() + subscription.planTier.slice(1)}`
                                         : (userRole?.name || "Sin rol")}
                                 </span>
                             </div>

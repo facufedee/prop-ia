@@ -191,28 +191,32 @@ export default function PricingTable() {
                                         {/* Features List */}
                                         <ul className="space-y-3 mt-auto">
                                             {(plan.featuresList && plan.featuresList.length > 0) ? (
-                                                plan.featuresList.map((feature: string, index: number) => (
-                                                    <li key={index} className="flex items-start gap-3">
-                                                        <div className="mt-0.5 w-5 h-5 rounded-full flex items-center justify-center flex-shrink-0 bg-green-100 text-green-600">
-                                                            <Check className="w-3 h-3" />
-                                                        </div>
-                                                        <span className="text-sm text-gray-700 font-medium text-left">
-                                                            {feature}
-                                                        </span>
-                                                    </li>
-                                                ))
-                                            ) : (
+                                                plan.featuresList
+                                                    .filter((feature: string) => !feature.toLowerCase().includes('hasta') && !feature.toLowerCase().includes('usuario'))
+                                                    .map((feature: string, index: number) => (
+                                                        <li key={index} className="flex items-start gap-3">
+                                                            <div className="mt-0.5 w-5 h-5 rounded-full flex items-center justify-center flex-shrink-0 bg-green-100 text-green-600">
+                                                                <Check className="w-3 h-3" />
+                                                            </div>
+                                                            <span className="text-sm text-gray-700 font-medium text-left">
+                                                                {feature}
+                                                            </span>
+                                                        </li>
+                                                    ))
+                                            ) : null}
+
+                                            {/* Fallback to raw features if no featuresList is present */}
+                                            {(!plan.featuresList || plan.featuresList.length === 0) &&
                                                 Object.entries(plan.features || {}).map(([key, included]) => (
-                                                    <li key={key} className={`flex items-start gap-3 ${!included ? 'opacity-40 grayscale' : ''}`}>
-                                                        <div className={`mt-0.5 w-5 h-5 rounded-full flex items-center justify-center flex-shrink-0 ${included ? 'bg-green-100 text-green-600' : 'bg-gray-100 text-gray-300'}`}>
-                                                            {included ? <Check className="w-3 h-3" /> : <X className="w-3 h-3" />}
-                                                        </div>
-                                                        <span className={`text-sm ${included ? 'text-gray-700 font-medium' : 'text-gray-400'}`}>
-                                                            {FEATURE_LABELS[key] || key}
-                                                        </span>
-                                                    </li>
-                                                ))
-                                            )}
+                                                <li key={key} className={`flex items-start gap-3 ${!included ? 'opacity-40 grayscale' : ''}`}>
+                                                    <div className={`mt-0.5 w-5 h-5 rounded-full flex items-center justify-center flex-shrink-0 ${included ? 'bg-green-100 text-green-600' : 'bg-gray-100 text-gray-300'}`}>
+                                                        {included ? <Check className="w-3 h-3" /> : <X className="w-3 h-3" />}
+                                                    </div>
+                                                    <span className={`text-sm ${included ? 'text-gray-700 font-medium' : 'text-gray-400'}`}>
+                                                        {FEATURE_LABELS[key] || key}
+                                                    </span>
+                                                </li>
+                                            ))}
                                         </ul>
                                     </div>
                                 </div>
