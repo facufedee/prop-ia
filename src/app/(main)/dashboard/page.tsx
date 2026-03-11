@@ -1,15 +1,14 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { app, db, auth } from "@/infrastructure/firebase/client";
+import { db, auth } from "@/infrastructure/firebase/client";
 import { collection, query, where, getDocs } from "firebase/firestore";
 import { onAuthStateChanged } from "firebase/auth";
 import { leadsService } from "@/infrastructure/services/leadsService";
-import { auditLogService } from "@/infrastructure/services/auditLogService";
 import { alquileresService } from "@/infrastructure/services/alquileresService";
-import { AuditLog } from "@/domain/models/AuditLog";
 import { Lead } from "@/domain/models/Lead";
-import { isSameMonth, format, addDays } from "date-fns";
+import { Alquiler } from "@/domain/models/Alquiler";
+import { isSameMonth, addDays, format, differenceInDays } from "date-fns";
 import { es } from "date-fns/locale";
 import {
     Home,
@@ -19,19 +18,35 @@ import {
     ArrowUpRight,
     Building2,
     Calendar,
-    BarChart3,
+    MessageSquare,
     Plus,
-    Sparkles,
-    Search,
-    Bell,
+    GraduationCap,
+    Key,
+    ArrowRight,
+    Clock,
+    AlertTriangle,
     CheckCircle2,
-    ArrowRight
+    PlayCircle,
+    ChevronRight,
+    UserCheck,
+    BarChart3,
+    Calculator,
+    Star,
 } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/ui/context/AuthContext";
 import { useBranchContext } from "@/infrastructure/context/BranchContext";
-import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
+
+interface VencimientoProximo {
+    alquilerId: string;
+    direccion: string;
+    nombreInquilino: string;
+    monto: number;
+    fechaVencimiento: Date;
+    diasRestantes: number;
+    estado: 'pendiente' | 'vencido';
+}
 
 export default function DashboardPage() {
     const router = useRouter();
@@ -44,85 +59,107 @@ export default function DashboardPage() {
         activeRentals: 0,
         totalLeads: 0,
         honorariosMonth: 0,
-        recentActivity: [] as AuditLog[],
         recentLeads: [] as Lead[],
-        subscription: null as any
+        proximosVencimientos: [] as VencimientoProximo[],
+        totalClientes: 0,
+        subscription: null as any,
     });
     const [loading, setLoading] = useState(true);
 
-
     useEffect(() => {
-        if (!auth) {
-            setLoading(false);
-            return;
-        }
-        const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
-            if (!currentUser) {
-                router.push("/login");
-                return;
-            }
-            setUser(currentUser);
+        if (!auth) { setLoading(false); return; }
+        const unsub = onAuthStateChanged(auth, async (u) => {
+            if (!u) { router.push("/login"); return; }
+            setUser(u);
         });
-
-        return () => unsubscribe();
+        return () => unsub();
     }, [router]);
 
     useEffect(() => {
-        if (user) {
-            fetchStats(user.uid, selectedBranchId);
-        }
+        if (user) fetchStats(user.uid, selectedBranchId);
     }, [user, selectedBranchId]);
 
     const fetchStats = async (userId: string, branchId: string) => {
         if (!db) return;
-
         try {
             let propsQuery = query(collection(db, "properties"), where("userId", "==", userId));
-            if (branchId !== 'all') {
-                propsQuery = query(propsQuery, where("branchId", "==", branchId));
-            }
+            if (branchId !== 'all') propsQuery = query(propsQuery, where("branchId", "==", branchId));
 
             const subQuery = query(collection(db, "subscriptions"), where("userId", "==", userId));
-            const [propsSnapshot, leads, recentLogsData, alquileres, subSnapshot] = await Promise.all([
+            const inquilinosQuery = query(collection(db, "inquilinos"), where("userId", "==", userId));
+            const propietariosQuery = query(collection(db, "propietarios"), where("userId", "==", userId));
+
+            const [propsSnapshot, leads, alquileres, subSnapshot, inquilinosSnap, propietariosSnap] = await Promise.all([
                 getDocs(propsQuery),
                 leadsService.getLeads(userId),
-                auditLogService.getLogs("default-org-id", { userId }, 10),
                 alquileresService.getAlquileres(userId),
-                getDocs(subQuery)
+                getDocs(subQuery),
+                getDocs(inquilinosQuery),
+                getDocs(propietariosQuery),
             ]);
 
             const propertyIds = new Set(propsSnapshot.docs.map(d => d.id));
 
-            const filteredLeads = branchId === 'all'
-                ? leads
-                : leads.filter(l => l.propertyId && propertyIds.has(l.propertyId));
-
-            const filteredAlquileres = branchId === 'all'
-                ? alquileres
-                : alquileres.filter(a => propertyIds.has(a.propiedadId));
+            const filteredLeads = branchId === 'all' ? leads : leads.filter(l => l.propertyId && propertyIds.has(l.propertyId));
+            const filteredAlquileres = branchId === 'all' ? alquileres : alquileres.filter(a => propertyIds.has(a.propiedadId));
 
             const activeRentals = filteredAlquileres.filter(a => a.estado === 'activo').length;
 
+            // Honorarios del mes
             const now = new Date();
             let honorariosMonth = 0;
-
             filteredAlquileres.forEach(alquiler => {
                 alquiler.historialPagos.forEach(pago => {
                     const fechaPago = pago.fechaPago ? new Date(pago.fechaPago) : null;
                     if (pago.estado === 'pagado' && fechaPago && isSameMonth(fechaPago, now)) {
                         if (pago.desglose?.honorarios) {
                             honorariosMonth += pago.desglose.honorarios;
-                        } else {
-                            if (alquiler.honorariosTipo === 'fijo' && alquiler.honorariosValor) {
-                                honorariosMonth += alquiler.honorariosValor;
-                            } else if (alquiler.honorariosTipo === 'porcentaje' && alquiler.honorariosValor) {
-                                const baseAmount = pago.montoAlquiler || pago.monto;
-                                honorariosMonth += baseAmount * (alquiler.honorariosValor / 100);
-                            }
+                        } else if (alquiler.honorariosTipo === 'fijo' && alquiler.honorariosValor) {
+                            honorariosMonth += alquiler.honorariosValor;
+                        } else if (alquiler.honorariosTipo === 'porcentaje' && alquiler.honorariosValor) {
+                            const base = pago.montoAlquiler || pago.monto;
+                            honorariosMonth += base * (alquiler.honorariosValor / 100);
                         }
                     }
                 });
             });
+
+            // Próximos vencimientos (pendientes en los próximos 10 días o vencidos hace menos de 5)
+            const proximosVencimientos: VencimientoProximo[] = [];
+            const ventanaFutura = addDays(now, 10);
+            const ventanaPasada = addDays(now, -5);
+
+            filteredAlquileres
+                .filter(a => a.estado === 'activo')
+                .forEach(alquiler => {
+                    alquiler.historialPagos.forEach(pago => {
+                        if (pago.estado !== 'pendiente' && pago.estado !== 'vencido') return;
+                        const fechaVenc = pago.fechaVencimiento ? new Date(pago.fechaVencimiento) : null;
+                        if (!fechaVenc) return;
+                        if (fechaVenc >= ventanaPasada && fechaVenc <= ventanaFutura) {
+                            const dias = differenceInDays(fechaVenc, now);
+                            proximosVencimientos.push({
+                                alquilerId: alquiler.id,
+                                direccion: alquiler.direccion,
+                                nombreInquilino: alquiler.nombreInquilino,
+                                monto: pago.monto,
+                                fechaVencimiento: fechaVenc,
+                                diasRestantes: dias,
+                                estado: dias < 0 ? 'vencido' : 'pendiente',
+                            });
+                        }
+                    });
+                });
+
+            proximosVencimientos.sort((a, b) => a.diasRestantes - b.diasRestantes);
+
+            const recentLeads = filteredLeads
+                .sort((a, b) => {
+                    const dateA = a.createdAt instanceof Date ? a.createdAt.getTime() : (a.createdAt as any)?.seconds * 1000;
+                    const dateB = b.createdAt instanceof Date ? b.createdAt.getTime() : (b.createdAt as any)?.seconds * 1000;
+                    return dateB - dateA;
+                })
+                .slice(0, 5);
 
             setStats({
                 totalProperties: propsSnapshot.size,
@@ -130,13 +167,10 @@ export default function DashboardPage() {
                 activeRentals,
                 totalLeads: filteredLeads.length,
                 honorariosMonth,
-                recentActivity: recentLogsData.logs,
-                recentLeads: filteredLeads.sort((a, b) => {
-                    const dateA = a.createdAt instanceof Date ? a.createdAt.getTime() : (a.createdAt as any)?.seconds * 1000;
-                    const dateB = b.createdAt instanceof Date ? b.createdAt.getTime() : (b.createdAt as any)?.seconds * 1000;
-                    return dateB - dateA;
-                }).slice(0, 5), // Only keep the 5 most recent leads
-                subscription: !subSnapshot.empty ? subSnapshot.docs[0].data() : null
+                recentLeads,
+                proximosVencimientos: proximosVencimientos.slice(0, 5),
+                totalClientes: inquilinosSnap.size + propietariosSnap.size,
+                subscription: !subSnapshot.empty ? subSnapshot.docs[0].data() : null,
             });
             setLoading(false);
         } catch (error) {
@@ -145,20 +179,15 @@ export default function DashboardPage() {
         }
     };
 
-    const formatCurrency = (value: number) => {
-        return new Intl.NumberFormat('es-AR', { style: 'currency', currency: 'ARS', maximumFractionDigits: 0 }).format(value);
-    };
+    const formatCurrency = (value: number) =>
+        new Intl.NumberFormat('es-AR', { style: 'currency', currency: 'ARS', maximumFractionDigits: 0 }).format(value);
 
-    // Chart Data (Mocking trend for visual appeal or processing logs)
-    const chartData = [
-        { name: 'Lun', value: 400 },
-        { name: 'Mar', value: 300 },
-        { name: 'Mie', value: 550 },
-        { name: 'Jue', value: 450 },
-        { name: 'Vie', value: 650 },
-        { name: 'Sab', value: 400 },
-        { name: 'Dom', value: 300 },
-    ];
+    const getGreeting = () => {
+        const hour = new Date().getHours();
+        if (hour < 12) return "¡Buenos días";
+        if (hour < 19) return "¡Buenas tardes";
+        return "¡Buenas noches";
+    };
 
     if (loading) {
         return (
@@ -171,327 +200,351 @@ export default function DashboardPage() {
         );
     }
 
+    const TUTORIALS = [
+        { title: "Cómo cargar tu primera propiedad", duration: "3 min", href: "/dashboard/tutoriales", icon: Home, color: "indigo" },
+        { title: "Registrar un alquiler paso a paso", duration: "5 min", href: "/dashboard/tutoriales", icon: Key, color: "emerald" },
+        { title: "Gestión de cobros y honorarios", duration: "4 min", href: "/dashboard/tutoriales", icon: DollarSign, color: "violet" },
+        { title: "Cómo usar el CRM de Leads", duration: "3 min", href: "/dashboard/tutoriales", icon: MessageSquare, color: "orange" },
+    ];
+
+    const QUICK_ACTIONS = [
+        { label: "Nueva Propiedad", icon: Building2, href: "/dashboard/propiedades/nueva", color: "indigo", permission: "/dashboard/propiedades" },
+        { label: "Nuevo Alquiler", icon: Key, href: "/dashboard/alquileres/nuevo", color: "emerald", permission: "/dashboard/alquileres" },
+        { label: "Nueva Tasación", icon: Calculator, href: "/dashboard/tasacion", color: "violet", permission: "/dashboard/tasacion" },
+        { label: "Ver Reportes", icon: BarChart3, href: "/dashboard/finanzas", color: "amber", permission: "/dashboard/finanzas" },
+    ];
+
     return (
-        <div className="min-h-screen bg-gray-50/50 p-6 md:p-8 max-w-7xl mx-auto space-y-8">
-            {/* Professional Header */}
-            <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
-                <div>
-                    <h1 className="text-3xl font-bold text-gray-900 tracking-tight">
-                        Hola, {user?.displayName?.split(' ')[0] || 'Colega'}
-                    </h1>
-                    <div className="flex flex-col mt-2 space-y-1">
-                        <p className="text-indigo-600 font-semibold text-sm capitalize flex items-center gap-1.5">
-                            Plan {stats.subscription?.planTier || "Básico"}
+        <div className="min-h-screen bg-[#F8F9FC] p-5 md:p-8">
+            <div className="max-w-7xl mx-auto space-y-6">
+
+                {/* ─── HEADER ──────────────────────────────────────────── */}
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                    <div>
+                        <h1 className="text-2xl md:text-3xl font-bold text-gray-900 tracking-tight">
+                            {getGreeting()}, {user?.displayName?.split(' ')[0] || 'Colega'}! 👋
+                        </h1>
+                        <p className="text-sm text-gray-500 mt-1">
+                            {format(new Date(), "EEEE d 'de' MMMM, yyyy", { locale: es })}
+                            {stats.subscription && (
+                                <span className="ml-2 text-indigo-600 font-medium capitalize">· Plan {stats.subscription.planTier}</span>
+                            )}
                         </p>
-                        {stats.subscription?.endDate ? (
-                            <p className="text-xs font-medium text-gray-500 bg-gray-100 px-2.5 py-1 rounded w-fit">
-                                Vence: {new Date(stats.subscription.endDate.seconds * 1000).toLocaleDateString('es-AR')}
-                            </p>
-                        ) : user?.metadata?.creationTime ? (
-                            <p className="text-xs font-medium text-gray-500 bg-gray-100 px-2.5 py-1 rounded w-fit">
-                                Vence: {format(addDays(new Date(user.metadata.creationTime), 14), 'dd/MM/yyyy')}
-                            </p>
-                        ) : null}
                     </div>
-                </div>
-                <div className="flex items-center gap-3">
-                    <div className="hidden md:flex items-center bg-white border border-gray-200 rounded-xl px-3 py-2 shadow-sm">
-                        <Search size={18} className="text-gray-400 mr-2" />
-                        <input type="text" placeholder="Buscar..." className="text-sm bg-transparent outline-none text-gray-600 w-40" />
-                    </div>
-                    <button className="p-2.5 bg-white border border-gray-200 rounded-xl text-gray-500 hover:text-indigo-600 hover:border-indigo-100 transition shadow-sm relative">
-                        <Bell size={20} />
-                        <span className="absolute top-2 right-2.5 w-2 h-2 bg-red-500 rounded-full border-2 border-white"></span>
-                    </button>
                     <Link
-                        id="new-property-btn"
                         href="/dashboard/propiedades/nueva"
-                        className="flex items-center gap-2 px-5 py-2.5 bg-gray-900 text-white rounded-xl hover:bg-black transition-all shadow-lg hover:shadow-gray-900/20 font-medium"
+                        className="inline-flex items-center gap-2 px-5 py-2.5 bg-indigo-600 text-white rounded-xl hover:bg-indigo-700 transition-all shadow-lg shadow-indigo-600/20 font-medium text-sm"
                     >
                         <Plus size={18} />
-                        <span className="hidden sm:inline">Nueva Propiedad</span>
+                        Nueva Propiedad
                     </Link>
                 </div>
-            </div>
 
-            {/* Premium Status Banner 
-            {userRole?.name === "Cliente Free" && (
-                <div className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-indigo-900 to-violet-900 text-white shadow-xl">
-                    <div className="absolute top-0 right-0 w-64 h-64 bg-white/5 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2"></div>
-                    <div className="relative z-10 p-6 md:p-8 flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
-                        <div>
-                            <div className="flex items-center gap-2 mb-2">
-                                <span className="px-2.5 py-0.5 rounded-md bg-indigo-500/30 border border-indigo-400/30 text-indigo-100 text-xs font-bold uppercase tracking-wide">
-                                    Plan Básico
-                                </span>
+                {/* ─── KPI CARDS (4 columnas) ───────────────────────────── */}
+                <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+                    {/* Propiedades */}
+                    <Link
+                        href="/dashboard/propiedades"
+                        className={`group bg-white rounded-2xl p-5 border border-gray-100 shadow-sm hover:shadow-md hover:border-indigo-200 transition-all duration-200 hover:-translate-y-0.5 ${!userPermissions.includes('/dashboard/propiedades') ? 'pointer-events-none opacity-70' : ''}`}
+                    >
+                        <div className="flex items-start justify-between mb-4">
+                            <div className="p-2.5 bg-indigo-50 rounded-xl group-hover:bg-indigo-100 transition-colors">
+                                <Building2 size={22} className="text-indigo-600" />
                             </div>
-                            <h3 className="text-xl md:text-2xl font-bold text-white mb-1">
-                                Lleva tu inmobiliaria al siguiente nivel
-                            </h3>
-                            <p className="text-indigo-100 max-w-xl text-sm leading-relaxed">
-                                Desbloquea gestión ilimitada, automatización de leads con IA y herramientas avanzadas de marketing.
-                            </p>
+                            <span className="text-[11px] font-semibold text-indigo-600 bg-indigo-50 px-2.5 py-1 rounded-full flex items-center gap-1">
+                                <ArrowUpRight size={11} />
+                                Activas
+                            </span>
                         </div>
-                        <Link
-                            href="/precios"
-                            className="flex-shrink-0 px-6 py-3 bg-white text-indigo-900 rounded-xl font-bold hover:bg-indigo-50 transition-colors shadow-lg flex items-center gap-2"
-                        >
-                            <Sparkles size={18} className="text-indigo-600" />
-                            Ver Planes PRO
-                        </Link>
-                    </div>
-                </div>
-            )}
-*/}
-            {/* Stats Overview */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                {userPermissions.includes('/dashboard/propiedades') ? (
-                    <Link href="/dashboard/propiedades" className="group">
-                        <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 hover:shadow-md transition-all md:hover:scale-[1.02] cursor-pointer h-full relative overflow-hidden">
-                            <div className="flex justify-between items-start mb-4 relative z-10">
-                                <div className="p-3 bg-blue-50 rounded-xl text-blue-600 group-hover:bg-blue-100 transition-colors">
-                                    <Building2 size={28} />
-                                </div>
-                                {userRole?.name === "Cliente Free" ? (
-                                    <span className={`flex items-center text-xs font-bold px-3 py-1.5 rounded-full ${stats.totalProperties >= 10 ? 'bg-red-50 text-red-600' : 'bg-indigo-50 text-indigo-600'}`}>
-                                        Plan Básico
-                                    </span>
-                                ) : (
-                                    <span className="flex items-center text-xs font-medium text-green-600 bg-green-50 px-2 py-1 rounded-full">
-                                        <ArrowUpRight size={12} className="mr-1" /> Activas
-                                    </span>
-                                )}
-                            </div>
-
-                            <div className="relative z-10">
-                                <div className="flex items-baseline gap-2">
-                                    <h3 className="text-4xl md:text-5xl font-extrabold text-gray-900 tracking-tight">
-                                        {stats.totalProperties}
-                                    </h3>
-                                    {userRole?.name === "Cliente Free" && (
-                                        <span className="text-xl text-gray-400 font-medium">/ 50</span>
-                                    )}
-                                </div>
-                                <p className="text-sm text-gray-500 mt-2 font-medium">Propiedades Totales</p>
-
-                                {userRole?.name === "Cliente Free" && (
-                                    <div className="mt-4 w-full bg-gray-100 rounded-full h-2 overflow-hidden">
-                                        <div
-                                            className={`h-full rounded-full transition-all duration-500 ${stats.totalProperties >= 50 ? 'bg-red-500' : 'bg-indigo-500'}`}
-                                            style={{ width: `${Math.min((stats.totalProperties / 50) * 100, 100)}%` }}
-                                        />
-                                    </div>
-                                )}
-                            </div>
+                        <div className="space-y-1">
+                            <p className="text-3xl font-bold text-gray-900">{stats.totalProperties}</p>
+                            <p className="text-sm text-gray-500 font-medium">Propiedades</p>
+                        </div>
+                        <div className="mt-3 flex items-center gap-1 text-xs text-indigo-600 font-medium opacity-0 group-hover:opacity-100 transition-opacity">
+                            Ver propiedades <ChevronRight size={12} />
                         </div>
                     </Link>
-                ) : (
-                    <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 h-full opacity-75">
-                        <div className="flex justify-between items-start mb-4">
-                            <div className="p-3 bg-gray-50 rounded-xl text-gray-400">
-                                <Building2 size={24} />
-                            </div>
-                        </div>
-                        <h3 className="text-4xl font-bold text-gray-900">{stats.totalProperties}</h3>
-                        <p className="text-sm text-gray-500 mt-1">Propiedades Totales</p>
-                    </div>
-                )}
 
-                {userPermissions.includes('/dashboard/alquileres') ? (
-                    <Link href="/dashboard/alquileres" className="group">
-                        <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 hover:shadow-md transition-all md:hover:scale-[1.02] cursor-pointer h-full">
-                            <div className="flex justify-between items-start mb-4">
-                                <div className="p-3 bg-indigo-50 text-indigo-600 rounded-xl group-hover:bg-indigo-100 transition-colors">
-                                    <Users size={24} />
-                                </div>
-                                <span className="flex items-center text-xs font-medium text-green-600 bg-green-50 px-2 py-1 rounded-full">
-                                    <ArrowUpRight size={12} className="mr-1" /> Activos
-                                </span>
+                    {/* Alquileres */}
+                    <Link
+                        href="/dashboard/alquileres"
+                        className={`group bg-white rounded-2xl p-5 border border-gray-100 shadow-sm hover:shadow-md hover:border-emerald-200 transition-all duration-200 hover:-translate-y-0.5 ${!userPermissions.includes('/dashboard/alquileres') ? 'pointer-events-none opacity-70' : ''}`}
+                    >
+                        <div className="flex items-start justify-between mb-4">
+                            <div className="p-2.5 bg-emerald-50 rounded-xl group-hover:bg-emerald-100 transition-colors">
+                                <Key size={22} className="text-emerald-600" />
                             </div>
-                            <div className="flex items-baseline gap-2">
-                                <h3 className="text-3xl font-bold text-gray-900">{stats.activeRentals}</h3>
-                                <span className="text-sm text-gray-400">/ 50</span>
-                            </div>
-                            <p className="text-sm text-gray-500 mt-1">Alquileres</p>
-                            <p className="text-xs text-gray-400 mt-2">En curso</p>
+                            <span className="text-[11px] font-semibold text-emerald-600 bg-emerald-50 px-2.5 py-1 rounded-full flex items-center gap-1">
+                                <ArrowUpRight size={11} />
+                                Activos
+                            </span>
+                        </div>
+                        <div className="space-y-1">
+                            <p className="text-3xl font-bold text-gray-900">{stats.activeRentals}</p>
+                            <p className="text-sm text-gray-500 font-medium">Alquileres</p>
+                        </div>
+                        <div className="mt-3 flex items-center gap-1 text-xs text-emerald-600 font-medium opacity-0 group-hover:opacity-100 transition-opacity">
+                            Ver alquileres <ChevronRight size={12} />
                         </div>
                     </Link>
-                ) : (
-                    <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 h-full opacity-75">
-                        <div className="flex justify-between items-start mb-4">
-                            <div className="p-3 bg-gray-50 rounded-xl text-gray-400">
-                                <Users size={24} />
-                            </div>
-                        </div>
-                        <div className="flex items-baseline gap-2">
-                            <h3 className="text-3xl font-bold text-gray-900">{stats.activeRentals}</h3>
-                            <span className="text-sm text-gray-400">/ {stats.totalAlquileres}</span>
-                        </div>
-                        <p className="text-sm text-gray-500 mt-1">Alquileres</p>
-                    </div>
-                )}
 
-                {userPermissions.includes('/dashboard/finanzas') ? (
-                    <Link href="/dashboard/finanzas" className="group">
-                        <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 hover:shadow-md transition-all md:hover:scale-[1.02] cursor-pointer h-full">
-                            <div className="flex justify-between items-start mb-4">
-                                <div className="p-3 bg-emerald-50 rounded-xl text-emerald-600 group-hover:bg-emerald-100 transition-colors">
-                                    <DollarSign size={24} />
-                                </div>
-                                <span className="flex items-center text-xs font-medium text-green-600 bg-green-50 px-2 py-1 rounded-full">
-                                    <TrendingUp size={12} className="mr-1" /> Mes actual
-                                </span>
+                    {/* Clientes */}
+                    <Link
+                        href="/dashboard/clientes"
+                        className={`group bg-white rounded-2xl p-5 border border-gray-100 shadow-sm hover:shadow-md hover:border-violet-200 transition-all duration-200 hover:-translate-y-0.5 ${!userPermissions.includes('/dashboard/clientes') ? 'pointer-events-none opacity-70' : ''}`}
+                    >
+                        <div className="flex items-start justify-between mb-4">
+                            <div className="p-2.5 bg-violet-50 rounded-xl group-hover:bg-violet-100 transition-colors">
+                                <UserCheck size={22} className="text-violet-600" />
                             </div>
-                            <h3 className="text-3xl font-bold text-gray-900">{formatCurrency(stats.honorariosMonth)}</h3>
-                            <p className="text-sm text-gray-500 mt-1">Ingresos Honorarios</p>
-                            <div className="flex items-center gap-1 mt-2 text-xs text-indigo-600 font-medium opacity-0 group-hover:opacity-100 transition-opacity">
-                                Ver detalles <ArrowUpRight size={12} />
-                            </div>
+                            <span className="text-[11px] font-semibold text-violet-600 bg-violet-50 px-2.5 py-1 rounded-full flex items-center gap-1">
+                                <ArrowUpRight size={11} />
+                                Total
+                            </span>
+                        </div>
+                        <div className="space-y-1">
+                            <p className="text-3xl font-bold text-gray-900">{stats.totalClientes}</p>
+                            <p className="text-sm text-gray-500 font-medium">Clientes</p>
+                        </div>
+                        <div className="mt-3 flex items-center gap-1 text-xs text-violet-600 font-medium opacity-0 group-hover:opacity-100 transition-opacity">
+                            Ver clientes <ChevronRight size={12} />
                         </div>
                     </Link>
-                ) : (
-                    <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 h-full opacity-75">
-                        <div className="flex justify-between items-start mb-4">
-                            <div className="p-3 bg-gray-50 rounded-xl text-gray-400">
-                                <DollarSign size={24} />
+
+                    {/* Comisiones */}
+                    <Link
+                        href="/dashboard/finanzas"
+                        className={`group bg-white rounded-2xl p-5 border border-gray-100 shadow-sm hover:shadow-md hover:border-amber-200 transition-all duration-200 hover:-translate-y-0.5 ${!userPermissions.includes('/dashboard/finanzas') ? 'pointer-events-none opacity-70' : ''}`}
+                    >
+                        <div className="flex items-start justify-between mb-4">
+                            <div className="p-2.5 bg-amber-50 rounded-xl group-hover:bg-amber-100 transition-colors">
+                                <TrendingUp size={22} className="text-amber-600" />
                             </div>
+                            <span className="text-[11px] font-semibold text-amber-600 bg-amber-50 px-2.5 py-1 rounded-full whitespace-nowrap">
+                                Este mes
+                            </span>
                         </div>
-                        <h3 className="text-3xl font-bold text-gray-900">{formatCurrency(stats.honorariosMonth)}</h3>
-                        <p className="text-sm text-gray-500 mt-1">Ingresos Honorarios</p>
-                    </div>
-                )}
-            </div>
-
-            {/* Main Content Grid */}
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-                {/* Left Column: Chart & Activity */}
-                <div className="lg:col-span-2 space-y-8">
-                    {/* Activity Chart or Welcome Banner */}
-                    {stats.totalProperties === 0 ? (
-                        <div className="bg-gradient-to-br from-indigo-900 via-indigo-800 to-indigo-900 rounded-2xl shadow-lg p-8 text-white relative overflow-hidden ring-1 ring-white/10">
-                            <div className="absolute top-0 right-0 w-96 h-96 bg-white/5 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2"></div>
-                            <div className="absolute bottom-0 left-0 w-64 h-64 bg-indigo-500/20 rounded-full blur-3xl translate-y-1/3 -translate-x-1/3"></div>
-
-                            <div className="relative z-10">
-                                <h2 className="text-2xl font-bold mb-3">¡Bienvenido a tu Dashboard! 🚀</h2>
-                                <p className="text-indigo-100 mb-6 max-w-lg leading-relaxed text-sm md:text-base">
-                                    Aquí verás métricas clave sobre el rendimiento de tu inmobiliaria.
-                                    Para comenzar a ver datos interesantes, cargá tu primera propiedad y empezá a gestionar tu cartera.
-                                </p>
-                                <div className="flex flex-wrap gap-4">
-                                    <Link href="/dashboard/propiedades/nueva" className="px-5 py-2.5 bg-white text-indigo-900 rounded-xl font-bold hover:bg-indigo-50 transition-all shadow-md flex items-center gap-2 text-sm">
-                                        <Plus size={18} />
-                                        Cargar Propiedad
-                                    </Link>
-                                    <Link href="/dashboard/tutoriales" className="px-5 py-2.5 bg-white/10 text-white border border-white/20 rounded-xl font-medium hover:bg-white/20 transition-all flex items-center gap-2 text-sm backdrop-blur-sm">
-                                        <Search size={18} />
-                                        Ver Tutoriales
-                                    </Link>
-                                </div>
-                            </div>
+                        <div className="space-y-1">
+                            <p className="text-2xl font-bold text-gray-900 leading-tight">{formatCurrency(stats.honorariosMonth)}</p>
+                            <p className="text-sm text-gray-500 font-medium">Comisiones</p>
                         </div>
-                    ) : (
-                        <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
-                            <div className="flex justify-between items-center mb-6">
-                                <h2 className="text-lg font-bold text-gray-900">Rendimiento</h2>
-                                <button className="text-sm text-indigo-600 font-medium hover:underline">Ver reporte</button>
-                            </div>
-                            <div className="h-[300px] w-full flex flex-col items-center justify-center text-gray-400 border border-dashed border-gray-200 rounded-xl bg-gray-50/50">
-                                <BarChart3 size={48} className="mb-3 opacity-20" />
-                                <p className="text-sm font-medium">Recopilando datos de actividad...</p>
-                                <p className="text-xs text-center max-w-xs mt-1 opacity-70">
-                                    Las métricas de rendimiento estarán disponibles pronto basado en tus leads y visitas.
-                                </p>
-                            </div>
+                        <div className="mt-3 flex items-center gap-1 text-xs text-amber-600 font-medium opacity-0 group-hover:opacity-100 transition-opacity">
+                            Ver finanzas <ChevronRight size={12} />
                         </div>
-                    )}
-
-                    {/* Quick Actions Grid */}
-                    <div>
-                        <h2 className="text-lg font-bold text-gray-900 mb-4">Accesos Directos</h2>
-                        <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-                            {userPermissions.includes('/dashboard/propiedades') && (
-                                <Link href="/dashboard/propiedades/nueva" className="p-4 bg-white border border-gray-200 rounded-xl hover:border-indigo-300 hover:shadow-md transition-all group group text-center flex flex-col items-center justify-center gap-3">
-                                    <div className="p-3 bg-indigo-50 text-indigo-600 rounded-full group-hover:scale-110 transition-transform">
-                                        <Home size={20} />
-                                    </div>
-                                    <span className="text-sm font-medium text-gray-700">Crear Propiedad</span>
-                                </Link>
-                            )}
-
-                            {userPermissions.includes('/dashboard/alquileres') && (
-                                <Link href="/dashboard/alquileres" className="p-4 bg-white border border-gray-200 rounded-xl hover:border-indigo-300 hover:shadow-md transition-all group text-center flex flex-col items-center justify-center gap-3">
-                                    <div className="p-3 bg-emerald-50 text-emerald-600 rounded-full group-hover:scale-110 transition-transform">
-                                        <DollarSign size={20} />
-                                    </div>
-                                    <span className="text-sm font-medium text-gray-700">Registrar Cobro</span>
-                                </Link>
-                            )}
-
-                            {userPermissions.includes('/dashboard/tasacion') && (
-                                <Link href="/dashboard/tasacion" className="p-4 bg-white border border-gray-200 rounded-xl hover:border-indigo-300 hover:shadow-md transition-all group text-center flex flex-col items-center justify-center gap-3">
-                                    <div className="p-3 bg-purple-50 text-purple-600 rounded-full group-hover:scale-110 transition-transform">
-                                        <BarChart3 size={20} />
-                                    </div>
-                                    <span className="text-sm font-medium text-gray-700">Nueva Tasación</span>
-                                </Link>
-                            )}
-
-                            {userPermissions.includes('/dashboard/clientes') && (
-                                <Link href="/dashboard/clientes" className="p-4 bg-white border border-gray-200 rounded-xl hover:border-indigo-300 hover:shadow-md transition-all group text-center flex flex-col items-center justify-center gap-3">
-                                    <div className="p-3 bg-orange-50 text-orange-600 rounded-full group-hover:scale-110 transition-transform">
-                                        <Users size={20} />
-                                    </div>
-                                    <span className="text-sm font-medium text-gray-700">Alta Cliente</span>
-                                </Link>
-                            )}
-                        </div>
-                    </div>
+                    </Link>
                 </div>
 
-                {/* Right Column: Recent Leads */}
-                <div className="lg:col-span-1">
-                    <div className="bg-white rounded-2xl shadow-sm border border-gray-100 h-full">
-                        <div className="p-6 border-b border-gray-100">
-                            <h2 className="text-lg font-bold text-gray-900">Últimas Consultas</h2>
+                {/* ─── FILA PRINCIPAL (3 columnas) ─────────────────────── */}
+                <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
+
+                    {/* PRÓXIMOS VENCIMIENTOS */}
+                    <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden flex flex-col">
+                        <div className="px-5 py-4 border-b border-gray-100 flex items-center justify-between">
+                            <div className="flex items-center gap-2.5">
+                                <div className="p-2 bg-orange-50 rounded-lg">
+                                    <Calendar size={18} className="text-orange-500" />
+                                </div>
+                                <div>
+                                    <h2 className="font-semibold text-gray-900 text-sm">Próximos Vencimientos</h2>
+                                    <p className="text-xs text-gray-400">Próximos 10 días</p>
+                                </div>
+                            </div>
+                            {stats.proximosVencimientos.length > 0 && (
+                                <span className="text-xs font-bold bg-orange-100 text-orange-600 px-2 py-0.5 rounded-full">
+                                    {stats.proximosVencimientos.length}
+                                </span>
+                            )}
                         </div>
-                        <div className="p-6 space-y-4">
-                            {stats.recentLeads && stats.recentLeads.length > 0 ? (
-                                stats.recentLeads.map((lead: any) => (
-                                    <div key={lead.id} className="p-3 bg-gray-50 rounded-xl border border-gray-100 hover:border-indigo-200 transition-colors">
-                                        <div className="flex justify-between items-start mb-2">
-                                            <p className="text-sm font-bold text-gray-900">{lead.nombre}</p>
-                                            <span className={`text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full ${lead.estado === 'nuevo' ? 'bg-green-100 text-green-700' :
-                                                lead.estado === 'contactado' ? 'bg-blue-100 text-blue-700' :
-                                                    lead.estado === 'leido' ? 'bg-indigo-100 text-indigo-700' :
-                                                        'bg-gray-200 text-gray-700'
-                                                }`}>
-                                                {lead.estado}
-                                            </span>
-                                        </div>
-                                        <p className="text-xs text-gray-600 line-clamp-2 mb-2 italic">"{lead.mensaje || 'Sin mensaje'}"</p>
-                                        <div className="flex items-center justify-between text-[10px] text-gray-400 font-medium">
-                                            <span>{lead.propertyTitle ? `Por: ${lead.propertyTitle}` : 'Consulta General'}</span>
-                                            <span>{format(new Date(lead.createdAt.seconds ? lead.createdAt.seconds * 1000 : lead.createdAt), 'dd/MM HH:mm')}</span>
-                                        </div>
+
+                        <div className="flex-1 divide-y divide-gray-50">
+                            {stats.proximosVencimientos.length === 0 ? (
+                                <div className="flex flex-col items-center justify-center py-10 px-4 text-center">
+                                    <div className="w-12 h-12 bg-green-50 rounded-full flex items-center justify-center mb-3">
+                                        <CheckCircle2 size={24} className="text-green-500" />
                                     </div>
-                                ))
+                                    <p className="text-sm font-medium text-gray-700">Sin vencimientos próximos</p>
+                                    <p className="text-xs text-gray-400 mt-1">Todo al día 🎉</p>
+                                </div>
                             ) : (
-                                <div className="text-center py-10">
-                                    <div className="inline-flex justify-center items-center w-12 h-12 rounded-full bg-indigo-50 text-indigo-400 mb-3">
-                                        <Users size={24} />
-                                    </div>
-                                    <p className="text-sm text-gray-500">No hay consultas recientes.</p>
-                                </div>
+                                stats.proximosVencimientos.map((v, i) => (
+                                    <Link
+                                        key={`${v.alquilerId}-${i}`}
+                                        href={`/dashboard/alquileres?id=${v.alquilerId}`}
+                                        className="flex items-start gap-3 px-5 py-3.5 hover:bg-gray-50 transition-colors group"
+                                    >
+                                        <div className={`mt-0.5 p-1.5 rounded-lg flex-shrink-0 ${v.estado === 'vencido' ? 'bg-red-50' : v.diasRestantes <= 3 ? 'bg-orange-50' : 'bg-yellow-50'}`}>
+                                            {v.estado === 'vencido' ? (
+                                                <AlertTriangle size={14} className="text-red-500" />
+                                            ) : (
+                                                <Clock size={14} className={v.diasRestantes <= 3 ? "text-orange-500" : "text-yellow-500"} />
+                                            )}
+                                        </div>
+                                        <div className="flex-1 min-w-0">
+                                            <p className="text-sm font-medium text-gray-900 truncate">{v.direccion}</p>
+                                            <p className="text-xs text-gray-400 truncate">{v.nombreInquilino}</p>
+                                        </div>
+                                        <div className="text-right flex-shrink-0">
+                                            <p className="text-sm font-bold text-gray-900">{formatCurrency(v.monto)}</p>
+                                            <p className={`text-xs font-medium ${v.estado === 'vencido' ? 'text-red-500' : v.diasRestantes <= 3 ? 'text-orange-500' : 'text-gray-400'}`}>
+                                                {v.estado === 'vencido' ? `Venció hace ${Math.abs(v.diasRestantes)}d` : v.diasRestantes === 0 ? 'Hoy' : `En ${v.diasRestantes}d`}
+                                            </p>
+                                        </div>
+                                    </Link>
+                                ))
                             )}
                         </div>
-                        <div className="p-4 border-t border-gray-100">
-                            <Link href="/dashboard/leads" className="flex items-center justify-center gap-2 text-sm font-medium text-indigo-600 hover:text-indigo-700 w-full py-2 hover:bg-indigo-50 rounded-lg transition-colors">
-                                Ver todas las consultas <ArrowRight size={16} />
+
+                        <div className="px-5 py-3 border-t border-gray-100 bg-gray-50/50">
+                            <Link href="/dashboard/alquileres" className="flex items-center justify-center gap-1.5 text-xs font-semibold text-indigo-600 hover:text-indigo-700 transition-colors">
+                                Ver todos los alquileres <ArrowRight size={14} />
+                            </Link>
+                        </div>
+                    </div>
+
+                    {/* NUEVAS CONSULTAS */}
+                    <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden flex flex-col">
+                        <div className="px-5 py-4 border-b border-gray-100 flex items-center justify-between">
+                            <div className="flex items-center gap-2.5">
+                                <div className="p-2 bg-blue-50 rounded-lg">
+                                    <MessageSquare size={18} className="text-blue-500" />
+                                </div>
+                                <div>
+                                    <h2 className="font-semibold text-gray-900 text-sm">Nuevas Consultas</h2>
+                                    <p className="text-xs text-gray-400">Últimas recibidas</p>
+                                </div>
+                            </div>
+                            {stats.totalLeads > 0 && (
+                                <span className="text-xs font-bold bg-blue-100 text-blue-600 px-2 py-0.5 rounded-full">
+                                    {stats.totalLeads}
+                                </span>
+                            )}
+                        </div>
+
+                        <div className="flex-1 divide-y divide-gray-50">
+                            {stats.recentLeads.length === 0 ? (
+                                <div className="flex flex-col items-center justify-center py-10 px-4 text-center">
+                                    <div className="w-12 h-12 bg-blue-50 rounded-full flex items-center justify-center mb-3">
+                                        <MessageSquare size={24} className="text-blue-300" />
+                                    </div>
+                                    <p className="text-sm font-medium text-gray-700">Sin consultas aún</p>
+                                    <p className="text-xs text-gray-400 mt-1">Las consultas de tus propiedades aparecerán aquí</p>
+                                </div>
+                            ) : (
+                                stats.recentLeads.map((lead: any) => (
+                                    <Link
+                                        key={lead.id}
+                                        href={`/dashboard/leads?id=${lead.id}`}
+                                        className="flex items-start gap-3 px-5 py-3.5 hover:bg-gray-50 transition-colors group"
+                                    >
+                                        <div className="w-8 h-8 rounded-full bg-indigo-100 flex items-center justify-center flex-shrink-0 text-indigo-600 font-bold text-sm">
+                                            {lead.nombre?.charAt(0)?.toUpperCase() || '?'}
+                                        </div>
+                                        <div className="flex-1 min-w-0">
+                                            <div className="flex items-center gap-2">
+                                                <p className="text-sm font-medium text-gray-900 truncate">{lead.nombre}</p>
+                                                <span className={`text-[10px] font-bold uppercase px-1.5 py-0.5 rounded-full flex-shrink-0 ${
+                                                    lead.estado === 'nuevo' ? 'bg-green-100 text-green-700' :
+                                                    lead.estado === 'contactado' ? 'bg-blue-100 text-blue-700' :
+                                                    'bg-gray-100 text-gray-600'
+                                                }`}>
+                                                    {lead.estado}
+                                                </span>
+                                            </div>
+                                            <p className="text-xs text-gray-400 truncate mt-0.5">{lead.propertyTitle || 'Consulta general'}</p>
+                                        </div>
+                                        <p className="text-[10px] text-gray-400 flex-shrink-0 mt-0.5">
+                                            {lead.createdAt?.seconds
+                                                ? format(new Date(lead.createdAt.seconds * 1000), 'dd/MM')
+                                                : format(new Date(lead.createdAt), 'dd/MM')}
+                                        </p>
+                                    </Link>
+                                ))
+                            )}
+                        </div>
+
+                        <div className="px-5 py-3 border-t border-gray-100 bg-gray-50/50">
+                            <Link href="/dashboard/leads" className="flex items-center justify-center gap-1.5 text-xs font-semibold text-indigo-600 hover:text-indigo-700 transition-colors">
+                                Ver todas las consultas <ArrowRight size={14} />
+                            </Link>
+                        </div>
+                    </div>
+
+                    {/* TUTORIALES */}
+                    <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden flex flex-col">
+                        <div className="px-5 py-4 border-b border-gray-100 flex items-center justify-between">
+                            <div className="flex items-center gap-2.5">
+                                <div className="p-2 bg-violet-50 rounded-lg">
+                                    <GraduationCap size={18} className="text-violet-500" />
+                                </div>
+                                <div>
+                                    <h2 className="font-semibold text-gray-900 text-sm">Tutoriales</h2>
+                                    <p className="text-xs text-gray-400">Aprendé a usar la plataforma</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div className="flex-1 divide-y divide-gray-50">
+                            {TUTORIALS.map((t, i) => {
+                                const colorMap: Record<string, string> = {
+                                    indigo: "bg-indigo-50 text-indigo-600",
+                                    emerald: "bg-emerald-50 text-emerald-600",
+                                    violet: "bg-violet-50 text-violet-600",
+                                    orange: "bg-orange-50 text-orange-600",
+                                };
+                                return (
+                                    <Link key={i} href={t.href} className="flex items-center gap-3 px-5 py-3.5 hover:bg-gray-50 transition-colors group">
+                                        <div className={`p-2 rounded-lg flex-shrink-0 ${colorMap[t.color]}`}>
+                                            <t.icon size={16} />
+                                        </div>
+                                        <div className="flex-1 min-w-0">
+                                            <p className="text-sm font-medium text-gray-800 leading-tight">{t.title}</p>
+                                            <div className="flex items-center gap-1 mt-0.5 text-xs text-gray-400">
+                                                <PlayCircle size={11} />
+                                                {t.duration}
+                                            </div>
+                                        </div>
+                                        <ChevronRight size={16} className="text-gray-300 group-hover:text-indigo-600 transition-colors flex-shrink-0" />
+                                    </Link>
+                                );
+                            })}
+                        </div>
+
+                        <div className="px-5 py-3 border-t border-gray-100 bg-gray-50/50">
+                            <Link href="/dashboard/tutoriales" className="flex items-center justify-center gap-1.5 text-xs font-semibold text-indigo-600 hover:text-indigo-700 transition-colors">
+                                Ver todos los tutoriales <ArrowRight size={14} />
                             </Link>
                         </div>
                     </div>
                 </div>
+
+                {/* ─── ACCESOS RÁPIDOS ──────────────────────────────────── */}
+                <div>
+                    <h2 className="text-sm font-semibold text-gray-500 uppercase tracking-wider mb-3">Accesos Rápidos</h2>
+                    <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                        {QUICK_ACTIONS.filter(a => !a.permission || userPermissions.includes(a.permission)).map((action, i) => {
+                            const colorMap: Record<string, { bg: string; icon: string; hover: string }> = {
+                                indigo: { bg: "bg-indigo-50", icon: "text-indigo-600", hover: "hover:bg-indigo-100 hover:border-indigo-200" },
+                                emerald: { bg: "bg-emerald-50", icon: "text-emerald-600", hover: "hover:bg-emerald-100 hover:border-emerald-200" },
+                                violet: { bg: "bg-violet-50", icon: "text-violet-600", hover: "hover:bg-violet-100 hover:border-violet-200" },
+                                amber: { bg: "bg-amber-50", icon: "text-amber-600", hover: "hover:bg-amber-100 hover:border-amber-200" },
+                            };
+                            const c = colorMap[action.color];
+                            return (
+                                <Link
+                                    key={i}
+                                    href={action.href}
+                                    className={`flex items-center gap-3 p-4 bg-white rounded-xl border border-gray-100 shadow-sm ${c.hover} transition-all group`}
+                                >
+                                    <div className={`p-2.5 ${c.bg} rounded-lg group-hover:scale-110 transition-transform`}>
+                                        <action.icon size={18} className={c.icon} />
+                                    </div>
+                                    <span className="text-sm font-medium text-gray-700">{action.label}</span>
+                                </Link>
+                            );
+                        })}
+                    </div>
+                </div>
+
             </div>
         </div>
     );

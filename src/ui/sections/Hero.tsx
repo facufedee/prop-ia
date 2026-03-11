@@ -15,7 +15,7 @@ export default function Hero() {
         <div className="absolute bottom-[-10%] left-[-10%] w-[50%] h-[50%] bg-purple-100/40 rounded-full blur-[100px]" />
       </div>
 
-      <div className="relative max-w-5xl mx-auto px-8 lg:px-12 w-full z-10">
+      <div className="relative max-w-7xl mx-auto px-8 lg:px-16 w-full z-10">
         <div className="grid lg:grid-cols-2 gap-6 lg:gap-4 items-center">
 
           {/* Left Column: Text & CTA */}

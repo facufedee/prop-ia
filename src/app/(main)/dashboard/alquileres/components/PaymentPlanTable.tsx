@@ -4,11 +4,12 @@ import { useState } from "react";
 import { format, addMonths, startOfMonth, isSameMonth, parseISO, isValid } from "date-fns";
 import { es } from "date-fns/locale";
 import { Pago, Alquiler } from "@/domain/models/Alquiler";
-import { CheckCircle2, Clock, AlertCircle, Edit2, ExternalLink } from "lucide-react";
+import { CheckCircle2, Clock, AlertCircle, Edit2, ExternalLink, ChevronDown } from "lucide-react";
 import PaymentEditModal from "./PaymentEditModal";
 import { whatsappService } from "@/infrastructure/services/whatsappService";
-import { receiptService } from "@/infrastructure/services/receiptService";
+import { receiptService, AgencyProfile } from "@/infrastructure/services/receiptService";
 import { reportService } from "@/infrastructure/services/reportService";
+import { useAuth } from "@/ui/context/AuthContext";
 import PaymentHistoryModal from "./PaymentHistoryModal";
 import IPCAdjustmentModal from "./IPCAdjustmentModal";
 import { FileText, TrendingUp } from "lucide-react";
@@ -25,9 +26,24 @@ interface PaymentPlanTableProps {
 }
 
 export default function PaymentPlanTable({ alquiler, inquilino, onUpdatePayment, onUpdateContract }: PaymentPlanTableProps) {
+    const { user, userData } = useAuth();
+    const agencyProfile: AgencyProfile | undefined = userData ? {
+        agencyName: userData.agencyName,
+        agencyLicense: userData.agencyLicense,
+        agencyManager: userData.agencyManager,
+        agencyCuit: userData.agencyCuit,
+        agencyAddress: userData.agencyAddress,
+        agencyWhatsapp: userData.agencyWhatsapp,
+        logoUrl: userData.logoUrl,
+        condicionIva: userData.inmobiliariaProfile?.condicionIva,
+        firmante: userData.inmobiliariaProfile?.firmante,
+        cargoFirmante: userData.inmobiliariaProfile?.cargoFirmante,
+    } : undefined;
     const [selectedPayment, setSelectedPayment] = useState<Pago | null>(null);
     const [confirmingPayment, setConfirmingPayment] = useState<Pago | null>(null);
     const [showIPCModal, setShowIPCModal] = useState(false);
+    const [showPending, setShowPending] = useState(true);
+    const [showHistory, setShowHistory] = useState(true);
 
     const generatePeriods = (): Pago[] => {
         const periods: Pago[] = [];
@@ -206,7 +222,7 @@ export default function PaymentPlanTable({ alquiler, inquilino, onUpdatePayment,
     };
 
     const handleDownloadReceipt = (pago: Pago) => {
-        receiptService.generateReceipt(pago, alquiler);
+        receiptService.generateReceipt(pago, alquiler, agencyProfile, user?.uid);
     };
 
     return (
@@ -236,73 +252,91 @@ export default function PaymentPlanTable({ alquiler, inquilino, onUpdatePayment,
 
             {/* Pending Section */}
             <div>
-                <div className="flex items-center gap-3 mb-6">
+                <button
+                    onClick={() => setShowPending(prev => !prev)}
+                    className="flex items-center gap-3 mb-6 w-full group"
+                >
                     <h4 className="text-lg font-bold text-gray-900">
                         Pagos Pendientes
                     </h4>
                     <span className="bg-amber-100 text-amber-700 px-2.5 py-0.5 rounded-full text-xs font-bold">
                         {pendingPayments.length}
                     </span>
-                </div>
-                {pendingPayments.length > 0 ? (
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                        {pendingPayments.map((pago) => (
-                            <PaymentCard
-                                key={pago.id}
-                                payment={pago}
-                                contract={alquiler}
-                                onUpdate={onUpdatePayment}
-                                onMarkPaid={handleMarkAsPaid}
-                                onCancelPayment={(p) => {
-                                    if (window.confirm(`¿Cancelar el pago de ${p.mes}? Volverá a estado pendiente.`)) {
-                                        onUpdatePayment({ ...p, estado: 'pendiente', fechaPago: undefined });
-                                    }
-                                }}
-                                onEdit={(p) => setSelectedPayment(p)}
-                                onDownload={handleDownloadReceipt}
-                            />
-                        ))}
-                    </div>
-                ) : (
-                    <div className="p-8 text-center bg-gray-50 rounded-2xl border border-dashed border-gray-200">
-                        <p className="text-gray-500 text-sm">No hay pagos pendientes por cobrar.</p>
-                    </div>
+                    <ChevronDown
+                        size={18}
+                        className={`ml-auto text-gray-400 group-hover:text-gray-600 transition-transform duration-200 ${showPending ? '' : '-rotate-90'}`}
+                    />
+                </button>
+                {showPending && (
+                    pendingPayments.length > 0 ? (
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                            {pendingPayments.map((pago) => (
+                                <PaymentCard
+                                    key={pago.id}
+                                    payment={pago}
+                                    contract={alquiler}
+                                    onUpdate={onUpdatePayment}
+                                    onMarkPaid={handleMarkAsPaid}
+                                    onCancelPayment={(p) => {
+                                        if (window.confirm(`¿Cancelar el pago de ${p.mes}? Volverá a estado pendiente.`)) {
+                                            onUpdatePayment({ ...p, estado: 'pendiente', fechaPago: undefined });
+                                        }
+                                    }}
+                                    onEdit={(p) => setSelectedPayment(p)}
+                                    onDownload={handleDownloadReceipt}
+                                />
+                            ))}
+                        </div>
+                    ) : (
+                        <div className="p-8 text-center bg-gray-50 rounded-2xl border border-dashed border-gray-200">
+                            <p className="text-gray-500 text-sm">No hay pagos pendientes por cobrar.</p>
+                        </div>
+                    )
                 )}
             </div>
 
             {/* Paid Section */}
             <div>
-                <div className="flex items-center gap-3 mb-6">
+                <button
+                    onClick={() => setShowHistory(prev => !prev)}
+                    className="flex items-center gap-3 mb-6 w-full group"
+                >
                     <h4 className="text-lg font-bold text-gray-900">
                         Historial
                     </h4>
                     <span className="bg-gray-100 text-gray-600 px-2.5 py-0.5 rounded-full text-xs font-bold">
                         {paidPayments.length}
                     </span>
-                </div>
-                {paidPayments.length > 0 ? (
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                        {paidPayments.map((pago) => (
-                            <PaymentCard
-                                key={pago.id}
-                                payment={pago}
-                                contract={alquiler}
-                                onUpdate={onUpdatePayment}
-                                onMarkPaid={handleMarkAsPaid}
-                                onCancelPayment={(p) => {
-                                    if (window.confirm(`¿Cancelar el pago de ${p.mes}? Volverá a estado pendiente.`)) {
-                                        onUpdatePayment({ ...p, estado: 'pendiente', fechaPago: undefined });
-                                    }
-                                }}
-                                onEdit={(p) => setSelectedPayment(p)}
-                                onDownload={handleDownloadReceipt}
-                            />
-                        ))}
-                    </div>
-                ) : (
-                    <div className="p-8 text-center bg-gray-50 rounded-xl border border-dashed border-gray-300">
-                        <p className="text-gray-500">Aún no hay pagos registrados.</p>
-                    </div>
+                    <ChevronDown
+                        size={18}
+                        className={`ml-auto text-gray-400 group-hover:text-gray-600 transition-transform duration-200 ${showHistory ? '' : '-rotate-90'}`}
+                    />
+                </button>
+                {showHistory && (
+                    paidPayments.length > 0 ? (
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                            {paidPayments.map((pago) => (
+                                <PaymentCard
+                                    key={pago.id}
+                                    payment={pago}
+                                    contract={alquiler}
+                                    onUpdate={onUpdatePayment}
+                                    onMarkPaid={handleMarkAsPaid}
+                                    onCancelPayment={(p) => {
+                                        if (window.confirm(`¿Cancelar el pago de ${p.mes}? Volverá a estado pendiente.`)) {
+                                            onUpdatePayment({ ...p, estado: 'pendiente', fechaPago: undefined });
+                                        }
+                                    }}
+                                    onEdit={(p) => setSelectedPayment(p)}
+                                    onDownload={handleDownloadReceipt}
+                                />
+                            ))}
+                        </div>
+                    ) : (
+                        <div className="p-8 text-center bg-gray-50 rounded-xl border border-dashed border-gray-300">
+                            <p className="text-gray-500">Aún no hay pagos registrados.</p>
+                        </div>
+                    )
                 )}
             </div>
 

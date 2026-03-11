@@ -23,11 +23,13 @@ export default function DashboardLayout({
         strategy="afterInteractive"
         dangerouslySetInnerHTML={{
           __html: `
-            gtag('event', 'conversion', {
-              'send_to': 'AW-17943485669/LYk7CMaLx4UcEOW5j-xC',
-              'value': 1.0,
-              'currency': 'ARS'
-            });
+            if (typeof gtag !== 'undefined') {
+              gtag('event', 'conversion', {
+                'send_to': 'AW-17943485669/LYk7CMaLx4UcEOW5j-xC',
+                'value': 1.0,
+                'currency': 'ARS'
+              });
+            }
           `,
         }}
       />

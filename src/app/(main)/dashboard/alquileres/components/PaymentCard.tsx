@@ -6,7 +6,8 @@ import Image from "next/image";
 import { Pago, Alquiler } from "@/domain/models/Alquiler";
 import { Edit2, Download, AlertCircle, CheckCircle2, Clock, Trash2, MoreVertical, XCircle, TrendingUp } from "lucide-react";
 import { whatsappService } from "@/infrastructure/services/whatsappService";
-import { receiptService } from "@/infrastructure/services/receiptService";
+import { receiptService, AgencyProfile } from "@/infrastructure/services/receiptService";
+import { useAuth } from "@/ui/context/AuthContext";
 
 interface PaymentCardProps {
     payment: Pago;
@@ -19,6 +20,20 @@ interface PaymentCardProps {
 }
 
 export const PaymentCard = ({ payment, contract, onUpdate, onMarkPaid, onDownload, onEdit, onCancelPayment }: PaymentCardProps) => {
+    const { user, userData } = useAuth();
+    const agencyProfile: AgencyProfile | undefined = userData ? {
+        agencyName: userData.agencyName,
+        agencyLicense: userData.agencyLicense,
+        agencyManager: userData.agencyManager,
+        agencyCuit: userData.agencyCuit,
+        agencyAddress: userData.agencyAddress,
+        agencyWhatsapp: userData.agencyWhatsapp,
+        logoUrl: userData.logoUrl,
+        // from inmobiliariaProfile if filled in configuracion tab
+        condicionIva: userData.inmobiliariaProfile?.condicionIva,
+        firmante: userData.inmobiliariaProfile?.firmante,
+        cargoFirmante: userData.inmobiliariaProfile?.cargoFirmante,
+    } : undefined;
     const [showMenu, setShowMenu] = useState(false);
     const [calculatedInterest, setCalculatedInterest] = useState<number | null>(null);
     const menuRef = useRef<HTMLDivElement>(null);
@@ -90,7 +105,7 @@ export const PaymentCard = ({ payment, contract, onUpdate, onMarkPaid, onDownloa
 
         try {
             // 1. Download Receipt
-            receiptService.generateReceipt(payment, contract);
+            receiptService.generateReceipt(payment, contract, agencyProfile, user?.uid);
 
             // 2. Prepare Message
             // Ensure monthName is correctly formatted in Spanish

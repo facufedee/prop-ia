@@ -107,6 +107,7 @@ const initialExampleProperty: ExampleProperty = {
 import PortalesTab from "./components/PortalesTab";
 import MercadoPagoTab from "./components/MercadoPagoTab";
 import NotificationsTab from "./components/NotificationsTab";
+import InmobiliariaTab from "./components/InmobiliariaTab";
 // IndicesTab removed in favor of inline logic as seen below
 
 // Let's inline the content for now or add the component logic here to keep it self-contained as requested.
@@ -332,6 +333,12 @@ export default function ConfiguracionPage() {
             <h1 className="text-2xl font-bold mb-6 text-gray-900">Configuración</h1>
 
             <div className="flex border-b mb-6 overflow-x-auto">
+                <button
+                    className={`px-4 py-2 font-medium shrink-0 ${activeTab === "inmobiliaria" ? "border-b-2 border-black text-black" : "text-gray-500 hover:text-gray-700"}`}
+                    onClick={() => setActiveTab("inmobiliaria")}
+                >
+                    Mi Inmobiliaria
+                </button>
                 <button
                     className={`px-4 py-2 font-medium shrink-0 ${activeTab === "tasaciones" ? "border-b-2 border-black text-black" : "text-gray-500 hover:text-gray-700"}`}
                     onClick={() => setActiveTab("tasaciones")}
@@ -570,6 +577,10 @@ export default function ConfiguracionPage() {
                         ))}
                     </div>
                 </div>
+            )}
+
+            {activeTab === "inmobiliaria" && (
+                <InmobiliariaTab />
             )}
 
             {activeTab === "mercadopago" && (
