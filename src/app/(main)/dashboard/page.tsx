@@ -168,6 +168,19 @@ export default function DashboardPage() {
                 const planSnap = await getDoc(doc(db, "plans", subDocData.planId));
                 if (planSnap.exists()) {
                     planData = planSnap.data();
+                } else if (subDocData?.planTier) {
+                    // Fallback to querying by tier if the specific ID wasn't found
+                    const qPlan = query(collection(db, "plans"), where("tier", "==", subDocData.planTier));
+                    const planSnaps = await getDocs(qPlan);
+                    if (!planSnaps.empty) {
+                        planData = planSnaps.docs[0].data();
+                    }
+                }
+            } else if (subDocData?.planTier) {
+                const qPlan = query(collection(db, "plans"), where("tier", "==", subDocData.planTier));
+                const planSnaps = await getDocs(qPlan);
+                if (!planSnaps.empty) {
+                    planData = planSnaps.docs[0].data();
                 }
             }
 
