@@ -2,7 +2,7 @@ import * as z from "zod";
 
 export const planSchema = z.object({
     name: z.string().min(1, "El nombre es obligatorio"),
-    tier: z.enum(["basic", "professional", "enterprise"]),
+    tier: z.enum(["basic", "professional", "enterprise"]).catch("basic"),
     description: z.string().min(1, "La descripción es obligatoria"),
     icon: z.string().optional(),
     popular: z.boolean().optional(),

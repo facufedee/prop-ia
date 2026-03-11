@@ -39,7 +39,7 @@ export default function PlanForm({ initialData, onSave, onCancel }: PlanFormProp
 
     const defaultValues: PlanFormData = initialData ? {
         name: initialData.name,
-        tier: initialData.tier as "basic" | "professional" | "enterprise",
+        tier: (initialData.tier as "basic" | "professional" | "enterprise") || "basic",
         description: initialData.description,
         icon: initialData.icon || "Zap",
         popular: initialData.popular || false,
