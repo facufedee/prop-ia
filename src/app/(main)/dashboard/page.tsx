@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { db, auth } from "@/infrastructure/firebase/client";
-import { collection, query, where, getDocs } from "firebase/firestore";
+import { collection, query, where, getDocs, getDoc, doc } from "firebase/firestore";
 import { onAuthStateChanged } from "firebase/auth";
 import { leadsService } from "@/infrastructure/services/leadsService";
 import { alquileresService } from "@/infrastructure/services/alquileresService";
@@ -63,6 +63,7 @@ export default function DashboardPage() {
         proximosVencimientos: [] as VencimientoProximo[],
         totalClientes: 0,
         subscription: null as any,
+        plan: null as any,
     });
     const [loading, setLoading] = useState(true);
 
@@ -161,6 +162,15 @@ export default function DashboardPage() {
                 })
                 .slice(0, 5);
 
+            let planData = null;
+            const subDocData = !subSnapshot.empty ? subSnapshot.docs[0].data() : null;
+            if (subDocData?.planId) {
+                const planSnap = await getDoc(doc(db, "plans", subDocData.planId));
+                if (planSnap.exists()) {
+                    planData = planSnap.data();
+                }
+            }
+
             setStats({
                 totalProperties: propsSnapshot.size,
                 totalAlquileres: filteredAlquileres.length,
@@ -170,7 +180,8 @@ export default function DashboardPage() {
                 recentLeads,
                 proximosVencimientos: proximosVencimientos.slice(0, 5),
                 totalClientes: inquilinosSnap.size + propietariosSnap.size,
-                subscription: !subSnapshot.empty ? subSnapshot.docs[0].data() : null,
+                subscription: subDocData,
+                plan: planData,
             });
             setLoading(false);
         } catch (error) {
@@ -213,6 +224,16 @@ export default function DashboardPage() {
         { label: "Nueva Tasación", icon: Calculator, href: "/dashboard/tasacion", color: "violet", permission: "/dashboard/tasacion" },
         { label: "Ver Reportes", icon: BarChart3, href: "/dashboard/finanzas", color: "amber", permission: "/dashboard/finanzas" },
     ];
+    
+    // Limits logic
+    const propertiesLimit = stats.plan?.limits?.properties ?? (stats.subscription ? null : 10);
+    const clientsLimit = stats.plan?.limits?.clients ?? (stats.subscription ? null : 10);
+    
+    const renderLimit = (current: number, limitObj: any) => {
+        if (limitObj === undefined || limitObj === null) return current.toString();
+        if (limitObj === 'unlimited') return `${current} / ∞`;
+        return `${current} / ${limitObj}`;
+    };
 
     return (
         <div className="min-h-screen bg-[#F8F9FC] p-5 md:p-8">
@@ -257,7 +278,7 @@ export default function DashboardPage() {
                             </span>
                         </div>
                         <div className="space-y-1">
-                            <p className="text-3xl font-bold text-gray-900">{stats.totalProperties}</p>
+                            <p className="text-3xl font-bold text-gray-900">{renderLimit(stats.totalProperties, propertiesLimit)}</p>
                             <p className="text-sm text-gray-500 font-medium">Propiedades</p>
                         </div>
                         <div className="mt-3 flex items-center gap-1 text-xs text-indigo-600 font-medium opacity-0 group-hover:opacity-100 transition-opacity">
@@ -280,7 +301,7 @@ export default function DashboardPage() {
                             </span>
                         </div>
                         <div className="space-y-1">
-                            <p className="text-3xl font-bold text-gray-900">{stats.activeRentals}</p>
+                            <p className="text-3xl font-bold text-gray-900">{renderLimit(stats.activeRentals, propertiesLimit)}</p>
                             <p className="text-sm text-gray-500 font-medium">Alquileres</p>
                         </div>
                         <div className="mt-3 flex items-center gap-1 text-xs text-emerald-600 font-medium opacity-0 group-hover:opacity-100 transition-opacity">
@@ -303,7 +324,7 @@ export default function DashboardPage() {
                             </span>
                         </div>
                         <div className="space-y-1">
-                            <p className="text-3xl font-bold text-gray-900">{stats.totalClientes}</p>
+                            <p className="text-3xl font-bold text-gray-900">{renderLimit(stats.totalClientes, clientsLimit)}</p>
                             <p className="text-sm text-gray-500 font-medium">Clientes</p>
                         </div>
                         <div className="mt-3 flex items-center gap-1 text-xs text-violet-600 font-medium opacity-0 group-hover:opacity-100 transition-opacity">
