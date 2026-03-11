@@ -2,9 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { PublicProperty, publicService } from "@/infrastructure/services/publicService";
-import { Loader2, Filter, ChevronDown, RotateCcw, Search, LayoutGrid, List } from "lucide-react";
-import PortalHome from "@/ui/components/properties/public/PortalHome";
-import PropertyHorizontalCard from "@/ui/components/properties/public/PropertyHorizontalCard";
+import { Loader2, Filter, ChevronDown, RotateCcw, Search } from "lucide-react";
 import PropertiesGrid from "@/ui/components/properties/public/PropertiesGrid";
 
 // Filter Section Component
@@ -53,9 +51,6 @@ export default function PublicPropertiesPage() {
     // Pagination
     const [currentPage, setCurrentPage] = useState(1);
     const propertiesPerPage = 15;
-
-    // Initial Mode
-    const [isHomeMode, setIsHomeMode] = useState(true);
 
     // Filters
     const [operationType, setOperationType] = useState<string>("Todos");
@@ -154,13 +149,6 @@ export default function PublicPropertiesPage() {
         setCurrentPage(1); // Reset pagination on filter change
     }, [allProperties, operationType, currency, rooms, bathrooms, priceMin, priceMax, areaMin, areaMax, searchQuery]);
 
-    const handleHomeSearch = (filters: any) => {
-        setOperationType(filters.operationType);
-        setSearchQuery(filters.searchQuery);
-        setIsHomeMode(false);
-        window.scrollTo({ top: 0, behavior: 'smooth' });
-    };
-
     const clearAllFilters = () => {
         setOperationType("Todos");
         setCurrency("Todos");
@@ -171,34 +159,14 @@ export default function PublicPropertiesPage() {
         setAreaMin("");
         setAreaMax("");
         setSearchQuery("");
-        // Optional: Go back to home if clearing all? Maybe not.
-        setIsHomeMode(true);
     };
 
     const hasActiveFilters = operationType !== "Todos" || currency !== "Todos" || rooms !== "Todos" || bathrooms !== "Todos" || priceMin || priceMax || areaMin || areaMax || searchQuery;
-
-    // View Mode Toggle (Grid/List)
-    const [viewMode, setViewMode] = useState<'list' | 'grid'>('list');
-
-    if (isHomeMode) {
-        return (
-            <PortalHome
-                onSearch={handleHomeSearch}
-                featuredProperties={allProperties} // Pass all, component slices 4
-                loading={loading}
-            />
-        );
-    }
 
     return (
         <div className="min-h-screen bg-gray-50 pb-20 pt-28">
             <h1 className="sr-only">Propiedades en Venta y Alquiler - Zeta Prop</h1>
             <div className="container mx-auto px-4 max-w-7xl">
-
-                {/* Mobile Breadcrumb / Back to Home */}
-                <button onClick={() => setIsHomeMode(true)} className="mb-4 text-sm text-gray-500 hover:text-indigo-600 flex items-center gap-1">
-                    ← Volver al Inicio
-                </button>
 
                 <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
 
@@ -302,19 +270,9 @@ export default function PublicPropertiesPage() {
 
                     {/* RIGHT COLUMN: LISTING (9 cols) */}
                     <div className="lg:col-span-9">
-                        <div className="bg-white p-4 rounded-xl border border-gray-100 shadow-sm mb-6 flex items-center justify-between">
+                        <div className="flex items-center justify-between mb-6">
                             <div>
                                 <h2 className="text-xl font-bold text-gray-900">{filteredProperties.length} Inmuebles encontrados</h2>
-                                <p className="text-sm text-gray-500">Ordenado por más relevantes</p>
-                            </div>
-
-                            <div className="flex items-center gap-2 bg-gray-100 p-1 rounded-lg">
-                                <button onClick={() => setViewMode('list')} className={`p-2 rounded-md transition ${viewMode === 'list' ? 'bg-white text-indigo-600 shadow-sm' : 'text-gray-500 hover:text-gray-900'}`}>
-                                    <List size={20} />
-                                </button>
-                                <button onClick={() => setViewMode('grid')} className={`p-2 rounded-md transition ${viewMode === 'grid' ? 'bg-white text-indigo-600 shadow-sm' : 'text-gray-500 hover:text-gray-900'}`}>
-                                    <LayoutGrid size={20} />
-                                </button>
                             </div>
                         </div>
 
@@ -331,16 +289,12 @@ export default function PublicPropertiesPage() {
                                 <button onClick={clearAllFilters} className="mt-4 text-indigo-600 font-bold hover:underline">Limpiar Filtros</button>
                             </div>
                         ) : (
-                            <div className={`grid gap-6 ${viewMode === 'list' ? 'grid-cols-1' : 'grid-cols-1 md:grid-cols-2 xl:grid-cols-3'}`}>
-                                {filteredProperties.slice((currentPage - 1) * propertiesPerPage, currentPage * propertiesPerPage).map(property => (
-                                    viewMode === 'list' ? (
-                                        <PropertyHorizontalCard key={property.id} property={property} />
-                                    ) : (
-                                        <div key={property.id} className="h-full">
-                                            <PropertiesGrid properties={[property]} className="!grid-cols-1 !gap-0 h-full" />
-                                        </div>
-                                    )
-                                ))}
+                            <div>
+                                <PropertiesGrid
+                                    properties={filteredProperties.slice((currentPage - 1) * propertiesPerPage, currentPage * propertiesPerPage)}
+                                    loading={loading}
+                                    className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6"
+                                />
                             </div>
                         )}
 
