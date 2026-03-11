@@ -226,12 +226,38 @@ export default function DashboardPage() {
     ];
     
     // Limits logic
-    const propertiesLimit = stats.plan?.limits?.properties ?? (stats.subscription ? null : 10);
-    const clientsLimit = stats.plan?.limits?.clients ?? (stats.subscription ? null : 10);
+    let fallbackPropertiesLimit: number | null = null;
+    let fallbackClientsLimit: number | null = null;
+    
+    if (stats.subscription) {
+        const tier = stats.subscription.planTier?.toLowerCase() || '';
+        if (tier === 'basic') {
+            fallbackPropertiesLimit = 50;
+            fallbackClientsLimit = 999999; 
+        } else if (tier === 'professional' || tier === 'pro') {
+            fallbackPropertiesLimit = 150;
+            fallbackClientsLimit = 999999;
+        } else if (tier === 'enterprise') {
+            fallbackPropertiesLimit = 500;
+            fallbackClientsLimit = 999999;
+        } else {
+            fallbackPropertiesLimit = 50; 
+            fallbackClientsLimit = 999999;
+        }
+    } else {
+        // Cliente Free limits
+        fallbackPropertiesLimit = 10;
+        fallbackClientsLimit = 10;
+    }
+
+    const propertiesLimit = stats.plan?.limits?.properties ?? fallbackPropertiesLimit;
+    const clientsLimit = stats.plan?.limits?.clients ?? fallbackClientsLimit;
     
     const renderLimit = (current: number, limitObj: any) => {
         if (limitObj === undefined || limitObj === null) return current.toString();
-        if (limitObj === 'unlimited') return `${current} / ∞`;
+        if (limitObj === 'unlimited' || (typeof limitObj === 'number' && limitObj > 900000)) {
+             return `${current} / ∞`;
+        }
         return `${current} / ${limitObj}`;
     };
 
