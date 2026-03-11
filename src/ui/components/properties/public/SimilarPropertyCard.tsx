@@ -10,7 +10,7 @@ interface SimilarPropertyCardProps {
 export default function SimilarPropertyCard({ property }: SimilarPropertyCardProps) {
     // Format Price
     // Format Price
-    const formattedPrice = property.hidePrice
+    const formattedPrice = property.hidePrice || Number(property.price) === 0
         ? "Consultar Precio"
         : new Intl.NumberFormat('es-AR', {
             style: 'currency',

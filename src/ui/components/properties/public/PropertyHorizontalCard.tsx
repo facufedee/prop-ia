@@ -132,7 +132,7 @@ export default function PropertyHorizontalCard({ property }: PropertyHorizontalC
                     <div>
                         <p className="text-xs text-gray-500 font-medium mb-0.5">Precio</p>
                         <p className="text-2xl font-bold text-gray-900">
-                            {property.currency} {Number(property.price).toLocaleString('es-AR')}
+                            {property.hidePrice || Number(property.price) === 0 ? "Consultar Precio" : `${property.currency} ${Number(property.price).toLocaleString('es-AR')}`}
                         </p>
                     </div>
 

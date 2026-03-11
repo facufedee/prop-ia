@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { useForm, useController, Control } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Loader2, Check, Shield, Star, DollarSign, Activity } from "lucide-react";
+import { Loader2, Check, Shield, Star, DollarSign, Activity, X } from "lucide-react";
 import { Plan } from "@/domain/models/Subscription";
 import { planSchema, PlanFormData, defaultPlan } from "../schema";
 import { toast } from "sonner";
@@ -59,6 +59,8 @@ export default function PlanForm({ initialData, onSave, onCancel }: PlanFormProp
         register,
         control,
         handleSubmit,
+        setValue,
+        watch,
         formState: { errors }
     } = useForm<PlanFormData>({
         resolver: zodResolver(planSchema),
@@ -234,20 +236,18 @@ export default function PlanForm({ initialData, onSave, onCancel }: PlanFormProp
             <section className="space-y-6">
                 <div className="flex items-center gap-2 text-purple-600 mb-2">
                     <Check className="w-5 h-5" />
-                    <h3 className="text-lg font-bold text-gray-900">4. Funcionalidades (Feature Flags)</h3>
+                    <h3 className="text-lg font-bold text-gray-900">4. Funcionalidades Incluidas</h3>
                 </div>
+                
+                <p className="text-sm text-gray-500 mb-4">
+                    Escribe las características que quieres que se muestren en la tabla de precios para este plan.
+                </p>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                    <FeatureSwitch label="Gestión de Alquileres" name="features.rentals_management" register={register} />
-                    <FeatureSwitch label="Publicar en Portales" name="features.properties_publishing" register={register} />
-                    <FeatureSwitch label="Bot WhatsApp IA" name="features.whatsapp_bot" register={register} />
-                    <FeatureSwitch label="Agenda Automática" name="features.automatic_agenda" register={register} />
-                    <FeatureSwitch label="Notificaciones Auto" name="features.automatic_notifications" register={register} />
-                    <FeatureSwitch label="Tasador Online (Web)" name="features.online_valuations" register={register} />
-                    <FeatureSwitch label="Portal Inquilinos" name="features.tenant_portal" register={register} />
-                    <FeatureSwitch label="Marca Blanca / Branding" name="features.custom_branding" register={register} />
-                    <FeatureSwitch label="Multi-Sucursal" name="features.multi_branch" register={register} />
-                </div>
+                <DynamicFeaturesList
+                    features={watch("features") || []}
+                    onChange={(newFeatures) => setValue("features", newFeatures, { shouldValidate: true, shouldDirty: true })}
+                />
+                {errors.features && <p className="text-red-500 text-xs mt-1">{errors.features.message}</p>}
             </section>
 
             {/* Actions */}
@@ -323,17 +323,75 @@ function ResourceLimitInput({ label, name, control, icon }: { label: string, nam
     )
 }
 
-function FeatureSwitch({ label, name, register }: any) {
+function DynamicFeaturesList({ features, onChange }: { features: string[], onChange: (f: string[]) => void }) {
+    const [inputValue, setInputValue] = useState("");
+
+    const handleAdd = () => {
+        if (!inputValue.trim()) return;
+        if (features.includes(inputValue.trim())) {
+            toast.error("Esta característica ya existe en el plan");
+            return;
+        }
+        onChange([...features, inputValue.trim()]);
+        setInputValue("");
+    };
+
+    const handleKeyDown = (e: React.KeyboardEvent) => {
+        if (e.key === "Enter") {
+            e.preventDefault();
+            handleAdd();
+        }
+    };
+
+    const handleRemove = (indexToRemove: number) => {
+        onChange(features.filter((_, i) => i !== indexToRemove));
+    };
+
     return (
-        <label className="flex items-center justify-between p-4 bg-white border border-gray-200 rounded-xl cursor-pointer hover:border-purple-300 transition-all shadow-sm group hover:shadow-md has-[:checked]:border-purple-500 has-[:checked]:bg-purple-50/50 has-[:checked]:shadow-purple-100">
-            <span className="text-sm font-bold text-gray-700 select-none group-has-[:checked]:text-purple-900">{label}</span>
-            <div className="relative flex items-center">
+        <div className="space-y-4">
+            <div className="flex gap-2">
                 <input
-                    type="checkbox"
-                    {...register(name)}
-                    className="w-5 h-5 text-purple-600 rounded border-gray-300 focus:ring-purple-500 transition-colors shadow-sm cursor-pointer"
+                    type="text"
+                    value={inputValue}
+                    onChange={(e) => setInputValue(e.target.value)}
+                    onKeyDown={handleKeyDown}
+                    placeholder="Ej. 'Gestión de Inquilinos'"
+                    className="flex-1 px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-purple-500 focus:bg-white outline-none transition-all text-gray-900 font-medium"
                 />
+                <button
+                    type="button"
+                    onClick={handleAdd}
+                    disabled={!inputValue.trim()}
+                    className="px-6 py-3 bg-purple-100 text-purple-700 hover:bg-purple-200 disabled:opacity-50 disabled:cursor-not-allowed rounded-xl font-bold transition-all whitespace-nowrap"
+                >
+                    Agregar
+                </button>
             </div>
-        </label>
+
+            {features.length > 0 ? (
+                <ul className="grid grid-cols-1 md:grid-cols-2 gap-3 mt-4">
+                    {features.map((feature, idx) => (
+                        <li key={idx} className="flex items-center justify-between p-3 bg-white border border-gray-200 rounded-xl shadow-sm hover:border-purple-300 transition-all group">
+                            <span className="text-sm font-semibold text-gray-700 flex items-center gap-2">
+                                <Check className="w-4 h-4 text-purple-500" />
+                                {feature}
+                            </span>
+                            <button
+                                type="button"
+                                onClick={() => handleRemove(idx)}
+                                className="p-1.5 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors opacity-0 group-hover:opacity-100"
+                                title="Eliminar característica"
+                            >
+                                <X className="w-4 h-4" />
+                            </button>
+                        </li>
+                    ))}
+                </ul>
+            ) : (
+                <div className="p-8 text-center text-gray-400 bg-gray-50 border border-dashed border-gray-200 rounded-xl">
+                    No has agregado ninguna funcionalidad todavía.
+                </div>
+            )}
+        </div>
     );
 }

@@ -106,7 +106,7 @@ export default function PropertyPublicCard({ property }: PropertyPublicCardProps
                 {/* Price Tag */}
                 <div className="absolute bottom-3 left-3 bg-white/95 backdrop-blur-sm px-3 py-1.5 rounded-lg shadow-sm z-10">
                     <p className="font-bold text-gray-900">
-                        {property.currency} {Number(property.price)?.toLocaleString('es-AR')}
+                        {property.hidePrice || Number(property.price) === 0 ? "Consultar Precio" : `${property.currency} ${Number(property.price)?.toLocaleString('es-AR')}`}
                     </p>
                 </div>
             </div>

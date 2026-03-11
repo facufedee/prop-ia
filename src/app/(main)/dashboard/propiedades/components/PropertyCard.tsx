@@ -217,7 +217,7 @@ export default function PropertyCard({ property, onDelete, onUpdate, onDuplicate
                         </div>
 
                         <div className="text-xl font-bold text-indigo-600 mb-4">
-                            {property.hidePrice ? (
+                            {property.hidePrice || Number(property.price) === 0 ? (
                                 "Consultar Precio"
                             ) : (
                                 `${property.currency} ${Number(property.price)?.toLocaleString('es-AR')}`

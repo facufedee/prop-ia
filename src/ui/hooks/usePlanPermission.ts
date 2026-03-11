@@ -6,12 +6,8 @@ import { subscriptionService } from '@/infrastructure/services/subscriptionServi
 import { onAuthStateChanged } from 'firebase/auth';
 import { auth } from '@/infrastructure/firebase/client';
 
-export type FeatureKey =
-    | 'whatsapp_bot'
-    | 'ai_tasacion'
-    | 'portal_inverso'
-    | 'export_pdf'
-    | 'api_access';
+// FeatureKey is now functionally obsolete for strict typing, as features are dynamic strings, but we type it broadly.
+export type FeatureKey = string;
 
 export type LimitKey = 'properties' | 'users' | 'clients';
 
@@ -43,14 +39,8 @@ export function usePlanPermission() {
             if (subscription && subscription.planId) {
                 const plan = await subscriptionService.getPlanById(subscription.planId);
                 if (plan) {
-                    // Extract active features
-                    // New Plan Model has 'features' as an object of booleans: { whatsapp_bot: true, ... }
-                    // We convert valid true keys to permissions array
-                    const activeFeatures = Object.entries(plan.features || {})
-                        .filter(([_, enabled]) => enabled === true)
-                        .map(([key]) => key);
-
-                    setPermissions(activeFeatures);
+                    // Features are now stored as a dynamic string array.
+                    setPermissions(Array.isArray(plan.features) ? plan.features : []);
 
                     // Set limits
                     // @ts-ignore

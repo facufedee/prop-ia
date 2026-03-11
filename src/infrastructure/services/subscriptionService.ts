@@ -44,12 +44,18 @@ export const subscriptionService = {
             return PLANS as Plan[];
         }
 
-        return snapshot.docs.map(doc => ({
-            id: doc.id,
-            ...doc.data(),
-            createdAt: doc.data().createdAt?.toDate() || new Date(),
-            updatedAt: doc.data().updatedAt?.toDate() || new Date(),
-        })) as Plan[];
+        return snapshot.docs.map(doc => {
+            const data = doc.data();
+            const localPlan = PLANS.find((p: any) => p.id === doc.id) as Plan | undefined;
+            return {
+                id: doc.id,
+                ...data,
+                limits: localPlan ? localPlan.limits : data.limits,
+                features: localPlan ? localPlan.features : data.features,
+                createdAt: data.createdAt?.toDate() || new Date(),
+                updatedAt: data.updatedAt?.toDate() || new Date(),
+            };
+        }) as Plan[];
     },
 
     getPlanById: async (id: string): Promise<Plan | null> => {
@@ -57,13 +63,21 @@ export const subscriptionService = {
         const docRef = doc(db, PLANS_COLLECTION, id);
         const docSnap = await getDoc(docRef);
 
-        if (!docSnap.exists()) return null;
+        const localPlan = PLANS.find((p: any) => p.id === id) as Plan | undefined;
+
+        if (!docSnap.exists()) {
+            return localPlan || null;
+        }
+
+        const data = docSnap.data();
 
         return {
             id: docSnap.id,
-            ...docSnap.data(),
-            createdAt: docSnap.data().createdAt?.toDate() || new Date(),
-            updatedAt: docSnap.data().updatedAt?.toDate() || new Date(),
+            ...data,
+            limits: localPlan ? localPlan.limits : data.limits,
+            features: localPlan ? localPlan.features : data.features,
+            createdAt: data.createdAt?.toDate() || new Date(),
+            updatedAt: data.updatedAt?.toDate() || new Date(),
         } as Plan;
     },
 
@@ -507,7 +521,7 @@ export const subscriptionService = {
 
         // 1. Get Plan Limits
         const subscription = await subscriptionService.getUserSubscription(userId);
-        let limit: number | 'unlimited' = 5; // Default Free Limit
+        let limit: number | 'unlimited' = resource === 'properties' ? 25 : 80; // Default Free Limit
 
         if (subscription) {
             const plan = await subscriptionService.getPlanById(subscription.planId);
@@ -527,7 +541,7 @@ export const subscriptionService = {
         // The above block only runs if subscription exists.
         // If subscription is null, we need to set the default limit.
         if (!subscription) {
-            limit = resource === 'properties' ? 10 : 5;
+            limit = resource === 'properties' ? 25 : 80;
         }
 
         // 2. Count Current Usage (Real-time)

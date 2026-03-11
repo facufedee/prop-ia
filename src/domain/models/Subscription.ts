@@ -2,18 +2,7 @@ export type PlanTier = 'basic' | 'professional' | 'enterprise';
 export type BillingPeriod = 'monthly' | 'yearly';
 export type SubscriptionStatus = 'active' | 'cancelled' | 'expired' | 'trial';
 
-// Feature Flags (Boolean capabilities)
-export type AppFeature =
-    | 'rentals_management'
-    | 'properties_publishing'
-    | 'whatsapp_bot'
-    | 'automatic_agenda'
-    | 'automatic_notifications'
-    | 'online_valuations'
-    | 'tenant_portal'
-    | 'custom_branding'
-    | 'multi_branch';
-
+// Features will now be dynamically managed using a string[]
 export interface Plan {
     id: string;
     name: string;
@@ -23,8 +12,8 @@ export interface Plan {
         monthly: number;
         yearly: number;
     };
-    // Replaced array with strict boolean record
-    features: Record<AppFeature, boolean>;
+    // Use dynamic string array for plan features instead of boolean flags
+    features: string[];
     limits: {
         properties: number | 'unlimited';
         users: number | 'unlimited';
