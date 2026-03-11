@@ -396,7 +396,7 @@ export default function PropertyDetailPage({ id: propId }: Props) {
                             {property.agency && (
                                 <div className="bg-white rounded-2xl p-6 shadow-lg border border-gray-100 hover:shadow-xl transition-shadow duration-300">
                                     <div className="flex items-center gap-4 mb-8">
-                                        <div className="w-20 h-20 rounded-full bg-gray-100 overflow-hidden shrink-0 border border-gray-200 p-0.5">
+                                        <div className="relative w-20 h-20 rounded-full bg-gray-100 overflow-hidden shrink-0 border border-gray-200 p-0.5">
                                             {property.agency.photoURL ? (
                                                 <Image src={property.agency.photoURL} alt={property.agency.displayName} fill sizes="80px" className="object-cover rounded-full p-0.5" />
                                             ) : (

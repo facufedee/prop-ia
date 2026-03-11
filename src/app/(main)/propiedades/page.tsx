@@ -49,6 +49,10 @@ export default function PublicPropertiesPage() {
     const [allProperties, setAllProperties] = useState<PublicProperty[]>([]);
     const [filteredProperties, setFilteredProperties] = useState<PublicProperty[]>([]);
     const [loading, setLoading] = useState(true);
+    
+    // Pagination
+    const [currentPage, setCurrentPage] = useState(1);
+    const propertiesPerPage = 15;
 
     // Initial Mode
     const [isHomeMode, setIsHomeMode] = useState(true);
@@ -68,8 +72,15 @@ export default function PublicPropertiesPage() {
         const load = async () => {
             try {
                 const data = await publicService.getAllProperties();
-                setAllProperties(data);
-                setFilteredProperties(data);
+                // Sort by newest first. Assuming there is a createdAt timestamp.
+                // If not, we'll try to fallback to something else, but let's assume createdAt exists.
+                const sortedData = data.sort((a: any, b: any) => {
+                   const dateA = a.createdAt?.seconds ? a.createdAt.seconds : (a.createdAt ? new Date(a.createdAt).getTime() : 0);
+                   const dateB = b.createdAt?.seconds ? b.createdAt.seconds : (b.createdAt ? new Date(b.createdAt).getTime() : 0);
+                   return dateB - dateA;
+                });
+                setAllProperties(sortedData);
+                setFilteredProperties(sortedData);
             } catch (error) {
                 console.error(error);
             } finally {
@@ -140,6 +151,7 @@ export default function PublicPropertiesPage() {
         }
 
         setFilteredProperties(filtered);
+        setCurrentPage(1); // Reset pagination on filter change
     }, [allProperties, operationType, currency, rooms, bathrooms, priceMin, priceMax, areaMin, areaMax, searchQuery]);
 
     const handleHomeSearch = (filters: any) => {
@@ -320,7 +332,7 @@ export default function PublicPropertiesPage() {
                             </div>
                         ) : (
                             <div className={`grid gap-6 ${viewMode === 'list' ? 'grid-cols-1' : 'grid-cols-1 md:grid-cols-2 xl:grid-cols-3'}`}>
-                                {filteredProperties.map(property => (
+                                {filteredProperties.slice((currentPage - 1) * propertiesPerPage, currentPage * propertiesPerPage).map(property => (
                                     viewMode === 'list' ? (
                                         <PropertyHorizontalCard key={property.id} property={property} />
                                     ) : (
@@ -329,6 +341,29 @@ export default function PublicPropertiesPage() {
                                         </div>
                                     )
                                 ))}
+                            </div>
+                        )}
+
+                        {/* Pagination Controls */}
+                        {!loading && filteredProperties.length > propertiesPerPage && (
+                            <div className="flex items-center justify-center gap-4 mt-8">
+                                <button
+                                    onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
+                                    disabled={currentPage === 1}
+                                    className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-200 rounded-lg hover:bg-gray-50 hover:text-indigo-600 disabled:opacity-50 disabled:cursor-not-allowed transition"
+                                >
+                                    Anterior
+                                </button>
+                                <span className="text-sm font-medium text-gray-600">
+                                    Página {currentPage} de {Math.ceil(filteredProperties.length / propertiesPerPage)}
+                                </span>
+                                <button
+                                    onClick={() => setCurrentPage(p => Math.min(Math.ceil(filteredProperties.length / propertiesPerPage), p + 1))}
+                                    disabled={currentPage === Math.ceil(filteredProperties.length / propertiesPerPage)}
+                                    className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-200 rounded-lg hover:bg-gray-50 hover:text-indigo-600 disabled:opacity-50 disabled:cursor-not-allowed transition"
+                                >
+                                    Siguiente
+                                </button>
                             </div>
                         )}
                     </div>

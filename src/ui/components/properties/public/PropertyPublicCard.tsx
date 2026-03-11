@@ -116,7 +116,7 @@ export default function PropertyPublicCard({ property }: PropertyPublicCardProps
                 {/* Agency Info (Small) */}
                 {property.agency && (
                     <div className="flex items-center gap-2 mb-3">
-                        <div className="w-6 h-6 rounded-full bg-gray-100 overflow-hidden shrink-0">
+                        <div className="relative w-6 h-6 rounded-full bg-gray-100 overflow-hidden shrink-0">
                             {property.agency.photoURL ? (
                                 <NextImage src={property.agency.photoURL} alt={property.agency.displayName} fill className="object-cover" sizes="24px" />
                             ) : (
