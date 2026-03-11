@@ -17,6 +17,9 @@ const PublicMap = dynamic(() => import("@/ui/components/properties/public/Public
 import ContactModal from "@/ui/components/properties/public/ContactModal";
 import PropertyDisclaimer from "@/ui/components/properties/public/PropertyDisclaimer";
 
+import { formatDistanceToNow } from 'date-fns';
+import { es } from 'date-fns/locale';
+
 function getYouTubeId(url: string) {
     const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|&v=)([\w-]{11}).*/;
     const match = url.match(regExp);
@@ -107,6 +110,36 @@ export default function PropertyDetailPage({ id: propId }: Props) {
         window.open(waLink, '_blank');
     };
 
+    const handleReport = () => {
+        const title = property?.calle ? `${property.calle} ${property.altura || ''}` : property?.title;
+        const message = `Hola, me gustaría denunciar o reclamar esta propiedad: "${title}" (ID: ${property?.id}). URL: ${window.location.href}`;
+        const waLink = `https://wa.me/5491136894042?text=${encodeURIComponent(message)}`;
+        window.open(waLink, '_blank');
+    };
+    
+    // Parse createdAt date safely
+    const getPublishedTimeAgo = () => {
+        if (!property?.createdAt) return 'Publicado recientemente';
+        
+        try {
+            let dateVal: Date;
+            // Handle Firestore Timestamp
+            if (typeof property.createdAt === 'object' && property.createdAt !== null && 'seconds' in property.createdAt) {
+                dateVal = new Date((property.createdAt as any).seconds * 1000);
+            } else {
+                // Try parsing string or other formats
+                dateVal = new Date(property.createdAt);
+            }
+            
+            // Check if date is valid
+            if (isNaN(dateVal.getTime())) return 'Publicado recientemente';
+            
+            return 'Publicado ' + formatDistanceToNow(dateVal, { addSuffix: true, locale: es });
+        } catch (error) {
+            return 'Publicado recientemente';
+        }
+    };
+
     if (loading) return <div className="min-h-screen bg-white" />;
     if (!property) return <div className="min-h-screen flex items-center justify-center">Propiedad no encontrada</div>;
 
@@ -146,7 +179,7 @@ export default function PropertyDetailPage({ id: propId }: Props) {
                         </h1>
                         <div className="flex items-center gap-2 text-sm text-gray-500">
                             {property.code && <span className="font-mono bg-gray-100 px-2 py-0.5 rounded text-xs text-gray-600 mr-2">{property.code}</span>}
-                            <span>Publicado hace 3 días</span>
+                            <span>{getPublishedTimeAgo()}</span>
                         </div>
                     </div>
 
@@ -412,9 +445,11 @@ export default function PropertyDetailPage({ id: propId }: Props) {
                                                     {property.agency.displayName}
                                                 </Link>
                                             </h3>
-                                            <div className="flex text-amber-500 text-xs mt-1">
-                                                ★★★★★ <span className="text-gray-400 ml-1">(4.9)</span>
-                                            </div>
+                                            {(property.agency as any).rating && (property.agency as any).rating >= 5 ? (
+                                                <div className="flex text-amber-500 text-xs mt-1">
+                                                    ★★★★★ <span className="text-gray-400 ml-1">(5.0)</span>
+                                                </div>
+                                            ) : null}
                                         </div>
                                     </div>
 
@@ -426,10 +461,16 @@ export default function PropertyDetailPage({ id: propId }: Props) {
                                     </button>
                                     <Link
                                         href={`/propiedades/${property.agency.slug || property.userId}`}
-                                        className="block w-full text-center bg-white border border-gray-200 hover:bg-gray-50 text-gray-700 font-bold py-3 px-4 rounded-xl transition text-sm"
+                                        className="block w-full text-center bg-white border border-gray-200 hover:bg-gray-50 text-gray-700 font-bold py-3 px-4 rounded-xl transition text-sm mb-4"
                                     >
                                         Ver más propiedades
                                     </Link>
+                                    
+                                    <div className="pt-4 border-t border-gray-100 text-center">
+                                       <button onClick={handleReport} className="text-xs text-gray-400 hover:text-red-500 hover:underline transition font-medium">
+                                          Denunciar o Reclamar Propiedad
+                                       </button>
+                                    </div>
                                 </div>
                             )}
                         </div>
