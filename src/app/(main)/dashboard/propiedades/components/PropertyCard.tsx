@@ -1,15 +1,15 @@
 
-import { useState } from "react";
+import { useState, useRef, useEffect } from "react";
 import { Property } from "@/ui/components/tables/PropertiesTable";
 import Link from "next/link";
 import Image from "next/image";
-import { MapPin, Ruler, BedDouble, Bath, Car, Trash2, Edit, Printer, Share2, Eye, LayoutGrid, Check, X, MoreVertical, Copy, Power, DollarSign } from "lucide-react";
+import { MapPin, Ruler, BedDouble, Bath, Car, Trash2, Edit, Printer, Share2, Eye, LayoutGrid, Check, X, MoreVertical, Copy, Power, DollarSign, RefreshCw } from "lucide-react";
 
 interface PropertyCardProps {
     property: Property;
     onDelete: (id: string) => void;
     onUpdate?: (id: string, data: Partial<Property>) => Promise<void>;
-    onDuplicate?: (property: Property) => void;
+    onDuplicate?: (property: Property) => Promise<void>;
 }
 
 export default function PropertyCard({ property, onDelete, onUpdate, onDuplicate }: PropertyCardProps) {
@@ -21,6 +21,18 @@ export default function PropertyCard({ property, onDelete, onUpdate, onDuplicate
         hidePrice: property.hidePrice || false
     });
     const [showMenu, setShowMenu] = useState(false);
+    const [isDuplicating, setIsDuplicating] = useState(false);
+    const menuRef = useRef<HTMLDivElement>(null);
+
+    useEffect(() => {
+        function handleClickOutside(event: MouseEvent) {
+            if (menuRef.current && !menuRef.current.contains(event.target as Node)) {
+                setShowMenu(false);
+            }
+        }
+        document.addEventListener("mousedown", handleClickOutside);
+        return () => document.removeEventListener("mousedown", handleClickOutside);
+    }, []);
 
     const handleSave = async () => {
         if (onUpdate) {
@@ -43,6 +55,13 @@ export default function PropertyCard({ property, onDelete, onUpdate, onDuplicate
         }
     };
 
+    const unmarkAsSold = () => {
+        if (onUpdate) {
+            onUpdate(property.id, { status: 'inactive' });
+            setShowMenu(false);
+        }
+    };
+
     const getOperationColor = (type: string) => {
         switch (type) {
             case 'Venta': return 'bg-green-100 text-green-700 border-green-200';
@@ -58,6 +77,75 @@ export default function PropertyCard({ property, onDelete, onUpdate, onDuplicate
             {!isEditing && (
                 <Link href={`/dashboard/propiedades/editar/${property.id}`} className="absolute inset-0 z-0" title="Editar propiedad" />
             )}
+
+            {/* Menu Button - Top Right */}
+            <div className="absolute top-3 right-3 z-50 pointer-events-auto" ref={menuRef}>
+                <button
+                    onClick={(e) => { e.preventDefault(); e.stopPropagation(); setShowMenu(!showMenu); }}
+                    className="p-2 bg-white/90 hover:bg-white rounded-full text-gray-700 shadow-md transition-all"
+                >
+                    <MoreVertical size={16} />
+                </button>
+                {showMenu && (
+                    <div className="absolute right-0 mt-2 w-48 bg-white rounded-xl shadow-2xl border border-gray-100 p-1 flex flex-col gap-0.5 animate-in fade-in zoom-in-95 pointer-events-auto">
+                        <button
+                            onClick={(e) => { e.preventDefault(); e.stopPropagation(); setIsEditing(true); setShowMenu(false); }}
+                            className="w-full text-left px-3 py-2 text-sm text-gray-700 hover:bg-gray-100 rounded-lg flex items-center gap-2 transition-colors"
+                        >
+                            <Edit size={14} /> Edición rápida
+                        </button>
+                        <button
+                            onClick={async (e) => { 
+                                e.preventDefault(); 
+                                e.stopPropagation(); 
+                                if (onDuplicate && !isDuplicating) {
+                                    setIsDuplicating(true);
+                                    try {
+                                        await onDuplicate(property);
+                                    } finally {
+                                        setIsDuplicating(false);
+                                        setShowMenu(false);
+                                    }
+                                } 
+                            }}
+                            disabled={isDuplicating}
+                            className={`w-full text-left px-3 py-2 text-sm text-gray-700 hover:bg-gray-100 rounded-lg flex items-center gap-2 transition-colors ${isDuplicating ? 'opacity-50 cursor-not-allowed' : ''}`}
+                        >
+                            {isDuplicating ? (
+                                <>
+                                    <RefreshCw size={14} className="animate-spin text-indigo-600" /> Duplicando...
+                                </>
+                            ) : (
+                                <>
+                                    <Copy size={14} /> Duplicar
+                                </>
+                            )}
+                        </button>
+                        {property.status !== 'sold' ? (
+                            <button
+                                onClick={(e) => { e.preventDefault(); e.stopPropagation(); markAsSold(); }}
+                                className="w-full text-left px-3 py-2 text-sm text-gray-700 hover:bg-gray-100 rounded-lg flex items-center gap-2 transition-colors"
+                            >
+                                <DollarSign size={14} /> Marcar Vendida
+                            </button>
+                        ) : (
+                            <button
+                                onClick={(e) => { e.preventDefault(); e.stopPropagation(); unmarkAsSold(); }}
+                                className="w-full text-left px-3 py-2 text-sm text-gray-700 hover:bg-gray-100 rounded-lg flex items-center gap-2 transition-colors"
+                            >
+                                <RefreshCw size={14} /> Desmarcar Vendida
+                            </button>
+                        )}
+                        <div className="h-px bg-gray-100 my-1 mx-2" />
+                        <button
+                            onClick={(e) => { e.preventDefault(); e.stopPropagation(); onDelete(property.id); }}
+                            className="w-full text-left px-3 py-2 text-sm text-red-600 hover:bg-red-50 hover:text-red-700 rounded-lg flex items-center gap-2 transition-colors"
+                        >
+                            <Trash2 size={14} /> Eliminar
+                        </button>
+                    </div>
+                )}
+            </div>
 
             {/* Image Header */}
             <div className="relative h-48 bg-gray-100 group z-10 pointer-events-none">
@@ -97,50 +185,6 @@ export default function PropertyCard({ property, onDelete, onUpdate, onDuplicate
                         <span className="px-2.5 py-1 rounded-full text-xs font-semibold border shadow-sm bg-yellow-400 text-yellow-900 w-fit">
                             RESERVADA
                         </span>
-                    )}
-                </div>
-
-                {/* Menu Button - Top Right */}
-                <div className="absolute top-3 right-3 z-30 pointer-events-auto">
-                    <button
-                        onClick={(e) => { e.preventDefault(); e.stopPropagation(); setShowMenu(!showMenu); }}
-                        className="p-2 bg-white/90 hover:bg-white rounded-full text-gray-700 shadow-md transition-all"
-                    >
-                        <MoreVertical size={16} />
-                    </button>
-                    {showMenu && (
-                        <>
-                            <div className="fixed inset-0 z-10" onClick={(e) => { e.preventDefault(); e.stopPropagation(); setShowMenu(false); }} />
-                            <div className="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-xl border border-gray-100 z-50 py-1 overflow-hidden animate-in fade-in zoom-in-95 pointer-events-auto">
-                                <button
-                                    onClick={(e) => { e.preventDefault(); e.stopPropagation(); setIsEditing(true); setShowMenu(false); }}
-                                    className="w-full text-left px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 flex items-center gap-2"
-                                >
-                                    <Edit size={14} /> Edición rápida
-                                </button>
-                                <button
-                                    onClick={(e) => { e.preventDefault(); e.stopPropagation(); if (onDuplicate) onDuplicate(property); setShowMenu(false); }}
-                                    className="w-full text-left px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 flex items-center gap-2"
-                                >
-                                    <Copy size={14} /> Duplicar
-                                </button>
-                                {property.status !== 'sold' && (
-                                    <button
-                                        onClick={(e) => { e.preventDefault(); e.stopPropagation(); markAsSold(); }}
-                                        className="w-full text-left px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 flex items-center gap-2"
-                                    >
-                                        <DollarSign size={14} /> Marcar Vendida
-                                    </button>
-                                )}
-                                <div className="h-px bg-gray-100 my-1" />
-                                <button
-                                    onClick={(e) => { e.preventDefault(); e.stopPropagation(); onDelete(property.id); }}
-                                    className="w-full text-left px-4 py-2.5 text-sm text-red-600 hover:bg-red-50 flex items-center gap-2"
-                                >
-                                    <Trash2 size={14} /> Eliminar
-                                </button>
-                            </div>
-                        </>
                     )}
                 </div>
             </div>

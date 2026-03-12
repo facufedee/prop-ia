@@ -121,7 +121,7 @@ export default function PricingTable() {
                         <p className="text-sm text-gray-400 mt-2">Contacta al administrador para configurar los planes.</p>
                     </div>
                 ) : (
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-12">
+                    <div className="flex flex-col md:flex-row justify-center items-stretch gap-6 lg:gap-8 max-w-5xl mx-auto mb-12">
                         {effectivePlans.map((plan) => {
                             // Map icon string to component, default to Zap
                             const Icon = (plan.icon && iconMap[plan.icon]) ? iconMap[plan.icon] : Zap;
@@ -131,7 +131,7 @@ export default function PricingTable() {
                             return (
                                 <div
                                     key={plan.id}
-                                    className={`relative bg-white rounded-3xl shadow-xl overflow-hidden transition-all duration-300 hover:shadow-2xl hover:-translate-y-1 flex flex-col ${plan.popular ? 'ring-2 ring-indigo-600 scale-[1.02] md:scale-105 z-10' : 'border border-gray-100'
+                                    className={`relative bg-white rounded-3xl shadow-xl overflow-hidden transition-all duration-300 hover:shadow-2xl hover:-translate-y-1 flex flex-col w-full md:w-[400px] shrink-0 ${plan.popular ? 'ring-2 ring-indigo-600 scale-[1.02] md:scale-105 z-10' : 'border border-gray-100'
                                         }`}
                                 >
                                     {plan.popular && (
@@ -140,7 +140,7 @@ export default function PricingTable() {
                                         </div>
                                     )}
 
-                                    <div className="p-8 flex-1 flex flex-col">
+                                    <div className="p-8 flex-1 flex flex-col justify-start">
                                         {/* Icon */}
                                         <div className={`w-14 h-14 rounded-2xl flex items-center justify-center mb-6 shadow-sm ${plan.tier === 'enterprise' ? 'bg-purple-100 text-purple-600' : plan.tier === 'professional' ? 'bg-indigo-100 text-indigo-600' : 'bg-green-100 text-green-600'}`}>
                                             <Icon className="w-7 h-7" />
@@ -182,14 +182,14 @@ export default function PricingTable() {
                                             <p className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-4">INCLUYE</p>
 
                                             {/* Limits Summary */}
-                                            <div className="grid grid-cols-2 gap-y-3 gap-x-2 mb-6 text-sm">
+                                            <div className="flex flex-wrap items-center gap-x-6 gap-y-3 mb-8 pb-4 border-b border-gray-50">
                                                 <LimitItem label="Propiedades" value={plan.limits.properties} />
                                                 <LimitItem label="Usuarios" value={plan.limits.users} />
                                             </div>
                                         </div>
 
                                         {/* Features List */}
-                                        <ul className="space-y-3 mt-auto">
+                                        <ul className="space-y-4">
                                             {Array.isArray(plan.features) ? (
                                                 plan.features.map((feature: string, index: number) => (
                                                     <li key={index} className="flex items-start gap-3">
@@ -202,7 +202,7 @@ export default function PricingTable() {
                                                     </li>
                                                 ))
                                             ) : (
-                                                <li className="text-sm text-gray-400 italic">No hay características definidas.</li>
+                                                <li className="text-sm text-gray-400 italic text-center w-full">No hay características definidas.</li>
                                             )}
                                         </ul>
                                     </div>
@@ -245,10 +245,10 @@ function LimitItem({ label, value }: { label: string, value: number | 'unlimited
 
     return (
         <div className="flex items-center gap-2">
-            <span className="w-1.5 h-1.5 rounded-full bg-indigo-400"></span>
-            <span className="text-gray-600">
+            <span className="w-2 h-2 rounded-full bg-indigo-500"></span>
+            <span className="text-base font-bold text-gray-800">
                 {value === 'unlimited' ? 'Ilimitados' : value}
-                <span className="text-gray-400 font-normal ml-1">{label}</span>
+                <span className="text-sm text-gray-500 font-medium ml-1.5">{label}</span>
             </span>
         </div>
     )

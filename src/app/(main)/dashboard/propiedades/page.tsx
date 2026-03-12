@@ -2,8 +2,9 @@
 
 import { useEffect, useState } from "react";
 import PropertiesTable, { Property } from "@/ui/components/tables/PropertiesTable";
-import { Plus, Building2, Home, Key, Search, Filter, LayoutGrid, List, Share2 } from "lucide-react";
+import { Plus, Building2, Home, Key, Search, Filter, LayoutGrid, List, Share2, AlertTriangle } from "lucide-react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { auth, db } from "@/infrastructure/firebase/client";
 import { collection, query, where, getDocs, deleteDoc, doc, updateDoc, addDoc, getDoc } from "firebase/firestore";
 import { onAuthStateChanged } from "firebase/auth";
@@ -20,6 +21,9 @@ export default function PropiedadesPage() {
 
     const { selectedBranchId } = useBranchContext();
     const [user, setUser] = useState<any>(null);
+    const [deleteConfirmId, setDeleteConfirmId] = useState<string | null>(null);
+    
+    const router = useRouter();
 
     // 1. Auth Listener
     useEffect(() => {
@@ -88,9 +92,14 @@ export default function PropiedadesPage() {
         }
     };
 
-    const handleDelete = async (id: string) => {
-        if (!confirm("¿Estás seguro de que querés eliminar esta propiedad?")) return;
+    const handleDeleteClick = (id: string) => {
+        setDeleteConfirmId(id);
+    };
 
+    const confirmDelete = async () => {
+        if (!deleteConfirmId) return;
+        const id = deleteConfirmId;
+        setDeleteConfirmId(null);
         try {
             if (!db) throw new Error("Firestore not initialized");
             await deleteDoc(doc(db, "properties", id));
@@ -119,33 +128,24 @@ export default function PropiedadesPage() {
     };
 
     const handleDuplicateProperty = async (property: Property) => {
-        if (!confirm(`¿Duplicar la propiedad "${property.title}"?`)) return;
-
         try {
             if (!db) throw new Error("Firestore not initialized");
 
-            // Prepare copy data
-            // eslint-disable-next-line @typescript-eslint/no-unused-vars
             const { id, ...rest } = property;
             const newPropertyData = {
                 ...rest,
                 title: `${rest.title} (Copia)`,
                 createdAt: new Date(),
                 updatedAt: new Date(),
-                status: 'inactive', // Default to inactive for safety
-                // We reuse image URLs for now. 
-                // Note: Deleting images from one property won't affect the other if they are just URLs,
-                // but deleting the actual file in storage would affect both if we don't copy files.
-                // For MVP: Shared reference is acceptable if clearly understood, or we accept the risk.
+                status: 'inactive', 
             };
 
             const docRef = await addDoc(collection(db, "properties"), newPropertyData);
 
-            // Add to local state
             const newProperty = { id: docRef.id, ...newPropertyData } as Property;
             setProperties(prev => [newProperty, ...prev]);
 
-            alert("Propiedad duplicada correctamente. Se creó como 'Pausada'.");
+            router.push(`/dashboard/propiedades/editar/${docRef.id}`);
         } catch (error) {
             console.error("Error duplicating property:", error);
             alert("Error al duplicar la propiedad");
@@ -305,7 +305,7 @@ export default function PropiedadesPage() {
                                 <PropertyCard
                                     key={property.id}
                                     property={property}
-                                    onDelete={handleDelete}
+                                    onDelete={handleDeleteClick}
                                     onUpdate={handleUpdateProperty}
                                     onDuplicate={handleDuplicateProperty}
                                 />
@@ -318,11 +318,40 @@ export default function PropiedadesPage() {
                                 loading={loading}
                                 onUpdate={handleUpdateProperty}
                                 onDuplicate={handleDuplicateProperty}
-                                onDelete={handleDelete}
+                                onDelete={handleDeleteClick}
                             />
                         </div>
                     )}
                 </>
+            )}
+
+            {/* Delete Confirmation Modal */}
+            {deleteConfirmId && (
+                <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
+                    <div className="bg-white rounded-2xl p-6 max-w-sm w-full shadow-2xl animate-in zoom-in-95 duration-200">
+                        <div className="flex items-center gap-3 mb-4 text-red-600">
+                            <div className="p-3 bg-red-100 rounded-full">
+                                <AlertTriangle className="w-6 h-6" />
+                            </div>
+                            <h3 className="text-xl font-bold text-gray-900">Eliminar Propiedad</h3>
+                        </div>
+                        <p className="text-gray-600 mb-6 leading-relaxed">¿Estás seguro de que deseás eliminar esta propiedad? Esta acción eliminará permanentemente los datos y no se puede deshacer.</p>
+                        <div className="flex flex-col sm:flex-row justify-end gap-3 flex-wrap">
+                            <button 
+                                onClick={() => setDeleteConfirmId(null)} 
+                                className="px-5 py-2.5 bg-gray-100 text-gray-700 font-medium rounded-xl hover:bg-gray-200 transition-colors w-full sm:w-auto"
+                            >
+                                Cancelar
+                            </button>
+                            <button 
+                                onClick={confirmDelete} 
+                                className="px-5 py-2.5 bg-red-600 text-white font-medium rounded-xl hover:bg-red-700 transition-colors shadow-lg shadow-red-200 w-full sm:w-auto"
+                            >
+                                Sí, eliminar
+                            </button>
+                        </div>
+                    </div>
+                </div>
             )}
         </div>
     );

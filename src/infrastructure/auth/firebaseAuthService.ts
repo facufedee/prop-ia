@@ -59,7 +59,7 @@ export const saveUserToFirestore = async (user: User, additionalData?: { agencyN
                     `El usuario ${user.email} se ha unido a la plataforma.`,
                     "info",
                     "Administrador",
-                    "/dashboard/admin/usuarios"
+                    "/dashboard/gestion-plataforma"
                 );
             } catch (notifyError) {
                 console.warn("Failed to notify admins of new user:", notifyError);

@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { useForm, useController, Control } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Loader2, Check, Shield, Star, DollarSign, Activity, X } from "lucide-react";
+import { Loader2, Check, Shield, Star, DollarSign, Activity, X, ArrowDown, ArrowUp } from "lucide-react";
 import { Plan } from "@/domain/models/Subscription";
 import { planSchema, PlanFormData, defaultPlan } from "../schema";
 import { toast } from "sonner";
@@ -28,13 +28,28 @@ interface PlanFormProps {
 export default function PlanForm({ initialData, onSave, onCancel }: PlanFormProps) {
     const [saving, setSaving] = useState(false);
 
-    const getFeatures = (initialFeatures: any) => {
-        const defaults = { ...defaultPlan.features };
-        if (Array.isArray(initialFeatures)) return defaults;
-        if (typeof initialFeatures === 'object' && initialFeatures !== null) {
-            return { ...defaults, ...initialFeatures };
+    const getFeatures = (initialFeatures: any): string[] => {
+        if (Array.isArray(initialFeatures)) {
+            return initialFeatures;
         }
-        return defaults;
+        // Fallback for old boolean feature objects: { whatsapp_bot: true, ... }
+        if (typeof initialFeatures === 'object' && initialFeatures !== null) {
+            const FEATURE_LABELS: Record<string, string> = {
+                rentals_management: "Gestión de Alquileres",
+                properties_publishing: "Publicación en Portales",
+                whatsapp_bot: "Bot WhatsApp IA",
+                automatic_agenda: "Agenda Automática",
+                automatic_notifications: "Notificaciones Automáticas",
+                online_valuations: "Tasador Online",
+                tenant_portal: "Portal de Inquilinos",
+                custom_branding: "Marca Propia (White Label)",
+                multi_branch: "Multi-Sucursal"
+            };
+            return Object.entries(initialFeatures)
+                .filter(([_, enabled]) => enabled === true)
+                .map(([key]) => FEATURE_LABELS[key] || key);
+        }
+        return defaultPlan.features || [];
     };
 
     const defaultValues: PlanFormData = initialData ? {
@@ -238,7 +253,7 @@ export default function PlanForm({ initialData, onSave, onCancel }: PlanFormProp
                     <Check className="w-5 h-5" />
                     <h3 className="text-lg font-bold text-gray-900">4. Funcionalidades Incluidas</h3>
                 </div>
-                
+
                 <p className="text-sm text-gray-500 mb-4">
                     Escribe las características que quieres que se muestren en la tabla de precios para este plan.
                 </p>
@@ -323,16 +338,17 @@ function ResourceLimitInput({ label, name, control, icon }: { label: string, nam
     )
 }
 
-function DynamicFeaturesList({ features, onChange }: { features: string[], onChange: (f: string[]) => void }) {
+function DynamicFeaturesList({ features = [], onChange }: { features: string[], onChange: (f: string[]) => void }) {
     const [inputValue, setInputValue] = useState("");
+    const safeFeatures = Array.isArray(features) ? features : [];
 
     const handleAdd = () => {
         if (!inputValue.trim()) return;
-        if (features.includes(inputValue.trim())) {
+        if (safeFeatures.includes(inputValue.trim())) {
             toast.error("Esta característica ya existe en el plan");
             return;
         }
-        onChange([...features, inputValue.trim()]);
+        onChange([...safeFeatures, inputValue.trim()]);
         setInputValue("");
     };
 
@@ -344,7 +360,23 @@ function DynamicFeaturesList({ features, onChange }: { features: string[], onCha
     };
 
     const handleRemove = (indexToRemove: number) => {
-        onChange(features.filter((_, i) => i !== indexToRemove));
+        onChange(safeFeatures.filter((_, i) => i !== indexToRemove));
+    };
+
+    const handleMove = (index: number, direction: 'up' | 'down') => {
+        if (
+            (direction === 'up' && index === 0) ||
+            (direction === 'down' && index === safeFeatures.length - 1)
+        ) return;
+
+        const newFeatures = [...safeFeatures];
+        const targetIndex = direction === 'up' ? index - 1 : index + 1;
+
+        const temp = newFeatures[index];
+        newFeatures[index] = newFeatures[targetIndex];
+        newFeatures[targetIndex] = temp;
+
+        onChange(newFeatures);
     };
 
     return (
@@ -368,22 +400,43 @@ function DynamicFeaturesList({ features, onChange }: { features: string[], onCha
                 </button>
             </div>
 
-            {features.length > 0 ? (
+            {safeFeatures.length > 0 ? (
                 <ul className="grid grid-cols-1 md:grid-cols-2 gap-3 mt-4">
-                    {features.map((feature, idx) => (
+                    {safeFeatures.map((feature, idx) => (
                         <li key={idx} className="flex items-center justify-between p-3 bg-white border border-gray-200 rounded-xl shadow-sm hover:border-purple-300 transition-all group">
                             <span className="text-sm font-semibold text-gray-700 flex items-center gap-2">
                                 <Check className="w-4 h-4 text-purple-500" />
                                 {feature}
                             </span>
-                            <button
-                                type="button"
-                                onClick={() => handleRemove(idx)}
-                                className="p-1.5 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors opacity-0 group-hover:opacity-100"
-                                title="Eliminar característica"
-                            >
-                                <X className="w-4 h-4" />
-                            </button>
+                            <div className="flex items-center gap-1 opacity-100 md:opacity-0 group-hover:opacity-100 transition-opacity">
+                                <button
+                                    type="button"
+                                    onClick={() => handleMove(idx, 'up')}
+                                    disabled={idx === 0}
+                                    className="p-1.5 text-gray-400 hover:text-indigo-600 hover:bg-indigo-50 rounded-lg transition-colors disabled:opacity-30 disabled:hover:bg-transparent disabled:hover:text-gray-400"
+                                    title="Mover arriba"
+                                >
+                                    <ArrowUp className="w-4 h-4" />
+                                </button>
+                                <button
+                                    type="button"
+                                    onClick={() => handleMove(idx, 'down')}
+                                    disabled={idx === safeFeatures.length - 1}
+                                    className="p-1.5 text-gray-400 hover:text-indigo-600 hover:bg-indigo-50 rounded-lg transition-colors disabled:opacity-30 disabled:hover:bg-transparent disabled:hover:text-gray-400"
+                                    title="Mover abajo"
+                                >
+                                    <ArrowDown className="w-4 h-4" />
+                                </button>
+                                <div className="w-px h-4 bg-gray-200 mx-1"></div>
+                                <button
+                                    type="button"
+                                    onClick={() => handleRemove(idx)}
+                                    className="p-1.5 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors"
+                                    title="Eliminar característica"
+                                >
+                                    <X className="w-4 h-4" />
+                                </button>
+                            </div>
                         </li>
                     ))}
                 </ul>
