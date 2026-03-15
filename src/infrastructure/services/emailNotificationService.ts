@@ -30,7 +30,7 @@ const isUnsubscribed = async (email: string): Promise<boolean> => {
         return false;
     }
 };
-import { postmarkClient } from "@/lib/email";
+import { sendEmailWithResend } from "@/lib/resend";
 
 export interface NotificationSettings {
     enabled: boolean;
@@ -45,11 +45,11 @@ export interface NotificationSettings {
 }
 
 const DEFAULT_SETTINGS: NotificationSettings = {
-    enabled: false,
-    recipients: [],
+    enabled: true,
+    recipients: ['facundo@zetaprop.com.ar'],
     events: {
-        newUser: false,
-        newPayment: false,
+        newUser: true,
+        newPayment: true,
         newLead: false,
         subscriptionCancelled: false,
         newTicket: false
@@ -92,19 +92,12 @@ export const emailNotificationService = {
         // 2. Check if specific event is enabled
         if (!settings.events[event]) return;
 
-        // 3. Send Email
-        if (!postmarkClient) {
-            console.warn("Postmark client not configured");
-            return;
-        }
-
+        // 3. Send Email via Resend
         try {
-            await postmarkClient.sendEmail({
-                "From": "Facundo Zeta <facundo@zetaprop.com.ar>",
-                "ReplyTo": "facundo@zetaprop.com.ar",
-                "To": settings.recipients.join(","),
-                "Subject": `[ZetaProp Alerta] ${subject}`,
-                "HtmlBody": `
+            await sendEmailWithResend({
+                to: settings.recipients,
+                subject: `[ZetaProp Alerta] ${subject}`,
+                html: `
                     <h2>Nueva Notificación de ZetaProp</h2>
                     <p><strong>Evento:</strong> ${event}</p>
                     <p>${message}</p>
@@ -112,7 +105,6 @@ export const emailNotificationService = {
                     <h3>Datos:</h3>
                     <pre>${JSON.stringify(data, null, 2)}</pre>
                 `,
-                "TextBody": `Nueva Notificación: ${subject}. ${message}`
             });
             console.log(`Notification sent for ${event} to ${settings.recipients.length} recipients.`);
         } catch (error) {
@@ -121,19 +113,15 @@ export const emailNotificationService = {
     },
 
     sendTestEmail: async (recipients: string[]): Promise<boolean> => {
-        if (!postmarkClient) return false;
         try {
-            await postmarkClient.sendEmail({
-                "From": "Facundo Zeta <facundo@zetaprop.com.ar>",
-                "ReplyTo": "facundo@zetaprop.com.ar",
-                "To": recipients.join(","),
-                "Subject": "[ZetaProp] Email de Prueba",
-                "HtmlBody": `
+            await sendEmailWithResend({
+                to: recipients,
+                subject: "[ZetaProp] Email de Prueba",
+                html: `
                     <h2>¡Funciona!</h2>
-                    <p>Este es un correo de prueba para verificar la integración de notificaciones de ZetaProp.</p>
-                    <p>Si estás viendo esto, la configuración de Postmark es correcta.</p>
+                    <p>Este es un correo de prueba para verificar la integración de notificaciones de ZetaProp usando Resend.</p>
+                    <p>Si estás viendo esto, la configuración de correo es correcta.</p>
                 `,
-                "TextBody": "Este es un correo de prueba de ZetaProp. Si lo lees, funciona."
             });
             return true;
         } catch (e) {
@@ -144,12 +132,6 @@ export const emailNotificationService = {
 
     sendWelcomeEmail: async (to: string, name: string): Promise<{ success: boolean; error?: any }> => {
         console.log(`[Service] Attempting to send welcome email to ${to}`);
-        if (!postmarkClient) {
-            const msg = "[Service] Postmark client not configured for welcome email";
-            console.warn(msg);
-            return { success: false, error: msg };
-        }
-
         const firstName = name ? name.split(' ')[0] : 'Hola';
 
         // Check if user is unsubscribed
@@ -160,12 +142,10 @@ export const emailNotificationService = {
         }
 
         try {
-            await postmarkClient.sendEmail({
-                "From": "Facundo Zeta <facundo@zetaprop.com.ar>",
-                "ReplyTo": "facundo@zetaprop.com.ar",
-                "To": to,
-                "Subject": "Bienvenido/a a Zeta Prop 🚀 | Cargá tu primer alquiler hoy",
-                "HtmlBody": `
+            await sendEmailWithResend({
+                to,
+                subject: "Bienvenido/a a Zeta Prop 🚀 | Cargá tu primer alquiler hoy",
+                html: `
                     <div style="font-family: Arial, sans-serif; color: #333; line-height: 1.6;">
                         <p>Hola ${firstName},</p>
                         
@@ -210,7 +190,6 @@ export const emailNotificationService = {
                         </p>
                     </div>
                 `,
-                "TextBody": `Hola ${firstName},\n\nGracias por registrarte en Zeta Prop.\n\nYa podés comenzar a organizar tu gestión desde hoy mismo.\n\nPara empezar, te recomiendo estos pasos simples:\n1. Cargar una propiedad\n2. Agregar el propietario\n3. Incorporar el inquilino\n4. Registrar el contrato (aunque ya esté avanzado)\n5. Cargar pagos y vencimientos\n\nNo importa si el alquiler ya está en curso. Podés ingresar contratos vigentes y continuar la gestión desde el punto en el que estás hoy.\n\nLa idea es que tengas todo centralizado: propiedades, contratos, aumentos y cobranzas en un solo lugar.\n\nSi en algún momento necesitás ayuda o querés sugerir mejoras, podés escribirme directamente a este mail.\n\nEstoy para ayudarte.\n\nFacundo\nZeta Prop\nzetaprop.com.ar\n\nIngresá al portal: zetaprop.com.ar/login\n\nConsejo: empezá cargando solo un alquiler. En menos de 10 minutos vas a ver cómo funciona todo el sistema.`
             });
             console.log(`Welcome email sent to ${to}`);
             await logSentEmail(to, "Bienvenido/a a Zeta Prop 🚀 | Cargá tu primer alquiler hoy", "welcome", "success");
@@ -225,12 +204,6 @@ export const emailNotificationService = {
 
     sendMarketingEmail: async (to: string, name: string, templateKey: string): Promise<{ success: boolean; error?: any }> => {
         console.log(`[Service] Attempting to send marketing email (${templateKey}) to ${to}`);
-        if (!postmarkClient) {
-            const msg = "[Service] Postmark client not configured for marketing email";
-            console.warn(msg);
-            return { success: false, error: msg };
-        }
-
         // Check if user is unsubscribed
         const unsubscribed = await isUnsubscribed(to);
         if (unsubscribed) {
@@ -462,13 +435,10 @@ export const emailNotificationService = {
         }
 
         try {
-            await postmarkClient.sendEmail({
-                "From": "Facundo Zeta <facundo@zetaprop.com.ar>",
-                "ReplyTo": "facundo@zetaprop.com.ar",
-                "To": to,
-                "Subject": template.subject,
-                "HtmlBody": template.htmlBody,
-                "TextBody": template.textBody
+            await sendEmailWithResend({
+                to,
+                subject: template.subject,
+                html: template.htmlBody,
             });
             console.log(`Marketing email (${templateKey}) sent to ${to}`);
             await logSentEmail(to, template.subject, templateKey, "success");

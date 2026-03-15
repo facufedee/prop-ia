@@ -341,6 +341,27 @@ function CheckoutContent() {
                                                                 `/dashboard/gestion-plataforma/${currentUser.uid}`
                                                             );
 
+                                                            // Email notification to Facundo via Resend
+                                                            try {
+                                                                await fetch('/api/notifications/trigger', {
+                                                                    method: 'POST',
+                                                                    headers: { 'Content-Type': 'application/json' },
+                                                                    body: JSON.stringify({
+                                                                        event: 'newPayment',
+                                                                        data: {
+                                                                            uid: currentUser.uid,
+                                                                            email: currentUser.email,
+                                                                            planId,
+                                                                            billing,
+                                                                        },
+                                                                        subject: 'Nuevo comprobante de pago enviado',
+                                                                        message: `El usuario <strong>${currentUser.email || 'desconocido'}</strong> hizo clic en "Enviar comprobante" en el checkout y aguarda aprobación del pago.`
+                                                                    })
+                                                                });
+                                                            } catch (e) {
+                                                                console.error('Failed to trigger payment email notification', e);
+                                                            }
+
                                                             setIsPendingPayment(true);
                                                             window.open("https://wa.me/5491123889745?text=Hola!%20Realicé%20una%20transferencia%20para%20el%20plan%20de%20suscripción.%20Adjunto%20el%20comprobante.", "_blank");
                                                             router.push("/dashboard");

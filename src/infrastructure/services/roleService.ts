@@ -43,6 +43,7 @@ export const PERMISSIONS: Permission[] = [
     { id: "/dashboard/novedades", label: "Novedades Zeta", description: "Acceso a noticias y actualizaciones para clientes" },
     { id: "/dashboard/emprendimientos", label: "Emprendimientos", description: "Gestión de emprendimientos y desarrollos" },
     { id: "/dashboard/tutoriales", label: "Tutoriales", description: "Acceso a guías y tutoriales del sistema" },
+    { id: "/dashboard/marketing", label: "Marketing", description: "Módulo de marketing, emails automáticos y campañas" },
 ];
 
 const ROLES_COLLECTION = "roles";
@@ -236,11 +237,11 @@ export const roleService = {
                     "/dashboard/sucursales",
                     "/dashboard/blog",
                     "/dashboard/cuenta",
-                    "/dashboard/cuenta",
                     "/dashboard/configuracion",
                     "/dashboard/novedades",
                     "/dashboard/emprendimientos",
-                    "/dashboard/tutoriales"
+                    "/dashboard/tutoriales",
+                    "/dashboard/marketing"
                 ],
                 isSystem: false
             });
@@ -268,7 +269,8 @@ export const roleService = {
                     "/dashboard/cuenta",
                     "/dashboard/novedades",
                     "/dashboard/emprendimientos",
-                    "/dashboard/tutoriales"
+                    "/dashboard/tutoriales",
+                    "/dashboard/marketing"
                 ],
                 isSystem: false
             });

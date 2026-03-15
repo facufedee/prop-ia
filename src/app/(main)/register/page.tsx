@@ -44,7 +44,19 @@ export default function RegisterPage() {
 
         try {
             await registerEmail(email, password, name, agency);
-            router.push("/dashboard"); // Redirect to dashboard after success
+
+            // Fire-and-forget welcome email via Resend
+            fetch('/api/marketing/send', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    type: 'welcome',
+                    to: email,
+                    data: { userName: name, email },
+                }),
+            }).catch(err => console.error('[Register] Welcome email error:', err));
+
+            router.push("/dashboard");
         } catch (err: any) {
             console.error(err);
             if (err.code === "auth/email-already-in-use") {

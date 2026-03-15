@@ -424,7 +424,7 @@ export const subscriptionService = {
                 console.error("[Webhook] Error updating user role:", error);
             }
 
-            // 8. Update payment record
+        // 8. Update payment record
             await updateDoc(doc(db, PAYMENTS_COLLECTION, pendingPayment.id), {
                 status: 'completed',
                 providerPaymentId: String(paymentId),
@@ -479,6 +479,39 @@ export const subscriptionService = {
                               <strong>Ref:</strong> ${paymentId}`
                 })
             }).catch(err => console.error("Failed to trigger email notification:", err));
+
+            // Send Marketing Email via Resend (fire-and-forget)
+            ;(async () => {
+                try {
+                    const userSnap = await getDoc(doc(db, 'users', userId));
+                    if (userSnap.exists()) {
+                        const userData = userSnap.data();
+                        const userEmail = userData?.email;
+                        if (userEmail) {
+                            const endDateFormatted = endDate.toLocaleDateString('es-AR', {
+                                year: 'numeric', month: 'long', day: 'numeric'
+                            });
+                            await fetch(`${baseUrl}/api/marketing/send`, {
+                                method: 'POST',
+                                headers: { 'Content-Type': 'application/json' },
+                                body: JSON.stringify({
+                                    type: 'payment_confirmed',
+                                    to: userEmail,
+                                    data: {
+                                        userName: userData?.displayName || userData?.name,
+                                        planName: plan.name,
+                                        amount: price,
+                                        period: billingPeriod,
+                                        endDate: endDateFormatted,
+                                    }
+                                })
+                            });
+                        }
+                    }
+                } catch (emailErr) {
+                    console.error('[Webhook] Marketing email send failed:', emailErr);
+                }
+            })();
 
             console.log(`✅ [Webhook] Subscription activated successfully for user: ${userId}`);
             return { success: true, message: "Subscription activated successfully" };

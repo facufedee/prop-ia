@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { db } from "@/infrastructure/firebase/client";
-import { collection, addDoc, updateDoc, Timestamp, query, where, getDocs, doc } from "firebase/firestore";
+import { collection, addDoc, updateDoc, Timestamp, query, where, getDocs, doc, getDoc } from "firebase/firestore";
+import { sendNewLeadNotificationEmail } from "@/lib/resendClient";
 
 export async function POST(request: Request) {
     try {
@@ -35,7 +36,7 @@ export async function POST(request: Request) {
             propertyId: propertyId || null,
             propertyTitle: propertyTitle || null,
             mensaje: mensaje || '',
-            fecha: new Date(), // using literal date obj for the array
+            fecha: new Date(),
             origen: origen || 'web'
         };
 
@@ -59,6 +60,33 @@ export async function POST(request: Request) {
             }
         };
 
+        /**
+         * Trigger email to the agent (userId) informing them of the new lead via Resend.
+         * Fetches the agent's email from Firestore and sends a direct Resend email.
+         * If no agent email is found, falls back to Facundo's email.
+         */
+        const triggerLeadEmail = async () => {
+            try {
+                const agentSnap = await getDoc(doc(db, 'users', userId));
+                const agentData = agentSnap.exists() ? agentSnap.data() : null;
+
+                const agentEmail =
+                    agentData?.email ||
+                    agentData?.contactEmail ||
+                    "facundo@zetaprop.com.ar";
+
+                await sendNewLeadNotificationEmail({
+                    to: agentEmail,
+                    leadName: nombre || "Un interesado",
+                    leadEmail: email || undefined,
+                    message: mensaje || undefined,
+                    propertyTitle: propertyTitle || undefined,
+                });
+            } catch (err) {
+                console.error("Failed to trigger lead email:", err);
+            }
+        };
+
         if (existingLeadDoc) {
             // Update existing lead
             const existingData = existingLeadDoc.data();
@@ -79,16 +107,16 @@ export async function POST(request: Request) {
 
             await updateDoc(doc(db, 'leads', existingLeadDoc.id), {
                 consultas: consultasAnteriores,
-                estado: 'nuevo', // flag as new to get agent's attention
+                estado: 'nuevo',
                 updatedAt: Timestamp.now(),
-                // Optionally update the main message/property to the latest inquiry so it shows up on lists
                 mensaje: mensaje || existingData.mensaje,
                 propertyId: propertyId || existingData.propertyId,
                 propertyTitle: propertyTitle || existingData.propertyTitle,
             });
 
-            // Trigger notification
+            // Trigger notification & email (fire-and-forget)
             await triggerNotification(existingLeadDoc.id);
+            triggerLeadEmail().catch(console.error);
 
             return NextResponse.json({ id: existingLeadDoc.id, success: true, unified: true });
 
@@ -107,7 +135,7 @@ export async function POST(request: Request) {
                 estado: 'nuevo' as const,
                 origen: origen || 'web',
                 notas: [],
-                consultas: [nuevaConsulta], // Initialize the history array
+                consultas: [nuevaConsulta],
                 createdAt: Timestamp.now(),
                 updatedAt: Timestamp.now(),
                 fechaContacto: Timestamp.now()
@@ -115,8 +143,9 @@ export async function POST(request: Request) {
 
             const docRef = await addDoc(collection(db, 'leads'), leadData);
 
-            // Trigger notification
+            // Trigger notification & email (fire-and-forget)
             await triggerNotification(docRef.id);
+            triggerLeadEmail().catch(console.error);
 
             return NextResponse.json({ id: docRef.id, success: true, unified: false });
         }
