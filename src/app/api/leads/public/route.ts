@@ -13,7 +13,7 @@ export async function POST(request: Request) {
         }
 
         // Unification Logic - Check if lead already exists by email or phone for the same user (agent)
-        let existingLeadDoc = null;
+        let existingLeadDoc: any = null;
         const leadsRef = collection(db, 'leads');
 
         if (email) {
@@ -40,7 +40,10 @@ export async function POST(request: Request) {
             origen: origen || 'web'
         };
 
-        const baseUrl = process.env.NEXT_PUBLIC_APP_URL || (request.headers.get('host') ? `http://${request.headers.get('host')}` : 'http://localhost:3000');
+        const host = request.headers.get('host');
+        const forwardedProto = request.headers.get('x-forwarded-proto');
+        const inferredProtocol = forwardedProto || (host?.includes('localhost') ? 'http' : 'https');
+        const baseUrl = process.env.NEXT_PUBLIC_APP_URL || (host ? `${inferredProtocol}://${host}` : 'http://localhost:3000');
 
         const triggerNotification = async (leadId: string) => {
             try {
