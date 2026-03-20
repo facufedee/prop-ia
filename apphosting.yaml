@@ -30,8 +30,44 @@ env:
     availability:
       - BUILD
       - RUNTIME
+  - variable: NEXT_PUBLIC_FIREBASE_MEASUREMENT_ID
+    value: G-W7RMLDXWYQ
+    availability:
+      - BUILD
+      - RUNTIME
+  - variable: NEXT_PUBLIC_FIREBASE_DATABASE_URL
+    value: https://prop-ia-default-rtdb.firebaseio.com
+    availability:
+      - BUILD
+      - RUNTIME
   - variable: NEXT_PUBLIC_GOOGLE_MAPS_API_KEY
     value: AIzaSyB6_ogFwkpVEPH6AhHF54NG76HEBxjX2j4
     availability:
       - BUILD
+      - RUNTIME
+  - variable: NEXT_PUBLIC_APP_URL
+    value: https://zetaprop.com.ar
+    availability:
+      - BUILD
+      - RUNTIME
+  - variable: NEXT_PUBLIC_MP_PUBLIC_KEY
+    value: APP_USR-f98ed9ed-7d4d-4696-a932-a45bc0d5182f
+    availability:
+      - BUILD
+      - RUNTIME
+  - variable: RESEND_API_KEY
+    value: re_aCwT31Cj_8FoLaP78CfSzYmDPKSaMbLgL
+    availability:
+      - RUNTIME
+  - variable: MP_ACCESS_TOKEN
+    value: APP_USR-3109570285020652-120215-f2139e859c9ab0fc6159e75176949812-99348769
+    availability:
+      - RUNTIME
+  - variable: GOOGLE_API_KEY
+    value: AIzaSyCv2GiYtX7eovuh3Pw2ekcdlKwbyqQ8qk8
+    availability:
+      - RUNTIME
+  - variable: POSTMARK_API_TOKEN
+    value: f875918c-6ad7-4673-8a13-145db7ed28b7
+    availability:
       - RUNTIME
