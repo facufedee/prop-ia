@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
-import { db } from "@/infrastructure/firebase/client";
-import { collection, addDoc, updateDoc, Timestamp, query, where, getDocs, doc, getDoc } from "firebase/firestore";
+import { adminDb } from "@/infrastructure/firebase/admin";
+import { FieldValue, Timestamp } from "firebase-admin/firestore";
 import { sendNewLeadNotificationEmail } from "@/lib/resendClient";
 
 export async function POST(request: Request) {
@@ -13,22 +13,28 @@ export async function POST(request: Request) {
         }
 
         // Unification Logic - Check if lead already exists by email or phone for the same user (agent)
-        let existingLeadDoc: any = null;
-        const leadsRef = collection(db, 'leads');
+        let existingLeadSnap: FirebaseFirestore.QueryDocumentSnapshot | null = null;
+        const leadsRef = adminDb.collection('leads');
 
         if (email) {
-            const qEmail = query(leadsRef, where("userId", "==", userId), where("email", "==", email));
-            const snapEmail = await getDocs(qEmail);
+            const snapEmail = await leadsRef
+                .where("userId", "==", userId)
+                .where("email", "==", email)
+                .limit(1)
+                .get();
             if (!snapEmail.empty) {
-                existingLeadDoc = snapEmail.docs[0];
+                existingLeadSnap = snapEmail.docs[0];
             }
         }
 
-        if (!existingLeadDoc && telefono) {
-            const qPhone = query(leadsRef, where("userId", "==", userId), where("telefono", "==", telefono));
-            const snapPhone = await getDocs(qPhone);
+        if (!existingLeadSnap && telefono) {
+            const snapPhone = await leadsRef
+                .where("userId", "==", userId)
+                .where("telefono", "==", telefono)
+                .limit(1)
+                .get();
             if (!snapPhone.empty) {
-                existingLeadDoc = snapPhone.docs[0];
+                existingLeadSnap = snapPhone.docs[0];
             }
         }
 
@@ -70,8 +76,8 @@ export async function POST(request: Request) {
          */
         const triggerLeadEmail = async () => {
             try {
-                const agentSnap = await getDoc(doc(db, 'users', userId));
-                const agentData = agentSnap.exists() ? agentSnap.data() : null;
+                const agentSnap = await adminDb.collection('users').doc(userId).get();
+                const agentData = agentSnap.exists ? agentSnap.data() : null;
 
                 const agentEmail =
                     agentData?.email ||
@@ -90,9 +96,9 @@ export async function POST(request: Request) {
             }
         };
 
-        if (existingLeadDoc) {
+        if (existingLeadSnap) {
             // Update existing lead
-            const existingData = existingLeadDoc.data();
+            const existingData = existingLeadSnap.data();
             const consultasAnteriores = existingData.consultas || [];
 
             // If the old lead didn't have the 'consultas' array, initialize it with its original message
@@ -108,7 +114,7 @@ export async function POST(request: Request) {
 
             consultasAnteriores.push(nuevaConsulta);
 
-            await updateDoc(doc(db, 'leads', existingLeadDoc.id), {
+            await adminDb.collection('leads').doc(existingLeadSnap.id).update({
                 consultas: consultasAnteriores,
                 estado: 'nuevo',
                 updatedAt: Timestamp.now(),
@@ -118,10 +124,10 @@ export async function POST(request: Request) {
             });
 
             // Trigger notification & email (fire-and-forget)
-            await triggerNotification(existingLeadDoc.id);
+            await triggerNotification(existingLeadSnap.id);
             triggerLeadEmail().catch(console.error);
 
-            return NextResponse.json({ id: existingLeadDoc.id, success: true, unified: true });
+            return NextResponse.json({ id: existingLeadSnap.id, success: true, unified: true });
 
         } else {
             // Create new lead
@@ -135,7 +141,7 @@ export async function POST(request: Request) {
                 userId,
                 organizationId: organizationId || null,
                 tipo: tipo || 'consulta',
-                estado: 'nuevo' as const,
+                estado: 'nuevo',
                 origen: origen || 'web',
                 notas: [],
                 consultas: [nuevaConsulta],
@@ -144,7 +150,7 @@ export async function POST(request: Request) {
                 fechaContacto: Timestamp.now()
             };
 
-            const docRef = await addDoc(collection(db, 'leads'), leadData);
+            const docRef = await leadsRef.add(leadData);
 
             // Trigger notification & email (fire-and-forget)
             await triggerNotification(docRef.id);

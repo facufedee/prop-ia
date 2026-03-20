@@ -1,4 +1,6 @@
 import * as admin from 'firebase-admin';
+import { getFirestore } from 'firebase-admin/firestore';
+import { getAuth } from 'firebase-admin/auth';
 
 if (!admin.apps.length) {
     try {
@@ -12,9 +14,7 @@ if (!admin.apps.length) {
                 credential: admin.credential.cert(serviceAccount)
             });
         } else {
-            // Fallback for environments where Google Auth Default Credentials might work
-            // or just to prevent crashing, though db calls will fail without auth.
-            console.warn("FIREBASE_SERVICE_ACCOUNT_KEY not set. Admin SDK initialized without explicit cert.");
+            // Cloud Run uses Application Default Credentials automatically
             admin.initializeApp();
         }
     } catch (error) {
@@ -22,5 +22,6 @@ if (!admin.apps.length) {
     }
 }
 
-export const adminAuth = admin.auth();
-export const adminDb = admin.firestore();
+// Use the named database 'propia' instead of the default database
+export const adminAuth = getAuth();
+export const adminDb = getFirestore('propia');
