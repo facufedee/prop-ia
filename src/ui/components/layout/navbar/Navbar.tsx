@@ -58,11 +58,16 @@ export default function Navbar() {
     <nav
       className={`
         fixed top-0 left-0 w-full z-50 transition-all duration-300
-        ${scrolled || isHeroPage
+        md:${scrolled || isHeroPage
           ? "bg-white/90 backdrop-blur-md shadow-sm border-b border-gray-100/50 py-3"
           : isDarkHero
             ? "bg-transparent border-b border-transparent py-5"
             : "bg-transparent border-b border-transparent py-5"}
+        ${scrolled || isHeroPage
+          ? "bg-white/90 backdrop-blur-md shadow-sm border-b border-gray-100/50 py-3 md:bg-white/90"
+          : isDarkHero
+            ? "bg-[#080810] border-b border-white/10 py-3 md:bg-transparent md:border-transparent md:py-5"
+            : "bg-[#080810] border-b border-white/10 py-3 md:bg-transparent md:border-transparent md:py-5"}
       `}
     >
       <div className="flex items-center justify-between max-w-7xl mx-auto px-6">
@@ -70,8 +75,9 @@ export default function Navbar() {
         {/* Logo */}
         <Link href="/" className="flex items-center gap-2 hover:opacity-80 transition-opacity">
           <div className={`relative h-8 w-40 transition-transform duration-300 ${scrolled ? 'scale-95' : 'scale-100'}`}>
+            {/* On mobile: always dark bg → always use white/dark logo. On desktop: respect scroll/page state */}
             <Image
-              src={isDarkHero ? "/assets/img/Logo_Zeta_Prop_Negro.png" : "/assets/img/logo_zeta_prop_marzo.jpeg"}
+              src={(isDarkHero || !scrolled && !isHeroPage) ? "/assets/img/Logo_Zeta_Prop_Negro.png" : "/assets/img/logo_zeta_prop_marzo.jpeg"}
               alt="Zeta Prop Logo"
               fill
               className="object-contain object-left"
@@ -231,7 +237,7 @@ export default function Navbar() {
         </div>
 
         {/* Mobile Toggle */}
-        <button className="md:hidden p-2 text-gray-700" onClick={() => setOpen(!open)}>
+        <button className={`md:hidden p-2 ${isDarkHero ? 'text-white' : scrolled || isHeroPage ? 'text-gray-700' : 'text-white'}`} onClick={() => setOpen(!open)}>
           {open ? <X size={26} /> : <Menu size={26} />}
         </button>
       </div>
@@ -239,28 +245,28 @@ export default function Navbar() {
       {/* Mobile Menu */}
       {open && (
         <div className="md:hidden mt-2 p-4 flex flex-col gap-4 
-        bg-white/90 backdrop-blur-xl border-t border-gray-100 shadow-xl rounded-b-2xl animate-in slide-in-from-top-2">
+        bg-[#080810] backdrop-blur-xl border-t border-white/10 shadow-xl rounded-b-2xl animate-in slide-in-from-top-2">
 
-          <Link href="/servicios" className="p-3 bg-gray-50/50 rounded-xl hover:bg-gray-100 font-medium" onClick={() => setOpen(false)}>Servicios</Link>
-          <Link href="/precios" className="p-3 bg-gray-50/50 rounded-xl hover:bg-gray-100 font-medium" onClick={() => setOpen(false)}>Precios</Link>
-          <Link href="/nosotros" className="p-3 bg-gray-50/50 rounded-xl hover:bg-gray-100 font-medium" onClick={() => setOpen(false)}>Nosotros</Link>
-          <Link href="/blog" className="p-3 bg-gray-50/50 rounded-xl hover:bg-gray-100 font-medium" onClick={() => setOpen(false)}>Blog</Link>
-          <Link href="/propiedades" className="p-3 bg-gray-50/50 rounded-xl hover:bg-gray-100 font-medium" onClick={() => setOpen(false)}>Propiedades</Link>
-          <Link href="/contacto" className="p-3 bg-gray-50/50 rounded-xl hover:bg-gray-100 font-medium" onClick={() => setOpen(false)}>Contacto</Link>
+          <Link href="/servicios" className="p-3 bg-white/5 rounded-xl hover:bg-white/10 font-medium text-white" onClick={() => setOpen(false)}>Servicios</Link>
+          <Link href="/precios" className="p-3 bg-white/5 rounded-xl hover:bg-white/10 font-medium text-white" onClick={() => setOpen(false)}>Precios</Link>
+          <Link href="/nosotros" className="p-3 bg-white/5 rounded-xl hover:bg-white/10 font-medium text-white" onClick={() => setOpen(false)}>Nosotros</Link>
+          <Link href="/blog" className="p-3 bg-white/5 rounded-xl hover:bg-white/10 font-medium text-white" onClick={() => setOpen(false)}>Blog</Link>
+          <Link href="/propiedades" className="p-3 bg-white/5 rounded-xl hover:bg-white/10 font-medium text-white" onClick={() => setOpen(false)}>Propiedades</Link>
+          <Link href="/contacto" className="p-3 bg-white/5 rounded-xl hover:bg-white/10 font-medium text-white" onClick={() => setOpen(false)}>Contacto</Link>
 
-          <div className="border-t border-gray-200 pt-4">
+          <div className="border-t border-white/10 pt-4">
             {!user ? (
               <div className="flex flex-col gap-3">
                 <Link
                   href="/login"
-                  className="block w-full border border-gray-300 px-4 py-3 rounded-xl text-center font-semibold text-gray-700"
+                  className="block w-full border border-white/20 px-4 py-3 rounded-xl text-center font-semibold text-white/90"
                   onClick={() => setOpen(false)}
                 >
                   Iniciar sesión
                 </Link>
                 <Link
                   href="/register"
-                  className="block w-full bg-black text-white px-4 py-3 rounded-xl text-center font-semibold shadow-lg"
+                  className="block w-full bg-indigo-600 hover:bg-indigo-500 text-white px-4 py-3 rounded-xl text-center font-semibold shadow-lg"
                   onClick={() => setOpen(false)}
                 >
                   Comenzar
@@ -269,7 +275,7 @@ export default function Navbar() {
             ) : (
               <>
                 <div className="flex items-center gap-3 px-2 mb-4">
-                  <div className="w-12 h-12 rounded-full bg-indigo-100 flex items-center justify-center text-indigo-600 relative overflow-hidden">
+                  <div className="w-12 h-12 rounded-full bg-indigo-900/50 flex items-center justify-center text-indigo-400 relative overflow-hidden">
                     {user.photoURL ? (
                       <Image
                         src={user.photoURL}
@@ -283,8 +289,8 @@ export default function Navbar() {
                     )}
                   </div>
                   <div>
-                    <p className="font-bold text-gray-900">{user.displayName || "Usuario"}</p>
-                    <p className="text-xs text-gray-500">{user.email}</p>
+                    <p className="font-bold text-white">{user.displayName || "Usuario"}</p>
+                    <p className="text-xs text-gray-400">{user.email}</p>
                   </div>
                 </div>
 
@@ -292,25 +298,25 @@ export default function Navbar() {
                 <div className="grid grid-cols-2 gap-3">
                   <Link
                     href="/dashboard"
-                    className="flex flex-col items-center justify-center gap-2 p-3 bg-gray-50 rounded-xl hover:bg-gray-100 border border-gray-100"
+                    className="flex flex-col items-center justify-center gap-2 p-3 bg-white/5 rounded-xl hover:bg-white/10 border border-white/10"
                     onClick={() => setOpen(false)}
                   >
-                    <LayoutDashboard size={20} className="text-gray-600" />
-                    <span className="text-xs font-medium">Dashboard</span>
+                    <LayoutDashboard size={20} className="text-indigo-400" />
+                    <span className="text-xs font-medium text-white">Dashboard</span>
                   </Link>
                   <Link
                     href="/dashboard/cuenta"
-                    className="flex flex-col items-center justify-center gap-2 p-3 bg-gray-50 rounded-xl hover:bg-gray-100 border border-gray-100"
+                    className="flex flex-col items-center justify-center gap-2 p-3 bg-white/5 rounded-xl hover:bg-white/10 border border-white/10"
                     onClick={() => setOpen(false)}
                   >
-                    <Settings size={20} className="text-gray-600" />
-                    <span className="text-xs font-medium">Cuenta</span>
+                    <Settings size={20} className="text-indigo-400" />
+                    <span className="text-xs font-medium text-white">Cuenta</span>
                   </Link>
                 </div>
 
                 <button
                   onClick={() => { if (auth) signOut(auth); }}
-                  className="w-full flex items-center justify-center gap-2 px-4 py-3 text-red-600 hover:bg-red-50 rounded-xl mt-3 font-medium border border-red-100"
+                  className="w-full flex items-center justify-center gap-2 px-4 py-3 text-red-400 hover:bg-red-500/10 rounded-xl mt-3 font-medium border border-red-500/20"
                 >
                   <LogOut size={18} />
                   Cerrar sesión

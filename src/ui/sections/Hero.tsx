@@ -96,7 +96,7 @@ export default function Hero() {
     const handleMouseLeave = () => setTilt({ x: 0, y: 0 });
 
     return (
-        <section className="relative w-full h-screen flex items-center overflow-hidden bg-[#080810]">
+        <section className="relative w-full min-h-screen md:h-screen flex items-start md:items-center overflow-hidden bg-[#080810] pt-20 md:pt-0">
 
             {/* Dot grid */}
             <div className="absolute inset-0 pointer-events-none" style={{
