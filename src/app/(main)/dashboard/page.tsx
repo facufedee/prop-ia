@@ -237,16 +237,16 @@ export default function DashboardPage() {
         { label: "Nueva Tasación", icon: Calculator, href: "/dashboard/tasacion", color: "violet", permission: "/dashboard/tasacion" },
         { label: "Ver Reportes", icon: BarChart3, href: "/dashboard/finanzas", color: "amber", permission: "/dashboard/finanzas" },
     ];
-    
+
     // Limits logic
     let fallbackPropertiesLimit: number | null = null;
     let fallbackClientsLimit: number | null = null;
-    
+
     if (stats.subscription) {
         const tier = stats.subscription.planTier?.toLowerCase() || '';
         if (tier === 'basic') {
             fallbackPropertiesLimit = 50;
-            fallbackClientsLimit = 999999; 
+            fallbackClientsLimit = 999999;
         } else if (tier === 'professional' || tier === 'pro') {
             fallbackPropertiesLimit = 150;
             fallbackClientsLimit = 999999;
@@ -254,22 +254,22 @@ export default function DashboardPage() {
             fallbackPropertiesLimit = 500;
             fallbackClientsLimit = 999999;
         } else {
-            fallbackPropertiesLimit = 50; 
+            fallbackPropertiesLimit = 50;
             fallbackClientsLimit = 999999;
         }
     } else {
         // Cliente Free limits
-        fallbackPropertiesLimit = 10;
-        fallbackClientsLimit = 10;
+        fallbackPropertiesLimit = 50;
+        fallbackClientsLimit = 50;
     }
 
     const propertiesLimit = stats.plan?.limits?.properties ?? fallbackPropertiesLimit;
     const clientsLimit = stats.plan?.limits?.clients ?? fallbackClientsLimit;
-    
+
     const renderLimit = (current: number, limitObj: any) => {
         if (limitObj === undefined || limitObj === null) return current.toString();
         if (limitObj === 'unlimited' || (typeof limitObj === 'number' && limitObj > 900000)) {
-             return `${current} / ∞`;
+            return `${current} / ∞`;
         }
         return `${current} / ${limitObj}`;
     };
@@ -502,11 +502,10 @@ export default function DashboardPage() {
                                         <div className="flex-1 min-w-0">
                                             <div className="flex items-center gap-2">
                                                 <p className="text-sm font-medium text-gray-900 truncate">{lead.nombre}</p>
-                                                <span className={`text-[10px] font-bold uppercase px-1.5 py-0.5 rounded-full flex-shrink-0 ${
-                                                    lead.estado === 'nuevo' ? 'bg-green-100 text-green-700' :
-                                                    lead.estado === 'contactado' ? 'bg-blue-100 text-blue-700' :
-                                                    'bg-gray-100 text-gray-600'
-                                                }`}>
+                                                <span className={`text-[10px] font-bold uppercase px-1.5 py-0.5 rounded-full flex-shrink-0 ${lead.estado === 'nuevo' ? 'bg-green-100 text-green-700' :
+                                                        lead.estado === 'contactado' ? 'bg-blue-100 text-blue-700' :
+                                                            'bg-gray-100 text-gray-600'
+                                                    }`}>
                                                     {lead.estado}
                                                 </span>
                                             </div>

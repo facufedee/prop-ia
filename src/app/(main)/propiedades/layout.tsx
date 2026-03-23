@@ -2,8 +2,8 @@
 import { Metadata } from 'next';
 
 export const metadata: Metadata = {
-    title: 'Propiedades | CRM Inmobiliario | Gestión de Propiedades | Alquileres | Zeta Prop',
-    description: 'Explora las mejores propiedades en venta y alquiler de las inmobiliarias más confiables de Argentina. Gestionado por Zeta Prop.',
+    title: 'Encontrá tu Hogar | Propiedades en Venta y Alquiler | Zeta Prop',
+    description: 'Explorá miles de propiedades en venta y alquiler en Argentina. Casas, departamentos, PH, quintas y terrenos con las mejores inmobiliarias. Zeta Prop.',
 };
 
 export default function PropertiesLayout({

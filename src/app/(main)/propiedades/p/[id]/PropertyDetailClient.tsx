@@ -39,6 +39,7 @@ export default function PropertyDetailPage({ id: propId }: Props) {
     const [loading, setLoading] = useState(true);
     const [currentImageIndex, setCurrentImageIndex] = useState(0);
     const [showGalleryModal, setShowGalleryModal] = useState(false);
+    const [modalZoom, setModalZoom] = useState(false);
     const [showContactModal, setShowContactModal] = useState(false);
 
     const [isSaved, setIsSaved] = useState(false);
@@ -70,6 +71,18 @@ export default function PropertyDetailPage({ id: propId }: Props) {
         };
         load();
     }, [id]);
+
+    // Keyboard navigation for modal
+    useEffect(() => {
+        const handleKey = (e: KeyboardEvent) => {
+            if (!showGalleryModal) return;
+            if (e.key === 'Escape') { setShowGalleryModal(false); setModalZoom(false); }
+            if (e.key === 'ArrowRight') setCurrentImageIndex(prev => (prev + 1) % (property?.imageUrls?.length || 1));
+            if (e.key === 'ArrowLeft') setCurrentImageIndex(prev => (prev - 1 + (property?.imageUrls?.length || 1)) % (property?.imageUrls?.length || 1));
+        };
+        window.addEventListener('keydown', handleKey);
+        return () => window.removeEventListener('keydown', handleKey);
+    }, [showGalleryModal, property?.imageUrls?.length]);
 
     const handleSave = () => {
         if (isSaved) {
@@ -113,14 +126,14 @@ export default function PropertyDetailPage({ id: propId }: Props) {
     const handleReport = () => {
         const title = property?.calle ? `${property.calle} ${property.altura || ''}` : property?.title;
         const message = `Hola, me gustaría denunciar o reclamar esta propiedad: "${title}" (ID: ${property?.id}). URL: ${window.location.href}`;
-        const waLink = `https://wa.me/5491136894042?text=${encodeURIComponent(message)}`;
+        const waLink = `https://wa.me/5491123889745?text=${encodeURIComponent(message)}`;
         window.open(waLink, '_blank');
     };
-    
+
     // Parse createdAt date safely
     const getPublishedTimeAgo = () => {
         if (!property?.createdAt) return 'Publicado recientemente';
-        
+
         try {
             let dateVal: Date;
             // Handle Firestore Timestamp
@@ -130,10 +143,10 @@ export default function PropertyDetailPage({ id: propId }: Props) {
                 // Try parsing string or other formats
                 dateVal = new Date(property.createdAt);
             }
-            
+
             // Check if date is valid
             if (isNaN(dateVal.getTime())) return 'Publicado recientemente';
-            
+
             return 'Publicado ' + formatDistanceToNow(dateVal, { addSuffix: true, locale: es });
         } catch (error) {
             return 'Publicado recientemente';
@@ -216,8 +229,8 @@ export default function PropertyDetailPage({ id: propId }: Props) {
 
                                 return (
                                     <>
-                                        {/* Main Stage */}
-                                        <div className={`relative w-full h-[400px] bg-gray-900 rounded-2xl overflow-hidden group ${property.status === 'sold' ? 'grayscale opacity-90' : ''}`}>
+                                        {/* Main Stage — 16:9 container shows landscape photos fully */}
+                                        <div className={`relative w-full aspect-[4/3] md:aspect-[16/9] bg-gray-900 rounded-2xl overflow-hidden group ${property.status === 'sold' ? 'grayscale opacity-90' : ''}`}>
                                             {mediaItems.length > 0 && currentItem ? (
                                                 <>
                                                     {/* Content */}
@@ -234,29 +247,15 @@ export default function PropertyDetailPage({ id: propId }: Props) {
                                                             ></iframe>
                                                         </div>
                                                     ) : (
-                                                        <>
-                                                            {/* Blurred Background */}
-                                                            <div className="absolute inset-0">
-                                                                <Image
-                                                                    src={currentItem.url}
-                                                                    fill
-                                                                    className="object-cover blur-2xl opacity-50 scale-110"
-                                                                    sizes="(max-width: 1024px) 100vw, 66vw"
-                                                                    alt="Fondo borroso"
-                                                                />
-                                                            </div>
-                                                            {/* Main Image */}
-                                                            <div className="absolute inset-0 flex items-center justify-center p-2">
-                                                                <Image
-                                                                    src={currentItem.url}
-                                                                    fill
-                                                                    alt="Vista Principal"
-                                                                    className="object-contain cursor-pointer shadow-lg rounded-lg"
-                                                                    sizes="(max-width: 1024px) 100vw, 66vw"
-                                                                    onClick={() => setShowGalleryModal(true)}
-                                                                />
-                                                            </div>
-                                                        </>
+                                                        <Image
+                                                            src={currentItem.url}
+                                                            fill
+                                                            alt="Vista Principal"
+                                                            className="object-cover cursor-zoom-in"
+                                                            sizes="(max-width: 1024px) 100vw, 66vw"
+                                                            priority={currentImageIndex === 0}
+                                                            onClick={() => setShowGalleryModal(true)}
+                                                        />
                                                     )}
 
                                                     {/* Navigation Controls */}
@@ -465,11 +464,11 @@ export default function PropertyDetailPage({ id: propId }: Props) {
                                     >
                                         Ver más propiedades
                                     </Link>
-                                    
+
                                     <div className="pt-4 border-t border-gray-100 text-center">
-                                       <button onClick={handleReport} className="text-xs text-gray-400 hover:text-red-500 hover:underline transition font-medium">
-                                          Denunciar o Reclamar Propiedad
-                                       </button>
+                                        <button onClick={handleReport} className="text-xs text-gray-400 hover:text-red-500 hover:underline transition font-medium">
+                                            Denunciar o Reclamar Propiedad
+                                        </button>
                                     </div>
                                 </div>
                             )}
@@ -503,62 +502,88 @@ export default function PropertyDetailPage({ id: propId }: Props) {
 
             {/* Gallery Modal */}
             {showGalleryModal && property && property.imageUrls && (
-                <div className="fixed inset-0 z-[60] bg-black/95 flex items-center justify-center p-2 md:p-4 animate-in fade-in duration-200">
-                    <div className="bg-black w-full max-w-[95vw] h-[90vh] rounded-2xl overflow-hidden flex flex-col shadow-2xl ring-1 ring-white/10 relative">
+                <div
+                    className="fixed inset-0 z-[60] bg-black/98 flex items-center justify-center animate-in fade-in duration-200"
+                    onClick={(e) => { if (e.target === e.currentTarget) { setShowGalleryModal(false); setModalZoom(false); } }}
+                >
+                    <div className="w-full h-full flex flex-col">
                         {/* Header */}
-                        <div className="flex items-center justify-between p-4 bg-gradient-to-b from-black/80 to-transparent absolute top-0 left-0 right-0 z-20 pointer-events-none">
-                            <span className="text-sm font-medium px-4 py-1.5 bg-black/40 backdrop-blur-md rounded-full text-white border border-white/10">
+                        <div className="flex items-center justify-between px-4 py-3 bg-black/60 shrink-0 border-b border-white/10">
+                            <span className="text-sm font-medium text-white/70">
                                 {currentImageIndex + 1} / {property.imageUrls.length}
                             </span>
+                            <span className="text-xs text-white/40">{modalZoom ? 'Zoom activo · Clic para ajustar' : 'Clic en la imagen para zoom'}</span>
                             <button
-                                onClick={() => setShowGalleryModal(false)}
-                                className="p-3 bg-black/40 backdrop-blur-md hover:bg-white/20 rounded-full transition text-white border border-white/10 pointer-events-auto"
+                                onClick={() => { setShowGalleryModal(false); setModalZoom(false); }}
+                                className="flex items-center gap-2 px-4 py-2 bg-white/10 hover:bg-white/20 rounded-lg transition text-white text-sm font-semibold border border-white/20"
                             >
-                                <span className="sr-only">Cerrar</span>
-                                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+                                Cerrar
                             </button>
                         </div>
 
-                        {/* Main Image */}
-                        <div className="flex-1 relative flex items-center justify-center bg-zinc-900 overflow-hidden">
+                        {/* Main Image with click-to-zoom */}
+                        <div
+                            className={`flex-1 relative flex items-center justify-center bg-zinc-950 overflow-hidden ${modalZoom ? 'cursor-zoom-out' : 'cursor-zoom-in'}`}
+                            onClick={() => setModalZoom(z => !z)}
+                        >
+                            {/* Blurred background to fill letterbox areas */}
                             <Image
                                 src={property.imageUrls[currentImageIndex]}
-                                alt={`Imagen ${currentImageIndex + 1}`}
                                 fill
+                                className="object-cover blur-2xl opacity-30 scale-110 pointer-events-none"
                                 sizes="100vw"
-                                className="object-contain"
+                                alt=""
+                                aria-hidden
                             />
+                            {/* Sharp image centered */}
+                            <div className={`absolute inset-0 flex items-center justify-center transition-transform duration-300 ${modalZoom ? 'scale-[2]' : 'scale-100'}`}>
+                                <Image
+                                    src={property.imageUrls[currentImageIndex]}
+                                    alt={`Imagen ${currentImageIndex + 1}`}
+                                    fill
+                                    sizes="100vw"
+                                    className="object-contain"
+                                    priority
+                                />
+                            </div>
 
                             {/* Navigation Arrows */}
-                            <button
-                                onClick={prevImage}
-                                className="absolute left-4 p-4 bg-black/40 hover:bg-black/80 rounded-full text-white transition backdrop-blur-md border border-white/10 group"
-                            >
-                                <ChevronLeft size={32} className="group-hover:-translate-x-0.5 transition-transform" />
-                            </button>
-                            <button
-                                onClick={nextImage}
-                                className="absolute right-4 p-4 bg-black/40 hover:bg-black/80 rounded-full text-white transition backdrop-blur-md border border-white/10 group"
-                            >
-                                <ChevronRight size={32} className="group-hover:translate-x-0.5 transition-transform" />
-                            </button>
+                            {!modalZoom && property.imageUrls.length > 1 && (
+                                <>
+                                    <button
+                                        onClick={(e) => { e.stopPropagation(); setCurrentImageIndex(prev => (prev - 1 + property.imageUrls.length) % property.imageUrls.length); }}
+                                        className="absolute left-4 p-4 bg-black/40 hover:bg-black/80 rounded-full text-white transition backdrop-blur-md border border-white/10 z-10 group"
+                                    >
+                                        <ChevronLeft size={28} className="group-hover:-translate-x-0.5 transition-transform" />
+                                    </button>
+                                    <button
+                                        onClick={(e) => { e.stopPropagation(); setCurrentImageIndex(prev => (prev + 1) % property.imageUrls.length); }}
+                                        className="absolute right-4 p-4 bg-black/40 hover:bg-black/80 rounded-full text-white transition backdrop-blur-md border border-white/10 z-10 group"
+                                    >
+                                        <ChevronRight size={28} className="group-hover:translate-x-0.5 transition-transform" />
+                                    </button>
+                                </>
+                            )}
                         </div>
 
                         {/* Thumbnails Strip */}
-                        <div className="h-20 md:h-24 bg-zinc-950 p-2 md:p-4 shrink-0 flex gap-2 overflow-x-auto justify-center border-t border-white/10">
-                            {property.imageUrls.map((url, idx) => (
-                                <button
-                                    key={idx}
-                                    onClick={() => setCurrentImageIndex(idx)}
-                                    className={`h-full aspect-[4/3] rounded-lg overflow-hidden transition-all duration-200 border-2 ${idx === currentImageIndex
-                                        ? 'border-indigo-500 opacity-100 scale-105 shadow-lg shadow-indigo-500/20'
-                                        : 'border-transparent opacity-40 hover:opacity-80'
-                                        }`}
-                                >
-                                    <Image src={url} alt={`Thumbnail ${idx}`} fill sizes="120px" className="object-cover" />
-                                </button>
-                            ))}
-                        </div>
+                        {property.imageUrls.length > 1 && (
+                            <div className="h-20 bg-zinc-950 p-2 shrink-0 flex gap-2 overflow-x-auto border-t border-white/10">
+                                {property.imageUrls.map((url, idx) => (
+                                    <button
+                                        key={idx}
+                                        onClick={(e) => { e.stopPropagation(); setCurrentImageIndex(idx); setModalZoom(false); }}
+                                        className={`relative h-full aspect-[4/3] rounded-lg overflow-hidden transition-all duration-200 border-2 shrink-0 ${idx === currentImageIndex
+                                                ? 'border-indigo-500 opacity-100 scale-105 shadow-lg shadow-indigo-500/20'
+                                                : 'border-transparent opacity-40 hover:opacity-80'
+                                            }`}
+                                    >
+                                        <Image src={url} alt={`Thumbnail ${idx}`} fill sizes="100px" className="object-cover" />
+                                    </button>
+                                ))}
+                            </div>
+                        )}
                     </div>
                 </div>
             )}

@@ -4,6 +4,7 @@ import { app, auth } from "@/infrastructure/firebase/client";
 import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import Image from "next/image";
+import { usePathname } from "next/navigation";
 import { Menu, X, ChevronDown, User as UserIcon, LogOut, LayoutDashboard, Settings, Home } from "lucide-react";
 import { onAuthStateChanged, signOut, type User } from "firebase/auth";
 
@@ -13,6 +14,7 @@ export default function Navbar() {
   const [profileOpen, setProfileOpen] = useState(false);
   const [user, setUser] = useState<User | null>(null);
   const profileRef = useRef<HTMLDivElement>(null);
+  const pathname = usePathname();
 
 
 
@@ -47,13 +49,20 @@ export default function Navbar() {
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
+  // On /propiedades (landing), always show white background so dark text/logo are readable over the hero
+  const isHeroPage = pathname === "/propiedades";
+  // Dark hero = home page NOT yet scrolled
+  const isDarkHero = pathname === "/" && !scrolled;
+
   return (
     <nav
       className={`
         fixed top-0 left-0 w-full z-50 transition-all duration-300
-        ${scrolled
-          ? "bg-white/80 backdrop-blur-md shadow-sm border-b border-gray-100/50 py-3"
-          : "bg-transparent border-b border-transparent py-5"}
+        ${scrolled || isHeroPage
+          ? "bg-white/90 backdrop-blur-md shadow-sm border-b border-gray-100/50 py-3"
+          : isDarkHero
+            ? "bg-transparent border-b border-transparent py-5"
+            : "bg-transparent border-b border-transparent py-5"}
       `}
     >
       <div className="flex items-center justify-between max-w-7xl mx-auto px-6">
@@ -62,7 +71,7 @@ export default function Navbar() {
         <Link href="/" className="flex items-center gap-2 hover:opacity-80 transition-opacity">
           <div className={`relative h-8 w-40 transition-transform duration-300 ${scrolled ? 'scale-95' : 'scale-100'}`}>
             <Image
-              src="/assets/img/logo_zeta_prop_marzo.jpeg"
+              src={isDarkHero ? "/assets/img/Logo_Zeta_Prop_Negro.png" : "/assets/img/logo_zeta_prop_marzo.jpeg"}
               alt="Zeta Prop Logo"
               fill
               className="object-contain object-left"
@@ -72,23 +81,23 @@ export default function Navbar() {
         </Link>
 
         {/* Desktop menu */}
-        <div className="hidden md:flex items-center gap-8 text-lg font-medium text-gray-700">
-          <Link href="/servicios" className="hover:text-indigo-600 transition-colors">
+        <div className={`hidden md:flex items-center gap-8 text-lg font-medium transition-colors ${isDarkHero ? 'text-white/80' : 'text-gray-700'}`}>
+          <Link href="/servicios" className={`transition-colors ${isDarkHero ? 'hover:text-white' : 'hover:text-indigo-600'}`}>
             Servicios
           </Link>
-          <Link href="/precios" className="hover:text-indigo-600 transition-colors">
+          <Link href="/precios" className={`transition-colors ${isDarkHero ? 'hover:text-white' : 'hover:text-indigo-600'}`}>
             Precios
           </Link>
-          <Link href="/nosotros" className="hover:text-indigo-600 transition-colors">
+          <Link href="/nosotros" className={`transition-colors ${isDarkHero ? 'hover:text-white' : 'hover:text-indigo-600'}`}>
             Nosotros
           </Link>
-          <Link href="/blog" className="hover:text-indigo-600 transition-colors">
+          <Link href="/blog" className={`transition-colors ${isDarkHero ? 'hover:text-white' : 'hover:text-indigo-600'}`}>
             Blog
           </Link>
-          <Link href="/propiedades" className="hover:text-indigo-600 transition-colors">
+          <Link href="/propiedades" className={`transition-colors ${isDarkHero ? 'hover:text-white' : 'hover:text-indigo-600'}`}>
             Propiedades
           </Link>
-          <Link href="/contacto" className="hover:text-indigo-600 transition-colors">
+          <Link href="/contacto" className={`transition-colors ${isDarkHero ? 'hover:text-white' : 'hover:text-indigo-600'}`}>
             Contacto
           </Link>
         </div>
@@ -99,13 +108,21 @@ export default function Navbar() {
             <>
               <Link
                 href="/login"
-                className={`px-5 py-2.5 border rounded-xl text-sm font-medium transition-all ${scrolled ? 'border-gray-200 text-gray-700 hover:bg-gray-50' : 'border-gray-300/50 text-gray-800 bg-white/50 hover:bg-white'}`}
+                className={`px-5 py-2.5 border rounded-xl text-sm font-medium transition-all ${isDarkHero
+                    ? 'border-white/30 text-white/90 hover:bg-white/10'
+                    : scrolled || isHeroPage
+                      ? 'border-gray-200 text-gray-700 hover:bg-gray-50'
+                      : 'border-gray-300/50 text-gray-800 bg-white/50 hover:bg-white'
+                  }`}
               >
                 Iniciar sesión
               </Link>
               <Link
                 href="/register"
-                className="px-5 py-2.5 bg-black text-white rounded-xl text-sm font-medium hover:bg-gray-800 transition shadow-lg shadow-gray-900/10"
+                className={`px-5 py-2.5 rounded-xl text-sm font-medium transition shadow-lg ${isDarkHero
+                    ? 'bg-indigo-600 text-white hover:bg-indigo-500 shadow-indigo-500/20'
+                    : 'bg-black text-white hover:bg-gray-800 shadow-gray-900/10'
+                  }`}
               >
                 Comenzar
               </Link>
@@ -131,10 +148,10 @@ export default function Navbar() {
                       <UserIcon size={18} />
                     )}
                   </div>
-                  <span className="hidden md:block text-sm font-medium text-gray-700 max-w-[100px] truncate">
+                  <span className={`hidden md:block text-sm font-medium max-w-[100px] truncate ${isDarkHero ? 'text-white/90' : 'text-gray-700'}`}>
                     {user.displayName || user.email?.split('@')[0] || "Usuario"}
                   </span>
-                  <ChevronDown size={16} className={`text-gray-400 transition-transform ${profileOpen ? 'rotate-180' : ''}`} />
+                  <ChevronDown size={16} className={`transition-transform ${isDarkHero ? 'text-white/60' : 'text-gray-400'} ${profileOpen ? 'rotate-180' : ''}`} />
                 </button>
 
                 {profileOpen && (

@@ -15,6 +15,7 @@ export const metadata: Metadata = {
 
 const Features = dynamic(() => import("@/ui/sections/Features"));
 const Testimonials = dynamic(() => import("@/ui/sections/Testimonials"));
+const HumanPromise = dynamic(() => import("@/ui/sections/HumanPromise"));
 const PropertyNetworkCTA = dynamic(() => import("@/ui/sections/PropertyNetworkCTA"));
 const ContactForm = dynamic(() => import("@/ui/sections/ContactForm"));
 
@@ -57,8 +58,7 @@ export default function LandingPage() {
 
             <Hero />
             <Features />
-            {/* Testimonials removed as per user request */}
-            {/* <Testimonials /> */}
+            <HumanPromise />
             <PropertyNetworkCTA />
             <LatestBlogPosts />
             <FAQ />
