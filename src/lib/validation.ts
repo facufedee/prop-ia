@@ -21,7 +21,7 @@ export const propertySchema = z.object({
         'Oficina comercial',
         'PH',
         'Quinta Vacacional',
-        'Terreno', // Keeping Terreno just in case legacy data exists or user forgot it (it was in previous validation)
+        'Lote/Terreno',
         'Otro'
     ]),
     operation: z.enum(['venta', 'alquiler', 'alquiler_temporal']),

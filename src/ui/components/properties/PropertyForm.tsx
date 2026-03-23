@@ -40,7 +40,8 @@ const propertyTypeOptions = [
     "Local comercial",
     "Oficina comercial",
     "PH",
-    "Quinta Vacacional"
+    "Quinta Vacacional",
+    "Lote/Terreno"
 ];
 
 const commonFeatures = [

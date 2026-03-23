@@ -913,6 +913,7 @@ export default function PropertyWizard({ initialData, isEditing = false, ...prop
                                     <option value="Oficina comercial">Oficina comercial</option>
                                     <option value="PH">PH</option>
                                     <option value="Quinta Vacacional">Quinta Vacacional</option>
+                                    <option value="Lote/Terreno">Lote/Terreno</option>
                                 </select>
                             </div>
                             <div>

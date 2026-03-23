@@ -62,7 +62,7 @@ export default function Navbar() {
         <Link href="/" className="flex items-center gap-2 hover:opacity-80 transition-opacity">
           <div className={`relative h-8 w-40 transition-transform duration-300 ${scrolled ? 'scale-95' : 'scale-100'}`}>
             <Image
-              src="/assets/img/logo_web_ZetaProp.png"
+              src="/assets/img/logo_zeta_prop_marzo.jpeg"
               alt="Zeta Prop Logo"
               fill
               className="object-contain object-left"

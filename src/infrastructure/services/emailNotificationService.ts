@@ -131,77 +131,71 @@ export const emailNotificationService = {
     },
 
     sendWelcomeEmail: async (to: string, name: string): Promise<{ success: boolean; error?: any }> => {
-        console.log(`[Service] Attempting to send welcome email to ${to}`);
-        const firstName = name ? name.split(' ')[0] : 'Hola';
+        console.log(`[Service] Attempting  to send welcome email to ${to}`);
+
+        // Manejo de nombre más profesional: si no hay nombre, usamos un genérico
+        const firstName = name?.trim() ? name.split(' ')[0] : 'Propietario/a';
 
         // Check if user is unsubscribed
         const unsubscribed = await isUnsubscribed(to);
         if (unsubscribed) {
-            console.log(`[Service] User ${to} is unsubscribed. Skipping welcome marketing email.`);
+            console.log(`[Service] User ${to} is unsubscribed. Skipping welcome email.`);
             return { success: true };
         }
 
         try {
             await sendEmailWithResend({
                 to,
-                subject: "Bienvenido/a a Zeta Prop 🚀 | Cargá tu primer alquiler hoy",
+                subject: "Bienvenida/o a Zeta Prop 🚀 | Menos administración, más tranquilidad",
                 html: `
-                    <div style="font-family: Arial, sans-serif; color: #333; line-height: 1.6;">
-                        <p>Hola ${firstName},</p>
+                    <div style="font-family: 'Segoe UI', Arial, sans-serif; color: #333; line-height: 1.6; max-width: 600px; margin: 0 auto;">
+                        <p style="font-size: 1.1em;">Hola <strong>${firstName}</strong>,</p>
                         
-                        <p>Gracias por registrarte en Zeta Prop.</p>
+                        <p>¡Gracias por sumarte a <strong>Zeta Prop</strong>!</p>
                         
-                        <p>Ya podés comenzar a organizar tu gestión desde hoy mismo.</p>
+                        <p>Sabemos que gestionar propiedades y alquileres puede ser un caos: contratos que vencen, cálculos de aumentos que quitan tiempo y la dificultad de no tener una web propia que se vea profesional.</p>
                         
-                        <p>Para empezar, te recomiendo estos pasos simples:</p>
+                        <div style="background-color: #f9f9f9; border-left: 4px solid #2563eb; padding: 15px; margin: 20px 0;">
+                            <p style="margin-top: 0; font-weight: bold; color: #2563eb;">En Zeta Prop no somos solo un portal; somos tu aliado para olvidarte de:</p>
+                            <ul style="padding-left: 20px;">
+                                <li><strong>El desorden del Excel:</strong> Centralizá contratos, inquilinos y propietarios en un solo lugar.</li>
+                                <li><strong>Los cálculos manuales:</strong> El sistema automatiza la indexación de tus contratos.</li>
+                                <li><strong>No tener presencia online:</strong> Publicá y compartí tus propiedades con un link profesional en segundos.</li>
+                                <li><strong>Los olvidos costosos:</strong> Recibí notificaciones de vencimientos y cobros pendientes.</li>
+                            </ul>
+                        </div>
                         
-                        <ol>
-                            <li>Cargar una propiedad</li>
-                            <li>Agregar el propietario</li>
-                            <li>Incorporar el inquilino</li>
-                            <li>Registrar el contrato (aunque ya esté avanzado)</li>
-                            <li>Cargar pagos y vencimientos</li>
-                        </ol>
+                        <p>Solo te toma <strong>5 minutos</strong> cargar tu primer alquiler o propiedad para ver cómo el sistema empieza a trabajar por vos.</p>
                         
-                        <p>No importa si el alquiler ya está en curso. Podés ingresar contratos vigentes y continuar la gestión desde el punto en el que estás hoy.</p>
+                        <div style="text-align: center; margin: 30px 0;">
+                            <a href="https://zetaprop.com.ar/login" style="background-color: #2563eb; color: white; padding: 12px 25px; text-decoration: none; border-radius: 5px; font-weight: bold;">Ingresar a mi panel</a>
+                        </div>
                         
-                        <p>La idea es que tengas todo centralizado: propiedades, contratos, aumentos y cobranzas en un solo lugar.</p>
+                        <p>Estamos acá para simplificar tu día a día. Si tenés alguna sugerencia o algo que hoy te da mucho trabajo manual y querés que lo automaticemos, respondé directamente a este mail.</p>
                         
-                        <p>Si en algún momento necesitás ayuda o querés sugerir mejoras, podés escribirme directamente a este mail.</p>
-                        
-                        <p>Estoy para ayudarte.</p>
-                        
-                        <p><strong>Facundo</strong><br>
-                        Zeta Prop<br>
-                        <a href="https://zetaprop.com.ar">zetaprop.com.ar</a></p>
-                        
-                        <p style="font-size: 0.9em; color: #666;">
-                            Ingresá al portal: <a href="https://zetaprop.com.ar/login">zetaprop.com.ar/login</a>
-                        </p>
-                        
-                        <p style="font-size: 0.8em; color: #999; margin-top: 10px;">
-                            ¿No querés recibir más estos correos? <a href="https://zetaprop.com.ar/unsubscribe?email=${to}">Darse de baja</a>
-                        </p>
+                        <p>Éxitos con tu gestión,<br>
+                        <strong>Facundo</strong><br>
+                        Zeta Prop | <a href="https://zetaprop.com.ar" style="color: #2563eb;">zetaprop.com.ar</a></p>
                         
                         <hr style="border: 0; border-top: 1px solid #eee; margin: 20px 0;">
                         
-                        <p style="color: #666; font-size: 0.9em;">
-                            👉 <strong>Consejo:</strong> empezá cargando solo un alquiler. En menos de 10 minutos vas a ver cómo funciona todo el sistema.
+                        <p style="font-size: 0.8em; color: #999; text-align: center;">
+                            ¿No querés recibir más estos correos? <a href="https://zetaprop.com.ar/unsubscribe?email=${to}" style="color: #999;">Darse de baja</a>
                         </p>
                     </div>
                 `,
             });
+
             console.log(`Welcome email sent to ${to}`);
-            await logSentEmail(to, "Bienvenido/a a Zeta Prop 🚀 | Cargá tu primer alquiler hoy", "welcome", "success");
+            await logSentEmail(to, "Bienvenida/o a Zeta Prop 🚀", "welcome", "success");
             return { success: true };
+
         } catch (e: any) {
             console.error("Welcome email failed:", e);
-            await logSentEmail(to, "Bienvenido/a a Zeta Prop 🚀 | Cargá tu primer alquiler hoy", "welcome", "error", e.message || JSON.stringify(e));
-            // Return specific error message
+            await logSentEmail(to, "Bienvenida/o a Zeta Prop 🚀", "welcome", "error", e.message || JSON.stringify(e));
             return { success: false, error: e.message || JSON.stringify(e) };
         }
     },
-
     sendMarketingEmail: async (to: string, name: string, templateKey: string): Promise<{ success: boolean; error?: any }> => {
         console.log(`[Service] Attempting to send marketing email (${templateKey}) to ${to}`);
         // Check if user is unsubscribed
