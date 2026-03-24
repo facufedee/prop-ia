@@ -31,7 +31,7 @@ export default async function NovedadesPage() {
                             key={post.id}
                             className="bg-white rounded-2xl overflow-hidden shadow-sm hover:shadow-md transition-all duration-300 border border-gray-100 flex flex-col group h-full"
                         >
-                            <Link href={`/blog/${post.slug}`} target="_blank" className="block overflow-hidden aspect-video relative">
+                            <Link href={`/blog/${post.slug}`} target="_blank" rel="noopener noreferrer" className="block overflow-hidden aspect-video relative">
                                 {post.imageUrl ? (
                                     <Image
                                         src={post.imageUrl}
@@ -61,7 +61,7 @@ export default async function NovedadesPage() {
                                 </div>
 
                                 <h2 className="text-lg font-bold text-gray-900 mb-2 group-hover:text-indigo-600 transition-colors line-clamp-2">
-                                    <Link href={`/blog/${post.slug}`} target="_blank">
+                                    <Link href={`/blog/${post.slug}`} target="_blank" rel="noopener noreferrer">
                                         {post.title}
                                     </Link>
                                 </h2>
@@ -86,7 +86,7 @@ export default async function NovedadesPage() {
 
                                     <Link
                                         href={`/blog/${post.slug}`}
-                                        target="_blank"
+                                        target="_blank" rel="noopener noreferrer"
                                         className="text-indigo-600 font-bold text-xs flex items-center gap-1 group/link hover:underline"
                                     >
                                         Leer más

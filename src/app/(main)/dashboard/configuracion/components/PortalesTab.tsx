@@ -13,7 +13,6 @@ type Portal = {
 const PORTALS: Portal[] = [
     { id: 'argenprop', name: 'Argenprop', color: 'text-orange-500', bgColor: 'bg-orange-50' },
     { id: 'zonaprop', name: 'Zonaprop', color: 'text-orange-600', bgColor: 'bg-orange-50' },
-    { id: 'mercadolibre', name: 'MercadoLibre', color: 'text-yellow-600', bgColor: 'bg-yellow-50' },
     { id: 'lavoz', name: 'Clasificados La Voz', color: 'text-blue-600', bgColor: 'bg-blue-50' },
     { id: 'cadena3', name: 'Clasificados Cadena3', color: 'text-red-500', bgColor: 'bg-red-50' },
     { id: 'facebook', name: 'Facebook', color: 'text-blue-700', bgColor: 'bg-blue-50' },

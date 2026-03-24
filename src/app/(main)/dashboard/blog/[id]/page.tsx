@@ -64,7 +64,7 @@ export default function EditPostPage({ params }: { params: Promise<{ id: string 
                 <Link
                     href={`/social/blog/${post.id}`}
                     className="flex items-center gap-2 bg-pink-50 text-pink-700 hover:bg-pink-100 px-4 py-2 rounded-lg font-medium transition-colors border border-pink-200"
-                    target="_blank"
+                    target="_blank" rel="noopener noreferrer"
                 >
                     <Share2 size={18} />
                     <span>Generar RRSS</span>

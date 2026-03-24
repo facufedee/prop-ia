@@ -52,24 +52,7 @@ const nextConfig = {
                         key: 'Permissions-Policy',
                         value: 'camera=(), microphone=(), geolocation=(self), interest-cohort=()'
                     },
-                    // Content Security Policy - Properly configured for Firebase
-                    {
-                        key: 'Content-Security-Policy',
-                        value: [
-                            "default-src 'self'",
-                            "script-src 'self' 'unsafe-eval' 'unsafe-inline' https://www.googletagmanager.com https://apis.google.com https://sdk.mercadopago.com https://*.mercadopago.com https://*.mercadopago.com.ar https://http2.mlstatic.com https://maps.googleapis.com https://maps.gstatic.com",
-                            "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
-                            "img-src 'self' data: https: blob: https://http2.mlstatic.com https://maps.gstatic.com https://maps.googleapis.com https://*.mercadolibre.com https://mercadolibre.com https://*.mercadolivre.com https://mercadolivre.com https://*.mlstatic.com",
-                            "font-src 'self' https://fonts.gstatic.com",
-                            "connect-src 'self' https://*.googleapis.com https://*.firebaseio.com https://*.firebaseapp.com wss://*.firebaseio.com https://api.mercadopago.com https://*.mercadopago.com https://mercadopago.com https://*.mercadopago.com.ar https://mercadopago.com.ar https://events.mercadopago.com https://apis.datos.gob.ar",
-                            "frame-src 'self' https://www.google.com https://*.firebaseapp.com https://accounts.google.com https://www.mercadopago.com.ar https://mercadopago.com.ar https://*.mercadopago.com.ar https://www.mercadopago.com https://mercadopago.com https://*.mercadopago.com https://sdk.mercadopago.com",
-                            "object-src 'none'",
-                            "base-uri 'self'",
-                            "form-action 'self'",
-                            "frame-ancestors 'self'",
-                            "upgrade-insecure-requests"
-                        ].join('; ')
-                    },
+
                     // Allow Google Sign-in popups
                     {
                         key: 'Cross-Origin-Opener-Policy',

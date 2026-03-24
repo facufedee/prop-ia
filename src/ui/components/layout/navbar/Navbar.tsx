@@ -77,9 +77,10 @@ export default function Navbar() {
           <div className={`relative h-8 w-40 transition-transform duration-300 ${scrolled ? 'scale-95' : 'scale-100'}`}>
             {/* On mobile: always dark bg → always use white/dark logo. On desktop: respect scroll/page state */}
             <Image
-              src={(isDarkHero || !scrolled && !isHeroPage) ? "/assets/img/Logo_Zeta_Prop_Negro.png" : "/assets/img/logo_zeta_prop_marzo.jpeg"}
+              src={(isDarkHero || !scrolled && !isHeroPage) ? "/assets/img/Logo_Zeta_Prop_Negro.png" : "/assets/img/logo_zeta_prop_original.png"}
               alt="Zeta Prop Logo"
               fill
+              sizes="(max-width: 768px) 160px, 160px"
               className="object-contain object-left"
               priority
             />
@@ -115,10 +116,10 @@ export default function Navbar() {
               <Link
                 href="/login"
                 className={`px-5 py-2.5 border rounded-xl text-sm font-medium transition-all ${isDarkHero
-                    ? 'border-white/30 text-white/90 hover:bg-white/10'
-                    : scrolled || isHeroPage
-                      ? 'border-gray-200 text-gray-700 hover:bg-gray-50'
-                      : 'border-gray-300/50 text-gray-800 bg-white/50 hover:bg-white'
+                  ? 'border-white/30 text-white/90 hover:bg-white/10'
+                  : scrolled || isHeroPage
+                    ? 'border-gray-200 text-gray-700 hover:bg-gray-50'
+                    : 'border-gray-300/50 text-gray-800 bg-white/50 hover:bg-white'
                   }`}
               >
                 Iniciar sesión
@@ -126,8 +127,8 @@ export default function Navbar() {
               <Link
                 href="/register"
                 className={`px-5 py-2.5 rounded-xl text-sm font-medium transition shadow-lg ${isDarkHero
-                    ? 'bg-indigo-600 text-white hover:bg-indigo-500 shadow-indigo-500/20'
-                    : 'bg-black text-white hover:bg-gray-800 shadow-gray-900/10'
+                  ? 'bg-indigo-600 text-white hover:bg-indigo-500 shadow-indigo-500/20'
+                  : 'bg-black text-white hover:bg-gray-800 shadow-gray-900/10'
                   }`}
               >
                 Comenzar

@@ -15,11 +15,13 @@ import '@/infrastructure/firebase/client'; // Import to ensure Firebase (and Per
 const geistSans = Geist({
   variable: "--font-geist-sans",
   subsets: ["latin"],
+  display: "swap",
 });
 
 const geistMono = Geist_Mono({
   variable: "--font-geist-mono",
   subsets: ["latin"],
+  display: "swap",
 });
 
 export const metadata: Metadata = {
@@ -28,7 +30,7 @@ export const metadata: Metadata = {
     default: 'Zeta Prop | Tu CRM Inmobiliario Integral',
     template: '%s | Zeta Prop Argentina'
   },
-  description: 'Control total de tu inmobiliaria: Administración de propiedades, clientes, alquileres y emprendimientos. El sistema más completo de Argentina para potenciar tu negocio.',
+  description: 'Zeta Prop: el CRM inmobiliario más completo de Argentina. Administra propiedades, alquileres y clientes desde un ecosistema diseñado para tu éxito.',
   keywords: [
     'CRM inmobiliario',
     'gestión de propiedades',

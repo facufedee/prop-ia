@@ -180,8 +180,7 @@ export default function LeadCard({ lead, onStatusChange, onDelete, isDragging }:
                     <>
                         <a
                             href={`https://wa.me/${lead.telefono.replace(/\D/g, '')}?text=${whatsappText}`}
-                            target="_blank"
-                            rel="noopener noreferrer"
+                            target="_blank" rel="noopener noreferrer"
                             onClick={() => onStatusChange && lead.estado === 'nuevo' && onStatusChange(lead.id, 'contactado')}
                             className="flex-1 flex items-center justify-center gap-1.5 py-2 bg-green-500 hover:bg-green-600 text-white rounded-xl text-xs font-bold transition active:scale-95"
                         >

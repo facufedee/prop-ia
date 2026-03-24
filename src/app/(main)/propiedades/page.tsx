@@ -343,7 +343,7 @@ export default function PropiedadesLandingPage() {
                                 </Link>
                                 <Link
                                     href="/contacto"
-                                    target="_blank"
+                                    target="_blank" rel="noopener noreferrer"
                                     className="px-8 py-3.5 bg-white/10 text-white font-semibold rounded-xl hover:bg-white/20 transition-colors border border-white/30"
                                 >
                                     Contactarnos

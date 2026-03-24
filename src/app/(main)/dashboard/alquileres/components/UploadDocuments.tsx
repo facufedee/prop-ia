@@ -205,8 +205,7 @@ export default function UploadDocuments({
                                 <a
                                     key={index}
                                     href={url}
-                                    target="_blank"
-                                    rel="noopener noreferrer"
+                                    target="_blank" rel="noopener noreferrer"
                                     className="flex items-center gap-2 p-2 hover:bg-gray-50 rounded-lg transition-colors"
                                 >
                                     <FileText className="w-4 h-4 text-indigo-600" />

@@ -1,4 +1,5 @@
 import Link from "next/link";
+import Image from "next/image";
 import { Facebook, Twitter, Instagram, Linkedin, Github, Mail, ArrowRight } from "lucide-react";
 import { WhatsAppIcon } from "@/ui/icons/WhatsAppIcon";
 
@@ -9,10 +10,12 @@ export default function Footer() {
                 <div className="grid grid-cols-1 md:grid-cols-4 gap-12 mb-12">
                     {/* Brand & Description */}
                     <div className="space-y-6">
-                        <img
+                        <Image
                             src="/assets/img/logo_web_ZetaProp_fondonegro.png"
-                            alt="Zeta Prop"
+                            alt="Zeta Prop Logo"
                             className="h-10 w-auto"
+                            width={200}
+                            height={40}
                         />
                         <p className="text-gray-400 text-sm leading-relaxed">
                             Impulsando el futuro del Real Estate con tecnología avanzada. Potenciamos inmobiliarias con Inteligencia Artificial, automatización y herramientas de gestión integral para escalar tu negocio.

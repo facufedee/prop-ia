@@ -154,7 +154,7 @@ export default function BlogListPage() {
                                                     href={`/social/blog/${post.id}`}
                                                     className="p-2 text-gray-400 hover:text-pink-600 hover:bg-pink-50 rounded-lg transition-colors"
                                                     title="Generar para RRSS"
-                                                    target="_blank"
+                                                    target="_blank" rel="noopener noreferrer"
                                                 >
                                                     <Share2 size={18} />
                                                 </Link>

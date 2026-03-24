@@ -317,7 +317,7 @@ export default function PropertyCard({ property, onDelete, onUpdate, onDuplicate
                         <div className="flex items-center gap-1 border-l pl-3 border-gray-100 pointer-events-auto">
                             <Link
                                 href={`/print/propiedades/${property.id}`}
-                                target="_blank"
+                                target="_blank" rel="noopener noreferrer"
                                 onClick={(e) => e.stopPropagation()}
                                 className="p-2 rounded-lg text-gray-500 hover:bg-gray-100 hover:text-indigo-600 transition-colors"
                                 title="Imprimir Ficha"
@@ -334,7 +334,7 @@ export default function PropertyCard({ property, onDelete, onUpdate, onDuplicate
                             </Link>
                             <Link
                                 href={`/propiedades/p/${property.id}`}
-                                target="_blank"
+                                target="_blank" rel="noopener noreferrer"
                                 onClick={(e) => e.stopPropagation()}
                                 className="p-2 rounded-lg text-gray-500 hover:bg-gray-100 hover:text-indigo-600 transition-colors"
                                 title="Ver publicación"

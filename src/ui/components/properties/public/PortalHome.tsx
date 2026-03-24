@@ -39,6 +39,7 @@ export default function PortalHome({ onSearch, featuredProperties, loading }: Po
                             {/* Operation Select */}
                             <div className="relative min-w-[140px]">
                                 <select
+                                    aria-label="Tipo de operación"
                                     value={operationType}
                                     onChange={(e) => setOperationType(e.target.value)}
                                     className="w-full appearance-none bg-gray-50 border border-gray-200 text-gray-700 py-3 px-4 pr-8 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent font-medium"
@@ -55,6 +56,7 @@ export default function PortalHome({ onSearch, featuredProperties, loading }: Po
                             {/* Property Type Select */}
                             <div className="relative min-w-[180px]">
                                 <select
+                                    aria-label="Tipo de propiedad"
                                     value={propertyType}
                                     onChange={(e) => setPropertyType(e.target.value)}
                                     className="w-full appearance-none bg-gray-50 border border-gray-200 text-gray-700 py-3 px-4 pr-8 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent font-medium"
@@ -75,6 +77,7 @@ export default function PortalHome({ onSearch, featuredProperties, loading }: Po
                             {/* Location Input */}
                             <div className="relative flex-1">
                                 <input
+                                    aria-label="Ubicación"
                                     type="text"
                                     placeholder="Ingresá barrio o ciudad..."
                                     value={location}

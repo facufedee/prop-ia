@@ -65,8 +65,7 @@ export default function ShareButtons({ title, slug }: ShareButtonsProps) {
                     <a
                         key={link.name}
                         href={link.url}
-                        target="_blank"
-                        rel="noopener noreferrer"
+                        target="_blank" rel="noopener noreferrer"
                         className={`p-2 rounded-full bg-gray-50 text-gray-600 transition-colors ${link.color}`}
                         title={`Compartir en ${link.name}`}
                     >

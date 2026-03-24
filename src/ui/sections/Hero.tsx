@@ -96,7 +96,7 @@ export default function Hero() {
     const handleMouseLeave = () => setTilt({ x: 0, y: 0 });
 
     return (
-        <section className="relative w-full min-h-screen md:h-screen flex items-start md:items-center overflow-hidden bg-[#080810] pt-20 md:pt-0">
+        <section className="relative w-full min-h-screen md:h-screen flex items-start md:items-center overflow-hidden bg-[#080810] pt-24 md:pt-0">
 
             {/* Dot grid */}
             <div className="absolute inset-0 pointer-events-none" style={{
@@ -118,13 +118,6 @@ export default function Hero() {
 
                     {/* LEFT — text scrolls up slightly on scroll */}
                     <div style={{ transform: `translateY(${-scrollY * 0.08}px)`, opacity: Math.max(1 - scrollY / 500, 0), transition: "opacity 0.1s" }}>
-
-                        {/* Badge */}
-                        <div className="inline-flex items-center gap-2.5 mb-8 px-4 py-2 rounded-full text-xs font-bold uppercase tracking-widest"
-                            style={{ background: "rgba(99,102,241,0.15)", border: "1px solid rgba(129,140,248,0.4)", color: "#a5b4fc" }}>
-                            <span className="w-2 h-2 rounded-full bg-indigo-400 animate-pulse" />
-                            🚀 El portal creado POR inmobiliarias, PARA inmobiliarias
-                        </div>
 
                         {/* Main headline */}
                         <h1 className="text-4xl sm:text-5xl lg:text-5xl xl:text-6xl font-extrabold leading-[1.08] tracking-tight text-white mb-6">

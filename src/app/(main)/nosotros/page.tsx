@@ -83,8 +83,7 @@ export default function AboutPage() {
                                 </p>
                                 <a
                                     href="https://www.linkedin.com/in/floreszamoranofacundo/"
-                                    target="_blank"
-                                    rel="noopener noreferrer"
+                                    target="_blank" rel="noopener noreferrer"
                                     className="inline-flex items-center gap-2 text-gray-600 hover:text-blue-600 transition-colors bg-gray-50 px-4 py-2 rounded-full text-sm font-medium hover:bg-blue-50"
                                 >
                                     <Linkedin size={16} />
@@ -114,8 +113,7 @@ export default function AboutPage() {
                                 </p>
                                 <a
                                     href="https://www.linkedin.com/in/nahuelserrano/"
-                                    target="_blank"
-                                    rel="noopener noreferrer"
+                                    target="_blank" rel="noopener noreferrer"
                                     className="inline-flex items-center gap-2 text-gray-600 hover:text-blue-600 transition-colors bg-gray-50 px-4 py-2 rounded-full text-sm font-medium hover:bg-blue-50"
                                 >
                                     <Linkedin size={16} />

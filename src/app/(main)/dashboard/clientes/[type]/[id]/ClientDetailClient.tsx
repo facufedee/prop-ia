@@ -227,8 +227,7 @@ export default function ClientDetailClient({ type, id }: ClientDetailClientProps
                     <div className="flex justify-between gap-2 mb-6">
                         <a
                             href={`https://wa.me/${data.telefono.replace(/\D/g, '')}`}
-                            target="_blank"
-                            rel="noopener noreferrer"
+                            target="_blank" rel="noopener noreferrer"
                             className="flex-1 flex flex-col items-center justify-center gap-1.5 p-3 rounded-xl border border-gray-100 hover:border-green-200 hover:bg-green-50 text-gray-600 hover:text-green-600 transition-all cursor-pointer group"
                         >
                             <div className="w-8 h-8 rounded-full bg-gray-50 group-hover:bg-green-100 flex items-center justify-center transition-colors">
@@ -454,7 +453,7 @@ export default function ClientDetailClient({ type, id }: ClientDetailClientProps
                                                         {consulta.propertyTitle && (
                                                             <Link
                                                                 href={`/propiedades/p/${consulta.propertyId}`}
-                                                                target="_blank"
+                                                                target="_blank" rel="noopener noreferrer"
                                                                 className="inline-flex items-center gap-1.5 mt-2 text-xs font-semibold text-indigo-600 hover:underline bg-indigo-50 rounded-lg px-2.5 py-1 border border-indigo-100"
                                                             >
                                                                 <Home className="w-3 h-3" />
@@ -502,8 +501,7 @@ export default function ClientDetailClient({ type, id }: ClientDetailClientProps
                                                             <a
                                                                 id="whatsapp-contact-btn"
                                                                 href={`https://wa.me/${data.telefono.replace(/\D/g, '')}?text=${encodeURIComponent(`Hola ${data.nombre}, te contacto desde Zeta Prop por tu consulta.`)}`}
-                                                                target="_blank"
-                                                                rel="noopener noreferrer"
+                                                                target="_blank" rel="noopener noreferrer"
                                                                 onClick={() => {
                                                                     if (leadData?.estado === 'nuevo') handleUpdateLeadEstado('contactado');
                                                                 }}
@@ -699,7 +697,7 @@ export default function ClientDetailClient({ type, id }: ClientDetailClientProps
                                         <Link
                                             key={p.id}
                                             href={`/propiedades/p/${p.id}`}
-                                            target="_blank"
+                                            target="_blank" rel="noopener noreferrer"
                                             className="group bg-white rounded-2xl border border-gray-100 shadow-sm hover:shadow-md transition-all overflow-hidden flex flex-col"
                                         >
                                             {/* Image */}

@@ -173,8 +173,7 @@ export default function KanbanCard({ lead, index, onDelete, onStatusChange }: Ka
                                     <>
                                         <a
                                             href={`https://wa.me/${lead.telefono.replace(/\D/g, "")}?text=${waText}`}
-                                            target="_blank"
-                                            rel="noopener noreferrer"
+                                            target="_blank" rel="noopener noreferrer"
                                             onClick={(e) => { e.stopPropagation(); onStatusChange && lead.estado === 'nuevo' && onStatusChange(lead.id, 'contactado'); }}
                                             title="WhatsApp"
                                             className="w-7 h-7 flex items-center justify-center rounded-lg bg-green-50 hover:bg-green-100 text-green-600 transition-colors"
