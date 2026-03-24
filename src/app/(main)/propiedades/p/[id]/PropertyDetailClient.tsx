@@ -167,7 +167,7 @@ export default function PropertyDetailPage({ id: propId }: Props) {
     };
 
     return (
-        <div className="min-h-screen bg-white pb-20 pt-24">
+        <div className="min-h-screen bg-white pb-32 lg:pb-20 pt-24">
             <main className="container mx-auto px-4">
                 {/* Header (Title & Price) */}
                 <div className="flex flex-col md:flex-row justify-between items-start mb-8 gap-4">
@@ -499,6 +499,24 @@ export default function PropertyDetailPage({ id: propId }: Props) {
                 {/* Legal Disclaimer */}
                 <PropertyDisclaimer />
             </main>
+
+            {/* Mobile Sticky Contact Bar */}
+            <div className="fixed bottom-0 left-0 w-full bg-white border-t border-gray-100 px-5 py-4 lg:hidden z-[45] flex items-center justify-between shadow-[0_-4px_20px_rgba(0,0,0,0.04)] sm:pb-4 pb-[max(1rem,env(safe-area-inset-bottom))]">
+                <button
+                    onClick={() => setShowContactModal(true)}
+                    className="bg-indigo-600 text-white font-semibold py-3.5 px-8 rounded-xl active:scale-95 transition-transform text-[15px] shadow-sm shadow-indigo-600/20"
+                >
+                    Contactar
+                </button>
+                <div className="flex flex-col items-end">
+                    <span className="text-xl font-bold text-gray-900 leading-none">
+                        {property.hidePrice ? "Consultar" : `${property.currency} ${Number(property.price)?.toLocaleString('es-AR')}`}
+                    </span>
+                    <span className="text-xs text-gray-500 font-medium mt-1">
+                        {property.operation_type}
+                    </span>
+                </div>
+            </div>
 
             {/* Gallery Modal */}
             {showGalleryModal && property && property.imageUrls && (

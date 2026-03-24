@@ -1,6 +1,14 @@
+"use client";
+
 import React from 'react';
+import { usePathname } from 'next/navigation';
 
 const WhatsappButton = () => {
+    const pathname = usePathname();
+    
+    // Hide this global button on property detail pages to not clash with the elegant sticky contact bar
+    if (pathname?.startsWith('/propiedades/p/')) return null;
+
     return (
         <a
             href="https://wa.me/5491123889745"
