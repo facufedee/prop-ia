@@ -228,14 +228,12 @@ export default function Hero() {
                 .blob {
                   position: absolute;
                   border-radius: 50%;
-                  filter: blur(100px);
-                  opacity: 0.18;
                   pointer-events: none;
                   animation: blobMove 12s ease-in-out infinite alternate;
                 }
-                .blob-1 { width: 500px; height: 500px; background: #6366f1; top: -10%; right: 5%; animation-duration: 14s; }
-                .blob-2 { width: 380px; height: 380px; background: #8b5cf6; bottom: 0; left: 10%; animation-duration: 10s; animation-delay: -4s; }
-                .blob-3 { width: 300px; height: 300px; background: #10b981; top: 40%; right: 30%; animation-duration: 16s; animation-delay: -8s; opacity: 0.09; }
+                .blob-1 { width: 500px; height: 500px; background: radial-gradient(circle, rgba(99,102,241,0.18) 0%, rgba(99,102,241,0) 70%); top: -10%; right: 5%; animation-duration: 14s; }
+                .blob-2 { width: 380px; height: 380px; background: radial-gradient(circle, rgba(139,92,246,0.18) 0%, rgba(139,92,246,0) 70%); bottom: 0; left: 10%; animation-duration: 10s; animation-delay: -4s; }
+                .blob-3 { width: 300px; height: 300px; background: radial-gradient(circle, rgba(16,185,129,0.09) 0%, rgba(16,185,129,0) 70%); top: 40%; right: 30%; animation-duration: 16s; animation-delay: -8s; }
 
                 @keyframes blobMove {
                   0%   { transform: translate(0, 0) scale(1); }

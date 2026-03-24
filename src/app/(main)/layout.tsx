@@ -10,7 +10,6 @@ import CookieBanner from '@/ui/components/consent/CookieBanner';
 import FloatingChatWidget from '@/ui/components/FloatingChatWidget';
 import Script from 'next/script';
 import WhatsappButton from '@/ui/components/ui/WhatsappButton';
-import '@/infrastructure/firebase/client'; // Import to ensure Firebase (and Performance) initializes early
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -204,9 +203,9 @@ export default function RootLayout({
         />
         <Script
           src="https://www.googletagmanager.com/gtag/js?id=AW-17943485669"
-          strategy="afterInteractive"
+          strategy="lazyOnload"
         />
-        <Script id="google-ads-tag" strategy="afterInteractive">
+        <Script id="google-ads-tag" strategy="lazyOnload">
           {`
             window.dataLayer = window.dataLayer || [];
             function gtag(){dataLayer.push(arguments);}
