@@ -97,7 +97,7 @@ export default function PropiedadesLandingPage() {
         <div className="min-h-screen bg-gray-50">
 
             {/* ═══ HERO ═══════════════════════════════════════════════════ */}
-            <section className="relative w-full h-[420px] md:h-[500px] flex items-center justify-center overflow-hidden">
+            <section className="relative w-full min-h-[540px] md:h-[500px] pt-32 pb-16 md:py-0 flex flex-col md:flex-row items-center justify-center overflow-hidden">
                 {/* Background Image */}
                 <Image
                     src="/hero-propiedades.png"
@@ -118,16 +118,16 @@ export default function PropiedadesLandingPage() {
                     </p>
 
                     {/* Search Card */}
-                    <div className="bg-white rounded-2xl shadow-2xl overflow-hidden">
+                    <div className="bg-white rounded-2xl shadow-xl border border-gray-100 overflow-hidden mx-2 sm:mx-0">
                         {/* Tabs */}
-                        <div className="flex border-b border-gray-100">
+                        <div className="flex">
                             {(["Comprar", "Alquiler"] as const).map(op => (
                                 <button
                                     key={op}
                                     onClick={() => setOperacion(op)}
-                                    className={`flex-1 py-3.5 text-sm font-semibold transition-all ${operacion === op
-                                        ? "text-indigo-600 border-b-2 border-indigo-600 bg-indigo-50/50"
-                                        : "text-gray-500 hover:text-gray-700"
+                                    className={`flex-1 py-4 text-sm font-semibold transition-all border-b-2 ${operacion === op
+                                        ? "text-indigo-600 border-indigo-600 bg-white"
+                                        : "text-gray-500 border-gray-100 bg-gray-50 hover:bg-gray-100/50 hover:text-gray-700"
                                         }`}
                                 >
                                     {op}
@@ -136,14 +136,14 @@ export default function PropiedadesLandingPage() {
                         </div>
 
                         {/* Inputs row */}
-                        <div className="flex flex-col md:flex-row md:items-center gap-3 md:gap-0 p-3">
+                        <div className="flex flex-col md:flex-row md:items-center gap-3 md:gap-0 p-4 pt-5 md:pt-4">
                             {/* Property type */}
-                            <div className="w-full md:w-auto md:shrink-0">
+                            <div className="w-full md:w-auto md:shrink-0 relative">
                                 <select
                                     value={tipo}
                                     onChange={e => setTipo(e.target.value)}
-                                    className="w-full md:w-auto h-12 pl-3 pr-8 border border-gray-200 rounded-xl text-sm font-medium text-gray-700 bg-gray-50 focus:outline-none focus:ring-2 focus:ring-indigo-400 appearance-none cursor-pointer md:min-w-[160px]"
-                                    style={{ backgroundImage: "url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%236b7280' stroke-width='2'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E\")", backgroundRepeat: "no-repeat", backgroundPosition: "right 8px center" }}
+                                    className="w-full md:w-auto h-[52px] md:h-12 pl-4 pr-10 border border-gray-200 md:border-none rounded-xl md:rounded-none text-[15px] font-medium text-gray-700 bg-gray-50 md:bg-transparent focus:outline-none focus:ring-2 focus:ring-indigo-500 appearance-none cursor-pointer md:min-w-[170px]"
+                                    style={{ backgroundImage: "url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%236b7280' stroke-width='2'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E\")", backgroundRepeat: "no-repeat", backgroundPosition: "right 14px center" }}
                                 >
                                     <option value="">Tipo de inmueble</option>
                                     {PROPERTY_TYPES.map(t => (
@@ -156,23 +156,24 @@ export default function PropiedadesLandingPage() {
                             <div className="hidden md:block w-px h-8 bg-gray-200 mx-2 shrink-0" />
 
                             {/* Location input */}
-                            <div className="w-full md:flex-1 relative border border-gray-200 md:border-none rounded-xl md:rounded-none bg-gray-50 md:bg-transparent">
-                                <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 w-4 h-4" />
+                            <div className="w-full md:flex-1 relative">
+                                <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 w-5 h-5 md:w-4 md:h-4" />
                                 <input
                                     type="text"
-                                    placeholder="Ingresá ubicación o características (ej: Ituzaingó, pileta...)"
+                                    placeholder="Buscar ubicación o características..."
                                     value={ubicacion}
                                     onChange={e => setUbicacion(e.target.value)}
                                     onKeyDown={e => e.key === "Enter" && handleSearch()}
-                                    className="w-full h-12 pl-10 pr-4 text-sm text-gray-800 bg-transparent focus:outline-none placeholder:text-gray-400"
+                                    className="w-full h-[52px] md:h-12 pl-11 md:pl-10 pr-4 text-[15px] text-gray-800 bg-gray-50 md:bg-transparent border border-gray-200 md:border-none rounded-xl md:rounded-none focus:outline-none focus:ring-2 focus:ring-indigo-500 placeholder:text-gray-400"
                                 />
                             </div>
 
                             {/* Search button */}
                             <button
                                 onClick={handleSearch}
-                                className="w-full md:w-auto shrink-0 h-12 px-6 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold rounded-xl transition-colors text-sm md:ml-2"
+                                className="w-full md:w-auto shrink-0 h-[52px] md:h-12 px-8 mt-1 md:mt-0 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-xl md:rounded-lg transition-colors text-[15px] md:ml-2 flex items-center justify-center gap-2 shadow-sm shadow-indigo-600/20 active:scale-[0.98]"
                             >
+                                <Search className="w-4 h-4 md:hidden" />
                                 Buscar
                             </button>
                         </div>
@@ -181,7 +182,7 @@ export default function PropiedadesLandingPage() {
             </section>
 
             {/* ═══ CATEGORÍAS RÁPIDAS ════════════════════════════════════ */}
-            <section className="container mx-auto px-4 max-w-6xl -mt-6 relative z-10 mb-12">
+            <section className="container mx-auto px-4 max-w-6xl mt-8 md:-mt-6 relative z-10 mb-12">
                 <div className="flex flex-wrap justify-center gap-3">
                     {QUICK_CATEGORIES.map(cat => {
                         const Icon = cat.icon;

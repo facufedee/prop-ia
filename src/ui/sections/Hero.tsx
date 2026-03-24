@@ -11,25 +11,7 @@ const TRUST_PILLS = [
     "14 días gratis",
 ];
 
-// Animated counter hook
-function useCounter(target: number, duration = 1400) {
-    const [count, setCount] = useState(0);
-    const started = useRef(false);
-    useEffect(() => {
-        if (started.current) return;
-        started.current = true;
-        const steps = 40;
-        const interval = duration / steps;
-        let current = 0;
-        const timer = setInterval(() => {
-            current++;
-            setCount(Math.round((target * current) / steps));
-            if (current >= steps) clearInterval(timer);
-        }, interval);
-        return () => clearInterval(timer);
-    }, [target, duration]);
-    return count;
-}
+// Removed useCounter to avoid React re-renders on every tick.
 
 const KPI_ROWS = [
     { label: "Casas vendidas este mes", value: 23, suffix: "", color: "#10b981", icon: Home, trend: "+18% vs mes anterior" },
@@ -39,10 +21,35 @@ const KPI_ROWS = [
 ];
 
 function KpiRow({ label, value, suffix, color, icon: Icon, trend, format }: typeof KPI_ROWS[0]) {
-    const count = useCounter(value);
-    const display = format === "currency"
-        ? `$${(count / 1000000).toFixed(count >= 1000000 ? 1 : 0)}M`
-        : `${count.toLocaleString("es-AR")}${suffix}`;
+    const valueRef = useRef<HTMLParagraphElement>(null);
+
+    useEffect(() => {
+        let timer: NodeJS.Timeout;
+        const duration = 1400;
+        const steps = 40;
+        const interval = duration / steps;
+        
+        const delay = setTimeout(() => {
+            let current = 0;
+            timer = setInterval(() => {
+                current++;
+                const count = Math.round((value * current) / steps);
+                if (valueRef.current) {
+                    const display = format === "currency"
+                        ? `$${(count / 1000000).toFixed(count >= 1000000 ? 1 : 0)}M`
+                        : `${count.toLocaleString("es-AR")}${suffix}`;
+                    valueRef.current.textContent = display;
+                }
+                if (current >= steps) clearInterval(timer);
+            }, interval);
+        }, 100);
+
+        return () => {
+            clearTimeout(delay);
+            clearInterval(timer);
+        };
+    }, [value, suffix, format]);
+
     return (
         <div className="flex items-center gap-3 py-3 border-b border-white/[0.08] last:border-0">
             <div className="w-8 h-8 rounded-lg flex items-center justify-center shrink-0"
@@ -53,8 +60,8 @@ function KpiRow({ label, value, suffix, color, icon: Icon, trend, format }: type
                 <p className="text-xs text-gray-300 leading-none mb-1 font-medium truncate">{label}</p>
                 <p className="text-[11px] text-gray-500 leading-none truncate">{trend}</p>
             </div>
-            <p className="text-lg font-extrabold tabular-nums shrink-0" style={{ color }}>
-                {display}
+            <p ref={valueRef} className="text-lg font-extrabold tabular-nums shrink-0" style={{ color }}>
+                {format === "currency" ? "$0M" : `0${suffix}`}
             </p>
         </div>
     );
@@ -69,19 +76,46 @@ const ACTIVITY = [
 
 export default function Hero() {
     const [activeActivity, setActiveActivity] = useState(0);
-    const [scrollY, setScrollY] = useState(0);
-    const cardRef = useRef<HTMLDivElement>(null);
+    const tiltCardRef = useRef<HTMLDivElement>(null);
+    const bgRef = useRef<HTMLDivElement>(null);
+    const textGroupRef = useRef<HTMLDivElement>(null);
+    const cardContainerRef = useRef<HTMLDivElement>(null);
     const [tilt, setTilt] = useState({ x: 0, y: 0 });
 
-    // Cycle activity feed
+    // Cycle activity feed (delayed start for Lighthouse LCP window)
     useEffect(() => {
-        const t = setInterval(() => setActiveActivity(a => (a + 1) % ACTIVITY.length), 2200);
-        return () => clearInterval(t);
+        let t: NodeJS.Timeout;
+        const delayTimeout = setTimeout(() => {
+            t = setInterval(() => setActiveActivity(a => (a + 1) % ACTIVITY.length), 2500);
+        }, 4000);
+        return () => {
+            clearTimeout(delayTimeout);
+            clearInterval(t);
+        };
     }, []);
 
-    // Parallax on scroll
+    // Parallax on scroll (no React state updates)
     useEffect(() => {
-        const onScroll = () => setScrollY(window.scrollY);
+        let ticking = false;
+        const onScroll = () => {
+            if (!ticking) {
+                window.requestAnimationFrame(() => {
+                    const sy = window.scrollY;
+                    if (bgRef.current) {
+                        bgRef.current.style.background = `rgba(8,8,16,${Math.min(sy / 400, 0.6)})`;
+                    }
+                    if (textGroupRef.current) {
+                        textGroupRef.current.style.transform = `translateY(${-sy * 0.08}px)`;
+                        textGroupRef.current.style.opacity = `${Math.max(1 - sy / 500, 0)}`;
+                    }
+                    if (cardContainerRef.current) {
+                        cardContainerRef.current.style.transform = `translateY(${-sy * 0.04}px)`;
+                    }
+                    ticking = false;
+                });
+                ticking = true;
+            }
+        };
         window.addEventListener("scroll", onScroll, { passive: true });
         return () => window.removeEventListener("scroll", onScroll);
     }, []);
@@ -110,14 +144,14 @@ export default function Hero() {
             <div className="blob blob-3" />
 
             {/* Scroll-parallax vignette on blobs */}
-            <div className="absolute inset-0 pointer-events-none transition-opacity duration-300"
-                style={{ background: `rgba(8,8,16,${Math.min(scrollY / 400, 0.6)})` }} />
+            <div ref={bgRef} className="absolute inset-0 pointer-events-none transition-opacity duration-300"
+                style={{ background: `rgba(8,8,16,0)` }} />
 
             <div className="relative z-10 max-w-7xl mx-auto px-6 lg:px-16 w-full">
                 <div className="grid lg:grid-cols-[1fr_420px] gap-14 items-center">
 
                     {/* LEFT — text scrolls up slightly on scroll */}
-                    <div style={{ transform: `translateY(${-scrollY * 0.08}px)`, opacity: Math.max(1 - scrollY / 500, 0), transition: "opacity 0.1s" }}>
+                    <div ref={textGroupRef} style={{ transform: `translateY(0px)`, opacity: 1, transition: "opacity 0.1s" }}>
 
                         {/* Main headline */}
                         <h1 className="text-4xl sm:text-5xl lg:text-5xl xl:text-6xl font-extrabold leading-[1.08] tracking-tight text-white mb-6">
@@ -161,9 +195,9 @@ export default function Hero() {
 
                     {/* RIGHT — tilt card */}
                     <div
-                        ref={cardRef}
+                        ref={cardContainerRef}
                         className="hidden lg:block cursor-default"
-                        style={{ perspective: "900px", transform: `translateY(${-scrollY * 0.04}px)` }}
+                        style={{ perspective: "900px", transform: `translateY(0px)` }}
                         onMouseMove={handleMouseMove}
                         onMouseLeave={handleMouseLeave}
                     >
