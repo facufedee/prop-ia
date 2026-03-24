@@ -144,7 +144,7 @@ export default function ContactForm() {
                                     <Mail className="w-6 h-6 text-white" />
                                 </div>
                                 <div>
-                                    <h4 className="font-semibold text-gray-900 mb-1">Email</h4>
+                                    <h3 className="font-semibold text-gray-900 mb-1">Email</h3>
                                     <p className="text-gray-600">facundo@zetaprop.com.ar</p>
                                     <p className="text-sm text-gray-500">Respuesta rápida</p>
                                 </div>
@@ -155,7 +155,7 @@ export default function ContactForm() {
                                     <WhatsAppIcon className="w-6 h-6 text-white" />
                                 </div>
                                 <div>
-                                    <h4 className="font-semibold text-gray-900 mb-1">WhatsApp</h4>
+                                    <h3 className="font-semibold text-gray-900 mb-1">WhatsApp</h3>
                                     <a href="https://wa.me/5491123889745" target="_blank" rel="noopener noreferrer" className="text-gray-600 hover:text-green-600 transition-colors">
                                         +54 9 11 2388-9745
                                     </a>
@@ -168,7 +168,7 @@ export default function ContactForm() {
                                     <Building className="w-6 h-6 text-white" />
                                 </div>
                                 <div>
-                                    <h4 className="font-semibold text-gray-900 mb-1">Oficina</h4>
+                                    <h3 className="font-semibold text-gray-900 mb-1">Oficina</h3>
                                     <p className="text-gray-600">Oeste de Buenos Aires, Argentina</p>
                                     <p className="text-sm text-gray-500">Visitas con cita previa</p>
                                 </div>
@@ -260,7 +260,7 @@ export default function ContactForm() {
                                     <label htmlFor="message" className="block text-sm font-medium text-gray-700">
                                         Mensaje *
                                     </label>
-                                    <span className={`text-xs ${formData.message.length > 450 ? 'text-red-500' : 'text-gray-400'}`}>
+                                    <span className={`text-xs ${formData.message.length > 450 ? 'text-red-500' : 'text-gray-500'}`}>
                                         {formData.message.length}/500
                                     </span>
                                 </div>
@@ -298,7 +298,7 @@ export default function ContactForm() {
 
                             <p className="text-xs text-gray-500 text-center">
                                 Al enviar este formulario, aceptas nuestra{" "}
-                                <a href="/privacidad" className="text-indigo-600 hover:underline">
+                                <a href="/privacidad" className="text-indigo-600 underline hover:text-indigo-700">
                                     Política de Privacidad
                                 </a>
                             </p>

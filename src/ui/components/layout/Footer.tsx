@@ -80,10 +80,10 @@ export default function Footer() {
                 </div>
 
                 <div className="border-t border-gray-800 pt-8 flex flex-col md:flex-row justify-between items-center gap-4">
-                    <p className="text-sm text-gray-500">
+                    <p className="text-sm text-gray-400">
                         © {new Date().getFullYear()} Zeta Prop. Todos los derechos reservados.
                     </p>
-                    <div className="text-sm text-gray-500 text-center md:text-right">
+                    <div className="text-sm text-gray-400 text-center md:text-right">
                         Hecho con ❤️ en Ituzaingó, Buenos Aires
                     </div>
                 </div>

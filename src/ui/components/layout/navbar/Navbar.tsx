@@ -238,7 +238,11 @@ export default function Navbar() {
         </div>
 
         {/* Mobile Toggle */}
-        <button className={`md:hidden p-2 ${isDarkHero ? 'text-white' : scrolled || isHeroPage ? 'text-gray-700' : 'text-white'}`} onClick={() => setOpen(!open)}>
+        <button 
+          className={`md:hidden p-2 ${isDarkHero ? 'text-white' : scrolled || isHeroPage ? 'text-gray-700' : 'text-white'}`} 
+          onClick={() => setOpen(!open)}
+          aria-label={open ? "Cerrar menú principal" : "Abrir menú principal"}
+        >
           {open ? <X size={26} /> : <Menu size={26} />}
         </button>
       </div>

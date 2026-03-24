@@ -39,7 +39,7 @@ export default function CookieBanner() {
                         <Cookie className="w-5 h-5 text-blue-600" />
                         Configuración de Cookies
                     </h3>
-                    <button onClick={() => setIsVisible(false)} className="text-gray-400 hover:text-gray-600">
+                    <button onClick={() => setIsVisible(false)} aria-label="Cerrar banner de cookies" className="text-gray-400 hover:text-gray-600">
                         <X className="w-4 h-4" />
                     </button>
                 </div>

@@ -13,16 +13,16 @@ export const metadata: Metadata = {
     },
 };
 
-const Features = dynamic(() => import("@/ui/sections/Features"));
-const Testimonials = dynamic(() => import("@/ui/sections/Testimonials"));
-const HumanPromise = dynamic(() => import("@/ui/sections/HumanPromise"));
-const PropertyNetworkCTA = dynamic(() => import("@/ui/sections/PropertyNetworkCTA"));
-const ContactForm = dynamic(() => import("@/ui/sections/ContactForm"));
+import Features from "@/ui/sections/Features";
+import Testimonials from "@/ui/sections/Testimonials";
+import HumanPromise from "@/ui/sections/HumanPromise";
+import PropertyNetworkCTA from "@/ui/sections/PropertyNetworkCTA";
+import ContactForm from "@/ui/sections/ContactForm";
 
-const GoogleAuthPrompt = dynamic(() => import("@/ui/components/auth/GoogleAuthPrompt"));
+import GoogleAuthPrompt from "@/ui/components/auth/GoogleAuthPrompt";
 
-const LatestBlogPosts = dynamic(() => import("@/ui/sections/LatestBlogPosts"));
-const FAQ = dynamic(() => import("@/ui/sections/FAQ"));
+import LatestBlogPosts from "@/ui/sections/LatestBlogPosts";
+import FAQ from "@/ui/sections/FAQ";
 
 export default function LandingPage() {
     return (

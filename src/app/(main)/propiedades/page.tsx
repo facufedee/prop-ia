@@ -136,13 +136,13 @@ export default function PropiedadesLandingPage() {
                         </div>
 
                         {/* Inputs row */}
-                        <div className="flex items-center gap-0 p-3">
+                        <div className="flex flex-col md:flex-row md:items-center gap-3 md:gap-0 p-3">
                             {/* Property type */}
-                            <div className="shrink-0">
+                            <div className="w-full md:w-auto md:shrink-0">
                                 <select
                                     value={tipo}
                                     onChange={e => setTipo(e.target.value)}
-                                    className="h-12 pl-3 pr-8 border border-gray-200 rounded-xl text-sm font-medium text-gray-700 bg-gray-50 focus:outline-none focus:ring-2 focus:ring-indigo-400 appearance-none cursor-pointer min-w-[160px]"
+                                    className="w-full md:w-auto h-12 pl-3 pr-8 border border-gray-200 rounded-xl text-sm font-medium text-gray-700 bg-gray-50 focus:outline-none focus:ring-2 focus:ring-indigo-400 appearance-none cursor-pointer md:min-w-[160px]"
                                     style={{ backgroundImage: "url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%236b7280' stroke-width='2'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E\")", backgroundRepeat: "no-repeat", backgroundPosition: "right 8px center" }}
                                 >
                                     <option value="">Tipo de inmueble</option>
@@ -153,10 +153,10 @@ export default function PropiedadesLandingPage() {
                             </div>
 
                             {/* Divider */}
-                            <div className="w-px h-8 bg-gray-200 mx-2 shrink-0" />
+                            <div className="hidden md:block w-px h-8 bg-gray-200 mx-2 shrink-0" />
 
                             {/* Location input */}
-                            <div className="flex-1 relative">
+                            <div className="w-full md:flex-1 relative border border-gray-200 md:border-none rounded-xl md:rounded-none bg-gray-50 md:bg-transparent">
                                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 w-4 h-4" />
                                 <input
                                     type="text"
@@ -171,7 +171,7 @@ export default function PropiedadesLandingPage() {
                             {/* Search button */}
                             <button
                                 onClick={handleSearch}
-                                className="shrink-0 h-12 px-6 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold rounded-xl transition-colors text-sm ml-2"
+                                className="w-full md:w-auto shrink-0 h-12 px-6 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold rounded-xl transition-colors text-sm md:ml-2"
                             >
                                 Buscar
                             </button>
