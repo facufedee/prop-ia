@@ -276,11 +276,11 @@ export const roleService = {
             });
         }
 
-        // 4. Cliente Free
-        if (!roleNames.includes("Cliente Free")) {
+        // 4. Cliente Básico
+        if (!roleNames.includes("Cliente Básico")) {
             await roleService.createRole({
-                name: "Cliente Free",
-                description: "Plan gratuito inicial",
+                name: "Cliente Básico",
+                description: "Plan inicial",
                 permissions: [
                     "/dashboard",
                     "/dashboard/propiedades",
@@ -317,7 +317,7 @@ export const roleService = {
     // Get the default role (Cliente)
     getDefaultRole: async (): Promise<Role | null> => {
         if (!db) throw new Error("Firestore not initialized");
-        const q = query(collection(db, ROLES_COLLECTION), where("name", "==", "Cliente Free"));
+        const q = query(collection(db, ROLES_COLLECTION), where("name", "==", "Cliente Básico"));
         const querySnapshot = await getDocs(q);
         if (!querySnapshot.empty) {
             const doc = querySnapshot.docs[0];

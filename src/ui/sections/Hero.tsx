@@ -28,7 +28,7 @@ function KpiRow({ label, value, suffix, color, icon: Icon, trend, format }: type
         const duration = 1400;
         const steps = 40;
         const interval = duration / steps;
-        
+
         const delay = setTimeout(() => {
             let current = 0;
             timer = setInterval(() => {
@@ -130,7 +130,7 @@ export default function Hero() {
     const handleMouseLeave = () => setTilt({ x: 0, y: 0 });
 
     return (
-        <section className="relative w-full min-h-screen md:h-screen flex items-start md:items-center overflow-hidden bg-[#080810] pt-24 md:pt-0">
+        <section className="relative w-full min-h-[100dvh] lg:min-h-screen flex items-center overflow-hidden bg-[#080810] pt-20 lg:pt-0">
 
             {/* Dot grid */}
             <div className="absolute inset-0 pointer-events-none" style={{
@@ -151,41 +151,46 @@ export default function Hero() {
                 <div className="grid lg:grid-cols-[1fr_420px] gap-14 items-center">
 
                     {/* LEFT — text scrolls up slightly on scroll */}
-                    <div ref={textGroupRef} style={{ transform: `translateY(0px)`, opacity: 1, transition: "opacity 0.1s" }}>
+                    <div ref={textGroupRef} className="flex flex-col text-center lg:text-left items-center lg:items-start" style={{ transform: `translateY(0px)`, opacity: 1, transition: "opacity 0.1s" }}>
 
                         {/* Main headline */}
                         <h1 className="text-4xl sm:text-5xl lg:text-5xl xl:text-6xl font-extrabold leading-[1.08] tracking-tight text-white mb-6">
-                            ¡El portal que se adapta<br />
-                            <span className="text-gradient">a las necesidades</span><br />
+                            ¡El portal que se adapta<br className="hidden lg:block" />
+                            <span className="text-gradient"> a las necesidades</span><br />
                             de tu inmobiliaria!
                         </h1>
 
                         {/* Subtitle */}
-                        <p className="text-gray-300 text-base sm:text-lg leading-relaxed max-w-xl mb-10">
-                            Mucho más que una web de avisos: somos el{" "}
-                            <span className="text-white font-semibold">ecosistema de gestión integral (ERP)</span>{" "}
-                            diseñado para que recuperes el control de tu oficina. En Zeta Prop no sos un número de cliente;{" "}
-                            <span className="text-indigo-300 font-semibold">crecemos desde las bases con vos</span>,
-                            escuchando cada una de tus sugerencias para evolucionar juntos.
-                        </p>
+                        <div className="text-gray-300 text-[15px] sm:text-lg leading-relaxed max-w-lg mx-auto lg:mx-0 mb-10 space-y-4">
+                            <p>
+                                Mucho más que una web de avisos: somos el{" "}
+                                <span className="text-white font-semibold">sistema operativo de tu inmobiliaria</span>,{" "}
+                                diseñado para que recuperes el control de tu oficina.
+                            </p>
+                            <p>
+                                En Zeta Prop no sos un número de cliente;{" "}
+                                <span className="text-indigo-300 font-semibold">crecemos desde las bases con vos</span>,
+                                escuchando cada una de tus sugerencias para evolucionar juntos.
+                            </p>
+                        </div>
 
                         {/* CTAs */}
-                        <div className="flex flex-col sm:flex-row gap-4 mb-12">
+                        <div className="flex flex-col w-full sm:w-auto sm:flex-row gap-4 mb-10 w-full px-2 sm:px-0">
                             <Link href="/register"
-                                className="group inline-flex items-center justify-center gap-3 px-8 py-4 bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-base rounded-2xl transition-all duration-200 hover:shadow-2xl hover:shadow-indigo-500/30 hover:-translate-y-1 active:scale-95">
+                                className="group flex items-center justify-center gap-3 px-6 py-3.5 sm:px-8 sm:py-4 bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-[15px] sm:text-base rounded-2xl transition-all duration-200 hover:shadow-2xl hover:shadow-indigo-500/30 active:scale-95 w-full sm:w-auto">
                                 Registrá tu Inmobiliaria Gratis
                                 <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
                             </Link>
                             <Link href="/precios"
-                                className="inline-flex items-center justify-center gap-2 px-8 py-4 text-gray-200 hover:text-white font-semibold text-base rounded-2xl border border-white/15 hover:border-white/30 hover:bg-white/8 transition-all duration-200">
+                                className="flex items-center justify-center gap-2 px-6 py-3.5 sm:px-8 sm:py-4 text-gray-200 hover:text-white font-semibold text-[15px] sm:text-base rounded-2xl border border-white/15 hover:border-white/30 hover:bg-white/8 transition-all duration-200 w-full sm:w-auto">
                                 Ver planes y precios
                             </Link>
                         </div>
 
                         {/* Trust pills */}
-                        <div className="flex flex-wrap gap-3">
+                        <div className="flex flex-wrap items-center justify-center lg:justify-start gap-2.5">
                             {TRUST_PILLS.map(label => (
-                                <div key={label} className="flex items-center gap-1.5 text-sm text-gray-300 border border-white/15 rounded-full px-3 py-1.5 bg-white/[0.04] hover:bg-white/[0.08] transition-colors cursor-default">
+                                <div key={label} className="flex items-center gap-1.5 text-[13px] sm:text-sm text-gray-300 border border-white/15 rounded-full px-3 py-1.5 bg-white/[0.04] hover:bg-white/[0.08] transition-colors cursor-default">
                                     <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400 shrink-0" />
                                     {label}
                                 </div>

@@ -32,6 +32,7 @@ import {
     BarChart3,
     Calculator,
     Star,
+    Camera,
 } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -276,333 +277,346 @@ export default function DashboardPage() {
 
     return (
         <div className="min-h-screen bg-[#F8F9FC] p-5 md:p-8">
-            <div className="max-w-7xl mx-auto space-y-6">
+            <div className="max-w-7xl mx-auto space-y-12 pb-10">
 
-                {/* ─── HEADER ──────────────────────────────────────────── */}
-                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-                    <div>
-                        <h1 className="text-2xl md:text-3xl font-bold text-gray-900 tracking-tight">
-                            {getGreeting()}, {user?.displayName?.split(' ')[0] || 'Colega'}! 👋
+                {/* ─── 1. BANNER DE BIENVENIDA ──────────────────────────── */}
+                <div className="relative w-full bg-gradient-to-br from-indigo-900 via-indigo-800 to-indigo-950 rounded-3xl p-8 md:p-10 overflow-hidden shadow-xl shadow-indigo-900/20">
+                    <div className="relative z-10 md:w-2/3">
+                        <span className="inline-block px-3 py-1 mb-4 text-[10px] font-bold uppercase tracking-widest text-indigo-200 bg-white/10 rounded-full border border-white/20 backdrop-blur-md">
+                            Panel de Control
+                        </span>
+                        <h1 className="text-3xl md:text-4xl font-extrabold text-white tracking-tight mb-3">
+                            {getGreeting()}, {user?.displayName?.split(' ')[0] || 'Colega'} 👋
                         </h1>
-                        <p className="text-sm text-gray-500 mt-1">
-                            {format(new Date(), "EEEE d 'de' MMMM, yyyy", { locale: es })}
-                            {stats.subscription && (
-                                <span className="ml-2 text-indigo-600 font-medium capitalize">· Plan {stats.subscription.planTier}</span>
-                            )}
+                        <p className="text-indigo-200 text-sm md:text-base font-medium max-w-lg mb-8">
+                            {format(new Date(), "EEEE d 'de' MMMM, yyyy", { locale: es })}. Aquí tenés el resumen operativo de tu inmobiliaria listo para revisar.
                         </p>
+                        <div className="flex flex-wrap gap-4">
+                            <Link href="/dashboard/propiedades/nueva" className="bg-white hover:bg-indigo-50 text-indigo-900 font-bold px-6 py-3.5 rounded-xl transition-all shadow-lg active:scale-95 flex items-center gap-2 text-sm">
+                                <Plus size={18} /> Nueva Propiedad
+                            </Link>
+                            <Link href="/dashboard/leads" className="bg-indigo-500/20 hover:bg-indigo-500/30 text-white font-bold px-6 py-3.5 rounded-xl transition-all border border-indigo-400/30 backdrop-blur-md active:scale-95 flex items-center gap-2 text-sm">
+                                Ver Consultas
+                            </Link>
+                        </div>
                     </div>
-                    <Link
-                        href="/dashboard/propiedades/nueva"
-                        className="inline-flex items-center gap-2 px-5 py-2.5 bg-indigo-600 text-white rounded-xl hover:bg-indigo-700 transition-all shadow-lg shadow-indigo-600/20 font-medium text-sm"
-                    >
-                        <Plus size={18} />
-                        Nueva Propiedad
-                    </Link>
+
+                    {/* Abstract illustration element */}
+                    <div className="absolute right-0 top-0 bottom-0 w-1/3 opacity-30 md:opacity-100 pointer-events-none flex items-center justify-center">
+                        <div className="absolute right-10 w-64 h-64 bg-indigo-500/50 rounded-full mix-blend-overlay filter blur-3xl opacity-80 animate-pulse"></div>
+                        <Building2 size={220} className="text-white/10 rotate-12 relative z-0" strokeWidth={0.5} />
+                    </div>
                 </div>
 
-                {/* ─── KPI CARDS (4 columnas) ───────────────────────────── */}
-                <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-                    {/* Propiedades */}
-                    <Link
-                        href="/dashboard/propiedades"
-                        className={`group bg-white rounded-2xl p-5 border border-gray-100 shadow-sm hover:shadow-md hover:border-indigo-200 transition-all duration-200 hover:-translate-y-0.5 ${!userPermissions.includes('/dashboard/propiedades') ? 'pointer-events-none opacity-70' : ''}`}
-                    >
-                        <div className="flex items-start justify-between mb-4">
-                            <div className="p-2.5 bg-indigo-50 rounded-xl group-hover:bg-indigo-100 transition-colors">
-                                <Building2 size={22} className="text-indigo-600" />
-                            </div>
-                            <span className="text-[11px] font-semibold text-indigo-600 bg-indigo-50 px-2.5 py-1 rounded-full flex items-center gap-1">
-                                <ArrowUpRight size={11} />
-                                Activas
-                            </span>
-                        </div>
-                        <div className="space-y-1">
-                            <p className="text-3xl font-bold text-gray-900">{renderLimit(stats.totalProperties, propertiesLimit)}</p>
-                            <p className="text-sm text-gray-500 font-medium">Propiedades</p>
-                        </div>
-                        <div className="mt-3 flex items-center gap-1 text-xs text-indigo-600 font-medium opacity-0 group-hover:opacity-100 transition-opacity">
-                            Ver propiedades <ChevronRight size={12} />
-                        </div>
-                    </Link>
+                {/* ─── 2. MÓDULO DE PROPIEDADES ─────────────────────────── */}
+                <section>
+                    <div className="flex items-center gap-3 mb-5">
+                        <div className="p-2 bg-indigo-100 rounded-lg"><Building2 size={18} className="text-indigo-600" /></div>
+                        <h2 className="text-xl font-bold text-gray-900">Módulo de Propiedades</h2>
+                    </div>
 
-                    {/* Alquileres */}
-                    <Link
-                        href="/dashboard/alquileres"
-                        className={`group bg-white rounded-2xl p-5 border border-gray-100 shadow-sm hover:shadow-md hover:border-emerald-200 transition-all duration-200 hover:-translate-y-0.5 ${!userPermissions.includes('/dashboard/alquileres') ? 'pointer-events-none opacity-70' : ''}`}
-                    >
-                        <div className="flex items-start justify-between mb-4">
-                            <div className="p-2.5 bg-emerald-50 rounded-xl group-hover:bg-emerald-100 transition-colors">
-                                <Key size={22} className="text-emerald-600" />
-                            </div>
-                            <span className="text-[11px] font-semibold text-emerald-600 bg-emerald-50 px-2.5 py-1 rounded-full flex items-center gap-1">
-                                <ArrowUpRight size={11} />
-                                Activos
-                            </span>
-                        </div>
-                        <div className="space-y-1">
-                            <p className="text-3xl font-bold text-gray-900">{renderLimit(stats.activeRentals, propertiesLimit)}</p>
-                            <p className="text-sm text-gray-500 font-medium">Alquileres</p>
-                        </div>
-                        <div className="mt-3 flex items-center gap-1 text-xs text-emerald-600 font-medium opacity-0 group-hover:opacity-100 transition-opacity">
-                            Ver alquileres <ChevronRight size={12} />
-                        </div>
-                    </Link>
-
-                    {/* Clientes */}
-                    <Link
-                        href="/dashboard/clientes"
-                        className={`group bg-white rounded-2xl p-5 border border-gray-100 shadow-sm hover:shadow-md hover:border-violet-200 transition-all duration-200 hover:-translate-y-0.5 ${!userPermissions.includes('/dashboard/clientes') ? 'pointer-events-none opacity-70' : ''}`}
-                    >
-                        <div className="flex items-start justify-between mb-4">
-                            <div className="p-2.5 bg-violet-50 rounded-xl group-hover:bg-violet-100 transition-colors">
-                                <UserCheck size={22} className="text-violet-600" />
-                            </div>
-                            <span className="text-[11px] font-semibold text-violet-600 bg-violet-50 px-2.5 py-1 rounded-full flex items-center gap-1">
-                                <ArrowUpRight size={11} />
-                                Total
-                            </span>
-                        </div>
-                        <div className="space-y-1">
-                            <p className="text-3xl font-bold text-gray-900">{renderLimit(stats.totalClientes, clientsLimit)}</p>
-                            <p className="text-sm text-gray-500 font-medium">Clientes</p>
-                        </div>
-                        <div className="mt-3 flex items-center gap-1 text-xs text-violet-600 font-medium opacity-0 group-hover:opacity-100 transition-opacity">
-                            Ver clientes <ChevronRight size={12} />
-                        </div>
-                    </Link>
-
-                    {/* Comisiones */}
-                    <Link
-                        href="/dashboard/finanzas"
-                        className={`group bg-white rounded-2xl p-5 border border-gray-100 shadow-sm hover:shadow-md hover:border-amber-200 transition-all duration-200 hover:-translate-y-0.5 ${!userPermissions.includes('/dashboard/finanzas') ? 'pointer-events-none opacity-70' : ''}`}
-                    >
-                        <div className="flex items-start justify-between mb-4">
-                            <div className="p-2.5 bg-amber-50 rounded-xl group-hover:bg-amber-100 transition-colors">
-                                <TrendingUp size={22} className="text-amber-600" />
-                            </div>
-                            <span className="text-[11px] font-semibold text-amber-600 bg-amber-50 px-2.5 py-1 rounded-full whitespace-nowrap">
-                                Este mes
-                            </span>
-                        </div>
-                        <div className="space-y-1">
-                            <p className="text-2xl font-bold text-gray-900 leading-tight">{formatCurrency(stats.honorariosMonth)}</p>
-                            <p className="text-sm text-gray-500 font-medium">Comisiones</p>
-                        </div>
-                        <div className="mt-3 flex items-center gap-1 text-xs text-amber-600 font-medium opacity-0 group-hover:opacity-100 transition-opacity">
-                            Ver finanzas <ChevronRight size={12} />
-                        </div>
-                    </Link>
-                </div>
-
-                {/* ─── FILA PRINCIPAL (3 columnas) ─────────────────────── */}
-                <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
-
-                    {/* PRÓXIMOS VENCIMIENTOS */}
-                    <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden flex flex-col">
-                        <div className="px-5 py-4 border-b border-gray-100 flex items-center justify-between">
-                            <div className="flex items-center gap-2.5">
-                                <div className="p-2 bg-orange-50 rounded-lg">
-                                    <Calendar size={18} className="text-orange-500" />
-                                </div>
+                    <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
+                        {/* Status properties (2 cols) */}
+                        <div className="lg:col-span-2 bg-white rounded-3xl border border-gray-100 shadow-sm p-8 flex flex-col justify-between relative overflow-hidden group hover:border-indigo-200 transition-colors">
+                            <div className="flex justify-between items-start mb-8 relative z-10">
                                 <div>
-                                    <h2 className="font-semibold text-gray-900 text-sm">Próximos Vencimientos</h2>
-                                    <p className="text-xs text-gray-400">Próximos 10 días</p>
+                                    <p className="text-xs font-bold text-gray-500 uppercase tracking-widest mb-1">Inventario Activo</p>
+                                    <p className="text-6xl font-extrabold text-gray-900 tracking-tight">{stats.totalProperties}</p>
                                 </div>
-                            </div>
-                            {stats.proximosVencimientos.length > 0 && (
-                                <span className="text-xs font-bold bg-orange-100 text-orange-600 px-2 py-0.5 rounded-full">
-                                    {stats.proximosVencimientos.length}
+                                <span className="bg-green-100 text-green-700 text-xs font-bold px-3 py-1.5 rounded-full flex items-center gap-1.5 shadow-sm">
+                                    <CheckCircle2 size={14} /> Saludable
                                 </span>
-                            )}
-                        </div>
+                            </div>
 
-                        <div className="flex-1 divide-y divide-gray-50">
-                            {stats.proximosVencimientos.length === 0 ? (
-                                <div className="flex flex-col items-center justify-center py-10 px-4 text-center">
-                                    <div className="w-12 h-12 bg-green-50 rounded-full flex items-center justify-center mb-3">
-                                        <CheckCircle2 size={24} className="text-green-500" />
-                                    </div>
-                                    <p className="text-sm font-medium text-gray-700">Sin vencimientos próximos</p>
-                                    <p className="text-xs text-gray-400 mt-1">Todo al día 🎉</p>
+                            <div className="space-y-3 relative z-10">
+                                <div className="flex justify-between text-sm font-semibold">
+                                    <span className="text-gray-500">Límite del Plan {stats.subscription?.planTier || 'Actual'}</span>
+                                    <span className="text-indigo-600 font-bold">{renderLimit(stats.totalProperties, propertiesLimit)}</span>
                                 </div>
-                            ) : (
-                                stats.proximosVencimientos.map((v, i) => (
-                                    <Link
-                                        key={`${v.alquilerId}-${i}`}
-                                        href={`/dashboard/alquileres?id=${v.alquilerId}`}
-                                        className="flex items-start gap-3 px-5 py-3.5 hover:bg-gray-50 transition-colors group"
-                                    >
-                                        <div className={`mt-0.5 p-1.5 rounded-lg flex-shrink-0 ${v.estado === 'vencido' ? 'bg-red-50' : v.diasRestantes <= 3 ? 'bg-orange-50' : 'bg-yellow-50'}`}>
-                                            {v.estado === 'vencido' ? (
-                                                <AlertTriangle size={14} className="text-red-500" />
-                                            ) : (
-                                                <Clock size={14} className={v.diasRestantes <= 3 ? "text-orange-500" : "text-yellow-500"} />
-                                            )}
-                                        </div>
-                                        <div className="flex-1 min-w-0">
-                                            <p className="text-sm font-medium text-gray-900 truncate">{v.direccion}</p>
-                                            <p className="text-xs text-gray-400 truncate">{v.nombreInquilino}</p>
-                                        </div>
-                                        <div className="text-right flex-shrink-0">
-                                            <p className="text-sm font-bold text-gray-900">{formatCurrency(v.monto)}</p>
-                                            <p className={`text-xs font-medium ${v.estado === 'vencido' ? 'text-red-500' : v.diasRestantes <= 3 ? 'text-orange-500' : 'text-gray-400'}`}>
-                                                {v.estado === 'vencido' ? `Venció hace ${Math.abs(v.diasRestantes)}d` : v.diasRestantes === 0 ? 'Hoy' : `En ${v.diasRestantes}d`}
-                                            </p>
-                                        </div>
-                                    </Link>
-                                ))
-                            )}
-                        </div>
-
-                        <div className="px-5 py-3 border-t border-gray-100 bg-gray-50/50">
-                            <Link href="/dashboard/alquileres" className="flex items-center justify-center gap-1.5 text-xs font-semibold text-indigo-600 hover:text-indigo-700 transition-colors">
-                                Ver todos los alquileres <ArrowRight size={14} />
-                            </Link>
-                        </div>
-                    </div>
-
-                    {/* NUEVAS CONSULTAS */}
-                    <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden flex flex-col">
-                        <div className="px-5 py-4 border-b border-gray-100 flex items-center justify-between">
-                            <div className="flex items-center gap-2.5">
-                                <div className="p-2 bg-blue-50 rounded-lg">
-                                    <MessageSquare size={18} className="text-blue-500" />
-                                </div>
-                                <div>
-                                    <h2 className="font-semibold text-gray-900 text-sm">Nuevas Consultas</h2>
-                                    <p className="text-xs text-gray-400">Últimas recibidas</p>
+                                <div className="w-full bg-gray-100 rounded-full h-3 overflow-hidden shadow-inner">
+                                    <div
+                                        className="h-full rounded-full bg-indigo-500 transition-all duration-1000 ease-out relative overflow-hidden"
+                                        style={{ width: typeof propertiesLimit === 'number' ? `${Math.min((stats.totalProperties / propertiesLimit) * 100, 100)}%` : '20%' }}
+                                    ></div>
                                 </div>
                             </div>
-                            {stats.totalLeads > 0 && (
-                                <span className="text-xs font-bold bg-blue-100 text-blue-600 px-2 py-0.5 rounded-full">
-                                    {stats.totalLeads}
-                                </span>
-                            )}
+                            <Building2 size={160} className="absolute -right-8 -bottom-8 text-indigo-50 opacity-40 group-hover:scale-110 transition-transform duration-500 pointer-events-none" />
                         </div>
 
-                        <div className="flex-1 divide-y divide-gray-50">
-                            {stats.recentLeads.length === 0 ? (
-                                <div className="flex flex-col items-center justify-center py-10 px-4 text-center">
-                                    <div className="w-12 h-12 bg-blue-50 rounded-full flex items-center justify-center mb-3">
-                                        <MessageSquare size={24} className="text-blue-300" />
-                                    </div>
-                                    <p className="text-sm font-medium text-gray-700">Sin consultas aún</p>
-                                    <p className="text-xs text-gray-400 mt-1">Las consultas de tus propiedades aparecerán aquí</p>
+                        {/* Quick Add (1 col) */}
+                        <div className="lg:col-span-1 bg-gradient-to-b from-gray-50 to-white rounded-3xl border border-gray-100 shadow-sm p-3 flex flex-col gap-3">
+                            <Link href="/dashboard/propiedades/nueva" className="flex-1 flex flex-col items-center justify-center p-6 bg-white hover:bg-indigo-50/50 rounded-2xl transition-all border border-dashed border-gray-300 hover:border-indigo-400 group relative overflow-hidden">
+                                <div className="w-16 h-16 bg-indigo-50 text-indigo-600 rounded-2xl flex items-center justify-center mb-4 group-hover:-translate-y-1 group-hover:shadow-lg group-hover:shadow-indigo-500/20 transition-all relative z-10">
+                                    <Plus size={28} strokeWidth={2.5} />
                                 </div>
-                            ) : (
-                                stats.recentLeads.map((lead: any) => (
-                                    <Link
-                                        key={lead.id}
-                                        href={`/dashboard/leads?id=${lead.id}`}
-                                        className="flex items-start gap-3 px-5 py-3.5 hover:bg-gray-50 transition-colors group"
-                                    >
-                                        <div className="w-8 h-8 rounded-full bg-indigo-100 flex items-center justify-center flex-shrink-0 text-indigo-600 font-bold text-sm">
-                                            {lead.nombre?.charAt(0)?.toUpperCase() || '?'}
-                                        </div>
-                                        <div className="flex-1 min-w-0">
-                                            <div className="flex items-center gap-2">
-                                                <p className="text-sm font-medium text-gray-900 truncate">{lead.nombre}</p>
-                                                <span className={`text-[10px] font-bold uppercase px-1.5 py-0.5 rounded-full flex-shrink-0 ${lead.estado === 'nuevo' ? 'bg-green-100 text-green-700' :
-                                                        lead.estado === 'contactado' ? 'bg-blue-100 text-blue-700' :
-                                                            'bg-gray-100 text-gray-600'
-                                                    }`}>
-                                                    {lead.estado}
-                                                </span>
-                                            </div>
-                                            <p className="text-xs text-gray-400 truncate mt-0.5">{lead.propertyTitle || 'Consulta general'}</p>
-                                        </div>
-                                        <p className="text-[10px] text-gray-400 flex-shrink-0 mt-0.5">
-                                            {lead.createdAt?.seconds
-                                                ? format(new Date(lead.createdAt.seconds * 1000), 'dd/MM')
-                                                : format(new Date(lead.createdAt), 'dd/MM')}
-                                        </p>
-                                    </Link>
-                                ))
-                            )}
-                        </div>
-
-                        <div className="px-5 py-3 border-t border-gray-100 bg-gray-50/50">
-                            <Link href="/dashboard/leads" className="flex items-center justify-center gap-1.5 text-xs font-semibold text-indigo-600 hover:text-indigo-700 transition-colors">
-                                Ver todas las consultas <ArrowRight size={14} />
+                                <span className="text-[15px] font-bold text-gray-800 relative z-10">Cargar propiedad</span>
+                            </Link>
+                            <Link href="/dashboard/propiedades" className="py-4 px-4 text-center text-sm font-bold text-indigo-600 hover:bg-indigo-50 rounded-2xl transition flex items-center justify-center gap-2 relative">
+                                Ir al inventario <ArrowRight size={16} />
                             </Link>
                         </div>
                     </div>
+                </section>
 
-                    {/* TUTORIALES */}
-                    <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden flex flex-col">
-                        <div className="px-5 py-4 border-b border-gray-100 flex items-center justify-between">
-                            <div className="flex items-center gap-2.5">
-                                <div className="p-2 bg-violet-50 rounded-lg">
-                                    <GraduationCap size={18} className="text-violet-500" />
+                {/* ─── 3. MÓDULO DE ALQUILERES ──────────────────────────── */}
+                <section>
+                    <div className="flex items-center gap-3 mb-5">
+                        <div className="p-2 bg-emerald-100 rounded-lg"><Key size={18} className="text-emerald-600" /></div>
+                        <h2 className="text-xl font-bold text-gray-900">Módulo de Alquileres</h2>
+                    </div>
+
+                    <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
+                        {/* KPI Alquileres (1 col) */}
+                        <div className="lg:col-span-1 bg-white rounded-3xl border border-gray-100 shadow-sm p-8 flex flex-col justify-center relative overflow-hidden group hover:border-emerald-200 transition-colors">
+                            <div className="w-14 h-14 bg-emerald-50 rounded-2xl flex items-center justify-center mb-8 relative z-10 group-hover:scale-110 transition-transform">
+                                <Key size={26} className="text-emerald-600" />
+                            </div>
+                            <div className="relative z-10">
+                                <p className="text-5xl font-extrabold text-gray-900 tracking-tight mb-2">{stats.activeRentals}</p>
+                                <p className="text-[11px] text-gray-500 font-bold uppercase tracking-widest">Contratos Activos</p>
+                            </div>
+                            <Link href="/dashboard/alquileres" className="absolute inset-0 z-20"></Link>
+                            <div className="mt-8 pt-5 border-t border-gray-100 relative z-10 flex items-center justify-between pointer-events-none">
+                                <span className="text-xs font-bold text-emerald-600">Ver contratos</span>
+                                <ChevronRight size={16} className="text-emerald-400 group-hover:translate-x-1 transition-transform" />
+                            </div>
+                            <Key size={140} className="absolute -right-8 -top-8 text-emerald-50 opacity-30 group-hover:rotate-12 transition-transform duration-500 pointer-events-none" />
+                        </div>
+
+                        {/* Próximos Vencimientos (2 cols) */}
+                        <div className="lg:col-span-2 bg-white rounded-3xl border border-gray-100 shadow-sm overflow-hidden flex flex-col relative">
+                            <div className="px-6 py-5 border-b border-gray-100 flex items-center justify-between bg-gray-50/50">
+                                <div className="flex items-center gap-3">
+                                    <div className="p-2.5 bg-orange-100 rounded-xl">
+                                        <Calendar size={20} className="text-orange-600" />
+                                    </div>
+                                    <div>
+                                        <h3 className="font-bold text-gray-900 text-[15px]">Próximos Vencimientos</h3>
+                                        <p className="text-[11px] font-medium text-gray-500 uppercase tracking-widest mt-0.5">Siguientes 10 días</p>
+                                    </div>
                                 </div>
-                                <div>
-                                    <h2 className="font-semibold text-gray-900 text-sm">Tutoriales</h2>
-                                    <p className="text-xs text-gray-400">Aprendé a usar la plataforma</p>
+                                {stats.proximosVencimientos.length > 0 && (
+                                    <span className="text-[11px] font-black bg-orange-100 text-orange-600 px-3 py-1 rounded-full border border-orange-200 shadow-sm">
+                                        {stats.proximosVencimientos.length} PENDIENTES
+                                    </span>
+                                )}
+                            </div>
+
+                            <div className="flex-1 divide-y divide-gray-50 min-h-[220px]">
+                                {stats.proximosVencimientos.length === 0 ? (
+                                    <div className="flex flex-col items-center justify-center h-full py-10 px-4 text-center">
+                                        <div className="w-16 h-16 bg-green-50 rounded-full flex items-center justify-center mb-4 border border-green-100 shadow-sm">
+                                            <CheckCircle2 size={32} className="text-green-500" />
+                                        </div>
+                                        <p className="text-[16px] font-bold text-gray-800">Sin vencimientos próximos</p>
+                                        <p className="text-[13px] font-medium text-gray-400 mt-1">Todo al día en tus cobranzas 🎉</p>
+                                    </div>
+                                ) : (
+                                    stats.proximosVencimientos.map((v, i) => (
+                                        <Link
+                                            key={`${v.alquilerId}-${i}`}
+                                            href={`/dashboard/alquileres?id=${v.alquilerId}`}
+                                            className="flex items-center gap-4 px-6 py-4.5 hover:bg-orange-50/30 transition-colors group"
+                                        >
+                                            <div className={`p-3 rounded-xl flex-shrink-0 shadow-sm border ${v.estado === 'vencido' ? 'bg-red-50 border-red-100' : 'bg-white border-gray-100'}`}>
+                                                {v.estado === 'vencido' ? (
+                                                    <AlertTriangle size={20} className="text-red-500" />
+                                                ) : (
+                                                    <Clock size={20} className={v.diasRestantes <= 3 ? "text-orange-500" : "text-gray-400"} />
+                                                )}
+                                            </div>
+                                            <div className="flex-1 min-w-0">
+                                                <p className="text-[15px] font-bold text-gray-900 truncate mb-1">{v.direccion}</p>
+                                                <p className="text-xs font-medium text-gray-500 truncate text-emerald-700/80">{v.nombreInquilino}</p>
+                                            </div>
+                                            <div className="text-right flex-shrink-0">
+                                                <p className="text-[16px] font-black text-gray-900">{formatCurrency(v.monto)}</p>
+                                                <p className={`text-[11px] font-bold uppercase tracking-wider mt-1.5 ${v.estado === 'vencido' ? 'text-red-500' : v.diasRestantes <= 3 ? 'text-orange-600' : 'text-gray-400'}`}>
+                                                    {v.estado === 'vencido' ? `Venció hace ${Math.abs(v.diasRestantes)}d` : v.diasRestantes === 0 ? 'Hoy' : `En ${v.diasRestantes}d`}
+                                                </p>
+                                            </div>
+                                        </Link>
+                                    ))
+                                )}
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                {/* ─── 4. MÓDULO DE CLIENTES Y LEADS ────────────────────── */}
+                <section>
+                    <div className="flex items-center gap-3 mb-5">
+                        <div className="p-2 bg-blue-100 rounded-lg"><Users size={18} className="text-blue-600" /></div>
+                        <h2 className="text-xl font-bold text-gray-900">Módulo de Clientes & Leads</h2>
+                    </div>
+
+                    <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
+                        {/* KPI Clientes (1 col) */}
+                        <div className="lg:col-span-1 flex flex-col gap-5">
+                            {/* Clientes Card */}
+                            <Link href="/dashboard/clientes" className="bg-white rounded-3xl border border-gray-100 shadow-sm p-6 flex flex-row items-center gap-6 hover:-translate-y-1 hover:shadow-lg hover:border-violet-200 hover:shadow-violet-500/10 transition-all group overflow-hidden relative">
+                                <div className="w-16 h-16 bg-violet-50 rounded-2xl flex items-center justify-center flex-shrink-0 group-hover:bg-violet-100 transition-colors z-10 border border-violet-100 shadow-sm">
+                                    <UserCheck size={30} className="text-violet-600" />
+                                </div>
+                                <div className="z-10">
+                                    <p className="text-[11px] font-bold text-gray-500 uppercase tracking-widest mb-1.5">Total Clientes</p>
+                                    <p className="text-4xl font-extrabold text-gray-900 tracking-tight">{renderLimit(stats.totalClientes, clientsLimit)}</p>
+                                </div>
+                                <UserCheck size={100} className="absolute -right-6 -bottom-6 text-violet-50 opacity-40 group-hover:rotate-6 transition-transform z-0 pointer-events-none" />
+                            </Link>
+
+                            {/* Tip del dia */}
+                            <div className="bg-gradient-to-br from-amber-50 to-orange-50 rounded-3xl border border-amber-100/50 shadow-sm p-7 flex-1 relative overflow-hidden group">
+                                <div className="relative z-10 flex flex-col h-full">
+                                    <div className="flex items-center gap-2 mb-4">
+                                        <div className="p-1.5 bg-amber-200/50 rounded-lg">
+                                            <Star size={16} className="text-amber-600 fill-amber-600" />
+                                        </div>
+                                        <span className="text-[11px] font-black uppercase tracking-widest text-amber-700">Zeta Tip</span>
+                                    </div>
+                                    <p className="text-[14px] font-bold text-gray-800 leading-relaxed mb-6">
+                                        ¿Sabías que las propiedades con <strong className="text-amber-700">fotos de alta calidad</strong> reciben hasta un 40% más de consultas directas?
+                                    </p>
+                                    <div className="mt-auto">
+                                        <Link href="/dashboard/propiedades" className="inline-flex items-center gap-2.5 text-[13px] font-bold text-white bg-gray-900 hover:bg-black px-5 py-3 rounded-xl shadow-md transition-all active:scale-95 group-hover:shadow-xl w-max">
+                                            <Camera size={16} /> Mejorar Fotos
+                                        </Link>
+                                    </div>
                                 </div>
                             </div>
                         </div>
 
-                        <div className="flex-1 divide-y divide-gray-50">
-                            {TUTORIALS.map((t, i) => {
-                                const colorMap: Record<string, string> = {
-                                    indigo: "bg-indigo-50 text-indigo-600",
-                                    emerald: "bg-emerald-50 text-emerald-600",
-                                    violet: "bg-violet-50 text-violet-600",
-                                    orange: "bg-orange-50 text-orange-600",
-                                };
-                                return (
-                                    <Link key={i} href={t.href} className="flex items-center gap-3 px-5 py-3.5 hover:bg-gray-50 transition-colors group">
-                                        <div className={`p-2 rounded-lg flex-shrink-0 ${colorMap[t.color]}`}>
-                                            <t.icon size={16} />
-                                        </div>
-                                        <div className="flex-1 min-w-0">
-                                            <p className="text-sm font-medium text-gray-800 leading-tight">{t.title}</p>
-                                            <div className="flex items-center gap-1 mt-0.5 text-xs text-gray-400">
-                                                <PlayCircle size={11} />
-                                                {t.duration}
-                                            </div>
-                                        </div>
-                                        <ChevronRight size={16} className="text-gray-300 group-hover:text-indigo-600 transition-colors flex-shrink-0" />
-                                    </Link>
-                                );
-                            })}
-                        </div>
-
-                        <div className="px-5 py-3 border-t border-gray-100 bg-gray-50/50">
-                            <Link href="/dashboard/tutoriales" className="flex items-center justify-center gap-1.5 text-xs font-semibold text-indigo-600 hover:text-indigo-700 transition-colors">
-                                Ver todos los tutoriales <ArrowRight size={14} />
-                            </Link>
-                        </div>
-                    </div>
-                </div>
-
-                {/* ─── ACCESOS RÁPIDOS ──────────────────────────────────── */}
-                <div>
-                    <h2 className="text-sm font-semibold text-gray-500 uppercase tracking-wider mb-3">Accesos Rápidos</h2>
-                    <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-                        {QUICK_ACTIONS.filter(a => !a.permission || userPermissions.includes(a.permission)).map((action, i) => {
-                            const colorMap: Record<string, { bg: string; icon: string; hover: string }> = {
-                                indigo: { bg: "bg-indigo-50", icon: "text-indigo-600", hover: "hover:bg-indigo-100 hover:border-indigo-200" },
-                                emerald: { bg: "bg-emerald-50", icon: "text-emerald-600", hover: "hover:bg-emerald-100 hover:border-emerald-200" },
-                                violet: { bg: "bg-violet-50", icon: "text-violet-600", hover: "hover:bg-violet-100 hover:border-violet-200" },
-                                amber: { bg: "bg-amber-50", icon: "text-amber-600", hover: "hover:bg-amber-100 hover:border-amber-200" },
-                            };
-                            const c = colorMap[action.color];
-                            return (
-                                <Link
-                                    key={i}
-                                    href={action.href}
-                                    className={`flex items-center gap-3 p-4 bg-white rounded-xl border border-gray-100 shadow-sm ${c.hover} transition-all group`}
-                                >
-                                    <div className={`p-2.5 ${c.bg} rounded-lg group-hover:scale-110 transition-transform`}>
-                                        <action.icon size={18} className={c.icon} />
+                        {/* Nuevas Consultas (2 cols) */}
+                        <div className="lg:col-span-2 bg-white rounded-3xl border border-gray-100 shadow-sm overflow-hidden flex flex-col">
+                            <div className="px-6 py-5 border-b border-gray-100 flex items-center justify-between bg-gray-50/50">
+                                <div className="flex items-center gap-3">
+                                    <div className="p-2.5 bg-blue-100 rounded-xl">
+                                        <MessageSquare size={20} className="text-blue-600" />
                                     </div>
-                                    <span className="text-sm font-medium text-gray-700">{action.label}</span>
-                                </Link>
-                            );
-                        })}
+                                    <div>
+                                        <h3 className="font-bold text-gray-900 text-[15px]">Nuevas Consultas</h3>
+                                        <p className="text-[11px] font-medium text-gray-500 uppercase tracking-widest mt-0.5">Leads entrantes</p>
+                                    </div>
+                                </div>
+                                {stats.totalLeads > 0 && (
+                                    <span className="text-[11px] font-black bg-blue-100 text-blue-600 px-3 py-1 rounded-full border border-blue-200 shadow-sm">
+                                        {stats.totalLeads} LEADS
+                                    </span>
+                                )}
+                            </div>
+
+                            <div className="flex-1 divide-y divide-gray-50 min-h-[220px]">
+                                {stats.recentLeads.length === 0 ? (
+                                    <div className="flex flex-col items-center justify-center h-full py-10 px-4 text-center">
+                                        <div className="w-16 h-16 bg-blue-50 rounded-full flex items-center justify-center mb-4 border border-blue-100 shadow-sm">
+                                            <MessageSquare size={28} className="text-blue-400" />
+                                        </div>
+                                        <p className="text-[16px] font-bold text-gray-800">Bandeja limpia</p>
+                                        <p className="text-[13px] font-medium text-gray-400 mt-1">Acá van a llegar las consultas de los clientes interesados</p>
+                                    </div>
+                                ) : (
+                                    stats.recentLeads.map((lead: any) => (
+                                        <Link
+                                            key={lead.id}
+                                            href={`/dashboard/leads?id=${lead.id}`}
+                                            className="flex items-center gap-5 px-6 py-4.5 hover:bg-blue-50/30 transition-colors group"
+                                        >
+                                            <div className="w-12 h-12 rounded-2xl bg-indigo-50 border border-indigo-100 flex items-center justify-center flex-shrink-0 text-indigo-700 font-black text-[17px] shadow-sm">
+                                                {lead.nombre?.charAt(0)?.toUpperCase() || '?'}
+                                            </div>
+                                            <div className="flex-1 min-w-0">
+                                                <div className="flex items-center gap-3 mb-1.5">
+                                                    <p className="text-[15px] font-bold text-gray-900 truncate">{lead.nombre}</p>
+                                                    <span className={`text-[10px] font-black uppercase tracking-widest px-2.5 py-0.5 rounded-md flex-shrink-0 border ${lead.estado === 'nuevo' ? 'bg-green-50 text-green-700 border-green-200 shadow-sm' :
+                                                        lead.estado === 'contactado' ? 'bg-blue-50 text-blue-700 border-blue-200' :
+                                                            'bg-gray-50 text-gray-600 border-gray-200'
+                                                        }`}>
+                                                        {lead.estado}
+                                                    </span>
+                                                </div>
+                                                <div className="flex items-center gap-3">
+                                                    <p className="text-[13px] font-medium text-gray-500 truncate">{lead.propertyTitle || 'Consulta general por sistema'}</p>
+                                                    <span className="w-1 h-1 bg-gray-300 rounded-full"></span>
+                                                    <p className="text-[11px] font-bold text-gray-400 uppercase tracking-widest flex-shrink-0">
+                                                        {lead.createdAt?.seconds
+                                                            ? format(new Date(lead.createdAt.seconds * 1000), 'dd/MM')
+                                                            : format(new Date(lead.createdAt), 'dd/MM')}
+                                                    </p>
+                                                </div>
+                                            </div>
+                                            <div className="text-right">
+                                                <ChevronRight size={18} className="text-gray-300 group-hover:text-indigo-600 group-hover:translate-x-1 transition-all" />
+                                            </div>
+                                        </Link>
+                                    ))
+                                )}
+                            </div>
+                        </div>
                     </div>
-                </div>
+                </section>
+
+                {/* ─── 5. MÓDULO FINANCIERO & SOPORTE ───────────────────── */}
+                <section>
+                    <div className="flex items-center gap-3 mb-5">
+                        <div className="p-2 bg-amber-100 rounded-lg"><DollarSign size={18} className="text-amber-600" /></div>
+                        <h2 className="text-xl font-bold text-gray-900">Módulo Financiero</h2>
+                    </div>
+
+                    <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
+                        {/* Comisiones Anchas (2 Cols) */}
+                        <div className="lg:col-span-2 bg-gradient-to-br from-indigo-900 to-indigo-950 rounded-3xl shadow-xl shadow-indigo-900/10 p-8 text-white relative overflow-hidden group">
+                            <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] opacity-5 mix-blend-overlay"></div>
+                            <div className="relative z-10 flex flex-col h-full justify-between">
+                                <div>
+                                    <div className="flex items-center gap-2.5 mb-2">
+                                        <div className="p-1.5 bg-indigo-800/50 rounded-lg">
+                                            <TrendingUp size={18} className="text-indigo-300" />
+                                        </div>
+                                        <p className="text-indigo-200 font-bold text-[12px] uppercase tracking-widest">Facturación del Mes</p>
+                                    </div>
+                                    <p className="text-6xl font-extrabold tracking-tight mt-3">{formatCurrency(stats.honorariosMonth)}</p>
+                                </div>
+                                <div className="mt-10 flex justify-between items-end">
+                                    <Link href="/dashboard/finanzas" className="bg-white/10 hover:bg-white/20 transition-all border border-white/20 backdrop-blur-md px-6 py-3.5 rounded-xl text-sm font-bold flex items-center gap-2 active:scale-95 shadow-lg shadow-black/10">
+                                        Ver reporte completo <ArrowRight size={16} />
+                                    </Link>
+                                </div>
+                            </div>
+                            <div className="absolute -right-10 -bottom-10 pointer-events-none opacity-10 group-hover:opacity-20 group-hover:scale-110 transition-all duration-700">
+                                <DollarSign size={240} />
+                            </div>
+                        </div>
+
+                        {/* Accesos rápidos (1 col) */}
+                        <div className="lg:col-span-1 bg-white rounded-3xl border border-gray-100 shadow-sm p-7 flex flex-col justify-center">
+                            <h3 className="text-xs font-black text-gray-400 uppercase tracking-widest mb-5">Herramientas Rápidas</h3>
+                            <div className="space-y-3">
+                                {QUICK_ACTIONS.filter(a => !a.permission || userPermissions.includes(a.permission)).map((action, i) => {
+                                    const colorMap: Record<string, { bg: string; icon: string; hover: string }> = {
+                                        indigo: { bg: "bg-indigo-50", icon: "text-indigo-600", hover: "hover:border-indigo-300 hover:shadow-lg hover:shadow-indigo-500/10" },
+                                        emerald: { bg: "bg-emerald-50", icon: "text-emerald-600", hover: "hover:border-emerald-300 hover:shadow-lg hover:shadow-emerald-500/10" },
+                                        violet: { bg: "bg-violet-50", icon: "text-violet-600", hover: "hover:border-violet-300 hover:shadow-lg hover:shadow-violet-500/10" },
+                                        amber: { bg: "bg-amber-50", icon: "text-amber-600", hover: "hover:border-amber-300 hover:shadow-lg hover:shadow-amber-500/10" },
+                                    };
+                                    const c = colorMap[action.color];
+                                    return (
+                                        <Link
+                                            key={i}
+                                            href={action.href}
+                                            className={`flex items-center gap-4 p-3 bg-white rounded-2xl border border-gray-100 shadow-sm transition-all group ${c.hover}`}
+                                        >
+                                            <div className={`p-2.5 ${c.bg} rounded-xl group-hover:scale-110 transition-transform shadow-sm`}>
+                                                <action.icon size={18} className={c.icon} />
+                                            </div>
+                                            <span className="text-[14px] font-bold text-gray-800">{action.label}</span>
+                                            <ChevronRight size={16} className="text-gray-300 ml-auto group-hover:text-gray-800 transition-colors" />
+                                        </Link>
+                                    );
+                                })}
+                            </div>
+                        </div>
+                    </div>
+                </section>
 
             </div>
         </div>
