@@ -11,11 +11,14 @@ if (!admin.apps.length) {
         // Check if we have credentials (production/local with env)
         if (Object.keys(serviceAccount).length > 0) {
             admin.initializeApp({
-                credential: admin.credential.cert(serviceAccount)
+                credential: admin.credential.cert(serviceAccount),
+                projectId: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID || serviceAccount.project_id
             });
         } else {
             // Cloud Run uses Application Default Credentials automatically
-            admin.initializeApp();
+            admin.initializeApp({
+                projectId: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID || 'prop-ia'
+            });
         }
     } catch (error) {
         console.error('Firebase admin initialization error', error);

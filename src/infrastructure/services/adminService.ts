@@ -6,6 +6,7 @@ import { Subscription, PlanTier } from "@/domain/models/Subscription";
 const USERS_COLLECTION = "users";
 const SUBSCRIPTIONS_COLLECTION = "subscriptions";
 const RENTALS_COLLECTION = "alquileres";
+const PROPERTIES_COLLECTION = "properties";
 
 export const adminService = {
     // Obtener todos los usuarios con su suscripción
@@ -25,6 +26,10 @@ export const adminService = {
         const rentalsQuery = query(collection(db, RENTALS_COLLECTION));
         const rentalsSnapshot = await getDocs(rentalsQuery);
 
+        // 4. Fetch Properties
+        const propertiesQuery = query(collection(db, PROPERTIES_COLLECTION));
+        const propertiesSnapshot = await getDocs(propertiesQuery);
+
         const subscriptionsMap = new Map<string, Subscription>();
         subsSnapshot.docs.forEach(doc => {
             const sub = { id: doc.id, ...doc.data() } as Subscription;
@@ -40,11 +45,21 @@ export const adminService = {
             }
         });
 
-        // 4. Merge data
+        const propertiesCountMap = new Map<string, number>();
+        propertiesSnapshot.docs.forEach(doc => {
+            const property = doc.data();
+            const userId = property.userId;
+            if (userId) {
+                propertiesCountMap.set(userId, (propertiesCountMap.get(userId) || 0) + 1);
+            }
+        });
+
+        // 5. Merge data
         const users: User[] = usersSnapshot.docs.map(doc => {
             const userData = doc.data();
             const sub = subscriptionsMap.get(doc.id);
             const alquileresCount = rentalsCountMap.get(doc.id) || 0;
+            const propiedadesCount = propertiesCountMap.get(doc.id) || 0;
 
             return {
                 uid: doc.id,
@@ -56,6 +71,7 @@ export const adminService = {
                 lastLogin: userData.lastLogin?.toDate(),
                 organizationId: userData.organizationId,
                 alquileresCount,
+                propiedadesCount,
                 subscription: sub ? {
                     planId: sub.planId, // Use actual planId
                     planTier: sub.planTier,
@@ -224,9 +240,16 @@ export const adminService = {
             .filter((p: any) => ['completed', 'approved', 'refunded'].includes(p.status) || p.isManual);
 
         // 6. Sent Emails History
-        const emailsQuery = query(collection(db, "sent_emails"), where("to", "==", userData.email || ""), orderBy("sentAt", "desc"));
+        const emailsQuery = query(collection(db, "emailLogs"), where("to", "==", userData.email || ""), orderBy("sentAt", "desc"));
         const emailsSnapshot = await getDocs(emailsQuery);
-        const sentEmails = emailsSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+        const sentEmails = emailsSnapshot.docs.map(doc => {
+            const data = doc.data();
+            return {
+                id: doc.id,
+                ...data,
+                sentAt: data.sentAt?.toDate ? data.sentAt.toDate() : new Date(data.sentAt),
+            };
+        });
 
         return {
             user: userData,

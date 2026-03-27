@@ -26,6 +26,23 @@ export default function AdminUserProfilePage() {
         sentEmails: any[];
     } | null>(null);
 
+    const [customTemplates, setCustomTemplates] = useState<{type: string, name: string}[]>([]);
+    const [emailPage, setEmailPage] = useState(0);
+    const EMAIL_PAGE_SIZE = 5;
+
+    const DEFAULT_TEMPLATES_MINIMAL: Record<string, string> = {
+        welcome: "Bienvenida",
+        payment_confirmed: "Pago Confirmado",
+        payment_expiring: "Pago por Vencer",
+        new_lead: "Nueva Consulta",
+        activation: "Activación",
+        value: "Valor (Liquidaciones)",
+        social: "Prueba Social",
+        conversion: "Conversión",
+        promotion: "Promocional (Old)",
+        crm_portal: "CRM + Portal"
+    };
+
     // Form inputs for Subscription Tab
     const [planTier, setPlanTier] = useState<PlanTier>("basic");
     const [endDate, setEndDate] = useState<string>("");
@@ -41,12 +58,23 @@ export default function AdminUserProfilePage() {
     const loadData = async () => {
         try {
             setLoading(true);
+            setEmailPage(0);
             const data = await adminService.getUserProfileData(uid);
             setProfileData(data);
 
             if (data.subscription) {
                 setPlanTier(data.subscription.planTier);
                 setEndDate(data.subscription.endDate ? data.subscription.endDate.toISOString().split('T')[0] : "");
+            }
+
+            try {
+                const templatesRes = await fetch('/api/marketing/templates');
+                if (templatesRes.ok) {
+                    const temp = await templatesRes.json();
+                    setCustomTemplates(temp.templates || []);
+                }
+            } catch (err) {
+                console.error("Error loading custom marketing templates", err);
             }
         } catch (error) {
             console.error("Error loading user profile:", error);
@@ -206,7 +234,7 @@ export default function AdminUserProfilePage() {
     return (
         <div className="space-y-6 max-w-6xl mx-auto pb-12">
             {/* Header */}
-            <div className="flex items-center justify-between">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                 <div className="flex items-center gap-4">
                     <button
                         onClick={() => router.back()}
@@ -216,10 +244,10 @@ export default function AdminUserProfilePage() {
                     </button>
                     <div>
                         <h1 className="text-2xl font-bold text-gray-900">Perfil de Usuario</h1>
-                        <p className="text-sm text-gray-500">{user.email}</p>
+                        <p className="text-sm text-gray-500 break-all">{user.email}</p>
                     </div>
                 </div>
-                <div className="flex gap-4 items-center">
+                <div className="flex flex-wrap gap-3 items-center sm:justify-end">
                     {user.disabled ? (
                         <>
                             <span className="inline-flex items-center px-3 py-1 bg-red-100 text-red-800 rounded-full text-sm font-medium gap-1">
@@ -267,6 +295,7 @@ export default function AdminUserProfilePage() {
                     <span className="text-gray-200">|</span>
 
                     <button
+                        id="btn-delete-account"
                         onClick={handleDeleteAccount}
                         className="text-sm font-medium text-red-500 hover:text-red-700 hover:underline flex items-center gap-1 transition-colors"
                     >
@@ -276,8 +305,8 @@ export default function AdminUserProfilePage() {
             </div>
 
             {/* Tabs Navigation */}
-            <div className="border-b border-gray-200">
-                <nav className="flex space-x-8">
+            <div className="border-b border-gray-200 overflow-x-auto scrollbar-hide">
+                <nav className="flex space-x-8 min-w-max px-2">
                     {[
                         { id: 'resumen', label: 'Resumen General', icon: UserIcon },
                         { id: 'suscripcion', label: 'Plan y Límites', icon: Calendar },
@@ -286,8 +315,9 @@ export default function AdminUserProfilePage() {
                     ].map((tab) => (
                         <button
                             key={tab.id}
+                            id={`tab-${tab.id}`}
                             onClick={() => setActiveTab(tab.id as 'resumen' | 'suscripcion' | 'pagos' | 'correos')}
-                            className={`flex items-center gap-2 py-4 px-1 border-b-2 font-medium text-sm transition-colors ${activeTab === tab.id
+                            className={`flex items-center whitespace-nowrap gap-2 py-4 px-1 border-b-2 font-medium text-sm transition-colors ${activeTab === tab.id
                                 ? 'border-indigo-500 text-indigo-600'
                                 : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
                                 }`}
@@ -455,6 +485,7 @@ export default function AdminUserProfilePage() {
 
                             <div className="pt-4 border-t border-gray-100 flex justify-end">
                                 <button
+                                    id="btn-save-sub"
                                     onClick={handleUpdateSubscription}
                                     disabled={updatingSub}
                                     className="px-6 py-2 bg-indigo-600 text-white rounded-xl hover:bg-indigo-700 transition-colors disabled:opacity-50"
@@ -522,6 +553,7 @@ export default function AdminUserProfilePage() {
                             </div>
 
                             <button
+                                id="btn-add-payment"
                                 onClick={handleAddPayment}
                                 disabled={addingPayment}
                                 className="w-full px-4 py-2 bg-green-600 text-white font-medium rounded-xl hover:bg-green-700 transition-colors disabled:opacity-50 mt-2"
@@ -612,13 +644,12 @@ export default function AdminUserProfilePage() {
                                 defaultValue=""
                             >
                                 <option value="" disabled>{user.unsubscribedMarketing ? "No mails (Baja)" : "Seleccionar Plantilla..."}</option>
-                                <option value="welcome">1. Bienvenida</option>
-                                <option value="activation">2. Activación</option>
-                                <option value="value">3. Valor (Liquidaciones)</option>
-                                <option value="social">4. Prueba Social</option>
-                                <option value="conversion">5. Conversión</option>
-                                <option value="promotion">6. Promocional (Old)</option>
-                                <option value="crm_portal">7. CRM + Portal</option>
+                                {Object.entries(DEFAULT_TEMPLATES_MINIMAL).map(([key, name]) => (
+                                    <option key={key} value={key}>{name}</option>
+                                ))}
+                                {customTemplates.filter(t => !DEFAULT_TEMPLATES_MINIMAL[t.type]).map(t => (
+                                    <option key={t.type} value={t.type}>✨ {t.name}</option>
+                                ))}
                             </select>
                         </div>
                     </div>
@@ -628,6 +659,7 @@ export default function AdminUserProfilePage() {
                             No se han guardado registros de correos para este usuario.
                         </div>
                     ) : (
+                        <>
                         <div className="overflow-x-auto">
                             <table className="w-full text-left font-sans">
                                 <thead className="bg-gray-50 text-xs text-gray-500 uppercase font-semibold border-b">
@@ -639,13 +671,13 @@ export default function AdminUserProfilePage() {
                                     </tr>
                                 </thead>
                                 <tbody className="divide-y divide-gray-100 text-sm">
-                                    {sentEmails.map((email) => (
+                                    {sentEmails.slice(emailPage * EMAIL_PAGE_SIZE, (emailPage + 1) * EMAIL_PAGE_SIZE).map((email) => (
                                         <tr key={email.id} className="hover:bg-gray-50 transition-colors">
                                             <td className="px-6 py-4 whitespace-nowrap text-gray-500">
                                                 {format(new Date(email.sentAt), "dd/MM/yyyy HH:mm")}
                                             </td>
                                             <td className="px-6 py-4 text-gray-900">
-                                                {email.status === 'success' ? (
+                                                {email.status === 'sent' ? (
                                                     <span className="inline-flex items-center gap-1 text-green-600 bg-green-50 px-2 py-1 rounded-md text-xs font-medium border border-green-200">
                                                         <CheckCircle className="w-3 h-3" /> Exitoso
                                                     </span>
@@ -657,7 +689,7 @@ export default function AdminUserProfilePage() {
                                             </td>
                                             <td className="px-6 py-4">
                                                 <p className="font-medium text-gray-900 text-sm">{email.subject}</p>
-                                                <p className="text-xs text-indigo-500 mt-1 uppercase font-mono">{email.templateKey}</p>
+                                                <p className="text-xs text-indigo-500 mt-1 uppercase font-mono">{email.type}</p>
                                             </td>
                                             <td className="px-6 py-4 text-xs text-red-500 max-w-[250px] truncate">
                                                 {email.error || "-"}
@@ -667,6 +699,28 @@ export default function AdminUserProfilePage() {
                                 </tbody>
                             </table>
                         </div>
+                        {sentEmails.length > EMAIL_PAGE_SIZE && (
+                            <div className="px-6 py-4 border-t border-gray-100 flex items-center justify-between text-sm text-gray-500">
+                                <span>{emailPage * EMAIL_PAGE_SIZE + 1}–{Math.min((emailPage + 1) * EMAIL_PAGE_SIZE, sentEmails.length)} de {sentEmails.length}</span>
+                                <div className="flex gap-2">
+                                    <button
+                                        onClick={() => setEmailPage(p => p - 1)}
+                                        disabled={emailPage === 0}
+                                        className="px-3 py-1 rounded-lg border border-gray-200 hover:bg-gray-50 disabled:opacity-40 disabled:cursor-not-allowed transition"
+                                    >
+                                        ← Anterior
+                                    </button>
+                                    <button
+                                        onClick={() => setEmailPage(p => p + 1)}
+                                        disabled={(emailPage + 1) * EMAIL_PAGE_SIZE >= sentEmails.length}
+                                        className="px-3 py-1 rounded-lg border border-gray-200 hover:bg-gray-50 disabled:opacity-40 disabled:cursor-not-allowed transition"
+                                    >
+                                        Siguiente →
+                                    </button>
+                                </div>
+                            </div>
+                        )}
+                        </>
                     )}
                 </div>
             )}

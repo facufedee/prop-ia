@@ -16,73 +16,74 @@ export async function GET(request: Request) {
         // }
 
         const now = new Date();
-        // Target: subscriptions expiring in exactly 7 days (±12h window)
-        const sevenDaysFromNow = new Date(now);
-        sevenDaysFromNow.setDate(sevenDaysFromNow.getDate() + 7);
-
-        const windowStart = new Date(sevenDaysFromNow);
-        windowStart.setHours(0, 0, 0, 0);
-
-        const windowEnd = new Date(sevenDaysFromNow);
-        windowEnd.setHours(23, 59, 59, 999);
-
-        // Query active subscriptions ending in the 7-day window
-        const { Timestamp } = await import('firebase-admin/firestore');
-
-        const subscriptionsSnap = await adminDb
-            .collection('subscriptions')
-            .where('status', '==', 'active')
-            .where('endDate', '>=', Timestamp.fromDate(windowStart))
-            .where('endDate', '<=', Timestamp.fromDate(windowEnd))
-            .get();
+        const intervals = [7, 3];
 
         let notifiedCount = 0;
         const errors: string[] = [];
+        const { Timestamp } = await import('firebase-admin/firestore');
 
-        for (const subDoc of subscriptionsSnap.docs) {
-            const sub = subDoc.data();
-            const userId = sub.userId;
-            const planName = sub.planId || 'Plan ZetaProp';
-            const endDate = sub.endDate?.toDate();
+        for (const daysLeft of intervals) {
+            const targetDate = new Date(now);
+            targetDate.setDate(targetDate.getDate() + daysLeft);
 
-            if (!userId || !endDate) continue;
+            const windowStart = new Date(targetDate);
+            windowStart.setHours(0, 0, 0, 0);
 
-            try {
-                // Get user email and name from Firestore
-                const userSnap = await adminDb.collection('users').doc(userId).get();
-                if (!userSnap.exists) continue;
+            const windowEnd = new Date(targetDate);
+            windowEnd.setHours(23, 59, 59, 999);
 
-                const userData = userSnap.data();
-                const email = userData?.email;
-                const displayName = userData?.displayName || userData?.name;
+            // Query active subscriptions ending in the specific window
+            const subscriptionsSnap = await adminDb
+                .collection('subscriptions')
+                .where('status', '==', 'active')
+                .where('endDate', '>=', Timestamp.fromDate(windowStart))
+                .where('endDate', '<=', Timestamp.fromDate(windowEnd))
+                .get();
 
-                if (!email) continue;
+            for (const subDoc of subscriptionsSnap.docs) {
+                const sub = subDoc.data();
+                const userId = sub.userId;
+                const planName = sub.planId || 'Plan ZetaProp';
+                const endDate = sub.endDate?.toDate();
 
-                const expiryDateFormatted = endDate.toLocaleDateString('es-AR', {
-                    weekday: 'long',
-                    year: 'numeric',
-                    month: 'long',
-                    day: 'numeric',
-                });
+                if (!userId || !endDate) continue;
 
-                await marketingEmailService.sendPaymentExpiringEmail(email, {
-                    userName: displayName,
-                    planName,
-                    expiryDate: expiryDateFormatted,
-                    daysLeft: 7,
-                });
+                try {
+                    // Get user email and name from Firestore
+                    const userSnap = await adminDb.collection('users').doc(userId).get();
+                    if (!userSnap.exists) continue;
 
-                notifiedCount++;
-                console.log(`[Cron check-subscriptions] Sent expiry reminder to ${email} for user ${userId}`);
-            } catch (err: any) {
-                console.error(`[Cron check-subscriptions] Error for user ${userId}:`, err.message);
-                errors.push(userId);
+                    const userData = userSnap.data();
+                    const email = userData?.email;
+                    const displayName = userData?.displayName || userData?.name;
+
+                    if (!email) continue;
+
+                    const expiryDateFormatted = endDate.toLocaleDateString('es-AR', {
+                        weekday: 'long',
+                        year: 'numeric',
+                        month: 'long',
+                        day: 'numeric',
+                    });
+
+                    await marketingEmailService.sendPaymentExpiringEmail(email, {
+                        userName: displayName,
+                        planName,
+                        expiryDate: expiryDateFormatted,
+                        daysLeft,
+                    });
+
+                    notifiedCount++;
+                    console.log(`[Cron check-subscriptions] Sent ${daysLeft}-day expiry reminder to ${email} for user ${userId}`);
+                } catch (err: any) {
+                    console.error(`[Cron check-subscriptions] Error for user ${userId}:`, err.message);
+                    errors.push(userId);
+                }
             }
         }
 
         return NextResponse.json({
             success: true,
-            checked: subscriptionsSnap.size,
             notified: notifiedCount,
             errors: errors.length > 0 ? errors : undefined,
         });

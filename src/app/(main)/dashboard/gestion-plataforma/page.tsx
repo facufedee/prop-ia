@@ -9,7 +9,7 @@ import { es } from "date-fns/locale";
 import {
     Shield, User as UserIcon, Calendar, Mail, Search,
     Trash2, Ban, CheckCircle, Clock, Eye, AlertCircle,
-    ChevronUp, ChevronDown, ChevronsUpDown, MailX
+    ChevronUp, ChevronDown, ChevronsUpDown, MailX, Home, Key
 } from "lucide-react";
 import { toast } from "sonner";
 import { PlanTier } from "@/domain/models/Subscription";
@@ -277,7 +277,7 @@ export default function PlatformManagementPage() {
                                         className="px-6 py-3 font-semibold text-gray-700 cursor-pointer select-none hover:bg-gray-100 transition-colors whitespace-nowrap text-center"
                                         onClick={() => handleSort("alquileres")}
                                     >
-                                        Alquileres <SortIcon field="alquileres" />
+                                        Prop. / Alq. <SortIcon field="alquileres" />
                                     </th>
                                     <th
                                         className="px-6 py-3 font-semibold text-gray-700 cursor-pointer select-none hover:bg-gray-100 transition-colors whitespace-nowrap"
@@ -394,10 +394,17 @@ export default function PlatformManagementPage() {
                                                     )}
                                                 </td>
 
-                                                {/* Alquileres */}
-                                                <td className="px-6 py-3.5 text-center">
-                                                    <div className="inline-flex items-center justify-center min-w-[2rem] h-7 px-2 rounded-full bg-indigo-50 text-indigo-700 font-semibold text-xs">
-                                                        {user.alquileresCount || 0}
+                                                {/* Propiedades / Alquileres */}
+                                                <td className="px-6 py-3.5">
+                                                    <div className="flex items-center justify-center gap-2">
+                                                        <div className="flex items-center gap-1 bg-blue-50 text-blue-700 px-2.5 py-1 rounded-md text-xs font-semibold border border-blue-100" title="Propiedades">
+                                                            <Home size={12} strokeWidth={2.5} />
+                                                            {user.propiedadesCount || 0}
+                                                        </div>
+                                                        <div className="flex items-center gap-1 bg-indigo-50 text-indigo-700 px-2.5 py-1 rounded-md text-xs font-semibold border border-indigo-100" title="Alquileres">
+                                                            <Key size={12} strokeWidth={2.5} />
+                                                            {user.alquileresCount || 0}
+                                                        </div>
                                                     </div>
                                                 </td>
 

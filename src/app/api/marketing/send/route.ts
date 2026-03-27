@@ -29,7 +29,8 @@ export async function POST(req: Request) {
                 await marketingEmailService.sendNewLeadEmail(to, data);
                 break;
             default:
-                return NextResponse.json({ error: `Unknown email type: ${type}` }, { status: 400 });
+                await marketingEmailService.sendCustomEmail(to, type, data);
+                break;
         }
 
         return NextResponse.json({ success: true, type });

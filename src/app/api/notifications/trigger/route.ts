@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { emailNotificationService } from '@/infrastructure/services/emailNotificationService';
+import { marketingEmailService } from '@/infrastructure/services/marketingEmailService';
 
 export async function POST(request: Request) {
     try {
@@ -36,12 +37,17 @@ export async function POST(request: Request) {
                 console.error('[API] Missing email or templateKey for marketingEmail');
                 return NextResponse.json({ error: 'Missing email or templateKey' }, { status: 400 });
             }
-            const result = await emailNotificationService.sendMarketingEmail(email, name || '', templateKey);
-            console.log(`[API] sendMarketingEmail result:`, result);
-            if (result.success) {
+            try {
+                await marketingEmailService.sendCustomEmail(
+                    email,
+                    templateKey,
+                    { userName: name || '' }
+                );
+                console.log(`[API] sendCustomEmail success for ${email}`);
                 return NextResponse.json({ success: true });
-            } else {
-                return NextResponse.json({ success: false, error: result.error }, { status: 400 });
+            } catch (err: any) {
+                console.error(`[API] sendCustomEmail error:`, err);
+                return NextResponse.json({ success: false, error: err.message }, { status: 400 });
             }
         }
 

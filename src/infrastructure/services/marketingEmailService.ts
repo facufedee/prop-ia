@@ -1,9 +1,11 @@
 import { adminDb } from '@/infrastructure/firebase/admin';
 import { sendEmailWithResend } from '@/lib/resend';
-import { Timestamp } from 'firebase-admin/firestore';
+import * as admin from 'firebase-admin';
+
+const Timestamp = admin.firestore.Timestamp;
 
 // ======= Template Types =======
-export type EmailTemplateType = 'welcome' | 'payment_confirmed' | 'payment_expiring' | 'new_lead';
+export type EmailTemplateType = string;
 
 export interface EmailTemplate {
     id?: string;
@@ -251,6 +253,50 @@ export const marketingEmailService = {
         }
     },
 
+    // ---------- SEND CUSTOM TEMPLATE ----------
+    sendCustomEmail: async (to: string, type: string, data: Record<string, any> = {}) => {
+        try {
+            const template = await getCustomTemplate(type);
+            if (!template) {
+                throw new Error(`Template not found for type: ${type}`);
+            }
+
+            let html = template.html || '';
+
+            // Basic replacements for standard variables if present
+            html = html.replace(/\{\{userName\}\}/g, data.userName || data.leadName || 'Usuario')
+                       .replace(/\{\{planName\}\}/g, data.planName || 'Plan ZetaProp')
+                       .replace(/\{\{expiryDate\}\}/g, data.expiryDate || '')
+                       .replace(/\{\{leadName\}\}/g, data.leadName || 'Usuario')
+                       .replace(/\{\{email\}\}/g, to);
+
+            const subject = template.subject || 'Notificación de ZetaProp';
+
+            await sendEmailWithResend({ to, subject, html });
+
+            await logEmail({
+                type,
+                to,
+                subject,
+                status: 'sent',
+                sentAt: new Date(),
+                metadata: data,
+            });
+            return { success: true };
+        } catch (error: any) {
+            console.error('[MarketingEmailService] sendCustomEmail failed for type', type, ':', error);
+            await logEmail({
+                type,
+                to,
+                subject: 'Error de envío de custom template',
+                status: 'failed',
+                error: error?.message,
+                sentAt: new Date(),
+            });
+            throw error;
+        }
+    },
+
     // ---------- TEMPLATE MANAGEMENT ----------
     getTemplates: async (): Promise<EmailTemplate[]> => {
         const snap = await adminDb.collection(EMAIL_TEMPLATES_COLLECTION).get();
@@ -304,7 +350,7 @@ export const marketingEmailService = {
         });
     },
 
-    getEmailStats: async (): Promise<Record<EmailTemplateType, { sent: number; failed: number }>> => {
+    getEmailStats: async (): Promise<Record<string, { sent: number; failed: number }>> => {
         const snap = await adminDb.collection(EMAIL_LOGS_COLLECTION).get();
         const stats: Record<string, { sent: number; failed: number }> = {
             welcome: { sent: 0, failed: 0 },
@@ -315,12 +361,13 @@ export const marketingEmailService = {
 
         snap.docs.forEach(doc => {
             const { type, status } = doc.data();
-            if (stats[type]) {
-                if (status === 'sent') stats[type].sent++;
-                else if (status === 'failed') stats[type].failed++;
+            if (!stats[type]) {
+                stats[type] = { sent: 0, failed: 0 };
             }
+            if (status === 'sent') stats[type].sent++;
+            else if (status === 'failed') stats[type].failed++;
         });
 
-        return stats as Record<EmailTemplateType, { sent: number; failed: number }>;
+        return stats;
     },
 };
