@@ -4,6 +4,7 @@ import { usePathname } from "next/navigation";
 import Navbar from "@/ui/components/layout/navbar/Navbar";
 import Footer from "@/ui/components/layout/Footer";
 import { AuthProvider } from "@/ui/context/AuthContext";
+import { ThemeProvider } from "@/ui/context/ThemeContext";
 
 export default function ClientLayout({ children }: { children: React.ReactNode }) {
     const pathname = usePathname();
@@ -13,6 +14,7 @@ export default function ClientLayout({ children }: { children: React.ReactNode }
     const isHome = pathname === "/";
 
     return (
+        <ThemeProvider>
         <AuthProvider>
             {!isDashboard && <Navbar />}
             <div className={!isDashboard && !isHome ? "pt-16 md:pt-0" : ""}>
@@ -20,5 +22,6 @@ export default function ClientLayout({ children }: { children: React.ReactNode }
             </div>
             {!isDashboard && <Footer />}
         </AuthProvider>
+        </ThemeProvider>
     );
 }

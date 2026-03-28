@@ -1,5 +1,7 @@
 @import "tailwindcss";
 
+@custom-variant dark (&:where(.dark, .dark *));
+
 :root {
   --background: #ffffff;
   --foreground: #171717;
@@ -73,3 +75,200 @@ body {
 .animate-gradient-xy {
   animation: gradient-xy 6s ease infinite;
 }
+
+/* ─── Dashboard Dark Mode Overrides ────────────────────────────────────────────
+   Scoped to [data-dashboard] so la landing y otras páginas no se ven afectadas.
+   Selectores directos (sin nesting) para máxima compatibilidad con Tailwind v4.
+─────────────────────────────────────────────────────────────────────────────── */
+
+/* Fondos */
+.dark [data-dashboard] .bg-white                    { background-color: #1e2433 !important; }
+.dark [data-dashboard] .bg-gray-50                  { background-color: #161b27 !important; }
+.dark [data-dashboard] .bg-gray-50\/70              { background-color: #161b27 !important; }
+.dark [data-dashboard] .bg-gray-50\/60              { background-color: #161b27 !important; }
+.dark [data-dashboard] .bg-gray-50\/50              { background-color: #161b27 !important; }
+.dark [data-dashboard] .bg-gray-100                 { background-color: #252d3d !important; }
+.dark [data-dashboard] .bg-gray-100\/60             { background-color: #252d3d !important; }
+.dark [data-dashboard] .bg-gray-100\/70             { background-color: #252d3d !important; }
+.dark [data-dashboard] .bg-gray-100\/80             { background-color: #252d3d !important; }
+.dark [data-dashboard] .bg-gray-200                 { background-color: #2e384d !important; }
+.dark [data-dashboard] .bg-gray-200\/50             { background-color: rgba(46,56,77,0.5) !important; }
+.dark [data-dashboard] .bg-white\/90                { background-color: rgba(30,36,51,0.9) !important; }
+.dark [data-dashboard] .bg-white\/80                { background-color: rgba(30,36,51,0.8) !important; }
+
+/* Fondos de estado / badges claros */
+.dark [data-dashboard] .bg-green-50                 { background-color: #0d2318 !important; }
+.dark [data-dashboard] .bg-green-100                { background-color: #0d2318 !important; }
+.dark [data-dashboard] .bg-blue-50                  { background-color: #0d1626 !important; }
+.dark [data-dashboard] .bg-blue-100                 { background-color: #0d1626 !important; }
+.dark [data-dashboard] .bg-indigo-50                { background-color: #0d1626 !important; }
+.dark [data-dashboard] .bg-indigo-50\/40            { background-color: rgba(13,22,38,0.4) !important; }
+.dark [data-dashboard] .bg-indigo-50\/60            { background-color: rgba(13,22,38,0.6) !important; }
+.dark [data-dashboard] .bg-indigo-100               { background-color: #0d1626 !important; }
+.dark [data-dashboard] .bg-yellow-50                { background-color: #1f1a07 !important; }
+.dark [data-dashboard] .bg-yellow-100               { background-color: #1f1a07 !important; }
+.dark [data-dashboard] .bg-amber-50                 { background-color: #1f1a07 !important; }
+.dark [data-dashboard] .bg-amber-50\/60             { background-color: rgba(31,26,7,0.6) !important; }
+.dark [data-dashboard] .bg-amber-100                { background-color: #1f1a07 !important; }
+.dark [data-dashboard] .bg-blue-50\/60              { background-color: rgba(13,22,38,0.6) !important; }
+.dark [data-dashboard] .bg-teal-50\/60              { background-color: rgba(10,31,30,0.6) !important; }
+.dark [data-dashboard] .bg-emerald-50\/60           { background-color: rgba(13,35,24,0.6) !important; }
+.dark [data-dashboard] .bg-purple-50\/60            { background-color: rgba(22,13,38,0.6) !important; }
+.dark [data-dashboard] .bg-red-50                   { background-color: #280d0d !important; }
+.dark [data-dashboard] .bg-red-100                  { background-color: #280d0d !important; }
+.dark [data-dashboard] .bg-orange-50                { background-color: #200e06 !important; }
+.dark [data-dashboard] .bg-orange-100               { background-color: #200e06 !important; }
+.dark [data-dashboard] .bg-purple-50                { background-color: #160d26 !important; }
+.dark [data-dashboard] .bg-purple-100               { background-color: #160d26 !important; }
+.dark [data-dashboard] .bg-violet-50                { background-color: #160d26 !important; }
+.dark [data-dashboard] .bg-violet-100               { background-color: #160d26 !important; }
+.dark [data-dashboard] .bg-teal-50                  { background-color: #0a1f1e !important; }
+.dark [data-dashboard] .bg-teal-100                 { background-color: #0a1f1e !important; }
+.dark [data-dashboard] .bg-emerald-50               { background-color: #0d2318 !important; }
+.dark [data-dashboard] .bg-emerald-100              { background-color: #0d2318 !important; }
+/* Fondo principal de página */
+.dark [data-dashboard] .bg-\[\#F8F9FC\]             { background-color: #0f1623 !important; }
+
+/* Texto principal (escala de grises) */
+.dark [data-dashboard] .text-gray-900               { color: #f1f5f9 !important; }
+.dark [data-dashboard] .text-gray-800               { color: #e2e8f0 !important; }
+.dark [data-dashboard] .text-gray-700               { color: #cbd5e1 !important; }
+.dark [data-dashboard] .text-gray-600               { color: #94a3b8 !important; }
+.dark [data-dashboard] .text-gray-500               { color: #64748b !important; }
+.dark [data-dashboard] .text-gray-400               { color: #475569 !important; }
+
+/* Texto de estado con colores */
+.dark [data-dashboard] .text-green-700              { color: #4ade80 !important; }
+.dark [data-dashboard] .text-green-600              { color: #22c55e !important; }
+.dark [data-dashboard] .text-green-500              { color: #4ade80 !important; }
+.dark [data-dashboard] .text-green-800              { color: #86efac !important; }
+.dark [data-dashboard] .text-blue-700               { color: #818cf8 !important; }
+.dark [data-dashboard] .text-indigo-700             { color: #818cf8 !important; }
+.dark [data-dashboard] .text-blue-600               { color: #6366f1 !important; }
+.dark [data-dashboard] .text-indigo-600             { color: #6366f1 !important; }
+.dark [data-dashboard] .text-indigo-400             { color: #a5b4fc !important; }
+.dark [data-dashboard] .text-indigo-900             { color: #c7d2fe !important; }
+.dark [data-dashboard] .text-yellow-700             { color: #fbbf24 !important; }
+.dark [data-dashboard] .text-amber-700              { color: #fbbf24 !important; }
+.dark [data-dashboard] .text-amber-600              { color: #f59e0b !important; }
+.dark [data-dashboard] .text-red-700                { color: #f87171 !important; }
+.dark [data-dashboard] .text-orange-700             { color: #fb923c !important; }
+.dark [data-dashboard] .text-red-600                { color: #ef4444 !important; }
+.dark [data-dashboard] .text-purple-700             { color: #a78bfa !important; }
+.dark [data-dashboard] .text-violet-700             { color: #a78bfa !important; }
+.dark [data-dashboard] .text-violet-600             { color: #8b5cf6 !important; }
+.dark [data-dashboard] .text-violet-500             { color: #a78bfa !important; }
+.dark [data-dashboard] .text-black                  { color: #e2e8f0 !important; }
+.dark [data-dashboard] .text-indigo-800             { color: #a5b4fc !important; }
+.dark [data-dashboard] .text-yellow-800             { color: #fbbf24 !important; }
+.dark [data-dashboard] .text-yellow-900             { color: #fde68a !important; }
+.dark [data-dashboard] .text-red-500                { color: #f87171 !important; }
+.dark [data-dashboard] .text-teal-600               { color: #2dd4bf !important; }
+.dark [data-dashboard] .text-teal-700               { color: #2dd4bf !important; }
+.dark [data-dashboard] .text-purple-600             { color: #c084fc !important; }
+.dark [data-dashboard] .text-emerald-700            { color: #34d399 !important; }
+.dark [data-dashboard] .text-emerald-700\/80        { color: rgba(52,211,153,0.8) !important; }
+.dark [data-dashboard] .text-emerald-600            { color: #34d399 !important; }
+.dark [data-dashboard] .text-emerald-500            { color: #6ee7b7 !important; }
+.dark [data-dashboard] .text-orange-600             { color: #fb923c !important; }
+
+/* Bordes */
+.dark [data-dashboard] .border-gray-100             { border-color: rgba(255,255,255,0.07) !important; }
+.dark [data-dashboard] .border-gray-100\/50         { border-color: rgba(255,255,255,0.05) !important; }
+.dark [data-dashboard] .border-gray-200             { border-color: rgba(255,255,255,0.10) !important; }
+.dark [data-dashboard] .border-gray-200\/80         { border-color: rgba(255,255,255,0.08) !important; }
+.dark [data-dashboard] .border-gray-200\/60         { border-color: rgba(255,255,255,0.06) !important; }
+.dark [data-dashboard] .border-gray-300             { border-color: rgba(255,255,255,0.15) !important; }
+.dark [data-dashboard] .border-green-200            { border-color: rgba(74,222,128,0.25)  !important; }
+.dark [data-dashboard] .border-green-300            { border-color: rgba(74,222,128,0.30)  !important; }
+.dark [data-dashboard] .border-indigo-200           { border-color: rgba(129,140,248,0.25) !important; }
+.dark [data-dashboard] .border-indigo-300           { border-color: rgba(129,140,248,0.30) !important; }
+.dark [data-dashboard] .border-blue-200             { border-color: rgba(129,140,248,0.25) !important; }
+.dark [data-dashboard] .border-blue-300             { border-color: rgba(129,140,248,0.30) !important; }
+.dark [data-dashboard] .border-amber-300            { border-color: rgba(251,191,36,0.30)  !important; }
+.dark [data-dashboard] .border-red-200              { border-color: rgba(248,113,113,0.25) !important; }
+.dark [data-dashboard] .border-red-300              { border-color: rgba(248,113,113,0.30) !important; }
+.dark [data-dashboard] .border-violet-300           { border-color: rgba(167,139,250,0.30) !important; }
+.dark [data-dashboard] .border-teal-300             { border-color: rgba(45,212,191,0.30)  !important; }
+.dark [data-dashboard] .border-indigo-100           { border-color: rgba(129,140,248,0.15) !important; }
+.dark [data-dashboard] .border-violet-100           { border-color: rgba(167,139,250,0.15) !important; }
+.dark [data-dashboard] .border-yellow-200           { border-color: rgba(251,191,36,0.25)  !important; }
+.dark [data-dashboard] .border-purple-200           { border-color: rgba(192,132,252,0.25) !important; }
+.dark [data-dashboard] .border-emerald-200          { border-color: rgba(52,211,153,0.25)  !important; }
+.dark [data-dashboard] .border-orange-200           { border-color: rgba(251,146,60,0.25)  !important; }
+.dark [data-dashboard] .border-amber-100\/50        { border-color: rgba(251,191,36,0.10)  !important; }
+.dark [data-dashboard] .border-gray-50              { border-color: rgba(255,255,255,0.04) !important; }
+
+/* Inputs, selects y textareas */
+.dark [data-dashboard] input:not([type="range"]):not([type="checkbox"]):not([type="radio"]),
+.dark [data-dashboard] select,
+.dark [data-dashboard] textarea {
+  background-color: #252d3d !important;
+  color: #e2e8f0 !important;
+  border-color: rgba(255,255,255,0.12) !important;
+}
+.dark [data-dashboard] input::placeholder,
+.dark [data-dashboard] textarea::placeholder { color: #475569 !important; }
+
+/* Tablas */
+.dark [data-dashboard] thead                        { background-color: #1a2236 !important; }
+.dark [data-dashboard] th                           { color: #94a3b8 !important; border-color: rgba(255,255,255,0.08) !important; }
+.dark [data-dashboard] td                           { border-color: rgba(255,255,255,0.06) !important; }
+.dark [data-dashboard] tr:hover td                  { background-color: rgba(255,255,255,0.03) !important; }
+
+/* Divisores */
+.dark [data-dashboard] hr                           { border-color: rgba(255,255,255,0.08) !important; }
+.dark [data-dashboard] .divide-gray-50 > * + *      { border-color: rgba(255,255,255,0.05) !important; }
+.dark [data-dashboard] .divide-gray-100 > * + *     { border-color: rgba(255,255,255,0.08) !important; }
+.dark [data-dashboard] .divide-gray-200 > * + *     { border-color: rgba(255,255,255,0.08) !important; }
+
+/* Hover states */
+.dark [data-dashboard] .hover\:bg-gray-50:hover          { background-color: rgba(255,255,255,0.04) !important; }
+.dark [data-dashboard] .hover\:bg-gray-100:hover         { background-color: rgba(255,255,255,0.06) !important; }
+.dark [data-dashboard] .hover\:bg-gray-200\/50:hover     { background-color: rgba(255,255,255,0.06) !important; }
+.dark [data-dashboard] .hover\:bg-white:hover            { background-color: rgba(255,255,255,0.05) !important; }
+.dark [data-dashboard] .hover\:bg-gray-900:hover         { background-color: rgba(255,255,255,0.08) !important; }
+.dark [data-dashboard] .hover\:text-gray-900:hover       { color: #f1f5f9 !important; }
+.dark [data-dashboard] .hover\:text-gray-700:hover       { color: #e2e8f0 !important; }
+.dark [data-dashboard] .hover\:text-indigo-700:hover     { color: #818cf8 !important; }
+.dark [data-dashboard] .hover\:border-indigo-100:hover   { border-color: rgba(129,140,248,0.20) !important; }
+.dark [data-dashboard] .hover\:border-emerald-200:hover  { border-color: rgba(52,211,153,0.30)  !important; }
+.dark [data-dashboard] .hover\:border-violet-200:hover   { border-color: rgba(167,139,250,0.30) !important; }
+.dark [data-dashboard] .hover\:bg-orange-50\/30:hover    { background-color: rgba(255,237,213,0.04) !important; }
+.dark [data-dashboard] .hover\:bg-blue-50\/30:hover      { background-color: rgba(219,234,254,0.04) !important; }
+.dark [data-dashboard] .hover\:bg-indigo-50\/50:hover    { background-color: rgba(13,22,38,0.5)  !important; }
+.dark [data-dashboard] .hover\:bg-indigo-100:hover       { background-color: rgba(13,22,38,0.6)  !important; }
+.dark [data-dashboard] .hover\:bg-green-100:hover        { background-color: rgba(13,35,24,0.6)  !important; }
+.dark [data-dashboard] .hover\:bg-gray-200:hover         { background-color: rgba(255,255,255,0.08) !important; }
+.dark [data-dashboard] .hover\:text-black:hover          { color: #e2e8f0 !important; }
+.dark [data-dashboard] .hover\:text-indigo-600:hover     { color: #818cf8 !important; }
+.dark [data-dashboard] .hover\:text-red-500:hover        { color: #f87171 !important; }
+
+/* Sombras */
+.dark [data-dashboard] .shadow-sm                   { box-shadow: 0 1px 3px rgba(0,0,0,0.5)  !important; }
+.dark [data-dashboard] .shadow-md                   { box-shadow: 0 4px 12px rgba(0,0,0,0.6) !important; }
+.dark [data-dashboard] .shadow-lg                   { box-shadow: 0 8px 24px rgba(0,0,0,0.7) !important; }
+.dark [data-dashboard] .shadow-xl                   { box-shadow: 0 12px 32px rgba(0,0,0,0.8) !important; }
+
+/* Gradientes — sobreescribir CSS vars de Tailwind */
+.dark [data-dashboard] .from-gray-50   { --tw-gradient-from: #161b27 !important; }
+.dark [data-dashboard] .to-white       { --tw-gradient-to:   #1e2433 !important; }
+.dark [data-dashboard] .to-gray-50     { --tw-gradient-to:   #161b27 !important; }
+.dark [data-dashboard] .from-amber-50  { --tw-gradient-from: #1f1a07 !important; }
+.dark [data-dashboard] .to-orange-50   { --tw-gradient-to:   #200e06 !important; }
+
+/* Bordes izquierdos (prioridad en kanban cards) */
+.dark [data-dashboard] .border-l-red-400    { border-left-color: rgba(248,113,113,0.7) !important; }
+.dark [data-dashboard] .border-l-amber-400  { border-left-color: rgba(251,191,36,0.7)  !important; }
+.dark [data-dashboard] .border-l-emerald-400 { border-left-color: rgba(52,211,153,0.7) !important; }
+
+/* Ring colors (urgencia en kanban cards) */
+.dark [data-dashboard] .ring-red-200    { --tw-ring-color: rgba(248,113,113,0.3) !important; }
+.dark [data-dashboard] .ring-orange-200 { --tw-ring-color: rgba(251,146,60,0.3)  !important; }
+.dark [data-dashboard] .ring-indigo-200 { --tw-ring-color: rgba(129,140,248,0.3) !important; }
+
+/* SVG fills */
+.dark [data-dashboard] .fill-amber-600 { fill: #f59e0b !important; }
+
+/* Scrollbars */
+.dark [data-dashboard] * { scrollbar-color: #334155 transparent; }

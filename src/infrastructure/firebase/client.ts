@@ -53,9 +53,13 @@ const storage = getStorage(app);
 const auth = typeof window !== "undefined" ? getAuth(app) : undefined;
 
 // Initialize Performance Monitoring
+// instrumentationEnabled = false: prevents auto-tracing DOM elements,
+// which causes "invalid attribute value" errors with Tailwind fractional
+// classes like py-1.5, px-2.5, etc. (they contain dots → invalid CSS selectors).
 let perf: any = null;
 if (typeof window !== "undefined") {
   perf = getPerformance(app);
+  perf.instrumentationEnabled = false;
 }
 
 export { app, auth, db, storage, perf };

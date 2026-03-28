@@ -22,6 +22,10 @@ export const PERMISSIONS: Permission[] = [
     { id: "/dashboard/tasacion", label: "Tasación Inteligente", description: "Acceso a herramientas de tasación" },
     { id: "/dashboard/propiedades", label: "Propiedades", description: "Gestión de propiedades" },
     { id: "/dashboard/alquileres", label: "Alquileres", description: "Gestión de contratos de alquiler" },
+    { id: "/dashboard/agenda-cobros", label: "Agenda de Cobros", description: "Cobros pendientes de todos los contratos" },
+    { id: "/dashboard/liquidaciones", label: "Liquidaciones", description: "Pagos pendientes a propietarios" },
+    { id: "/dashboard/ventas", label: "Ventas", description: "Pipeline de operaciones de compraventa" },
+    { id: "/dashboard/ventas/reportes", label: "Reportes de Ventas", description: "Volumen, comisiones y cierres" },
     { id: "/dashboard/agentes", label: "Agentes", description: "Gestión de agentes y comisiones" },
     { id: "/dashboard/leads", label: "Consultas", description: "Gestión de clientes potenciales" },
     { id: "/dashboard/clientes", label: "Clientes", description: "Base de datos de clientes" },
@@ -226,6 +230,10 @@ export const roleService = {
                     "/dashboard/propiedades",
                     "/dashboard/tasacion", // Advanced
                     "/dashboard/alquileres",
+                    "/dashboard/agenda-cobros",
+                    "/dashboard/liquidaciones",
+                    "/dashboard/ventas",
+                    "/dashboard/ventas/reportes",
                     "/dashboard/agentes",
                     "/dashboard/leads",
                     "/dashboard/clientes",
@@ -257,6 +265,10 @@ export const roleService = {
                     "/dashboard/propiedades",
                     "/dashboard/tasacion",
                     "/dashboard/alquileres",
+                    "/dashboard/agenda-cobros",
+                    "/dashboard/liquidaciones",
+                    "/dashboard/ventas",
+                    "/dashboard/ventas/reportes",
                     "/dashboard/agentes",
                     "/dashboard/leads",
                     "/dashboard/clientes",
@@ -285,6 +297,9 @@ export const roleService = {
                     "/dashboard",
                     "/dashboard/propiedades",
                     "/dashboard/alquileres",
+                    "/dashboard/agenda-cobros",
+                    "/dashboard/liquidaciones",
+                    "/dashboard/ventas",
                     "/dashboard/clientes",
                     "/dashboard/finanzas",
                     "/dashboard/soporte",
@@ -314,6 +329,64 @@ export const roleService = {
             });
         }
     },
+    // Sync default roles: add missing permissions to existing roles without removing any
+    syncDefaultRoles: async (): Promise<{ updated: string[] }> => {
+        const DEFAULT_PERMISSIONS: Record<string, string[]> = {
+            "Super Admin": PERMISSIONS.map(p => p.id),
+            "Cliente Enterprise": [
+                "/dashboard", "/dashboard/propiedades", "/dashboard/tasacion",
+                "/dashboard/alquileres", "/dashboard/agenda-cobros", "/dashboard/liquidaciones",
+                "/dashboard/ventas", "/dashboard/ventas/reportes",
+                "/dashboard/agentes", "/dashboard/leads", "/dashboard/clientes", "/dashboard/chat",
+                "/dashboard/publicaciones", "/dashboard/finanzas", "/dashboard/calendario",
+                "/dashboard/soporte", "/dashboard/sucursales", "/dashboard/blog",
+                "/dashboard/cuenta", "/dashboard/configuracion", "/dashboard/novedades",
+                "/dashboard/emprendimientos", "/dashboard/tutoriales", "/dashboard/marketing",
+            ],
+            "Cliente Pro": [
+                "/dashboard", "/dashboard/propiedades", "/dashboard/tasacion",
+                "/dashboard/alquileres", "/dashboard/agenda-cobros", "/dashboard/liquidaciones",
+                "/dashboard/ventas", "/dashboard/ventas/reportes",
+                "/dashboard/agentes", "/dashboard/leads", "/dashboard/clientes", "/dashboard/chat",
+                "/dashboard/publicaciones", "/dashboard/finanzas", "/dashboard/calendario",
+                "/dashboard/sucursales", "/dashboard/blog", "/dashboard/cuenta",
+                "/dashboard/novedades", "/dashboard/emprendimientos", "/dashboard/tutoriales",
+                "/dashboard/marketing",
+            ],
+            "Cliente Básico": [
+                "/dashboard", "/dashboard/propiedades", "/dashboard/alquileres",
+                "/dashboard/agenda-cobros", "/dashboard/liquidaciones",
+                "/dashboard/ventas", "/dashboard/clientes", "/dashboard/finanzas",
+                "/dashboard/soporte", "/dashboard/tutoriales",
+            ],
+            "Agente": [
+                "/dashboard", "/dashboard/propiedades", "/dashboard/alquileres",
+                "/dashboard/leads", "/dashboard/calendario", "/dashboard/cuenta",
+                "/dashboard/blog", "/dashboard/novedades", "/dashboard/tutoriales",
+            ],
+        };
+
+        const roles = await roleService.getRoles();
+        const updated: string[] = [];
+
+        for (const role of roles) {
+            const defaultPerms = DEFAULT_PERMISSIONS[role.name];
+            if (!defaultPerms) continue;
+
+            const existing = new Set(role.permissions || []);
+            const missing = defaultPerms.filter(p => !existing.has(p));
+
+            if (missing.length > 0) {
+                await roleService.updateRole(role.id, {
+                    permissions: [...existing, ...missing],
+                });
+                updated.push(role.name);
+            }
+        }
+
+        return { updated };
+    },
+
     // Get the default role (Cliente)
     getDefaultRole: async (): Promise<Role | null> => {
         if (!db) throw new Error("Firestore not initialized");

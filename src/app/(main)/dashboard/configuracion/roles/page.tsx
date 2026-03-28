@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { roleService, Role, PERMISSIONS, Permission } from "@/infrastructure/services/roleService";
-import { Plus, Edit2, Trash2, Check, X, Shield, User as UserIcon, Save } from "lucide-react";
+import { Plus, Edit2, Trash2, Check, X, Shield, User as UserIcon, Save, RefreshCw } from "lucide-react";
 import { collection, getDocs } from "firebase/firestore";
 import { db } from "@/infrastructure/firebase/client";
 
@@ -17,6 +17,7 @@ export default function RolesPage() {
     const [roles, setRoles] = useState<Role[]>([]);
     const [users, setUsers] = useState<UserData[]>([]);
     const [loading, setLoading] = useState(true);
+    const [syncing, setSyncing] = useState(false);
     const [editingRole, setEditingRole] = useState<Role | null>(null);
     const [isCreating, setIsCreating] = useState(false);
     const [newRoleName, setNewRoleName] = useState("");
@@ -45,6 +46,24 @@ export default function RolesPage() {
             console.error("Error loading data:", error);
         } finally {
             setLoading(false);
+        }
+    };
+
+    const handleSyncRoles = async () => {
+        setSyncing(true);
+        try {
+            const { updated } = await roleService.syncDefaultRoles();
+            if (updated.length > 0) {
+                alert(`Permisos actualizados en: ${updated.join(", ")}`);
+            } else {
+                alert("Todos los roles ya están al día.");
+            }
+            loadData();
+        } catch (error) {
+            console.error("Error syncing roles:", error);
+            alert("Error al sincronizar roles");
+        } finally {
+            setSyncing(false);
         }
     };
 
@@ -121,12 +140,23 @@ export default function RolesPage() {
                     <h1 className="text-2xl font-bold text-gray-900">Roles y Permisos</h1>
                     <p className="text-gray-500">Gestioná los roles de usuario y sus niveles de acceso.</p>
                 </div>
-                <button
-                    onClick={handleCreateRole}
-                    className="flex items-center gap-2 bg-indigo-600 text-white px-4 py-2 rounded-xl hover:bg-indigo-700 transition"
-                >
-                    <Plus size={18} /> Nuevo Rol
-                </button>
+                <div className="flex gap-2">
+                    <button
+                        onClick={handleSyncRoles}
+                        disabled={syncing}
+                        className="flex items-center gap-2 bg-white border border-gray-200 text-gray-700 px-4 py-2 rounded-xl hover:bg-gray-50 transition disabled:opacity-60"
+                        title="Agrega permisos nuevos a roles existentes sin quitar los actuales"
+                    >
+                        <RefreshCw size={16} className={syncing ? "animate-spin" : ""} />
+                        {syncing ? "Sincronizando..." : "Sincronizar permisos"}
+                    </button>
+                    <button
+                        onClick={handleCreateRole}
+                        className="flex items-center gap-2 bg-indigo-600 text-white px-4 py-2 rounded-xl hover:bg-indigo-700 transition"
+                    >
+                        <Plus size={18} /> Nuevo Rol
+                    </button>
+                </div>
             </div>
 
             {loading ? (

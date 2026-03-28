@@ -33,7 +33,10 @@ import {
   GraduationCap,
   PieChart,
   ChevronDown,
-  UserPlus
+  UserPlus,
+  ClipboardList,
+  Handshake,
+  TrendingUp,
 } from "lucide-react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
@@ -60,9 +63,30 @@ type MenuItem = {
 // Menu Configuration - Main list
 const MENU_ITEMS: MenuItem[] = [
   { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard, description: "Resumen general de tu inmobiliaria" },
-
-  { href: "/dashboard/alquileres", label: "Alquileres", icon: Key, description: "Administra contratos, cuotas y renovaciones" },
   { href: "/dashboard/propiedades", label: "Propiedades", icon: Home, description: "Gestión de tu catálogo de inmuebles" },
+
+  {
+    href: "/dashboard/alquileres",
+    label: "Alquileres",
+    icon: Key,
+    description: "Administra contratos, cuotas y renovaciones",
+    subItems: [
+      { href: "/dashboard/alquileres", label: "Panel de Contratos", icon: Key, description: "Todos los contratos activos" },
+      { href: "/dashboard/agenda-cobros", label: "Agenda de Cobros", icon: ClipboardList, description: "Cobros pendientes de todos los contratos" },
+      { href: "/dashboard/liquidaciones", label: "Liquidaciones", icon: DollarSign, description: "Pagos pendientes a propietarios" },
+      { href: "/dashboard/finanzas", label: "Reportes", icon: PieChart, description: "Ingresos, honorarios y movimientos" },
+    ]
+  },
+  {
+    href: "/dashboard/ventas",
+    label: "Ventas",
+    icon: Handshake,
+    description: "Operaciones de compraventa",
+    subItems: [
+      { href: "/dashboard/ventas", label: "Pipeline de Operaciones", icon: Handshake, description: "Todas las operaciones en curso" },
+      { href: "/dashboard/ventas/reportes", label: "Reportes de Ventas", icon: TrendingUp, description: "Volumen, comisiones y cierres" },
+    ]
+  },
   {
     href: "/dashboard/clientes",
     label: "Clientes",
@@ -75,7 +99,6 @@ const MENU_ITEMS: MenuItem[] = [
     ]
   },
   { href: "/dashboard/leads", label: "Consultas", icon: MessageSquare, description: "Central de consultas y mensajes (Leads)" },
-  { href: "/dashboard/finanzas", label: "Reportes", icon: PieChart, description: "Reportes financieros, honorarios y cajas" },
   { href: "/dashboard/calendario", label: "Agenda", icon: Calendar, description: "Calendario de citas y eventos" },
 
   // Divider
@@ -185,7 +208,7 @@ export default function DashboardSidebar({ isOpen = false, onClose }: DashboardS
     // This removes the need for checking "adminOnly" since admins
     // will just have those permissions included in their array
     if (userPermissions && userPermissions.length > 0) {
-       return userPermissions.includes(requiredPermission);
+      return userPermissions.includes(requiredPermission);
     }
 
     return false;
@@ -204,14 +227,17 @@ export default function DashboardSidebar({ isOpen = false, onClose }: DashboardS
       {/* Sidebar */}
       <aside
         className={cn(
-          "fixed top-0 left-0 z-50 h-screen bg-gray-50 border-r border-gray-200 transition-all duration-300 ease-in-out flex flex-col lg:relative",
+          "fixed top-0 left-0 z-50 h-screen bg-gray-50 dark:bg-gray-950 border-r border-gray-200 dark:border-transparent transition-all duration-300 ease-in-out flex flex-col lg:relative",
           collapsed ? "lg:w-20" : "lg:w-64",
-          "w-64", // Mobile width always full
+          "w-64",
           isOpen ? "translate-x-0" : "-translate-x-full lg:translate-x-0"
         )}
       >
         {/* Header */}
-        <div className="h-16 flex items-center justify-between px-4 border-b border-gray-200 min-h-[64px] bg-white">
+        <div className={cn(
+          "h-16 flex items-center justify-between px-4 border-b border-gray-200 dark:border-white/10 min-h-[64px]",
+          collapsed ? "px-0 justify-center" : ""
+        )}>
           {!collapsed && (
             <>
               {(userRole as any)?.logoUrl ? (
@@ -219,13 +245,13 @@ export default function DashboardSidebar({ isOpen = false, onClose }: DashboardS
                   <img
                     src={(userRole as any).logoUrl}
                     alt="Logo Inmobiliaria"
-                    className="h-12 w-auto max-w-[200px] object-contain"
+                    className="h-10 w-auto max-w-[180px] object-contain dark:brightness-0 dark:invert"
                   />
                 </div>
               ) : (
                 <h1 className="text-2xl font-bold truncate">
-                  <span className="text-gray-900">Zeta</span>
-                  <span className="bg-gradient-to-r from-indigo-600 to-violet-600 bg-clip-text text-transparent">Prop</span>
+                  <span className="text-gray-900 dark:text-white">Zeta</span>
+                  <span className="bg-gradient-to-r from-indigo-600 to-violet-600 dark:from-indigo-400 dark:to-violet-400 bg-clip-text text-transparent">Prop</span>
                 </h1>
               )}
             </>
@@ -233,119 +259,126 @@ export default function DashboardSidebar({ isOpen = false, onClose }: DashboardS
           {collapsed && (
             <div className="w-full flex justify-center py-2">
               {(userRole as any)?.logoUrl ? (
-                <div className="w-12 h-12 flex items-center justify-center">
+                <div className="w-10 h-10 flex items-center justify-center">
                   <img
                     src={(userRole as any).logoUrl}
                     alt="Logo"
-                    className="max-w-full max-h-full object-contain"
+                    className="max-w-full max-h-full object-contain dark:brightness-0 dark:invert"
                   />
                 </div>
               ) : (
-                <div className="text-center">
-                  <div className="text-lg font-bold leading-none">
-                    <div className="text-gray-900">Z</div>
-                    <div className="bg-gradient-to-r from-indigo-600 to-violet-600 bg-clip-text text-transparent">P</div>
-                  </div>
+                <div className="text-lg font-bold leading-none text-center">
+                  <div className="text-gray-900 dark:text-white">Z</div>
+                  <div className="bg-gradient-to-r from-indigo-600 to-violet-600 dark:from-indigo-400 dark:to-violet-400 bg-clip-text text-transparent">P</div>
                 </div>
               )}
             </div>
           )}
 
           {/* Desktop Collapse Toggle */}
-          <button
-            onClick={() => setCollapsed(!collapsed)}
-            className="hidden lg:flex p-1.5 hover:bg-gray-100 rounded-lg text-gray-500 transition-colors"
-          >
-            {collapsed ? <ChevronRight size={18} /> : <ChevronLeft size={18} />}
-          </button>
+          {!collapsed && (
+            <button
+              onClick={() => setCollapsed(!collapsed)}
+              className="hidden lg:flex p-1.5 hover:bg-gray-100 dark:hover:bg-white/10 rounded-lg text-gray-500 dark:text-gray-400 transition-colors"
+            >
+              <ChevronLeft size={18} />
+            </button>
+          )}
 
           {/* Mobile Close Button */}
           <button
             onClick={onClose}
-            className="lg:hidden p-1 hover:bg-gray-100 rounded-lg text-gray-500"
+            className="lg:hidden p-1 hover:bg-gray-100 dark:hover:bg-white/10 rounded-lg text-gray-500 dark:text-gray-400"
           >
             <X size={20} />
           </button>
         </div>
 
+        {/* Collapsed expand button */}
+        {collapsed && (
+          <button
+            onClick={() => setCollapsed(false)}
+            className="hidden lg:flex mx-auto mt-3 p-1.5 hover:bg-gray-100 dark:hover:bg-white/10 rounded-lg text-gray-500 dark:text-gray-400 transition-colors"
+          >
+            <ChevronRight size={18} />
+          </button>
+        )}
+
         {/* Content */}
-        <div className="flex-1 overflow-y-auto overflow-x-visible py-4 px-3 scrollbar-none space-y-1 relative pb-20">
+        <div className="flex-1 overflow-y-auto overflow-x-hidden py-4 px-3 scrollbar-none space-y-0.5 pb-20">
           {MENU_ITEMS.filter(hasPermission).map((item) => {
             if (item.isDivider) {
-              return <div key={item.href} className="my-3 mx-2 border-t border-gray-200"></div>;
+              return <div key={item.href} className="my-2 mx-2 border-t border-gray-200 dark:border-white/10"></div>;
             }
 
-            const isActive = pathname === item.href || (item.subItems && pathname.startsWith(item.href));
+            const isActive = pathname === item.href || (item.subItems && item.subItems.some(s => pathname === s.href));
             const isExpanded = expandedMenus.includes(item.href);
 
             return (
-              <div key={item.href} className="flex flex-col relative group">
+              <div key={item.href} className="flex flex-col">
                 <Link
                   href={item.subItems ? "#" : item.href}
                   onClick={(e) => handleItemClick(e, item)}
                   className={cn(
-                    "flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all duration-200 w-full",
-                    isActive && !item.subItems
-                      ? "bg-indigo-50 text-indigo-700 font-medium"
-                      : "text-gray-600 hover:bg-white hover:text-gray-900",
+                    "flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all duration-150 w-full group",
+                    isActive
+                      ? "bg-indigo-600 text-white"
+                      : "text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-white/8 hover:text-gray-900 dark:hover:text-white",
                     collapsed ? "justify-center px-0" : ""
                   )}
                 >
                   <item.icon
-                    size={20}
+                    size={18}
                     className={cn(
-                      "transition-colors flex-shrink-0",
-                      isActive && !item.subItems ? "text-indigo-600" : "text-gray-500 group-hover:text-gray-700"
+                      "flex-shrink-0 transition-colors",
+                      isActive ? "text-white" : "text-gray-400 dark:text-gray-500 group-hover:text-gray-700 dark:group-hover:text-gray-300"
                     )}
                   />
                   {!collapsed && (
                     <div className="flex flex-1 items-center justify-between min-w-0">
-                      <span className="truncate">{item.label}</span>
+                      <span className="truncate text-sm font-medium">{item.label}</span>
 
                       {item.subItems && (
-                        <ChevronDown size={16} className={cn("transition-transform text-gray-400 font-normal", isExpanded && "rotate-180")} />
+                        <ChevronDown size={14} className={cn("transition-transform text-gray-400 dark:text-gray-600 flex-shrink-0", isExpanded && "rotate-180")} />
                       )}
 
                       {item.href === '/dashboard/leads' && unreadCount > 0 && (
-                        <span className="bg-red-500 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full min-w-[20px] text-center ml-2 shadow-sm animate-pulse">
+                        <span className="bg-red-500 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full min-w-[18px] text-center ml-2">
                           {unreadCount}
                         </span>
                       )}
 
                       {!isActive && item.href === '/dashboard/soporte/ticketera' && ticketCount > 0 && (
-                        <span className="bg-red-500 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full min-w-[20px] text-center ml-2 shadow-sm animate-pulse">
+                        <span className="bg-red-500 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full min-w-[18px] text-center ml-2">
                           {ticketCount}
                         </span>
                       )}
                     </div>
                   )}
-
-                  {/* Tooltips removed */}
                 </Link>
 
                 {/* Submenu Items */}
                 {item.subItems && isExpanded && !collapsed && (
-                  <div className="pl-10 pr-3 py-1 space-y-1 mt-1 bg-gray-100/30 rounded-xl relative border-l-2 border-indigo-100 mx-3">
-                    {item.subItems.map(sub => (
-                      <Link
-                        key={sub.href}
-                        href={sub.href}
-                        onClick={() => onClose && onClose()}
-                        className={cn(
-                          "flex items-center gap-2 py-2 px-3 rounded-lg text-sm text-gray-500 hover:text-indigo-600 hover:bg-white transition-all w-full relative group/sub"
-                        )}
-                      >
-                        <sub.icon size={14} className="opacity-70 group-hover/sub:opacity-100 group-hover/sub:text-indigo-600" />
-                        <span className="font-medium">{sub.label}</span>
-
-                        {sub.description && (
-                          <div className="absolute left-full top-1/2 -translate-y-1/2 ml-4 w-40 px-3 py-2 bg-gray-900 border border-gray-700 text-white text-[11px] rounded-lg shadow-xl opacity-0 invisible group-hover/sub:opacity-100 group-hover/sub:visible transition-all z-[100] pointer-events-none">
-                            <div className="font-bold mb-0.5 text-gray-100 leading-tight">{sub.label}</div>
-                            <div className="text-gray-300 font-normal leading-snug">{sub.description}</div>
-                          </div>
-                        )}
-                      </Link>
-                    ))}
+                  <div className="ml-4 pl-4 mt-0.5 mb-1 space-y-0.5 border-l border-gray-200 dark:border-white/10">
+                    {item.subItems.map(sub => {
+                      const isSubActive = pathname === sub.href;
+                      return (
+                        <Link
+                          key={sub.href}
+                          href={sub.href}
+                          onClick={() => onClose && onClose()}
+                          className={cn(
+                            "flex items-center gap-2 py-2 px-3 rounded-lg text-sm transition-all w-full",
+                            isSubActive
+                              ? "bg-indigo-600/80 text-white"
+                              : "text-gray-500 dark:text-gray-500 hover:bg-gray-100 dark:hover:bg-white/8 hover:text-gray-900 dark:hover:text-white"
+                          )}
+                        >
+                          <sub.icon size={14} className={cn("flex-shrink-0", isSubActive ? "text-white" : "text-gray-400 dark:text-gray-600")} />
+                          <span className="font-medium">{sub.label}</span>
+                        </Link>
+                      );
+                    })}
                   </div>
                 )}
               </div>
@@ -354,17 +387,17 @@ export default function DashboardSidebar({ isOpen = false, onClose }: DashboardS
         </div>
 
         {/* Footer Actions */}
-        <div className="p-4 border-t border-gray-100 space-y-2">
+        <div className="p-3 border-t border-gray-200 dark:border-white/10">
           <button
             onClick={handleLogout}
             className={cn(
-              "flex items-center gap-3 w-full px-3 py-2.5 rounded-xl text-red-600 hover:bg-red-50 transition-colors",
+              "flex items-center gap-3 w-full px-3 py-2.5 rounded-lg text-gray-500 dark:text-gray-500 hover:bg-red-50 dark:hover:bg-white/8 hover:text-red-600 dark:hover:text-red-400 transition-colors",
               collapsed ? "justify-center" : ""
             )}
             title={collapsed ? "Cerrar Sesión" : undefined}
           >
-            <LogOut size={20} className="flex-shrink-0" />
-            {!collapsed && <span className="truncate">Cerrar Sesión</span>}
+            <LogOut size={18} className="flex-shrink-0" />
+            {!collapsed && <span className="text-sm font-medium truncate">Cerrar Sesión</span>}
           </button>
         </div>
       </aside>

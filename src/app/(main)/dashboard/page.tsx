@@ -459,7 +459,7 @@ export default function DashboardPage() {
                                     <UserCheck size={30} className="text-violet-600" />
                                 </div>
                                 <div className="z-10">
-                                    <p className="text-[11px] font-bold text-gray-500 uppercase tracking-widest mb-1.5">Total Clientes</p>
+                                    <p className="text-[11px] font-bold text-gray-500 uppercase tracking-widest mb-1.5">Todos</p>
                                     <p className="text-4xl font-extrabold text-gray-900 tracking-tight">{renderLimit(stats.totalClientes, clientsLimit)}</p>
                                 </div>
                                 <UserCheck size={100} className="absolute -right-6 -bottom-6 text-violet-50 opacity-40 group-hover:rotate-6 transition-transform z-0 pointer-events-none" />
