@@ -2,11 +2,13 @@
 
 import { useEffect, useState, useCallback, useRef } from "react";
 import Image from "next/image";
+import { useSearchParams } from "next/navigation";
 import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
 import {
     Globe, Palette, Building2, CheckCircle2, AlertCircle, Loader2,
     Eye, EyeOff, ExternalLink, Copy, Check, Sparkles, Smartphone,
     Instagram, Facebook, Phone, Mail, MapPin, Save, Upload, X, ImageIcon,
+    TrendingUp, Link2,
 } from "lucide-react";
 import { useAuth } from "@/ui/context/AuthContext";
 import { storage } from "@/infrastructure/firebase/client";
@@ -45,14 +47,18 @@ const PRESET_COLORS = [
 // ── Types ─────────────────────────────────────────────────────────────────────
 
 type FormData = Omit<Site, "id" | "userId" | "createdAt" | "updatedAt">;
-type Tab = "plantilla" | "identidad" | "colores" | "contacto";
+type Tab = "plantilla" | "identidad" | "colores" | "contacto" | "dominio" | "seo";
 
 const TABS: { id: Tab; label: string; icon: any }[] = [
     { id: "plantilla", label: "Plantilla", icon: Sparkles },
     { id: "identidad", label: "Identidad", icon: Building2 },
     { id: "colores", label: "Colores", icon: Palette },
     { id: "contacto", label: "Contacto", icon: Phone },
+    { id: "dominio", label: "Dominio", icon: Link2 },
+    { id: "seo", label: "SEO", icon: TrendingUp },
 ];
+
+const VALID_TABS: Tab[] = ["plantilla", "identidad", "colores", "contacto", "dominio", "seo"];
 
 // ── Image upload helper ───────────────────────────────────────────────────────
 
@@ -67,12 +73,24 @@ async function uploadSiteImage(userId: string, type: "logo" | "cover", file: Fil
 
 export default function MiSitioPage() {
     const { user } = useAuth();
+    const searchParams = useSearchParams();
 
     const [site, setSite] = useState<Site | null>(null);
     const [loading, setLoading] = useState(true);
     const [saving, setSaving] = useState(false);
     const [publishing, setPublishing] = useState(false);
-    const [activeTab, setActiveTab] = useState<Tab>("plantilla");
+
+    const tabFromUrl = searchParams.get("tab") as Tab | null;
+    const [activeTab, setActiveTab] = useState<Tab>(
+        tabFromUrl && VALID_TABS.includes(tabFromUrl) ? tabFromUrl : "plantilla"
+    );
+
+    // Sync tab when URL changes (sidebar navigation)
+    useEffect(() => {
+        if (tabFromUrl && VALID_TABS.includes(tabFromUrl)) {
+            setActiveTab(tabFromUrl);
+        }
+    }, [tabFromUrl]);
     const [copied, setCopied] = useState(false);
     const [slugError, setSlugError] = useState("");
     const [checkingSlug, setCheckingSlug] = useState(false);
@@ -619,6 +637,119 @@ export default function MiSitioPage() {
                                         </div>
                                     </div>
                                 ))}
+                            </>
+                        )}
+
+                        {/* ── DOMINIO ── */}
+                        {activeTab === "dominio" && (
+                            <>
+                                <h3 className="font-semibold text-gray-900 dark:text-white">Dominio</h3>
+
+                                {/* Subdominio actual */}
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
+                                        Subdominio en Zeta Prop
+                                    </label>
+                                    <div className="flex items-center rounded-xl border border-gray-300 dark:border-gray-600 overflow-hidden focus-within:ring-2 focus-within:ring-indigo-500">
+                                        <span className="px-3 py-3 bg-gray-50 dark:bg-gray-800 text-gray-500 text-sm border-r border-gray-300 dark:border-gray-600 whitespace-nowrap">
+                                            https://
+                                        </span>
+                                        <input
+                                            type="text"
+                                            value={form.slug}
+                                            onChange={(e) => {
+                                                const val = e.target.value.toLowerCase().replace(/[^a-z0-9-]/g, "");
+                                                set("slug", val);
+                                                setSlugError("");
+                                            }}
+                                            onBlur={() => form.slug && validateSlug(form.slug)}
+                                            placeholder="mi-inmobiliaria"
+                                            className="flex-1 px-3 py-3 text-sm bg-white dark:bg-gray-900 text-gray-900 dark:text-white outline-none"
+                                        />
+                                        <span className="px-3 py-3 bg-gray-50 dark:bg-gray-800 text-gray-500 text-sm border-l border-gray-300 dark:border-gray-600 whitespace-nowrap">
+                                            .zetaprop.com.ar
+                                        </span>
+                                    </div>
+                                    {checkingSlug && (
+                                        <p className="mt-1 text-xs text-gray-400 flex items-center gap-1">
+                                            <Loader2 className="w-3 h-3 animate-spin" /> Verificando disponibilidad...
+                                        </p>
+                                    )}
+                                    {slugError && (
+                                        <p className="mt-1 text-xs text-red-500 flex items-center gap-1">
+                                            <AlertCircle className="w-3 h-3" /> {slugError}
+                                        </p>
+                                    )}
+                                    {!slugError && !checkingSlug && form.slug.length >= 3 && (
+                                        <p className="mt-1 text-xs text-green-600 flex items-center gap-1">
+                                            <CheckCircle2 className="w-3 h-3" /> Disponible
+                                        </p>
+                                    )}
+                                </div>
+
+                                {/* Dominio propio — próximamente */}
+                                <div className="mt-4 rounded-xl border border-dashed border-indigo-300 dark:border-indigo-700 bg-indigo-50 dark:bg-indigo-900/20 p-5">
+                                    <div className="flex items-center gap-2 mb-2">
+                                        <Globe className="w-4 h-4 text-indigo-500" />
+                                        <p className="text-sm font-semibold text-indigo-700 dark:text-indigo-300">Dominio propio</p>
+                                        <span className="px-2 py-0.5 text-[10px] font-bold bg-indigo-200 dark:bg-indigo-800 text-indigo-700 dark:text-indigo-300 rounded-full uppercase tracking-wide">Próximamente</span>
+                                    </div>
+                                    <p className="text-xs text-indigo-600 dark:text-indigo-400 leading-relaxed">
+                                        Pronto podrás conectar tu propio dominio (ej: <strong>miinmobiliaria.com</strong>) al sitio.
+                                        Solo necesitarás agregar un registro CNAME en tu proveedor de DNS.
+                                    </p>
+                                </div>
+                            </>
+                        )}
+
+                        {/* ── SEO ── */}
+                        {activeTab === "seo" && (
+                            <>
+                                <h3 className="font-semibold text-gray-900 dark:text-white">SEO</h3>
+                                <p className="text-xs text-gray-500 dark:text-gray-400 -mt-2">
+                                    Estos datos ya se generan automáticamente con la información de tu sitio.
+                                </p>
+
+                                {/* Vista previa del resultado en Google */}
+                                <div className="rounded-xl border border-gray-200 dark:border-gray-700 p-4 bg-white dark:bg-gray-800">
+                                    <p className="text-xs text-gray-400 dark:text-gray-500 mb-3 font-medium">Vista previa en Google</p>
+                                    <p className="text-[#1a0dab] dark:text-blue-400 text-base font-medium leading-tight line-clamp-1">
+                                        {form.nombre ? `${form.nombre} | Portal Inmobiliario` : "Nombre de tu inmobiliaria | Portal Inmobiliario"}
+                                    </p>
+                                    <p className="text-green-700 dark:text-green-500 text-xs mt-0.5">
+                                        https://{form.slug || "tu-slug"}.zetaprop.com.ar
+                                    </p>
+                                    <p className="text-gray-600 dark:text-gray-400 text-xs mt-1 line-clamp-2">
+                                        {form.descripcion || "Descripción de tu inmobiliaria. Se muestra en los resultados de búsqueda."}
+                                    </p>
+                                </div>
+
+                                {/* Open Graph preview */}
+                                <div>
+                                    <p className="text-xs font-medium text-gray-700 dark:text-gray-300 mb-2">Imagen al compartir en redes (Open Graph)</p>
+                                    {form.coverUrl ? (
+                                        <div className="rounded-xl overflow-hidden border border-gray-200 dark:border-gray-700">
+                                            <Image src={form.coverUrl} alt="OG Image" width={600} height={200} className="w-full h-32 object-cover" />
+                                            <div className="px-3 py-2 bg-gray-50 dark:bg-gray-800 border-t border-gray-200 dark:border-gray-700">
+                                                <p className="text-xs font-semibold text-gray-800 dark:text-white truncate">{form.nombre || "Mi Inmobiliaria"}</p>
+                                                <p className="text-xs text-gray-400 truncate">{form.slug || "tu-slug"}.zetaprop.com.ar</p>
+                                            </div>
+                                        </div>
+                                    ) : (
+                                        <div className="rounded-xl border border-dashed border-gray-300 dark:border-gray-600 p-4 text-center text-xs text-gray-400">
+                                            <ImageIcon className="w-5 h-5 mx-auto mb-1 opacity-40" />
+                                            Subí una imagen de portada en la tab "Identidad" para que aparezca al compartir el sitio.
+                                        </div>
+                                    )}
+                                </div>
+
+                                <div className="rounded-xl bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 p-4 space-y-2 text-xs text-gray-600 dark:text-gray-400">
+                                    <p className="font-semibold text-gray-700 dark:text-gray-300">¿Qué se indexa automáticamente?</p>
+                                    <p className="flex items-center gap-2"><CheckCircle2 className="w-3.5 h-3.5 text-green-500 flex-shrink-0" /> Título: nombre de la inmobiliaria</p>
+                                    <p className="flex items-center gap-2"><CheckCircle2 className="w-3.5 h-3.5 text-green-500 flex-shrink-0" /> Descripción: slogan / descripción</p>
+                                    <p className="flex items-center gap-2"><CheckCircle2 className="w-3.5 h-3.5 text-green-500 flex-shrink-0" /> Imagen: imagen de portada (si subiste una)</p>
+                                    <p className="flex items-center gap-2"><CheckCircle2 className="w-3.5 h-3.5 text-green-500 flex-shrink-0" /> URL canónica: tu subdominio</p>
+                                </div>
                             </>
                         )}
                     </div>

@@ -37,9 +37,11 @@ import {
   ClipboardList,
   Handshake,
   TrendingUp,
+  Globe,
+  Palette,
 } from "lucide-react";
 import Link from "next/link";
-import { usePathname, useRouter } from "next/navigation";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { cn } from "@/lib/utils";
 import { auth } from "@/infrastructure/firebase/client";
 import { signOut } from "firebase/auth";
@@ -104,6 +106,20 @@ const MENU_ITEMS: MenuItem[] = [
   // Divider
   { href: "divider-1", label: "", icon: LayoutDashboard, isDivider: true },
 
+  {
+    href: "/dashboard/mi-sitio",
+    label: "Mi Sitio Web",
+    icon: Globe,
+    description: "Tu portal inmobiliario público",
+    subItems: [
+      { href: "/dashboard/mi-sitio?tab=plantilla", label: "Plantilla", icon: Sparkles, description: "Elegí el diseño de tu sitio" },
+      { href: "/dashboard/mi-sitio?tab=identidad", label: "Identidad y Logo", icon: Building2, description: "Nombre, logo e imagen de portada" },
+      { href: "/dashboard/mi-sitio?tab=colores", label: "Colores", icon: Palette, description: "Personalizá los colores" },
+      { href: "/dashboard/mi-sitio?tab=contacto", label: "Contacto y Redes", icon: MessageSquare, description: "WhatsApp, email y redes sociales" },
+      { href: "/dashboard/mi-sitio?tab=dominio", label: "Dominio", icon: Globe, description: "Subdominio y dominio propio" },
+      { href: "/dashboard/mi-sitio?tab=seo", label: "SEO", icon: TrendingUp, description: "Título, descripción y metadatos" },
+    ],
+  },
   { href: "/dashboard/novedades", label: "Noticias", icon: Sparkles, description: "Novedades y actualizaciones del rubro" },
   { href: "/dashboard/tutoriales", label: "Tutoriales", icon: GraduationCap, description: "Aprende a usar la plataforma al máximo" },
   { href: "/dashboard/soporte", label: "Soporte", icon: Headphones, description: "Mesa de ayuda y contacto directo" },
@@ -140,6 +156,9 @@ interface DashboardSidebarProps {
 
 export default function DashboardSidebar({ isOpen = false, onClose }: DashboardSidebarProps) {
   const pathname = usePathname();
+  const searchParams = useSearchParams();
+  const currentTab = searchParams.get("tab");
+  const fullPath = currentTab ? `${pathname}?tab=${currentTab}` : pathname;
   const router = useRouter();
   const { userRole, userPermissions, user } = useAuth();
   const [collapsed, setCollapsed] = useState(false);
@@ -311,7 +330,7 @@ export default function DashboardSidebar({ isOpen = false, onClose }: DashboardS
               return <div key={item.href} className="my-2 mx-2 border-t border-gray-200 dark:border-white/10"></div>;
             }
 
-            const isActive = pathname === item.href || (item.subItems && item.subItems.some(s => pathname === s.href));
+            const isActive = pathname === item.href || (item.subItems && item.subItems.some(s => fullPath === s.href || pathname === s.href));
             const isExpanded = expandedMenus.includes(item.href);
 
             return (
@@ -361,7 +380,7 @@ export default function DashboardSidebar({ isOpen = false, onClose }: DashboardS
                 {item.subItems && isExpanded && !collapsed && (
                   <div className="ml-4 pl-4 mt-0.5 mb-1 space-y-0.5 border-l border-gray-200 dark:border-white/10">
                     {item.subItems.map(sub => {
-                      const isSubActive = pathname === sub.href;
+                      const isSubActive = fullPath === sub.href || pathname === sub.href;
                       return (
                         <Link
                           key={sub.href}
