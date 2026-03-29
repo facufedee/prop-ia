@@ -1,5 +1,6 @@
 import { db } from "@/infrastructure/firebase/client";
-import { collection, getDocs, query, orderBy, where, getDoc, doc, deleteDoc, updateDoc, setDoc } from "firebase/firestore";
+import { collection, getDocs, query, orderBy, where, getDoc, doc, deleteDoc, updateDoc, setDoc, limit, Timestamp } from "firebase/firestore";
+import { subDays, format, startOfMonth, subMonths } from "date-fns";
 import { User } from "@/domain/models/User";
 import { Subscription, PlanTier } from "@/domain/models/Subscription";
 
@@ -304,6 +305,111 @@ export const adminService = {
             pendingPaymentApproval: false,
             showPaymentWelcome: true
         });
+    },
+
+    // ======== PLATFORM DASHBOARD DATA ========
+
+    getPlatformDashboard: async () => {
+        if (!db) throw new Error("Firestore not initialized");
+
+        const [usersSnap, subsSnap, logsSnap] = await Promise.all([
+            getDocs(collection(db, USERS_COLLECTION)),
+            getDocs(collection(db, SUBSCRIPTIONS_COLLECTION)),
+            getDocs(query(
+                collection(db, "audit_logs"),
+                where("timestamp", ">=", Timestamp.fromDate(subDays(new Date(), 30))),
+                orderBy("timestamp", "desc"),
+                limit(2000)
+            )),
+        ]);
+
+        const now = new Date();
+
+        // ── KPIs ──────────────────────────────────────────────────────────────
+        let totalUsers = 0, activeUsers = 0, trialUsers = 0, expiredUsers = 0,
+            disabledUsers = 0, mrr = 0, expiringSoon = 0;
+
+        const subsMap = new Map<string, any>();
+        subsSnap.docs.forEach(d => subsMap.set(d.data().userId, d.data()));
+
+        usersSnap.docs.forEach(d => {
+            const u = d.data();
+            totalUsers++;
+            if (u.disabled) { disabledUsers++; return; }
+            const sub = subsMap.get(d.id);
+            if (!sub) {
+                // trial: 14 days from createdAt
+                const created = u.createdAt?.toDate?.() ?? now;
+                const trialEnd = new Date(created.getTime() + 14 * 86400000);
+                if (now > trialEnd) expiredUsers++; else trialUsers++;
+                return;
+            }
+            const endDate: Date = sub.endDate?.toDate?.() ?? new Date(sub.endDate);
+            const daysLeft = (endDate.getTime() - now.getTime()) / 86400000;
+            if (now > endDate) { expiredUsers++; }
+            else {
+                activeUsers++;
+                if (sub.status === 'active' && sub.amount) mrr += sub.amount;
+                if (daysLeft <= 7) expiringSoon++;
+            }
+        });
+
+        // ── Registrations by month (last 6 months) ───────────────────────────
+        const registrationsByMonth: { month: string; usuarios: number }[] = [];
+        for (let i = 5; i >= 0; i--) {
+            const monthStart = startOfMonth(subMonths(now, i));
+            const monthEnd = startOfMonth(subMonths(now, i - 1));
+            const count = usersSnap.docs.filter(d => {
+                const created = d.data().createdAt?.toDate?.();
+                return created && created >= monthStart && created < monthEnd;
+            }).length;
+            registrationsByMonth.push({ month: format(monthStart, "MMM"), usuarios: count });
+        }
+
+        // ── Plan distribution ─────────────────────────────────────────────────
+        const planCount: Record<string, number> = { basic: 0, professional: 0, enterprise: 0 };
+        subsSnap.docs.forEach(d => {
+            const tier = d.data().planTier || "basic";
+            planCount[tier] = (planCount[tier] || 0) + 1;
+        });
+        const planDistribution = Object.entries(planCount).map(([name, value]) => ({ name, value }));
+
+        // ── Module usage (last 30 days from audit_logs) ───────────────────────
+        const moduleCount: Record<string, number> = {};
+        logsSnap.docs.forEach(d => {
+            const m: string = d.data().module || "Desconocido";
+            moduleCount[m] = (moduleCount[m] || 0) + 1;
+        });
+        const moduleUsage = Object.entries(moduleCount)
+            .sort((a, b) => b[1] - a[1])
+            .slice(0, 8)
+            .map(([module, acciones]) => ({ module, acciones }));
+
+        // ── At-risk users (active but no login > 14 days) ─────────────────────
+        const atRisk = usersSnap.docs
+            .filter(d => {
+                const u = d.data();
+                if (u.disabled) return false;
+                const lastLogin = u.lastLogin?.toDate?.();
+                if (!lastLogin) return false;
+                return (now.getTime() - lastLogin.getTime()) > 14 * 86400000;
+            })
+            .slice(0, 10)
+            .map(d => ({
+                uid: d.id,
+                displayName: d.data().displayName || d.data().email,
+                email: d.data().email,
+                lastLogin: d.data().lastLogin?.toDate?.(),
+                planTier: subsMap.get(d.id)?.planTier || "trial",
+            }));
+
+        return {
+            kpis: { totalUsers, activeUsers, trialUsers, expiredUsers, disabledUsers, mrr, expiringSoon },
+            registrationsByMonth,
+            planDistribution,
+            moduleUsage,
+            atRisk,
+        };
     },
 
     registerManualPayment: async (uid: string, paymentData: { amount: number; paymentMethod: string; description: string; date: Date }) => {
