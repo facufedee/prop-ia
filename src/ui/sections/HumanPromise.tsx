@@ -6,7 +6,7 @@ import { ArrowRight, Quote } from "lucide-react";
 
 export default function HumanPromise() {
     return (
-        <section className="relative w-full min-h-screen flex items-center overflow-hidden bg-[#070710]">
+        <section className="relative w-full lg:min-h-screen flex items-center overflow-hidden bg-[#070710]">
 
             {/* Subtle grid */}
             <div
@@ -21,7 +21,7 @@ export default function HumanPromise() {
             <div className="absolute right-0 top-1/4 w-[600px] h-[600px] bg-indigo-800/20 rounded-full blur-[120px] pointer-events-none" />
             <div className="absolute left-1/4 bottom-0 w-[400px] h-[400px] bg-violet-900/15 rounded-full blur-[100px] pointer-events-none" />
 
-            <div className="relative z-10 max-w-7xl mx-auto px-6 lg:px-16 w-full py-24">
+            <div className="relative z-10 max-w-7xl mx-auto px-5 sm:px-8 lg:px-16 w-full py-14 sm:py-20 lg:py-24">
                 <div className="grid lg:grid-cols-2 gap-16 items-center">
 
                     {/* LEFT — text */}

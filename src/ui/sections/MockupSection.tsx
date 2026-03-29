@@ -1,6 +1,6 @@
 export function MockupSection() {
     return (
-        <section className="py-24 bg-white px-6">
+        <section className="py-14 sm:py-20 lg:py-24 bg-white px-5 sm:px-6">
             <div className="max-w-6xl mx-auto text-center mb-12">
                 <h2 className="text-4xl font-bold">Una plataforma moderna y clara</h2>
                 <p className="text-gray-600 mt-2">Diseñada para que trabajes más rápido y con menos esfuerzo.</p>

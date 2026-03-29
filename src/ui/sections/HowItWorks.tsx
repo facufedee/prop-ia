@@ -21,7 +21,7 @@ export function HowItWorks() {
     ];
 
     return (
-        <section id="como-funciona" className="py-24 bg-gray-50 px-6 scroll-mt-20">
+        <section id="como-funciona" className="py-14 sm:py-20 lg:py-24 bg-gray-50 px-5 sm:px-6 scroll-mt-20">
             <div className="max-w-6xl mx-auto">
                 <div className="text-center mb-16">
                     <h2 className="text-4xl font-bold text-gray-900 mb-4">¿Cómo funciona Zeta Prop?</h2>

@@ -146,6 +146,28 @@ service cloud.firestore {
       allow write: if isOwner(resource.data.userId) || isAdmin();
     }
     
+    // Sites Collection (portales inmobiliarios públicos)
+    match /sites/{siteId} {
+      // Lectura pública solo si el sitio está publicado (para el render del portal)
+      // O si el dueño lo lee (para el builder del dashboard)
+      allow read: if resource.data.published == true ||
+                     isOwner(resource.data.userId) ||
+                     isAdmin();
+
+      // Solo el dueño puede crear su propio sitio
+      allow create: if isAuthenticated() &&
+                       request.resource.data.userId == request.auth.uid &&
+                       validateString(request.resource.data.slug, 3, 30) &&
+                       request.resource.data.slug.matches('^[a-z0-9-]+$') &&
+                       validateString(request.resource.data.nombre, 2, 100);
+
+      // Solo el dueño o admin pueden editar
+      allow update: if isOwner(resource.data.userId) || isAdmin();
+
+      // Solo admin puede eliminar
+      allow delete: if isAdmin();
+    }
+
     // Default deny all other collections
     match /{document=**} {
       allow read, write: if false;

@@ -99,8 +99,8 @@ export default function ContactForm() {
 
     if (submitted) {
         return (
-            <section id="contacto" className="py-24 bg-gradient-to-br from-green-50 to-emerald-50">
-                <div className="max-w-7xl mx-auto px-6">
+            <section id="contacto" className="py-14 sm:py-20 lg:py-24 bg-gradient-to-br from-green-50 to-emerald-50">
+                <div className="max-w-7xl mx-auto px-5 sm:px-6">
                     <div className="max-w-2xl mx-auto text-center">
                         <div className="w-20 h-20 bg-green-500 rounded-full flex items-center justify-center mx-auto mb-6 animate-bounce">
                             <CheckCircle className="w-10 h-10 text-white" />
@@ -118,8 +118,8 @@ export default function ContactForm() {
     }
 
     return (
-        <section id="contacto" className="py-24 bg-gradient-to-br from-indigo-50 via-purple-50 to-pink-50">
-            <div className="max-w-7xl mx-auto px-6">
+        <section id="contacto" className="py-14 sm:py-20 lg:py-24 bg-gradient-to-br from-indigo-50 via-purple-50 to-pink-50">
+            <div className="max-w-7xl mx-auto px-5 sm:px-6">
                 <div className="grid lg:grid-cols-2 gap-12 items-center">
                     {/* Left: Info */}
                     <div>

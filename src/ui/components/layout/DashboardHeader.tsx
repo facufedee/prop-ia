@@ -137,7 +137,7 @@ export default function DashboardHeader({ onMobileMenuClick }: DashboardHeaderPr
     const { theme, toggleTheme } = useTheme();
 
     return (
-        <header className="bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-white/10 h-16 px-4 md:px-8 flex items-center justify-between sticky top-0 z-40 shadow-sm dark:shadow-black/20">
+        <header className="bg-white/80 dark:bg-gray-900/80 backdrop-blur-md border-b border-gray-200 dark:border-white/10 h-16 px-4 md:px-8 flex items-center justify-between sticky top-0 z-40 shadow-sm dark:shadow-black/20">
             {/* Left Section */}
             <div className="flex items-center gap-4">
                 <button

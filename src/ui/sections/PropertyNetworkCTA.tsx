@@ -3,12 +3,12 @@ import { ArrowRight, Building2, Search, ShieldCheck, BadgeCheck, Camera, Users }
 
 export default function PropertyNetworkCTA() {
     return (
-        <section className="py-16 bg-indigo-50/30 border-y border-indigo-100 relative overflow-hidden">
+        <section className="py-12 sm:py-16 bg-indigo-50/30 border-y border-indigo-100 relative overflow-hidden">
             {/* Subtle decorative background */}
             <div className="absolute top-0 right-0 -mt-20 -mr-20 w-80 h-80 bg-gradient-to-br from-indigo-100 to-purple-100 rounded-full blur-3xl opacity-60"></div>
             <div className="absolute bottom-0 left-0 -mb-20 -ml-20 w-80 h-80 bg-gradient-to-tr from-blue-100 to-indigo-100 rounded-full blur-3xl opacity-60"></div>
 
-            <div className="container mx-auto px-4 relative z-10">
+            <div className="max-w-7xl mx-auto px-5 sm:px-6 relative z-10">
                 <div className="max-w-4xl mx-auto text-center">
                     <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-indigo-100 border border-indigo-200 mb-6">
                         <Building2 className="w-4 h-4 text-indigo-700" />

@@ -2,7 +2,7 @@
 
 import { Lead, LeadEstado, LeadOrigen, LeadPrioridad, normalizarEstado } from "@/domain/models/Lead";
 import { Mail, MessageSquare, Phone, Clock, Trash2, ArrowRight, AlertTriangle, AlertCircle, Zap } from "lucide-react";
-import Link from 'next/link';
+import { useRouter } from "next/navigation";
 import { useState } from "react";
 
 interface LeadCardProps {
@@ -80,6 +80,7 @@ const PRIORIDAD_CONFIG: Record<LeadPrioridad, { emoji: string; label: string; co
 // ── Component ─────────────────────────────────────────────────────────────────
 
 export default function LeadCard({ lead, onStatusChange, onDelete, isDragging }: LeadCardProps) {
+    const router = useRouter();
     const hoursAgo = getHoursAgo(lead.ultimaActividad ?? lead.createdAt);
     const isUrgent = hoursAgo >= 24;
     const origenConfig = ORIGEN_CONFIG[lead.origen] ?? ORIGEN_CONFIG.otro;
@@ -103,7 +104,9 @@ export default function LeadCard({ lead, onStatusChange, onDelete, isDragging }:
     );
 
     return (
-        <div className={`bg-white rounded-2xl border shadow-sm transition-all duration-200 flex flex-col group relative select-none
+        <div 
+            onClick={() => router.push(`/dashboard/clientes/leads/${lead.id}`)}
+            className={`bg-white rounded-2xl border shadow-sm transition-all duration-200 flex flex-col group relative select-none cursor-pointer
             ${isUrgent ? 'border-orange-200 shadow-orange-50' : 'border-gray-100'}
             ${isDragging ? 'shadow-xl rotate-1 scale-105 opacity-90 border-indigo-300' : 'hover:shadow-md hover:-translate-y-0.5'}
         `}>
@@ -124,18 +127,16 @@ export default function LeadCard({ lead, onStatusChange, onDelete, isDragging }:
 
             {/* Header */}
             <div className="p-4 flex items-start gap-3">
-                <Link href={`/dashboard/clientes/leads/${lead.id}`} className="flex-shrink-0">
+                <div className="flex-shrink-0">
                     <div className={`w-10 h-10 rounded-full flex items-center justify-center font-bold text-sm ${avatarColor} border border-white shadow-sm hover:scale-105 transition-transform`}>
                         {initials}
                     </div>
-                </Link>
+                </div>
                 <div className="flex-1 min-w-0">
-                    <Link href={`/dashboard/clientes/leads/${lead.id}`}>
-                        <h3 className="font-bold text-gray-900 text-sm leading-tight line-clamp-1 hover:text-indigo-600 transition-colors flex items-center gap-1">
-                            {lead.nombre}
-                            <ArrowRight size={12} className="opacity-0 group-hover:opacity-100 transition-opacity text-indigo-400 flex-shrink-0" />
-                        </h3>
-                    </Link>
+                    <h3 className="font-bold text-gray-900 text-sm leading-tight line-clamp-1 group-hover:text-indigo-600 transition-colors flex items-center gap-1">
+                        {lead.nombre}
+                        <ArrowRight size={12} className="opacity-0 group-hover:opacity-100 transition-opacity text-indigo-400 flex-shrink-0" />
+                    </h3>
                     {/* Badges row */}
                     <div className="flex flex-wrap items-center gap-1 mt-1">
                         {/* Source badge */}
@@ -181,14 +182,14 @@ export default function LeadCard({ lead, onStatusChange, onDelete, isDragging }:
                         <a
                             href={`https://wa.me/${lead.telefono.replace(/\D/g, '')}?text=${whatsappText}`}
                             target="_blank" rel="noopener noreferrer"
-                            onClick={() => onStatusChange && lead.estado === 'nuevo' && onStatusChange(lead.id, 'contactado')}
+                            onClick={(e) => { e.stopPropagation(); onStatusChange && lead.estado === 'nuevo' && onStatusChange(lead.id, 'contactado'); }}
                             className="flex-1 flex items-center justify-center gap-1.5 py-2 bg-green-500 hover:bg-green-600 text-white rounded-xl text-xs font-bold transition active:scale-95"
                         >
                             <MessageSquare size={12} /> WA
                         </a>
                         <a
                             href={`tel:${lead.telefono.replace(/\D/g, '')}`}
-                            onClick={() => onStatusChange && onStatusChange(lead.id, 'contactado')}
+                            onClick={(e) => { e.stopPropagation(); onStatusChange && onStatusChange(lead.id, 'contactado'); }}
                             className="flex-1 flex items-center justify-center gap-1.5 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-xs font-bold transition active:scale-95"
                         >
                             <Phone size={12} /> Llamar
@@ -207,13 +208,13 @@ export default function LeadCard({ lead, onStatusChange, onDelete, isDragging }:
                         Sin contacto
                     </button>
                 )}
-                <Link
-                    href={`/dashboard/clientes/leads/${lead.id}`}
+                <button
+                    onClick={(e) => { e.stopPropagation(); router.push(`/dashboard/clientes/leads/${lead.id}`); }}
                     className="w-9 flex items-center justify-center py-2 bg-gray-100 hover:bg-gray-200 text-gray-600 rounded-xl text-xs font-bold transition"
                     title="Ver historial"
                 >
                     <ArrowRight size={14} />
-                </Link>
+                </button>
             </div>
         </div>
     );

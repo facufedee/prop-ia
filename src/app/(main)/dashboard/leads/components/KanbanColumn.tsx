@@ -31,7 +31,7 @@ export default function KanbanColumn({
     onStatusChange
 }: KanbanColumnProps) {
     return (
-        <div className={`flex flex-col rounded-2xl ${columnBg} border border-gray-200/80 min-w-[290px] max-w-[320px] flex-shrink-0 h-full shadow-sm`}>
+        <div className={`flex flex-col rounded-2xl ${columnBg} border border-gray-200/80 w-full md:min-w-[290px] md:max-w-[320px] flex-shrink-0 h-full shadow-sm`}>
             {/* Column Header */}
             <div className={`px-4 py-3.5 ${headerBg} rounded-t-2xl border-b border-gray-200/60 sticky top-0 z-10`}>
                 <div className="flex items-center justify-between">

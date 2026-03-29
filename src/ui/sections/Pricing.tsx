@@ -21,7 +21,7 @@ export function Pricing() {
     ];
 
     return (
-        <section id="pricing" className="py-24 bg-white px-6 scroll-mt-20">
+        <section id="pricing" className="py-14 sm:py-20 lg:py-24 bg-white px-5 sm:px-6 scroll-mt-20">
             <div className="max-w-6xl mx-auto text-center mb-16">
                 <h2 className="text-4xl font-bold">Planes que crecen con vos</h2>
                 <p className="text-gray-600 mt-2">Elegí el plan que mejor se adapta a tu negocio.</p>

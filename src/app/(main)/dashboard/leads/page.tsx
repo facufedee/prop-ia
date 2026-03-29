@@ -147,10 +147,19 @@ export default function LeadsPage() {
     const [loading, setLoading] = useState(true);
     const [searchTerm, setSearchTerm] = useState("");
     const [viewMode, setViewMode] = useState<"kanban" | "list">("kanban");
+    const [activeColumn, setActiveColumn] = useState<ColumnKey>(COLUMNS[0].id);
+    const [isMobile, setIsMobile] = useState(false);
     const [filterOrigen, setFilterOrigen] = useState<LeadOrigen | 'all'>('all');
     const [filterPrioridad, setFilterPrioridad] = useState<LeadPrioridad | 'all'>('all');
     const [showNewLeadModal, setShowNewLeadModal] = useState(false);
     const { userRole, user } = useAuth();
+
+    useEffect(() => {
+        const checkMobile = () => setIsMobile(window.innerWidth < 768);
+        checkMobile();
+        window.addEventListener('resize', checkMobile);
+        return () => window.removeEventListener('resize', checkMobile);
+    }, []);
 
     // ── Fetch ─────────────────────────────────────────────────────────────────
     const fetchLeads = useCallback(async () => {
@@ -345,54 +354,94 @@ export default function LeadsPage() {
             </div>
 
             {/* ── Kanban Board ── */}
-            {viewMode === "kanban" ? (
-                <DragDropContext onDragEnd={handleDragEnd}>
-                    <div className="flex gap-4 overflow-x-auto pb-6 flex-1 items-start">
-                        {COLUMNS.map((col) => (
-                            <KanbanColumn
-                                key={col.id}
-                                id={col.id}
-                                title={col.title}
-                                subtitle={col.subtitle}
-                                icon={col.icon}
-                                color={col.color}
-                                headerBg={col.headerBg}
-                                columnBg={col.columnBg}
-                                leads={columnLeads(col.id)}
-                                onDelete={handleDelete}
-                                onStatusChange={handleStatusChange}
-                            />
-                        ))}
-                    </div>
-                </DragDropContext>
-            ) : (
-                /* ── List View ── */
-                <>
-                    {filteredLeads.length === 0 ? (
-                        <div className="text-center py-16 bg-gray-50 rounded-xl border border-gray-200 border-dashed">
-                            <MessageSquare className="w-12 h-12 text-gray-300 mx-auto mb-4" />
-                            <p className="text-gray-500 text-lg">No se encontraron consultas</p>
-                            <button
-                                onClick={() => setShowNewLeadModal(true)}
-                                className="mt-4 px-4 py-2 bg-indigo-600 text-white rounded-xl text-sm font-semibold hover:bg-indigo-700 transition"
-                            >
-                                + Nuevo Lead
-                            </button>
+            {/* ── Main View Area ────────────────────────────────────────────────────────── */}
+            <div className="flex-1 flex flex-col min-h-0">
+                {viewMode === "kanban" ? (
+                    isMobile ? (
+                        <div className="flex-1 flex flex-col min-h-0">
+                            {/* Mobile Column Tabs */}
+                            <div className="flex gap-2 overflow-x-auto pb-4 no-scrollbar -mx-2 px-2 shrink-0">
+                                {COLUMNS.map((col) => {
+                                    const count = columnLeads(col.id).length;
+                                    const isActive = activeColumn === col.id;
+                                    return (
+                                        <button
+                                            key={col.id}
+                                            onClick={() => setActiveColumn(col.id)}
+                                            className={`
+                                                flex items-center gap-2 px-4 py-2.5 rounded-2xl text-xs font-bold whitespace-nowrap transition-all border
+                                                ${isActive
+                                                    ? `${col.color} border-current ring-1 ring-current/20 shadow-sm`
+                                                    : "bg-white text-gray-400 border-gray-100 hover:border-gray-200"
+                                                }
+                                            `}
+                                        >
+                                            <col.icon size={14} className={isActive ? "text-current" : "text-gray-300"} />
+                                            <span>{col.title}</span>
+                                            <span className={`px-1.5 py-0.5 rounded-full text-[10px] ${isActive ? "bg-white/20" : "bg-gray-100 text-gray-500"}`}>
+                                                {count}
+                                            </span>
+                                        </button>
+                                    );
+                                })}
+                            </div>
+
+                            {/* Active Column */}
+                            <div className="flex-1 min-h-0">
+                                <DragDropContext onDragEnd={handleDragEnd}>
+                                    <KanbanColumn
+                                        {...COLUMNS.find((c) => c.id === activeColumn)!}
+                                        leads={columnLeads(activeColumn)}
+                                        onStatusChange={handleStatusChange}
+                                        onDelete={handleDelete}
+                                    />
+                                </DragDropContext>
+                            </div>
                         </div>
                     ) : (
-                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                            {filteredLeads.map((lead) => (
+                        <div className="flex-1 overflow-x-auto min-h-0 pb-4 no-scrollbar">
+                            <DragDropContext onDragEnd={handleDragEnd}>
+                                <div className="flex gap-4 h-full pr-8">
+                                    {COLUMNS.map((col) => (
+                                        <KanbanColumn
+                                            key={col.id}
+                                            {...col}
+                                            leads={columnLeads(col.id)}
+                                            onStatusChange={handleStatusChange}
+                                            onDelete={handleDelete}
+                                        />
+                                    ))}
+                                </div>
+                            </DragDropContext>
+                        </div>
+                    )
+                ) : (
+                    /* LIST VIEW */
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 pb-8">
+                        {filteredLeads.length === 0 ? (
+                            <div className="col-span-full text-center py-16 bg-gray-50 rounded-xl border border-gray-200 border-dashed">
+                                <MessageSquare className="w-12 h-12 text-gray-300 mx-auto mb-4" />
+                                <p className="text-gray-500 text-lg">No se encontraron consultas</p>
+                                <button
+                                    onClick={() => setShowNewLeadModal(true)}
+                                    className="mt-4 px-4 py-2 bg-indigo-600 text-white rounded-xl text-sm font-semibold hover:bg-indigo-700 transition"
+                                >
+                                    + Nuevo Lead
+                                </button>
+                            </div>
+                        ) : (
+                            filteredLeads.map((lead) => (
                                 <LeadCard
                                     key={lead.id}
                                     lead={lead}
                                     onStatusChange={handleStatusChange}
                                     onDelete={handleDelete}
                                 />
-                            ))}
-                        </div>
-                    )}
-                </>
-            )}
+                            ))
+                        )}
+                    </div>
+                )}
+            </div>
 
             {/* ── New Lead Modal ── */}
             {showNewLeadModal && user && (

@@ -130,7 +130,7 @@ export default function Hero() {
     const handleMouseLeave = () => setTilt({ x: 0, y: 0 });
 
     return (
-        <section className="relative w-full min-h-[100dvh] lg:min-h-screen flex items-center overflow-hidden bg-[#080810] pt-20 lg:pt-0">
+        <section className="relative w-full min-h-[100dvh] lg:min-h-screen flex items-center overflow-hidden bg-[#080810] pt-16 lg:pt-0">
 
             {/* Dot grid */}
             <div className="absolute inset-0 pointer-events-none" style={{
@@ -147,11 +147,11 @@ export default function Hero() {
             <div ref={bgRef} className="absolute inset-0 pointer-events-none transition-opacity duration-300"
                 style={{ background: `rgba(8,8,16,0)` }} />
 
-            <div className="relative z-10 max-w-7xl mx-auto px-6 lg:px-16 w-full">
+            <div className="relative z-10 max-w-7xl mx-auto px-5 sm:px-8 lg:px-16 w-full">
                 <div className="grid lg:grid-cols-[1fr_420px] gap-14 items-center">
 
                     {/* LEFT — text scrolls up slightly on scroll */}
-                    <div ref={textGroupRef} className="flex flex-col text-center lg:text-left items-center lg:items-start" style={{ transform: `translateY(0px)`, opacity: 1, transition: "opacity 0.1s" }}>
+                    <div ref={textGroupRef} className="flex flex-col text-center lg:text-left items-center lg:items-start w-full" style={{ transform: `translateY(0px)`, opacity: 1, transition: "opacity 0.1s" }}>
 
                         {/* Main headline */}
                         <h1 className="text-4xl sm:text-5xl lg:text-5xl xl:text-6xl font-extrabold leading-[1.08] tracking-tight text-white mb-6">
@@ -175,14 +175,14 @@ export default function Hero() {
                         </div>
 
                         {/* CTAs */}
-                        <div className="flex flex-col w-full sm:w-auto sm:flex-row gap-4 mb-10 w-full px-2 sm:px-0">
+                        <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 mb-10 w-full sm:w-auto">
                             <Link href="/register"
-                                className="group flex items-center justify-center gap-3 px-6 py-3.5 sm:px-8 sm:py-4 bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-[15px] sm:text-base rounded-2xl transition-all duration-200 hover:shadow-2xl hover:shadow-indigo-500/30 active:scale-95 w-full sm:w-auto">
+                                className="group flex items-center justify-center gap-3 px-6 py-4 sm:px-8 bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-[15px] sm:text-base rounded-2xl transition-all duration-200 hover:shadow-2xl hover:shadow-indigo-500/30 active:scale-95">
                                 Registrá tu Inmobiliaria Gratis
-                                <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
+                                <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform flex-shrink-0" />
                             </Link>
                             <Link href="/precios"
-                                className="flex items-center justify-center gap-2 px-6 py-3.5 sm:px-8 sm:py-4 text-gray-200 hover:text-white font-semibold text-[15px] sm:text-base rounded-2xl border border-white/15 hover:border-white/30 hover:bg-white/8 transition-all duration-200 w-full sm:w-auto">
+                                className="flex items-center justify-center gap-2 px-6 py-4 sm:px-8 text-gray-200 hover:text-white font-semibold text-[15px] sm:text-base rounded-2xl border border-white/15 hover:border-white/30 hover:bg-white/[0.08] transition-all duration-200">
                                 Ver planes y precios
                             </Link>
                         </div>

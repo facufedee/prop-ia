@@ -71,7 +71,7 @@ export default function FAQ() {
     const [openIndex, setOpenIndex] = useState<number | null>(null);
 
     return (
-        <section id="faq" className="py-24 bg-gray-50 px-6 scroll-mt-20">
+        <section id="faq" className="py-14 sm:py-20 lg:py-24 bg-gray-50 px-5 sm:px-6 scroll-mt-20">
             <div className="max-w-4xl mx-auto">
                 <div className="text-center mb-16">
                     <div className="inline-flex items-center justify-center p-3 bg-white border border-gray-200 shadow-sm rounded-xl mb-4">

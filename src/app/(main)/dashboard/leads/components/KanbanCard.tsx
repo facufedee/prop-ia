@@ -4,6 +4,7 @@ import { Lead, LeadEstado, LeadOrigen, LeadPrioridad } from "@/domain/models/Lea
 import { Draggable } from "@hello-pangea/dnd";
 import { MessageSquare, Mail, Phone, Clock, Building2, Trash2, ArrowRight, Copy, AlertTriangle, AlertCircle } from "lucide-react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useState } from "react";
 
 interface KanbanCardProps {
@@ -58,6 +59,7 @@ const PRIORIDAD_CONFIG: Record<LeadPrioridad, { emoji: string; border: string }>
 // ── Component ─────────────────────────────────────────────────────────────────
 
 export default function KanbanCard({ lead, index, onDelete, onStatusChange }: KanbanCardProps) {
+    const router = useRouter();
     const [showActions, setShowActions] = useState(false);
     const consultaCount = lead.consultas?.length ?? 1;
     const latestMsg = lead.consultas?.length
@@ -80,7 +82,7 @@ export default function KanbanCard({ lead, index, onDelete, onStatusChange }: Ka
                     ref={provided.innerRef}
                     {...provided.draggableProps}
                     {...provided.dragHandleProps}
-                    className={`bg-white rounded-2xl border border-gray-100 shadow-sm transition-all duration-200 select-none mb-3 group relative overflow-hidden
+                    className={`bg-white rounded-2xl border border-gray-100 shadow-sm transition-all duration-200 select-none mb-3 group relative overflow-hidden cursor-pointer
                         ${prioridadConfig?.border ?? ''}
                         ${snapshot.isDragging
                             ? "shadow-2xl rotate-[1.5deg] scale-[1.02] border-indigo-200 ring-2 ring-indigo-200 z-50"
@@ -90,6 +92,7 @@ export default function KanbanCard({ lead, index, onDelete, onStatusChange }: Ka
                     `}
                     onMouseEnter={() => setShowActions(true)}
                     onMouseLeave={() => setShowActions(false)}
+                    onClick={() => router.push(`/dashboard/clientes/leads/${lead.id}`)}
                 >
                     {/* Urgency top bar */}
                     {(isUrgent24 || isUrgent48) && (
@@ -113,13 +116,10 @@ export default function KanbanCard({ lead, index, onDelete, onStatusChange }: Ka
                                 {getInitials(lead.nombre)}
                             </div>
                             <div className="flex-1 min-w-0">
-                                <Link
-                                    href={`/dashboard/clientes/leads/${lead.id}`}
-                                    className="font-bold text-gray-900 text-sm hover:text-indigo-600 transition-colors flex items-center gap-1 group/link"
-                                >
+                                <span className="font-bold text-gray-900 text-sm flex items-center gap-1 group/link">
                                     <span className="truncate">{lead.nombre || "Sin nombre"}</span>
                                     <ArrowRight size={12} className="opacity-0 group-hover/link:opacity-100 transition-opacity flex-shrink-0 text-indigo-400" />
-                                </Link>
+                                </span>
                                 <div className="flex items-center gap-1.5 mt-0.5">
                                     <span className="text-[10px] text-gray-400 flex items-center gap-0.5">
                                         <Clock size={9} /> {timeAgo(lead.createdAt)}

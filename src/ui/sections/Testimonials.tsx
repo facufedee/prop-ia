@@ -28,8 +28,8 @@ export default function Testimonials() {
     ];
 
     return (
-        <section className="py-24 bg-gray-50">
-            <div className="max-w-7xl mx-auto px-6">
+        <section className="py-14 sm:py-20 lg:py-24 bg-gray-50">
+            <div className="max-w-7xl mx-auto px-5 sm:px-6">
                 <div className="text-center mb-16">
                     <span className="inline-block px-4 py-2 bg-indigo-100 text-indigo-700 rounded-full text-sm font-semibold mb-6">
                         TESTIMONIOS

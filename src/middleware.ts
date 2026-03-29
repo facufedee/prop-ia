@@ -7,8 +7,41 @@ const limiter = new InMemoryRateLimiter({
     uniqueTokenPerInterval: 500, // Max 500 users per second
 });
 
+// Subdomains that belong to the platform itself (not user sites)
+const RESERVED_SUBDOMAINS = new Set(['www', 'app', 'api', 'mail', 'smtp', 'ftp', 'admin']);
+const MAIN_DOMAIN = 'zetaprop.com.ar';
+
+function applySecurityHeaders(response: NextResponse, request: NextRequest): NextResponse {
+    const url = request.nextUrl.clone();
+    response.headers.set('Strict-Transport-Security', 'max-age=31536000; includeSubDomains; preload');
+    response.headers.set('X-Content-Type-Options', 'nosniff');
+    response.headers.set('X-Frame-Options', 'SAMEORIGIN');
+    response.headers.set('Referrer-Policy', 'strict-origin-when-cross-origin');
+    response.headers.set('Permissions-Policy', 'camera=(), microphone=(), geolocation=(self), payment=(self)');
+    if (url.hostname !== MAIN_DOMAIN && process.env.NODE_ENV === 'production') {
+        response.headers.set('Link', `<https://${MAIN_DOMAIN}${url.pathname}>; rel="canonical"`);
+    }
+    return response;
+}
+
 export async function middleware(request: NextRequest) {
     const nonce = Buffer.from(crypto.getRandomValues(new Uint8Array(16))).toString('base64');
+
+    // ── Subdomain site routing ────────────────────────────────────────────────
+    // Detects requests like mariposa.zetaprop.com.ar and rewrites to /sites/mariposa
+    const host = request.headers.get('host') ?? '';
+    if (host.endsWith(`.${MAIN_DOMAIN}`)) {
+        const subdomain = host.slice(0, -(MAIN_DOMAIN.length + 1));
+        if (subdomain && !RESERVED_SUBDOMAINS.has(subdomain)) {
+            const url = request.nextUrl.clone();
+            // Preserve the original path (e.g. /propiedades → /sites/slug/propiedades)
+            const originalPath = url.pathname === '/' ? '' : url.pathname;
+            url.pathname = `/sites/${subdomain}${originalPath}`;
+            const response = NextResponse.rewrite(url);
+            return applySecurityHeaders(response, request);
+        }
+    }
+    // ─────────────────────────────────────────────────────────────────────────
 
     // Rate Limiting (Simple IP-based) - Skip in Development
     if (process.env.NODE_ENV !== 'development') {
@@ -28,44 +61,7 @@ export async function middleware(request: NextRequest) {
         },
     });
 
-    // Security Headers (OWASP Top 10 Mitigation)
-
-    // 1. Strict Transport Security (HSTS)
-    // Force HTTPS for 1 year, include subdomains, preload
-    response.headers.set(
-        'Strict-Transport-Security',
-        'max-age=31536000; includeSubDomains; preload'
-    );
-
-    // 2. X-Content-Type-Options
-    // Prevent MIME type sniffing
-    response.headers.set('X-Content-Type-Options', 'nosniff');
-
-    // 3. X-Frame-Options
-    // Prevent Clickjacking (allow from same origin is safer than DENY if you use iframes internally)
-    response.headers.set('X-Frame-Options', 'SAMEORIGIN');
-
-    // 4. Referrer Policy
-    // Control information leakage in Referer header
-    response.headers.set('Referrer-Policy', 'strict-origin-when-cross-origin');
-
-    // 5. Permissions Policy (Camera, Mic, Geolocation, etc.)
-    // Restrict browser features
-    response.headers.set(
-        'Permissions-Policy',
-        'camera=(), microphone=(), geolocation=(self), payment=(self)'
-    );
-
-    // 7. Canonical Header (Help Google normalize URLs)
-    const url = request.nextUrl.clone();
-    // Ensure we are pointing to the canonical domain
-    if (url.hostname !== 'zetaprop.com.ar' && process.env.NODE_ENV === 'production') {
-        // logic to redirect could go here, but for now we just set the header if possible
-        // Actually, setting the Link header is good practice
-        response.headers.set('Link', `<https://zetaprop.com.ar${url.pathname}>; rel="canonical"`);
-    }
-
-    return response;
+    return applySecurityHeaders(response, request);
 }
 
 export const config = {

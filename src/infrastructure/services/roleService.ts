@@ -48,6 +48,7 @@ export const PERMISSIONS: Permission[] = [
     { id: "/dashboard/emprendimientos", label: "Emprendimientos", description: "Gestión de emprendimientos y desarrollos" },
     { id: "/dashboard/tutoriales", label: "Tutoriales", description: "Acceso a guías y tutoriales del sistema" },
     { id: "/dashboard/marketing", label: "Marketing", description: "Módulo de marketing, emails automáticos y campañas" },
+    { id: "/dashboard/mi-sitio", label: "Mi Sitio Web", description: "Portal inmobiliario público propio con subdominio" },
 ];
 
 const ROLES_COLLECTION = "roles";
@@ -249,7 +250,8 @@ export const roleService = {
                     "/dashboard/novedades",
                     "/dashboard/emprendimientos",
                     "/dashboard/tutoriales",
-                    "/dashboard/marketing"
+                    "/dashboard/marketing",
+                    "/dashboard/mi-sitio"
                 ],
                 isSystem: false
             });
@@ -282,7 +284,8 @@ export const roleService = {
                     "/dashboard/novedades",
                     "/dashboard/emprendimientos",
                     "/dashboard/tutoriales",
-                    "/dashboard/marketing"
+                    "/dashboard/marketing",
+                    "/dashboard/mi-sitio"
                 ],
                 isSystem: false
             });
@@ -303,7 +306,8 @@ export const roleService = {
                     "/dashboard/clientes",
                     "/dashboard/finanzas",
                     "/dashboard/soporte",
-                    "/dashboard/tutoriales"
+                    "/dashboard/tutoriales",
+                    "/dashboard/mi-sitio"
                 ],
                 isSystem: false
             });
@@ -342,6 +346,7 @@ export const roleService = {
                 "/dashboard/soporte", "/dashboard/sucursales", "/dashboard/blog",
                 "/dashboard/cuenta", "/dashboard/configuracion", "/dashboard/novedades",
                 "/dashboard/emprendimientos", "/dashboard/tutoriales", "/dashboard/marketing",
+                "/dashboard/mi-sitio",
             ],
             "Cliente Pro": [
                 "/dashboard", "/dashboard/propiedades", "/dashboard/tasacion",
@@ -351,13 +356,13 @@ export const roleService = {
                 "/dashboard/publicaciones", "/dashboard/finanzas", "/dashboard/calendario",
                 "/dashboard/sucursales", "/dashboard/blog", "/dashboard/cuenta",
                 "/dashboard/novedades", "/dashboard/emprendimientos", "/dashboard/tutoriales",
-                "/dashboard/marketing",
+                "/dashboard/marketing", "/dashboard/mi-sitio",
             ],
             "Cliente Básico": [
                 "/dashboard", "/dashboard/propiedades", "/dashboard/alquileres",
                 "/dashboard/agenda-cobros", "/dashboard/liquidaciones",
                 "/dashboard/ventas", "/dashboard/clientes", "/dashboard/finanzas",
-                "/dashboard/soporte", "/dashboard/tutoriales",
+                "/dashboard/soporte", "/dashboard/tutoriales", "/dashboard/mi-sitio",
             ],
             "Agente": [
                 "/dashboard", "/dashboard/propiedades", "/dashboard/alquileres",

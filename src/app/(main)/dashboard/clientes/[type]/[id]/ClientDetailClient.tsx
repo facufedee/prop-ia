@@ -203,7 +203,7 @@ export default function ClientDetailClient({ type, id }: ClientDetailClientProps
     const inqData = type === 'inquilinos' ? (data as Inquilino) : null;
 
     return (
-        <div className="flex h-screen bg-gray-50 -m-6"> {/* Negative margin to span full dashboard area */}
+        <div className="flex h-full bg-gray-50 overflow-hidden">
             {/* LEFT SIDEBAR: Contact Profile */}
             <div className="w-[350px] bg-white border-r border-gray-200 flex flex-col shadow-sm z-10 overflow-y-auto hidden md:flex">
                 <div className="p-6 pb-4">
@@ -325,12 +325,35 @@ export default function ClientDetailClient({ type, id }: ClientDetailClientProps
                 </div>
             </div>
 
-            {/* MAIN CONTENT AREA */}
-            <div className="flex-1 flex flex-col bg-white/50 overflow-hidden">
-                {/* Header (Mobile Only + Tabs) */}
-                <div className="bg-white border-b border-gray-200 px-8 pt-6">
-                    <h2 className="text-2xl font-bold text-gray-900 mb-6 flex items-center gap-2">
-                        <FileText className="w-6 h-6 text-indigo-500" />
+            <div className="flex-1 flex flex-col bg-white overflow-hidden">
+                {/* Mobile Quick Action Header */}
+                <div className="md:hidden bg-white border-b border-gray-200 px-4 py-4 flex items-center justify-between sticky top-0 z-20">
+                    <div className="flex items-center gap-3">
+                        <Link href="/dashboard/clientes" className="p-2 -ml-2 text-gray-400 hover:text-gray-900">
+                            <ArrowLeft className="w-5 h-5" />
+                        </Link>
+                        <div className="w-10 h-10 rounded-full bg-gradient-to-tr from-indigo-100 to-purple-100 border border-indigo-200 flex items-center justify-center text-indigo-700 font-bold shadow-sm">
+                            {data.nombre.charAt(0).toUpperCase()}
+                        </div>
+                        <div>
+                            <h1 className="text-base font-bold text-gray-900 leading-tight">{data.nombre}</h1>
+                            <p className="text-[10px] text-gray-500 capitalize">{type.slice(0, -1)}</p>
+                        </div>
+                    </div>
+                    <div className="flex gap-2">
+                        <a href={`https://wa.me/${data.telefono.replace(/\D/g, '')}`} target="_blank" rel="noopener noreferrer" className="w-9 h-9 rounded-full bg-green-50 text-green-600 flex items-center justify-center border border-green-100">
+                            <MessageSquare size={16} />
+                        </a>
+                        <a href={`tel:${data.telefono}`} className="w-9 h-9 rounded-full bg-indigo-50 text-indigo-600 flex items-center justify-center border border-indigo-100">
+                            <Phone size={16} />
+                        </a>
+                    </div>
+                </div>
+
+                {/* Header (Tabs) */}
+                <div className="bg-white border-b border-gray-200 px-4 md:px-8 pt-6">
+                    <h2 className="text-xl md:text-2xl font-bold text-gray-900 mb-6 flex items-center gap-2">
+                        <FileText className="w-5 h-5 md:w-6 md:h-6 text-indigo-500" />
                         Historial y Registro
                     </h2>
 
@@ -365,7 +388,7 @@ export default function ClientDetailClient({ type, id }: ClientDetailClientProps
                 </div>
 
                 {/* Tab Content */}
-                <div className="flex-1 overflow-y-auto p-8">
+                <div className="flex-1 overflow-y-auto p-4 md:p-8">
 
                     {/* ACTIVITY TAB */}
                     {activeTab === 'activity' && (() => {
@@ -475,7 +498,7 @@ export default function ClientDetailClient({ type, id }: ClientDetailClientProps
 
                                                 {/* Action Toolbar */}
                                                 {!isArchived && (
-                                                    <div className="mx-4 mb-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-white rounded-xl border border-gray-100 p-2 shadow-sm">
+                                                    <div className="mx-3 md:mx-4 mb-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-white rounded-xl border border-gray-100 p-2 shadow-sm">
                                                         {/* Left: Status and Whatsapp */}
                                                         <div className="flex flex-wrap items-center gap-2">
                                                             {(idx === 0) && leadData && ( // Only show status changer on the first/latest message logic or globally. Let's show globally for ease.

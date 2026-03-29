@@ -29,8 +29,8 @@ export default function LatestBlogPosts() {
 
     if (loading) {
         return (
-            <section className="py-24 bg-white">
-                <div className="max-w-7xl mx-auto px-6 text-center">
+            <section className="py-14 sm:py-20 lg:py-24 bg-white">
+                <div className="max-w-7xl mx-auto px-5 sm:px-6 text-center">
                     <div className="animate-pulse space-y-4">
                         <div className="h-8 bg-gray-200 rounded w-1/3 mx-auto"></div>
                         <div className="h-4 bg-gray-200 rounded w-1/4 mx-auto"></div>
@@ -48,8 +48,8 @@ export default function LatestBlogPosts() {
     if (posts.length === 0) return null;
 
     return (
-        <section className="py-24 bg-white">
-            <div className="max-w-7xl mx-auto px-6">
+        <section className="py-14 sm:py-20 lg:py-24 bg-white">
+            <div className="max-w-7xl mx-auto px-5 sm:px-6">
                 <div className="flex flex-col md:flex-row justify-between items-end mb-12 gap-6">
                     <div>
                         <span className="inline-block px-4 py-2 bg-indigo-50 text-indigo-700 rounded-full text-sm font-semibold mb-4">
