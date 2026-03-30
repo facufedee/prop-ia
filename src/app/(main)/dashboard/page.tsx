@@ -38,6 +38,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/ui/context/AuthContext";
 import { useBranchContext } from "@/infrastructure/context/BranchContext";
+import { AnnouncementBanner } from "@/ui/components/dashboard/AnnouncementBanner";
 
 interface VencimientoProximo {
     alquilerId: string;
@@ -277,7 +278,8 @@ export default function DashboardPage() {
 
     return (
         <div className="min-h-screen bg-[#F8F9FC] p-5 md:p-8">
-            <div className="max-w-7xl mx-auto space-y-12 pb-10">
+            <div className="max-w-7xl mx-auto space-y-8 pb-10">
+                <AnnouncementBanner />
 
                 {/* ─── 1. BANNER DE BIENVENIDA ──────────────────────────── */}
                 <div className="relative w-full bg-gradient-to-br from-indigo-900 via-indigo-800 to-indigo-950 rounded-3xl p-8 md:p-10 overflow-hidden shadow-xl shadow-indigo-900/20">

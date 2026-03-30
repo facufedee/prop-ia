@@ -43,6 +43,7 @@ interface Announcement {
     type: AnnouncementType;
     active: boolean;
     createdAt?: string;
+    expiresAt?: string;
 }
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
@@ -128,7 +129,7 @@ export default function PlatformManagementPage() {
     // ── Anuncios tab ────────────────────────────────────────────────────────
     const [announcements, setAnnouncements] = useState<Announcement[]>([]);
     const [annLoading, setAnnLoading] = useState(false);
-    const [newAnn, setNewAnn] = useState({ title: "", message: "", type: "info" as AnnouncementType });
+    const [newAnn, setNewAnn] = useState({ title: "", message: "", type: "info" as AnnouncementType, expiresAt: "" });
     const [savingAnn, setSavingAnn] = useState(false);
 
     // ── Load data ───────────────────────────────────────────────────────────
@@ -155,7 +156,8 @@ export default function PlatformManagementPage() {
         try {
             const res = await fetch("/api/admin/announcements");
             const data = await res.json();
-            if (data.announcement) setAnnouncements([data.announcement]);
+            if (data.announcements) setAnnouncements(data.announcements);
+            else if (data.announcement) setAnnouncements([data.announcement]); // Backwards compatibility
             else setAnnouncements([]);
         } catch { toast.error("Error al cargar anuncios"); }
         finally { setAnnLoading(false); }
@@ -291,7 +293,7 @@ export default function PlatformManagementPage() {
                 body: JSON.stringify(newAnn),
             });
             toast.success("Anuncio publicado");
-            setNewAnn({ title: "", message: "", type: "info" });
+            setNewAnn({ title: "", message: "", type: "info", expiresAt: "" });
             loadAnnouncements();
         } catch { toast.error("Error al publicar"); }
         finally { setSavingAnn(false); }
@@ -708,6 +710,13 @@ export default function PlatformManagementPage() {
                                     className="w-full px-3 py-2.5 text-sm border border-gray-200 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-800 text-gray-900 dark:text-white outline-none focus:ring-2 focus:ring-indigo-500 resize-none" />
                             </div>
 
+                            <div>
+                                <label className="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1.5">Fecha de vencimiento (Opcional)</label>
+                                <input type="datetime-local" value={newAnn.expiresAt} onChange={e => setNewAnn(p => ({ ...p, expiresAt: e.target.value }))}
+                                    className="w-full px-3 py-2.5 text-sm border border-gray-200 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-800 text-gray-900 dark:text-white outline-none focus:ring-2 focus:ring-indigo-500" />
+                                <p className="text-[10px] text-gray-400 mt-1">Si no se elige, el anuncio permanecerá activo hasta ser eliminado manualmente.</p>
+                            </div>
+
                             {/* Preview */}
                             {(newAnn.title || newAnn.message) && (() => {
                                 const s = ANNOUNCEMENT_STYLES[newAnn.type];
@@ -718,6 +727,9 @@ export default function PlatformManagementPage() {
                                             <Icon className="w-3.5 h-3.5" /> {newAnn.title || "Título"}
                                         </p>
                                         <p className="text-xs text-gray-600 dark:text-gray-300">{newAnn.message || "Mensaje..."}</p>
+                                        {newAnn.expiresAt && !isNaN(new Date(newAnn.expiresAt).getTime()) && (
+                                            <p className="text-[10px] text-gray-400 mt-2">Vence: {format(new Date(newAnn.expiresAt), "dd/MM/yy HH:mm", { locale: es })}</p>
+                                        )}
                                     </div>
                                 );
                             })()}
@@ -752,11 +764,19 @@ export default function PlatformManagementPage() {
                                                             <Icon className="w-4 h-4" /> {ann.title}
                                                         </p>
                                                         <p className="text-xs text-gray-600 dark:text-gray-300">{ann.message}</p>
-                                                        {ann.createdAt && (
-                                                            <p className="text-[10px] text-gray-400 dark:text-gray-500 mt-2">
-                                                                Publicado {format(new Date(ann.createdAt), "dd MMM yyyy HH:mm", { locale: es })}
-                                                            </p>
-                                                        )}
+                                                        <div className="flex flex-wrap items-center gap-3 mt-2">
+                                                            {ann.createdAt && !isNaN(new Date(ann.createdAt).getTime()) && (
+                                                                <p className="text-[10px] text-gray-400 dark:text-gray-500">
+                                                                    Publicado {format(new Date(ann.createdAt), "dd/MM/yy HH:mm", { locale: es })}
+                                                                </p>
+                                                            )}
+                                                            {ann.expiresAt && !isNaN(new Date(ann.expiresAt).getTime()) && (
+                                                                <p className="text-[10px] text-amber-600 font-bold flex items-center gap-1">
+                                                                    <Clock className="w-3 h-3" />
+                                                                    Vence {format(new Date(ann.expiresAt), "dd/MM/yy HH:mm", { locale: es })}
+                                                                </p>
+                                                            )}
+                                                        </div>
                                                     </div>
                                                     <button onClick={() => handleDeleteAnnouncement(ann.id)} className="p-1.5 text-gray-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg flex-shrink-0 transition-colors" title="Desactivar">
                                                         <X className="w-4 h-4" />
