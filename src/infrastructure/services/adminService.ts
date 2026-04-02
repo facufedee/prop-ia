@@ -430,5 +430,67 @@ export const adminService = {
         });
 
         // Optionally, we could extend the subscription here if asked, but we'll manage that separately in the UI form
-    }
+    },
+
+    // Extender vencimiento de TODOS los usuarios hasta una fecha dada
+    bulkExtendSubscriptions: async (endDate: Date, planFilter: PlanTier | "all" = "all"): Promise<{ updated: number; created: number }> => {
+        if (!db) throw new Error("Firestore not initialized");
+
+        const [usersSnap, subsSnap] = await Promise.all([
+            getDocs(collection(db, USERS_COLLECTION)),
+            getDocs(collection(db, SUBSCRIPTIONS_COLLECTION)),
+        ]);
+
+        // Build map userId → subscriptionDoc
+        const subsMap = new Map<string, { ref: any; data: any }>();
+        subsSnap.docs.forEach(d => subsMap.set(d.data().userId, { ref: d.ref, data: d.data() }));
+
+        let updated = 0;
+        let created = 0;
+
+        const ops: Promise<void>[] = [];
+
+        usersSnap.docs.forEach(userDoc => {
+            const user = userDoc.data();
+            if (user.disabled) return;
+
+            const sub = subsMap.get(userDoc.id);
+
+            // Apply plan filter (only if user has a subscription with that plan)
+            if (planFilter !== "all" && sub?.data?.planTier !== planFilter) return;
+
+            if (sub) {
+                // Update existing subscription
+                ops.push(
+                    updateDoc(sub.ref, {
+                        endDate,
+                        status: "active",
+                        updatedAt: new Date(),
+                    }).then(() => { updated++; })
+                );
+            } else {
+                // Create free basic subscription for trial/unsub users
+                const newRef = doc(collection(db, SUBSCRIPTIONS_COLLECTION));
+                ops.push(
+                    setDoc(newRef, {
+                        userId: userDoc.id,
+                        planTier: "basic",
+                        planId: "basic",
+                        status: "active",
+                        billingPeriod: "monthly",
+                        amount: 0,
+                        currency: "ARS",
+                        startDate: new Date(),
+                        endDate,
+                        createdAt: new Date(),
+                        updatedAt: new Date(),
+                        usage: { properties: 0, users: 0, clients: 0, tasaciones: 0, aiCredits: 0 },
+                    }).then(() => { created++; })
+                );
+            }
+        });
+
+        await Promise.all(ops);
+        return { updated, created };
+    },
 };

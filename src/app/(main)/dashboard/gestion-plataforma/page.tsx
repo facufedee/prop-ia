@@ -132,6 +132,11 @@ export default function PlatformManagementPage() {
     const [newAnn, setNewAnn] = useState({ title: "", message: "", type: "info" as AnnouncementType, expiresAt: "" });
     const [savingAnn, setSavingAnn] = useState(false);
 
+    // ── Bulk extend ─────────────────────────────────────────────────────────
+    const [bulkDate, setBulkDate] = useState("2026-04-30");
+    const [bulkPlan, setBulkPlan] = useState<PlanTier | "all">("all");
+    const [bulkLoading, setBulkLoading] = useState(false);
+
     // ── Load data ───────────────────────────────────────────────────────────
 
     const loadUsers = useCallback(async () => {
@@ -193,6 +198,25 @@ export default function PlatformManagementPage() {
             await adminService.updateUserPlan(uid, newPlan as PlanTier);
             toast.success("Plan actualizado");
         } catch { setUsers(prev); toast.error("Error al actualizar plan"); }
+    };
+
+    const handleBulkExtend = async () => {
+        const affected = users.filter(u => {
+            if (u.disabled) return false;
+            if (bulkPlan !== "all" && u.subscription?.planTier !== bulkPlan) return false;
+            return true;
+        }).length;
+        if (!confirm(`¿Extender el acceso de ${affected} usuario${affected !== 1 ? "s" : ""} hasta el ${bulkDate}?`)) return;
+        setBulkLoading(true);
+        try {
+            const { updated, created } = await adminService.bulkExtendSubscriptions(new Date(bulkDate + "T23:59:59"), bulkPlan);
+            toast.success(`✅ Acceso extendido: ${updated} actualizados, ${created} nuevos`);
+            await loadUsers();
+        } catch (e: any) {
+            toast.error("Error al extender: " + e.message);
+        } finally {
+            setBulkLoading(false);
+        }
     };
 
     const handleSort = (field: SortField) => {
@@ -476,6 +500,37 @@ export default function PlatformManagementPage() {
                 {/* ═══════════════════════════════ USUARIOS TAB ════════════════════════════════ */}
                 {activeTab === "usuarios" && (
                     <div className="space-y-4">
+
+                        {/* ── Bulk extend panel ── */}
+                        <div className="bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-700 rounded-2xl p-4">
+                            <div className="flex flex-col md:flex-row gap-4 items-start md:items-center justify-between">
+                                <div>
+                                    <p className="font-semibold text-amber-800 dark:text-amber-300 flex items-center gap-2">
+                                        <Calendar className="w-4 h-4" /> Extender acceso masivo
+                                    </p>
+                                    <p className="text-xs text-amber-700 dark:text-amber-400 mt-0.5">
+                                        Extiende el vencimiento de todos los usuarios (o por plan) hasta la fecha elegida.
+                                    </p>
+                                </div>
+                                <div className="flex flex-wrap gap-2 items-center">
+                                    <select value={bulkPlan} onChange={e => setBulkPlan(e.target.value as any)}
+                                        className="px-3 py-2 text-sm border border-amber-300 dark:border-amber-600 rounded-xl bg-white dark:bg-gray-800 text-gray-800 dark:text-white outline-none focus:ring-2 focus:ring-amber-400">
+                                        <option value="all">Todos los planes</option>
+                                        <option value="basic">Solo Basic</option>
+                                        <option value="professional">Solo Professional</option>
+                                        <option value="enterprise">Solo Enterprise</option>
+                                    </select>
+                                    <input type="date" value={bulkDate} onChange={e => setBulkDate(e.target.value)}
+                                        className="px-3 py-2 text-sm border border-amber-300 dark:border-amber-600 rounded-xl bg-white dark:bg-gray-800 text-gray-800 dark:text-white outline-none focus:ring-2 focus:ring-amber-400" />
+                                    <button onClick={handleBulkExtend} disabled={bulkLoading || !bulkDate}
+                                        className="flex items-center gap-2 px-4 py-2 text-sm font-semibold bg-amber-500 hover:bg-amber-600 disabled:opacity-50 text-white rounded-xl transition-colors">
+                                        {bulkLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : <CheckCircle className="w-4 h-4" />}
+                                        {bulkLoading ? "Procesando..." : "Extender todos"}
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+
                         <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-2xl p-4 flex flex-col md:flex-row gap-3 justify-between items-center">
                             <div className="flex items-center gap-4">
                                 <span className="text-sm text-gray-600 dark:text-gray-400">Total: <strong className="text-gray-900 dark:text-white">{users.length}</strong></span>
