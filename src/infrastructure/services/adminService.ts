@@ -436,6 +436,16 @@ export const adminService = {
     bulkExtendSubscriptions: async (endDate: Date, planFilter: PlanTier | "all" = "all"): Promise<{ updated: number; created: number }> => {
         if (!db) throw new Error("Firestore not initialized");
 
+        // Normaliza variantes en español/inglés al valor canónico en inglés
+        const normalizePlan = (tier: string | undefined): string => {
+            if (!tier) return "basic";
+            const t = tier.toLowerCase().trim();
+            if (t === "basico" || t === "básico" || t === "base") return "basic";
+            if (t === "profesional") return "professional";
+            if (t === "empresarial") return "enterprise";
+            return t;
+        };
+
         const [usersSnap, subsSnap] = await Promise.all([
             getDocs(collection(db, USERS_COLLECTION)),
             getDocs(collection(db, SUBSCRIPTIONS_COLLECTION)),
@@ -455,9 +465,10 @@ export const adminService = {
             if (user.disabled) return;
 
             const sub = subsMap.get(userDoc.id);
+            const storedPlan = normalizePlan(sub?.data?.planTier);
 
-            // Apply plan filter (only if user has a subscription with that plan)
-            if (planFilter !== "all" && sub?.data?.planTier !== planFilter) return;
+            // Apply plan filter using normalized comparison
+            if (planFilter !== "all" && storedPlan !== planFilter) return;
 
             if (sub) {
                 // Update existing subscription

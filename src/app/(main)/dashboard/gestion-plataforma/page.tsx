@@ -200,10 +200,19 @@ export default function PlatformManagementPage() {
         } catch { setUsers(prev); toast.error("Error al actualizar plan"); }
     };
 
+    const normalizePlan = (tier: string | undefined): string => {
+        if (!tier) return "basic";
+        const t = tier.toLowerCase().trim();
+        if (t === "basico" || t === "básico" || t === "base") return "basic";
+        if (t === "profesional") return "professional";
+        if (t === "empresarial") return "enterprise";
+        return t;
+    };
+
     const handleBulkExtend = async () => {
         const affected = users.filter(u => {
             if (u.disabled) return false;
-            if (bulkPlan !== "all" && u.subscription?.planTier !== bulkPlan) return false;
+            if (bulkPlan !== "all" && normalizePlan(u.subscription?.planTier) !== bulkPlan) return false;
             return true;
         }).length;
         if (!confirm(`¿Extender el acceso de ${affected} usuario${affected !== 1 ? "s" : ""} hasta el ${bulkDate}?`)) return;
