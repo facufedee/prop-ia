@@ -74,13 +74,13 @@ export default function Navbar() {
 
         {/* Logo */}
         <Link href="/" className="flex items-center gap-2 hover:opacity-80 transition-opacity">
-          <div className={`relative h-8 w-40 transition-transform duration-300 ${scrolled ? 'scale-95' : 'scale-100'}`}>
+          <div className={`relative h-10 w-40 md:h-16 md:w-64 transition-transform duration-300 ${scrolled ? 'scale-95' : 'scale-100'}`}>
             {/* On mobile: always dark bg → always use white/dark logo. On desktop: respect scroll/page state */}
             <Image
-              src={(isDarkHero || !scrolled && !isHeroPage) ? "/assets/img/Logo_Zeta_Prop_Negro.png" : "/assets/img/logo_zeta_prop_original.png"}
+              src="/assets/img/logo_zeta_prop_transparent.png"
               alt="Zeta Prop Logo"
               fill
-              sizes="(max-width: 768px) 160px, 160px"
+              sizes="(max-width: 768px) 200px, 200px"
               className="object-contain object-left"
               priority
             />
@@ -103,6 +103,9 @@ export default function Navbar() {
           </Link>
           <Link href="/propiedades" className={`transition-colors ${isDarkHero ? 'hover:text-white' : 'hover:text-indigo-600'}`}>
             Propiedades
+          </Link>
+          <Link href="/faqs" className={`transition-colors ${isDarkHero ? 'hover:text-white' : 'hover:text-indigo-600'}`}>
+            FAQs
           </Link>
           <Link href="/contacto" className={`transition-colors ${isDarkHero ? 'hover:text-white' : 'hover:text-indigo-600'}`}>
             Contacto
@@ -238,8 +241,8 @@ export default function Navbar() {
         </div>
 
         {/* Mobile Toggle */}
-        <button 
-          className={`md:hidden p-2 ${isDarkHero ? 'text-white' : scrolled || isHeroPage ? 'text-gray-700' : 'text-white'}`} 
+        <button
+          className={`md:hidden p-2 ${isDarkHero ? 'text-white' : scrolled || isHeroPage ? 'text-gray-700' : 'text-white'}`}
           onClick={() => setOpen(!open)}
           aria-label={open ? "Cerrar menú principal" : "Abrir menú principal"}
         >
@@ -257,6 +260,7 @@ export default function Navbar() {
           <Link href="/nosotros" className="p-3 bg-white/5 rounded-xl hover:bg-white/10 font-medium text-white" onClick={() => setOpen(false)}>Nosotros</Link>
           <Link href="/blog" className="p-3 bg-white/5 rounded-xl hover:bg-white/10 font-medium text-white" onClick={() => setOpen(false)}>Blog</Link>
           <Link href="/propiedades" className="p-3 bg-white/5 rounded-xl hover:bg-white/10 font-medium text-white" onClick={() => setOpen(false)}>Propiedades</Link>
+          <Link href="/faqs" className="p-3 bg-white/5 rounded-xl hover:bg-white/10 font-medium text-white" onClick={() => setOpen(false)}>FAQs</Link>
           <Link href="/contacto" className="p-3 bg-white/5 rounded-xl hover:bg-white/10 font-medium text-white" onClick={() => setOpen(false)}>Contacto</Link>
 
           <div className="border-t border-white/10 pt-4">

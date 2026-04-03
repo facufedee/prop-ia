@@ -1,5 +1,5 @@
 export type PlanTier = 'basic' | 'professional' | 'enterprise';
-export type BillingPeriod = 'monthly' | 'yearly';
+export type BillingPeriod = 'monthly' | 'quarterly' | 'yearly';
 export type SubscriptionStatus = 'active' | 'cancelled' | 'expired' | 'trial';
 
 // Features will now be dynamically managed using a string[]
@@ -10,6 +10,7 @@ export interface Plan {
     description: string;
     price: {
         monthly: number;
+        quarterly?: number; // 3 months — defaults to yearly/4 if not set
         yearly: number;
     };
     // Use dynamic string array for plan features instead of boolean flags

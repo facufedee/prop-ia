@@ -336,10 +336,15 @@ export const subscriptionService = {
             // 6. Calculate subscription dates and price
             const startDate = new Date();
             const endDate = new Date(startDate);
-            const price = billingPeriod === 'yearly' ? plan.price.yearly : plan.price.monthly;
+            const price =
+                billingPeriod === 'yearly' ? plan.price.yearly :
+                billingPeriod === 'quarterly' ? (plan.price.quarterly ?? Math.round(plan.price.yearly / 4)) :
+                plan.price.monthly;
 
             if (billingPeriod === 'yearly') {
                 endDate.setFullYear(endDate.getFullYear() + 1);
+            } else if (billingPeriod === 'quarterly') {
+                endDate.setMonth(endDate.getMonth() + 3);
             } else {
                 endDate.setMonth(endDate.getMonth() + 1);
             }
@@ -354,6 +359,8 @@ export const subscriptionService = {
                 const newEndDate = new Date(existingSubscription.endDate);
                 if (billingPeriod === 'yearly') {
                     newEndDate.setFullYear(newEndDate.getFullYear() + 1);
+                } else if (billingPeriod === 'quarterly') {
+                    newEndDate.setMonth(newEndDate.getMonth() + 3);
                 } else {
                     newEndDate.setMonth(newEndDate.getMonth() + 1);
                 }

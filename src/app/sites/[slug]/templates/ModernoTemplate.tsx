@@ -34,7 +34,7 @@ export default function ModernoTemplate({ site, properties, search, onSearchChan
                 <div className="max-w-6xl mx-auto px-5 sm:px-6 h-16 flex items-center justify-between">
                     <div className="flex items-center gap-3">
                         {site.logoUrl ? (
-                            <Image src={site.logoUrl} alt={site.nombre} width={120} height={40} className="h-9 w-auto object-contain" />
+                            <Image src={site.logoUrl} alt={site.nombre} width={160} height={48} className="h-12 w-auto object-contain" />
                         ) : (
                             <div className="flex items-center gap-2">
                                 <Building2 className="w-7 h-7" style={{ color: primary }} />

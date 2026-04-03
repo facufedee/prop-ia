@@ -71,3 +71,7 @@ env:
     value: f875918c-6ad7-4673-8a13-145db7ed28b7
     availability:
       - RUNTIME
+  - variable: MP_WEBHOOK_SECRET
+    value: f6a3972ae232f5d02d41cc2055efbb7289a73cc9a32442570b84eba5b68ae20f
+    availability:
+      - RUNTIME

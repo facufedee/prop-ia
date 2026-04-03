@@ -22,7 +22,6 @@ import ContactForm from "@/ui/sections/ContactForm";
 import GoogleAuthPrompt from "@/ui/components/auth/GoogleAuthPrompt";
 
 import LatestBlogPosts from "@/ui/sections/LatestBlogPosts";
-import FAQ from "@/ui/sections/FAQ";
 
 export default function LandingPage() {
     return (
@@ -61,7 +60,6 @@ export default function LandingPage() {
             <HumanPromise />
             <PropertyNetworkCTA />
             <LatestBlogPosts />
-            <FAQ />
             <ContactForm />
 
         </main>

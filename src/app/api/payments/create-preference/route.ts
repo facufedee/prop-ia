@@ -63,8 +63,14 @@ export async function POST(request: Request) {
         const mpPreference = new Preference(sdkClient);
 
         // Calculate price based on billing period
-        const price = billing === 'monthly' ? plan.price.monthly : plan.price.yearly;
-        const billingLabel = billing === 'monthly' ? 'Mensual' : 'Anual';
+        const price =
+            billing === 'yearly' ? plan.price.yearly :
+            billing === 'quarterly' ? (plan.price.quarterly ?? Math.round(plan.price.yearly / 4)) :
+            plan.price.monthly;
+        const billingLabel =
+            billing === 'yearly' ? 'Anual' :
+            billing === 'quarterly' ? '3 Meses' :
+            'Mensual';
 
         // Base URL for redirects
         const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000';
@@ -93,6 +99,7 @@ export async function POST(request: Request) {
                 failure: `${baseUrl}/checkout/failure`,
                 pending: `${baseUrl}/checkout/pending`
             },
+            ...(isLocal ? {} : { auto_return: "approved" }),
             metadata: {
                 plan_id: planId,
                 billing_period: billing,

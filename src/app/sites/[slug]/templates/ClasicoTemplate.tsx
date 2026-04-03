@@ -45,7 +45,7 @@ export default function ClasicoTemplate({ site, properties, search, onSearchChan
                 <div className="max-w-6xl mx-auto px-5 sm:px-6 py-5 flex items-center justify-between">
                     <div className="flex items-center gap-4">
                         {site.logoUrl ? (
-                            <Image src={site.logoUrl} alt={site.nombre} width={140} height={50} className="h-12 w-auto object-contain" />
+                            <Image src={site.logoUrl} alt={site.nombre} width={180} height={56} className="h-14 w-auto object-contain" />
                         ) : (
                             <div>
                                 <p className="text-2xl font-bold text-stone-900 tracking-wide">{site.nombre}</p>

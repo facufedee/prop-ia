@@ -34,30 +34,43 @@ export async function POST(req: Request) {
 
         // 3. Create the payment with full metadata to allow webhook activation
         console.log(`🚀 Process Payment: Creating payment for $${transaction_amount} in ${mpConfig.activeMode} mode...`);
+        console.log(`📋 formData received:`, JSON.stringify({
+            payment_method_id: formData.payment_method_id,
+            installments: formData.installments,
+            issuer_id: formData.issuer_id,
+            token: formData.token ? `${formData.token.substring(0, 8)}...` : 'MISSING',
+            payer_email: formData.payer?.email,
+            identification: formData.payer?.identification,
+        }));
 
-        const result = await payment.create({
-            body: {
-                transaction_amount: Number(transaction_amount),
-                token: formData.token,
-                description: formData.description || "Suscripción ZetaProp",
-                installments: Number(formData.installments),
-                payment_method_id: formData.payment_method_id,
-                issuer_id: formData.issuer_id,
-                payer: {
-                    email: formData.payer.email,
-                    identification: {
-                        type: formData.payer.identification.type,
-                        number: formData.payer.identification.number
-                    }
-                },
-                // Metadata so webhook / direct processing can link to user and plan
-                metadata: {
-                    plan_id: planId,
-                    billing_period: billing,
-                    user_id: userId
+        const paymentBody: any = {
+            transaction_amount: Number(transaction_amount),
+            token: formData.token,
+            description: formData.description || "Suscripción ZetaProp",
+            installments: Number(formData.installments) || 1,
+            payment_method_id: formData.payment_method_id,
+            binary_mode: true,
+            payer: {
+                email: formData.payer.email,
+                identification: {
+                    type: formData.payer.identification?.type || "DNI",
+                    number: formData.payer.identification?.number || ""
                 }
+            },
+            metadata: {
+                plan_id: planId,
+                billing_period: billing,
+                user_id: userId
             }
-        });
+        };
+
+        if (formData.issuer_id) {
+            paymentBody.issuer_id = formData.issuer_id;
+        }
+
+        console.log(`📤 Sending to MP:`, JSON.stringify(paymentBody));
+
+        const result = await payment.create({ body: paymentBody });
 
         console.log("✅ Process Payment: Payment created:", result.id, result.status);
 

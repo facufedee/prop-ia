@@ -32,7 +32,7 @@ export default function MinimalistaTemplate({ site, properties, search, onSearch
                 <div className="max-w-5xl mx-auto px-6 h-16 flex items-center justify-between">
                     <div>
                         {site.logoUrl ? (
-                            <Image src={site.logoUrl} alt={site.nombre} width={120} height={36} className="h-8 w-auto object-contain" />
+                            <Image src={site.logoUrl} alt={site.nombre} width={160} height={44} className="h-11 w-auto object-contain" />
                         ) : (
                             <span className="font-semibold text-gray-900 tracking-tight">{site.nombre}</span>
                         )}

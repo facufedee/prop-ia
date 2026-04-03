@@ -37,7 +37,6 @@ export default function PaymentBrick({ preferenceId, amount, publicKey, email, p
 
     const initialization = {
         amount: amount,
-        preferenceId: preferenceId,
         payer: {
             email: email || "",
         },

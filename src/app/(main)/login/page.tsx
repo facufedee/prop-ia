@@ -1,15 +1,17 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { useRouter } from "next/navigation";
+import { useState, useEffect, Suspense } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { Eye, EyeOff, Loader2, Mail, Lock } from "lucide-react";
 import { loginWithGoogle, loginEmail } from "@/infrastructure/auth/firebaseAuthService";
 import { auth } from "@/infrastructure/firebase/client";
 import { onAuthStateChanged } from "firebase/auth";
 
-export default function LoginPage() {
+function LoginContent() {
     const router = useRouter();
+    const searchParams = useSearchParams();
+    const redirectTo = searchParams.get("redirect") || "/dashboard";
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
     const [loading, setLoading] = useState(false);
@@ -22,12 +24,12 @@ export default function LoginPage() {
 
         const unsubscribe = onAuthStateChanged(auth, (user) => {
             if (user) {
-                router.push("/dashboard");
+                router.push(redirectTo);
             }
         });
 
         return () => unsubscribe();
-    }, [router]);
+    }, [router, redirectTo]);
 
     const handleLogin = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -36,7 +38,7 @@ export default function LoginPage() {
 
         try {
             await loginEmail(email, password);
-            router.push("/dashboard");
+            router.push(redirectTo);
         } catch (err: any) {
             console.error(err);
             if (err.code === "auth/invalid-credential" || err.code === "auth/user-not-found" || err.code === "auth/wrong-password") {
@@ -56,7 +58,7 @@ export default function LoginPage() {
         setError(null);
         try {
             await loginWithGoogle();
-            router.push("/dashboard");
+            router.push(redirectTo);
         } catch (err: any) {
             if (err.code === 'auth/cancelled-popup-request') {
                 return;
@@ -214,5 +216,13 @@ export default function LoginPage() {
                 </div>
             </div>
         </div>
+    );
+}
+
+export default function LoginPage() {
+    return (
+        <Suspense fallback={<div className="min-h-screen flex items-center justify-center"><div className="w-8 h-8 border-2 border-indigo-600 border-t-transparent rounded-full animate-spin" /></div>}>
+            <LoginContent />
+        </Suspense>
     );
 }
