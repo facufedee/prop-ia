@@ -167,7 +167,7 @@ export default function DashboardPage() {
 
             let planData = null;
             const rawSub = !subSnapshot.empty ? subSnapshot.docs[0].data() : null;
-            const subDocData = rawSub ? {
+            const subDocData: any = rawSub ? {
                 ...rawSub,
                 endDate: rawSub.endDate?.toDate ? rawSub.endDate.toDate() : rawSub.endDate,
                 startDate: rawSub.startDate?.toDate ? rawSub.startDate.toDate() : rawSub.startDate,
