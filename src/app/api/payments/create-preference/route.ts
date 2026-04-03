@@ -9,7 +9,7 @@ export async function POST(request: Request) {
     try {
         // Parse request body to get plan information
         const body = await request.json();
-        const { planId, billing, userId } = body;
+        const { planId, billing, userId, creditAmount = 0 } = body;
         console.log(`📡 API: Request received for userId: ${userId}, planId: ${planId}, billing: ${billing}`);
 
         if (!planId || !billing) {
@@ -63,10 +63,14 @@ export async function POST(request: Request) {
         const mpPreference = new Preference(sdkClient);
 
         // Calculate price based on billing period
-        const price =
+        const basePrice =
             billing === 'yearly' ? plan.price.yearly :
             billing === 'quarterly' ? (plan.price.quarterly ?? Math.round(plan.price.yearly / 4)) :
             plan.price.monthly;
+
+        // Apply proration credit (minimum $1 to avoid MP rejection)
+        const credit = Math.min(Number(creditAmount) || 0, basePrice - 1);
+        const price = Math.max(basePrice - credit, 1);
         const billingLabel =
             billing === 'yearly' ? 'Anual' :
             billing === 'quarterly' ? '3 Meses' :
@@ -104,7 +108,9 @@ export async function POST(request: Request) {
                 plan_id: planId,
                 billing_period: billing,
                 plan_name: plan.name,
-                user_id: userId
+                user_id: userId,
+                credit_applied: credit,
+                base_amount: basePrice,
             },
             statement_descriptor: "Zeta Prop"
         };
@@ -136,6 +142,8 @@ export async function POST(request: Request) {
             planId,
             billingPeriod: billing,
             amount: price,
+            baseAmount: basePrice,
+            creditApplied: credit,
             provider: 'mercadopago',
             preferenceId: result.id,
             status: 'pending',

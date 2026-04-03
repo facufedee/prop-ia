@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { db, auth } from "@/infrastructure/firebase/client";
-import { collection, query, where, getDocs, getDoc, doc } from "firebase/firestore";
+import { collection, query, where, getDocs, getDoc, doc, orderBy } from "firebase/firestore";
 import { onAuthStateChanged } from "firebase/auth";
 import { leadsService } from "@/infrastructure/services/leadsService";
 import { alquileresService } from "@/infrastructure/services/alquileresService";
@@ -33,6 +33,7 @@ import {
     Calculator,
     Star,
     Camera,
+    CreditCard,
 } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -88,7 +89,7 @@ export default function DashboardPage() {
             let propsQuery = query(collection(db, "properties"), where("userId", "==", userId));
             if (branchId !== 'all') propsQuery = query(propsQuery, where("branchId", "==", branchId));
 
-            const subQuery = query(collection(db, "subscriptions"), where("userId", "==", userId));
+            const subQuery = query(collection(db, "subscriptions"), where("userId", "==", userId), where("status", "==", "active"), orderBy("createdAt", "desc"));
             const inquilinosQuery = query(collection(db, "inquilinos"), where("userId", "==", userId));
             const propietariosQuery = query(collection(db, "propietarios"), where("userId", "==", userId));
 
@@ -165,7 +166,12 @@ export default function DashboardPage() {
                 .slice(0, 5);
 
             let planData = null;
-            const subDocData = !subSnapshot.empty ? subSnapshot.docs[0].data() : null;
+            const rawSub = !subSnapshot.empty ? subSnapshot.docs[0].data() : null;
+            const subDocData = rawSub ? {
+                ...rawSub,
+                endDate: rawSub.endDate?.toDate ? rawSub.endDate.toDate() : rawSub.endDate,
+                startDate: rawSub.startDate?.toDate ? rawSub.startDate.toDate() : rawSub.startDate,
+            } : null;
             if (subDocData?.planId) {
                 const planSnap = await getDoc(doc(db, "plans", subDocData.planId));
                 if (planSnap.exists()) {
@@ -310,7 +316,42 @@ export default function DashboardPage() {
                     </div>
                 </div>
 
-                {/* ─── 2. MÓDULO DE PROPIEDADES ─────────────────────────── */}
+                {/* ─── 2. SUSCRIPCIÓN ───────────────────────────────────── */}
+                {stats.subscription && (
+                    <div className="bg-white rounded-2xl border border-violet-100 shadow-sm p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                        <div className="flex items-center gap-4">
+                            <div className="w-11 h-11 bg-violet-50 rounded-xl flex items-center justify-center flex-shrink-0 border border-violet-100">
+                                <CreditCard size={20} className="text-violet-600" />
+                            </div>
+                            <div>
+                                <div className="flex items-center gap-2">
+                                    <p className="font-extrabold text-gray-900">{stats.plan?.name || `Plan ${stats.subscription.planTier}`}</p>
+                                    <span className="bg-green-100 text-green-700 text-[9px] font-black uppercase tracking-wider px-2 py-0.5 rounded-full border border-green-200">Activa</span>
+                                </div>
+                                <p className="text-xs text-gray-400 mt-0.5">
+                                    {stats.subscription.billingPeriod === 'monthly' ? 'Mensual' :
+                                     stats.subscription.billingPeriod === 'quarterly' ? 'Trimestral' : 'Anual'}
+                                    {stats.subscription.amount ? ` · ${new Intl.NumberFormat('es-AR', { style: 'currency', currency: 'ARS', minimumFractionDigits: 0 }).format(stats.subscription.amount)}` : ''}
+                                </p>
+                            </div>
+                        </div>
+                        <div className="flex items-center gap-6 sm:gap-8">
+                            <div>
+                                <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Vence el</p>
+                                <p className="font-extrabold text-gray-900 text-sm mt-0.5">
+                                    {stats.subscription.endDate instanceof Date
+                                        ? format(stats.subscription.endDate, "d MMM yyyy", { locale: es })
+                                        : '—'}
+                                </p>
+                            </div>
+                            <Link href="/precios" className="text-xs font-bold text-violet-600 hover:text-violet-700 flex items-center gap-1 whitespace-nowrap">
+                                Cambiar plan <ArrowRight size={13} />
+                            </Link>
+                        </div>
+                    </div>
+                )}
+
+                {/* ─── 3. MÓDULO DE PROPIEDADES ─────────────────────────── */}
                 <section>
                     <div className="flex items-center gap-3 mb-5">
                         <div className="p-2 bg-indigo-100 rounded-lg"><Building2 size={18} className="text-indigo-600" /></div>
@@ -557,7 +598,7 @@ export default function DashboardPage() {
                     </div>
                 </section>
 
-                {/* ─── 5. MÓDULO FINANCIERO & SOPORTE ───────────────────── */}
+                {/* ─── 6. MÓDULO FINANCIERO & SOPORTE ───────────────────── */}
                 <section>
                     <div className="flex items-center gap-3 mb-5">
                         <div className="p-2 bg-amber-100 rounded-lg"><DollarSign size={18} className="text-amber-600" /></div>

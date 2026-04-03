@@ -27,6 +27,10 @@ function CheckoutContent() {
     const [billing, setBilling] = useState<Billing>(billingParam || 'monthly');
     const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>('mercadopago');
 
+    // Suscripción activa y crédito por prorrata
+    const [currentSubscription, setCurrentSubscription] = useState<any>(null);
+    const [prorationCredit, setProrationCredit] = useState(0);
+
     // MP state
     const [mpInitPoint, setMpInitPoint] = useState<string | null>(null);
     const [mpLoading, setMpLoading] = useState(false);
@@ -34,7 +38,7 @@ function CheckoutContent() {
     const preferenceCache = useRef<Record<string, string>>({});
 
 
-    // Auth listener
+    // Auth listener + fetch active subscription
     useEffect(() => {
         if (!auth) { setAuthLoading(false); return; }
         const unsub = onAuthStateChanged(auth, async (user) => {
@@ -44,6 +48,15 @@ function CheckoutContent() {
                     const userDoc = await getDoc(doc(db, "users", user.uid));
                     if (userDoc.exists() && userDoc.data().pendingPaymentApproval) {
                         setIsPendingPayment(true);
+                    }
+                } catch {}
+
+                // Fetch active subscription for proration
+                try {
+                    const { subscriptionService } = await import("@/infrastructure/services/subscriptionService");
+                    const sub = await subscriptionService.getUserSubscription(user.uid);
+                    if (sub && sub.status === 'active') {
+                        setCurrentSubscription(sub);
                     }
                 } catch {}
             }
@@ -69,11 +82,35 @@ function CheckoutContent() {
         fetchPlan();
     }, [planId]);
 
+    // Calcular crédito por días no usados de la suscripción actual
+    useEffect(() => {
+        if (!currentSubscription || !planData) { setProrationCredit(0); return; }
+        // No aplicar crédito si es el mismo plan
+        if (currentSubscription.planId === planId) { setProrationCredit(0); return; }
+
+        const now = new Date();
+        const end = currentSubscription.endDate instanceof Date
+            ? currentSubscription.endDate
+            : currentSubscription.endDate?.toDate?.() || new Date();
+        const start = currentSubscription.startDate instanceof Date
+            ? currentSubscription.startDate
+            : currentSubscription.startDate?.toDate?.() || new Date();
+
+        if (now >= end) { setProrationCredit(0); return; }
+
+        const totalMs = end.getTime() - start.getTime();
+        const remainingMs = end.getTime() - now.getTime();
+        if (totalMs <= 0) { setProrationCredit(0); return; }
+
+        const credit = Math.round((remainingMs / totalMs) * (currentSubscription.amount || 0));
+        setProrationCredit(Math.max(0, credit));
+    }, [currentSubscription, planId, planData]);
+
     // Create MP preference when method = mercadopago
     useEffect(() => {
         if (paymentMethod !== 'mercadopago' || !planId || !currentUser?.uid || !planData) return;
 
-        const cacheKey = `${planId}-${billing}`;
+        const cacheKey = `${planId}-${billing}-${prorationCredit}`;
         if (preferenceCache.current[cacheKey]) {
             setMpInitPoint(preferenceCache.current[cacheKey]);
             return;
@@ -85,7 +122,7 @@ function CheckoutContent() {
         fetch('/api/payments/create-preference', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ planId, billing, userId: currentUser.uid }),
+            body: JSON.stringify({ planId, billing, userId: currentUser.uid, creditAmount: prorationCredit }),
         })
             .then(async res => {
                 const data = await res.json();
@@ -108,10 +145,12 @@ function CheckoutContent() {
                 setMpError(`Error: ${err.message}`);
             })
             .finally(() => setMpLoading(false));
-    }, [paymentMethod, planId, billing, currentUser?.uid, planData]);
+    }, [paymentMethod, planId, billing, currentUser?.uid, planData, prorationCredit]);
 
     const formatPrice = (price: number) =>
         new Intl.NumberFormat('es-AR', { style: 'currency', currency: 'ARS', minimumFractionDigits: 0 }).format(price);
+
+    const getFinalPrice = () => Math.max(getPrice() - prorationCredit, 1);
 
     const getQuarterlyPrice = () => {
         if (!planData) return 0;
@@ -319,20 +358,44 @@ function CheckoutContent() {
                                     </div>
 
                                     {/* 2. Price */}
-                                    <div className="text-center py-4 bg-gray-50 rounded-xl border border-gray-100">
-                                        <p className="text-xs text-gray-400 mb-1">Total a pagar</p>
-                                        <p className="text-4xl font-extrabold text-gray-900 tracking-tight">
-                                            {formatPrice(getPrice())}
-                                        </p>
-                                        <p className="text-sm text-gray-400 mt-1">
-                                            {billing === 'monthly' && 'por mes'}
-                                            {billing === 'quarterly' && `por 3 meses · ${formatPrice(getMonthlyEquivalent())}/mes`}
-                                            {billing === 'yearly' && `por año · ${formatPrice(getMonthlyEquivalent())}/mes`}
-                                        </p>
-                                        {savingsLabel && (
-                                            <div className="mt-2 inline-flex items-center gap-1 bg-green-50 text-green-700 px-3 py-1 rounded-full text-xs font-bold border border-green-100">
-                                                🎉 {savingsLabel}
-                                            </div>
+                                    <div className="py-4 bg-gray-50 rounded-xl border border-gray-100 px-4 space-y-2">
+                                        {prorationCredit > 0 ? (
+                                            <>
+                                                <div className="flex justify-between text-sm text-gray-500">
+                                                    <span>Precio del plan</span>
+                                                    <span>{formatPrice(getPrice())}</span>
+                                                </div>
+                                                <div className="flex justify-between text-sm text-green-700 font-semibold">
+                                                    <span>Crédito por días no usados</span>
+                                                    <span>− {formatPrice(prorationCredit)}</span>
+                                                </div>
+                                                <div className="border-t border-gray-200 pt-2 flex justify-between items-center">
+                                                    <p className="text-xs text-gray-400">Total a pagar</p>
+                                                    <p className="text-3xl font-extrabold text-gray-900 tracking-tight">{formatPrice(getFinalPrice())}</p>
+                                                </div>
+                                                <div className="bg-green-50 border border-green-200 rounded-lg px-3 py-2 text-xs text-green-800 leading-relaxed">
+                                                    Tu suscripción actual tiene días sin usar. Ese valor se descuenta automáticamente del nuevo plan — solo pagás la diferencia.
+                                                </div>
+                                            </>
+                                        ) : (
+                                            <>
+                                                <p className="text-xs text-gray-400 text-center">Total a pagar</p>
+                                                <p className="text-4xl font-extrabold text-gray-900 tracking-tight text-center">
+                                                    {formatPrice(getPrice())}
+                                                </p>
+                                                <p className="text-sm text-gray-400 text-center">
+                                                    {billing === 'monthly' && 'por mes'}
+                                                    {billing === 'quarterly' && `por 3 meses · ${formatPrice(getMonthlyEquivalent())}/mes`}
+                                                    {billing === 'yearly' && `por año · ${formatPrice(getMonthlyEquivalent())}/mes`}
+                                                </p>
+                                                {savingsLabel && (
+                                                    <div className="flex justify-center">
+                                                        <div className="inline-flex items-center gap-1 bg-green-50 text-green-700 px-3 py-1 rounded-full text-xs font-bold border border-green-100">
+                                                            🎉 {savingsLabel}
+                                                        </div>
+                                                    </div>
+                                                )}
+                                            </>
                                         )}
                                     </div>
 
