@@ -148,8 +148,7 @@ export async function POST(request: Request) {
         return NextResponse.json({
             preference_id: result.id,
             payment_id: paymentRef.id,
-            init_point: result.init_point,
-            sandbox_init_point: result.sandbox_init_point
+            checkout_url: activeEnv === 'sandbox' ? result.sandbox_init_point : result.init_point,
         });
 
     } catch (error: any) {

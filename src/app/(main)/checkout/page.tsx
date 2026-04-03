@@ -94,7 +94,7 @@ function CheckoutContent() {
                 return data;
             })
             .then(data => {
-                const url = data.sandbox_init_point || data.init_point;
+                const url = data.checkout_url;
                 if (url) {
                     preferenceCache.current[cacheKey] = url;
                     setMpInitPoint(url);
