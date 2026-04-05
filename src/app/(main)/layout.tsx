@@ -21,6 +21,7 @@ const geistMono = Geist_Mono({
   variable: "--font-geist-mono",
   subsets: ["latin"],
   display: "swap",
+  preload: false, // Not used in initial viewport — avoids unused preload warning
 });
 
 export const metadata: Metadata = {
@@ -168,18 +169,14 @@ export default function RootLayout({
                 '@context': 'https://schema.org',
                 '@type': 'SoftwareApplication',
                 name: 'Zeta Prop',
-                operatingSystem: 'Web Browser, Android, iOS',
+                url: 'https://zetaprop.com.ar',
+                operatingSystem: 'Web',
                 applicationCategory: 'BusinessApplication',
-                aggregateRating: {
-                  '@type': 'AggregateRating',
-                  ratingValue: '4.8',
-                  ratingCount: '124'
-                },
                 offers: {
                   '@type': 'Offer',
                   price: '0',
                   priceCurrency: 'ARS',
-                  description: 'Plan Gratuito disponible para hasta 10 propiedades.'
+                  description: '14 días de prueba gratis, sin tarjeta de crédito.'
                 }
               },
               {
@@ -189,7 +186,10 @@ export default function RootLayout({
                 url: 'https://zetaprop.com.ar',
                 potentialAction: {
                   '@type': 'SearchAction',
-                  target: 'https://zetaprop.com.ar/buscar?q={search_term_string}',
+                  target: {
+                    '@type': 'EntryPoint',
+                    urlTemplate: 'https://zetaprop.com.ar/busqueda?loc={search_term_string}',
+                  },
                   'query-input': 'required name=search_term_string',
                 },
               }
@@ -206,7 +206,10 @@ export default function RootLayout({
             function gtag(){dataLayer.push(arguments);}
             gtag('js', new Date());
 
-            gtag('config', 'AW-17943485669');
+            gtag('config', 'AW-17943485669', {
+              cookie_domain: 'zetaprop.com.ar',
+              cookie_flags: 'SameSite=None;Secure'
+            });
           `}
         </Script>
       </body>

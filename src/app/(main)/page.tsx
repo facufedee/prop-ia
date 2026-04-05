@@ -1,5 +1,4 @@
 import { Metadata } from "next";
-import dynamic from "next/dynamic";
 import Hero from "@/ui/sections/Hero";
 
 export const metadata: Metadata = {
@@ -50,14 +49,13 @@ import HumanPromise from "@/ui/sections/HumanPromise";
 import PropertyNetworkCTA from "@/ui/sections/PropertyNetworkCTA";
 import ContactForm from "@/ui/sections/ContactForm";
 
-import GoogleAuthPrompt from "@/ui/components/auth/GoogleAuthPrompt";
-
 import LatestBlogPosts from "@/ui/sections/LatestBlogPosts";
+import GoogleAuthPromptLazy from "@/ui/components/auth/GoogleAuthPromptLazy";
 
 export default function LandingPage() {
     return (
         <main className="bg-white min-h-screen flex flex-col gap-0">
-            <GoogleAuthPrompt />
+            <GoogleAuthPromptLazy />
 
             {/* Structured Data — SoftwareApplication */}
             <script

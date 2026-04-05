@@ -1,49 +1,68 @@
-"use client";
-
-import { useEffect, useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { ArrowRight, Calendar, Clock } from "lucide-react";
-import { BlogPost, blogService } from "@/infrastructure/services/blogService";
+import { adminDb } from "@/infrastructure/firebase/admin";
+import { Timestamp } from "firebase-admin/firestore";
 
-export default function LatestBlogPosts() {
-    const [posts, setPosts] = useState<BlogPost[]>([]);
-    const [loading, setLoading] = useState(true);
+interface PostSummary {
+    id: string;
+    title: string;
+    slug: string;
+    excerpt: string;
+    content: string;
+    imageUrl: string;
+    category: string;
+    author?: { name: string; photo?: string };
+    publishedAt?: Date;
+}
 
-    useEffect(() => {
-        async function fetchPosts() {
-            try {
-                // Fetch all published posts and slice top 3
-                // Ideally we would have a limit parameter in API/Service
-                const allPosts = await blogService.getPublishedPosts();
-                setPosts(allPosts.slice(0, 3));
-            } catch (error) {
-                console.error("Failed to fetch latest posts", error);
-            } finally {
-                setLoading(false);
+async function getLatestPosts(): Promise<PostSummary[]> {
+    try {
+        const now = new Date();
+        const snap = await adminDb
+            .collection("blog_posts")
+            .where("published", "==", true)
+            .orderBy("createdAt", "desc")
+            .limit(10) // fetch extra to account for expiry/future filtering
+            .get();
+
+        const posts = snap.docs.map((docSnap) => {
+            const d = docSnap.data();
+            const pubDate = d.publishedAt instanceof Timestamp ? d.publishedAt.toDate() : (d.publishedAt ?? null);
+            const expDate = d.expiresAt instanceof Timestamp ? d.expiresAt.toDate() : (d.expiresAt ?? null);
+
+            // Filter scheduled / expired
+            if (pubDate && pubDate > now) return null;
+            if (expDate && expDate < now) return null;
+
+            let excerpt = d.excerpt;
+            if (!excerpt && d.content) {
+                const plainText = d.content.replace(/[#*`_\[\]]/g, "").replace(/\n/g, " ").trim();
+                excerpt = plainText.substring(0, 150);
             }
-        }
 
-        fetchPosts();
-    }, []);
+            return {
+                id: docSnap.id,
+                title: d.title ?? "",
+                slug: d.slug ?? "",
+                excerpt: excerpt ?? "",
+                content: d.content ?? "",
+                imageUrl: d.imageUrl ?? "",
+                category: d.category ?? "",
+                author: d.author,
+                publishedAt: pubDate ?? undefined,
+            } satisfies PostSummary;
+        });
 
-    if (loading) {
-        return (
-            <section className="py-14 sm:py-20 lg:py-24 bg-white">
-                <div className="max-w-7xl mx-auto px-5 sm:px-6 text-center">
-                    <div className="animate-pulse space-y-4">
-                        <div className="h-8 bg-gray-200 rounded w-1/3 mx-auto"></div>
-                        <div className="h-4 bg-gray-200 rounded w-1/4 mx-auto"></div>
-                        <div className="grid md:grid-cols-3 gap-8 mt-12">
-                            {[1, 2, 3].map(i => (
-                                <div key={i} className="bg-gray-100 h-80 rounded-2xl"></div>
-                            ))}
-                        </div>
-                    </div>
-                </div>
-            </section>
-        );
+        return (posts.filter(Boolean) as PostSummary[]).slice(0, 3);
+    } catch (error) {
+        console.error("Failed to fetch latest posts (server)", error);
+        return [];
     }
+}
+
+export default async function LatestBlogPosts() {
+    const posts = await getLatestPosts();
 
     if (posts.length === 0) return null;
 
@@ -72,6 +91,9 @@ export default function LatestBlogPosts() {
                     {posts.map((post) => {
                         const words = post.content.split(/\s+/).length;
                         const readTime = Math.ceil(words / 200);
+                        const dateStr = post.publishedAt
+                            ? post.publishedAt.toLocaleDateString("es-AR")
+                            : "";
 
                         return (
                             <Link key={post.id} href={`/blog/${post.slug}`} className="group flex flex-col h-full bg-white border border-gray-100 rounded-2xl overflow-hidden hover:shadow-lg transition-all duration-300">
@@ -98,12 +120,12 @@ export default function LatestBlogPosts() {
                                 {/* Content */}
                                 <div className="flex flex-col flex-1 p-6">
                                     <div className="flex items-center gap-4 text-xs text-gray-500 mb-3">
-                                        <span className="flex items-center gap-1">
-                                            <Calendar size={14} />
-                                            {post.publishedAt
-                                                ? (post.publishedAt instanceof Date ? post.publishedAt.toLocaleDateString() : (post.publishedAt as any)?.toDate?.().toLocaleDateString())
-                                                : ""}
-                                        </span>
+                                        {dateStr && (
+                                            <span className="flex items-center gap-1">
+                                                <Calendar size={14} />
+                                                {dateStr}
+                                            </span>
+                                        )}
                                         <span className="flex items-center gap-1">
                                             <Clock size={14} />
                                             {readTime} min
@@ -121,18 +143,20 @@ export default function LatestBlogPosts() {
                                         </span>
                                     </p>
 
-                                    <div className="flex items-center gap-2 pt-4 border-t border-gray-50 mt-auto">
-                                        <div className="relative w-6 h-6 rounded-full bg-gray-200 overflow-hidden">
-                                            {post.author?.photo ? (
-                                                <Image src={post.author.photo} alt={post.author.name} fill className="object-cover" sizes="24px" />
-                                            ) : (
-                                                <div className="w-full h-full bg-indigo-100" />
-                                            )}
+                                    {post.author?.name && (
+                                        <div className="flex items-center gap-2 pt-4 border-t border-gray-50 mt-auto">
+                                            <div className="relative w-6 h-6 rounded-full bg-gray-200 overflow-hidden">
+                                                {post.author.photo ? (
+                                                    <Image src={post.author.photo} alt={post.author.name} fill className="object-cover" sizes="24px" />
+                                                ) : (
+                                                    <div className="w-full h-full bg-indigo-100" />
+                                                )}
+                                            </div>
+                                            <span className="text-xs font-medium text-gray-700">
+                                                {post.author.name}
+                                            </span>
                                         </div>
-                                        <span className="text-xs font-medium text-gray-700">
-                                            {post.author?.name}
-                                        </span>
-                                    </div>
+                                    )}
                                 </div>
                             </Link>
                         );

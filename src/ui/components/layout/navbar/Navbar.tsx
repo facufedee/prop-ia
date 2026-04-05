@@ -80,7 +80,7 @@ export default function Navbar() {
               src="/assets/img/logo_zeta_prop_transparent.png"
               alt="Zeta Prop Logo"
               fill
-              sizes="(max-width: 768px) 200px, 200px"
+              sizes="(max-width: 768px) 160px, 256px"
               className="object-contain object-left"
               priority
             />

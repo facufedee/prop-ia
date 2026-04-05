@@ -5,15 +5,19 @@ import crypto from "crypto";
 const CONFIG_COLLECTION = "configurations";
 const MP_CONFIG_ID = "mercadopago";
 
-const _rawKey = process.env.DB_ENCRYPTION_KEY;
-if (!_rawKey || _rawKey.length < 32) {
-    throw new Error("DB_ENCRYPTION_KEY env var must be set and at least 32 characters long");
-}
-const ENCRYPTION_KEY: string = _rawKey;
 const IV_LENGTH = 16;
+
+function getEncryptionKey(): string {
+    const key = process.env.DB_ENCRYPTION_KEY;
+    if (!key || key.length < 32) {
+        throw new Error("DB_ENCRYPTION_KEY env var must be set and at least 32 characters long");
+    }
+    return key;
+}
 
 function encrypt(text: string) {
     if (!text) return "";
+    const ENCRYPTION_KEY = getEncryptionKey();
     const iv = crypto.randomBytes(IV_LENGTH);
     const cipher = crypto.createCipheriv('aes-256-cbc', Buffer.from(ENCRYPTION_KEY.substring(0, 32)), iv);
     let encrypted = cipher.update(text);
@@ -23,6 +27,7 @@ function encrypt(text: string) {
 
 function decrypt(text: string) {
     if (!text) return "";
+    const ENCRYPTION_KEY = getEncryptionKey();
     const textParts = text.split(':');
     const iv = Buffer.from(textParts.shift()!, 'hex');
     const encryptedText = Buffer.from(textParts.join(':'), 'hex');

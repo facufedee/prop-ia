@@ -83,7 +83,7 @@ const jsonLd = {
             url: 'https://zetaprop.com.ar',
             logo: {
                 '@type': 'ImageObject',
-                url: 'https://zetaprop.com.ar/assets/img/Logo%20ZetaProp%20Fondo%20Blanco%202.png',
+                url: 'https://zetaprop.com.ar/assets/img/Logo%20ZetaProp%20Fondo%20Blanco.png',
             },
             description: 'Portal inmobiliario líder en Argentina. Miles de propiedades en venta y alquiler.',
             areaServed: {

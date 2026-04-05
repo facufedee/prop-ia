@@ -3,9 +3,10 @@ import { db } from "@/infrastructure/firebase/client"; // adminAuth might not be
 import { collection, query, where, getDocs, doc, getDoc } from "firebase/firestore";
 import { SignJWT } from "jose";
 
-const PORTAL_JWT_SECRET = process.env.PORTAL_JWT_SECRET;
-if (!PORTAL_JWT_SECRET) {
-    throw new Error("PORTAL_JWT_SECRET env var must be set");
+function getPortalSecret(): string {
+    const secret = process.env.PORTAL_JWT_SECRET;
+    if (!secret) throw new Error("PORTAL_JWT_SECRET env var must be set");
+    return secret;
 }
 
 export async function POST(request: NextRequest) {
@@ -86,7 +87,7 @@ export async function POST(request: NextRequest) {
             .setProtectedHeader({ alg: 'HS256' })
             .setIssuedAt()
             .setExpirationTime('24h')
-            .sign(new TextEncoder().encode(PORTAL_JWT_SECRET));
+            .sign(new TextEncoder().encode(getPortalSecret()));
 
         // 5. Return success
         const response = NextResponse.json({

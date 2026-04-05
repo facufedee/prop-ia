@@ -1,3 +1,5 @@
+"use client";
+
 import { useState } from "react";
 import Link from "next/link";
 import NextImage from "next/image";
@@ -61,19 +63,21 @@ export default function PropertyPublicCard({ property }: PropertyPublicCardProps
                             <>
                                 <button
                                     onClick={prevImage}
+                                    aria-label="Imagen anterior"
                                     className="absolute left-2 top-1/2 -translate-y-1/2 p-1 bg-white/80 rounded-full shadow-sm opacity-0 group-hover:opacity-100 transition-opacity hover:bg-white text-gray-700 hover:text-indigo-600 z-10"
                                 >
-                                    <ChevronLeft className="w-5 h-5" />
+                                    <ChevronLeft className="w-5 h-5" aria-hidden="true" />
                                 </button>
                                 <button
                                     onClick={nextImage}
+                                    aria-label="Siguiente imagen"
                                     className="absolute right-2 top-1/2 -translate-y-1/2 p-1 bg-white/80 rounded-full shadow-sm opacity-0 group-hover:opacity-100 transition-opacity hover:bg-white text-gray-700 hover:text-indigo-600 z-10"
                                 >
-                                    <ChevronRight className="w-5 h-5" />
+                                    <ChevronRight className="w-5 h-5" aria-hidden="true" />
                                 </button>
 
                                 {/* Dots Indicator */}
-                                <div className="absolute bottom-3 left-1/2 -translate-x-1/2 flex gap-1 z-10 opacity-0 group-hover:opacity-100 transition-opacity">
+                                <div className="absolute bottom-3 left-1/2 -translate-x-1/2 flex gap-1 z-10 opacity-0 group-hover:opacity-100 transition-opacity" aria-hidden="true">
                                     {property.imageUrls.slice(0, 5).map((_, idx) => (
                                         <div
                                             key={idx}
