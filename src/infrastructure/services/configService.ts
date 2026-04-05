@@ -5,8 +5,11 @@ import crypto from "crypto";
 const CONFIG_COLLECTION = "configurations";
 const MP_CONFIG_ID = "mercadopago";
 
-// Use a fallback for development, but ideally should be in .env.local
-const ENCRYPTION_KEY = process.env.DB_ENCRYPTION_KEY || "a_very_secret_key_32_chars_long!!";
+const _rawKey = process.env.DB_ENCRYPTION_KEY;
+if (!_rawKey || _rawKey.length < 32) {
+    throw new Error("DB_ENCRYPTION_KEY env var must be set and at least 32 characters long");
+}
+const ENCRYPTION_KEY: string = _rawKey;
 const IV_LENGTH = 16;
 
 function encrypt(text: string) {

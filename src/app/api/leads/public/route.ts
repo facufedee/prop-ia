@@ -2,15 +2,30 @@ import { NextResponse } from "next/server";
 import { adminDb } from "@/infrastructure/firebase/admin";
 import { FieldValue, Timestamp } from "firebase-admin/firestore";
 import { sendNewLeadNotificationEmail } from "@/lib/resendClient";
+import { z } from "zod";
+
+const leadSchema = z.object({
+    nombre: z.string().min(1).max(100).trim(),
+    email: z.string().email().max(200).optional().or(z.literal("")),
+    telefono: z.string().max(30).optional(),
+    mensaje: z.string().max(2000).optional(),
+    propertyId: z.string().max(100).optional().nullable(),
+    propertyTitle: z.string().max(200).optional().nullable(),
+    userId: z.string().min(1).max(128),
+    organizationId: z.string().max(128).optional().nullable(),
+    tipo: z.enum(["consulta", "visita", "tasacion", "otro"]).optional(),
+    origen: z.string().max(50).optional(),
+});
 
 export async function POST(request: Request) {
     try {
         const body = await request.json();
-        const { nombre, email, telefono, mensaje, propertyId, propertyTitle, userId, organizationId, tipo, origen } = body;
-
-        if (!userId) {
-            return NextResponse.json({ error: "Missing required fields" }, { status: 400 });
+        const parsed = leadSchema.safeParse(body);
+        if (!parsed.success) {
+            return NextResponse.json({ error: "Datos inválidos", details: parsed.error.flatten() }, { status: 400 });
         }
+
+        const { nombre, email, telefono, mensaje, propertyId, propertyTitle, userId, organizationId, tipo, origen } = parsed.data;
 
         // Unification Logic - Check if lead already exists by email or phone for the same user (agent)
         let existingLeadSnap: FirebaseFirestore.QueryDocumentSnapshot | null = null;
@@ -160,6 +175,6 @@ export async function POST(request: Request) {
         }
     } catch (error: any) {
         console.error("Error creating public lead:", error);
-        return NextResponse.json({ error: error.message }, { status: 500 });
+        return NextResponse.json({ error: "Error interno" }, { status: 500 });
     }
 }

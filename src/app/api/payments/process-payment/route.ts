@@ -1,15 +1,23 @@
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import { MercadoPagoConfig, Payment } from "mercadopago";
 import { configService } from "@/infrastructure/services/configService";
 import { subscriptionService } from "@/infrastructure/services/subscriptionService";
+import { verifyAuth } from "@/lib/apiAuth";
 
-export async function POST(req: Request) {
+export async function POST(req: NextRequest) {
+    const authResult = await verifyAuth(req);
+    if (authResult.error) return authResult.error;
+
     try {
         const body = await req.json();
         const { formData, transaction_amount, planId, userId, billing } = body;
 
-        // 1. Get the ACTIVE Access Token (dynamically, like we do for public key)
-        const mpConfig = await configService.getMercadoPagoConfig(true); // Decrypted
+        // Ensure the userId in the body matches the authenticated user
+        if (userId && userId !== authResult.user.uid) {
+            return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+        }
+
+        const mpConfig = await configService.getMercadoPagoConfig(true);
 
         if (!mpConfig) {
             console.error("❌ Process Payment: Config not found");
@@ -19,29 +27,17 @@ export async function POST(req: Request) {
         const activeEnv = mpConfig.activeMode;
         const activeConfig = mpConfig[activeEnv];
 
-        if (!activeConfig || !activeConfig.accessToken) {
+        if (!activeConfig?.accessToken) {
             console.error(`❌ Process Payment: Missing Access Token for ${activeEnv}`);
-            return NextResponse.json({ error: "Access Token missing" }, { status: 500 });
+            return NextResponse.json({ error: "Payment configuration incomplete" }, { status: 500 });
         }
 
-        // 2. Initialize Mercado Pago with the Active Token
         const client = new MercadoPagoConfig({
             accessToken: activeConfig.accessToken,
-            options: { timeout: 10000 }
+            options: { timeout: 10000 },
         });
 
         const payment = new Payment(client);
-
-        // 3. Create the payment with full metadata to allow webhook activation
-        console.log(`🚀 Process Payment: Creating payment for $${transaction_amount} in ${mpConfig.activeMode} mode...`);
-        console.log(`📋 formData received:`, JSON.stringify({
-            payment_method_id: formData.payment_method_id,
-            installments: formData.installments,
-            issuer_id: formData.issuer_id,
-            token: formData.token ? `${formData.token.substring(0, 8)}...` : 'MISSING',
-            payer_email: formData.payer?.email,
-            identification: formData.payer?.identification,
-        }));
 
         const paymentBody: any = {
             transaction_amount: Number(transaction_amount),
@@ -54,31 +50,25 @@ export async function POST(req: Request) {
                 email: formData.payer.email,
                 identification: {
                     type: formData.payer.identification?.type || "DNI",
-                    number: formData.payer.identification?.number || ""
-                }
+                    number: formData.payer.identification?.number || "",
+                },
             },
             metadata: {
                 plan_id: planId,
                 billing_period: billing,
-                user_id: userId
-            }
+                user_id: authResult.user.uid,
+            },
         };
 
         if (formData.issuer_id) {
             paymentBody.issuer_id = formData.issuer_id;
         }
 
-        console.log(`📤 Sending to MP:`, JSON.stringify(paymentBody));
-
         const result = await payment.create({ body: paymentBody });
 
-        console.log("✅ Process Payment: Payment created:", result.id, result.status);
-
-        // 4. If payment was approved immediately (e.g. debit card), activate subscription directly
-        if (result.status === 'approved' && result.id) {
-            console.log("✅ Payment approved immediately, triggering subscription activation...");
+        if (result.status === "approved" && result.id) {
             const activationResult = await subscriptionService.processPaymentWebhook(String(result.id));
-            console.log(`[Direct Activation] Result:`, activationResult.message);
+            console.log(`[Direct Activation] ${activationResult.message}`);
         }
 
         return NextResponse.json({
@@ -86,12 +76,8 @@ export async function POST(req: Request) {
             status: result.status,
             status_detail: result.status_detail,
         });
-
     } catch (error: any) {
-        console.error("❌ Process Payment Error:", error);
-        return NextResponse.json({
-            error: error.message || "Error processing payment",
-            details: error.cause || null
-        }, { status: 500 });
+        console.error("❌ Process Payment Error:", error.message);
+        return NextResponse.json({ error: "Error procesando el pago" }, { status: 500 });
     }
 }

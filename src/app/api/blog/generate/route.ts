@@ -1,13 +1,35 @@
 import { NextRequest, NextResponse } from "next/server";
 import * as cheerio from "cheerio";
 import { GoogleGenerativeAI } from "@google/generative-ai";
+import { verifyAuth } from "@/lib/apiAuth";
+
+const PRIVATE_IP_REGEX =
+    /^(127\.|10\.|192\.168\.|172\.(1[6-9]|2\d|3[01])\.|169\.254\.|0\.|::1|localhost)/i;
+
+function isSafeUrl(raw: string): boolean {
+    try {
+        const parsed = new URL(raw);
+        if (!["http:", "https:"].includes(parsed.protocol)) return false;
+        if (PRIVATE_IP_REGEX.test(parsed.hostname)) return false;
+        return true;
+    } catch {
+        return false;
+    }
+}
 
 export async function POST(request: NextRequest) {
+    const authResult = await verifyAuth(request);
+    if (authResult.error) return authResult.error;
+
     try {
         const { url } = await request.json();
 
         if (!url) {
             return NextResponse.json({ error: "URL is required" }, { status: 400 });
+        }
+
+        if (!isSafeUrl(url)) {
+            return NextResponse.json({ error: "URL inválida o no permitida" }, { status: 400 });
         }
 
         const apiKey = process.env.GOOGLE_API_KEY;
@@ -73,6 +95,6 @@ export async function POST(request: NextRequest) {
 
     } catch (error: any) {
         console.error("Error generating blog post:", error);
-        return NextResponse.json({ error: error.message }, { status: 500 });
+        return NextResponse.json({ error: "Error generando el post" }, { status: 500 });
     }
 }

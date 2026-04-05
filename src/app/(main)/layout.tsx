@@ -95,9 +95,9 @@ export const metadata: Metadata = {
   },
   category: 'business',
 
-  verification: {
-    google: 'verification_token', // Placeholder
-  },
+  // verification: {
+  //   google: 'PEGAR_AQUI_EL_TOKEN_DE_GOOGLE_SEARCH_CONSOLE',
+  // },
 };
 
 export const viewport = {

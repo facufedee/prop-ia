@@ -11,6 +11,25 @@ import { onAuthStateChanged } from "firebase/auth";
 import { useBranchContext } from "@/infrastructure/context/BranchContext";
 import PropertyCard from "./components/PropertyCard";
 
+function normalizeStr(str: string): string {
+    return str.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
+}
+
+function fuzzyMatch(text: string, query: string): boolean {
+    const normText = normalizeStr(text);
+    const normQuery = normalizeStr(query.trim());
+    if (!normQuery) return true;
+    if (normText.includes(normQuery)) return true;
+    const queryWords = normQuery.split(/\s+/).filter(Boolean);
+    if (queryWords.length > 1) {
+        const textWords = normText.split(/[\s,.-]+/).filter(Boolean);
+        return queryWords.every(qw =>
+            textWords.some(tw => tw.includes(qw) || qw.includes(tw))
+        );
+    }
+    return false;
+}
+
 export default function PropiedadesPage() {
     const [properties, setProperties] = useState<Property[]>([]);
     const [filteredProperties, setFilteredProperties] = useState<Property[]>([]);
@@ -53,11 +72,10 @@ export default function PropiedadesPage() {
 
         // Filter by Search
         if (searchTerm.trim()) {
-            const lowerTerm = searchTerm.toLowerCase();
             result = result.filter(p =>
-                (p.title && p.title.toLowerCase().includes(lowerTerm)) ||
-                (p.localidad && p.localidad.toLowerCase().includes(lowerTerm)) ||
-                (p.provincia && p.provincia.toLowerCase().includes(lowerTerm))
+                (p.title && fuzzyMatch(p.title, searchTerm)) ||
+                (p.localidad && fuzzyMatch(p.localidad, searchTerm)) ||
+                (p.provincia && fuzzyMatch(p.provincia, searchTerm))
             );
         }
 

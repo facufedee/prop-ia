@@ -97,11 +97,14 @@ export default function PropiedadesLandingPage() {
         <div className="min-h-screen bg-gray-50">
 
             {/* ═══ HERO ═══════════════════════════════════════════════════ */}
-            <section className="relative w-full min-h-[540px] md:h-[500px] pt-32 pb-16 md:py-0 flex flex-col md:flex-row items-center justify-center overflow-hidden">
+            <section
+                aria-label="Buscador de propiedades"
+                className="relative w-full min-h-[540px] md:h-[500px] pt-32 pb-16 md:py-0 flex flex-col md:flex-row items-center justify-center overflow-hidden"
+            >
                 {/* Background Image */}
                 <Image
                     src="/hero-propiedades.png"
-                    alt="Encontrá tu hogar ideal"
+                    alt="Propiedades en venta y alquiler en Argentina"
                     fill
                     className="object-cover object-center"
                     priority
@@ -111,7 +114,7 @@ export default function PropiedadesLandingPage() {
 
                 <div className="relative z-10 w-full max-w-3xl mx-auto px-4 text-center">
                     <h1 className="text-4xl md:text-5xl font-bold text-white mb-2 drop-shadow-lg">
-                        Encontrá tu hogar
+                        Encontrá tu hogar ideal
                     </h1>
                     <p className="text-white/80 text-lg mb-8 drop-shadow">
                         Miles de propiedades en venta y alquiler en Argentina
@@ -182,7 +185,7 @@ export default function PropiedadesLandingPage() {
             </section>
 
             {/* ═══ CATEGORÍAS RÁPIDAS ════════════════════════════════════ */}
-            <section className="container mx-auto px-4 max-w-6xl mt-8 md:-mt-6 relative z-10 mb-12">
+            <section aria-label="Categorías de propiedades" className="container mx-auto px-4 max-w-6xl mt-8 md:-mt-6 relative z-10 mb-12">
                 <div className="flex flex-wrap justify-center gap-3">
                     {QUICK_CATEGORIES.map(cat => {
                         const Icon = cat.icon;
@@ -201,7 +204,7 @@ export default function PropiedadesLandingPage() {
             </section>
 
             {/* ═══ PROPIEDADES DESTACADAS ════════════════════════════════ */}
-            <section className="container mx-auto px-4 max-w-7xl mb-16">
+            <section aria-label="Propiedades destacadas" className="container mx-auto px-4 max-w-7xl mb-16">
                 <div className="flex items-center justify-between mb-6">
                     <div>
                         <h2 className="text-2xl font-bold text-gray-900">Propiedades Destacadas</h2>
@@ -239,31 +242,55 @@ export default function PropiedadesLandingPage() {
             </section>
 
             {/* ═══ ZONAS POPULARES ═══════════════════════════════════════ */}
-            <section className="bg-white py-14 mb-16">
+            <section aria-label="Zonas populares" className="bg-white py-14 mb-16">
                 <div className="container mx-auto px-4 max-w-6xl">
                     <h2 className="text-2xl font-bold text-gray-900 mb-2">Zonas Populares</h2>
                     <p className="text-sm text-gray-500 mb-8">Explorá propiedades en las ubicaciones más buscadas</p>
-                    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-3">
-                        {POPULAR_ZONES.map(zona => (
-                            <Link
-                                key={zona}
-                                href={`/busqueda?loc=${encodeURIComponent(zona)}`}
-                                className="group flex items-center justify-between p-4 bg-gray-50 hover:bg-indigo-50 border border-gray-100 hover:border-indigo-200 rounded-xl transition-all"
-                            >
-                                <span className="text-sm font-medium text-gray-700 group-hover:text-indigo-700">
-                                    <MapPin size={12} className="inline mr-1 text-gray-400 group-hover:text-indigo-400" />
-                                    {zona}
-                                </span>
-                                <ArrowRight size={13} className="text-gray-300 group-hover:text-indigo-500 transition-colors" />
-                            </Link>
-                        ))}
+                    <nav aria-label="Búsquedas por zona">
+                        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-3">
+                            {POPULAR_ZONES.map(zona => (
+                                <Link
+                                    key={zona}
+                                    href={`/busqueda?loc=${encodeURIComponent(zona)}`}
+                                    title={`Propiedades en ${zona}`}
+                                    className="group flex items-center justify-between p-4 bg-gray-50 hover:bg-indigo-50 border border-gray-100 hover:border-indigo-200 rounded-xl transition-all"
+                                >
+                                    <span className="text-sm font-medium text-gray-700 group-hover:text-indigo-700">
+                                        <MapPin size={12} className="inline mr-1 text-gray-400 group-hover:text-indigo-400" />
+                                        {zona}
+                                    </span>
+                                    <ArrowRight size={13} className="text-gray-300 group-hover:text-indigo-500 transition-colors" />
+                                </Link>
+                            ))}
+                        </div>
+                    </nav>
+                </div>
+            </section>
+
+            {/* ═══ TEXTO SEO ESTÁTICO ════════════════════════════════════ */}
+            <section aria-label="Información sobre el portal" className="bg-gray-50 py-12 border-t border-gray-100">
+                <div className="container mx-auto px-4 max-w-5xl">
+                    <h2 className="text-xl font-bold text-gray-800 mb-4">Encontrá propiedades en venta y alquiler en Argentina</h2>
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-6 text-sm text-gray-600 leading-relaxed">
+                        <div>
+                            <h3 className="font-semibold text-gray-700 mb-2">Casas y departamentos</h3>
+                            <p>Explorá una amplia selección de <strong>casas en venta</strong>, <strong>departamentos en alquiler</strong> y PH en Buenos Aires, GBA y todo el interior del país.</p>
+                        </div>
+                        <div>
+                            <h3 className="font-semibold text-gray-700 mb-2">Inmuebles comerciales</h3>
+                            <p>Encontrá <strong>locales comerciales</strong>, oficinas, galpones y depósitos para alquilar o comprar. La mejor oferta de inmuebles comerciales en Argentina.</p>
+                        </div>
+                        <div>
+                            <h3 className="font-semibold text-gray-700 mb-2">Terrenos e inversiones</h3>
+                            <p>Descubrí <strong>terrenos y lotes</strong> en las mejores ubicaciones para construir o invertir. Quintas vacacionales y propiedades rurales en todo el país.</p>
+                        </div>
                     </div>
                 </div>
             </section>
 
             {/* ═══ BLOG / RECURSOS ════════════════════════════════════════ */}
             {!loadingPosts && posts.length > 0 && (
-                <section className="container mx-auto px-4 max-w-7xl mb-16">
+                <section aria-label="Guías y recursos inmobiliarios" className="container mx-auto px-4 max-w-7xl mb-16">
                     <div className="flex items-center justify-between mb-6">
                         <div>
                             <h2 className="text-2xl font-bold text-gray-900">Guías y Recursos</h2>
@@ -318,7 +345,7 @@ export default function PropiedadesLandingPage() {
             )}
 
             {/* ═══ CTA INMOBILIARIAS ══════════════════════════════════════ */}
-            <section className="py-16 mb-8">
+            <section aria-label="Publicá tu inmobiliaria" className="py-16 mb-8">
                 <div className="container mx-auto px-4 max-w-5xl">
                     <div className="relative rounded-3xl overflow-hidden bg-gradient-to-r from-indigo-600 via-indigo-700 to-violet-700 p-10 md:p-14 text-white text-center shadow-xl">
                         {/* Background decorative circles */}

@@ -6,23 +6,18 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     const baseUrl = 'https://zetaprop.com.ar';
 
     // 1. Static Routes
-    const staticRoutes = [
-        '',
-        '/propiedades',
-        '/contacto',
-        '/login',
-        '/blog',
-        '/nosotros',
-        '/servicios',
-        '/precios',
-        '/terminos',
-        '/privacidad'
-    ].map((route) => ({
-        url: `${baseUrl}${route}`,
-        lastModified: new Date(),
-        changeFrequency: 'daily' as const,
-        priority: route === '' ? 1 : 0.8,
-    }));
+    const staticRoutes: MetadataRoute.Sitemap = [
+        { url: baseUrl,                         priority: 1.0, changeFrequency: 'daily'   as const },
+        { url: `${baseUrl}/propiedades`,        priority: 0.9, changeFrequency: 'daily'   as const },
+        { url: `${baseUrl}/busqueda`,           priority: 0.9, changeFrequency: 'daily'   as const },
+        { url: `${baseUrl}/precios`,            priority: 0.8, changeFrequency: 'weekly'  as const },
+        { url: `${baseUrl}/blog`,               priority: 0.8, changeFrequency: 'daily'   as const },
+        { url: `${baseUrl}/nosotros`,           priority: 0.7, changeFrequency: 'monthly' as const },
+        { url: `${baseUrl}/servicios`,          priority: 0.7, changeFrequency: 'monthly' as const },
+        { url: `${baseUrl}/contacto`,           priority: 0.6, changeFrequency: 'monthly' as const },
+        { url: `${baseUrl}/terminos`,           priority: 0.3, changeFrequency: 'yearly'  as const },
+        { url: `${baseUrl}/privacidad`,         priority: 0.3, changeFrequency: 'yearly'  as const },
+    ].map((route) => ({ ...route, lastModified: new Date() }));
 
     // 2. Dynamic Property Routes (Friendly URLs)
     let propertiesSitemap: MetadataRoute.Sitemap = [];

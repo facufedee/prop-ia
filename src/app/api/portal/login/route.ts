@@ -3,8 +3,10 @@ import { db } from "@/infrastructure/firebase/client"; // adminAuth might not be
 import { collection, query, where, getDocs, doc, getDoc } from "firebase/firestore";
 import { SignJWT } from "jose";
 
-// Secret for Portal Session (should be in env, fallback for dev)
-const PORTAL_JWT_SECRET = process.env.PORTAL_JWT_SECRET || "default_portal_secret_key_12345";
+const PORTAL_JWT_SECRET = process.env.PORTAL_JWT_SECRET;
+if (!PORTAL_JWT_SECRET) {
+    throw new Error("PORTAL_JWT_SECRET env var must be set");
+}
 
 export async function POST(request: NextRequest) {
     try {
@@ -106,7 +108,7 @@ export async function POST(request: NextRequest) {
         return response;
 
     } catch (error: any) {
-        console.error("Portal Login Error:", error);
-        return NextResponse.json({ message: "Error interno del servidor", error: error.message }, { status: 500 });
+        console.error("Portal Login Error:", error.message);
+        return NextResponse.json({ message: "Error interno del servidor" }, { status: 500 });
     }
 }

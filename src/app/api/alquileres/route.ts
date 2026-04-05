@@ -1,38 +1,34 @@
 import { NextRequest, NextResponse } from "next/server";
 import { alquileresService } from "@/infrastructure/services/alquileresService";
-
+import { verifyAuth } from "@/lib/apiAuth";
 
 // GET - List all contracts for user
 export async function GET(request: NextRequest) {
-    try {
-        const userId = request.headers.get("x-user-id");
-        if (!userId) {
-            return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-        }
+    const authResult = await verifyAuth(request);
+    if (authResult.error) return authResult.error;
 
-        const alquileres = await alquileresService.getAlquileres(userId);
+    try {
+        const alquileres = await alquileresService.getAlquileres(authResult.user.uid);
         return NextResponse.json(alquileres);
     } catch (error: any) {
-        return NextResponse.json({ error: error.message }, { status: 500 });
+        return NextResponse.json({ error: "Error interno" }, { status: 500 });
     }
 }
 
 // POST - Create new contract
 export async function POST(request: NextRequest) {
-    try {
-        const userId = request.headers.get("x-user-id");
-        if (!userId) {
-            return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-        }
+    const authResult = await verifyAuth(request);
+    if (authResult.error) return authResult.error;
 
+    try {
         const body = await request.json();
         const id = await alquileresService.createAlquiler({
             ...body,
-            userId,
+            userId: authResult.user.uid,
         });
 
         return NextResponse.json({ id }, { status: 201 });
     } catch (error: any) {
-        return NextResponse.json({ error: error.message }, { status: 500 });
+        return NextResponse.json({ error: "Error interno" }, { status: 500 });
     }
 }

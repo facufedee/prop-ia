@@ -17,6 +17,27 @@ const RELATED_ZONES = [
     "El Palomar", "Hurlingham", "Villa del Parque", "Palermo", "Belgrano",
 ];
 
+function normalizeStr(str: string): string {
+    return str.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
+}
+
+function fuzzyMatch(text: string, query: string): boolean {
+    const normText = normalizeStr(text);
+    const normQuery = normalizeStr(query.trim());
+    if (!normQuery) return true;
+    // Direct contains (handles acentos: "tucuman" -> "Tucumán")
+    if (normText.includes(normQuery)) return true;
+    // Word-by-word partial match: "bueno aires" -> "buenos aires"
+    const queryWords = normQuery.split(/\s+/).filter(Boolean);
+    if (queryWords.length > 1) {
+        const textWords = normText.split(/[\s,.-]+/).filter(Boolean);
+        return queryWords.every(qw =>
+            textWords.some(tw => tw.includes(qw) || qw.includes(tw))
+        );
+    }
+    return false;
+}
+
 function shuffleArray<T>(arr: T[]): T[] {
     const a = [...arr];
     for (let i = a.length - 1; i > 0; i--) {
@@ -48,108 +69,45 @@ const FilterSection = ({
     );
 };
 
-function BusquedaContent() {
-    const searchParams = useSearchParams();
-    const router = useRouter();
+interface FilterPanelProps {
+    searchQuery: string;
+    setSearchQuery: (v: string) => void;
+    propertyType: string;
+    setPropertyType: (v: string) => void;
+    operationType: string;
+    setOperationType: (v: string) => void;
+    currency: string;
+    setCurrency: (v: string) => void;
+    rooms: string;
+    setRooms: (v: string) => void;
+    priceMin: string;
+    setPriceMin: (v: string) => void;
+    priceMax: string;
+    setPriceMax: (v: string) => void;
+    areaMin: string;
+    setAreaMin: (v: string) => void;
+    areaMax: string;
+    setAreaMax: (v: string) => void;
+    setCurrentPage: (v: number) => void;
+    hasActiveFilters: boolean;
+    clearAllFilters: () => void;
+}
 
-    const [allProperties, setAllProperties] = useState<PublicProperty[]>([]);
-    const [loading, setLoading] = useState(true);
-    const [currentPage, setCurrentPage] = useState(1);
-    const [showMobileFilter, setShowMobileFilter] = useState(false);
-    const propertiesPerPage = 15;
-
-    // Filters — initialized from URL params
-    const [operationType, setOperationType] = useState(searchParams.get("operacion") || "Todos");
-    const [propertyType, setPropertyType] = useState(searchParams.get("tipo") || "Todos");
-    const [currency, setCurrency] = useState("Todos");
-    const [rooms, setRooms] = useState("Todos");
-    const [priceMin, setPriceMin] = useState("");
-    const [priceMax, setPriceMax] = useState("");
-    const [areaMin, setAreaMin] = useState("");
-    const [areaMax, setAreaMax] = useState("");
-    const [searchQuery, setSearchQuery] = useState(searchParams.get("loc") || "");
-
-    useEffect(() => {
-        publicService.getAllProperties().then(data => {
-            setAllProperties(shuffleArray(data));
-            setLoading(false);
-        }).catch(() => setLoading(false));
-    }, []);
-
-    // Re-sync if URL params change (e.g. landing click)
-    useEffect(() => {
-        setOperationType(searchParams.get("operacion") || "Todos");
-        setPropertyType(searchParams.get("tipo") || "Todos");
-        setSearchQuery(searchParams.get("loc") || "");
-        setCurrentPage(1);
-    }, [searchParams]);
-
-    const hasActiveFilters = operationType !== "Todos" || propertyType !== "Todos" || currency !== "Todos"
-        || rooms !== "Todos" || priceMin || priceMax || areaMin || areaMax || searchQuery;
-
-    const clearAllFilters = () => {
-        setOperationType("Todos");
-        setPropertyType("Todos");
-        setCurrency("Todos");
-        setRooms("Todos");
-        setPriceMin("");
-        setPriceMax("");
-        setAreaMin("");
-        setAreaMax("");
-        setSearchQuery("");
-        router.push("/busqueda");
-    };
-
-    const filteredProperties = useMemo(() => {
-        let filtered = [...allProperties];
-
-        if (operationType !== "Todos") filtered = filtered.filter(p => p.operation_type === operationType);
-        if (propertyType !== "Todos") filtered = filtered.filter(p => p.type === propertyType || (p as any).property_type === propertyType);
-        if (currency !== "Todos") filtered = filtered.filter(p => p.currency === currency);
-        if (rooms !== "Todos") {
-            if (rooms === "4+") filtered = filtered.filter(p => (p.rooms || 0) >= 4);
-            else filtered = filtered.filter(p => (p.rooms || 0) === Number(rooms));
-        }
-        if (priceMin) filtered = filtered.filter(p => Number(p.price) >= Number(priceMin));
-        if (priceMax) filtered = filtered.filter(p => Number(p.price) <= Number(priceMax));
-        if (areaMin) filtered = filtered.filter(p => (p.area_covered || 0) >= Number(areaMin));
-        if (areaMax) filtered = filtered.filter(p => (p.area_covered || 0) <= Number(areaMax));
-        if (searchQuery) {
-            const q = searchQuery.toLowerCase().trim();
-            filtered = filtered.filter(p => {
-                const fields = [
-                    p.title,
-                    p.localidad,
-                    p.provincia,
-                    p.address,
-                    p.calle,
-                    p.altura,
-                    p.code,
-                    p.type,
-                    (p as any).barrio,
-                    (p as any).ciudad,
-                    (p as any).property_type,
-                    (p as any).description,
-                    (p as any).all_features,
-                ];
-                return fields.some(f => f && String(f).toLowerCase().includes(q));
-            });
-        }
-        return filtered;
-    }, [allProperties, operationType, propertyType, currency, rooms, priceMin, priceMax, areaMin, areaMax, searchQuery]);
-
-    const paginatedProperties = filteredProperties.slice((currentPage - 1) * propertiesPerPage, currentPage * propertiesPerPage);
-    const totalPages = Math.ceil(filteredProperties.length / propertiesPerPage);
-
-    // Breadcrumbs
-    const breadcrumbs = [
-        { label: "Inicio", href: "/propiedades" },
-        ...(operationType !== "Todos" ? [{ label: operationType, href: `/busqueda?operacion=${operationType}` }] : []),
-        ...(propertyType !== "Todos" ? [{ label: propertyType, href: `/busqueda?tipo=${encodeURIComponent(propertyType)}` }] : []),
-        ...(searchQuery ? [{ label: searchQuery, href: `/busqueda?loc=${encodeURIComponent(searchQuery)}` }] : []),
-    ];
-
-    const FilterPanel = () => (
+function FilterPanel({
+    searchQuery, setSearchQuery,
+    propertyType, setPropertyType,
+    operationType, setOperationType,
+    currency, setCurrency,
+    rooms, setRooms,
+    priceMin, setPriceMin,
+    priceMax, setPriceMax,
+    areaMin, setAreaMin,
+    areaMax, setAreaMax,
+    setCurrentPage,
+    hasActiveFilters,
+    clearAllFilters,
+}: FilterPanelProps) {
+    return (
         <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
             <div className="p-4 bg-gray-50 border-b border-gray-100 flex items-center justify-between">
                 <span className="font-bold text-gray-900 flex items-center gap-2"><Filter size={16} /> Filtros</span>
@@ -259,6 +217,122 @@ function BusquedaContent() {
             </div>
         </div>
     );
+}
+
+function BusquedaContent() {
+    const searchParams = useSearchParams();
+    const router = useRouter();
+
+    const [allProperties, setAllProperties] = useState<PublicProperty[]>([]);
+    const [loading, setLoading] = useState(true);
+    const [currentPage, setCurrentPage] = useState(1);
+    const [showMobileFilter, setShowMobileFilter] = useState(false);
+    const propertiesPerPage = 15;
+
+    // Filters — initialized from URL params
+    const [operationType, setOperationType] = useState(searchParams.get("operacion") || "Todos");
+    const [propertyType, setPropertyType] = useState(searchParams.get("tipo") || "Todos");
+    const [currency, setCurrency] = useState("Todos");
+    const [rooms, setRooms] = useState("Todos");
+    const [priceMin, setPriceMin] = useState("");
+    const [priceMax, setPriceMax] = useState("");
+    const [areaMin, setAreaMin] = useState("");
+    const [areaMax, setAreaMax] = useState("");
+    const [searchQuery, setSearchQuery] = useState(searchParams.get("loc") || "");
+
+    useEffect(() => {
+        publicService.getAllProperties().then(data => {
+            setAllProperties(shuffleArray(data));
+            setLoading(false);
+        }).catch(() => setLoading(false));
+    }, []);
+
+    // Re-sync if URL params change (e.g. landing click)
+    useEffect(() => {
+        setOperationType(searchParams.get("operacion") || "Todos");
+        setPropertyType(searchParams.get("tipo") || "Todos");
+        setSearchQuery(searchParams.get("loc") || "");
+        setCurrentPage(1);
+    }, [searchParams]);
+
+    const hasActiveFilters = operationType !== "Todos" || propertyType !== "Todos" || currency !== "Todos"
+        || rooms !== "Todos" || priceMin || priceMax || areaMin || areaMax || searchQuery;
+
+    const clearAllFilters = () => {
+        setOperationType("Todos");
+        setPropertyType("Todos");
+        setCurrency("Todos");
+        setRooms("Todos");
+        setPriceMin("");
+        setPriceMax("");
+        setAreaMin("");
+        setAreaMax("");
+        setSearchQuery("");
+        router.push("/busqueda");
+    };
+
+    const filteredProperties = useMemo(() => {
+        let filtered = [...allProperties];
+
+        if (operationType !== "Todos") filtered = filtered.filter(p => p.operation_type === operationType);
+        if (propertyType !== "Todos") filtered = filtered.filter(p => p.type === propertyType || (p as any).property_type === propertyType);
+        if (currency !== "Todos") filtered = filtered.filter(p => p.currency === currency);
+        if (rooms !== "Todos") {
+            if (rooms === "4+") filtered = filtered.filter(p => (p.rooms || 0) >= 4);
+            else filtered = filtered.filter(p => (p.rooms || 0) === Number(rooms));
+        }
+        if (priceMin) filtered = filtered.filter(p => Number(p.price) >= Number(priceMin));
+        if (priceMax) filtered = filtered.filter(p => Number(p.price) <= Number(priceMax));
+        if (areaMin) filtered = filtered.filter(p => (p.area_covered || 0) >= Number(areaMin));
+        if (areaMax) filtered = filtered.filter(p => (p.area_covered || 0) <= Number(areaMax));
+        if (searchQuery) {
+            filtered = filtered.filter(p => {
+                const fields = [
+                    p.title,
+                    p.localidad,
+                    p.provincia,
+                    p.address,
+                    p.calle,
+                    p.altura,
+                    p.code,
+                    p.type,
+                    (p as any).barrio,
+                    (p as any).ciudad,
+                    (p as any).property_type,
+                    (p as any).description,
+                    (p as any).all_features,
+                ];
+                return fields.some(f => f && fuzzyMatch(String(f), searchQuery));
+            });
+        }
+        return filtered;
+    }, [allProperties, operationType, propertyType, currency, rooms, priceMin, priceMax, areaMin, areaMax, searchQuery]);
+
+    const paginatedProperties = filteredProperties.slice((currentPage - 1) * propertiesPerPage, currentPage * propertiesPerPage);
+    const totalPages = Math.ceil(filteredProperties.length / propertiesPerPage);
+
+    // Breadcrumbs
+    const breadcrumbs = [
+        { label: "Inicio", href: "/propiedades" },
+        ...(operationType !== "Todos" ? [{ label: operationType, href: `/busqueda?operacion=${operationType}` }] : []),
+        ...(propertyType !== "Todos" ? [{ label: propertyType, href: `/busqueda?tipo=${encodeURIComponent(propertyType)}` }] : []),
+        ...(searchQuery ? [{ label: searchQuery, href: `/busqueda?loc=${encodeURIComponent(searchQuery)}` }] : []),
+    ];
+
+    const filterPanelProps: FilterPanelProps = {
+        searchQuery, setSearchQuery,
+        propertyType, setPropertyType,
+        operationType, setOperationType,
+        currency, setCurrency,
+        rooms, setRooms,
+        priceMin, setPriceMin,
+        priceMax, setPriceMax,
+        areaMin, setAreaMin,
+        areaMax, setAreaMax,
+        setCurrentPage,
+        hasActiveFilters: !!hasActiveFilters,
+        clearAllFilters,
+    };
 
     return (
         <div className="min-h-screen bg-gray-50 pb-20 pt-24">
@@ -279,7 +353,7 @@ function BusquedaContent() {
 
                     {/* Filter Panel — desktop only */}
                     <div className="hidden lg:block lg:col-span-3 sticky top-24">
-                        <FilterPanel />
+                        <FilterPanel {...filterPanelProps} />
                     </div>
 
                     {/* Results */}
@@ -382,7 +456,7 @@ function BusquedaContent() {
                             </button>
                         </div>
                         <div className="p-4">
-                            <FilterPanel />
+                            <FilterPanel {...filterPanelProps} />
                         </div>
                         <div className="sticky bottom-0 bg-white p-4 border-t border-gray-100">
                             <button

@@ -1,40 +1,26 @@
 import { GoogleGenerativeAI } from "@google/generative-ai";
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
+import { verifyAuth } from "@/lib/apiAuth";
 
 const apiKey = process.env.GOOGLE_API_KEY;
 
-
-export async function POST(request: Request) {
-    console.log("API Route: /api/generate-description called");
+export async function POST(request: NextRequest) {
+    const authResult = await verifyAuth(request);
+    if (authResult.error) return authResult.error;
 
     if (!apiKey) {
         console.error("API Error: GOOGLE_API_KEY is missing");
-        return NextResponse.json(
-            { error: "Configuration Error: API Key missing" },
-            { status: 500 }
-        );
+        return NextResponse.json({ error: "Configuration Error: API Key missing" }, { status: 500 });
     }
 
     try {
         const body = await request.json();
-        console.log("API Route: Received body", JSON.stringify(body, null, 2));
-
         const {
-            operation_type,
-
-            property_type,
-            property_subtype,
-            provincia,
-            localidad,
-            calle,
-            rooms,
-            bedrooms,
-            bathrooms,
-            area_total,
-            area_covered,
-            antiquity_type,
-            price,
-            currency
+            operation_type, property_type, property_subtype,
+            provincia, localidad, calle,
+            rooms, bedrooms, bathrooms,
+            area_total, area_covered,
+            antiquity_type, price, currency,
         } = body;
 
         const genAI = new GoogleGenerativeAI(apiKey);
@@ -45,7 +31,7 @@ export async function POST(request: Request) {
             Genera un título atractivo y una descripción detallada y vendedora para una publicación inmobiliaria con los siguientes datos:
 
             - Operación: ${operation_type}
-            - Tipo: ${property_type} ${property_subtype || ''}
+            - Tipo: ${property_type} ${property_subtype || ""}
             - Ubicación: ${calle}, ${localidad}, ${provincia}
             - Ambientes: ${rooms}
             - Dormitorios: ${bedrooms}
@@ -63,19 +49,12 @@ export async function POST(request: Request) {
 
         const result = await model.generateContent(prompt);
         const responseText = result.response.text();
-
-        // Clean up markdown if present (Gemini sometimes adds ```json ... ```)
         const cleanedText = responseText.replace(/```json/g, "").replace(/```/g, "").trim();
-
         const jsonResponse = JSON.parse(cleanedText);
 
         return NextResponse.json(jsonResponse);
-
     } catch (error: any) {
-        console.error("Error generating description:", error);
-        return NextResponse.json(
-            { error: "Error generating content", details: error.message },
-            { status: 500 }
-        );
+        console.error("Error generating description:", error.message);
+        return NextResponse.json({ error: "Error generando descripción" }, { status: 500 });
     }
 }

@@ -1,7 +1,8 @@
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import { adminDb } from "@/infrastructure/firebase/admin";
 import { sendEmailWithResend } from "@/lib/resend";
 import * as admin from "firebase-admin";
+import { verifyAdmin } from "@/lib/apiAuth";
 
 interface BulkEmailBody {
     subject: string;
@@ -10,7 +11,10 @@ interface BulkEmailBody {
     campaignName?: string;
 }
 
-export async function POST(req: Request) {
+export async function POST(req: NextRequest) {
+    const authResult = await verifyAdmin(req);
+    if (authResult.error) return authResult.error;
+
     try {
         const body = await req.json() as BulkEmailBody;
         const { subject, html, userIds, campaignName } = body;
@@ -76,6 +80,6 @@ export async function POST(req: Request) {
         return NextResponse.json({ success: true, sent, failed, total: emailsToSend.length });
     } catch (error: any) {
         console.error("[bulk-email]", error);
-        return NextResponse.json({ error: error.message || "Error interno" }, { status: 500 });
+        return NextResponse.json({ error: "Error interno" }, { status: 500 });
     }
 }

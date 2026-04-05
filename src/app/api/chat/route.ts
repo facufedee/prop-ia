@@ -11,73 +11,51 @@ export async function POST(request: Request) {
 
     try {
         const body = await request.json();
-        const { messages } = body; // Array of { role: 'user'|'assistant', content: string }
+        const { messages } = body;
 
-        // Transform history for Gemini
-        // Gemini expects: { role: 'user' | 'model', parts: [{ text: ... }] }
-        // Also supports 'function' role but for simple chat history we map assistant->model
+        if (!Array.isArray(messages)) {
+            return NextResponse.json({ error: "Invalid messages format" }, { status: 400 });
+        }
+
         const history = messages.map((m: any) => ({
             role: m.sender === "user" ? "user" : "model",
-            parts: [{ text: m.content }]
+            parts: [{ text: String(m.content).substring(0, 10000) }],
         }));
 
         const genAI = new GoogleGenerativeAI(apiKey);
-        // Use gemini-2.0-flash-exp or stable if available. 
-        // Using "gemini-2.0-flash" as seen in other route.
         const model = genAI.getGenerativeModel({
             model: "gemini-2.0-flash",
-            tools: [{ functionDeclarations: tools }]
+            tools: [{ functionDeclarations: tools }],
         });
 
-        const chat = model.startChat({
-            history: history.slice(0, -1), // Previous history
-        });
-
-        // Send last message
+        const chat = model.startChat({ history: history.slice(0, -1) });
         const lastMsg = history[history.length - 1];
         let result = await chat.sendMessage(lastMsg.parts);
         let response = result.response;
 
-        // Loop for function calls
-        // Limit steps to avoid infinite loops
         let steps = 0;
         const MAX_STEPS = 5;
 
         while (steps < MAX_STEPS) {
             const calls = response.functionCalls();
+            if (!calls?.length) break;
 
-            if (calls && calls.length > 0) {
-                // Execute tools
-                const parts: any[] = [];
-                for (const call of calls) {
-                    console.log("Calling tool:", call.name);
-                    const toolResult = await runTool(call.name, call.args);
-                    parts.push({
-                        functionResponse: {
-                            name: call.name,
-                            response: { result: toolResult }
-                        }
-                    });
-                }
-
-                // Send function output back to model
-                result = await chat.sendMessage(parts);
-                response = result.response;
-                steps++;
-            } else {
-                // No more function calls, we have the answer
-                break;
+            const parts: any[] = [];
+            for (const call of calls) {
+                const toolResult = await runTool(call.name, call.args);
+                parts.push({
+                    functionResponse: { name: call.name, response: { result: toolResult } },
+                });
             }
+
+            result = await chat.sendMessage(parts);
+            response = result.response;
+            steps++;
         }
 
-        const text = response.text();
-        return NextResponse.json({
-            role: "assistant",
-            content: text
-        });
-
+        return NextResponse.json({ role: "assistant", content: response.text() });
     } catch (error: any) {
-        console.error("Chat API Error:", error);
-        return NextResponse.json({ error: error.message }, { status: 500 });
+        console.error("Chat API Error:", error.message);
+        return NextResponse.json({ error: "Error procesando respuesta" }, { status: 500 });
     }
 }

@@ -1,19 +1,19 @@
-import { NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 import { adminDb } from '@/infrastructure/firebase/admin';
 import { marketingEmailService } from '@/infrastructure/services/marketingEmailService';
+import { verifyCronSecret } from '@/lib/apiAuth';
 
 /**
  * Cron job: Check subscriptions expiring in 7 days and send reminder emails.
  * Call this endpoint daily via a cron service (e.g., Vercel Cron, GitHub Actions).
  * GET /api/cron/check-subscriptions
+ * Requires header: x-cron-secret: <CRON_SECRET>
  */
-export async function GET(request: Request) {
+export async function GET(request: NextRequest) {
+    const authError = verifyCronSecret(request);
+    if (authError) return authError;
+
     try {
-        // Optional: Verify cron secret header for security
-        // const cronSecret = request.headers.get('x-cron-secret');
-        // if (cronSecret !== process.env.CRON_SECRET) {
-        //     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-        // }
 
         const now = new Date();
         const intervals = [7, 3];
@@ -89,6 +89,6 @@ export async function GET(request: Request) {
         });
     } catch (error: any) {
         console.error('[Cron check-subscriptions] Fatal error:', error);
-        return NextResponse.json({ error: error.message }, { status: 500 });
+        return NextResponse.json({ error: "Error interno" }, { status: 500 });
     }
 }

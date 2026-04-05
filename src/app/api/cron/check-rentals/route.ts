@@ -1,10 +1,11 @@
-import { NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 import { alquileresService } from '@/infrastructure/services/alquileresService';
 import { notificationService } from '@/infrastructure/services/notificationService';
+import { verifyCronSecret } from '@/lib/apiAuth';
 
-// Note: To make this secure in production, use a secret header check,
-// but for now, it's open to allow easy testing of the "Real Alerts" feature.
-export async function GET(request: Request) {
+export async function GET(request: NextRequest) {
+    const authError = verifyCronSecret(request);
+    if (authError) return authError;
     try {
         const alquileres = await alquileresService.getAllActiveAlquileres();
         let count = 0;
