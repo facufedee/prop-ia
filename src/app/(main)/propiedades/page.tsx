@@ -1,6 +1,6 @@
 import Link from "next/link";
 import Image from "next/image";
-import { ChevronRight, Calendar, BookOpen, MapPin, ArrowRight } from "lucide-react";
+import { ChevronRight, Calendar, BookOpen, MapPin, ArrowRight, Home, Building2, TreePine, Warehouse } from "lucide-react";
 import { format } from "date-fns";
 import { es } from "date-fns/locale";
 import { publicServerService } from "@/infrastructure/services/publicServerService";
@@ -8,12 +8,12 @@ import PropertyHero from "@/ui/components/properties/public/PropertyHero";
 import PropertyPublicCard from "@/ui/components/properties/public/PropertyPublicCard";
 
 const QUICK_CATEGORIES = [
-    { label: "Casas", tipo: "Casa", icon: "Home", color: "bg-amber-50 text-amber-700 border-amber-200 hover:bg-amber-100" },
-    { label: "Departamentos", tipo: "Departamento", icon: "Building2", color: "bg-indigo-50 text-indigo-700 border-indigo-200 hover:bg-indigo-100" },
-    { label: "PH", tipo: "PH", icon: "Home", color: "bg-violet-50 text-violet-700 border-violet-200 hover:bg-violet-100" },
-    { label: "Quintas", tipo: "Quinta Vacacional", icon: "TreePine", color: "bg-green-50 text-green-700 border-green-200 hover:bg-green-100" },
-    { label: "Terrenos", tipo: "Lote/Terreno", icon: "MapPin", color: "bg-orange-50 text-orange-700 border-orange-200 hover:bg-orange-100" },
-    { label: "Locales", tipo: "Local comercial", icon: "Warehouse", color: "bg-sky-50 text-sky-700 border-sky-200 hover:bg-sky-100" },
+    { label: "Casas", tipo: "Casa", icon: Home, color: "bg-amber-50 text-amber-700 border-amber-200 hover:bg-amber-100" },
+    { label: "Departamentos", tipo: "Departamento", icon: Building2, color: "bg-indigo-50 text-indigo-700 border-indigo-200 hover:bg-indigo-100" },
+    { label: "PH", tipo: "PH", icon: Home, color: "bg-violet-50 text-violet-700 border-violet-200 hover:bg-violet-100" },
+    { label: "Quintas", tipo: "Quinta Vacacional", icon: TreePine, color: "bg-green-50 text-green-700 border-green-200 hover:bg-green-100" },
+    { label: "Terrenos", tipo: "Lote/Terreno", icon: MapPin, color: "bg-orange-50 text-orange-700 border-orange-200 hover:bg-orange-100" },
+    { label: "Locales", tipo: "Local comercial", icon: Warehouse, color: "bg-sky-50 text-sky-700 border-sky-200 hover:bg-sky-100" },
 ];
 
 const POPULAR_ZONES = [
@@ -33,7 +33,7 @@ export default async function PropiedadesLandingPage() {
     };
 
     return (
-        <div className="min-h-screen bg-gray-50">
+        <main className="min-h-screen bg-gray-50">
 
             {/* ═══ HERO ═══════════════════════════════════════════════════ */}
             <PropertyHero />
@@ -41,15 +41,19 @@ export default async function PropiedadesLandingPage() {
             {/* ═══ CATEGORÍAS RÁPIDAS ════════════════════════════════════ */}
             <section aria-label="Categorías de propiedades" className="container mx-auto px-4 max-w-6xl mt-8 md:-mt-6 relative z-10 mb-12">
                 <div className="flex flex-wrap justify-center gap-3">
-                    {QUICK_CATEGORIES.map(cat => (
-                        <Link
-                            key={cat.label}
-                            href={`/busqueda?tipo=${encodeURIComponent(cat.tipo)}`}
-                            className={`flex items-center gap-2 px-5 py-2.5 rounded-full border text-sm font-semibold transition-all shadow-sm bg-white hover:shadow-md ${cat.color}`}
-                        >
-                            {cat.label}
-                        </Link>
-                    ))}
+                    {QUICK_CATEGORIES.map(cat => {
+                        const Icon = cat.icon;
+                        return (
+                            <Link
+                                key={cat.label}
+                                href={`/busqueda?tipo=${encodeURIComponent(cat.tipo)}`}
+                                className={`flex items-center gap-2 px-5 py-2.5 rounded-full border text-sm font-semibold transition-all shadow-sm bg-white hover:shadow-md ${cat.color}`}
+                            >
+                                <Icon size={16} />
+                                {cat.label}
+                            </Link>
+                        );
+                    })}
                 </div>
             </section>
 
@@ -108,7 +112,7 @@ export default async function PropiedadesLandingPage() {
             {/* ═══ TEXTO SEO ESTÁTICO ════════════════════════════════════ */}
             <section aria-label="Información sobre el portal" className="bg-gray-50 py-12 border-t border-gray-100">
                 <div className="container mx-auto px-4 max-w-5xl">
-                    <h1 className="text-xl font-bold text-gray-800 mb-4">Encontrá propiedades en venta y alquiler en Argentina</h1>
+                    <h2 className="text-xl font-bold text-gray-800 mb-4">Encontrá propiedades en venta y alquiler en Argentina</h2>
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-6 text-sm text-gray-600 leading-relaxed">
                         <div>
                             <h3 className="font-semibold text-gray-700 mb-2">Casas y departamentos</h3>
@@ -220,7 +224,6 @@ export default async function PropiedadesLandingPage() {
                     </div>
                 </div>
             </section>
-
-        </div>
+        </main>
     );
 }
