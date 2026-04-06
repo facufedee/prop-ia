@@ -4,7 +4,6 @@ import crypto from "crypto";
 
 const CONFIG_COLLECTION = "configurations";
 const MP_CONFIG_ID = "mercadopago";
-
 const IV_LENGTH = 16;
 
 function getEncryptionKey(): string {
@@ -15,38 +14,29 @@ function getEncryptionKey(): string {
     return key;
 }
 
-function encrypt(text: string) {
+export function encryptConfigValue(text: string): string {
     if (!text) return "";
     const ENCRYPTION_KEY = getEncryptionKey();
     const iv = crypto.randomBytes(IV_LENGTH);
-    const cipher = crypto.createCipheriv('aes-256-cbc', Buffer.from(ENCRYPTION_KEY.substring(0, 32)), iv);
-    let encrypted = cipher.update(text);
-    encrypted = Buffer.concat([encrypted, cipher.final()]);
-    return iv.toString('hex') + ':' + encrypted.toString('hex');
+    const cipher = crypto.createCipheriv("aes-256-cbc", Buffer.from(ENCRYPTION_KEY.substring(0, 32)), iv);
+    const encrypted = Buffer.concat([cipher.update(text), cipher.final()]);
+    return iv.toString("hex") + ":" + encrypted.toString("hex");
 }
 
-function decrypt(text: string) {
+export function decryptConfigValue(text: string): string {
     if (!text) return "";
     const ENCRYPTION_KEY = getEncryptionKey();
-    const textParts = text.split(':');
-    const iv = Buffer.from(textParts.shift()!, 'hex');
-    const encryptedText = Buffer.from(textParts.join(':'), 'hex');
-    const decipher = crypto.createDecipheriv('aes-256-cbc', Buffer.from(ENCRYPTION_KEY.substring(0, 32)), iv);
-    let decrypted = decipher.update(encryptedText);
-    decrypted = Buffer.concat([decrypted, decipher.final()]);
-    return decrypted.toString();
+    const parts = text.split(":");
+    const iv = Buffer.from(parts.shift()!, "hex");
+    const encryptedText = Buffer.from(parts.join(":"), "hex");
+    const decipher = crypto.createDecipheriv("aes-256-cbc", Buffer.from(ENCRYPTION_KEY.substring(0, 32)), iv);
+    return Buffer.concat([decipher.update(encryptedText), decipher.final()]).toString();
 }
 
 export interface MercadoPagoConfig {
-    activeMode: 'sandbox' | 'production';
-    sandbox: {
-        publicKey: string;
-        accessToken: string;
-    };
-    production: {
-        publicKey: string;
-        accessToken: string;
-    };
+    activeMode: "sandbox" | "production";
+    sandbox: { publicKey: string; accessToken: string };
+    production: { publicKey: string; accessToken: string };
     updatedAt?: Date;
 }
 
@@ -54,44 +44,38 @@ export const configService = {
     getMercadoPagoConfig: async (decryptKeys = false): Promise<MercadoPagoConfig | null> => {
         if (!db) throw new Error("Firestore not initialized");
         const docSnap = await getDoc(doc(db, CONFIG_COLLECTION, MP_CONFIG_ID));
-
         if (!docSnap.exists()) return null;
 
         const data = docSnap.data();
+        const resolve = (val: string) => (decryptKeys ? decryptConfigValue(val) : val);
 
-        // Handle migration from old structure if necessary
-        const config: MercadoPagoConfig = {
-            activeMode: data.activeMode || data.mode || 'sandbox',
+        return {
+            activeMode: data.activeMode ?? data.mode ?? "sandbox",
             sandbox: {
-                publicKey: decryptKeys ? decrypt(data.sandbox?.publicKey || (data.mode === 'sandbox' ? data.publicKey : '')) : (data.sandbox?.publicKey || (data.mode === 'sandbox' ? data.publicKey : '')),
-                accessToken: decryptKeys ? decrypt(data.sandbox?.accessToken || (data.mode === 'sandbox' ? data.accessToken : '')) : (data.sandbox?.accessToken || (data.mode === 'sandbox' ? data.accessToken : ''))
+                publicKey:   resolve(data.sandbox?.publicKey   ?? (data.mode === "sandbox"    ? data.publicKey    : "")),
+                accessToken: resolve(data.sandbox?.accessToken ?? (data.mode === "sandbox"    ? data.accessToken  : "")),
             },
             production: {
-                publicKey: decryptKeys ? decrypt(data.production?.publicKey || (data.mode === 'production' ? data.publicKey : '')) : (data.production?.publicKey || (data.mode === 'production' ? data.publicKey : '')),
-                accessToken: decryptKeys ? decrypt(data.production?.accessToken || (data.mode === 'production' ? data.accessToken : '')) : (data.production?.accessToken || (data.mode === 'production' ? data.accessToken : ''))
+                publicKey:   resolve(data.production?.publicKey   ?? (data.mode === "production" ? data.publicKey    : "")),
+                accessToken: resolve(data.production?.accessToken ?? (data.mode === "production" ? data.accessToken  : "")),
             },
-            updatedAt: data.updatedAt?.toDate()
+            updatedAt: data.updatedAt?.toDate(),
         };
-
-        return config;
     },
 
     saveMercadoPagoConfig: async (config: MercadoPagoConfig): Promise<void> => {
         if (!db) throw new Error("Firestore not initialized");
-
-        const dataToSave = {
+        await setDoc(doc(db, CONFIG_COLLECTION, MP_CONFIG_ID), {
             activeMode: config.activeMode,
             sandbox: {
-                publicKey: encrypt(config.sandbox.publicKey),
-                accessToken: encrypt(config.sandbox.accessToken)
+                publicKey:   encryptConfigValue(config.sandbox.publicKey),
+                accessToken: encryptConfigValue(config.sandbox.accessToken),
             },
             production: {
-                publicKey: encrypt(config.production.publicKey),
-                accessToken: encrypt(config.production.accessToken)
+                publicKey:   encryptConfigValue(config.production.publicKey),
+                accessToken: encryptConfigValue(config.production.accessToken),
             },
-            updatedAt: Timestamp.now()
-        };
-
-        await setDoc(doc(db, CONFIG_COLLECTION, MP_CONFIG_ID), dataToSave);
-    }
+            updatedAt: Timestamp.now(),
+        });
+    },
 };

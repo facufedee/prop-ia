@@ -1,10 +1,28 @@
 import { NextRequest, NextResponse } from "next/server";
 import { MercadoPagoConfig, Preference } from "mercadopago";
-import { configService } from "@/infrastructure/services/configService";
-import { subscriptionService } from "@/infrastructure/services/subscriptionService";
-import { db } from "@/infrastructure/firebase/client";
-import { collection, addDoc, Timestamp } from "firebase/firestore";
+import { decryptConfigValue } from "@/infrastructure/services/configService";
+import { adminDb } from "@/infrastructure/firebase/admin";
+import { Timestamp } from "firebase-admin/firestore";
 import { verifyAuth } from "@/lib/apiAuth";
+
+/** Read and decrypt the MercadoPago config using the Admin SDK (bypasses Firestore auth rules). */
+async function getMpConfig() {
+    const snap = await adminDb.collection("configurations").doc("mercadopago").get();
+    if (!snap.exists) return null;
+    const data = snap.data()!;
+
+    const mode: "sandbox" | "production" = data.activeMode ?? data.mode ?? "sandbox";
+    const raw = data[mode] ?? {};
+    // Support old flat structure too
+    const rawKey   = raw.publicKey   ?? (data.mode === mode ? data.publicKey   : "");
+    const rawToken = raw.accessToken ?? (data.mode === mode ? data.accessToken : "");
+
+    return {
+        mode,
+        publicKey:   decryptConfigValue(rawKey),
+        accessToken: decryptConfigValue(rawToken),
+    };
+}
 
 export async function POST(request: NextRequest) {
     const authResult = await verifyAuth(request);
@@ -18,57 +36,52 @@ export async function POST(request: NextRequest) {
             return NextResponse.json({ error: "Missing planId or billing parameter" }, { status: 400 });
         }
 
-        const plan = await subscriptionService.getPlanById(planId);
-        if (!plan) {
+        // Read plan via adminDb
+        const planSnap = await adminDb.collection("plans").doc(planId).get();
+        if (!planSnap.exists) {
             return NextResponse.json({ error: "Plan not found" }, { status: 404 });
         }
+        const plan = planSnap.data()!;
 
-        const mpConfig = await configService.getMercadoPagoConfig(true);
+        // Read MP config via adminDb + decrypt
+        const mpConfig = await getMpConfig();
         if (!mpConfig) {
             return NextResponse.json({ error: "Payment configuration not found" }, { status: 500 });
         }
-
-        const activeEnv = mpConfig.activeMode;
-        const activeMPConfig = mpConfig[activeEnv];
-
-        if (!activeMPConfig.publicKey || !activeMPConfig.accessToken) {
+        if (!mpConfig.publicKey || !mpConfig.accessToken) {
             return NextResponse.json({ error: "Payment configuration incomplete" }, { status: 500 });
         }
 
         const sdkClient = new MercadoPagoConfig({
-            accessToken: activeMPConfig.accessToken,
+            accessToken: mpConfig.accessToken,
             options: { timeout: 5000 },
         });
-
         const mpPreference = new Preference(sdkClient);
 
         const basePrice =
-            billing === "yearly" ? plan.price.yearly :
+            billing === "yearly"    ? plan.price.yearly :
             billing === "quarterly" ? (plan.price.quarterly ?? Math.round(plan.price.yearly / 4)) :
             plan.price.monthly;
 
         const credit = Math.min(Number(creditAmount) || 0, basePrice - 1);
-        const price = Math.max(basePrice - credit, 1);
+        const price  = Math.max(basePrice - credit, 1);
         const billingLabel =
-            billing === "yearly" ? "Anual" :
+            billing === "yearly"    ? "Anual" :
             billing === "quarterly" ? "3 Meses" :
             "Mensual";
 
         const baseUrl = process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
         const isLocal = baseUrl.includes("localhost");
-        const notificationUrl = isLocal ? undefined : `${baseUrl}/api/webhooks/mercadopago`;
 
         const preferenceBody: any = {
-            items: [
-                {
-                    id: planId,
-                    title: `${plan.name} - ${billingLabel}`,
-                    description: plan.description,
-                    quantity: 1,
-                    unit_price: price,
-                    currency_id: "ARS",
-                },
-            ],
+            items: [{
+                id: planId,
+                title: `${plan.name} - ${billingLabel}`,
+                description: plan.description,
+                quantity: 1,
+                unit_price: price,
+                currency_id: "ARS",
+            }],
             back_urls: {
                 success: `${baseUrl}/checkout/success`,
                 failure: `${baseUrl}/checkout/failure`,
@@ -84,11 +97,8 @@ export async function POST(request: NextRequest) {
                 base_amount: basePrice,
             },
             statement_descriptor: "Zeta Prop",
+            ...(!isLocal && { notification_url: `${baseUrl}/api/webhooks/mercadopago` }),
         };
-
-        if (notificationUrl) {
-            preferenceBody.notification_url = notificationUrl;
-        }
 
         const result = await mpPreference.create({ body: preferenceBody });
 
@@ -97,9 +107,8 @@ export async function POST(request: NextRequest) {
             return NextResponse.json({ error: "Error creating payment preference" }, { status: 500 });
         }
 
-        if (!db) throw new Error("Firestore not initialized");
-
-        const paymentRef = await addDoc(collection(db, "payments"), {
+        // Save payment record via adminDb
+        const paymentRef = await adminDb.collection("payments").add({
             userId: authResult.user.uid,
             planId,
             billingPeriod: billing,
@@ -116,10 +125,11 @@ export async function POST(request: NextRequest) {
         return NextResponse.json({
             preference_id: result.id,
             payment_id: paymentRef.id,
-            checkout_url: activeEnv === "sandbox" ? result.sandbox_init_point : result.init_point,
+            checkout_url: mpConfig.mode === "sandbox" ? result.sandbox_init_point : result.init_point,
         });
+
     } catch (error: any) {
-        console.error("❌ Create Preference Error:", error.message);
+        console.error("❌ Create Preference Error:", error.message, error.cause ?? "");
         return NextResponse.json({ error: "Error creando preferencia de pago" }, { status: 500 });
     }
 }

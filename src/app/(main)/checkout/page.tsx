@@ -119,32 +119,34 @@ function CheckoutContent() {
         setMpLoading(true);
         setMpError(null);
         setMpInitPoint(null);
-        fetch('/api/payments/create-preference', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ planId, billing, userId: currentUser.uid, creditAmount: prorationCredit }),
-        })
-            .then(async res => {
+
+        (async () => {
+            try {
+                const token = await currentUser.getIdToken();
+                const res = await fetch('/api/payments/create-preference', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`,
+                    },
+                    body: JSON.stringify({ planId, billing, creditAmount: prorationCredit }),
+                });
                 const data = await res.json();
-                console.log('🔍 create-preference response:', res.status, JSON.stringify(data));
                 if (!res.ok) throw new Error(data.error || `Error ${res.status}`);
-                return data;
-            })
-            .then(data => {
-                const url = data.checkout_url;
+                const url: string | undefined = data.checkout_url;
                 if (url) {
                     preferenceCache.current[cacheKey] = url;
                     setMpInitPoint(url);
                 } else {
-                    console.error('⚠️ No init_point in response:', data);
                     setMpError("No se pudo inicializar el pago. Intentá con transferencia.");
                 }
-            })
-            .catch(err => {
+            } catch (err: any) {
                 console.error('❌ create-preference error:', err.message);
                 setMpError(`Error: ${err.message}`);
-            })
-            .finally(() => setMpLoading(false));
+            } finally {
+                setMpLoading(false);
+            }
+        })();
     }, [paymentMethod, planId, billing, currentUser?.uid, planData, prorationCredit]);
 
     const formatPrice = (price: number) =>
