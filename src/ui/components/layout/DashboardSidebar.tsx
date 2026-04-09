@@ -64,7 +64,7 @@ type MenuItem = {
 
 // Menu Configuration - Main list
 const MENU_ITEMS: MenuItem[] = [
-  { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard, description: "Resumen general de tu inmobiliaria" },
+  { href: "/dashboard", label: "Menú Principal", icon: LayoutDashboard, description: "Resumen general de tu inmobiliaria" },
   { href: "/dashboard/propiedades", label: "Propiedades", icon: Home, description: "Gestión de tu catálogo de inmuebles" },
 
   {
@@ -252,65 +252,79 @@ export default function DashboardSidebar({ isOpen = false, onClose }: DashboardS
           isOpen ? "translate-x-0" : "-translate-x-full lg:translate-x-0"
         )}
       >
-        {/* Header */}
+        {/* Branding & Header */}
         <div className={cn(
-          "h-16 flex items-center justify-between px-4 border-b border-gray-200 dark:border-white/10 min-h-[64px]",
-          collapsed ? "px-0 justify-center" : ""
+          "flex flex-col border-b border-gray-200 dark:border-white/10 relative",
+          collapsed ? "py-4 items-center" : "p-6"
         )}>
-          {!collapsed && (
-            <>
+          {!collapsed ? (
+            <div className="flex flex-col gap-4">
+              <div className="flex items-center justify-between">
+                {/* Agency Logo */}
+                <div className="h-12 flex items-center justify-start">
+                  {(userRole as any)?.logoUrl ? (
+                    <img
+                      src={(userRole as any).logoUrl}
+                      alt="Logo Inmobiliaria"
+                      className="h-10 w-auto max-w-full object-contain dark:brightness-0 dark:invert"
+                    />
+                  ) : (
+                    <h1 className="text-xl font-bold truncate">
+                      <span className="text-gray-900 dark:text-white">Zeta</span>
+                      <span className="bg-gradient-to-r from-indigo-600 to-violet-600 dark:from-indigo-400 dark:to-violet-400 bg-clip-text text-transparent">Prop</span>
+                    </h1>
+                  )}
+                </div>
+
+                {/* Desktop Collapse Toggle */}
+                <button
+                  onClick={() => setCollapsed(!collapsed)}
+                  className="hidden lg:flex p-1.5 hover:bg-gray-100 dark:hover:bg-white/10 rounded-lg text-gray-500 dark:text-gray-400 transition-colors"
+                >
+                  <ChevronLeft size={18} />
+                </button>
+
+                {/* Mobile Close Button */}
+                <button
+                  onClick={onClose}
+                  className="lg:hidden p-1 hover:bg-gray-100 dark:hover:bg-white/10 rounded-lg text-gray-500 dark:text-gray-400"
+                >
+                  <X size={20} />
+                </button>
+              </div>
+
+              {/* User Identity */}
+              <div className="flex items-center gap-3 p-3 bg-white dark:bg-white/5 rounded-2xl border border-gray-100 dark:border-white/5 shadow-sm">
+                <div className="w-10 h-10 rounded-full bg-indigo-100 dark:bg-indigo-900/50 flex items-center justify-center text-indigo-600 dark:text-indigo-400 font-bold shrink-0 overflow-hidden">
+                   {user?.photoURL ? (
+                     <img src={user.photoURL} alt="User" className="w-full h-full object-cover" />
+                   ) : (
+                     user?.displayName?.charAt(0) || user?.email?.charAt(0) || "U"
+                   )}
+                </div>
+                <div className="flex flex-col min-w-0">
+                  <span className="text-xs font-bold text-gray-900 dark:text-white truncate">
+                    {user?.displayName || "Mi Inmobiliaria"}
+                  </span>
+                  <span className="text-[10px] text-gray-500 dark:text-gray-400 uppercase tracking-widest font-medium">
+                    {userRole?.name || "Panel de Gestión"}
+                  </span>
+                </div>
+              </div>
+            </div>
+          ) : (
+            <div className="flex flex-col items-center gap-4">
               {(userRole as any)?.logoUrl ? (
-                <div className="flex items-center justify-center flex-1 min-w-0 py-2">
-                  <img
-                    src={(userRole as any).logoUrl}
-                    alt="Logo Inmobiliaria"
-                    className="h-10 w-auto max-w-[180px] object-contain dark:brightness-0 dark:invert"
-                  />
-                </div>
+                <img
+                  src={(userRole as any).logoUrl}
+                  alt="Logo"
+                  className="w-8 h-8 object-contain dark:brightness-0 dark:invert"
+                />
               ) : (
-                <h1 className="text-2xl font-bold truncate">
-                  <span className="text-gray-900 dark:text-white">Zeta</span>
-                  <span className="bg-gradient-to-r from-indigo-600 to-violet-600 dark:from-indigo-400 dark:to-violet-400 bg-clip-text text-transparent">Prop</span>
-                </h1>
-              )}
-            </>
-          )}
-          {collapsed && (
-            <div className="w-full flex justify-center py-2">
-              {(userRole as any)?.logoUrl ? (
-                <div className="w-10 h-10 flex items-center justify-center">
-                  <img
-                    src={(userRole as any).logoUrl}
-                    alt="Logo"
-                    className="max-w-full max-h-full object-contain dark:brightness-0 dark:invert"
-                  />
-                </div>
-              ) : (
-                <div className="text-lg font-bold leading-none text-center">
-                  <div className="text-gray-900 dark:text-white">Z</div>
-                  <div className="bg-gradient-to-r from-indigo-600 to-violet-600 dark:from-indigo-400 dark:to-violet-400 bg-clip-text text-transparent">P</div>
-                </div>
+                <span className="font-bold text-indigo-600 text-xl text-center">Z</span>
               )}
             </div>
           )}
-
-          {/* Desktop Collapse Toggle */}
-          {!collapsed && (
-            <button
-              onClick={() => setCollapsed(!collapsed)}
-              className="hidden lg:flex p-1.5 hover:bg-gray-100 dark:hover:bg-white/10 rounded-lg text-gray-500 dark:text-gray-400 transition-colors"
-            >
-              <ChevronLeft size={18} />
-            </button>
-          )}
-
-          {/* Mobile Close Button */}
-          <button
-            onClick={onClose}
-            className="lg:hidden p-1 hover:bg-gray-100 dark:hover:bg-white/10 rounded-lg text-gray-500 dark:text-gray-400"
-          >
-            <X size={20} />
-          </button>
         </div>
 
         {/* Collapsed expand button */}

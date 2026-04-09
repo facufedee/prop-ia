@@ -8,9 +8,10 @@ import { MapPin, Bath, Bed, Maximize, Home, ChevronLeft, ChevronRight } from "lu
 
 interface PropertyPublicCardProps {
     property: PublicProperty;
+    basePath?: string;
 }
 
-export default function PropertyPublicCard({ property }: PropertyPublicCardProps) {
+export default function PropertyPublicCard({ property, basePath = "" }: PropertyPublicCardProps) {
     const [currentImageIndex, setCurrentImageIndex] = useState(0);
 
     const formatPrice = (currency: string, price: number) => {
@@ -34,7 +35,7 @@ export default function PropertyPublicCard({ property }: PropertyPublicCardProps
     };
 
     return (
-        <Link href={`/propiedades/p/${property.id}`} className="group block bg-white rounded-2xl overflow-hidden border border-gray-100 hover:shadow-xl transition-all duration-300">
+        <Link href={basePath ? `${basePath}/propiedades/${property.id}` : `/propiedades/p/${property.id}`} className="group block bg-white rounded-2xl overflow-hidden border border-gray-100 hover:shadow-xl transition-all duration-300">
             {/* Image Container */}
             <div className="relative aspect-[4/3] bg-gray-200 overflow-hidden">
                 {property.imageUrls && property.imageUrls.length > 0 ? (

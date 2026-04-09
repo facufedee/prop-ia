@@ -4,204 +4,294 @@ import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
-import { ChevronLeft, MapPin, BedDouble, Bath, Maximize2, MessageCircle, Phone, Mail, Building2, ChevronRight } from "lucide-react";
+import dynamic from 'next/dynamic';
+import { 
+    ChevronLeft, MapPin, BedDouble, Bath, Maximize2, 
+    MessageCircle, Phone, Mail, Building2, ChevronRight,
+    Share2, Heart, PlayCircle, Home
+} from "lucide-react";
 import { useSite } from "../../SiteProvider";
 import { publicService, PublicProperty } from "@/infrastructure/services/publicService";
+import SiteNavbar from "../../../components/SiteNavbar";
+import SiteFooter from "../../../components/SiteFooter";
+import SiteContactForm from "../../../components/SiteContactForm";
+
+const PublicMap = dynamic(() => import("@/ui/components/properties/public/PublicMap"), {
+    ssr: false,
+    loading: () => <div className="w-full h-full bg-gray-100 animate-pulse rounded-2xl" />
+});
+
+function getYouTubeId(url: string) {
+    const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|&v=)([\w-]{11}).*/;
+    const match = url.match(regExp);
+    return match ? match[2] : null;
+}
 
 export default function PropiedadDetailPage() {
-    const { site } = useSite();
-    const params = useParams<{ id: string }>();
+    const { site, basePath } = useSite();
+    const params = useParams<{ id: string; slug: string }>();
     const [property, setProperty] = useState<PublicProperty | null>(null);
     const [loading, setLoading] = useState(true);
-    const [activeImg, setActiveImg] = useState(0);
+    const [currentImageIndex, setCurrentImageIndex] = useState(0);
+    const [isSaved, setIsSaved] = useState(false);
 
     useEffect(() => {
         if (!params?.id) return;
         publicService.getPropertyById(params.id).then((p) => {
             setProperty(p);
             setLoading(false);
-        });
+            
+            // Check if saved
+            const saved = localStorage.getItem(`saved_${params.id}`);
+            if (saved) setIsSaved(true);
+        }).catch(() => setLoading(false));
     }, [params?.id]);
 
     if (!site) return null;
-
-    const primary = site.colorPrimario;
+    const primary = site.colorPrimario || "#4f46e5";
 
     if (loading) {
         return (
-            <div className="min-h-screen flex items-center justify-center">
-                <div className="w-8 h-8 border-4 border-indigo-200 border-t-indigo-600 rounded-full animate-spin" />
+            <div className="min-h-screen flex items-center justify-center bg-gray-50">
+                <div className="w-12 h-12 border-4 border-indigo-100 border-t-indigo-600 rounded-full animate-spin" />
             </div>
         );
     }
 
     if (!property) {
         return (
-            <div className="min-h-screen flex items-center justify-center text-center px-6">
-                <div>
-                    <Building2 className="w-12 h-12 text-gray-300 mx-auto mb-3" />
-                    <h1 className="text-xl font-bold text-gray-900 mb-2">Propiedad no encontrada</h1>
-                    <Link href="/propiedades" className="text-sm font-medium" style={{ color: primary }}>
-                        ← Volver al listado
+            <div className="min-h-screen flex items-center justify-center text-center px-6 bg-gray-50">
+                <div className="bg-white p-10 rounded-3xl shadow-sm border border-gray-100">
+                    <Building2 className="w-16 h-16 text-gray-200 mx-auto mb-4" />
+                    <h1 className="text-2xl font-black text-gray-900 mb-2 tracking-tight">Propiedad no encontrada</h1>
+                    <p className="text-gray-400 mb-8 max-w-xs mx-auto">Lo sentimos, no pudimos localizar la propiedad que estás buscando.</p>
+                    <Link href={`${basePath}/propiedades`} className="inline-flex items-center gap-2 px-6 py-3 rounded-2xl font-bold bg-gray-900 text-white hover:bg-black transition-all">
+                        <ChevronLeft className="w-4 h-4" /> Volver al listado
                     </Link>
                 </div>
             </div>
         );
     }
 
-    const images = property.imageUrls ?? [];
-    const waMessage = encodeURIComponent(`Hola! Me interesa la propiedad: ${property.title}`);
+    const handleShare = () => {
+        if (navigator.share) {
+            navigator.share({
+                title: property.title,
+                url: window.location.href
+            }).catch(console.error);
+        } else {
+            navigator.clipboard.writeText(window.location.href);
+            alert("Enlace copiado al portapapeles");
+        }
+    };
+
+    const handleSave = () => {
+        if (isSaved) {
+            localStorage.removeItem(`saved_${property.id}`);
+            setIsSaved(false);
+        } else {
+            localStorage.setItem(`saved_${property.id}`, 'true');
+            setIsSaved(true);
+        }
+    };
+
+    const mediaItems = [
+        ...(property.imageUrls?.map(url => ({ type: 'image', url })) || []),
+        ...(property.video_url ? [{ 
+            type: 'video', 
+            url: property.video_url, 
+            videoId: getYouTubeId(property.video_url),
+            thumbnail: `https://img.youtube.com/vi/${getYouTubeId(property.video_url)}/0.jpg`
+        }] : [])
+    ].filter((item: any) => item.type === 'video' ? !!item.videoId : true);
+
+    const currentMedia = mediaItems[currentImageIndex];
+
+    const waMessage = encodeURIComponent(`Hola! Me interesa la propiedad: ${property.title}. Link: ${window.location.href}`);
     const waUrl = site.whatsapp
         ? `https://wa.me/${site.whatsapp.replace(/\D/g, "")}?text=${waMessage}`
         : null;
 
     return (
-        <div className="min-h-screen bg-white">
-            {/* Header */}
-            <header className="sticky top-0 z-50 bg-white/95 backdrop-blur border-b border-gray-100 shadow-sm">
-                <div className="max-w-5xl mx-auto px-5 sm:px-6 h-16 flex items-center gap-4">
-                    <Link href="/propiedades" className="flex items-center gap-1.5 text-sm text-gray-500 hover:text-gray-900 transition-colors">
-                        <ChevronLeft className="w-4 h-4" /> Propiedades
-                    </Link>
-                    <span className="text-gray-300">·</span>
-                    <span className="text-sm text-gray-700 line-clamp-1 flex-1">{property.title}</span>
+        <div className="min-h-screen bg-gray-50 font-sans" style={{ fontFamily: "'Outfit', sans-serif" }}>
+            <SiteNavbar site={site} basePath={basePath} />
+
+            <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+                {/* ── Breadcrumbs & Actions ── */}
+                <div className="flex flex-col md:flex-row md:items-center justify-between mb-8 gap-4">
+                    <nav className="flex items-center gap-2 text-sm text-gray-400 font-medium">
+                        <Link href={`${basePath}/propiedades`} className="hover:text-gray-900 transition-colors">Propiedades</Link>
+                        <ChevronRight className="w-4 h-4" />
+                        <span className="text-gray-900 font-bold truncate max-w-[200px] md:max-w-md">{property.title}</span>
+                    </nav>
+
+                    <div className="flex items-center gap-3">
+                        <button onClick={handleShare} className="flex items-center gap-2 px-4 py-2 bg-white rounded-xl border border-gray-200 text-sm font-bold text-gray-600 hover:bg-gray-50 transition-all active:scale-95 shadow-sm">
+                            <Share2 size={16} /> Compartir
+                        </button>
+                        <button onClick={handleSave} className={`flex items-center gap-2 px-4 py-2 rounded-xl border transition-all active:scale-95 shadow-sm text-sm font-bold ${isSaved ? "bg-red-50 border-red-200 text-red-600" : "bg-white border-gray-200 text-gray-600 hover:bg-gray-50"}`}>
+                            <Heart size={16} className={isSaved ? "fill-current" : ""} /> {isSaved ? "Guardado" : "Guardar"}
+                        </button>
+                    </div>
                 </div>
-            </header>
 
-            <div className="max-w-5xl mx-auto px-5 sm:px-6 py-8">
-                {/* Image gallery */}
-                {images.length > 0 ? (
-                    <div className="mb-8">
-                        <div className="relative aspect-[16/9] rounded-2xl overflow-hidden bg-gray-100 mb-3">
-                            <Image
-                                src={images[activeImg]}
-                                alt={property.title}
-                                fill
-                                className="object-cover"
-                                sizes="(max-width: 1024px) 100vw, 900px"
-                                priority
-                            />
-                            {images.length > 1 && (
-                                <>
-                                    <button
-                                        onClick={() => setActiveImg((i) => Math.max(0, i - 1))}
-                                        className="absolute left-3 top-1/2 -translate-y-1/2 w-9 h-9 bg-black/40 hover:bg-black/60 text-white rounded-full flex items-center justify-center transition-colors"
-                                    >
-                                        <ChevronLeft className="w-5 h-5" />
-                                    </button>
-                                    <button
-                                        onClick={() => setActiveImg((i) => Math.min(images.length - 1, i + 1))}
-                                        className="absolute right-3 top-1/2 -translate-y-1/2 w-9 h-9 bg-black/40 hover:bg-black/60 text-white rounded-full flex items-center justify-center transition-colors"
-                                    >
-                                        <ChevronRight className="w-5 h-5" />
-                                    </button>
-                                </>
-                            )}
-                            <div className="absolute bottom-3 right-3 bg-black/50 text-white text-xs px-2.5 py-1 rounded-full">
-                                {activeImg + 1} / {images.length}
-                            </div>
-                        </div>
-                        {images.length > 1 && (
-                            <div className="flex gap-2 overflow-x-auto pb-1">
-                                {images.map((img, i) => (
-                                    <button
-                                        key={i}
-                                        onClick={() => setActiveImg(i)}
-                                        className={`relative w-16 h-16 flex-shrink-0 rounded-xl overflow-hidden border-2 transition-all ${i === activeImg ? "opacity-100" : "border-transparent opacity-60 hover:opacity-80"}`}
-                                        style={i === activeImg ? { borderColor: primary } : {}}
-                                    >
-                                        <Image src={img} alt="" fill className="object-cover" sizes="64px" />
-                                    </button>
-                                ))}
-                            </div>
-                        )}
-                    </div>
-                ) : (
-                    <div className="aspect-[16/9] rounded-2xl bg-gray-100 flex items-center justify-center mb-8">
-                        <Building2 className="w-16 h-16 text-gray-300" />
-                    </div>
-                )}
-
-                <div className="grid lg:grid-cols-3 gap-8">
-                    {/* Left: details */}
-                    <div className="lg:col-span-2">
-                        <div className="flex items-start justify-between gap-4 mb-4">
-                            <div>
-                                <span
-                                    className="inline-block px-2.5 py-1 text-xs font-bold text-white rounded-full capitalize mb-3"
-                                    style={{ backgroundColor: primary }}
-                                >
-                                    {property.operation_type}
-                                </span>
-                                <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">{property.title}</h1>
-                            </div>
-                            {!property.hidePrice && (
-                                <div className="text-right">
-                                    <p className="text-2xl font-bold text-gray-900">
-                                        {property.currency} {property.price.toLocaleString("es-AR")}
-                                    </p>
-                                    {property.expenses && (
-                                        <p className="text-sm text-gray-500">+ ${property.expenses.toLocaleString("es-AR")} expensas</p>
-                                    )}
-                                </div>
-                            )}
-                        </div>
-
-                        {property.localidad && (
-                            <p className="flex items-center gap-2 text-gray-500 mb-6">
-                                <MapPin className="w-4 h-4 flex-shrink-0" />
-                                {[property.address || property.calle, property.localidad, property.provincia].filter(Boolean).join(", ")}
-                            </p>
-                        )}
-
-                        {/* Stats */}
-                        <div className="grid grid-cols-3 gap-4 mb-8">
-                            {property.rooms > 0 && (
-                                <div className="text-center p-4 bg-gray-50 rounded-xl">
-                                    <BedDouble className="w-5 h-5 mx-auto mb-1 text-gray-400" />
-                                    <p className="font-bold text-gray-900">{property.rooms}</p>
-                                    <p className="text-xs text-gray-500">Ambientes</p>
-                                </div>
-                            )}
-                            {property.bathrooms > 0 && (
-                                <div className="text-center p-4 bg-gray-50 rounded-xl">
-                                    <Bath className="w-5 h-5 mx-auto mb-1 text-gray-400" />
-                                    <p className="font-bold text-gray-900">{property.bathrooms}</p>
-                                    <p className="text-xs text-gray-500">Baños</p>
-                                </div>
-                            )}
-                            {property.area_covered > 0 && (
-                                <div className="text-center p-4 bg-gray-50 rounded-xl">
-                                    <Maximize2 className="w-5 h-5 mx-auto mb-1 text-gray-400" />
-                                    <p className="font-bold text-gray-900">{property.area_covered}</p>
-                                    <p className="text-xs text-gray-500">m² cubiertos</p>
-                                </div>
-                            )}
-                        </div>
-
-                        {/* Description */}
-                        {property.description && (
-                            <div>
-                                <h2 className="text-lg font-bold text-gray-900 mb-3">Descripción</h2>
-                                <p className="text-gray-600 leading-relaxed whitespace-pre-line">{property.description}</p>
-                            </div>
-                        )}
-                    </div>
-
-                    {/* Right: contact card */}
-                    <div>
-                        <div className="sticky top-24 bg-white rounded-2xl border border-gray-200 shadow-sm p-6">
-                            <div className="flex items-center gap-3 mb-6">
-                                {site.logoUrl ? (
-                                    <Image src={site.logoUrl} alt={site.nombre} width={48} height={48} className="w-12 h-12 object-contain rounded-lg" />
+                <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 items-start">
+                    {/* ── Main content (Gallery + Details) ── */}
+                    <div className="lg:col-span-8 space-y-10">
+                        
+                        {/* ── Gallery ── */}
+                        <div className="space-y-4">
+                            <div className="relative aspect-[16/10] sm:aspect-[16/9] rounded-[32px] overflow-hidden bg-gray-900 shadow-2xl border border-black/5 group">
+                                {currentMedia ? (
+                                    <>
+                                        {currentMedia.type === 'video' ? (
+                                            <iframe
+                                                width="100%"
+                                                height="100%"
+                                                src={`https://www.youtube.com/embed/${(currentMedia as any).videoId}?autoplay=1`}
+                                                title="YouTube video player"
+                                                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                                                allowFullScreen
+                                                className="w-full h-full"
+                                            />
+                                        ) : (
+                                            <Image
+                                                src={currentMedia.url}
+                                                alt={property.title}
+                                                fill
+                                                className="object-cover"
+                                                sizes="(max-width: 1024px) 100vw, 850px"
+                                                priority
+                                            />
+                                        )}
+                                        
+                                        {mediaItems.length > 1 && (
+                                            <>
+                                                <button onClick={() => setCurrentImageIndex(i => (i - 1 + mediaItems.length) % mediaItems.length)} 
+                                                    className="absolute left-4 top-1/2 -translate-y-1/2 w-12 h-12 bg-white/20 hover:bg-white/40 backdrop-blur-md text-white rounded-full flex items-center justify-center transition-all opacity-0 group-hover:opacity-100 shadow-lg">
+                                                    <ChevronLeft size={24} />
+                                                </button>
+                                                <button onClick={() => setCurrentImageIndex(i => (i + 1) % mediaItems.length)} 
+                                                    className="absolute right-4 top-1/2 -translate-y-1/2 w-12 h-12 bg-white/20 hover:bg-white/40 backdrop-blur-md text-white rounded-full flex items-center justify-center transition-all opacity-0 group-hover:opacity-100 shadow-lg">
+                                                    <ChevronRight size={24} />
+                                                </button>
+                                                <div className="absolute bottom-6 right-6 bg-black/50 backdrop-blur-md text-white px-4 py-1.5 rounded-full text-xs font-bold tracking-widest border border-white/10">
+                                                    {currentImageIndex + 1} / {mediaItems.length}
+                                                </div>
+                                            </>
+                                        )}
+                                    </>
                                 ) : (
-                                    <div className="w-12 h-12 rounded-lg flex items-center justify-center" style={{ backgroundColor: primary + "20" }}>
-                                        <Building2 className="w-6 h-6" style={{ color: primary }} />
+                                    <div className="w-full h-full flex flex-col items-center justify-center text-white/20">
+                                        <Home size={64} className="mb-4" />
+                                        <p className="font-bold uppercase tracking-widest text-xs">Sin imágenes</p>
                                     </div>
                                 )}
-                                <div>
-                                    <p className="font-bold text-gray-900 text-sm">{site.nombre}</p>
-                                    {site.direccion && <p className="text-xs text-gray-500">{site.direccion}</p>}
+                            </div>
+
+                            {mediaItems.length > 1 && (
+                                <div className="flex gap-3 overflow-x-auto pb-4 px-1 scrollbar-hide">
+                                    {mediaItems.map((item, i) => (
+                                        <button
+                                            key={i}
+                                            onClick={() => setCurrentImageIndex(i)}
+                                            className={`relative w-24 h-16 sm:w-32 sm:h-20 flex-shrink-0 rounded-2xl overflow-hidden border-2 transition-all ${i === currentImageIndex ? "scale-105 shadow-md shadow-black/10" : "grayscale opacity-50 hover:opacity-100 hover:grayscale-0"}`}
+                                            style={i === currentImageIndex ? { borderColor: primary } : { borderColor: "transparent" }}
+                                        >
+                                            <Image src={item.type === 'video' ? (item as any).thumbnail : (item as any).url} alt="" fill className="object-cover" sizes="128px" />
+                                            {item.type === 'video' && <div className="absolute inset-0 flex items-center justify-center bg-black/20"><PlayCircle className="text-white w-8 h-8" /></div>}
+                                        </button>
+                                    ))}
+                                </div>
+                            )}
+                        </div>
+
+                        {/* ── Key Features Bar ── */}
+                        <div className="bg-white rounded-3xl p-8 shadow-sm border border-gray-100 flex flex-wrap items-center justify-around gap-8">
+                            <div className="flex items-center gap-4">
+                                <div className="w-12 h-12 rounded-2xl bg-gray-50 flex items-center justify-center text-gray-400">
+                                    <Maximize2 size={24} />
+                                </div>
+                                <div className="flex flex-col">
+                                    <span className="text-xl font-black text-gray-900">{property.area_covered || "-"}</span>
+                                    <span className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">m² cubiertos</span>
+                                </div>
+                            </div>
+                            <div className="w-[1px] h-10 bg-gray-100 hidden sm:block" />
+                            <div className="flex items-center gap-4">
+                                <div className="w-12 h-12 rounded-2xl bg-gray-50 flex items-center justify-center text-gray-400">
+                                    <BedDouble size={24} />
+                                </div>
+                                <div className="flex flex-col">
+                                    <span className="text-xl font-black text-gray-900">{property.rooms || "-"}</span>
+                                    <span className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Ambientes</span>
+                                </div>
+                            </div>
+                            <div className="w-[1px] h-10 bg-gray-100 hidden sm:block" />
+                            <div className="flex items-center gap-4">
+                                <div className="w-12 h-12 rounded-2xl bg-gray-50 flex items-center justify-center text-gray-400">
+                                    <Bath size={24} />
+                                </div>
+                                <div className="flex flex-col">
+                                    <span className="text-xl font-black text-gray-900">{property.bathrooms || "-"}</span>
+                                    <span className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Baños</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* ── Description & Location ── */}
+                        <div className="space-y-10">
+                            <div className="bg-white rounded-[32px] p-8 sm:p-10 shadow-sm border border-gray-100">
+                                <h2 className="text-2xl font-black text-gray-900 mb-6 tracking-tight">Descripción General</h2>
+                                <div className="text-gray-600 leading-relaxed whitespace-pre-line text-lg font-medium">
+                                    {property.description}
+                                </div>
+                            </div>
+
+                            <div className="bg-white rounded-[32px] p-8 sm:p-10 shadow-sm border border-gray-100">
+                                <h2 className="text-2xl font-black text-gray-900 mb-6 tracking-tight">Ubicación</h2>
+                                <div className="h-[400px] w-full rounded-[24px] overflow-hidden bg-gray-50 border border-gray-100 relative z-0">
+                                    <PublicMap lat={property.lat || -34.6037} lng={property.lng || -58.3816} />
+                                </div>
+                                <div className="mt-6 flex items-start gap-3 p-4 bg-gray-50 rounded-2xl">
+                                    <MapPin className="w-5 h-5 text-gray-400 mt-1" />
+                                    <div>
+                                        <p className="font-bold text-gray-900 text-lg">{[property.address || property.calle, property.altura].filter(Boolean).join(" ")}</p>
+                                        <p className="text-gray-500 font-medium">{[property.localidad, property.provincia].filter(Boolean).join(", ")}</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* ── Sidebar (Contact & Price) ── */}
+                    <div className="lg:col-span-4 lg:sticky lg:top-24 space-y-6">
+                        {/* Price Card */}
+                        <div className="bg-white rounded-[32px] p-8 shadow-xl shadow-black/5 border border-gray-100 text-center">
+                            <span className="inline-block px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-[0.2em] mb-4 text-white" style={{ backgroundColor: primary }}>
+                                {property.operation_type}
+                            </span>
+                            <h2 className="text-4xl font-black text-gray-900 mb-2">
+                                {property.hidePrice ? "Consultar Precio" : `${property.currency} ${property.price.toLocaleString("es-AR")}`}
+                            </h2>
+                            {property.expenses && (
+                                <p className="text-gray-400 font-bold uppercase text-[10px] tracking-widest">+ ${property.expenses.toLocaleString("es-AR")} expensas</p>
+                            )}
+                        </div>
+
+                        {/* Contact Agency Card */}
+                        <div className="bg-white rounded-[32px] p-8 shadow-xl shadow-black/5 border border-gray-100">
+                            <div className="flex items-center gap-4 mb-8">
+                                <div className="relative w-16 h-16 rounded-2xl overflow-hidden bg-gray-50 border border-gray-100 p-2">
+                                    {site.logoUrl ? (
+                                        <Image src={site.logoUrl} alt={site.nombre} fill className="object-contain p-2" />
+                                    ) : (
+                                        <Building2 className="w-full h-full text-gray-200" />
+                                    )}
+                                </div>
+                                <div className="min-w-0">
+                                    <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1">Publicado por</p>
+                                    <h3 className="text-xl font-black text-gray-900 truncate">{site.nombre}</h3>
                                 </div>
                             </div>
 
@@ -211,25 +301,47 @@ export default function PropiedadDetailPage() {
                                         href={waUrl}
                                         target="_blank"
                                         rel="noopener noreferrer"
-                                        className="flex items-center justify-center gap-2 w-full py-3 bg-green-500 hover:bg-green-600 text-white rounded-xl font-semibold transition-colors"
+                                        className="flex items-center justify-center gap-3 w-full py-4 bg-[#25D366] hover:bg-[#1fb354] text-white rounded-2xl font-black text-sm uppercase tracking-widest transition-all active:scale-95 shadow-lg shadow-green-100"
                                     >
-                                        <MessageCircle className="w-5 h-5" /> Consultar por WhatsApp
+                                        <MessageCircle size={20} /> WhatsApp
                                     </a>
                                 )}
                                 {site.email && (
                                     <a
                                         href={`mailto:${site.email}?subject=Consulta: ${property.title}`}
-                                        className="flex items-center justify-center gap-2 w-full py-3 rounded-xl font-semibold border-2 transition-colors hover:bg-gray-50"
-                                        style={{ borderColor: primary, color: primary }}
+                                        className="flex items-center justify-center gap-3 w-full py-4 bg-white border-2 rounded-2xl font-black text-sm uppercase tracking-widest transition-all active:scale-95 hover:bg-gray-50"
+                                        style={{ color: primary, borderColor: primary }}
                                     >
-                                        <Mail className="w-5 h-5" /> Enviar email
+                                        <Mail size={20} /> Enviar Email
+                                    </a>
+                                )}
+                                {site.whatsapp && (
+                                    <a
+                                        href={`tel:${site.whatsapp.replace(/\D/g, "")}`}
+                                        className="flex items-center justify-center gap-3 w-full py-4 text-gray-500 font-bold text-sm tracking-wide"
+                                    >
+                                        <Phone size={18} /> {site.whatsapp}
                                     </a>
                                 )}
                             </div>
                         </div>
+
+                        {/* Disclaimer Small */}
+                        <div className="p-6 bg-gray-100/50 rounded-2xl border border-gray-100">
+                            <p className="text-[10px] text-gray-400 font-medium leading-relaxed">
+                                Todas las operaciones inmobiliarias son objeto de intermediación y conclusión por parte del martillero y corredor colegiado, cuyos datos se exhiben en este sitio.
+                            </p>
+                        </div>
                     </div>
                 </div>
+            </main>
+
+            {/* Custom Site Contact Form at Bottom */}
+            <div className="bg-white border-t border-gray-100 mt-20 pt-20">
+                <SiteContactForm site={site} />
             </div>
+
+            <SiteFooter site={site} basePath={basePath} />
         </div>
     );
 }

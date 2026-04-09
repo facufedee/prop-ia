@@ -124,6 +124,8 @@ export default function MiSitioPage() {
                     facebook: s.facebook ?? "",
                     direccion: s.direccion ?? "",
                     published: s.published,
+                    customDomain: s.customDomain ?? "",
+                    customDomainVerified: s.customDomainVerified ?? false,
                 });
             }
             setLoading(false);
@@ -687,16 +689,56 @@ export default function MiSitioPage() {
                                     )}
                                 </div>
 
-                                {/* Dominio propio — próximamente */}
-                                <div className="mt-4 rounded-xl border border-dashed border-indigo-300 dark:border-indigo-700 bg-indigo-50 dark:bg-indigo-900/20 p-5">
-                                    <div className="flex items-center gap-2 mb-2">
-                                        <Globe className="w-4 h-4 text-indigo-500" />
-                                        <p className="text-sm font-semibold text-indigo-700 dark:text-indigo-300">Dominio propio</p>
-                                        <span className="px-2 py-0.5 text-[10px] font-bold bg-indigo-200 dark:bg-indigo-800 text-indigo-700 dark:text-indigo-300 rounded-full uppercase tracking-wide">Próximamente</span>
+                                {/* Dominio propio — funcional */}
+                                <div className="mt-6 space-y-4">
+                                    <div className="flex items-center gap-2 mb-1">
+                                        <Globe className="w-5 h-5 text-indigo-500" />
+                                        <h4 className="text-sm font-bold text-gray-900 dark:text-white">Dominio propio</h4>
                                     </div>
-                                    <p className="text-xs text-indigo-600 dark:text-indigo-400 leading-relaxed">
-                                        Pronto podrás conectar tu propio dominio (ej: <strong>miinmobiliaria.com</strong>) al sitio.
-                                        Solo necesitarás agregar un registro CNAME en tu proveedor de DNS.
+                                    
+                                    <p className="text-xs text-gray-500 dark:text-gray-400">
+                                        Conectá tu propio dominio (ej: <strong>inmobiliariarojas.com</strong>) para que tu sitio sea profesional.
+                                    </p>
+
+                                    <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-300 dark:border-gray-600 focus-within:ring-2 focus-within:ring-indigo-500 transition-all overflow-hidden">
+                                        <input
+                                            type="text"
+                                            value={form.customDomain || ""}
+                                            onChange={(e) => set("customDomain", e.target.value.toLowerCase().trim())}
+                                            placeholder="ej: miinmobiliaria.com"
+                                            className="w-full px-4 py-3 text-sm bg-transparent text-gray-900 dark:text-white outline-none"
+                                        />
+                                    </div>
+
+                                    {form.customDomain && (
+                                        <div className="rounded-xl bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 p-4 space-y-3">
+                                            <div className="flex items-start gap-2">
+                                                <AlertCircle className="w-4 h-4 text-amber-600 mt-0.5" />
+                                                <div className="flex-1">
+                                                    <p className="text-xs font-bold text-amber-800 dark:text-amber-400">Configuración Pendiente</p>
+                                                    <p className="text-[11px] text-amber-700 dark:text-amber-500 mt-1">
+                                                        Recordá apuntar tu dominio a los registros DNS de Zeta Prop para que funcione.
+                                                    </p>
+                                                </div>
+                                            </div>
+                                            <div className="flex items-center gap-3">
+                                                <label className="flex items-center gap-2 cursor-pointer">
+                                                    <input
+                                                        type="checkbox"
+                                                        checked={!!form.customDomainVerified}
+                                                        onChange={(e) => set("customDomainVerified", e.target.checked)}
+                                                        className="w-4 h-4 rounded border-amber-300 text-amber-600 focus:ring-amber-500"
+                                                    />
+                                                    <span className="text-[11px] font-medium text-amber-800 dark:text-amber-400">
+                                                        Ya configuré los DNS en mi proveedor
+                                                    </span>
+                                                </label>
+                                            </div>
+                                        </div>
+                                    )}
+
+                                    <p className="text-[11px] text-gray-400 leading-relaxed italic">
+                                        * Nota: La activación puede tardar hasta 24hs dependiendo de tu proveedor de dominio.
                                     </p>
                                 </div>
                             </>

@@ -10,9 +10,12 @@ import { Site } from "@/domain/models/Site";
 interface SiteContextValue {
     site: Site | null;
     loading: boolean;
+    /** Empty string when on subdomain (middleware handles routing),
+     *  "/sites/[slug]" when accessed via platform path. */
+    basePath: string;
 }
 
-const SiteContext = createContext<SiteContextValue>({ site: null, loading: true });
+const SiteContext = createContext<SiteContextValue>({ site: null, loading: true, basePath: "" });
 
 export function useSite() {
     return useContext(SiteContext);
@@ -26,6 +29,9 @@ export default function SiteProvider({ children }: { children: React.ReactNode }
 
     const [site, setSite] = useState<Site | null>(null);
     const [loading, setLoading] = useState(true);
+    // Empty string when on subdomain (middleware rewrites /propiedades → /sites/slug/propiedades).
+    // "/sites/slug" when accessed via platform path directly.
+    const [basePath, setBasePath] = useState("");
 
     useEffect(() => {
         if (!slug) return;
@@ -33,6 +39,12 @@ export default function SiteProvider({ children }: { children: React.ReactNode }
             setSite(s);
             setLoading(false);
         });
+    }, [slug]);
+
+    useEffect(() => {
+        if (!slug) return;
+        const onSitePath = window.location.pathname.startsWith("/sites/");
+        setBasePath(onSitePath ? `/sites/${slug}` : "");
     }, [slug]);
 
     // Inject CSS custom properties for the site theme
@@ -50,14 +62,29 @@ export default function SiteProvider({ children }: { children: React.ReactNode }
         );
     }
 
-    if (!site || !site.published) {
+    if (!site) {
         return (
             <div className="min-h-screen flex items-center justify-center bg-gray-50">
                 <div className="text-center max-w-sm px-6">
                     <div className="text-5xl mb-4">🏠</div>
                     <h1 className="text-2xl font-bold text-gray-900 mb-2">Sitio no encontrado</h1>
                     <p className="text-gray-500">
-                        Este sitio aún no existe o no está publicado todavía.
+                        No existe ningún sitio con el identificador <strong className="text-gray-700 font-mono">{slug}</strong>.
+                        Verificá el URL o el subdominio configurado en tu panel.
+                    </p>
+                </div>
+            </div>
+        );
+    }
+
+    if (!site.published) {
+        return (
+            <div className="min-h-screen flex items-center justify-center bg-gray-50">
+                <div className="text-center max-w-sm px-6">
+                    <div className="text-5xl mb-4">🔒</div>
+                    <h1 className="text-2xl font-bold text-gray-900 mb-2">Sitio no publicado</h1>
+                    <p className="text-gray-500">
+                        Este sitio está configurado pero todavía no fue publicado. Entrá a tu panel y hacé clic en <strong>Publicar</strong>.
                     </p>
                 </div>
             </div>
@@ -65,7 +92,7 @@ export default function SiteProvider({ children }: { children: React.ReactNode }
     }
 
     return (
-        <SiteContext.Provider value={{ site, loading }}>
+        <SiteContext.Provider value={{ site, loading, basePath }}>
             {children}
         </SiteContext.Provider>
     );

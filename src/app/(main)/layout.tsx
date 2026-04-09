@@ -1,28 +1,12 @@
 import type { Metadata } from 'next';
-import { Geist, Geist_Mono } from 'next/font/google';
-import "../globals.css";
 import ClientLayout from '@/ui/components/layout/ClientLayout';
 
 import { Toaster } from 'sonner';
 import CookieBanner from '@/ui/components/consent/CookieBanner';
 // import BubbleChat from '@/ui/components/chat/BubbleChat';
 
-import FloatingChatWidget from '@/ui/components/FloatingChatWidget';
 import Script from 'next/script';
 import WhatsappButton from '@/ui/components/ui/WhatsappButton';
-
-const geistSans = Geist({
-  variable: "--font-geist-sans",
-  subsets: ["latin"],
-  display: "swap",
-});
-
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
-  subsets: ["latin"],
-  display: "swap",
-  preload: false, // Not used in initial viewport — avoids unused preload warning
-});
 
 export const metadata: Metadata = {
   metadataBase: new URL('https://zetaprop.com.ar'),
@@ -111,21 +95,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="es">
-      <head>
-        {/* DNS Prefetch */}
-        <link rel="dns-prefetch" href="https://www.googletagmanager.com" />
-
-        {/* FID Polyfill for Firebase Performance Monitoring */}
-        <script
-          dangerouslySetInnerHTML={{
-            __html: `!function(n,e){var t,o,i,c=[],f={passive:!0,capture:!0},r=new Date,a="pointerup",u="pointercancel";function p(n,c){t||(t=c,o=n,i=new Date,w(e),s())}function s(){o>=0&&o<i-r&&(c.forEach(function(n){n(o,t)}),c=[])}function l(t){if(t.cancelable){var o=(t.timeStamp>1e12?new Date:performance.now())-t.timeStamp;"pointerdown"==t.type?function(t,o){function i(){p(t,o),r()}function c(){r()}function r(){e(a,i,f),e(u,c,f)}n(a,i,f),n(u,c,f)}(p,o):p(o,t)}}function w(n){["click","mousedown","keydown","touchstart","pointerdown"].forEach(function(e){n(e,l,f)})}w(n),self.perfMetrics=self.perfMetrics||{},self.perfMetrics.onFirstInputDelay=function(n){c.push(n),s()}}(addEventListener,removeEventListener);`
-          }}
-        />
-      </head>
-      <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased bg-gray-50 text-gray-900`}
-      >
+    <>
         <Toaster position="top-right" richColors />
         <ClientLayout>
           {children}
@@ -212,7 +182,6 @@ export default function RootLayout({
             });
           `}
         </Script>
-      </body>
-    </html>
+    </>
   );
 }

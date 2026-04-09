@@ -82,6 +82,22 @@ export const publicService = {
         }
     },
 
+    // Get properties by userId (efficient direct query — use this for site pages)
+    getPropertiesByUserId: async (userId: string): Promise<PublicProperty[]> => {
+        if (!db || !userId) return [];
+        try {
+            const q = query(
+                collection(db, PROPERTIES_COLLECTION),
+                where("userId", "==", userId)
+            );
+            const snapshot = await getDocs(q);
+            return snapshot.docs.map(d => ({ id: d.id, ...d.data() } as PublicProperty));
+        } catch (error) {
+            console.error("getPropertiesByUserId:", error);
+            return [];
+        }
+    },
+
     // Get properties by Agency Slug (Name)
     getPropertiesByAgencySlug: async (slug: string): Promise<{ agency: PublicAgency, properties: PublicProperty[] } | null> => {
         const agency = await publicService.getAgencyBySlug(slug);

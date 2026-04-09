@@ -20,7 +20,19 @@ const PROPERTY_TYPES = [
     "Hotel",
 ];
 
-export default function PropertyHero() {
+interface PropertyHeroProps {
+    title?: string;
+    subtitle?: string;
+    coverUrl?: string;
+    basePath?: string;
+}
+
+export default function PropertyHero({
+    title = "Encontrá tu hogar ideal",
+    subtitle = "Miles de propiedades en venta y alquiler en Argentina",
+    coverUrl = "/hero-propiedades.png",
+    basePath = ""
+}: PropertyHeroProps) {
     const router = useRouter();
 
     // Hero search state
@@ -34,7 +46,9 @@ export default function PropertyHero() {
         params.set("operacion", op);
         if (tipo) params.set("tipo", tipo);
         if (ubicacion.trim()) params.set("loc", ubicacion.trim());
-        router.push(`/busqueda?${params.toString()}`);
+        
+        const searchPath = basePath ? `${basePath}/propiedades` : '/busqueda';
+        router.push(`${searchPath}?${params.toString()}`);
     };
 
     return (
@@ -44,8 +58,8 @@ export default function PropertyHero() {
         >
             {/* Background Image */}
             <Image
-                src="/hero-propiedades.png"
-                alt="Propiedades en venta y alquiler en Argentina"
+                src={coverUrl}
+                alt={title}
                 fill
                 className="object-cover object-center"
                 priority
@@ -56,10 +70,10 @@ export default function PropertyHero() {
 
             <div className="relative z-10 w-full max-w-3xl mx-auto px-4 text-center">
                 <h1 className="text-4xl md:text-5xl font-bold text-white mb-2 drop-shadow-lg">
-                    Encontrá tu hogar ideal
+                    {title}
                 </h1>
                 <p className="text-white/80 text-lg mb-8 drop-shadow">
-                    Miles de propiedades en venta y alquiler en Argentina
+                    {subtitle}
                 </p>
 
                 {/* Search Card */}

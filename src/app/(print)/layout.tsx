@@ -16,9 +16,8 @@ export default function PrintLayout({
     children: React.ReactNode;
 }) {
     return (
-        <html lang="es">
-            <head>
-                <style>{`
+        <section className={`${inter.className} bg-gray-100 print:bg-white min-h-screen`}>
+            <style dangerouslySetInnerHTML={{ __html: `
                 @page {
                     margin: 0;
                     size: auto;
@@ -39,13 +38,10 @@ export default function PrintLayout({
                         print-color-adjust: exact !important;
                     }
                 }
-            `}</style>
-            </head>
-            <body className={`${inter.className} bg-gray-100 print:bg-white min-h-screen`}>
-                <AuthProvider>
-                    {children}
-                </AuthProvider>
-            </body>
-        </html>
+            `}} />
+            <AuthProvider>
+                {children}
+            </AuthProvider>
+        </section>
     );
 }

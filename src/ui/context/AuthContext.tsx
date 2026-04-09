@@ -28,11 +28,17 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       setLoading(false);
       return;
     }
-    const unsub = onAuthStateChanged(auth, (u) => {
+    const unsub = onAuthStateChanged(auth, async (u) => {
       setUser(u);
 
       if (u) {
-        Cookies.set("authToken", "logged", { expires: 7 });
+        try {
+          const token = await u.getIdToken();
+          Cookies.set("authToken", token, { expires: 7, secure: true, sameSite: 'strict' });
+        } catch (error) {
+          console.error("Error getting ID token:", error);
+          Cookies.set("authToken", "logged", { expires: 7 }); // Fallback
+        }
       } else {
         Cookies.remove("authToken");
         setUserRole(null);

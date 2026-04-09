@@ -8,20 +8,20 @@ import ClasicoTemplate from "./templates/ClasicoTemplate";
 import MinimalistaTemplate from "./templates/MinimalistaTemplate";
 
 export default function SitePage() {
-    const { site } = useSite();
+    const { site, basePath } = useSite();
     const [properties, setProperties] = useState<PublicProperty[]>([]);
     const [search, setSearch] = useState("");
 
     useEffect(() => {
-        if (!site) return;
-        publicService.getPropertiesByAgencySlug(site.slug).then((result) => {
-            if (result) setProperties(result.properties.filter((p) => p.status === "active").slice(0, 6));
+        if (!site?.userId) return;
+        publicService.getPropertiesByUserId(site.userId).then((result) => {
+            setProperties(result.filter((p) => p.status === "active").slice(0, 6));
         });
-    }, [site]);
+    }, [site?.userId]);
 
     if (!site) return null;
 
-    const props = { site, properties, search, onSearchChange: setSearch };
+    const props = { site, properties, search, onSearchChange: setSearch, basePath };
 
     switch (site.template) {
         case "clasico":      return <ClasicoTemplate {...props} />;
