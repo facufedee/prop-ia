@@ -11,7 +11,7 @@ import {
     serverTimestamp,
     Timestamp,
 } from "firebase/firestore";
-import { Site, SiteTemplate } from "@/domain/models/Site";
+import { Site, SiteTemplate, NavItem } from "@/domain/models/Site";
 
 const COLLECTION = "sites";
 
@@ -32,6 +32,7 @@ function fromFirestore(id: string, data: Record<string, any>): Site {
         instagram: data.instagram,
         facebook: data.facebook,
         direccion: data.direccion,
+        navItems: Array.isArray(data.navItems) ? (data.navItems as NavItem[]) : undefined,
         published: data.published ?? false,
         customDomain: data.customDomain,
         customDomainVerified: data.customDomainVerified,

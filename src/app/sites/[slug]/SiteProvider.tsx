@@ -1,66 +1,49 @@
 "use client";
 
 import { useEffect, useState, createContext, useContext } from "react";
-import { useParams } from "next/navigation";
-import { siteService } from "@/infrastructure/services/siteService";
 import { Site } from "@/domain/models/Site";
+import { SitePayload, payloadToSite } from "./siteTypes";
 
-// ── Site Context ──────────────────────────────────────────────────────────────
+// ── Context ───────────────────────────────────────────────────────────────────
 
 interface SiteContextValue {
     site: Site | null;
     loading: boolean;
-    /** Empty string when on subdomain (middleware handles routing),
-     *  "/sites/[slug]" when accessed via platform path. */
     basePath: string;
 }
 
-const SiteContext = createContext<SiteContextValue>({ site: null, loading: true, basePath: "" });
+const SiteContext = createContext<SiteContextValue>({ site: null, loading: false, basePath: "" });
 
 export function useSite() {
     return useContext(SiteContext);
 }
 
 // ── Provider ──────────────────────────────────────────────────────────────────
+// Receives pre-fetched site data from the server layout.
+// No client-side Firebase fetch — eliminates the loading waterfall.
 
-export default function SiteProvider({ children }: { children: React.ReactNode }) {
-    const params = useParams<{ slug: string }>();
-    const slug = params?.slug ?? "";
+interface Props {
+    children: React.ReactNode;
+    initialSite: SitePayload | null;
+}
 
-    const [site, setSite] = useState<Site | null>(null);
-    const [loading, setLoading] = useState(true);
-    // Empty string when on subdomain (middleware rewrites /propiedades → /sites/slug/propiedades).
-    // "/sites/slug" when accessed via platform path directly.
+export default function SiteProvider({ children, initialSite }: Props) {
+    const site = initialSite ? payloadToSite(initialSite) : null;
+
+    // basePath: "" on custom domains, "/sites/slug" when accessed via platform path
     const [basePath, setBasePath] = useState("");
 
     useEffect(() => {
-        if (!slug) return;
-        siteService.getSiteBySlug(slug).then((s) => {
-            setSite(s);
-            setLoading(false);
-        });
-    }, [slug]);
-
-    useEffect(() => {
-        if (!slug) return;
         const onSitePath = window.location.pathname.startsWith("/sites/");
-        setBasePath(onSitePath ? `/sites/${slug}` : "");
-    }, [slug]);
+        setBasePath(onSitePath ? `/sites/${initialSite?.slug ?? ""}` : "");
+    }, [initialSite?.slug]);
 
-    // Inject CSS custom properties for the site theme
+    // Inject CSS custom properties for site theme
     useEffect(() => {
         if (!site) return;
-        document.documentElement.style.setProperty("--site-primary", site.colorPrimario);
+        document.documentElement.style.setProperty("--site-primary",   site.colorPrimario);
         document.documentElement.style.setProperty("--site-secondary", site.colorSecundario);
-    }, [site]);
-
-    if (loading) {
-        return (
-            <div className="min-h-screen flex items-center justify-center bg-white">
-                <div className="w-8 h-8 border-4 border-indigo-200 border-t-indigo-600 rounded-full animate-spin" />
-            </div>
-        );
-    }
+    }, [site?.colorPrimario, site?.colorSecundario]);
 
     if (!site) {
         return (
@@ -69,8 +52,7 @@ export default function SiteProvider({ children }: { children: React.ReactNode }
                     <div className="text-5xl mb-4">🏠</div>
                     <h1 className="text-2xl font-bold text-gray-900 mb-2">Sitio no encontrado</h1>
                     <p className="text-gray-500">
-                        No existe ningún sitio con el identificador <strong className="text-gray-700 font-mono">{slug}</strong>.
-                        Verificá el URL o el subdominio configurado en tu panel.
+                        No existe ningún sitio con este identificador. Verificá el URL o subdominio.
                     </p>
                 </div>
             </div>
@@ -92,7 +74,7 @@ export default function SiteProvider({ children }: { children: React.ReactNode }
     }
 
     return (
-        <SiteContext.Provider value={{ site, loading, basePath }}>
+        <SiteContext.Provider value={{ site, loading: false, basePath }}>
             {children}
         </SiteContext.Provider>
     );

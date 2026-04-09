@@ -8,12 +8,12 @@ import {
     Globe, Palette, Building2, CheckCircle2, AlertCircle, Loader2,
     Eye, EyeOff, ExternalLink, Copy, Check, Sparkles, Smartphone,
     Instagram, Facebook, Phone, Mail, MapPin, Save, Upload, X, ImageIcon,
-    TrendingUp, Link2,
+    TrendingUp, Link2, Menu, Plus, Trash2, ArrowUp, ArrowDown, MessageCircle,
 } from "lucide-react";
 import { useAuth } from "@/ui/context/AuthContext";
 import { storage } from "@/infrastructure/firebase/client";
 import { siteService } from "@/infrastructure/services/siteService";
-import { Site, SiteTemplate, DEFAULT_SITE } from "@/domain/models/Site";
+import { Site, SiteTemplate, DEFAULT_SITE, NavItem, DEFAULT_NAV_ITEMS } from "@/domain/models/Site";
 import { toast } from "sonner";
 
 // ── Template options ──────────────────────────────────────────────────────────
@@ -47,18 +47,29 @@ const PRESET_COLORS = [
 // ── Types ─────────────────────────────────────────────────────────────────────
 
 type FormData = Omit<Site, "id" | "userId" | "createdAt" | "updatedAt">;
-type Tab = "plantilla" | "identidad" | "colores" | "contacto" | "dominio" | "seo";
+type Tab = "plantilla" | "identidad" | "colores" | "menu" | "contacto" | "dominio" | "seo";
 
 const TABS: { id: Tab; label: string; icon: any }[] = [
     { id: "plantilla", label: "Plantilla", icon: Sparkles },
     { id: "identidad", label: "Identidad", icon: Building2 },
     { id: "colores", label: "Colores", icon: Palette },
+    { id: "menu", label: "Menú", icon: Menu },
     { id: "contacto", label: "Contacto", icon: Phone },
     { id: "dominio", label: "Dominio", icon: Link2 },
     { id: "seo", label: "SEO", icon: TrendingUp },
 ];
 
-const VALID_TABS: Tab[] = ["plantilla", "identidad", "colores", "contacto", "dominio", "seo"];
+const VALID_TABS: Tab[] = ["plantilla", "identidad", "colores", "menu", "contacto", "dominio", "seo"];
+
+const HREF_PRESETS = [
+    { label: "Inicio", value: "/" },
+    { label: "Propiedades", value: "/propiedades" },
+    { label: "Venta", value: "/propiedades?operacion=venta" },
+    { label: "Alquiler", value: "/propiedades?operacion=alquiler" },
+    { label: "Alquiler temporal", value: "/propiedades?operacion=temporal" },
+    { label: "Nosotros", value: "#nosotros" },
+    { label: "Contacto", value: "#contacto" },
+];
 
 // ── Image upload helper ───────────────────────────────────────────────────────
 
@@ -126,6 +137,7 @@ export default function MiSitioPage() {
                     published: s.published,
                     customDomain: s.customDomain ?? "",
                     customDomainVerified: s.customDomainVerified ?? false,
+                    navItems: s.navItems ?? DEFAULT_NAV_ITEMS,
                 });
             }
             setLoading(false);
@@ -240,6 +252,34 @@ export default function MiSitioPage() {
     const set = (field: keyof FormData, value: any) =>
         setForm((prev) => ({ ...prev, [field]: value }));
 
+    // ── Nav items helpers ────────────────────────────────────────────────────
+
+    const navItems: NavItem[] = form.navItems ?? DEFAULT_NAV_ITEMS;
+
+    const setNavItems = (items: NavItem[]) => set("navItems", items);
+
+    const updateNavItem = (idx: number, field: keyof NavItem, value: any) => {
+        const updated = navItems.map((item, i) => i === idx ? { ...item, [field]: value } : item);
+        setNavItems(updated);
+    };
+
+    const toggleNavItem = (idx: number) =>
+        updateNavItem(idx, "enabled", !navItems[idx].enabled);
+
+    const moveNavItem = (idx: number, dir: -1 | 1) => {
+        const next = idx + dir;
+        if (next < 0 || next >= navItems.length) return;
+        const updated = [...navItems];
+        [updated[idx], updated[next]] = [updated[next], updated[idx]];
+        setNavItems(updated);
+    };
+
+    const removeNavItem = (idx: number) =>
+        setNavItems(navItems.filter((_, i) => i !== idx));
+
+    const addNavItem = () =>
+        setNavItems([...navItems, { label: "Nuevo ítem", href: "/propiedades", enabled: true }]);
+
     // ── Render ──────────────────────────────────────────────────────────────
 
     if (loading) {
@@ -254,22 +294,22 @@ export default function MiSitioPage() {
         <div className="max-w-5xl mx-auto space-y-6">
 
             {/* ── Page header ── */}
-            <div className="flex items-start justify-between gap-4 flex-wrap">
+            <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
                 <div>
-                    <h1 className="text-2xl font-bold text-gray-900 dark:text-white flex items-center gap-2">
-                        <Globe className="w-6 h-6 text-indigo-500" /> Mi Sitio Web
+                    <h1 className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-white flex items-center gap-2">
+                        <Globe className="w-5 h-5 sm:w-6 sm:h-6 text-indigo-500" /> Mi Sitio Web
                     </h1>
                     <p className="text-gray-500 dark:text-gray-400 text-sm mt-1">
                         Creá tu portal inmobiliario público con tus propiedades y tu identidad.
                     </p>
                 </div>
 
-                <div className="flex items-center gap-3 flex-wrap">
+                <div className="flex items-center gap-3">
                     {site && (
                         <button
                             onClick={handlePublish}
                             disabled={publishing}
-                            className={`flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold transition-all ${
+                            className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-semibold transition-all whitespace-nowrap ${
                                 site.published
                                     ? "bg-green-100 text-green-700 hover:bg-red-50 hover:text-red-600"
                                     : "bg-gray-100 text-gray-600 hover:bg-green-50 hover:text-green-700 dark:bg-gray-800 dark:text-gray-300"
@@ -288,57 +328,65 @@ export default function MiSitioPage() {
                     <button
                         onClick={handleSave}
                         disabled={saving}
-                        className="flex items-center gap-2 px-5 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-sm font-semibold transition-all disabled:opacity-60"
+                        className="flex items-center justify-center gap-2 flex-1 sm:flex-none px-5 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-sm font-semibold transition-all disabled:opacity-60 whitespace-nowrap"
                     >
                         {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
-                        {site ? "Guardar cambios" : "Crear sitio"}
+                        {site ? "Guardar" : "Crear sitio"}
                     </button>
                 </div>
             </div>
 
             {/* ── Site URL banner ── */}
             {site?.published && siteUrl && (
-                <div className="flex items-center gap-3 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-2xl px-5 py-3">
+                <div className="flex items-center gap-2 sm:gap-3 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-2xl px-4 sm:px-5 py-3">
                     <CheckCircle2 className="w-5 h-5 text-green-600 flex-shrink-0" />
-                    <span className="text-sm text-green-700 dark:text-green-400 flex-1 font-medium">{siteUrl}</span>
-                    <button onClick={copyUrl} className="p-1.5 rounded-lg hover:bg-green-100 dark:hover:bg-green-800 transition-colors text-green-600">
+                    <span className="text-xs sm:text-sm text-green-700 dark:text-green-400 flex-1 font-medium truncate">{siteUrl}</span>
+                    <button onClick={copyUrl} className="p-1.5 rounded-lg hover:bg-green-100 dark:hover:bg-green-800 transition-colors text-green-600 flex-shrink-0">
                         {copied ? <Check className="w-4 h-4" /> : <Copy className="w-4 h-4" />}
                     </button>
-                    <a href={siteUrl} target="_blank" rel="noopener noreferrer" className="p-1.5 rounded-lg hover:bg-green-100 dark:hover:bg-green-800 transition-colors text-green-600">
+                    <a href={siteUrl} target="_blank" rel="noopener noreferrer" className="p-1.5 rounded-lg hover:bg-green-100 dark:hover:bg-green-800 transition-colors text-green-600 flex-shrink-0">
                         <ExternalLink className="w-4 h-4" />
                     </a>
                 </div>
             )}
+            {site && !site.published && (
+                <div className="flex items-center gap-3 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-2xl px-4 py-3">
+                    <AlertCircle className="w-5 h-5 text-amber-600 flex-shrink-0" />
+                    <p className="text-xs sm:text-sm text-amber-700 dark:text-amber-400 flex-1">
+                        Tu sitio está guardado pero no publicado. Usá el botón <strong>Despublicado</strong> para activarlo.
+                    </p>
+                </div>
+            )}
 
             {/* ── Main grid: tabs + preview ── */}
-            <div className="grid lg:grid-cols-5 gap-6">
+            <div className="grid lg:grid-cols-5 gap-6 items-start">
 
                 {/* Left: editor (3/5) */}
                 <div className="lg:col-span-3 space-y-4">
 
                     {/* Tabs */}
-                    <div className="flex bg-gray-100 dark:bg-gray-800 rounded-xl p-1 gap-1">
+                    <div className="flex bg-gray-100 dark:bg-gray-800 rounded-xl p-1 gap-1 overflow-x-auto scrollbar-none">
                         {TABS.map((tab) => {
                             const Icon = tab.icon;
                             return (
                                 <button
                                     key={tab.id}
                                     onClick={() => setActiveTab(tab.id)}
-                                    className={`flex-1 flex items-center justify-center gap-1.5 px-3 py-2 rounded-lg text-xs font-semibold transition-all ${
+                                    className={`flex-shrink-0 flex items-center justify-center gap-1.5 px-3 py-2.5 rounded-lg text-xs font-semibold transition-all ${
                                         activeTab === tab.id
                                             ? "bg-white dark:bg-gray-700 text-gray-900 dark:text-white shadow-sm"
                                             : "text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200"
                                     }`}
                                 >
-                                    <Icon className="w-3.5 h-3.5" />
-                                    <span className="hidden sm:inline">{tab.label}</span>
+                                    <Icon className="w-3.5 h-3.5 flex-shrink-0" />
+                                    <span className="hidden xs:inline">{tab.label}</span>
                                 </button>
                             );
                         })}
                     </div>
 
                     {/* Tab content */}
-                    <div className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-200 dark:border-gray-700 p-6 space-y-5">
+                    <div className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-200 dark:border-gray-700 p-4 sm:p-6 space-y-5">
 
                         {/* ── PLANTILLA ── */}
                         {activeTab === "plantilla" && (
@@ -380,7 +428,7 @@ export default function MiSitioPage() {
                                         Subdominio *
                                     </label>
                                     <div className="flex items-center rounded-xl border border-gray-300 dark:border-gray-600 overflow-hidden focus-within:ring-2 focus-within:ring-indigo-500">
-                                        <span className="px-3 py-3 bg-gray-50 dark:bg-gray-800 text-gray-500 text-sm border-r border-gray-300 dark:border-gray-600 whitespace-nowrap">
+                                        <span className="px-2 sm:px-3 py-3 bg-gray-50 dark:bg-gray-800 text-gray-500 text-xs sm:text-sm border-r border-gray-300 dark:border-gray-600 whitespace-nowrap">
                                             https://
                                         </span>
                                         <input
@@ -393,10 +441,11 @@ export default function MiSitioPage() {
                                             }}
                                             onBlur={() => form.slug && validateSlug(form.slug)}
                                             placeholder="mi-inmobiliaria"
-                                            className="flex-1 px-3 py-3 text-sm bg-white dark:bg-gray-900 text-gray-900 dark:text-white outline-none"
+                                            className="flex-1 min-w-0 px-2 sm:px-3 py-3 text-sm bg-white dark:bg-gray-900 text-gray-900 dark:text-white outline-none"
                                         />
-                                        <span className="px-3 py-3 bg-gray-50 dark:bg-gray-800 text-gray-500 text-sm border-l border-gray-300 dark:border-gray-600 whitespace-nowrap">
-                                            .zetaprop.com.ar
+                                        <span className="px-2 sm:px-3 py-3 bg-gray-50 dark:bg-gray-800 text-gray-500 text-xs sm:text-sm border-l border-gray-300 dark:border-gray-600 whitespace-nowrap">
+                                            <span className="hidden sm:inline">.zetaprop.com.ar</span>
+                                            <span className="sm:hidden">.zetaprop</span>
                                         </span>
                                     </div>
                                     {checkingSlug && (
@@ -516,20 +565,22 @@ export default function MiSitioPage() {
                                         }}
                                     />
                                     {form.coverUrl ? (
-                                        <div className="relative rounded-xl overflow-hidden border border-gray-200 dark:border-gray-700">
-                                            <Image src={form.coverUrl} alt="Cover" width={600} height={200} className="w-full h-32 object-cover" />
-                                            <div className="absolute inset-0 bg-black/40 flex items-center justify-center gap-3 opacity-0 hover:opacity-100 transition-opacity">
+                                        <div className="rounded-xl overflow-hidden border border-gray-200 dark:border-gray-700">
+                                            <div className="relative">
+                                                <Image src={form.coverUrl} alt="Cover" width={600} height={200} className="w-full h-32 object-cover" />
+                                            </div>
+                                            <div className="flex gap-2 p-2 bg-gray-50 dark:bg-gray-800 border-t border-gray-200 dark:border-gray-700">
                                                 <button
                                                     onClick={() => coverInputRef.current?.click()}
                                                     disabled={uploadingCover}
-                                                    className="flex items-center gap-1.5 px-3 py-1.5 bg-white text-gray-900 text-xs font-semibold rounded-lg"
+                                                    className="flex items-center gap-1.5 px-3 py-1.5 bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600 text-gray-700 dark:text-gray-200 text-xs font-semibold rounded-lg hover:bg-gray-50 transition-colors"
                                                 >
                                                     {uploadingCover ? <Loader2 className="w-3 h-3 animate-spin" /> : <Upload className="w-3 h-3" />}
                                                     Cambiar
                                                 </button>
                                                 <button
                                                     onClick={() => set("coverUrl", undefined)}
-                                                    className="flex items-center gap-1.5 px-3 py-1.5 bg-red-500 text-white text-xs font-semibold rounded-lg"
+                                                    className="flex items-center gap-1.5 px-3 py-1.5 bg-red-50 dark:bg-red-900/30 border border-red-200 dark:border-red-800 text-red-600 dark:text-red-400 text-xs font-semibold rounded-lg hover:bg-red-100 transition-colors"
                                                 >
                                                     <X className="w-3 h-3" /> Quitar
                                                 </button>
@@ -613,6 +664,194 @@ export default function MiSitioPage() {
                             </>
                         )}
 
+                        {/* ── MENÚ ── */}
+                        {activeTab === "menu" && (
+                            <>
+                                <h3 className="font-semibold text-gray-900 dark:text-white">Menú principal</h3>
+                                <p className="text-xs text-gray-500 dark:text-gray-400 -mt-2">
+                                    Activá, renombrá o reordená los ítems del menú de tu sitio.
+                                </p>
+
+                                {/* ── Items list ── */}
+                                <div className="space-y-2">
+                                    {navItems.map((item, idx) => (
+                                        <div
+                                            key={idx}
+                                            className={`flex items-center gap-2 p-3 rounded-xl border transition-all ${
+                                                item.enabled
+                                                    ? "bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700"
+                                                    : "bg-gray-50 dark:bg-gray-800/50 border-gray-100 dark:border-gray-700/50 opacity-60"
+                                            }`}
+                                        >
+                                            {/* Visible toggle */}
+                                            <button
+                                                onClick={() => toggleNavItem(idx)}
+                                                title={item.enabled ? "Ocultar" : "Mostrar"}
+                                                className={`flex-shrink-0 p-1.5 rounded-lg transition-colors ${
+                                                    item.enabled
+                                                        ? "text-indigo-500 hover:bg-indigo-50 dark:hover:bg-indigo-900/30"
+                                                        : "text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700"
+                                                }`}
+                                            >
+                                                {item.enabled ? <Eye className="w-4 h-4" /> : <EyeOff className="w-4 h-4" />}
+                                            </button>
+
+                                            {/* Label */}
+                                            <input
+                                                type="text"
+                                                value={item.label}
+                                                onChange={(e) => updateNavItem(idx, "label", e.target.value)}
+                                                className="w-24 sm:w-32 flex-shrink-0 text-sm font-medium text-gray-900 dark:text-white bg-transparent border-b border-transparent hover:border-gray-300 focus:border-indigo-400 outline-none pb-0.5 transition-colors"
+                                                placeholder="Nombre"
+                                            />
+
+                                            {/* Href select */}
+                                            <select
+                                                value={HREF_PRESETS.some(p => p.value === item.href) ? item.href : "__custom"}
+                                                onChange={(e) => {
+                                                    if (e.target.value !== "__custom") updateNavItem(idx, "href", e.target.value);
+                                                }}
+                                                className="flex-1 min-w-0 text-xs text-gray-500 dark:text-gray-400 bg-transparent border border-gray-200 dark:border-gray-600 rounded-lg px-2 py-1.5 outline-none focus:border-indigo-400 cursor-pointer"
+                                            >
+                                                {HREF_PRESETS.map(p => (
+                                                    <option key={p.value} value={p.value}>{p.label}</option>
+                                                ))}
+                                                {!HREF_PRESETS.some(p => p.value === item.href) && (
+                                                    <option value="__custom">Personalizado</option>
+                                                )}
+                                            </select>
+
+                                            {/* Custom href input if not in presets */}
+                                            {!HREF_PRESETS.some(p => p.value === item.href) && (
+                                                <input
+                                                    type="text"
+                                                    value={item.href}
+                                                    onChange={(e) => updateNavItem(idx, "href", e.target.value)}
+                                                    placeholder="/ruta"
+                                                    className="w-24 text-xs text-gray-500 dark:text-gray-400 bg-transparent border border-gray-200 dark:border-gray-600 rounded-lg px-2 py-1.5 outline-none focus:border-indigo-400"
+                                                />
+                                            )}
+
+                                            {/* Move up/down */}
+                                            <div className="flex flex-col gap-0.5 flex-shrink-0">
+                                                <button
+                                                    onClick={() => moveNavItem(idx, -1)}
+                                                    disabled={idx === 0}
+                                                    className="p-0.5 text-gray-400 hover:text-gray-600 disabled:opacity-20 disabled:cursor-not-allowed transition-colors"
+                                                >
+                                                    <ArrowUp className="w-3 h-3" />
+                                                </button>
+                                                <button
+                                                    onClick={() => moveNavItem(idx, 1)}
+                                                    disabled={idx === navItems.length - 1}
+                                                    className="p-0.5 text-gray-400 hover:text-gray-600 disabled:opacity-20 disabled:cursor-not-allowed transition-colors"
+                                                >
+                                                    <ArrowDown className="w-3 h-3" />
+                                                </button>
+                                            </div>
+
+                                            {/* Delete */}
+                                            <button
+                                                onClick={() => removeNavItem(idx)}
+                                                className="flex-shrink-0 p-1.5 text-gray-300 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors"
+                                            >
+                                                <Trash2 className="w-3.5 h-3.5" />
+                                            </button>
+                                        </div>
+                                    ))}
+                                </div>
+
+                                {/* Add item */}
+                                <button
+                                    onClick={addNavItem}
+                                    className="flex items-center gap-2 w-full py-2.5 px-4 rounded-xl border-2 border-dashed border-gray-200 dark:border-gray-700 text-sm font-medium text-gray-500 dark:text-gray-400 hover:border-indigo-300 hover:text-indigo-500 transition-colors"
+                                >
+                                    <Plus className="w-4 h-4" /> Agregar ítem
+                                </button>
+
+                                {/* ── Navbar preview ── */}
+                                <div>
+                                    <p className="text-xs font-medium text-gray-500 dark:text-gray-400 mb-3 flex items-center gap-1.5">
+                                        <Smartphone className="w-3.5 h-3.5" /> Vista previa del menú
+                                    </p>
+
+                                    {/* Desktop navbar */}
+                                    <div className="rounded-xl border border-gray-200 dark:border-gray-700 overflow-hidden shadow-sm">
+                                        {/* Browser bar */}
+                                        <div className="bg-gray-100 dark:bg-gray-800 px-3 py-2 flex items-center gap-2 border-b border-gray-200 dark:border-gray-700">
+                                            <div className="flex gap-1.5">
+                                                <div className="w-2 h-2 rounded-full bg-red-400" />
+                                                <div className="w-2 h-2 rounded-full bg-yellow-400" />
+                                                <div className="w-2 h-2 rounded-full bg-green-400" />
+                                            </div>
+                                            <div className="flex-1 bg-white dark:bg-gray-700 rounded px-2 py-0.5 text-[10px] text-gray-400 truncate">
+                                                {form.slug || "tu-sitio"}.zetaprop.com.ar
+                                            </div>
+                                        </div>
+
+                                        {/* Navbar */}
+                                        <div className="bg-white dark:bg-gray-900 px-4 h-14 flex items-center justify-between gap-3 border-b border-gray-100 dark:border-gray-800">
+                                            {/* Logo / nombre */}
+                                            <div className="flex-shrink-0">
+                                                {form.logoUrl ? (
+                                                    <Image src={form.logoUrl} alt={form.nombre} width={100} height={32}
+                                                        className="h-8 w-auto object-contain" />
+                                                ) : (
+                                                    <span className="font-bold text-sm text-gray-900 dark:text-white">
+                                                        {form.nombre || "Mi Inmobiliaria"}
+                                                    </span>
+                                                )}
+                                            </div>
+
+                                            {/* Nav links */}
+                                            <nav className="hidden sm:flex items-center gap-4 overflow-hidden">
+                                                {navItems.filter(n => n.enabled).map((item, i) => (
+                                                    <span
+                                                        key={i}
+                                                        className="text-xs font-medium whitespace-nowrap transition-colors"
+                                                        style={{ color: i === 0 ? form.colorPrimario : "#6b7280" }}
+                                                    >
+                                                        {item.label}
+                                                    </span>
+                                                ))}
+                                            </nav>
+
+                                            {/* CTA button */}
+                                            <div
+                                                className="flex-shrink-0 flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-white text-xs font-semibold"
+                                                style={{ background: form.colorPrimario }}
+                                            >
+                                                <MessageCircle className="w-3 h-3" />
+                                                <span className="hidden sm:inline">Consultar</span>
+                                            </div>
+                                        </div>
+
+                                        {/* Mobile nav (icons scroll) */}
+                                        <div className="sm:hidden bg-white dark:bg-gray-900 px-4 pb-3 flex gap-4 overflow-x-auto border-b border-gray-100 dark:border-gray-800">
+                                            {navItems.filter(n => n.enabled).map((item, i) => (
+                                                <span key={i} className="text-xs text-gray-600 dark:text-gray-400 whitespace-nowrap py-1">
+                                                    {item.label}
+                                                </span>
+                                            ))}
+                                        </div>
+
+                                        {/* Page content hint */}
+                                        <div className="bg-gray-50 dark:bg-gray-800/50 px-4 py-3 flex flex-col gap-1.5">
+                                            <div className="h-2 bg-gray-200 dark:bg-gray-700 rounded-full w-2/3" />
+                                            <div className="h-1.5 bg-gray-100 dark:bg-gray-700/50 rounded-full w-1/2" />
+                                        </div>
+                                    </div>
+
+                                    {navItems.filter(n => n.enabled).length === 0 && (
+                                        <p className="text-xs text-amber-600 dark:text-amber-400 mt-2 flex items-center gap-1.5">
+                                            <AlertCircle className="w-3.5 h-3.5" />
+                                            Activá al menos un ítem para que aparezca el menú.
+                                        </p>
+                                    )}
+                                </div>
+                            </>
+                        )}
+
                         {/* ── CONTACTO ── */}
                         {activeTab === "contacto" && (
                             <>
@@ -653,7 +892,7 @@ export default function MiSitioPage() {
                                         Subdominio en Zeta Prop
                                     </label>
                                     <div className="flex items-center rounded-xl border border-gray-300 dark:border-gray-600 overflow-hidden focus-within:ring-2 focus-within:ring-indigo-500">
-                                        <span className="px-3 py-3 bg-gray-50 dark:bg-gray-800 text-gray-500 text-sm border-r border-gray-300 dark:border-gray-600 whitespace-nowrap">
+                                        <span className="px-2 sm:px-3 py-3 bg-gray-50 dark:bg-gray-800 text-gray-500 text-xs sm:text-sm border-r border-gray-300 dark:border-gray-600 whitespace-nowrap">
                                             https://
                                         </span>
                                         <input
@@ -666,10 +905,11 @@ export default function MiSitioPage() {
                                             }}
                                             onBlur={() => form.slug && validateSlug(form.slug)}
                                             placeholder="mi-inmobiliaria"
-                                            className="flex-1 px-3 py-3 text-sm bg-white dark:bg-gray-900 text-gray-900 dark:text-white outline-none"
+                                            className="flex-1 min-w-0 px-2 sm:px-3 py-3 text-sm bg-white dark:bg-gray-900 text-gray-900 dark:text-white outline-none"
                                         />
-                                        <span className="px-3 py-3 bg-gray-50 dark:bg-gray-800 text-gray-500 text-sm border-l border-gray-300 dark:border-gray-600 whitespace-nowrap">
-                                            .zetaprop.com.ar
+                                        <span className="px-2 sm:px-3 py-3 bg-gray-50 dark:bg-gray-800 text-gray-500 text-xs sm:text-sm border-l border-gray-300 dark:border-gray-600 whitespace-nowrap">
+                                            <span className="hidden sm:inline">.zetaprop.com.ar</span>
+                                            <span className="sm:hidden">.zetaprop</span>
                                         </span>
                                     </div>
                                     {checkingSlug && (
@@ -797,8 +1037,8 @@ export default function MiSitioPage() {
                     </div>
                 </div>
 
-                {/* Right: preview (2/5) */}
-                <div className="lg:col-span-2">
+                {/* Right: preview (2/5) — hidden on mobile */}
+                <div className="hidden lg:block lg:col-span-2">
                     <div className="sticky top-6">
                         <div className="flex items-center gap-2 mb-3">
                             <Smartphone className="w-4 h-4 text-gray-400" />
@@ -875,9 +1115,12 @@ export default function MiSitioPage() {
                             <p>1. Completá los datos y guardá.</p>
                             <p>2. Publicá el sitio con el botón de arriba.</p>
                             <p>3. Tu portal queda en <strong>{form.slug || "tu-slug"}.zetaprop.com.ar</strong></p>
-                            <p className="text-indigo-500 dark:text-indigo-400 mt-2">
-                                Dominio propio próximamente.
-                            </p>
+                            {siteUrl && (
+                                <a href={siteUrl} target="_blank" rel="noopener noreferrer"
+                                    className="flex items-center gap-1.5 mt-2 font-semibold text-indigo-600 dark:text-indigo-400 hover:underline">
+                                    <ExternalLink className="w-3.5 h-3.5" /> Ver mi sitio
+                                </a>
+                            )}
                         </div>
                     </div>
                 </div>

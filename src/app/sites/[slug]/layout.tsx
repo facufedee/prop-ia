@@ -1,56 +1,55 @@
 import { Metadata } from "next";
-import { adminDb } from "@/infrastructure/firebase/admin";
 import SiteProvider from "./SiteProvider";
+import { getSitePayload } from "./siteData";
 
-// ── SEO: server-side metadata per site ───────────────────────────────────────
+// ISR: revalidate every 60 s — site config rarely changes
+export const revalidate = 60;
+
+// ── SSR Metadata ──────────────────────────────────────────────────────────────
 
 export async function generateMetadata(
     { params }: { params: Promise<{ slug: string }> }
 ): Promise<Metadata> {
     const { slug } = await params;
+    const site = await getSitePayload(slug); // cached — shared with layout render
 
-    try {
-        const snap = await adminDb
-            .collection("sites")
-            .where("slug", "==", slug)
-            .where("published", "==", true)
-            .limit(1)
-            .get();
-
-        if (snap.empty) {
-            return { title: "Sitio no encontrado", robots: { index: false, follow: false } };
-        }
-
-        const data = snap.docs[0].data();
-        const nombre: string = data.nombre ?? slug;
-        const descripcion: string = data.descripcion ?? `Portal inmobiliario de ${nombre}`;
-        const coverUrl: string | undefined = data.coverUrl;
-        const logoUrl: string | undefined = data.logoUrl;
-
-        return {
-            title: `${nombre} | Portal Inmobiliario`,
-            description: descripcion,
-            openGraph: {
-                title: nombre,
-                description: descripcion,
-                images: coverUrl ? [coverUrl] : logoUrl ? [logoUrl] : [],
-                siteName: nombre,
-                type: "website",
-            },
-            twitter: {
-                card: "summary_large_image",
-                title: nombre,
-                description: descripcion,
-                images: coverUrl ? [coverUrl] : [],
-            },
-        };
-    } catch {
-        return { title: slug };
+    if (!site) {
+        return { title: "Sitio no encontrado", robots: { index: false, follow: false } };
     }
+
+    const nombre      = site.nombre      || slug;
+    const descripcion = site.descripcion || `Portal inmobiliario de ${nombre}`;
+
+    return {
+        title:       `${nombre} | Portal Inmobiliario`,
+        description: descripcion,
+        openGraph: {
+            title:       nombre,
+            description: descripcion,
+            images:      site.coverUrl ? [site.coverUrl] : site.logoUrl ? [site.logoUrl] : [],
+            siteName:    nombre,
+            type:        "website",
+        },
+        twitter: {
+            card:        "summary_large_image",
+            title:       nombre,
+            description: descripcion,
+            images:      site.coverUrl ? [site.coverUrl] : [],
+        },
+    };
 }
 
 // ── Layout ────────────────────────────────────────────────────────────────────
 
-export default function SiteLayout({ children }: { children: React.ReactNode }) {
-    return <SiteProvider>{children}</SiteProvider>;
+export default async function SiteLayout({
+    children,
+    params,
+}: {
+    children: React.ReactNode;
+    params: Promise<{ slug: string }>;
+}) {
+    const { slug } = await params;
+    const site = await getSitePayload(slug); // cached — same call as generateMetadata
+
+    return <SiteProvider initialSite={site}>{children}</SiteProvider>;
 }
