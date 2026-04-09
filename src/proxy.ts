@@ -68,6 +68,7 @@ export async function proxy(request: NextRequest) {
     const originalPath = url.pathname === '/' ? '' : url.pathname;
     
     let targetSlug: string | null = null;
+    let lookupError: string | null = null;
 
     try {
         // 1. RATE LIMITING (Global & API Specific)
@@ -125,24 +126,35 @@ export async function proxy(request: NextRequest) {
                 } else {
                     const result = await domainLookupService.findSlugByDomain(host);
                     targetSlug = result.slug;
+                    if (result.error) {
+                        lookupError = result.error;
+                    }
                     domainCache.set(host, { slug: targetSlug, expiry: now + CACHE_TTL });
                 }
             }
 
             // C. Rewrite if target found
             if (targetSlug) {
+                console.log(`[Proxy] Rewriting ${host}${pathname} to /sites/${targetSlug}${originalPath}`);
                 url.pathname = `/sites/${targetSlug}${originalPath}`;
                 const response = NextResponse.rewrite(url);
+                response.headers.set('X-Debug-Host', host);
+                response.headers.set('X-Debug-Target', targetSlug);
                 return applySecurityHeaders(response, request);
             }
         }
 
-        return applySecurityHeaders(NextResponse.next(), request);
+        const response = NextResponse.next();
+        response.headers.set('X-Debug-Host', host);
+        response.headers.set('X-Debug-Slug-Found', targetSlug || 'NULL');
+        if (lookupError) {
+            response.headers.set('X-Debug-Lookup-Err', lookupError.replace(/\n/g, ' ').slice(0, 200));
+        }
+        return applySecurityHeaders(response, request);
 
     } catch (e: any) {
         console.error("[Proxy] Critical Error:", e.message);
         const errResp = NextResponse.next();
-        // Sanitize header value for safety
         const safeMsg = (e.message || "Unknown error").replace(/\n/g, ' ').slice(0, 200);
         errResp.headers.set('X-Proxy-Error', safeMsg);
         return applySecurityHeaders(errResp, request);
