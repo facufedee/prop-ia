@@ -5,7 +5,8 @@
  */
 
 const PROJECT_ID = process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID || "prop-ia";
-const REST_URL = `https://firestore.googleapis.com/v1/projects/${PROJECT_ID}/databases/(default)/documents:runQuery`;
+const API_KEY = process.env.NEXT_PUBLIC_FIREBASE_API_KEY || "";
+const REST_URL = `https://firestore.googleapis.com/v1/projects/${PROJECT_ID}/databases/(default)/documents:runQuery?key=${API_KEY}`;
 
 export const domainLookupService = {
     /**
@@ -34,19 +35,26 @@ export const domainLookupService = {
                                     value: { stringValue: normalizedDomain }
                                 }
                             },
-                            {
-                                fieldFilter: {
-                                    field: { fieldPath: "customDomainVerified" },
-                                    op: "EQUAL",
-                                    value: { booleanValue: true }
+                                {
+                                    fieldFilter: {
+                                        field: { fieldPath: "customDomainVerified" },
+                                        op: "EQUAL",
+                                        value: { booleanValue: true }
+                                    }
+                                },
+                                {
+                                    fieldFilter: {
+                                        field: { fieldPath: "published" },
+                                        op: "EQUAL",
+                                        value: { booleanValue: true }
+                                    }
                                 }
-                            }
-                        ]
-                    }
-                },
-                limit: 1
-            }
-        };
+                            ]
+                        }
+                    },
+                    limit: 1
+                }
+            };
 
         try {
             const response = await fetch(REST_URL, {

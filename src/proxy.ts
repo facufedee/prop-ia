@@ -21,7 +21,7 @@ const globalLimiter = new InMemoryRateLimiter({
 
 // Cache for domain lookups (short-lived)
 const domainCache = new Map<string, { slug: string | null; expiry: number }>();
-const CACHE_TTL = 30 * 1000; // 30 seconds
+const CACHE_TTL = 1000; // 1 second for debugging
 
 // ── Helpers ──────────────────────────────────────────────────────────────────
 
