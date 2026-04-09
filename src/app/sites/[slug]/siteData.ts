@@ -36,6 +36,31 @@ export interface ServerProperty {
     [key: string]: unknown;
 }
 
+// ── Firestore → plain object serializer ──────────────────────────────────────
+// Firestore Admin SDK returns Timestamp, GeoPoint, etc. — class instances that
+// cannot cross the Server→Client boundary. This recursively converts them.
+function serialize(value: unknown): unknown {
+    if (value === null || value === undefined) return value;
+
+    // Firestore Timestamp → ISO string
+    if (typeof (value as any)?.toDate === "function") {
+        return (value as any).toDate().toISOString();
+    }
+
+    // Array → recurse
+    if (Array.isArray(value)) return value.map(serialize);
+
+    // Plain object → recurse
+    if (typeof value === "object" && Object.getPrototypeOf(value) === Object.prototype) {
+        return Object.fromEntries(
+            Object.entries(value as Record<string, unknown>).map(([k, v]) => [k, serialize(v)])
+        );
+    }
+
+    // Primitives (string, number, boolean) — safe as-is
+    return value;
+}
+
 function toSitePayload(id: string, data: Record<string, unknown>): SitePayload {
     return {
         id,
@@ -87,7 +112,7 @@ export const getActiveProperties = cache(async (userId: string): Promise<ServerP
             .where("userId", "==", userId)
             .get();
         return snap.docs
-            .map(d => ({ id: d.id, ...d.data() } as ServerProperty))
+            .map(d => serialize({ id: d.id, ...d.data() }) as ServerProperty)
             .filter(p => p.status === "active");
     } catch (err) {
         console.error("getActiveProperties:", err);
