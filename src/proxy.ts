@@ -63,7 +63,7 @@ function getClientIp(req: NextRequest): string {
 
 export async function proxy(request: NextRequest) {
     const { pathname } = request.nextUrl;
-    const host = request.headers.get('host') ?? '';
+    const host = request.headers.get('x-forwarded-host') || request.headers.get('host') || '';
     const url = request.nextUrl.clone();
     const originalPath = url.pathname === '/' ? '' : url.pathname;
     
