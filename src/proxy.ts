@@ -21,7 +21,7 @@ const globalLimiter = new InMemoryRateLimiter({
 
 // Cache for domain lookups (short-lived)
 const domainCache = new Map<string, { slug: string | null; expiry: number }>();
-const CACHE_TTL = 1000; // 1 second for debugging
+const CACHE_TTL = 30 * 1000; // 30 seconds
 
 // ── Helpers ──────────────────────────────────────────────────────────────────
 
@@ -66,83 +66,87 @@ export async function proxy(request: NextRequest) {
     const host = request.headers.get('host') ?? '';
     const url = request.nextUrl.clone();
     const originalPath = url.pathname === '/' ? '' : url.pathname;
-
-    // 1. RATE LIMITING (Global & API Specific)
-    if (process.env.NODE_ENV !== 'development') {
-        const ip = getClientIp(request);
-        try {
-            // Global limit
-            await globalLimiter.check(ip, 60); // 60 req/min
-        } catch {
-            return new NextResponse('Too Many Requests', { status: 429 });
-        }
-    }
-
-    // 2. AUTH GUARD & REDIRECTS
-    const token = request.cookies.get("authToken")?.value;
-    const isAuthPath = pathname === "/login" || pathname === "/register";
-
-    if (pathname.startsWith("/dashboard") || isAuthPath) {
-        const isValid = token ? await verifyFirebaseToken(token) : false;
-
-        // If on login/register and already validly logged in -> redirect to dashboard
-        if (isAuthPath && isValid) {
-            return NextResponse.redirect(new URL("/dashboard", request.url));
-        }
-
-        // If on dashboard and NOT logged in -> redirect to login
-        if (pathname.startsWith("/dashboard") && !isValid) {
-            const response = NextResponse.redirect(new URL("/login", request.url));
-            if (token) response.cookies.delete("authToken");
-            return response;
-        }
-    }
-
-    // 3. SITE ROUTING (Subdomains & Custom Domains)
+    
     let targetSlug: string | null = null;
 
-    // Skip routing for static files, API, and platform reserved paths
-    const isPlatformPath = pathname.startsWith('/_next') || pathname.startsWith('/api') || 
-                          pathname.startsWith('/assets') || pathname === '/favicon.ico' ||
-                          pathname.startsWith('/login') || pathname.startsWith('/dashboard') ||
-                          pathname.startsWith('/sites'); // Avoid loops
-
-    if (!isPlatformPath) {
-        // A. Subdomain site routing
-        if (host.endsWith(`.${MAIN_DOMAIN}`)) {
-            const subdomain = host.slice(0, -(MAIN_DOMAIN.length + 1));
-            if (subdomain && !RESERVED_SUBDOMAINS.has(subdomain)) {
-                targetSlug = subdomain;
-            }
-        } 
-        // B. Custom Domain routing
-        else if (host !== MAIN_DOMAIN && host !== 'localhost:3000' && !host.endsWith('.vercel.app')) {
-            const now = Date.now();
-            const cached = domainCache.get(host);
-            if (cached && cached.expiry > now) {
-                targetSlug = cached.slug;
-            } else {
-                targetSlug = await domainLookupService.findSlugByDomain(host);
-                console.log(`[Proxy] Domain lookup result for ${host}:`, targetSlug);
-                domainCache.set(host, { slug: targetSlug, expiry: now + CACHE_TTL });
+    try {
+        // 1. RATE LIMITING (Global & API Specific)
+        if (process.env.NODE_ENV !== 'development') {
+            const ip = getClientIp(request);
+            try {
+                // Global limit
+                await globalLimiter.check(ip, 60); // 60 req/min
+            } catch {
+                return new NextResponse('Too Many Requests', { status: 429 });
             }
         }
 
-        // C. Rewrite if target found
-        // C. Rewrite if target found
-        if (targetSlug) {
-            console.log(`[Proxy] Rewriting ${host}${pathname} to /sites/${targetSlug}${originalPath}`);
-            url.pathname = `/sites/${targetSlug}${originalPath}`;
-            const response = NextResponse.rewrite(url);
-            response.headers.set('X-Debug-Host', host);
-            response.headers.set('X-Debug-Target', targetSlug);
-            return applySecurityHeaders(response, request);
+        // 2. AUTH GUARD & REDIRECTS
+        const token = request.cookies.get("authToken")?.value;
+        const isAuthPath = pathname === "/login" || pathname === "/register";
+
+        if (pathname.startsWith("/dashboard") || isAuthPath) {
+            const isValid = token ? await verifyFirebaseToken(token) : false;
+
+            // If on login/register and already validly logged in -> redirect to dashboard
+            if (isAuthPath && isValid) {
+                return NextResponse.redirect(new URL("/dashboard", request.url));
+            }
+
+            // If on dashboard and NOT logged in -> redirect to login
+            if (pathname.startsWith("/dashboard") && !isValid) {
+                const response = NextResponse.redirect(new URL("/login", request.url));
+                if (token) response.cookies.delete("authToken");
+                return response;
+            }
         }
+
+        // 3. SITE ROUTING (Subdomains & Custom Domains)
+        // Skip routing for static files, API, and platform reserved paths
+        const isPlatformPath = pathname.startsWith('/_next') || pathname.startsWith('/api') || 
+                              pathname.startsWith('/assets') || pathname === '/favicon.ico' ||
+                              pathname.startsWith('/login') || pathname.startsWith('/dashboard') ||
+                              pathname.startsWith('/sites'); // Avoid loops
+
+        if (!isPlatformPath) {
+            // A. Subdomain site routing
+            if (host.endsWith(`.${MAIN_DOMAIN}`)) {
+                const subdomain = host.slice(0, -(MAIN_DOMAIN.length + 1));
+                if (subdomain && !RESERVED_SUBDOMAINS.has(subdomain)) {
+                    targetSlug = subdomain;
+                }
+            } 
+            // B. Custom Domain routing
+            else if (host !== MAIN_DOMAIN && host !== 'localhost:3000' && !host.endsWith('.vercel.app')) {
+                const now = Date.now();
+                const cached = domainCache.get(host);
+                if (cached && cached.expiry > now) {
+                    targetSlug = cached.slug;
+                } else {
+                    const result = await domainLookupService.findSlugByDomain(host);
+                    targetSlug = result.slug;
+                    domainCache.set(host, { slug: targetSlug, expiry: now + CACHE_TTL });
+                }
+            }
+
+            // C. Rewrite if target found
+            if (targetSlug) {
+                url.pathname = `/sites/${targetSlug}${originalPath}`;
+                const response = NextResponse.rewrite(url);
+                return applySecurityHeaders(response, request);
+            }
+        }
+
+        return applySecurityHeaders(NextResponse.next(), request);
+
+    } catch (e: any) {
+        console.error("[Proxy] Critical Error:", e.message);
+        const errResp = NextResponse.next();
+        // Sanitize header value for safety
+        const safeMsg = (e.message || "Unknown error").replace(/\n/g, ' ').slice(0, 200);
+        errResp.headers.set('X-Proxy-Error', safeMsg);
+        return applySecurityHeaders(errResp, request);
     }
-
-    const response = NextResponse.next();
-    response.headers.set('X-Debug-Status', 'NEXT_CALLED');
-    return applySecurityHeaders(response, request);
 }
 
 export const config = {

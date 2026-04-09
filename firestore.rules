@@ -154,11 +154,8 @@ service cloud.firestore {
     
     // Sites Collection (portales inmobiliarios públicos)
     match /sites/{siteId} {
-      // Lectura pública solo si el sitio está publicado (para el render del portal)
-      // O si el dueño lo lee (para el builder del dashboard)
-      allow read: if resource.data.published == true ||
-                     isOwner(resource.data.userId) ||
-                     isAdmin();
+      // Lectura pública para portales y ruteo
+      allow read: if true;
 
       // Solo el dueño puede crear su propio sitio
       allow create: if isAuthenticated() &&

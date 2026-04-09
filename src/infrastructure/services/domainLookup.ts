@@ -6,7 +6,7 @@
 
 const PROJECT_ID = process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID || "prop-ia";
 const API_KEY = process.env.NEXT_PUBLIC_FIREBASE_API_KEY || "";
-const REST_URL = `https://firestore.googleapis.com/v1/projects/${PROJECT_ID}/databases/(default)/documents:runQuery?key=${API_KEY}`;
+const REST_URL = `https://firestore.googleapis.com/v1/projects/${PROJECT_ID}/databases/propia/documents:runQuery?key=${API_KEY}`;
 
 export const domainLookupService = {
     /**
@@ -14,8 +14,8 @@ export const domainLookupService = {
      * @param domain The hostname to look up (e.g., claudiogomezinmuebles.com)
      * @returns The slug if found and verified, null otherwise.
      */
-    async findSlugByDomain(domain: string): Promise<string | null> {
-        if (!domain) return null;
+    async findSlugByDomain(domain: string): Promise<{slug: string | null; error?: string}> {
+        if (!domain) return { slug: null };
 
         // Normalize domain: remove www. if present
         const normalizedDomain = domain.startsWith('www.') ? domain.slice(4) : domain;
@@ -43,8 +43,7 @@ export const domainLookupService = {
 
             if (!response.ok) {
                 const errText = await response.text();
-                console.error("domainLookupService: Firestore REST error", errText);
-                return null;
+                return { slug: null, error: `HTTP ${response.status}: ${errText.slice(0, 100)}` };
             }
 
             const data = await response.json();
@@ -55,17 +54,16 @@ export const domainLookupService = {
                 const isPublished = fields.published?.booleanValue ?? false;
                 const isVerified = fields.customDomainVerified?.booleanValue ?? false;
 
-                console.log(`[DomainLookup] Found site: ${slug}, Published: ${isPublished}, Verified: ${isVerified}`);
-
                 if (isPublished && isVerified) {
-                    return slug || null;
+                    return { slug: slug || null };
+                } else {
+                    return { slug: null, error: `Found but: Pub=${isPublished}, Ver=${isVerified}` };
                 }
             }
 
-            return null;
-        } catch (error) {
-            console.error("domainLookupService: Error in findSlugByDomain", error);
-            return null;
+            return { slug: null, error: "Not found in DB" };
+        } catch (error: any) {
+            return { slug: null, error: error.message };
         }
     }
 };
