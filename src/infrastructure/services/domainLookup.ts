@@ -19,42 +19,20 @@ export const domainLookupService = {
 
         // Normalize domain: remove www. if present
         const normalizedDomain = domain.startsWith('www.') ? domain.slice(4) : domain;
-        console.log(`[DomainLookup] Looking up: ${domain} (normalized: ${normalizedDomain})`);
-
+        
         const body = {
             structuredQuery: {
                 from: [{ collectionId: "sites" }],
                 where: {
-                    compositeFilter: {
-                        op: "AND",
-                        filters: [
-                            {
-                                fieldFilter: {
-                                    field: { fieldPath: "customDomain" },
-                                    op: "EQUAL",
-                                    value: { stringValue: normalizedDomain }
-                                }
-                            },
-                                {
-                                    fieldFilter: {
-                                        field: { fieldPath: "customDomainVerified" },
-                                        op: "EQUAL",
-                                        value: { booleanValue: true }
-                                    }
-                                },
-                                {
-                                    fieldFilter: {
-                                        field: { fieldPath: "published" },
-                                        op: "EQUAL",
-                                        value: { booleanValue: true }
-                                    }
-                                }
-                            ]
-                        }
-                    },
-                    limit: 1
-                }
-            };
+                    fieldFilter: {
+                        field: { fieldPath: "customDomain" },
+                        op: "EQUAL",
+                        value: { stringValue: normalizedDomain }
+                    }
+                },
+                limit: 1
+            }
+        };
 
         try {
             const response = await fetch(REST_URL, {
@@ -64,15 +42,24 @@ export const domainLookupService = {
             });
 
             if (!response.ok) {
-                console.error("domainLookupService: Firestore REST error", await response.text());
+                const errText = await response.text();
+                console.error("domainLookupService: Firestore REST error", errText);
                 return null;
             }
 
             const data = await response.json();
             
-            // data is an array of objects like [{ document: { fields: { slug: { stringValue: "..." } } } }]
             if (data && data.length > 0 && data[0].document) {
-                return data[0].document.fields.slug?.stringValue || null;
+                const fields = data[0].document.fields;
+                const slug = fields.slug?.stringValue;
+                const isPublished = fields.published?.booleanValue ?? false;
+                const isVerified = fields.customDomainVerified?.booleanValue ?? false;
+
+                console.log(`[DomainLookup] Found site: ${slug}, Published: ${isPublished}, Verified: ${isVerified}`);
+
+                if (isPublished && isVerified) {
+                    return slug || null;
+                }
             }
 
             return null;

@@ -129,16 +129,19 @@ export async function proxy(request: NextRequest) {
         }
 
         // C. Rewrite if target found
+        // C. Rewrite if target found
         if (targetSlug) {
             console.log(`[Proxy] Rewriting ${host}${pathname} to /sites/${targetSlug}${originalPath}`);
             url.pathname = `/sites/${targetSlug}${originalPath}`;
             const response = NextResponse.rewrite(url);
+            response.headers.set('X-Debug-Host', host);
+            response.headers.set('X-Debug-Target', targetSlug);
             return applySecurityHeaders(response, request);
         }
     }
 
-    // Default response
     const response = NextResponse.next();
+    response.headers.set('X-Debug-Status', 'NEXT_CALLED');
     return applySecurityHeaders(response, request);
 }
 
