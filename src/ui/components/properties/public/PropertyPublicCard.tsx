@@ -35,7 +35,7 @@ export default function PropertyPublicCard({ property, basePath = "" }: Property
     };
 
     return (
-        <Link href={basePath ? `${basePath}/propiedades/${property.id}` : `/propiedades/p/${property.id}`} className="group block bg-white rounded-2xl overflow-hidden border border-gray-100 hover:shadow-xl transition-all duration-300">
+        <Link href={basePath ? `${basePath}/propiedades/${property.id}` : `/propiedades/${property.id}`} className="group block bg-white rounded-2xl overflow-hidden border border-gray-100 hover:shadow-xl transition-all duration-300">
             {/* Image Container */}
             <div className="relative aspect-[4/3] bg-gray-200 overflow-hidden">
                 {property.imageUrls && property.imageUrls.length > 0 ? (
