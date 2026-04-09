@@ -4,7 +4,7 @@
  * Uses the Firestore REST API to avoid heavy SDK dependencies.
  */
 
-const PROJECT_ID = process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID || "propia";
+const PROJECT_ID = process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID || "prop-ia";
 const REST_URL = `https://firestore.googleapis.com/v1/projects/${PROJECT_ID}/databases/(default)/documents:runQuery`;
 
 export const domainLookupService = {
@@ -15,6 +15,10 @@ export const domainLookupService = {
      */
     async findSlugByDomain(domain: string): Promise<string | null> {
         if (!domain) return null;
+
+        // Normalize domain: remove www. if present
+        const normalizedDomain = domain.startsWith('www.') ? domain.slice(4) : domain;
+        console.log(`[DomainLookup] Looking up: ${domain} (normalized: ${normalizedDomain})`);
 
         const body = {
             structuredQuery: {
@@ -27,7 +31,7 @@ export const domainLookupService = {
                                 fieldFilter: {
                                     field: { fieldPath: "customDomain" },
                                     op: "EQUAL",
-                                    value: { stringValue: domain }
+                                    value: { stringValue: normalizedDomain }
                                 }
                             },
                             {

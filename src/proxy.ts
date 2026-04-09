@@ -123,12 +123,14 @@ export async function proxy(request: NextRequest) {
                 targetSlug = cached.slug;
             } else {
                 targetSlug = await domainLookupService.findSlugByDomain(host);
+                console.log(`[Proxy] Domain lookup result for ${host}:`, targetSlug);
                 domainCache.set(host, { slug: targetSlug, expiry: now + CACHE_TTL });
             }
         }
 
         // C. Rewrite if target found
         if (targetSlug) {
+            console.log(`[Proxy] Rewriting ${host}${pathname} to /sites/${targetSlug}${originalPath}`);
             url.pathname = `/sites/${targetSlug}${originalPath}`;
             const response = NextResponse.rewrite(url);
             return applySecurityHeaders(response, request);
