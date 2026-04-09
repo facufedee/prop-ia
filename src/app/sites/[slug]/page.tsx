@@ -20,7 +20,12 @@ export default async function SitePage({
     const site = payloadToSite(payload);
 
     // Fetch properties server-side — no client waterfall
-    const rawProps = await getActiveProperties(site.userId);
+    let rawProps: Awaited<ReturnType<typeof getActiveProperties>> = [];
+    try {
+        rawProps = await getActiveProperties(site.userId);
+    } catch (err) {
+        console.error("[SitePage] getActiveProperties failed:", err);
+    }
     const properties = rawProps.slice(0, 6) as unknown as PublicProperty[];
 
     const templateProps = { site, properties, basePath: "" };

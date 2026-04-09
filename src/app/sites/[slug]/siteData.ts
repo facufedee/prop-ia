@@ -37,28 +37,32 @@ export interface ServerProperty {
 }
 
 // ── Firestore → plain object serializer ──────────────────────────────────────
-// Firestore Admin SDK returns Timestamp, GeoPoint, etc. — class instances that
-// cannot cross the Server→Client boundary. This recursively converts them.
-function serialize(value: unknown): unknown {
-    if (value === null || value === undefined) return value;
-
-    // Firestore Timestamp → ISO string
-    if (typeof (value as any)?.toDate === "function") {
-        return (value as any).toDate().toISOString();
-    }
-
-    // Array → recurse
-    if (Array.isArray(value)) return value.map(serialize);
-
-    // Plain object → recurse
-    if (typeof value === "object" && Object.getPrototypeOf(value) === Object.prototype) {
-        return Object.fromEntries(
-            Object.entries(value as Record<string, unknown>).map(([k, v]) => [k, serialize(v)])
-        );
-    }
-
-    // Primitives (string, number, boolean) — safe as-is
-    return value;
+// JSON round-trip is the most reliable way to strip ALL non-serializable class
+// instances (Timestamp, GeoPoint, DocumentReference, Bytes, etc.).
+// The replacer handles known Firestore types before JSON.stringify sees them.
+function serialize<T>(data: T): T {
+    return JSON.parse(
+        JSON.stringify(data, (_, value) => {
+            if (value === null || value === undefined) return value;
+            // Firestore Timestamp (Admin SDK) → ISO string
+            if (typeof value?.toDate === "function") {
+                return value.toDate().toISOString();
+            }
+            // Firestore Timestamp stored as plain {_seconds, _nanoseconds}
+            if (typeof value === "object" && "_seconds" in value && "_nanoseconds" in value) {
+                return new Date((value as any)._seconds * 1000).toISOString();
+            }
+            // Firestore GeoPoint → plain {latitude, longitude}
+            if (typeof value?.latitude === "number" && typeof value?.longitude === "number") {
+                return { latitude: value.latitude, longitude: value.longitude };
+            }
+            // Firestore DocumentReference → drop (return path string as fallback)
+            if (typeof value?.path === "string" && value?.firestore !== undefined) {
+                return value.path;
+            }
+            return value;
+        })
+    );
 }
 
 function toSitePayload(id: string, data: Record<string, unknown>): SitePayload {

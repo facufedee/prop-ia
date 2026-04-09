@@ -49,7 +49,13 @@ export default async function SiteLayout({
     params: Promise<{ slug: string }>;
 }) {
     const { slug } = await params;
-    const site = await getSitePayload(slug); // cached — same call as generateMetadata
+
+    let site = null;
+    try {
+        site = await getSitePayload(slug);
+    } catch (err) {
+        console.error("[SiteLayout] getSitePayload failed:", err);
+    }
 
     return <SiteProvider initialSite={site}>{children}</SiteProvider>;
 }
