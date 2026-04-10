@@ -336,9 +336,8 @@ export default function PropiedadDetailPage() {
                 </div>
             </main>
 
-            {/* Custom Site Contact Form at Bottom */}
             <div className="bg-white border-t border-gray-100 mt-20 pt-20">
-                <SiteContactForm site={site} />
+                <SiteContactForm site={site} propertyId={property.id} propertyTitle={property.title} />
             </div>
 
             <SiteFooter site={site} basePath={basePath} />

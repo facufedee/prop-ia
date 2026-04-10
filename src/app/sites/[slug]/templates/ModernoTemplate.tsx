@@ -9,6 +9,7 @@ import PropertyPublicCard from "@/ui/components/properties/public/PropertyPublic
 import SiteNavbar from "../../components/SiteNavbar";
 import SiteFooter from "../../components/SiteFooter";
 import SiteContactForm from "../../components/SiteContactForm";
+import { useSite } from "../SiteProvider";
 
 const QUICK_CATS = [
     { label: "Casas",         tipo: "Casa",            Icon: Home, color: "bg-amber-50 text-amber-700 border-amber-200 hover:bg-amber-100" },
@@ -25,7 +26,8 @@ interface Props {
     basePath: string;
 }
 
-export default function ModernoTemplate({ site, properties, basePath }: Props) {
+export default function ModernoTemplate({ site, properties }: Omit<Props, "basePath">) {
+    const { basePath } = useSite();
     const primary = site.colorPrimario || "#4f46e5";
 
     return (
@@ -34,11 +36,12 @@ export default function ModernoTemplate({ site, properties, basePath }: Props) {
 
             <main>
                 {/* ── Hero ── */}
-                <PropertyHero 
+                <PropertyHero
                     title={site.nombre}
                     subtitle={site.descripcion || "Encontrá tu lugar en el mundo"}
                     coverUrl={site.coverUrl}
                     basePath={basePath}
+                    isSite
                 />
 
                 {/* ── Categories ── */}

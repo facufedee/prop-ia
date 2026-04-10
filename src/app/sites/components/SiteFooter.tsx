@@ -3,13 +3,16 @@
 import Link from "next/link";
 import { Instagram, Facebook, Mail, MapPin, Phone, Building2 } from "lucide-react";
 import { Site } from "@/domain/models/Site";
+import { useSite } from "../[slug]/SiteProvider";
 
 interface SiteFooterProps {
   site: Site;
   basePath: string;
 }
 
-export default function SiteFooter({ site, basePath }: SiteFooterProps) {
+export default function SiteFooter({ site, basePath: propBasePath }: SiteFooterProps) {
+  const { basePath: contextBasePath } = useSite();
+  const basePath = propBasePath || contextBasePath || "";
   const primary = site.colorPrimario || "#4f46e5";
   
   return (

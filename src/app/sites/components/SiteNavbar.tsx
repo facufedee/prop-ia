@@ -5,6 +5,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { Menu, X, MessageCircle, Home, Building2, Phone, Mail } from "lucide-react";
 import { Site } from "@/domain/models/Site";
+import { useSite } from "../[slug]/SiteProvider";
 
 interface SiteNavbarProps {
   site: Site;
@@ -12,7 +13,9 @@ interface SiteNavbarProps {
   transparent?: boolean;
 }
 
-export default function SiteNavbar({ site, basePath, transparent = false }: SiteNavbarProps) {
+export default function SiteNavbar({ site, basePath: propBasePath, transparent = false }: SiteNavbarProps) {
+  const { basePath: contextBasePath } = useSite();
+  const basePath = propBasePath || contextBasePath || "";
   const [isOpen, setOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const primary = site.colorPrimario || "#4f46e5";

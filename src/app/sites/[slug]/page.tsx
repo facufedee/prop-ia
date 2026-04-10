@@ -28,7 +28,7 @@ export default async function SitePage({
     }
     const properties = rawProps.slice(0, 6) as unknown as PublicProperty[];
 
-    const templateProps = { site, properties, basePath: "" };
+    const templateProps = { site, properties };
 
     switch (site.template) {
         case "clasico":      return <ClasicoTemplate     {...templateProps} />;

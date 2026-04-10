@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
 import { Search } from "lucide-react";
+import { useSite } from "@/app/sites/[slug]/SiteProvider";
 
 const PROPERTY_TYPES = [
     "Casa",
@@ -25,15 +26,21 @@ interface PropertyHeroProps {
     subtitle?: string;
     coverUrl?: string;
     basePath?: string;
+    /** Pass true when used inside a site template (custom domain or subdomain).
+     *  Ensures the search routes to /propiedades (site listing) instead of /busqueda (main portal). */
+    isSite?: boolean;
 }
 
 export default function PropertyHero({
     title = "Encontrá tu hogar ideal",
     subtitle = "Miles de propiedades en venta y alquiler en Argentina",
     coverUrl = "/hero-propiedades.png",
-    basePath = ""
+    basePath: propBasePath,
+    isSite = false,
 }: PropertyHeroProps) {
     const router = useRouter();
+    const { basePath: contextBasePath } = useSite();
+    const basePath = propBasePath || contextBasePath || "";
 
     // Hero search state
     const [operacion, setOperacion] = useState<"Alquiler" | "Comprar">("Comprar");
@@ -42,12 +49,15 @@ export default function PropertyHero({
 
     const handleSearch = () => {
         const params = new URLSearchParams();
-        const op = operacion === "Comprar" ? "Venta" : "Alquiler";
+        const op = operacion === "Comprar" ? "venta" : "alquiler";
         params.set("operacion", op);
         if (tipo) params.set("tipo", tipo);
         if (ubicacion.trim()) params.set("loc", ubicacion.trim());
-        
-        const searchPath = basePath ? `${basePath}/propiedades` : '/busqueda';
+
+        // On a site (custom domain or subdomain), basePath may be "" but we still
+        // need to go to /propiedades (middleware rewrites it to /sites/slug/propiedades).
+        // On the main portal without isSite, fall back to /busqueda.
+        const searchPath = isSite ? `${basePath}/propiedades` : basePath ? `${basePath}/propiedades` : "/busqueda";
         router.push(`${searchPath}?${params.toString()}`);
     };
 

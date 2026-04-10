@@ -84,29 +84,71 @@ export const emailNotificationService = {
         await setDoc(ref, settings, { merge: true });
     },
 
-    sendNotification: async (event: keyof NotificationSettings['events'], data: any, subject: string, message: string) => {
+    sendNotification: async (event: keyof NotificationSettings['events'], data: any, subject: string, message: string, targetEmail?: string) => {
         // 1. Check if notifications are enabled globally
         const settings = await emailNotificationService.getSettings();
-        if (!settings.enabled || settings.recipients.length === 0) return;
+        if (!settings.enabled) return;
 
-        // 2. Check if specific event is enabled
-        if (!settings.events[event]) return;
+        // 2. Determine recipients
+        const recipients = targetEmail ? [targetEmail] : settings.recipients;
+        
+        if (recipients.length === 0) return;
 
-        // 3. Send Email via Resend
+        // 3. Check if specific event is enabled (only for global system notifications, agency leads always send if targetEmail is present)
+        if (!targetEmail && !settings.events[event]) return;
+
+        // 4. Send Email via Resend
         try {
             await sendEmailWithResend({
-                to: settings.recipients,
+                to: recipients,
                 subject: `[ZetaProp Alerta] ${subject}`,
                 html: `
-                    <h2>Nueva Notificación de ZetaProp</h2>
-                    <p><strong>Evento:</strong> ${event}</p>
-                    <p>${message}</p>
-                    <hr />
-                    <h3>Datos:</h3>
-                    <pre>${JSON.stringify(data, null, 2)}</pre>
+                    <div style="font-family: Arial, sans-serif; color: #333; line-height: 1.6; max-width: 600px; margin: 0 auto; border: 1px solid #eee; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 12px rgba(0,0,0,0.05);">
+                        <div style="background: linear-gradient(to r, #4f46e5, #7c3aed); padding: 24px; color: white;">
+                            <h2 style="margin: 0; font-size: 20px;">Nueva Notificación</h2>
+                            <p style="margin: 4px 0 0 0; opacity: 0.8; font-size: 14px;">${event === 'newLead' ? 'Nueva Consulta Recibida' : event}</p>
+                        </div>
+                        <div style="padding: 24px;">
+                            <p style="font-size: 16px; color: #4b5563; margin-top: 0;">${message}</p>
+                            
+                            <div style="background-color: #f9fafb; border-radius: 8px; padding: 16px; margin: 24px 0;">
+                                <h3 style="margin-top: 0; font-size: 14px; color: #9ca3af; text-transform: uppercase; letter-spacing: 0.05em;">Detalles del Lead</h3>
+                                <table style="width: 100%; font-size: 14px;">
+                                    <tr>
+                                        <td style="padding: 4px 0; color: #6b7280; width: 30%;">Nombre:</td>
+                                        <td style="padding: 4px 0; color: #111827; font-weight: 500;">${data.nombre || 'N/A'}</td>
+                                    </tr>
+                                    <tr>
+                                        <td style="padding: 4px 0; color: #6b7280;">Email:</td>
+                                        <td style="padding: 4px 0; color: #111827; font-weight: 500;">${data.email || 'N/A'}</td>
+                                    </tr>
+                                    <tr>
+                                        <td style="padding: 4px 0; color: #6b7280;">Teléfono:</td>
+                                        <td style="padding: 4px 0; color: #111827; font-weight: 500;">${data.telefono || 'N/A'}</td>
+                                    </tr>
+                                </table>
+                            </div>
+
+                            ${data.mensaje ? `
+                            <div style="margin: 24px 0;">
+                                <h3 style="margin-top: 0; font-size: 14px; color: #9ca3af; text-transform: uppercase; letter-spacing: 0.05em;">Mensaje:</h3>
+                                <div style="background-color: #fff; border: 1px solid #e5e7eb; border-radius: 8px; padding: 16px; font-style: italic; color: #374151;">
+                                    "${data.mensaje}"
+                                </div>
+                            </div>
+                            ` : ''}
+
+                            <div style="text-align: center; margin-top: 32px;">
+                                <a href="https://zetaprop.com.ar/dashboard/leads" style="display: inline-block; background-color: #4f46e5; color: white; padding: 12px 24px; text-decoration: none; border-radius: 8px; font-weight: 600; font-size: 14px;">Gestionar en el Panel</a>
+                            </div>
+                        </div>
+                        <div style="background-color: #f9fafb; padding: 16px; text-align: center; border-top: 1px solid #eee;">
+                            <p style="margin: 0; font-size: 12px; color: #9ca3af;">ZetaProp - Gestión Inmobiliaria Inteligente</p>
+                        </div>
+                    </div>
                 `,
             });
-            console.log(`Notification sent for ${event} to ${settings.recipients.length} recipients.`);
+            console.log(`Notification sent for ${event} to ${recipients.join(', ')}.`);
         } catch (error) {
             console.error("Failed to send email notification", error);
         }

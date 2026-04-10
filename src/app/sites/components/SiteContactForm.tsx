@@ -6,17 +6,50 @@ import { Site } from "@/domain/models/Site";
 
 interface SiteContactFormProps {
   site: Site;
+  propertyId?: string;
+  propertyTitle?: string;
 }
 
-export default function SiteContactForm({ site }: SiteContactFormProps) {
-  const [status, setStatus] = useState<"idle" | "loading" | "success">("idle");
+export default function SiteContactForm({ site, propertyId, propertyTitle }: SiteContactFormProps) {
+  const [formData, setFormData] = useState({
+    nombre: "",
+    email: "",
+    tel: "",
+    mensaje: "",
+  });
+  const [status, setStatus] = useState<"idle" | "loading" | "success" | "error">("idle");
   const primary = site.colorPrimario || "#4f46e5";
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setStatus("loading");
-    // Simulate sending
-    setTimeout(() => setStatus("success"), 1500);
+    
+    try {
+      const { leadsService } = await import("@/infrastructure/services/leadsService");
+      
+      await leadsService.createLead({
+        nombre: formData.nombre,
+        email: formData.email,
+        telefono: formData.tel,
+        mensaje: formData.mensaje,
+        userId: site.userId,
+        tipo: 'consulta',
+        estado: 'nuevo',
+        origen: 'web',
+        notas: [],
+        propertyId,
+        propertyTitle,
+      }, site.email);
+
+      setStatus("success");
+    } catch (error) {
+      console.error("Error sending lead:", error);
+      setStatus("error");
+    }
+  };
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    setFormData(prev => ({ ...prev, [e.target.name]: e.target.value }));
   };
 
   if (status === "success") {
@@ -28,7 +61,10 @@ export default function SiteContactForm({ site }: SiteContactFormProps) {
         <h3 className="text-2xl font-bold text-gray-900 mb-2">¡Mensaje enviado!</h3>
         <p className="text-gray-500">Nos pondremos en contacto con vos a la brevedad. Gracias por confiar en {site.nombre}.</p>
         <button 
-          onClick={() => setStatus("idle")}
+          onClick={() => {
+            setFormData({ nombre: "", email: "", tel: "", mensaje: "" });
+            setStatus("idle");
+          }}
           className="mt-8 text-sm font-bold uppercase tracking-widest text-gray-400 hover:text-gray-900 transition-colors"
         >
           Enviar otro mensaje
@@ -79,6 +115,9 @@ export default function SiteContactForm({ site }: SiteContactFormProps) {
                             <input 
                                 required
                                 type="text"
+                                name="nombre"
+                                value={formData.nombre}
+                                onChange={handleChange}
                                 className="w-full px-5 py-4 bg-gray-50 border-none rounded-2xl text-gray-900 placeholder-gray-300 focus:ring-2 focus:ring-indigo-500 transition-all outline-none"
                                 placeholder="Tu nombre completo"
                             />
@@ -88,6 +127,9 @@ export default function SiteContactForm({ site }: SiteContactFormProps) {
                             <input 
                                 required
                                 type="email"
+                                name="email"
+                                value={formData.email}
+                                onChange={handleChange}
                                 className="w-full px-5 py-4 bg-gray-50 border-none rounded-2xl text-gray-900 placeholder-gray-300 focus:ring-2 focus:ring-indigo-500 transition-all outline-none"
                                 placeholder="ejemplo@correo.com"
                             />
@@ -98,6 +140,9 @@ export default function SiteContactForm({ site }: SiteContactFormProps) {
                         <input 
                             required
                             type="tel"
+                            name="tel"
+                            value={formData.tel}
+                            onChange={handleChange}
                             className="w-full px-5 py-4 bg-gray-50 border-none rounded-2xl text-gray-900 placeholder-gray-300 focus:ring-2 focus:ring-indigo-500 transition-all outline-none"
                             placeholder="Ej: +54 9 11 1234-5678"
                         />
@@ -106,11 +151,19 @@ export default function SiteContactForm({ site }: SiteContactFormProps) {
                         <label className="block text-xs font-bold uppercase tracking-widest text-gray-400 mb-2 ml-1">Mensaje</label>
                         <textarea 
                             required
+                            name="mensaje"
+                            value={formData.mensaje}
+                            onChange={handleChange}
                             rows={4}
                             className="w-full px-5 py-4 bg-gray-50 border-none rounded-2xl text-gray-900 placeholder-gray-300 focus:ring-2 focus:ring-indigo-500 transition-all outline-none resize-none"
                             placeholder="¿En qué podemos ayudarte?"
                         />
                     </div>
+                    
+                    {status === "error" && (
+                      <p className="text-red-500 text-sm font-medium text-center">Hubo un error al enviar el mensaje. Reintentá en unos segundos.</p>
+                    )}
+
                     <button
                         disabled={status === "loading"}
                         className="w-full py-5 rounded-2xl text-white font-bold uppercase tracking-[0.2em] text-sm shadow-xl hover:scale-[1.02] active:scale-[0.98] transition-all disabled:opacity-50"

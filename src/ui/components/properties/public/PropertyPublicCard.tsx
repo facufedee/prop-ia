@@ -5,13 +5,16 @@ import Link from "next/link";
 import NextImage from "next/image";
 import { PublicProperty } from "@/infrastructure/services/publicService";
 import { MapPin, Bath, Bed, Maximize, Home, ChevronLeft, ChevronRight } from "lucide-react";
+import { useSite } from "@/app/sites/[slug]/SiteProvider";
 
 interface PropertyPublicCardProps {
     property: PublicProperty;
     basePath?: string;
 }
 
-export default function PropertyPublicCard({ property, basePath = "" }: PropertyPublicCardProps) {
+export default function PropertyPublicCard({ property, basePath: propBasePath }: PropertyPublicCardProps) {
+    const { basePath: contextBasePath } = useSite();
+    const basePath = propBasePath || contextBasePath || "";
     const [currentImageIndex, setCurrentImageIndex] = useState(0);
 
     const formatPrice = (currency: string, price: number) => {

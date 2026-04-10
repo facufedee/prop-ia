@@ -5,12 +5,12 @@ import { marketingEmailService } from '@/infrastructure/services/marketingEmailS
 export async function POST(request: Request) {
     try {
         const body = await request.json();
-        const { event, data, subject, message } = body;
+        const { event, data, subject, message, recipientEmail } = body;
 
-        console.log(`[API] Notification trigger received for event: ${event}`, data);
+        console.log(`[API] Notification trigger received for event: ${event}`, { ...data, recipientEmail });
 
         if (event === 'test') {
-            const result = await emailNotificationService.sendTestEmail(data.recipients);
+            const result = await emailNotificationService.sendTestEmail(data.recipients || [recipientEmail]);
             return NextResponse.json({ success: result });
         }
 
@@ -56,7 +56,7 @@ export async function POST(request: Request) {
         }
 
         // Delegate to the service (which runs server-side here)
-        await emailNotificationService.sendNotification(event, data, subject, message);
+        await emailNotificationService.sendNotification(event, data, subject, message, recipientEmail);
 
         return NextResponse.json({ success: true });
     } catch (error) {

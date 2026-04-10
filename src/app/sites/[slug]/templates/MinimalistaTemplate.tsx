@@ -9,6 +9,7 @@ import PropertyPublicCard from "@/ui/components/properties/public/PropertyPublic
 import SiteNavbar from "../../components/SiteNavbar";
 import SiteFooter from "../../components/SiteFooter";
 import SiteContactForm from "../../components/SiteContactForm";
+import { useSite } from "../SiteProvider";
 
 interface Props {
     site: Site;
@@ -16,17 +17,19 @@ interface Props {
     basePath: string;
 }
 
-export default function MinimalistaTemplate({ site, properties, basePath }: Props) {
+export default function MinimalistaTemplate({ site, properties }: Omit<Props, "basePath">) {
+    const { basePath } = useSite();
     return (
         <div className="min-h-screen bg-white transition-all font-sans" style={{ fontFamily: "'Outfit', sans-serif" }}>
             <SiteNavbar site={site} basePath={basePath} transparent />
 
             {/* ── Hero ── */}
-            <PropertyHero 
+            <PropertyHero
                 title={site.nombre}
                 subtitle={site.descripcion || "Diseño y exclusividad inmobiliaria"}
                 coverUrl={site.coverUrl}
                 basePath={basePath}
+                isSite
             />
 
             {/* ── Properties ── */}

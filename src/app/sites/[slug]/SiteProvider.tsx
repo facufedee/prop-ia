@@ -25,18 +25,25 @@ export function useSite() {
 interface Props {
     children: React.ReactNode;
     initialSite: SitePayload | null;
+    initialBasePath?: string;
 }
 
-export default function SiteProvider({ children, initialSite }: Props) {
+export default function SiteProvider({ children, initialSite, initialBasePath = "" }: Props) {
     const site = initialSite ? payloadToSite(initialSite) : null;
 
     // basePath: "" on custom domains, "/sites/slug" when accessed via platform path
-    const [basePath, setBasePath] = useState("");
+    // Initialized from server prop to avoid hydration mismatch
+    const [basePath, setBasePath] = useState(initialBasePath);
 
     useEffect(() => {
+        // Keep it in sync if the user navigates? (Actually basePath is stable for a given site instance)
+        // But window.location is client-only truth.
         const onSitePath = window.location.pathname.startsWith("/sites/");
-        setBasePath(onSitePath ? `/sites/${initialSite?.slug ?? ""}` : "");
-    }, [initialSite?.slug]);
+        const currentBasePath = onSitePath ? `/sites/${initialSite?.slug ?? ""}` : "";
+        if (currentBasePath !== basePath) {
+            setBasePath(currentBasePath);
+        }
+    }, [initialSite?.slug, basePath]);
 
     // Inject CSS custom properties for site theme
     useEffect(() => {

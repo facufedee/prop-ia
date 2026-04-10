@@ -9,6 +9,7 @@ import PropertyPublicCard from "@/ui/components/properties/public/PropertyPublic
 import SiteNavbar from "../../components/SiteNavbar";
 import SiteFooter from "../../components/SiteFooter";
 import SiteContactForm from "../../components/SiteContactForm";
+import { useSite } from "../SiteProvider";
 
 interface Props {
     site: Site;
@@ -16,7 +17,8 @@ interface Props {
     basePath: string;
 }
 
-export default function ClasicoTemplate({ site, properties, basePath }: Props) {
+export default function ClasicoTemplate({ site, properties }: Omit<Props, "basePath">) {
+    const { basePath } = useSite();
     const primary = site.colorPrimario;
 
     return (
@@ -24,11 +26,12 @@ export default function ClasicoTemplate({ site, properties, basePath }: Props) {
             <SiteNavbar site={site} basePath={basePath} transparent />
 
             {/* ── Hero ── */}
-            <PropertyHero 
+            <PropertyHero
                 title={site.nombre}
                 subtitle={site.descripcion || "Excelencia en gestión inmobiliaria"}
                 coverUrl={site.coverUrl}
                 basePath={basePath}
+                isSite
             />
 
             {/* ── Properties ── */}

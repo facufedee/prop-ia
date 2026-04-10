@@ -49,7 +49,7 @@ export const leadsService = {
     },
 
     // Create new lead (with Unification Logic)
-    createLead: async (data: Omit<Lead, "id" | "createdAt" | "updatedAt">): Promise<string> => {
+    createLead: async (data: Omit<Lead, "id" | "createdAt" | "updatedAt">, recipientEmail?: string): Promise<string> => {
         if (!db) throw new Error("Firestore not initialized");
         const leadsRef = collection(db, COLLECTION_NAME);
 
@@ -141,7 +141,8 @@ export const leadsService = {
                     event: 'newLead',
                     data: { ...data, id: docRef.id },
                     subject: `Nueva Consulta de ${data.nombre}`,
-                    message: `Has recibido una nueva consulta de <strong>${data.nombre}</strong> para la propiedad <strong>${data.propertyTitle || 'N/A'}</strong>.`
+                    message: `Has recibido una nueva consulta de <strong>${data.nombre}</strong> para la propiedad <strong>${data.propertyTitle || 'N/A'}</strong>.`,
+                    recipientEmail
                 })
             }).catch(err => console.error("Failed to trigger notification:", err));
 

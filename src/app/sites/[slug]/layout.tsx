@@ -1,6 +1,7 @@
 import { Metadata } from "next";
 import SiteProvider from "./SiteProvider";
 import { getSitePayload } from "./siteData";
+import { headers } from "next/headers";
 
 // ISR: revalidate every 60 s — site config rarely changes
 export const revalidate = 60;
@@ -49,6 +50,11 @@ export default async function SiteLayout({
     params: Promise<{ slug: string }>;
 }) {
     const { slug } = await params;
+    const headerList = await headers();
+    const host = headerList.get("host") || "";
+    // Detect if we are on the main platform or a custom domain
+    const isPlatformHost = host.includes("zetaprop.com.ar") || host.includes("localhost") || host.includes(".vercel.app");
+    const basePath = isPlatformHost ? `/sites/${slug}` : "";
 
     let site = null;
     try {
@@ -57,5 +63,5 @@ export default async function SiteLayout({
         console.error("[SiteLayout] getSitePayload failed:", err);
     }
 
-    return <SiteProvider initialSite={site}>{children}</SiteProvider>;
+    return <SiteProvider initialSite={site} initialBasePath={basePath}>{children}</SiteProvider>;
 }
