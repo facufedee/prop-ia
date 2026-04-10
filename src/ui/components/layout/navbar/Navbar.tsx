@@ -70,11 +70,11 @@ export default function Navbar() {
             : "bg-[#080810] border-b border-white/10 py-3 md:bg-transparent md:border-transparent md:py-5"}
       `}
     >
-      <div className="flex items-center justify-between max-w-7xl mx-auto px-6">
+      <div className="flex items-center justify-between max-w-[1400px] mx-auto px-4 sm:px-8">
 
         {/* Logo */}
         <Link href="/" className="flex items-center gap-2 hover:opacity-80 transition-opacity">
-          <div className={`relative h-10 w-40 md:h-16 md:w-64 transition-transform duration-300 ${scrolled ? 'scale-95' : 'scale-100'}`}>
+          <div className={`relative h-10 w-32 lg:h-12 lg:w-48 xl:h-16 xl:w-64 transition-transform duration-300 ${scrolled ? 'scale-95' : 'scale-100'}`}>
             {/* On mobile: always dark bg → always use white/dark logo. On desktop: respect scroll/page state */}
             <Image
               src="/assets/img/logo_zeta_prop_transparent.png"
@@ -88,7 +88,7 @@ export default function Navbar() {
         </Link>
 
         {/* Desktop menu */}
-        <div className={`hidden md:flex items-center gap-8 text-lg font-medium transition-colors ${isDarkHero ? 'text-white/80' : 'text-gray-700'}`}>
+        <div className={`hidden md:flex items-center lg:gap-4 xl:gap-8 text-base xl:text-lg font-medium transition-colors ${isDarkHero ? 'text-white/80' : 'text-gray-700'}`}>
           <Link href="/servicios" className={`transition-colors ${isDarkHero ? 'hover:text-white' : 'hover:text-indigo-600'}`}>
             Servicios
           </Link>

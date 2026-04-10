@@ -11,6 +11,7 @@ export interface Tutorial {
     title: string;
     description: string;
     icon: any;
+    category: 'propiedades' | 'clientes' | 'alquileres' | 'marketing' | 'ia';
     steps: TutorialStep[];
 }
 
@@ -20,6 +21,7 @@ export const TUTORIALS: Tutorial[] = [
         title: "Carga de Propiedades",
         description: "Aprende a publicar una nueva propiedad en el sistema paso a paso.",
         icon: Home,
+        category: "propiedades",
         steps: [
             {
                 title: "Acceder al Módulo",
@@ -60,6 +62,7 @@ export const TUTORIALS: Tutorial[] = [
         title: "Carga de Inquilinos",
         description: "Registra nuevos inquilinos para asociarlos a contratos.",
         icon: Users,
+        category: "clientes",
         steps: [
             {
                 title: "Acceder a Clientes",
@@ -88,6 +91,7 @@ export const TUTORIALS: Tutorial[] = [
         title: "Carga de Propietarios",
         description: "Da de alta propietarios para asignarles sus inmuebles.",
         icon: Users2,
+        category: "clientes",
         steps: [
             {
                 title: "Acceder a Clientes",
@@ -120,6 +124,7 @@ export const TUTORIALS: Tutorial[] = [
         title: "Carga de Alquileres",
         description: "Crea y administra contratos de alquiler.",
         icon: Key,
+        category: "alquileres",
         steps: [
             {
                 title: "Módulo Alquileres",
@@ -152,6 +157,7 @@ export const TUTORIALS: Tutorial[] = [
         title: "Carga de Emprendimientos",
         description: "Gestiona desarrollos inmobiliarios y sus unidades.",
         icon: Building2,
+        category: "propiedades",
         steps: [
             {
                 title: "Sección Emprendimientos",
@@ -180,6 +186,7 @@ export const TUTORIALS: Tutorial[] = [
         title: "Carga de Consorcio",
         description: "Guía para la administración de consorcios.",
         icon: Briefcase,
+        category: "alquileres",
         steps: [
             {
                 title: "Nota Importante",
@@ -204,6 +211,7 @@ export const TUTORIALS: Tutorial[] = [
         title: "Tasador Online",
         description: "Utiliza la inteligencia artificial para tasar propiedades.",
         icon: Calculator,
+        category: "ia",
         steps: [
             {
                 title: "Acceso",

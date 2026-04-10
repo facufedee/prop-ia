@@ -147,44 +147,47 @@ export default function Hero() {
             <div ref={bgRef} className="absolute inset-0 pointer-events-none transition-opacity duration-300"
                 style={{ background: `rgba(8,8,16,0)` }} />
 
-            <div className="relative z-10 max-w-7xl mx-auto px-5 sm:px-8 lg:px-16 w-full">
-                <div className="grid lg:grid-cols-[1fr_420px] gap-14 items-center">
+            <div className="relative z-10 max-w-[1400px] mx-auto px-5 sm:px-8 lg:px-12 w-full">
+                <div className="grid lg:grid-cols-[1fr_380px] xl:grid-cols-[1fr_420px] gap-8 lg:gap-12 xl:gap-20 items-center">
 
                     {/* LEFT — text scrolls up slightly on scroll */}
                     <div ref={textGroupRef} className="flex flex-col text-center lg:text-left items-center lg:items-start w-full" style={{ transform: `translateY(0px)`, opacity: 1, transition: "opacity 0.1s" }}>
 
                         {/* Main headline */}
-                        <h1 className="text-4xl sm:text-5xl lg:text-5xl xl:text-6xl font-extrabold leading-[1.08] tracking-tight text-white mb-6">
-                            ¡El portal que se adapta<br className="hidden lg:block" />
-                            <span className="text-gradient"> a las necesidades</span><br />
-                            de tu inmobiliaria!
+                        <h1 className="text-4xl sm:text-5xl lg:text-[2.75rem] xl:text-6xl font-extrabold leading-[1.08] tracking-tight text-white mb-6">
+                            El CRM que impulsa tu<br className="hidden lg:block" />
+                            inmobiliaria al<br className="hidden lg:block" />
+                            <span className="text-gradient"> futuro digital.</span>
                         </h1>
 
                         {/* Subtitle */}
-                        <div className="text-gray-300 text-[15px] sm:text-lg leading-relaxed max-w-lg mx-auto lg:mx-0 mb-10 space-y-4">
+                        <div className="text-gray-300 text-[15px] sm:text-lg leading-relaxed max-w-xl mx-auto lg:mx-0 mb-10">
                             <p>
-                                Mucho más que una web de avisos: somos el{" "}
-                                <span className="text-white font-semibold">sistema operativo de tu inmobiliaria</span>,{" "}
-                                diseñado para que recuperes el control de tu oficina.
+                                Centralizá la <span className="text-white font-semibold">gestión de clientes y leads</span>,
+                                automatizá el seguimiento y tomá el control total de tus <span className="text-white font-semibold">alquileres</span> desde un solo lugar.
+                                Además, proyectá una imagen profesional con tu propia <span className="text-indigo-300 font-semibold">página web directamente conectada</span> a nuestro sistema.
                             </p>
-                            <p>
-                                En Zeta Prop no sos un número de cliente;{" "}
-                                <span className="text-indigo-300 font-semibold">crecemos desde las bases con vos</span>,
-                                escuchando cada una de tus sugerencias para evolucionar juntos.
+                            <p className="mt-4 text-gray-400 italic text-sm sm:text-base">
+                                Evolucionamos con vos, adaptándonos a cada requerimiento de tu inmobiliaria.
                             </p>
                         </div>
 
                         {/* CTAs */}
-                        <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 mb-10 w-full sm:w-auto">
-                            <Link href="/register"
-                                className="group flex items-center justify-center gap-3 px-6 py-4 sm:px-8 bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-[15px] sm:text-base rounded-2xl transition-all duration-200 hover:shadow-2xl hover:shadow-indigo-500/30 active:scale-95">
-                                Registrá tu Inmobiliaria Gratis
-                                <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform flex-shrink-0" />
-                            </Link>
-                            <Link href="/precios"
-                                className="flex items-center justify-center gap-2 px-6 py-4 sm:px-8 text-gray-200 hover:text-white font-semibold text-[15px] sm:text-base rounded-2xl border border-white/15 hover:border-white/30 hover:bg-white/[0.08] transition-all duration-200">
-                                Ver planes y precios
-                            </Link>
+                        <div className="flex flex-col items-center lg:items-start gap-3 mb-10 w-full">
+                            <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 w-full sm:w-auto">
+                                <Link href="/register"
+                                    className="group flex items-center justify-center gap-3 px-6 py-4 sm:px-8 bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-[15px] sm:text-base rounded-2xl transition-all duration-200 hover:shadow-2xl hover:shadow-indigo-500/30 active:scale-95">
+                                    ¡Probá Zeta Prop Gratis!
+                                    <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform flex-shrink-0" />
+                                </Link>
+                                <Link href="/precios"
+                                    className="flex items-center justify-center gap-2 px-6 py-4 sm:px-8 text-gray-200 hover:text-white font-semibold text-[15px] sm:text-base rounded-2xl border border-white/15 hover:border-white/30 hover:bg-white/[0.08] transition-all duration-200">
+                                    Ver planes y precios
+                                </Link>
+                            </div>
+                            <p className="text-[12px] sm:text-[13px] text-gray-400 font-medium px-2">
+                                <span className="text-white font-bold">Sin tarjetas, sin pagos anticipados, ¡NADA!</span> Activación instantánea en un clic.
+                            </p>
                         </div>
 
                         {/* Trust pills */}
