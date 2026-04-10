@@ -21,7 +21,7 @@ const globalLimiter = new InMemoryRateLimiter({
 
 // Cache for domain lookups (short-lived)
 const domainCache = new Map<string, { slug: string | null; expiry: number }>();
-const CACHE_TTL = 30 * 1000; // 30 seconds
+const CACHE_TTL = 5 * 60 * 1000; // 5 minutes
 
 // ── Helpers ──────────────────────────────────────────────────────────────────
 
@@ -66,7 +66,12 @@ export async function proxy(request: NextRequest) {
     const host = request.headers.get('x-forwarded-host') || request.headers.get('host') || '';
     const url = request.nextUrl.clone();
     const originalPath = url.pathname === '/' ? '' : url.pathname;
-    
+
+    // Skip rate limiting and auth for all Next.js internal requests
+    if (pathname.startsWith('/_next/') || pathname === '/favicon.ico') {
+        return NextResponse.next();
+    }
+
     let targetSlug: string | null = null;
     let lookupError: string | null = null;
 
@@ -76,7 +81,7 @@ export async function proxy(request: NextRequest) {
             const ip = getClientIp(request);
             try {
                 // Global limit
-                await globalLimiter.check(ip, 60); // 60 req/min
+                await globalLimiter.check(ip, 120); // 120 req/min
             } catch {
                 return new NextResponse('Too Many Requests', { status: 429 });
             }
@@ -165,11 +170,9 @@ export const config = {
     matcher: [
         /*
          * Match all request paths except for the ones starting with:
-         * - api (API routes - handled separately or skipped)
-         * - _next/static (static files)
-         * - _next/image (image optimization files)
-         * - favicon.ico (favicon file)
+         * - _next (all Next.js internals: static, image, data, chunks, webpack)
+         * - favicon.ico
          */
-        '/((?!_next/static|_next/image|favicon.ico).*)',
+        '/((?!_next|favicon.ico).*)',
     ],
 };
