@@ -41,12 +41,28 @@ export default function PropiedadDetailPage() {
         publicService.getPropertyById(params.id).then((p) => {
             setProperty(p);
             setLoading(false);
-            
+
             // Check if saved
             const saved = localStorage.getItem(`saved_${params.id}`);
             if (saved) setIsSaved(true);
         }).catch(() => setLoading(false));
     }, [params?.id]);
+
+    // Keyboard nav for lightbox — must be before any early returns (Rules of Hooks)
+    useEffect(() => {
+        if (!lightboxOpen || !property) return;
+        const total = [
+            ...(property.imageUrls || []),
+            ...(property.video_url && getYouTubeId(property.video_url) ? [property.video_url] : []),
+        ].length;
+        const handler = (e: KeyboardEvent) => {
+            if (e.key === "Escape") setLightboxOpen(false);
+            if (e.key === "ArrowRight") setCurrentImageIndex(i => (i + 1) % total);
+            if (e.key === "ArrowLeft")  setCurrentImageIndex(i => (i - 1 + total) % total);
+        };
+        window.addEventListener("keydown", handler);
+        return () => window.removeEventListener("keydown", handler);
+    }, [lightboxOpen, property]);
 
     if (!site) return null;
     const primary = site.colorPrimario || "#4f46e5";
@@ -107,18 +123,6 @@ export default function PropiedadDetailPage() {
     ].filter((item: any) => item.type === 'video' ? !!item.videoId : true);
 
     const currentMedia = mediaItems[currentImageIndex];
-
-    // Keyboard nav for lightbox
-    useEffect(() => {
-        if (!lightboxOpen) return;
-        const handler = (e: KeyboardEvent) => {
-            if (e.key === "Escape") setLightboxOpen(false);
-            if (e.key === "ArrowRight") setCurrentImageIndex(i => (i + 1) % mediaItems.length);
-            if (e.key === "ArrowLeft")  setCurrentImageIndex(i => (i - 1 + mediaItems.length) % mediaItems.length);
-        };
-        window.addEventListener("keydown", handler);
-        return () => window.removeEventListener("keydown", handler);
-    }, [lightboxOpen, mediaItems.length]);
 
     const waMessage = encodeURIComponent(`Hola! Me interesa la propiedad: ${property.title}. Link: ${window.location.href}`);
     const waUrl = site.whatsapp

@@ -22,7 +22,9 @@ export async function generateMetadata(
     const descripcion = site.descripcion || `Portal inmobiliario de ${nombre}`;
 
     return {
-        ...(site.faviconUrl ? { icons: { icon: site.faviconUrl, apple: site.faviconUrl } } : {}),
+        icons: site.faviconUrl
+            ? { icon: site.faviconUrl, apple: site.faviconUrl }
+            : { icon: [], apple: [] }, // suppress Next.js default icon.png request on custom domains
         title:       `${nombre} | Portal Inmobiliario`,
         description: descripcion,
         openGraph: {
