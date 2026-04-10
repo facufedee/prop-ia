@@ -1,8 +1,14 @@
 "use client";
 
 import { GoogleMap, useJsApiLoader, MarkerF } from '@react-google-maps/api';
-import { useMemo } from 'react';
+import { useEffect, useState, useMemo } from 'react';
 import { Loader2 } from 'lucide-react';
+
+declare global {
+    interface Window {
+        gm_authFailure: () => void;
+    }
+}
 
 const containerStyle = {
     width: '100%',
@@ -17,7 +23,16 @@ interface PublicMapProps {
 const libraries: ("places" | "drawing" | "geometry" | "visualization")[] = ["places"];
 
 export default function PublicMap({ lat, lng }: PublicMapProps) {
+    const [mapError, setMapError] = useState(false);
     const apiKey = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY;
+
+    // Detect Google Maps Authentication Failure (like RefererNotAllowed)
+    useEffect(() => {
+        window.gm_authFailure = () => {
+            console.warn("Google Maps API Key rejected (Auth Failure). Falling back to iframe.");
+            setMapError(true);
+        };
+    }, []);
 
     const { isLoaded, loadError } = useJsApiLoader({
         id: 'google-map-script',
@@ -31,8 +46,8 @@ export default function PublicMap({ lat, lng }: PublicMapProps) {
     }), [lat, lng]);
 
     // Fallback if no API Key is provided OR if there is a Load Error (e.g. RefererNotAllowed)
-    if (!apiKey || loadError) {
-        if (loadError) console.warn("Google Maps Load Error (Referer/Key?):", loadError);
+    if (!apiKey || loadError || mapError) {
+        if (loadError || mapError) console.warn("Google Maps Load Error (Referer/Key?):", loadError || "Auth Failure");
         return (
             <iframe
                 width="100%"
