@@ -23,24 +23,24 @@ export default function SiteContactForm({ site, propertyId, propertyTitle }: Sit
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setStatus("loading");
-    
-    try {
-      const { leadsService } = await import("@/infrastructure/services/leadsService");
-      
-      await leadsService.createLead({
-        nombre: formData.nombre,
-        email: formData.email,
-        telefono: formData.tel,
-        mensaje: formData.mensaje,
-        userId: site.userId,
-        tipo: 'consulta',
-        estado: 'nuevo',
-        origen: 'web',
-        notas: [],
-        propertyId,
-        propertyTitle,
-      }, site.email);
 
+    try {
+      const res = await fetch("/api/leads", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          nombre: formData.nombre,
+          email: formData.email,
+          telefono: formData.tel,
+          mensaje: formData.mensaje,
+          userId: site.userId,
+          origen: "web",
+          propertyId,
+          propertyTitle,
+        }),
+      });
+
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
       setStatus("success");
     } catch (error) {
       console.error("Error sending lead:", error);

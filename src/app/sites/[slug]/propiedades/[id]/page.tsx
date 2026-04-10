@@ -11,6 +11,7 @@ import {
     Share2, Heart, PlayCircle, Home, X
 } from "lucide-react";
 import { useSite } from "../../SiteProvider";
+import { Site } from "@/domain/models/Site";
 import { publicService, PublicProperty } from "@/infrastructure/services/publicService";
 import SiteNavbar from "../../../components/SiteNavbar";
 import SiteFooter from "../../../components/SiteFooter";
@@ -25,6 +26,154 @@ function getYouTubeId(url: string) {
     const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|&v=)([\w-]{11}).*/;
     const match = url.match(regExp);
     return match ? match[2] : null;
+}
+
+// ── Sidebar contact card with inline lead form ────────────────────────────────
+
+interface SidebarContactCardProps {
+    site: Site;
+    primary: string;
+    waUrl: string | null;
+    propertyId: string;
+    propertyTitle: string;
+}
+
+function SidebarContactCard({ site, primary, waUrl, propertyId, propertyTitle }: SidebarContactCardProps) {
+    const [tab, setTab] = useState<"contacto" | "form">("contacto");
+    const [form, setForm] = useState({ nombre: "", email: "", telefono: "", mensaje: "" });
+    const [status, setStatus] = useState<"idle" | "loading" | "success" | "error">("idle");
+
+    if (!site) return null;
+
+    const handleSubmit = async (e: React.FormEvent) => {
+        e.preventDefault();
+        setStatus("loading");
+        try {
+            const res = await fetch("/api/leads", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    nombre: form.nombre,
+                    email: form.email,
+                    telefono: form.telefono,
+                    mensaje: form.mensaje || `Consulta sobre: ${propertyTitle}`,
+                    userId: site.userId,
+                    propertyId,
+                    propertyTitle,
+                    origen: "web-propiedad",
+                }),
+            });
+            if (!res.ok) throw new Error();
+            setStatus("success");
+        } catch {
+            setStatus("error");
+        }
+    };
+
+    return (
+        <div className="bg-white rounded-[32px] shadow-xl shadow-black/5 border border-gray-100 overflow-hidden">
+            {/* Agency header */}
+            <div className="flex items-center gap-4 p-8 pb-6">
+                <div className="relative w-14 h-14 rounded-2xl overflow-hidden bg-gray-50 border border-gray-100 p-1.5 flex-shrink-0">
+                    {site.logoUrl ? (
+                        <Image src={site.logoUrl} alt={site.nombre} fill className="object-contain p-1" />
+                    ) : (
+                        <Building2 className="w-full h-full text-gray-200" />
+                    )}
+                </div>
+                <div className="min-w-0">
+                    <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-0.5">Publicado por</p>
+                    <h3 className="text-lg font-black text-gray-900 truncate">{site.nombre}</h3>
+                </div>
+            </div>
+
+            {/* Tab switcher */}
+            <div className="flex border-b border-gray-100 mx-8 mb-6">
+                <button
+                    onClick={() => setTab("contacto")}
+                    className={`pb-3 text-xs font-bold uppercase tracking-widest transition-colors mr-6 ${tab === "contacto" ? "border-b-2 text-gray-900" : "text-gray-400 hover:text-gray-600"}`}
+                    style={tab === "contacto" ? { borderColor: primary } : {}}
+                >
+                    Contacto rápido
+                </button>
+                <button
+                    onClick={() => setTab("form")}
+                    className={`pb-3 text-xs font-bold uppercase tracking-widest transition-colors ${tab === "form" ? "border-b-2 text-gray-900" : "text-gray-400 hover:text-gray-600"}`}
+                    style={tab === "form" ? { borderColor: primary } : {}}
+                >
+                    Dejar consulta
+                </button>
+            </div>
+
+            <div className="px-8 pb-8">
+                {tab === "contacto" ? (
+                    <div className="space-y-3">
+                        {waUrl && (
+                            <a href={waUrl} target="_blank" rel="noopener noreferrer"
+                                className="flex items-center justify-center gap-3 w-full py-4 bg-[#25D366] hover:bg-[#1fb354] text-white rounded-2xl font-black text-sm uppercase tracking-widest transition-all active:scale-95 shadow-lg shadow-green-100">
+                                <MessageCircle size={20} /> WhatsApp
+                            </a>
+                        )}
+                        {site.email && (
+                            <a href={`mailto:${site.email}?subject=Consulta: ${propertyTitle}`}
+                                className="flex items-center justify-center gap-3 w-full py-4 bg-white border-2 rounded-2xl font-black text-sm uppercase tracking-widest transition-all active:scale-95 hover:bg-gray-50"
+                                style={{ color: primary, borderColor: primary }}>
+                                <Mail size={20} /> Enviar Email
+                            </a>
+                        )}
+                        {site.whatsapp && (
+                            <a href={`tel:${site.whatsapp.replace(/\D/g, "")}`}
+                                className="flex items-center justify-center gap-3 w-full py-4 text-gray-500 font-bold text-sm tracking-wide">
+                                <Phone size={18} /> {site.whatsapp}
+                            </a>
+                        )}
+                        <button
+                            onClick={() => setTab("form")}
+                            className="w-full py-3 text-xs font-bold uppercase tracking-widest text-gray-400 hover:text-gray-700 transition-colors border border-dashed border-gray-200 rounded-2xl hover:border-gray-300"
+                        >
+                            Dejar mis datos para que me contacten
+                        </button>
+                    </div>
+                ) : status === "success" ? (
+                    <div className="text-center py-6">
+                        <div className="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                            <svg className="w-6 h-6 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                            </svg>
+                        </div>
+                        <p className="font-bold text-gray-900 mb-1">¡Consulta enviada!</p>
+                        <p className="text-sm text-gray-500">{site.nombre} se va a poner en contacto con vos pronto.</p>
+                        <button onClick={() => { setStatus("idle"); setTab("contacto"); setForm({ nombre: "", email: "", telefono: "", mensaje: "" }); }}
+                            className="mt-4 text-xs text-gray-400 hover:text-gray-600 underline">Volver</button>
+                    </div>
+                ) : (
+                    <form onSubmit={handleSubmit} className="space-y-3">
+                        <input required type="text" placeholder="Tu nombre *" value={form.nombre}
+                            onChange={e => setForm(p => ({ ...p, nombre: e.target.value }))}
+                            className="w-full px-4 py-3 bg-gray-50 rounded-xl text-sm text-gray-900 outline-none focus:ring-2 focus:ring-indigo-300 placeholder-gray-400" />
+                        <input type="email" placeholder="Email" value={form.email}
+                            onChange={e => setForm(p => ({ ...p, email: e.target.value }))}
+                            className="w-full px-4 py-3 bg-gray-50 rounded-xl text-sm text-gray-900 outline-none focus:ring-2 focus:ring-indigo-300 placeholder-gray-400" />
+                        <input required type="tel" placeholder="Teléfono / WhatsApp *" value={form.telefono}
+                            onChange={e => setForm(p => ({ ...p, telefono: e.target.value }))}
+                            className="w-full px-4 py-3 bg-gray-50 rounded-xl text-sm text-gray-900 outline-none focus:ring-2 focus:ring-indigo-300 placeholder-gray-400" />
+                        <textarea placeholder="¿Alguna pregunta? (opcional)" value={form.mensaje} rows={3}
+                            onChange={e => setForm(p => ({ ...p, mensaje: e.target.value }))}
+                            className="w-full px-4 py-3 bg-gray-50 rounded-xl text-sm text-gray-900 outline-none focus:ring-2 focus:ring-indigo-300 resize-none placeholder-gray-400" />
+                        {status === "error" && <p className="text-xs text-red-500 text-center">Hubo un error. Intentá de nuevo.</p>}
+                        <button type="submit" disabled={status === "loading"}
+                            className="w-full py-4 rounded-2xl text-white font-black text-sm uppercase tracking-widest transition-all hover:opacity-90 active:scale-95 disabled:opacity-50"
+                            style={{ backgroundColor: primary }}>
+                            {status === "loading" ? "Enviando..." : "Enviar Consulta"}
+                        </button>
+                        <p className="text-[10px] text-gray-400 text-center">
+                            Tu consulta quedará guardada en el sistema y te contactarán a la brevedad.
+                        </p>
+                    </form>
+                )}
+            </div>
+        </div>
+    );
 }
 
 export default function PropiedadDetailPage() {
@@ -304,51 +453,13 @@ export default function PropiedadDetailPage() {
                         </div>
 
                         {/* Contact Agency Card */}
-                        <div className="bg-white rounded-[32px] p-8 shadow-xl shadow-black/5 border border-gray-100">
-                            <div className="flex items-center gap-4 mb-8">
-                                <div className="relative w-16 h-16 rounded-2xl overflow-hidden bg-gray-50 border border-gray-100 p-2">
-                                    {site.logoUrl ? (
-                                        <Image src={site.logoUrl} alt={site.nombre} fill className="object-contain p-2" />
-                                    ) : (
-                                        <Building2 className="w-full h-full text-gray-200" />
-                                    )}
-                                </div>
-                                <div className="min-w-0">
-                                    <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1">Publicado por</p>
-                                    <h3 className="text-xl font-black text-gray-900 truncate">{site.nombre}</h3>
-                                </div>
-                            </div>
-
-                            <div className="space-y-3">
-                                {waUrl && (
-                                    <a
-                                        href={waUrl}
-                                        target="_blank"
-                                        rel="noopener noreferrer"
-                                        className="flex items-center justify-center gap-3 w-full py-4 bg-[#25D366] hover:bg-[#1fb354] text-white rounded-2xl font-black text-sm uppercase tracking-widest transition-all active:scale-95 shadow-lg shadow-green-100"
-                                    >
-                                        <MessageCircle size={20} /> WhatsApp
-                                    </a>
-                                )}
-                                {site.email && (
-                                    <a
-                                        href={`mailto:${site.email}?subject=Consulta: ${property.title}`}
-                                        className="flex items-center justify-center gap-3 w-full py-4 bg-white border-2 rounded-2xl font-black text-sm uppercase tracking-widest transition-all active:scale-95 hover:bg-gray-50"
-                                        style={{ color: primary, borderColor: primary }}
-                                    >
-                                        <Mail size={20} /> Enviar Email
-                                    </a>
-                                )}
-                                {site.whatsapp && (
-                                    <a
-                                        href={`tel:${site.whatsapp.replace(/\D/g, "")}`}
-                                        className="flex items-center justify-center gap-3 w-full py-4 text-gray-500 font-bold text-sm tracking-wide"
-                                    >
-                                        <Phone size={18} /> {site.whatsapp}
-                                    </a>
-                                )}
-                            </div>
-                        </div>
+                        <SidebarContactCard
+                            site={site}
+                            primary={primary}
+                            waUrl={waUrl}
+                            propertyId={property.id}
+                            propertyTitle={property.title}
+                        />
 
                         {/* Disclaimer Small */}
                         <div className="p-6 bg-gray-100/50 rounded-2xl border border-gray-100">

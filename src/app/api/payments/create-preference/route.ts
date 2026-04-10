@@ -7,21 +7,48 @@ import { verifyAuth } from "@/lib/apiAuth";
 
 /** Read and decrypt the MercadoPago config using the Admin SDK (bypasses Firestore auth rules). */
 async function getMpConfig() {
-    const snap = await adminDb.collection("configurations").doc("mercadopago").get();
-    if (!snap.exists) return null;
-    const data = snap.data()!;
+    try {
+        const snap = await adminDb.collection("configurations").doc("mercadopago").get();
+        
+        if (snap.exists) {
+            const data = snap.data()!;
+            const mode: "sandbox" | "production" = data.activeMode ?? data.mode ?? "sandbox";
+            const raw = data[mode] ?? {};
+            
+            // Support old flat structure too
+            const rawKey   = raw.publicKey   ?? (data.mode === mode ? data.publicKey   : "");
+            const rawToken = raw.accessToken ?? (data.mode === mode ? data.accessToken : "");
 
-    const mode: "sandbox" | "production" = data.activeMode ?? data.mode ?? "sandbox";
-    const raw = data[mode] ?? {};
-    // Support old flat structure too
-    const rawKey   = raw.publicKey   ?? (data.mode === mode ? data.publicKey   : "");
-    const rawToken = raw.accessToken ?? (data.mode === mode ? data.accessToken : "");
+            try {
+                const publicKey = decryptConfigValue(rawKey);
+                const accessToken = decryptConfigValue(rawToken);
 
-    return {
-        mode,
-        publicKey:   decryptConfigValue(rawKey),
-        accessToken: decryptConfigValue(rawToken),
-    };
+                if (publicKey && accessToken) {
+                    return { mode, publicKey, accessToken };
+                }
+            } catch (decryptionError: any) {
+                console.warn("⚠️ Firestore MP config decryption failed, falling back to ENV vars:", decryptionError.message);
+            }
+        }
+    } catch (dbError: any) {
+        console.warn("⚠️ Failed to read Firestore MP config, falling back to ENV vars:", dbError.message);
+    }
+
+    // Fallback to Environment Variables
+    const envAccessToken = process.env.MP_ACCESS_TOKEN;
+    const envPublicKey = process.env.NEXT_PUBLIC_MP_PUBLIC_KEY;
+
+    if (envAccessToken && envPublicKey) {
+        // Simple heuristic: if it starts with APP_USR, it's likely production
+        const mode = envAccessToken.startsWith("APP_USR") ? "production" : "sandbox";
+        return {
+            mode: mode as "sandbox" | "production",
+            publicKey: envPublicKey,
+            accessToken: envAccessToken,
+        };
+    }
+
+    return null;
 }
 
 export async function POST(request: NextRequest) {
@@ -129,7 +156,14 @@ export async function POST(request: NextRequest) {
         });
 
     } catch (error: any) {
-        console.error("❌ Create Preference Error:", error.message, error.cause ?? "");
-        return NextResponse.json({ error: "Error creando preferencia de pago" }, { status: 500 });
+        const errorMessage = error.message || "Unknown error";
+        const errorCause = error.cause ? JSON.stringify(error.cause) : "";
+        console.error("❌ Create Preference Error:", errorMessage, errorCause);
+        
+        // Include specific error detail in internal response for easier debugging (optional)
+        return NextResponse.json({ 
+            error: "Error creando preferencia de pago",
+            detail: process.env.NODE_ENV === "development" ? errorMessage : undefined
+        }, { status: 500 });
     }
 }
