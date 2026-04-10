@@ -110,6 +110,8 @@ export default function MiSitioPage() {
 
     const logoInputRef = useRef<HTMLInputElement>(null);
     const coverInputRef = useRef<HTMLInputElement>(null);
+    const faviconInputRef = useRef<HTMLInputElement>(null);
+    const [uploadingFavicon, setUploadingFavicon] = useState(false);
 
     const [form, setForm] = useState<FormData>({ ...DEFAULT_SITE });
 
@@ -138,6 +140,10 @@ export default function MiSitioPage() {
                     customDomain: s.customDomain ?? "",
                     customDomainVerified: s.customDomainVerified ?? false,
                     navItems: s.navItems ?? DEFAULT_NAV_ITEMS,
+                    navbarBg: s.navbarBg ?? "#ffffff",
+                    navbarText: s.navbarText ?? "#111827",
+                    whatsappFloat: s.whatsappFloat ?? false,
+                    faviconUrl: s.faviconUrl ?? "",
                 });
             }
             setLoading(false);
@@ -190,6 +196,20 @@ export default function MiSitioPage() {
             toast.error("Error al subir la imagen");
         } finally {
             setUploadingCover(false);
+        }
+    };
+
+    const handleFaviconUpload = async (file: File) => {
+        if (!user?.uid) return;
+        setUploadingFavicon(true);
+        try {
+            const url = await uploadSiteImage(user.uid, "favicon" as any, file);
+            set("faviconUrl", url);
+            toast.success("Favicon subido");
+        } catch {
+            toast.error("Error al subir el favicon");
+        } finally {
+            setUploadingFavicon(false);
         }
     };
 
@@ -603,6 +623,56 @@ export default function MiSitioPage() {
                                         Si no subís una imagen, se usa el degradado de colores como fondo.
                                     </p>
                                 </div>
+
+                                {/* Favicon upload */}
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
+                                        Favicon <span className="text-gray-400 font-normal">(ícono de pestaña)</span>
+                                    </label>
+                                    <input
+                                        ref={faviconInputRef}
+                                        type="file"
+                                        accept="image/*"
+                                        className="hidden"
+                                        onChange={(e) => {
+                                            const file = e.target.files?.[0];
+                                            if (file) handleFaviconUpload(file);
+                                            e.target.value = "";
+                                        }}
+                                    />
+                                    <div className="flex items-center gap-3">
+                                        {form.faviconUrl ? (
+                                            <>
+                                                <div className="w-10 h-10 rounded-xl border border-gray-200 dark:border-gray-700 overflow-hidden bg-gray-50 dark:bg-gray-800 flex items-center justify-center flex-shrink-0">
+                                                    <Image src={form.faviconUrl} alt="Favicon" width={32} height={32} className="w-8 h-8 object-contain" />
+                                                </div>
+                                                <div className="flex flex-col gap-1">
+                                                    <button onClick={() => faviconInputRef.current?.click()} disabled={uploadingFavicon}
+                                                        className="flex items-center gap-1.5 text-xs text-indigo-600 hover:text-indigo-800 font-medium">
+                                                        {uploadingFavicon ? <Loader2 className="w-3 h-3 animate-spin" /> : <Upload className="w-3 h-3" />}
+                                                        Cambiar favicon
+                                                    </button>
+                                                    <button onClick={() => set("faviconUrl", "")}
+                                                        className="flex items-center gap-1.5 text-xs text-red-500 hover:text-red-700 font-medium">
+                                                        <X className="w-3 h-3" /> Quitar
+                                                    </button>
+                                                </div>
+                                            </>
+                                        ) : (
+                                            <button onClick={() => faviconInputRef.current?.click()} disabled={uploadingFavicon}
+                                                className="flex items-center justify-center gap-2 w-full py-6 rounded-xl border-2 border-dashed border-gray-300 dark:border-gray-600 text-gray-500 dark:text-gray-400 hover:border-indigo-400 hover:text-indigo-500 transition-colors text-sm">
+                                                {uploadingFavicon ? (
+                                                    <><Loader2 className="w-4 h-4 animate-spin" /> Subiendo...</>
+                                                ) : (
+                                                    <><Upload className="w-4 h-4" /> Subir favicon (PNG/ICO 32×32)</>
+                                                )}
+                                            </button>
+                                        )}
+                                    </div>
+                                    <p className="text-xs text-gray-400 mt-1.5">
+                                        Se muestra en la pestaña del navegador. Recomendado: PNG cuadrado de 32×32px o 64×64px.
+                                    </p>
+                                </div>
                             </>
                         )}
 
@@ -648,6 +718,61 @@ export default function MiSitioPage() {
                                                 />
                                             ))}
                                         </div>
+                                    </div>
+                                </div>
+
+                                {/* Navbar colors */}
+                                <div className="pt-4 border-t border-gray-100 dark:border-gray-700">
+                                    <h4 className="text-sm font-semibold text-gray-900 dark:text-white mb-4">Colores del menú de navegación</h4>
+                                    <div className="grid sm:grid-cols-2 gap-5">
+                                        <div>
+                                            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                                                Fondo del menú
+                                            </label>
+                                            <div className="flex items-center gap-3">
+                                                <div className="w-10 h-10 rounded-xl border-2 border-white shadow-md flex-shrink-0" style={{ backgroundColor: form.navbarBg || "#ffffff" }} />
+                                                <input type="color" value={form.navbarBg || "#ffffff"} onChange={(e) => set("navbarBg", e.target.value)} className="w-full h-10 rounded-xl cursor-pointer" />
+                                            </div>
+                                            <div className="flex flex-wrap gap-2 mt-2">
+                                                {["#ffffff", "#111827", "#1e293b", "#0f172a", "#f8fafc", "#fffbeb"].map((c) => (
+                                                    <button key={c} onClick={() => set("navbarBg", c)}
+                                                        className="w-7 h-7 rounded-lg border-2 transition-transform hover:scale-110"
+                                                        style={{ backgroundColor: c, borderColor: form.navbarBg === c ? "#6366f1" : "#e5e7eb" }}
+                                                    />
+                                                ))}
+                                            </div>
+                                        </div>
+                                        <div>
+                                            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                                                Texto del menú
+                                            </label>
+                                            <div className="flex items-center gap-3">
+                                                <div className="w-10 h-10 rounded-xl border-2 border-white shadow-md flex-shrink-0" style={{ backgroundColor: form.navbarText || "#111827" }} />
+                                                <input type="color" value={form.navbarText || "#111827"} onChange={(e) => set("navbarText", e.target.value)} className="w-full h-10 rounded-xl cursor-pointer" />
+                                            </div>
+                                            <div className="flex flex-wrap gap-2 mt-2">
+                                                {["#111827", "#ffffff", "#4f46e5", "#6b7280", "#0ea5e9", "#10b981"].map((c) => (
+                                                    <button key={c} onClick={() => set("navbarText", c)}
+                                                        className="w-7 h-7 rounded-lg border-2 transition-transform hover:scale-110"
+                                                        style={{ backgroundColor: c, borderColor: form.navbarText === c ? "#6366f1" : "#e5e7eb" }}
+                                                    />
+                                                ))}
+                                            </div>
+                                        </div>
+                                    </div>
+                                    {/* Navbar preview */}
+                                    <div className="mt-4 rounded-xl border border-gray-200 dark:border-gray-700 overflow-hidden">
+                                        <div className="px-4 h-12 flex items-center justify-between gap-3 border-b"
+                                            style={{ backgroundColor: form.navbarBg || "#ffffff", borderColor: `${form.navbarText || "#111827"}15` }}>
+                                            <span className="font-bold text-sm" style={{ color: form.navbarText || "#111827" }}>{form.nombre || "Mi Inmobiliaria"}</span>
+                                            <div className="flex gap-4">
+                                                {["Inicio", "Propiedades", "Contacto"].map(l => (
+                                                    <span key={l} className="text-xs font-semibold hidden sm:block" style={{ color: form.navbarText || "#111827" }}>{l}</span>
+                                                ))}
+                                            </div>
+                                            <div className="px-3 py-1.5 rounded-lg text-white text-xs font-semibold" style={{ backgroundColor: form.colorPrimario }}>WhatsApp</div>
+                                        </div>
+                                        <div className="h-8 bg-gray-50 dark:bg-gray-800" />
                                     </div>
                                 </div>
 
@@ -856,6 +981,25 @@ export default function MiSitioPage() {
                         {activeTab === "contacto" && (
                             <>
                                 <h3 className="font-semibold text-gray-900 dark:text-white">Información de contacto</h3>
+
+                                {/* WhatsApp flotante toggle */}
+                                {form.whatsapp && (
+                                    <div className="flex items-center justify-between p-4 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-xl">
+                                        <div className="flex items-center gap-3">
+                                            <MessageCircle className="w-5 h-5 text-green-600 flex-shrink-0" />
+                                            <div>
+                                                <p className="text-sm font-semibold text-gray-900 dark:text-white">Botón flotante de WhatsApp</p>
+                                                <p className="text-xs text-gray-500 dark:text-gray-400">Aparece en todas las páginas de tu sitio para que te contacten más fácil.</p>
+                                            </div>
+                                        </div>
+                                        <button
+                                            onClick={() => set("whatsappFloat", !form.whatsappFloat)}
+                                            className={`relative w-12 h-6 rounded-full transition-colors flex-shrink-0 ${form.whatsappFloat ? "bg-green-500" : "bg-gray-300 dark:bg-gray-600"}`}
+                                        >
+                                            <span className={`absolute top-0.5 w-5 h-5 bg-white rounded-full shadow transition-transform ${form.whatsappFloat ? "translate-x-6" : "translate-x-0.5"}`} />
+                                        </button>
+                                    </div>
+                                )}
 
                                 {[
                                     { field: "whatsapp", label: "WhatsApp", placeholder: "+54 9 11 1234-5678", icon: Phone },

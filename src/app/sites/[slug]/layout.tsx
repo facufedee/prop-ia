@@ -22,6 +22,7 @@ export async function generateMetadata(
     const descripcion = site.descripcion || `Portal inmobiliario de ${nombre}`;
 
     return {
+        ...(site.faviconUrl ? { icons: { icon: site.faviconUrl, apple: site.faviconUrl } } : {}),
         title:       `${nombre} | Portal Inmobiliario`,
         description: descripcion,
         openGraph: {

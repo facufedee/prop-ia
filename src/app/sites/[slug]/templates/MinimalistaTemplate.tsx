@@ -9,6 +9,8 @@ import PropertyPublicCard from "@/ui/components/properties/public/PropertyPublic
 import SiteNavbar from "../../components/SiteNavbar";
 import SiteFooter from "../../components/SiteFooter";
 import SiteContactForm from "../../components/SiteContactForm";
+import SiteSafetySection from "../../components/SiteSafetySection";
+import SiteWhatsAppFloat from "../../components/SiteWhatsAppFloat";
 import { useSite } from "../SiteProvider";
 
 interface Props {
@@ -63,7 +65,9 @@ export default function MinimalistaTemplate({ site, properties }: Omit<Props, "b
             </section>
 
             <SiteContactForm site={site} />
+            <SiteSafetySection site={site} />
             <SiteFooter site={site} basePath={basePath} />
+            <SiteWhatsAppFloat site={site} />
         </div>
     );
 }

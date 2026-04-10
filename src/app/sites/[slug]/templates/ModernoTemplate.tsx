@@ -9,6 +9,8 @@ import PropertyPublicCard from "@/ui/components/properties/public/PropertyPublic
 import SiteNavbar from "../../components/SiteNavbar";
 import SiteFooter from "../../components/SiteFooter";
 import SiteContactForm from "../../components/SiteContactForm";
+import SiteSafetySection from "../../components/SiteSafetySection";
+import SiteWhatsAppFloat from "../../components/SiteWhatsAppFloat";
 import { useSite } from "../SiteProvider";
 
 const QUICK_CATS = [
@@ -95,7 +97,9 @@ export default function ModernoTemplate({ site, properties }: Omit<Props, "baseP
                 <SiteContactForm site={site} />
             </main>
 
+            <SiteSafetySection site={site} />
             <SiteFooter site={site} basePath={basePath} />
+            <SiteWhatsAppFloat site={site} />
         </div>
     );
 }

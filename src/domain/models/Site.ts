@@ -32,6 +32,16 @@ export interface Site {
     // Menú de navegación personalizable
     navItems?: NavItem[];
 
+    // Colores del navbar (default: blanco/#111827)
+    navbarBg?: string;
+    navbarText?: string;
+
+    // WhatsApp flotante
+    whatsappFloat?: boolean;
+
+    // Favicon personalizado
+    faviconUrl?: string;
+
     // Estado
     published: boolean;
 

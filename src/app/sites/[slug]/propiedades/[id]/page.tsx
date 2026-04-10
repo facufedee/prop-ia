@@ -5,10 +5,10 @@ import { useParams } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
 import dynamic from 'next/dynamic';
-import { 
-    ChevronLeft, MapPin, BedDouble, Bath, Maximize2, 
+import {
+    ChevronLeft, MapPin, BedDouble, Bath, Maximize2,
     MessageCircle, Phone, Mail, Building2, ChevronRight,
-    Share2, Heart, PlayCircle, Home
+    Share2, Heart, PlayCircle, Home, X
 } from "lucide-react";
 import { useSite } from "../../SiteProvider";
 import { publicService, PublicProperty } from "@/infrastructure/services/publicService";
@@ -34,6 +34,7 @@ export default function PropiedadDetailPage() {
     const [loading, setLoading] = useState(true);
     const [currentImageIndex, setCurrentImageIndex] = useState(0);
     const [isSaved, setIsSaved] = useState(false);
+    const [lightboxOpen, setLightboxOpen] = useState(false);
 
     useEffect(() => {
         if (!params?.id) return;
@@ -107,12 +108,25 @@ export default function PropiedadDetailPage() {
 
     const currentMedia = mediaItems[currentImageIndex];
 
+    // Keyboard nav for lightbox
+    useEffect(() => {
+        if (!lightboxOpen) return;
+        const handler = (e: KeyboardEvent) => {
+            if (e.key === "Escape") setLightboxOpen(false);
+            if (e.key === "ArrowRight") setCurrentImageIndex(i => (i + 1) % mediaItems.length);
+            if (e.key === "ArrowLeft")  setCurrentImageIndex(i => (i - 1 + mediaItems.length) % mediaItems.length);
+        };
+        window.addEventListener("keydown", handler);
+        return () => window.removeEventListener("keydown", handler);
+    }, [lightboxOpen, mediaItems.length]);
+
     const waMessage = encodeURIComponent(`Hola! Me interesa la propiedad: ${property.title}. Link: ${window.location.href}`);
     const waUrl = site.whatsapp
         ? `https://wa.me/${site.whatsapp.replace(/\D/g, "")}?text=${waMessage}`
         : null;
 
     return (
+        <>
         <div className="min-h-screen bg-gray-50 font-sans" style={{ fontFamily: "'Outfit', sans-serif" }}>
             <SiteNavbar site={site} basePath={basePath} />
 
@@ -155,14 +169,20 @@ export default function PropiedadDetailPage() {
                                                 className="w-full h-full"
                                             />
                                         ) : (
-                                            <Image
-                                                src={currentMedia.url}
-                                                alt={property.title}
-                                                fill
-                                                className="object-cover"
-                                                sizes="(max-width: 1024px) 100vw, 850px"
-                                                priority
-                                            />
+                                            <button
+                                                className="absolute inset-0 w-full h-full cursor-zoom-in"
+                                                onClick={() => setLightboxOpen(true)}
+                                                aria-label="Ver imagen ampliada"
+                                            >
+                                                <Image
+                                                    src={currentMedia.url}
+                                                    alt={property.title}
+                                                    fill
+                                                    className="object-cover"
+                                                    sizes="(max-width: 1024px) 100vw, 850px"
+                                                    priority
+                                                />
+                                            </button>
                                         )}
                                         
                                         {mediaItems.length > 1 && (
@@ -342,5 +362,60 @@ export default function PropiedadDetailPage() {
 
             <SiteFooter site={site} basePath={basePath} />
         </div>
+
+        {/* ── Lightbox ── */}
+        {lightboxOpen && currentMedia?.type !== "video" && (
+            <div
+                className="fixed inset-0 z-[9999] bg-black/95 flex items-center justify-center"
+                onClick={() => setLightboxOpen(false)}
+            >
+                {/* Close */}
+                <button
+                    className="absolute top-4 right-4 w-10 h-10 bg-white/10 hover:bg-white/20 rounded-full flex items-center justify-center text-white transition-colors z-10"
+                    onClick={() => setLightboxOpen(false)}
+                >
+                    <X size={20} />
+                </button>
+
+                {/* Counter */}
+                <div className="absolute top-4 left-1/2 -translate-x-1/2 bg-black/50 text-white text-xs px-4 py-1.5 rounded-full font-bold tracking-widest">
+                    {currentImageIndex + 1} / {mediaItems.length}
+                </div>
+
+                {/* Image */}
+                <div
+                    className="relative w-full h-full max-w-6xl max-h-[90vh] mx-auto px-16"
+                    onClick={(e) => e.stopPropagation()}
+                >
+                    <Image
+                        src={mediaItems[currentImageIndex].url}
+                        alt={property.title}
+                        fill
+                        className="object-contain"
+                        sizes="100vw"
+                        priority
+                    />
+                </div>
+
+                {/* Arrows */}
+                {mediaItems.length > 1 && (
+                    <>
+                        <button
+                            className="absolute left-4 top-1/2 -translate-y-1/2 w-12 h-12 bg-white/10 hover:bg-white/25 rounded-full flex items-center justify-center text-white transition-all"
+                            onClick={(e) => { e.stopPropagation(); setCurrentImageIndex(i => (i - 1 + mediaItems.length) % mediaItems.length); }}
+                        >
+                            <ChevronLeft size={28} />
+                        </button>
+                        <button
+                            className="absolute right-4 top-1/2 -translate-y-1/2 w-12 h-12 bg-white/10 hover:bg-white/25 rounded-full flex items-center justify-center text-white transition-all"
+                            onClick={(e) => { e.stopPropagation(); setCurrentImageIndex(i => (i + 1) % mediaItems.length); }}
+                        >
+                            <ChevronRight size={28} />
+                        </button>
+                    </>
+                )}
+            </div>
+        )}
+        </>
     );
 }
