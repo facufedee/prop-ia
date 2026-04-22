@@ -65,7 +65,7 @@ export const PLANS: UIPlan[] = [
             "Agenda"
         ],
         limits: {
-            properties: 50,
+            properties: 150,
             users: 5,
             clients: 'unlimited',
             tasaciones: 'unlimited',
@@ -82,7 +82,7 @@ export const PLANS: UIPlan[] = [
             "Portal de inquilinos avanzado",
             "Historial completo de interacciones con clientes",
             "Hasta 5 usuarios",
-            "Hasta 50 propiedades",
+            "Hasta 150 propiedades",
             "Clientes ilimitados",
         ],
         createdAt: new Date(),
