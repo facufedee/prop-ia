@@ -26,7 +26,7 @@ export default async function SitePage({
     } catch (err) {
         console.error("[SitePage] getActiveProperties failed:", err);
     }
-    const properties = rawProps.slice(0, 6) as unknown as PublicProperty[];
+    const properties = rawProps.slice(0, 12) as unknown as PublicProperty[];
 
     const templateProps = { site, properties };
 

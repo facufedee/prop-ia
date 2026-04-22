@@ -97,10 +97,14 @@ export default function PropiedadesPage() {
             }
 
             const querySnapshot = await getDocs(q);
-            const props = querySnapshot.docs.map(doc => ({
+            const props = (querySnapshot.docs.map(doc => ({
                 id: doc.id,
                 ...doc.data()
-            })) as Property[];
+            })) as Property[]).sort((a, b) => {
+                const aDate = (a as any).createdAt?.toMillis?.() ?? (a as any).createdAt ?? 0;
+                const bDate = (b as any).createdAt?.toMillis?.() ?? (b as any).createdAt ?? 0;
+                return bDate - aDate;
+            });
 
             setProperties(props);
         } catch (error) {
