@@ -97,7 +97,7 @@ export async function POST(request: Request) {
                 const agentEmail =
                     agentData?.email ||
                     agentData?.contactEmail ||
-                    "facundo@zetaprop.com.ar";
+                    "zetaprop.com.ar@gmail.com";
 
                 await sendNewLeadNotificationEmail({
                     to: agentEmail,

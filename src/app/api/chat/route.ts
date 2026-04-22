@@ -28,7 +28,7 @@ Ayudás a los usuarios de la plataforma con consultas sobre:
 
 ## Información base de Zeta Prop
 - Sitio web: zetaprop.com.ar
-- Contacto: soporte@zetaprop.com.ar | WhatsApp: +54 9 11 2388-9745
+- Contacto: zetaprop.com.ar@gmail.com | WhatsApp: +54 9 11 2388-9745
 - Fundadores: equipo argentino especializado en tecnología inmobiliaria
 - Prueba gratuita: 14 días sin tarjeta de crédito
 - Módulos principales: Propiedades, Alquileres, CRM/Leads, Portal Inquilinos, Tasación IA, Multi-sucursal, Sitio web propio, Marketing, Blog`;

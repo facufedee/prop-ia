@@ -160,7 +160,7 @@ async function getBlogPosts(limitCount?: number) {
 
 function getContactInfo() {
     return {
-        email_soporte: "soporte@zetaprop.com.ar",
+        email_soporte: "zetaprop.com.ar@gmail.com",
         whatsapp: "+54 9 11 2388-9745",
         sitio_web: "https://zetaprop.com.ar",
         horario_atencion: "Lunes a Viernes de 9 a 18hs (Argentina)",

@@ -6,7 +6,7 @@ export interface UIPlan extends Plan {
 
 export const PLANS: UIPlan[] = [
     {
-        id: "plan_basic",
+        id: "basic",
         name: "Básico",
         tier: "basic",
         description: "Gestión completa de alquileres y propiedades",
@@ -45,7 +45,7 @@ export const PLANS: UIPlan[] = [
         updatedAt: new Date(),
     },
     {
-        id: "plan_professional",
+        id: "professional",
         name: "Profesional",
         tier: "professional",
         description: "Automatización y herramientas avanzadas",
@@ -89,7 +89,7 @@ export const PLANS: UIPlan[] = [
         updatedAt: new Date(),
     },
     {
-        id: "plan_enterprise",
+        id: "enterprise",
         name: "Enterprise",
         tier: "enterprise",
         description: "Solución integral con marca propia",
