@@ -123,8 +123,8 @@ export const getActiveProperties = cache(async (userId: string): Promise<ServerP
             .map(d => serialize({ id: d.id, ...d.data() }) as ServerProperty)
             .filter(p => p.status === "active")
             .sort((a, b) => {
-                const aDate = a.createdAt ? new Date(a.createdAt).getTime() : 0;
-                const bDate = b.createdAt ? new Date(b.createdAt).getTime() : 0;
+                const aDate = a.createdAt ? new Date(a.createdAt as string).getTime() : 0;
+                const bDate = b.createdAt ? new Date(b.createdAt as string).getTime() : 0;
                 return bDate - aDate;
             });
     } catch (err) {
