@@ -46,6 +46,14 @@ const USERS_COLLECTION = "users";
 
 import { globalCache } from "@/infrastructure/cache/globalCache";
 
+const getMillis = (dateObj: any) => {
+    if (!dateObj) return 0;
+    if (typeof dateObj.toDate === 'function') return dateObj.toDate().getTime();
+    if (typeof dateObj === 'object' && '_seconds' in dateObj) return dateObj._seconds * 1000;
+    if (typeof dateObj === 'string' || typeof dateObj === 'number') return new Date(dateObj).getTime();
+    return 0;
+};
+
 export const publicService = {
     // Get all public properties (limit to recent 20 for now)
     getAllProperties: async (): Promise<PublicProperty[]> => {
@@ -64,7 +72,7 @@ export const publicService = {
             const properties = snapshot.docs.map(doc => ({
                 id: doc.id,
                 ...doc.data()
-            } as PublicProperty));
+            } as PublicProperty)).sort((a, b) => getMillis(b.createdAt) - getMillis(a.createdAt));
 
             // Populate agency data
             const propertiesWithAgency = await Promise.all(properties.map(async (p) => {
@@ -91,7 +99,7 @@ export const publicService = {
                 where("userId", "==", userId)
             );
             const snapshot = await getDocs(q);
-            return snapshot.docs.map(d => ({ id: d.id, ...d.data() } as PublicProperty));
+            return snapshot.docs.map(d => ({ id: d.id, ...d.data() } as PublicProperty)).sort((a, b) => getMillis(b.createdAt) - getMillis(a.createdAt));
         } catch (error) {
             console.error("getPropertiesByUserId:", error);
             return [];
