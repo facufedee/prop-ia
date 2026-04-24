@@ -74,6 +74,11 @@ export default function AgencyPropertiesPage() {
                     setAllProperties(result.properties);
                     setFilteredProperties(result.properties);
                 } else {
+                    const fallbackProp = await publicService.getPropertyById(slug);
+                    if (fallbackProp) {
+                        window.location.replace(`/propiedades/p/${slug}`);
+                        return;
+                    }
                     setError(true);
                 }
             } catch (err) {

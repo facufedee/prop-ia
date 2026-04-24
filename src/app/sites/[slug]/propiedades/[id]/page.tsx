@@ -280,7 +280,7 @@ export default function PropiedadDetailPage() {
 
     return (
         <>
-        <div className="min-h-screen bg-gray-50 font-sans" style={{ fontFamily: "'Outfit', sans-serif" }}>
+        <div className="min-h-screen bg-gray-50 font-sans pb-28 lg:pb-0" style={{ fontFamily: "'Outfit', sans-serif" }}>
             <SiteNavbar site={site} basePath={basePath} />
 
             <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
@@ -380,7 +380,7 @@ export default function PropiedadDetailPage() {
                         </div>
 
                         {/* ── Key Features Bar ── */}
-                        <div className="bg-white rounded-3xl p-8 shadow-sm border border-gray-100 flex flex-wrap items-center justify-around gap-8">
+                        <div className="bg-white rounded-3xl p-6 sm:p-8 shadow-sm border border-gray-100 flex flex-wrap items-center justify-around gap-4 sm:gap-8">
                             <div className="flex items-center gap-4">
                                 <div className="w-12 h-12 rounded-2xl bg-gray-50 flex items-center justify-center text-gray-400">
                                     <Maximize2 size={24} />
@@ -476,6 +476,35 @@ export default function PropiedadDetailPage() {
             </div>
 
             <SiteFooter site={site} basePath={basePath} />
+
+            {/* ── Mobile Sticky Contact Bar ── */}
+            <div className="fixed bottom-0 left-0 w-full bg-white border-t border-gray-100 px-5 py-4 lg:hidden z-[45] flex items-center justify-between shadow-[0_-4px_20px_rgba(0,0,0,0.04)] sm:pb-4 pb-[max(1rem,env(safe-area-inset-bottom))]">
+                {waUrl ? (
+                    <a
+                        href={waUrl} target="_blank" rel="noopener noreferrer"
+                        className="text-white font-black py-3.5 px-6 rounded-xl active:scale-95 transition-transform text-sm shadow-sm shadow-green-900/20 flex items-center gap-2 uppercase tracking-widest"
+                        style={{ backgroundColor: "#25D366" }}
+                    >
+                        <MessageCircle size={18} /> WhatsApp
+                    </a>
+                ) : (
+                    <button
+                        onClick={() => window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' })}
+                        className="text-white font-black py-3.5 px-6 rounded-xl active:scale-95 transition-transform text-sm uppercase tracking-widest"
+                        style={{ backgroundColor: primary }}
+                    >
+                        Contactar
+                    </button>
+                )}
+                <div className="flex flex-col items-end text-right">
+                    <span className="text-xl font-black text-gray-900 leading-none">
+                        {property.hidePrice || Number(property.price) === 0 ? "Consultar Precio" : `${property.currency} ${Number(property.price).toLocaleString("es-AR")}`}
+                    </span>
+                    <span className="text-[10px] text-gray-400 font-bold uppercase mt-1 tracking-widest">
+                        {property.operation_type}
+                    </span>
+                </div>
+            </div>
         </div>
 
         {/* ── Lightbox ── */}
