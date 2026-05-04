@@ -76,7 +76,7 @@ export default function AgencyPropertiesPage() {
                 } else {
                     const fallbackProp = await publicService.getPropertyById(slug);
                     if (fallbackProp) {
-                        window.location.replace(`/propiedades/p/${slug}`);
+                        window.location.replace(`/propiedades/${slug}`);
                         return;
                     }
                     setError(true);

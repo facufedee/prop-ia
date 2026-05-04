@@ -93,7 +93,7 @@ export default function PropertyPublicCard({ property, basePath: propBasePath }:
     const currentMedia = mediaItems[currentImageIndex];
 
     return (
-        <Link href={basePath ? `${basePath}/propiedades/${property.id}` : `/propiedades/p/${property.id}`}
+        <Link href={basePath ? `${basePath}/propiedades/${property.id}` : `/propiedades/${property.id}`}
             className="group block bg-white rounded-2xl overflow-hidden border border-gray-100 hover:shadow-xl transition-all duration-300">
 
             {/* Image Container */}

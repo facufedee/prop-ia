@@ -51,6 +51,10 @@ export default function TrialEnforcer() {
         const checkTrialStatus = async () => {
             if (loading || !user || !userRole) return;
 
+            // Super Admin or platform owner always has full access
+            if (userRole.name === "Super Admin") return;
+            if (user.email === "facundoflores8@gmail.com") return;
+
             // Fetch subscription status directly to ensure we have the latest data
             let planTier = 'basic';
             try {

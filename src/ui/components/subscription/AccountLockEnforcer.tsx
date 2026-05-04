@@ -11,7 +11,7 @@ import { toast } from "sonner";
 import { notificationService } from "@/infrastructure/services/notificationService";
 
 export default function AccountLockEnforcer() {
-    const { user, userData, loading } = useAuth();
+    const { user, userData, loading, userRole } = useAuth();
     const [isLocked, setIsLocked] = useState(false);
     const [lockReason, setLockReason] = useState<'suspended' | 'expired' | null>(null);
     const [requestingExtension, setRequestingExtension] = useState(false);
@@ -52,6 +52,12 @@ export default function AccountLockEnforcer() {
         const checkLockStatus = async () => {
             if (loading || !user) return;
 
+            // Super Admin or platform owner always has full access
+            if (userRole?.name === "Super Admin" || user.email === "facundoflores8@gmail.com") {
+                setIsLocked(false);
+                return;
+            }
+
             // 1. Check if manually suspended by admin
             if (userData?.disabled) {
                 setIsLocked(true);
@@ -91,7 +97,7 @@ export default function AccountLockEnforcer() {
         };
 
         checkLockStatus();
-    }, [user, userData, loading]);
+    }, [user, userData, loading, userRole]);
 
     if (!isLocked) return null;
 
