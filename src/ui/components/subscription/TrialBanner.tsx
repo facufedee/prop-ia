@@ -6,23 +6,35 @@ import { differenceInDays } from "date-fns";
 import { useRouter } from "next/navigation";
 import { Sparkles } from "lucide-react";
 
+const FREE_ROLES = ["Cliente Free", "Cliente Básico"];
+
 export default function TrialBanner() {
-    const { user, userRole, loading } = useAuth();
+    const { user, userRole, userData, loading } = useAuth();
     const [daysRemaining, setDaysRemaining] = useState<number | null>(null);
     const router = useRouter();
 
     useEffect(() => {
         if (loading || !user || !userRole) return;
 
-        if (userRole.name === "Cliente Free" && user.metadata.creationTime) {
-            const signupDate = new Date(user.metadata.creationTime);
-            const today = new Date();
-            const daysUsed = differenceInDays(today, signupDate);
-            const remaining = 7 - daysUsed;
+        if (FREE_ROLES.includes(userRole.name)) {
+            // Prefer Firestore createdAt so test accounts don't trigger incorrectly
+            const rawCreatedAt = userData?.createdAt;
+            const signupDate = rawCreatedAt?.toDate
+                ? rawCreatedAt.toDate()
+                : rawCreatedAt instanceof Date
+                    ? rawCreatedAt
+                    : user.metadata.creationTime
+                        ? new Date(user.metadata.creationTime)
+                        : null;
+
+            if (!signupDate) return;
+
+            const daysUsed = differenceInDays(new Date(), signupDate);
+            const remaining = 14 - daysUsed;
 
             setDaysRemaining(remaining);
         }
-    }, [user, userRole, loading]);
+    }, [user, userRole, userData, loading]);
 
     if (daysRemaining === null) return null;
 

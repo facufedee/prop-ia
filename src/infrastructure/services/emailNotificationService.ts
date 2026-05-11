@@ -4,13 +4,13 @@ import { doc, getDoc, setDoc, collection, addDoc, query, where, getDocs, limit }
 const logSentEmail = async (to: string, subject: string, templateKey: string, status: 'success' | 'error', errorMsg?: string) => {
     if (!db) return;
     try {
-        await addDoc(collection(db, "sent_emails"), {
+        await addDoc(collection(db, "emailLogs"), {
             to,
             subject,
-            templateKey,
+            type: templateKey,
             status,
             error: errorMsg || null,
-            sentAt: new Date().toISOString()
+            sentAt: new Date()
         });
     } catch (e) {
         console.error("Failed to log email to Firestore", e);

@@ -84,10 +84,20 @@ export default function TrialEnforcer() {
 
             if (hasPaidPlan) return;
 
-            const isFreeUser = userRole.name === "Cliente Free" || planTier === 'basic';
+            const isFreeUser = userRole.name === "Cliente Free" || userRole.name === "Cliente Básico" || planTier === 'basic';
 
-            if (isFreeUser && user.metadata.creationTime) {
-                const signupDate = new Date(user.metadata.creationTime);
+            if (isFreeUser) {
+                // Use Firestore createdAt so test accounts restarted via admin don't trigger incorrectly
+                const rawCreatedAt = userData?.createdAt;
+                const signupDate = rawCreatedAt?.toDate
+                    ? rawCreatedAt.toDate()
+                    : rawCreatedAt instanceof Date
+                        ? rawCreatedAt
+                        : user.metadata.creationTime
+                            ? new Date(user.metadata.creationTime)
+                            : null;
+
+                if (!signupDate) return;
                 const today = new Date();
                 const daysSinceSignup = differenceInDays(today, signupDate);
 
@@ -113,7 +123,7 @@ export default function TrialEnforcer() {
         };
 
         checkTrialStatus();
-    }, [user, userRole, loading]);
+    }, [user, userRole, userData, loading]);
 
     if (!isExpired) return null;
 
