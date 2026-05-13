@@ -78,7 +78,7 @@ export default function PlanForm({ initialData, onSave, onCancel }: PlanFormProp
         watch,
         formState: { errors }
     } = useForm<PlanFormData>({
-        resolver: zodResolver(planSchema),
+        resolver: zodResolver(planSchema) as any,
         defaultValues
     });
 

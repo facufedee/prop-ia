@@ -2,13 +2,13 @@ import * as z from "zod";
 
 export const planSchema = z.object({
     name: z.string().min(1, "El nombre es obligatorio"),
-    tier: z.enum(["basic", "professional", "enterprise"]).catch("basic"),
+    tier: z.enum(["basic", "professional", "enterprise"]).default("basic"),
     description: z.string().min(1, "La descripción es obligatoria"),
     icon: z.string().optional(),
     popular: z.boolean().optional(),
     price: z.object({
-        monthly: z.number().min(0, "El precio mensual debe ser 0 o mayor").catch(0),
-        yearly: z.number().min(0, "El precio anual debe ser 0 o mayor").catch(0),
+        monthly: z.number({ invalid_type_error: "Debe ser un número" }).min(0, "El precio mensual debe ser 0 o mayor").default(0),
+        yearly: z.number({ invalid_type_error: "Debe ser un número" }).min(0, "El precio anual debe ser 0 o mayor").default(0),
     }),
     features: z.array(z.string()),
     limits: z.object({
