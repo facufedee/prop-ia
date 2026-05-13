@@ -1,13 +1,27 @@
 "use client";
 
+import { useState, useEffect, Suspense } from "react";
 import dynamic from "next/dynamic";
 
-// Deferred: keeps Firebase auth iframe out of the critical render path
 const GoogleAuthPrompt = dynamic(() => import("./GoogleAuthPrompt"), {
     ssr: false,
-    loading: () => null,
 });
 
+// Wrapping in a mounted guard prevents the server/client Suspense boundary mismatch
+// that happens when a Server Component renders a dynamic(ssr:false) Client Component
+// without an explicit Suspense in the tree.
 export default function GoogleAuthPromptLazy() {
-    return <GoogleAuthPrompt />;
+    const [mounted, setMounted] = useState(false);
+
+    useEffect(() => {
+        setMounted(true);
+    }, []);
+
+    if (!mounted) return null;
+
+    return (
+        <Suspense fallback={null}>
+            <GoogleAuthPrompt />
+        </Suspense>
+    );
 }
