@@ -64,21 +64,13 @@ export function RoleProtection({ children, requiredPermission, requiredRole }: R
                 }
 
                 if (requiredPermission && !role.permissions.includes(requiredPermission)) {
-                    // Special check for Admin who usually has all, but permissions list should be explicit
-                    if (role.name !== "Administrador") {
+                    // Bypass strict check only for "Super Admin"
+                    if (role.name !== "Super Admin") {
                         hasAccess = false;
                     } else {
-                        // If admin, we usually assume access, but let's check if the permission covers it.
-                        // In my logic, Admin role SHOULD have the new permission in its list.
-                        // If the permission is newly added, old admin data might not have it yet unless updated.
-                        // For safety: Admin bypass or explicit check.
-                        // Let's use strict check for now, assuming roleService.initialize or updates run.
-                        if (!role.permissions.includes(requiredPermission)) {
-                            // Fallback: If it's admin, maybe allow?
-                            // Better strictly follow permissions to encourage correct config.
-                            // But for this dev phase, I'll allow "Administrador" name match to override.
-                            hasAccess = true;
-                        }
+                        // Super Admin bypass: usually super admins have all permissions.
+                        // If they don't have it explicitly yet (e.g. newly added perm), we allow access anyway.
+                        hasAccess = true;
                     }
                 }
 

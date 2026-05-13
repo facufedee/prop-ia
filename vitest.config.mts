@@ -12,5 +12,10 @@ export default defineConfig({
         alias: {
             '@': path.resolve(__dirname, './src'),
         },
+        coverage: {
+            provider: 'v8',
+            include: ['src/infrastructure/services/**/*.ts'],
+            exclude: ['**/*.test.ts', '**/*.spec.ts']
+        }
     },
 });

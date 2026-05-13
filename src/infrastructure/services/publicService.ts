@@ -28,6 +28,7 @@ export interface PublicProperty {
     calle?: string;
     altura?: string;
     createdAt?: any;
+    customTag?: string;
 }
 
 export interface PublicAgency {
@@ -183,9 +184,13 @@ export const publicService = {
     // Helper: Get Agency by Slug (Search by Name approximation)
     getAgencyBySlug: async (slug: string): Promise<PublicAgency | null> => {
         if (!db) return null;
-        // This is inefficient (Client side filtering or requires index).
-        // Best approach: Add 'slug' field to User.
-        // Fallback: Query all users and match. MVP ONLY.
+
+        // Fast path: try direct document lookup by ID first.
+        // This avoids scanning the entire users collection (which can be blocked by Firestore rules).
+        const byId = await publicService.getAgencyById(slug);
+        if (byId) return byId;
+
+        // Slow path: scan all users and match by slugified displayName.
         try {
             const q = query(collection(db, USERS_COLLECTION));
             const snapshot = await getDocs(q);
@@ -193,7 +198,7 @@ export const publicService = {
             const match = snapshot.docs.find(doc => {
                 const data = doc.data();
                 const userName = data.displayName || "";
-                return publicService.slugify(userName) === slug || doc.id === slug;
+                return publicService.slugify(userName) === slug;
             });
 
             if (match) {

@@ -49,17 +49,26 @@ export async function POST(req: NextRequest) {
         }
 
         const Body = params["Body"] ?? "";
-        const From = params["From"] ?? "";
+        const From = params["From"] ?? ""; // e.g. whatsapp:+5491112345678
 
-        const match = Body.match(/^(guest_[a-z0-9]+):/i);
-        if (match) {
-            const targetSessionId = match[1];
-            const replyText = Body.replace(match[0], "").trim();
+        if (Body && From) {
+            // Use the phone number as the session ID
+            const targetSessionId = From.replace(/[^a-zA-Z0-9+]/g, '');
+
+            // Ensure the session document exists (upsert)
+            // We use setDoc with merge to not overwrite existing data like 'userName' if any
+            const { setDoc, doc } = require("firebase/firestore");
+            await setDoc(doc(db, "chat_sessions", targetSessionId), {
+                phone: From,
+                lastMessageAt: Date.now(),
+                channel: "whatsapp"
+            }, { merge: true });
 
             await addDoc(collection(db, "chat_sessions", targetSessionId, "messages"), {
-                text: replyText,
-                sender: "agent",
+                text: Body.trim(),
+                sender: "user",
                 timestamp: Date.now(),
+                channel: "whatsapp"
             });
         }
 

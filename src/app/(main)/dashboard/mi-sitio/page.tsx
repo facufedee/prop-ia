@@ -9,11 +9,13 @@ import {
     Eye, EyeOff, ExternalLink, Copy, Check, Sparkles, Smartphone,
     Instagram, Facebook, Phone, Mail, MapPin, Save, Upload, X, ImageIcon,
     TrendingUp, Link2, Menu, Plus, Trash2, ArrowUp, ArrowDown, MessageCircle,
+    FileText,
 } from "lucide-react";
 import { useAuth } from "@/ui/context/AuthContext";
 import { storage } from "@/infrastructure/firebase/client";
 import { siteService } from "@/infrastructure/services/siteService";
-import { Site, SiteTemplate, DEFAULT_SITE, NavItem, DEFAULT_NAV_ITEMS } from "@/domain/models/Site";
+import { Site, SiteTemplate, DEFAULT_SITE, NavItem, DEFAULT_NAV_ITEMS, SitePage } from "@/domain/models/Site";
+import SitePagesEditor from "./SitePagesEditor";
 import { toast } from "sonner";
 
 // ── Template options ──────────────────────────────────────────────────────────
@@ -47,19 +49,20 @@ const PRESET_COLORS = [
 // ── Types ─────────────────────────────────────────────────────────────────────
 
 type FormData = Omit<Site, "id" | "userId" | "createdAt" | "updatedAt">;
-type Tab = "plantilla" | "identidad" | "colores" | "menu" | "contacto" | "dominio" | "seo";
+type Tab = "plantilla" | "identidad" | "colores" | "menu" | "paginas" | "contacto" | "dominio" | "seo";
 
 const TABS: { id: Tab; label: string; icon: any }[] = [
     { id: "plantilla", label: "Plantilla", icon: Sparkles },
     { id: "identidad", label: "Identidad", icon: Building2 },
     { id: "colores", label: "Colores", icon: Palette },
     { id: "menu", label: "Menú", icon: Menu },
+    { id: "paginas", label: "Páginas", icon: FileText },
     { id: "contacto", label: "Contacto", icon: Phone },
     { id: "dominio", label: "Dominio", icon: Link2 },
     { id: "seo", label: "SEO", icon: TrendingUp },
 ];
 
-const VALID_TABS: Tab[] = ["plantilla", "identidad", "colores", "menu", "contacto", "dominio", "seo"];
+const VALID_TABS: Tab[] = ["plantilla", "identidad", "colores", "menu", "paginas", "contacto", "dominio", "seo"];
 
 const HREF_PRESETS = [
     { label: "Inicio", value: "/" },
@@ -144,6 +147,7 @@ export default function MiSitioPage() {
                     navbarText: s.navbarText ?? "#111827",
                     whatsappFloat: s.whatsappFloat ?? false,
                     faviconUrl: s.faviconUrl ?? "",
+                    pages: s.pages ?? [],
                 });
             }
             setLoading(false);
@@ -1177,6 +1181,14 @@ export default function MiSitioPage() {
                                     <p className="flex items-center gap-2"><CheckCircle2 className="w-3.5 h-3.5 text-green-500 flex-shrink-0" /> URL canónica: tu subdominio</p>
                                 </div>
                             </>
+                        )}
+
+                        {/* ── PÁGINAS ── */}
+                        {activeTab === "paginas" && (
+                            <SitePagesEditor
+                                pages={form.pages || []}
+                                onChange={(pages) => set("pages", pages)}
+                            />
                         )}
                     </div>
                 </div>

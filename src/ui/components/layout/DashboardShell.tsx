@@ -4,6 +4,7 @@ import { useState } from "react";
 import DashboardSidebar from "./DashboardSidebar";
 import DashboardHeader from "./DashboardHeader";
 import DashboardFooter from "./DashboardFooter";
+import ChatPanel from "@/ui/components/chat/ChatPanel";
 
 export default function DashboardShell({ children }: { children: React.ReactNode }) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -21,6 +22,9 @@ export default function DashboardShell({ children }: { children: React.ReactNode
 
         <DashboardFooter />
       </div>
+
+      {/* Floating AI chat — visible on all screen sizes */}
+      <ChatPanel />
     </div>
   );
 }

@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { roleService, Role, PERMISSIONS, Permission } from "@/infrastructure/services/roleService";
+import { roleService, Role, Permission } from "@/infrastructure/services/roleService";
 import { Plus, Edit2, Trash2, Check, X, Shield, User as UserIcon, Save, RefreshCw } from "lucide-react";
 import { collection, getDocs } from "firebase/firestore";
 import { db } from "@/infrastructure/firebase/client";
@@ -22,6 +22,7 @@ export default function RolesPage() {
     const [isCreating, setIsCreating] = useState(false);
     const [newRoleName, setNewRoleName] = useState("");
     const [selectedPermissions, setSelectedPermissions] = useState<string[]>([]);
+    const [availablePermissions, setAvailablePermissions] = useState<Permission[]>([]);
 
     useEffect(() => {
         loadData();
@@ -33,8 +34,12 @@ export default function RolesPage() {
             // Initialize default roles if needed
             await roleService.initializeDefaultRoles();
 
-            const rolesData = await roleService.getRoles();
+            const [rolesData, permsData] = await Promise.all([
+                roleService.getRoles(),
+                roleService.getAvailablePermissions()
+            ]);
             setRoles(rolesData);
+            setAvailablePermissions(permsData);
 
             // Fetch users
             if (db) {
@@ -252,7 +257,7 @@ export default function RolesPage() {
                                 <div>
                                     <label className="block text-sm font-medium text-gray-700 mb-3">Permisos de Acceso</label>
                                     <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                                        {PERMISSIONS.map((perm) => (
+                                        {availablePermissions.map((perm) => (
                                             <label
                                                 key={perm.id}
                                                 className={`flex items-start gap-3 p-3 rounded-xl border cursor-pointer transition-all ${selectedPermissions.includes(perm.id)

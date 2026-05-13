@@ -1,5 +1,43 @@
 export type SiteTemplate = "moderno" | "clasico" | "minimalista";
 
+// ── Site Pages ──────────────────────────────────────────────────────────────
+
+export type SitePageType = "content" | "properties";
+
+export interface SitePageFaqItem {
+    question: string;
+    answer: string;
+}
+
+export interface SitePageTeamMember {
+    name: string;
+    role: string;
+    photoUrl?: string;
+    whatsapp?: string;
+    email?: string;
+}
+
+export interface SitePage {
+    id: string;               // URL slug — e.g. "quienes-somos"
+    label: string;            // Navbar label
+    type: SitePageType;
+    enabled: boolean;
+
+    // Content page fields
+    heroTitle?: string;
+    heroSubtitle?: string;
+    body?: string;
+    faqItems?: SitePageFaqItem[];
+    teamMembers?: SitePageTeamMember[];
+
+    // Properties page fields
+    pageTitle?: string;
+    pageSubtitle?: string;
+    filterTag?: string;       // Only show properties with this customTag
+}
+
+// ── ──────────────────────────────────────────────────────────────────────────
+
 export interface NavItem {
     label: string;
     href: string;   // relative to site root, e.g. "/propiedades?operacion=venta"
@@ -41,6 +79,9 @@ export interface Site {
 
     // Favicon personalizado
     faviconUrl?: string;
+
+    // Páginas personalizadas
+    pages?: SitePage[];
 
     // Estado
     published: boolean;

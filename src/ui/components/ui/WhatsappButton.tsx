@@ -6,7 +6,8 @@ import { usePathname } from 'next/navigation';
 const WhatsappButton = () => {
     const pathname = usePathname();
 
-    // Hide this global button on property detail pages to not clash with the elegant sticky contact bar
+    // Only show on public landing pages — hide in dashboard and property detail pages
+    if (pathname?.startsWith('/dashboard')) return null;
     if (pathname?.startsWith('/propiedades/')) return null;
 
     return (

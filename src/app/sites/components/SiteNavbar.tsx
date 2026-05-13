@@ -60,6 +60,11 @@ export default function SiteNavbar({ site, basePath: propBasePath }: SiteNavbarP
           <Link href={`${basePath}/propiedades`} className="hover:opacity-70 transition-opacity" style={{ color: navColor }}>
             Propiedades
           </Link>
+          {site.pages?.filter(p => p.enabled).map(page => (
+            <Link key={page.id} href={`${basePath}/p/${page.id}`} className="hover:opacity-70 transition-opacity" style={{ color: navColor }}>
+              {page.label}
+            </Link>
+          ))}
           {site.email && (
             <a href={`mailto:${site.email}`} className="hover:opacity-70 transition-opacity" style={{ color: navColor }}>
               Contacto
@@ -117,6 +122,17 @@ export default function SiteNavbar({ site, basePath: propBasePath }: SiteNavbarP
               <Building2 className="w-5 h-5 opacity-50" />
               Propiedades
             </Link>
+            {site.pages?.filter(p => p.enabled).map(page => (
+              <Link
+                key={page.id}
+                href={`${basePath}/p/${page.id}`}
+                className="flex items-center gap-3 p-4 rounded-xl font-bold"
+                style={{ backgroundColor: `${navColor}08`, color: navColor }}
+                onClick={() => setOpen(false)}
+              >
+                {page.label}
+              </Link>
+            ))}
             {site.whatsapp && (
               <a
                 href={`https://wa.me/${site.whatsapp.replace(/\D/g, "")}`}

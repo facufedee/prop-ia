@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { useParams } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
@@ -184,6 +184,7 @@ export default function PropiedadDetailPage() {
     const [currentImageIndex, setCurrentImageIndex] = useState(0);
     const [isSaved, setIsSaved] = useState(false);
     const [lightboxOpen, setLightboxOpen] = useState(false);
+    const touchStartX = useRef(0);
 
     useEffect(() => {
         if (!params?.id) return;
@@ -200,18 +201,30 @@ export default function PropiedadDetailPage() {
     // Keyboard nav for lightbox — must be before any early returns (Rules of Hooks)
     useEffect(() => {
         if (!lightboxOpen || !property) return;
-        const total = [
-            ...(property.imageUrls || []),
-            ...(property.video_url && getYouTubeId(property.video_url) ? [property.video_url] : []),
-        ].length;
+        // Only navigate within images in the lightbox (video is never shown there)
+        const total = property.imageUrls?.length || 1;
         const handler = (e: KeyboardEvent) => {
             if (e.key === "Escape") setLightboxOpen(false);
-            if (e.key === "ArrowRight") setCurrentImageIndex(i => (i + 1) % total);
-            if (e.key === "ArrowLeft")  setCurrentImageIndex(i => (i - 1 + total) % total);
+            if (e.key === "ArrowRight") setCurrentImageIndex(i => (Math.min(i, total - 1) + 1) % total);
+            if (e.key === "ArrowLeft")  setCurrentImageIndex(i => (Math.min(i, total - 1) - 1 + total) % total);
         };
         window.addEventListener("keydown", handler);
         return () => window.removeEventListener("keydown", handler);
     }, [lightboxOpen, property]);
+
+    // Preload adjacent images for instant transitions
+    useEffect(() => {
+        if (!property?.imageUrls?.length) return;
+        const total = property.imageUrls.length;
+        [1, 2, -1].forEach(offset => {
+            const idx = (currentImageIndex + offset + total * 10) % total;
+            const url = property.imageUrls[idx];
+            if (url) {
+                const img = new window.Image();
+                img.src = url;
+            }
+        });
+    }, [currentImageIndex, property?.imageUrls]);
 
     if (!site) return null;
     const primary = site.colorPrimario || "#4f46e5";
@@ -308,47 +321,68 @@ export default function PropiedadDetailPage() {
                         
                         {/* ── Gallery ── */}
                         <div className="space-y-4">
-                            <div className="relative aspect-[16/10] sm:aspect-[16/9] rounded-[32px] overflow-hidden bg-gray-900 shadow-2xl border border-black/5 group">
-                                {currentMedia ? (
+                            <div
+                                className="relative aspect-[16/10] sm:aspect-[16/9] rounded-[32px] overflow-hidden bg-gray-900 shadow-2xl border border-black/5 group"
+                                onTouchStart={(e) => { touchStartX.current = e.touches[0].clientX; }}
+                                onTouchEnd={(e) => {
+                                    const diff = touchStartX.current - e.changedTouches[0].clientX;
+                                    if (Math.abs(diff) > 40) {
+                                        diff > 0
+                                            ? setCurrentImageIndex(i => (i + 1) % mediaItems.length)
+                                            : setCurrentImageIndex(i => (i - 1 + mediaItems.length) % mediaItems.length);
+                                    }
+                                }}
+                            >
+                                {mediaItems.length > 0 ? (
                                     <>
-                                        {currentMedia.type === 'video' ? (
-                                            <iframe
-                                                width="100%"
-                                                height="100%"
-                                                src={`https://www.youtube.com/embed/${(currentMedia as any).videoId}?autoplay=1`}
-                                                title="YouTube video player"
-                                                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                                                allowFullScreen
-                                                className="w-full h-full"
-                                            />
-                                        ) : (
-                                            <button
-                                                className="absolute inset-0 w-full h-full cursor-zoom-in"
-                                                onClick={() => setLightboxOpen(true)}
-                                                aria-label="Ver imagen ampliada"
+                                        {/* Stacked layers — CSS opacity transition for instant, smooth switching */}
+                                        {mediaItems.map((item, i) => (
+                                            <div
+                                                key={i}
+                                                className={`absolute inset-0 transition-opacity duration-200 ${i === currentImageIndex ? 'opacity-100 z-[1]' : 'opacity-0 z-0 pointer-events-none'}`}
                                             >
-                                                <Image
-                                                    src={currentMedia.url}
-                                                    alt={property.title}
-                                                    fill
-                                                    className="object-cover"
-                                                    sizes="(max-width: 1024px) 100vw, 850px"
-                                                    priority
-                                                />
-                                            </button>
-                                        )}
-                                        
+                                                {item.type === 'video' ? (
+                                                    i === currentImageIndex ? (
+                                                        <iframe
+                                                            width="100%"
+                                                            height="100%"
+                                                            src={`https://www.youtube.com/embed/${(item as any).videoId}?autoplay=1`}
+                                                            title="YouTube video player"
+                                                            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                                                            allowFullScreen
+                                                            className="w-full h-full"
+                                                        />
+                                                    ) : null
+                                                ) : (
+                                                    <button
+                                                        className="absolute inset-0 w-full h-full cursor-zoom-in"
+                                                        onClick={() => setLightboxOpen(true)}
+                                                        aria-label="Ver imagen ampliada"
+                                                    >
+                                                        <Image
+                                                            src={(item as any).url}
+                                                            alt={property.title}
+                                                            fill
+                                                            className="object-cover"
+                                                            sizes="(max-width: 1024px) 100vw, 850px"
+                                                            priority={i === 0}
+                                                        />
+                                                    </button>
+                                                )}
+                                            </div>
+                                        ))}
+
                                         {mediaItems.length > 1 && (
                                             <>
-                                                <button onClick={() => setCurrentImageIndex(i => (i - 1 + mediaItems.length) % mediaItems.length)} 
-                                                    className="absolute left-4 top-1/2 -translate-y-1/2 w-12 h-12 bg-white/20 hover:bg-white/40 backdrop-blur-md text-white rounded-full flex items-center justify-center transition-all opacity-0 group-hover:opacity-100 shadow-lg">
+                                                <button onClick={() => setCurrentImageIndex(i => (i - 1 + mediaItems.length) % mediaItems.length)}
+                                                    className="absolute left-4 top-1/2 -translate-y-1/2 w-12 h-12 bg-white/20 hover:bg-white/40 backdrop-blur-md text-white rounded-full flex items-center justify-center transition-all opacity-0 group-hover:opacity-100 shadow-lg z-10">
                                                     <ChevronLeft size={24} />
                                                 </button>
-                                                <button onClick={() => setCurrentImageIndex(i => (i + 1) % mediaItems.length)} 
-                                                    className="absolute right-4 top-1/2 -translate-y-1/2 w-12 h-12 bg-white/20 hover:bg-white/40 backdrop-blur-md text-white rounded-full flex items-center justify-center transition-all opacity-0 group-hover:opacity-100 shadow-lg">
+                                                <button onClick={() => setCurrentImageIndex(i => (i + 1) % mediaItems.length)}
+                                                    className="absolute right-4 top-1/2 -translate-y-1/2 w-12 h-12 bg-white/20 hover:bg-white/40 backdrop-blur-md text-white rounded-full flex items-center justify-center transition-all opacity-0 group-hover:opacity-100 shadow-lg z-10">
                                                     <ChevronRight size={24} />
                                                 </button>
-                                                <div className="absolute bottom-6 right-6 bg-black/50 backdrop-blur-md text-white px-4 py-1.5 rounded-full text-xs font-bold tracking-widest border border-white/10">
+                                                <div className="absolute bottom-6 right-6 bg-black/50 backdrop-blur-md text-white px-4 py-1.5 rounded-full text-xs font-bold tracking-widest border border-white/10 z-10">
                                                     {currentImageIndex + 1} / {mediaItems.length}
                                                 </div>
                                             </>
@@ -508,58 +542,76 @@ export default function PropiedadDetailPage() {
         </div>
 
         {/* ── Lightbox ── */}
-        {lightboxOpen && currentMedia?.type !== "video" && (
-            <div
-                className="fixed inset-0 z-[9999] bg-black/95 flex items-center justify-center"
-                onClick={() => setLightboxOpen(false)}
-            >
-                {/* Close */}
-                <button
-                    className="absolute top-4 right-4 w-10 h-10 bg-white/10 hover:bg-white/20 rounded-full flex items-center justify-center text-white transition-colors z-10"
-                    onClick={() => setLightboxOpen(false)}
-                >
-                    <X size={20} />
-                </button>
+        {lightboxOpen && property.imageUrls?.length > 0 && (() => {
+            const imgs = property.imageUrls;
+            const total = imgs.length;
+            // Clamp to valid image index (avoids crash if gallery is on video position)
+            const lbIdx = Math.min(currentImageIndex, total - 1);
+            const setLbIdx = (idx: number) => setCurrentImageIndex(idx);
 
-                {/* Counter */}
-                <div className="absolute top-4 left-1/2 -translate-x-1/2 bg-black/50 text-white text-xs px-4 py-1.5 rounded-full font-bold tracking-widest">
-                    {currentImageIndex + 1} / {mediaItems.length}
-                </div>
-
-                {/* Image */}
+            return (
                 <div
-                    className="relative w-full h-full max-w-6xl max-h-[90vh] mx-auto px-16"
-                    onClick={(e) => e.stopPropagation()}
+                    className="fixed inset-0 z-[9999] bg-black/95 flex items-center justify-center animate-in fade-in duration-150"
+                    onClick={() => setLightboxOpen(false)}
+                    onTouchStart={(e) => { touchStartX.current = e.touches[0].clientX; }}
+                    onTouchEnd={(e) => {
+                        const diff = touchStartX.current - e.changedTouches[0].clientX;
+                        if (Math.abs(diff) > 40) {
+                            diff > 0
+                                ? setLbIdx((lbIdx + 1) % total)
+                                : setLbIdx((lbIdx - 1 + total) % total);
+                        }
+                    }}
                 >
-                    <Image
-                        src={mediaItems[currentImageIndex].url}
-                        alt={property.title}
-                        fill
-                        className="object-contain"
-                        sizes="100vw"
-                        priority
-                    />
-                </div>
+                    {/* Close */}
+                    <button
+                        className="absolute top-4 right-4 w-10 h-10 bg-white/10 hover:bg-white/20 rounded-full flex items-center justify-center text-white transition-colors z-10"
+                        onClick={() => setLightboxOpen(false)}
+                    >
+                        <X size={20} />
+                    </button>
 
-                {/* Arrows */}
-                {mediaItems.length > 1 && (
-                    <>
-                        <button
-                            className="absolute left-4 top-1/2 -translate-y-1/2 w-12 h-12 bg-white/10 hover:bg-white/25 rounded-full flex items-center justify-center text-white transition-all"
-                            onClick={(e) => { e.stopPropagation(); setCurrentImageIndex(i => (i - 1 + mediaItems.length) % mediaItems.length); }}
-                        >
-                            <ChevronLeft size={28} />
-                        </button>
-                        <button
-                            className="absolute right-4 top-1/2 -translate-y-1/2 w-12 h-12 bg-white/10 hover:bg-white/25 rounded-full flex items-center justify-center text-white transition-all"
-                            onClick={(e) => { e.stopPropagation(); setCurrentImageIndex(i => (i + 1) % mediaItems.length); }}
-                        >
-                            <ChevronRight size={28} />
-                        </button>
-                    </>
-                )}
-            </div>
-        )}
+                    {/* Counter */}
+                    <div className="absolute top-4 left-1/2 -translate-x-1/2 bg-black/50 text-white text-xs px-4 py-1.5 rounded-full font-bold tracking-widest z-10">
+                        {lbIdx + 1} / {total}
+                    </div>
+
+                    {/* Stacked images — render current ±1 for smooth transitions */}
+                    <div className="relative w-full h-full max-w-6xl max-h-[90vh] mx-auto px-16" onClick={(e) => e.stopPropagation()}>
+                        {imgs.map((url, i) => {
+                            const dist = Math.min(Math.abs(i - lbIdx), total - Math.abs(i - lbIdx));
+                            if (dist > 1) return null;
+                            return (
+                                <div
+                                    key={i}
+                                    className={`absolute inset-0 transition-opacity duration-200 ${i === lbIdx ? 'opacity-100 z-[1]' : 'opacity-0 z-0 pointer-events-none'}`}
+                                >
+                                    <Image src={url} alt={property.title} fill className="object-contain" sizes="100vw" priority={dist === 0} />
+                                </div>
+                            );
+                        })}
+                    </div>
+
+                    {/* Arrows */}
+                    {total > 1 && (
+                        <>
+                            <button
+                                className="absolute left-4 top-1/2 -translate-y-1/2 w-12 h-12 bg-white/10 hover:bg-white/25 rounded-full flex items-center justify-center text-white transition-all z-10"
+                                onClick={(e) => { e.stopPropagation(); setLbIdx((lbIdx - 1 + total) % total); }}
+                            >
+                                <ChevronLeft size={28} />
+                            </button>
+                            <button
+                                className="absolute right-4 top-1/2 -translate-y-1/2 w-12 h-12 bg-white/10 hover:bg-white/25 rounded-full flex items-center justify-center text-white transition-all z-10"
+                                onClick={(e) => { e.stopPropagation(); setLbIdx((lbIdx + 1) % total); }}
+                            >
+                                <ChevronRight size={28} />
+                            </button>
+                        </>
+                    )}
+                </div>
+            );
+        })()}
         </>
     );
 }

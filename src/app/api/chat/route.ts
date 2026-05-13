@@ -2,6 +2,7 @@ import { GoogleGenerativeAI } from "@google/generative-ai";
 import { NextRequest, NextResponse } from "next/server";
 import { verifyAuth } from "@/lib/apiAuth";
 import { chatTools, runChatTool } from "@/infrastructure/ai/chatTools";
+import { adminDb } from "@/infrastructure/firebase/admin";
 
 const apiKey = process.env.GOOGLE_API_KEY;
 
@@ -33,6 +34,34 @@ Ayudás a los usuarios de la plataforma con consultas sobre:
 - Prueba gratuita: 14 días sin tarjeta de crédito
 - Módulos principales: Propiedades, Alquileres, CRM/Leads, Portal Inquilinos, Tasación IA, Multi-sucursal, Sitio web propio, Marketing, Blog`;
 
+const CANNED_FREE_INTRO = `¡Hola! Soy el asistente IA de **Zeta Prop**. Con una suscripción activa puedo ayudarte con:
+
+- 📊 **Estadísticas** de tu cartera (propiedades activas, leads, alquileres)
+- 🏠 **Consultar propiedades** y contratos de alquiler en tiempo real
+- 💡 **Responder dudas** sobre cómo usar el sistema
+- 📋 **Resumir información** de clientes y operaciones
+
+Para acceder al asistente completo necesitás tener un plan activo. ¿Querés ver nuestros planes?`;
+
+const CANNED_FREE_UPGRADE = `Este asistente está disponible para usuarios con suscripción activa. 🚀
+
+Actualizá tu plan para acceder a consultas ilimitadas con IA sobre tus propiedades, alquileres y leads.
+
+👉 [**Ver planes y precios**](/precios)`;
+
+async function hasActiveSub(userId: string): Promise<boolean> {
+    try {
+        const snap = await adminDb.collection("subscriptions")
+            .where("userId", "==", userId)
+            .where("status", "==", "active")
+            .limit(1)
+            .get();
+        return !snap.empty;
+    } catch {
+        return false;
+    }
+}
+
 export async function POST(request: NextRequest) {
     if (!apiKey) {
         return NextResponse.json({ error: "Configuración incompleta del servidor" }, { status: 500 });
@@ -48,6 +77,14 @@ export async function POST(request: NextRequest) {
 
         if (!Array.isArray(messages) || messages.length === 0) {
             return NextResponse.json({ error: "Formato de mensajes inválido" }, { status: 400 });
+        }
+
+        // Gate: free users get canned responses — no Gemini calls
+        const isPaid = await hasActiveSub(authResult.user.uid);
+        if (!isPaid) {
+            const userMsgCount = messages.filter((m: any) => m.role === "user").length;
+            const content = userMsgCount <= 1 ? CANNED_FREE_INTRO : CANNED_FREE_UPGRADE;
+            return NextResponse.json({ role: "assistant", content });
         }
 
         // Limit conversation history to last 10 messages to control tokens

@@ -11,7 +11,7 @@
 
 import { db } from "@/infrastructure/firebase/client";
 import { collection, getDocs, doc, updateDoc } from "firebase/firestore";
-import { roleService, PERMISSIONS } from "@/infrastructure/services/roleService";
+import { roleService, DEFAULT_PERMISSIONS } from "@/infrastructure/services/roleService";
 
 export async function checkAndFixRoles() {
     if (!db) {
@@ -31,7 +31,7 @@ export async function checkAndFixRoles() {
 
         // 2. Buscar rol de Administrador sin nombre
         const adminRoleWithoutName = roles.find(r =>
-            !r.name && r.permissions?.length === PERMISSIONS.length
+            !r.name && r.permissions?.length === DEFAULT_PERMISSIONS.length
         );
 
         const adminRoleWithName = roles.find(r => r.name === "Administrador");

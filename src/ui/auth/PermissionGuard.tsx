@@ -2,9 +2,11 @@
 
 import { useEffect, useState } from "react";
 import { usePathname, useRouter } from "next/navigation";
-import { auth } from "@/infrastructure/firebase/client";
-import { roleService, PERMISSIONS } from "@/infrastructure/services/roleService";
+import { roleService, DEFAULT_PERMISSIONS } from "@/infrastructure/services/roleService";
 import { useAuth } from "@/ui/context/AuthContext";
+
+// Owner email always has full access regardless of role configuration in Firestore
+const OWNER_EMAIL = "facundoflores8@gmail.com";
 
 export default function PermissionGuard({ children }: { children: React.ReactNode }) {
     const router = useRouter();
@@ -14,90 +16,96 @@ export default function PermissionGuard({ children }: { children: React.ReactNod
     const [checking, setChecking] = useState(true);
 
     useEffect(() => {
+        // Wait for auth state to resolve
         if (authLoading) return;
 
+        // Not authenticated → redirect to login
         if (!user) {
             setAuthorized(false);
             setChecking(false);
             return;
         }
 
-        // If user is logged in but has no role yet, wait.
-        // The AuthContext onSnapshot will eventually trigger with the role.
-        // We can show a loading state while 'userRole' is null.
-        if (!userRole) {
-            // Potentially we could add a timeout here if role never appears?
-            // For now, assume it's syncing or account setup is slightly delayed.
+        // Owner email bypass — never blocked, regardless of Firestore role state
+        if (user.email === OWNER_EMAIL) {
+            setAuthorized(true);
+            setChecking(false);
             return;
         }
 
-        const checkPermissions = () => {
-            // If Super Admin or Admin, bypass checks
-            if (userRole.name === "Super Admin" || userRole.name === "Administrador") {
-                setAuthorized(true);
-                setChecking(false);
-                return;
-            }
+        // Role not yet loaded — keep waiting (AuthContext onSnapshot is async)
+        if (!userRole) return;
 
-            // Public/Common Dashboard Routes that all authenticated users should access
-            if (pathname === '/dashboard/cuenta' || pathname === '/dashboard/novedades' || pathname.startsWith('/dashboard/tutoriales')) {
-                setAuthorized(true);
-                setChecking(false);
-                return;
-            }
-
-            // Find the most specific permission matching the current path
-            const sortedPermissions = [...PERMISSIONS].sort((a, b) => b.id.length - a.id.length);
-            const matchingPermission = sortedPermissions.find(p => pathname.startsWith(p.id));
-
-            if (matchingPermission) {
-                const hasPermission = userRole.permissions.includes(matchingPermission.id);
-                if (hasPermission) {
-                    setAuthorized(true);
-                } else {
-                    console.warn(`Access denied to ${pathname}. Missing permission: ${matchingPermission.id}`);
-                    setAuthorized(false);
-                    router.push("/access-denied");
-                }
-            } else {
-                setAuthorized(true);
-            }
+        // Super Admin or Administrador — full access
+        if (userRole.name === "Super Admin" || userRole.name === "Administrador") {
+            setAuthorized(true);
             setChecking(false);
-        };
+            return;
+        }
 
-        checkPermissions();
+        // Public dashboard routes accessible to all authenticated users
+        if (
+            pathname === "/dashboard/cuenta" ||
+            pathname === "/dashboard/novedades" ||
+            pathname.startsWith("/dashboard/tutoriales")
+        ) {
+            setAuthorized(true);
+            setChecking(false);
+            return;
+        }
 
+        // Match most-specific permission for the current path
+        const sortedPermissions = [...DEFAULT_PERMISSIONS].sort((a, b) => b.id.length - a.id.length);
+        const matchingPermission = sortedPermissions.find(p => pathname.startsWith(p.id));
+
+        if (matchingPermission) {
+            if (userRole.permissions.includes(matchingPermission.id)) {
+                setAuthorized(true);
+            } else {
+                console.warn(`Access denied to ${pathname}. Missing: ${matchingPermission.id}`);
+                setAuthorized(false);
+                router.push("/access-denied");
+            }
+        } else {
+            // No matching permission rule — allow by default
+            setAuthorized(true);
+        }
+
+        setChecking(false);
     }, [user, userRole, authLoading, pathname, router]);
 
-
-    if (authLoading || (user && !userRole)) {
+    // While auth is loading
+    if (authLoading) {
         return (
             <div className="fixed inset-0 bg-white z-50 flex flex-col items-center justify-center gap-4">
-                <div className="w-8 h-8 border-4 border-indigo-600 border-t-transparent rounded-full animate-spin"></div>
-                <p className="text-gray-500 text-sm animate-pulse">
-                    {user && !userRole ? "Configurando su cuenta..." : "Verificando credenciales..."}
-                </p>
+                <div className="w-8 h-8 border-4 border-indigo-600 border-t-transparent rounded-full animate-spin" />
+                <p className="text-gray-500 text-sm animate-pulse">Verificando credenciales...</p>
             </div>
         );
     }
 
-    if (!user) {
-        // AuthGuard usually handles this, so rendering nothing is fine before redirect logic elsewhere kicks in
-        return null;
+    // Auth loaded but role hasn't resolved yet — only for non-owner users
+    // Show spinner briefly; if it never resolves, the snapshot/network is broken
+    if (user && !userRole && user.email !== OWNER_EMAIL) {
+        return (
+            <div className="fixed inset-0 bg-white z-50 flex flex-col items-center justify-center gap-4">
+                <div className="w-8 h-8 border-4 border-indigo-600 border-t-transparent rounded-full animate-spin" />
+                <p className="text-gray-500 text-sm animate-pulse">Configurando tu cuenta...</p>
+            </div>
+        );
     }
+
+    if (!user) return null;
 
     if (checking) {
-        // Keep spinner if still calculating permissions logic
         return (
             <div className="fixed inset-0 bg-white z-50 flex items-center justify-center">
-                <div className="w-8 h-8 border-4 border-indigo-600 border-t-transparent rounded-full animate-spin"></div>
+                <div className="w-8 h-8 border-4 border-indigo-600 border-t-transparent rounded-full animate-spin" />
             </div>
         );
     }
 
-    if (!authorized) {
-        return null; // The useEffect redirects to /access-denied
-    }
+    if (!authorized) return null;
 
     return <>{children}</>;
 }

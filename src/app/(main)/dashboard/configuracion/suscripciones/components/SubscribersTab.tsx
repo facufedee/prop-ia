@@ -196,92 +196,150 @@ export default function SubscribersTab() {
                 </div>
             </div>
 
-            {/* Subscriber Cards */}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                {subscriptions.map((sub) => {
-                    const daysRemaining = getDaysRemaining(sub.endDate);
-                    const isExpiringSoon = daysRemaining > 0 && daysRemaining <= 7;
+            {/* Subscriber Lists */}
+            <div className="space-y-8">
+                {/* Active Subscriptions */}
+                <div>
+                    <h3 className="text-lg font-bold text-gray-900 mb-4 flex items-center gap-2">
+                        <CheckCircle className="text-green-500" size={20} />
+                        Suscripciones Activas
+                    </h3>
+                    {activeSubscriptions.length > 0 ? (
+                        <div className="flex flex-col gap-3">
+                            {activeSubscriptions.map((sub) => {
+                                const daysRemaining = getDaysRemaining(sub.endDate);
+                                const isExpiringSoon = daysRemaining > 0 && daysRemaining <= 7;
 
-                    return (
-                        <div
-                            key={sub.id}
-                            className={`bg-white rounded-xl border p-5 hover:shadow-md transition-shadow ${isExpiringSoon ? 'border-amber-300 bg-amber-50/50' : 'border-gray-200'}`}
-                        >
-                            {/* Expiring Soon Badge */}
-                            {isExpiringSoon && (
-                                <div className="mb-3 -mt-1 -mx-1">
-                                    <span className="inline-flex items-center gap-1 px-2 py-1 rounded-lg text-xs font-medium bg-amber-100 text-amber-700">
-                                        <RefreshCw size={12} /> Renovación próxima
-                                    </span>
-                                </div>
-                            )}
-
-                            {/* Header */}
-                            <div className="flex items-start justify-between mb-4">
-                                <div className="flex items-center gap-3">
-                                    <div className="w-10 h-10 rounded-full bg-indigo-100 flex items-center justify-center text-indigo-600 font-bold">
-                                        {(sub.userName && sub.userName !== "Sin nombre") ? sub.userName.slice(0, 2).toUpperCase() : (sub.userEmail && sub.userEmail !== "Sin email" ? sub.userEmail.slice(0, 2).toUpperCase() : sub.userId.slice(0, 2).toUpperCase())}
-                                    </div>
-                                    <div>
-                                        <p className="font-medium text-gray-900 text-sm truncate max-w-[150px]" title={sub.userEmail && sub.userEmail !== "Sin email" ? sub.userEmail : sub.userId}>
-                                            {sub.userEmail && sub.userEmail !== "Sin email" ? sub.userEmail : sub.userId.slice(0, 12) + "..."}
-                                        </p>
-                                        <p className="text-xs text-gray-500 truncate max-w-[150px]">
-                                            {sub.planName} • {sub.userName && sub.userName !== "Sin nombre" ? sub.userName : "Usuario"}
-                                        </p>
-                                    </div>
-                                </div>
-                                <div className="flex flex-col items-end gap-2">
-                                    {getStatusBadge(sub.status)}
-                                    <button
-                                        onClick={() => handleDeleteSubscription(sub.id)}
-                                        className="text-xs text-red-500 hover:text-red-700 flex items-center gap-1 mt-1 transition-colors"
-                                        title="Eliminar suscripción del sistema"
+                                return (
+                                    <div
+                                        key={sub.id}
+                                        className={`flex flex-col md:flex-row md:items-center justify-between p-4 bg-white rounded-xl border hover:shadow-sm transition-shadow gap-4 ${isExpiringSoon ? 'border-amber-300 bg-amber-50/30' : 'border-gray-200'}`}
                                     >
-                                        <Trash2 size={12} /> Eliminar
-                                    </button>
-                                </div>
-                            </div>
+                                        {/* User Info */}
+                                        <div className="flex items-center gap-4 md:w-1/3">
+                                            <div className="w-10 h-10 rounded-full bg-indigo-100 flex items-center justify-center text-indigo-600 font-bold shrink-0">
+                                                {(sub.userName && sub.userName !== "Sin nombre") ? sub.userName.slice(0, 2).toUpperCase() : (sub.userEmail && sub.userEmail !== "Sin email" ? sub.userEmail.slice(0, 2).toUpperCase() : sub.userId.slice(0, 2).toUpperCase())}
+                                            </div>
+                                            <div className="min-w-0">
+                                                <p className="font-medium text-gray-900 text-sm truncate" title={sub.userEmail && sub.userEmail !== "Sin email" ? sub.userEmail : sub.userId}>
+                                                    {sub.userEmail && sub.userEmail !== "Sin email" ? sub.userEmail : sub.userId.slice(0, 12) + "..."}
+                                                </p>
+                                                <p className="text-xs text-gray-500 truncate">
+                                                    {sub.planName} • {sub.userName && sub.userName !== "Sin nombre" ? sub.userName : "Usuario"}
+                                                </p>
+                                            </div>
+                                        </div>
 
-                            {/* KPIs Grid */}
-                            <div className="grid grid-cols-2 gap-3 text-sm">
-                                <div className="flex items-center gap-2 text-gray-600">
-                                    <CreditCard size={14} className="text-gray-400" />
-                                    <span>{formatCurrency(sub.amount, sub.currency)}</span>
-                                </div>
-                                <div className="flex items-center gap-2 text-gray-600">
-                                    <Clock size={14} className="text-gray-400" />
-                                    <span className="capitalize">{sub.billingPeriod === 'monthly' ? 'Mensual' : 'Anual'}</span>
-                                </div>
-                                <div className="flex items-center gap-2 text-gray-600">
-                                    <Calendar size={14} className="text-gray-400" />
-                                    <span title="Inicio">{formatDate(sub.startDate)}</span>
-                                </div>
-                                <div className={`flex items-center gap-2 ${daysRemaining <= 0 ? 'text-red-600' : isExpiringSoon ? 'text-amber-600' : 'text-gray-600'}`}>
-                                    <Calendar size={14} className={daysRemaining <= 0 ? 'text-red-400' : isExpiringSoon ? 'text-amber-400' : 'text-gray-400'} />
-                                    <span title="Vencimiento">{formatDate(sub.endDate)}</span>
-                                </div>
-                            </div>
+                                        {/* KPIs Grid */}
+                                        <div className="flex gap-4 md:gap-8 text-sm md:flex-1 justify-start md:justify-center flex-wrap">
+                                            <div className="flex items-center gap-2 text-gray-600">
+                                                <CreditCard size={14} className="text-gray-400" />
+                                                <span className="w-16">{formatCurrency(sub.amount, sub.currency)}</span>
+                                            </div>
+                                            <div className="flex items-center gap-2 text-gray-600">
+                                                <Clock size={14} className="text-gray-400" />
+                                                <span className="capitalize w-16">{sub.billingPeriod === 'monthly' ? 'Mensual' : 'Anual'}</span>
+                                            </div>
+                                            <div className={`flex flex-col items-start md:items-center gap-1 ${daysRemaining <= 0 ? 'text-red-600' : isExpiringSoon ? 'text-amber-600' : 'text-gray-600'}`}>
+                                                <div className="flex items-center gap-1">
+                                                    <Calendar size={14} className="text-gray-400" />
+                                                    <span title="Vencimiento" className="text-xs font-semibold">{formatDate(sub.endDate)}</span>
+                                                </div>
+                                                <span className="text-[10px] bg-gray-100 px-2 py-0.5 rounded-full mt-1">
+                                                    {daysRemaining <= 0 ? `Expirado hace ${Math.abs(daysRemaining)} días` : `${daysRemaining} días rest.`}
+                                                </span>
+                                            </div>
+                                        </div>
 
-                            {/* Next Payment Date */}
-                            {sub.nextPaymentDate && (
-                                <div className="mt-3 pt-3 border-t border-gray-100 flex items-center gap-2 text-xs text-gray-500">
-                                    <RefreshCw size={12} />
-                                    <span>Próx. Renovación: <strong className="text-gray-700">{formatDate(sub.nextPaymentDate)}</strong></span>
-                                </div>
-                            )}
-
-                            {/* Days Remaining Footer */}
-                            <div className={`mt-3 pt-3 border-t text-center text-sm font-medium ${daysRemaining <= 0 ? 'text-red-600 border-red-200' : isExpiringSoon ? 'text-amber-600 border-amber-200' : 'text-gray-500 border-gray-100'}`}>
-                                {daysRemaining <= 0 ? (
-                                    <span>Expirado hace {Math.abs(daysRemaining)} días</span>
-                                ) : (
-                                    <span>{daysRemaining} días restantes</span>
-                                )}
-                            </div>
+                                        {/* Status & Actions */}
+                                        <div className="flex items-center justify-between md:justify-end gap-4 md:w-1/4 border-t md:border-none pt-3 md:pt-0 border-gray-100">
+                                            {getStatusBadge(sub.status)}
+                                            <button
+                                                onClick={() => handleDeleteSubscription(sub.id)}
+                                                className="text-xs text-red-500 hover:text-red-700 hover:bg-red-50 p-2 rounded-lg flex items-center gap-1 transition-colors"
+                                                title="Eliminar suscripción del sistema"
+                                            >
+                                                <Trash2 size={16} /> <span className="md:hidden">Eliminar</span>
+                                            </button>
+                                        </div>
+                                    </div>
+                                );
+                            })}
                         </div>
-                    );
-                })}
+                    ) : (
+                        <p className="text-sm text-gray-500 italic p-4 bg-gray-50 rounded-lg border border-dashed">No hay suscripciones activas.</p>
+                    )}
+                </div>
+
+                {/* Inactive Subscriptions */}
+                {subscriptions.filter(s => s.status !== 'active').length > 0 && (
+                    <div>
+                        <h3 className="text-lg font-bold text-gray-900 mb-4 flex items-center gap-2">
+                            <XCircle className="text-gray-400" size={20} />
+                            Suscripciones Inactivas o Expiradas
+                        </h3>
+                        <div className="flex flex-col gap-3 opacity-75 hover:opacity-100 transition-opacity">
+                            {subscriptions.filter(s => s.status !== 'active').map((sub) => {
+                                const daysRemaining = getDaysRemaining(sub.endDate);
+
+                                return (
+                                    <div
+                                        key={sub.id}
+                                        className="flex flex-col md:flex-row md:items-center justify-between p-4 bg-gray-50 rounded-xl border border-gray-200 gap-4 grayscale"
+                                    >
+                                        {/* User Info */}
+                                        <div className="flex items-center gap-4 md:w-1/3">
+                                            <div className="w-10 h-10 rounded-full bg-gray-200 flex items-center justify-center text-gray-500 font-bold shrink-0">
+                                                {(sub.userName && sub.userName !== "Sin nombre") ? sub.userName.slice(0, 2).toUpperCase() : (sub.userEmail && sub.userEmail !== "Sin email" ? sub.userEmail.slice(0, 2).toUpperCase() : sub.userId.slice(0, 2).toUpperCase())}
+                                            </div>
+                                            <div className="min-w-0">
+                                                <p className="font-medium text-gray-900 text-sm truncate" title={sub.userEmail && sub.userEmail !== "Sin email" ? sub.userEmail : sub.userId}>
+                                                    {sub.userEmail && sub.userEmail !== "Sin email" ? sub.userEmail : sub.userId.slice(0, 12) + "..."}
+                                                </p>
+                                                <p className="text-xs text-gray-500 truncate">
+                                                    {sub.planName} • {sub.userName && sub.userName !== "Sin nombre" ? sub.userName : "Usuario"}
+                                                </p>
+                                            </div>
+                                        </div>
+
+                                        {/* KPIs Grid */}
+                                        <div className="flex gap-4 md:gap-8 text-sm md:flex-1 justify-start md:justify-center flex-wrap">
+                                            <div className="flex items-center gap-2 text-gray-500">
+                                                <CreditCard size={14} />
+                                                <span className="w-16">{formatCurrency(sub.amount, sub.currency)}</span>
+                                            </div>
+                                            <div className="flex items-center gap-2 text-gray-500">
+                                                <Clock size={14} />
+                                                <span className="capitalize w-16">{sub.billingPeriod === 'monthly' ? 'Mensual' : 'Anual'}</span>
+                                            </div>
+                                            <div className="flex flex-col items-start md:items-center gap-1 text-gray-500">
+                                                <div className="flex items-center gap-1">
+                                                    <Calendar size={14} />
+                                                    <span title="Vencimiento" className="text-xs font-semibold">{formatDate(sub.endDate)}</span>
+                                                </div>
+                                                <span className="text-[10px] bg-gray-200 px-2 py-0.5 rounded-full mt-1">
+                                                    {daysRemaining <= 0 ? `Expirado hace ${Math.abs(daysRemaining)} días` : `${daysRemaining} días rest.`}
+                                                </span>
+                                            </div>
+                                        </div>
+
+                                        {/* Status & Actions */}
+                                        <div className="flex items-center justify-between md:justify-end gap-4 md:w-1/4 border-t md:border-none pt-3 md:pt-0 border-gray-200">
+                                            {getStatusBadge(sub.status)}
+                                            <button
+                                                onClick={() => handleDeleteSubscription(sub.id)}
+                                                className="text-xs text-red-500 hover:text-red-700 hover:bg-red-50 p-2 rounded-lg flex items-center gap-1 transition-colors"
+                                                title="Eliminar suscripción del sistema"
+                                            >
+                                                <Trash2 size={16} /> <span className="md:hidden">Eliminar</span>
+                                            </button>
+                                        </div>
+                                    </div>
+                                );
+                            })}
+                        </div>
+                    </div>
+                )}
             </div>
         </div>
     );

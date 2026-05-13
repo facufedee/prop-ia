@@ -55,30 +55,36 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     if (!user || !db) return;
 
     const userRef = doc(db, "users", user.uid);
-    const unsubSnapshot = onSnapshot(userRef, async (docSnap) => {
-      if (docSnap.exists()) {
-        const data = docSnap.data();
-        setUserData(data);
+    const unsubSnapshot = onSnapshot(
+      userRef,
+      async (docSnap) => {
+        if (docSnap.exists()) {
+          const data = docSnap.data();
+          setUserData(data);
 
-        if (data.roleId) {
-          try {
-            const role = await roleService.getRoleById(data.roleId);
-            // Optional: Merge logoUrl if stored in user doc
-            if (data.logoUrl && role) {
-              // We cast to any to attach logoUrl if Role type doesn't support it native yet, 
-              // or we expect Role to generally match what we need.
-              (role as any).logoUrl = data.logoUrl;
+          if (data.roleId) {
+            try {
+              const role = await roleService.getRoleById(data.roleId);
+              if (data.logoUrl && role) {
+                (role as any).logoUrl = data.logoUrl;
+              }
+              setUserRole(role);
+            } catch (error) {
+              console.error("Error fetching role:", error);
+              // Don't leave loading stuck — unblock with null role
+              setUserRole(null);
             }
-            setUserRole(role);
-          } catch (error) {
-            console.error("Error fetching role:", error);
           }
+          // If no roleId, userRole stays null — PermissionGuard handles this case
         }
-      } else {
-        // User doc might not exist yet if just registered?
+        setLoading(false);
+      },
+      (error) => {
+        // Firestore snapshot error (e.g. permission denied) — unblock loading
+        console.error("AuthContext snapshot error:", error);
+        setLoading(false);
       }
-      setLoading(false);
-    });
+    );
 
     return () => unsubSnapshot();
   }, [user]);

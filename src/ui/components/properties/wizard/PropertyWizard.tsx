@@ -140,6 +140,7 @@ export interface PropertyData {
     operations?: string[];
     rent_price?: string;
     rent_currency?: string;
+    customTag?: string;
 }
 
 interface PropertyWizardProps {
@@ -237,6 +238,7 @@ export default function PropertyWizard({ initialData, isEditing = false, ...prop
         remodeledYear: initialData?.remodeledYear || '',
         rent_price: initialData?.rent_price || '',
         rent_currency: initialData?.rent_currency || 'ARS',
+        customTag: initialData?.customTag || '',
     });
 
     // Step 5: Multimedia State
@@ -1694,6 +1696,19 @@ export default function PropertyWizard({ initialData, isEditing = false, ...prop
                         )}
 
                         <div className="grid grid-cols-1 gap-6 pt-4 border-t border-gray-100">
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-1">
+                                    Etiqueta de página <span className="text-gray-400 font-normal">(opcional)</span>
+                                </label>
+                                <p className="text-xs text-gray-400 mb-2">Usala para agrupar propiedades en páginas personalizadas de tu sitio. Ej: <em>emprendimiento</em>, <em>exclusiva</em>, <em>pozo</em>.</p>
+                                <input
+                                    type="text"
+                                    placeholder="ej: emprendimiento"
+                                    className="w-full p-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-gray-900 font-medium"
+                                    value={formData.customTag || ''}
+                                    onChange={(e) => handleChange('customTag', e.target.value.toLowerCase().trim())}
+                                />
+                            </div>
                             <div>
                                 <label className="block text-sm font-medium text-gray-700 mb-2">Video (YouTube URL)</label>
                                 <input

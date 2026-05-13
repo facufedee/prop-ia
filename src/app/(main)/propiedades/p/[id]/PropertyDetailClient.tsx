@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { useParams } from "next/navigation";
 import { PublicProperty, PublicAgency, publicService } from "@/infrastructure/services/publicService";
 import { MapPin, Bath, Bed, Maximize, Home, ChevronLeft, ChevronRight, Share2, Heart, ArrowRight, PlayCircle } from "lucide-react";
@@ -43,6 +43,7 @@ export default function PropertyDetailPage({ id: propId }: Props) {
     const [showContactModal, setShowContactModal] = useState(false);
 
     const [isSaved, setIsSaved] = useState(false);
+    const touchStartX = useRef(0);
 
     useEffect(() => {
         const load = async () => {
@@ -77,12 +78,27 @@ export default function PropertyDetailPage({ id: propId }: Props) {
         const handleKey = (e: KeyboardEvent) => {
             if (!showGalleryModal) return;
             if (e.key === 'Escape') { setShowGalleryModal(false); setModalZoom(false); }
-            if (e.key === 'ArrowRight') setCurrentImageIndex(prev => (prev + 1) % (property?.imageUrls?.length || 1));
-            if (e.key === 'ArrowLeft') setCurrentImageIndex(prev => (prev - 1 + (property?.imageUrls?.length || 1)) % (property?.imageUrls?.length || 1));
+            const total = property?.imageUrls?.length || 1;
+            if (e.key === 'ArrowRight') setCurrentImageIndex(prev => (Math.min(prev, total - 1) + 1) % total);
+            if (e.key === 'ArrowLeft') setCurrentImageIndex(prev => (Math.min(prev, total - 1) - 1 + total) % total);
         };
         window.addEventListener('keydown', handleKey);
         return () => window.removeEventListener('keydown', handleKey);
     }, [showGalleryModal, property?.imageUrls?.length]);
+
+    // Preload adjacent images for instant transitions
+    useEffect(() => {
+        if (!property?.imageUrls?.length) return;
+        const total = property.imageUrls.length;
+        [1, 2, -1].forEach(offset => {
+            const idx = (currentImageIndex + offset + total * 10) % total;
+            const url = property.imageUrls[idx];
+            if (url) {
+                const img = new window.Image();
+                img.src = url;
+            }
+        });
+    }, [currentImageIndex, property?.imageUrls]);
 
     const handleSave = () => {
         if (isSaved) {
@@ -230,33 +246,53 @@ export default function PropertyDetailPage({ id: propId }: Props) {
                                 return (
                                     <>
                                         {/* Main Stage — 16:9 container shows landscape photos fully */}
-                                        <div className={`relative w-full aspect-[4/3] md:aspect-[16/9] bg-gray-900 rounded-2xl overflow-hidden group ${property.status === 'sold' ? 'grayscale opacity-90' : ''}`}>
+                                        <div
+                                            className={`relative w-full aspect-[4/3] md:aspect-[16/9] bg-gray-900 rounded-2xl overflow-hidden group ${property.status === 'sold' ? 'grayscale opacity-90' : ''}`}
+                                            onTouchStart={(e) => { touchStartX.current = e.touches[0].clientX; }}
+                                            onTouchEnd={(e) => {
+                                                const diff = touchStartX.current - e.changedTouches[0].clientX;
+                                                if (Math.abs(diff) > 40) {
+                                                    diff > 0
+                                                        ? setCurrentImageIndex(prev => (prev + 1) % mediaItems.length)
+                                                        : setCurrentImageIndex(prev => (prev - 1 + mediaItems.length) % mediaItems.length);
+                                                }
+                                            }}
+                                        >
                                             {mediaItems.length > 0 && currentItem ? (
                                                 <>
-                                                    {/* Content */}
-                                                    {currentItem.type === 'video' ? (
-                                                        <div className="absolute inset-0 flex items-center justify-center bg-black">
-                                                            <iframe
-                                                                width="100%"
-                                                                height="100%"
-                                                                src={`https://www.youtube.com/embed/${currentItem.videoId}?autoplay=1`}
-                                                                title="YouTube video player"
-                                                                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                                                                allowFullScreen
-                                                                className="w-full h-full"
-                                                            ></iframe>
+                                                    {/* Stacked layers — CSS opacity transition for instant, smooth switching */}
+                                                    {mediaItems.map((item, idx) => (
+                                                        <div
+                                                            key={idx}
+                                                            className={`absolute inset-0 transition-opacity duration-200 ${idx === currentImageIndex ? 'opacity-100 z-[1]' : 'opacity-0 z-0 pointer-events-none'}`}
+                                                        >
+                                                            {item.type === 'video' ? (
+                                                                idx === currentImageIndex ? (
+                                                                    <div className="absolute inset-0 flex items-center justify-center bg-black">
+                                                                        <iframe
+                                                                            width="100%"
+                                                                            height="100%"
+                                                                            src={`https://www.youtube.com/embed/${item.videoId}?autoplay=1`}
+                                                                            title="YouTube video player"
+                                                                            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                                                                            allowFullScreen
+                                                                            className="w-full h-full"
+                                                                        />
+                                                                    </div>
+                                                                ) : null
+                                                            ) : (
+                                                                <Image
+                                                                    src={item.url}
+                                                                    fill
+                                                                    alt="Vista Principal"
+                                                                    className="object-cover cursor-zoom-in"
+                                                                    sizes="(max-width: 1024px) 100vw, 66vw"
+                                                                    priority={idx === 0}
+                                                                    onClick={() => setShowGalleryModal(true)}
+                                                                />
+                                                            )}
                                                         </div>
-                                                    ) : (
-                                                        <Image
-                                                            src={currentItem.url}
-                                                            fill
-                                                            alt="Vista Principal"
-                                                            className="object-cover cursor-zoom-in"
-                                                            sizes="(max-width: 1024px) 100vw, 66vw"
-                                                            priority={currentImageIndex === 0}
-                                                            onClick={() => setShowGalleryModal(true)}
-                                                        />
-                                                    )}
+                                                    ))}
 
                                                     {/* Navigation Controls */}
                                                     {mediaItems.length > 1 && (
@@ -519,16 +555,31 @@ export default function PropertyDetailPage({ id: propId }: Props) {
             </div>
 
             {/* Gallery Modal */}
-            {showGalleryModal && property && property.imageUrls && (
+            {showGalleryModal && property && property.imageUrls?.length > 0 && (() => {
+                // Clamp to valid image index (avoids crash if current item is a video)
+                const modalIdx = Math.min(currentImageIndex, property.imageUrls.length - 1);
+                const total = property.imageUrls.length;
+                const setModalIdx = (idx: number) => { setCurrentImageIndex(idx); setModalZoom(false); };
+
+                return (
                 <div
                     className="fixed inset-0 z-[60] bg-black/98 flex items-center justify-center animate-in fade-in duration-200"
                     onClick={(e) => { if (e.target === e.currentTarget) { setShowGalleryModal(false); setModalZoom(false); } }}
+                    onTouchStart={(e) => { touchStartX.current = e.touches[0].clientX; }}
+                    onTouchEnd={(e) => {
+                        const diff = touchStartX.current - e.changedTouches[0].clientX;
+                        if (Math.abs(diff) > 40) {
+                            diff > 0
+                                ? setModalIdx((modalIdx + 1) % total)
+                                : setModalIdx((modalIdx - 1 + total) % total);
+                        }
+                    }}
                 >
                     <div className="w-full h-full flex flex-col">
                         {/* Header */}
                         <div className="flex items-center justify-between px-4 py-3 bg-black/60 shrink-0 border-b border-white/10">
                             <span className="text-sm font-medium text-white/70">
-                                {currentImageIndex + 1} / {property.imageUrls.length}
+                                {modalIdx + 1} / {total}
                             </span>
                             <span className="text-xs text-white/40">{modalZoom ? 'Zoom activo · Clic para ajustar' : 'Clic en la imagen para zoom'}</span>
                             <button
@@ -545,38 +596,50 @@ export default function PropertyDetailPage({ id: propId }: Props) {
                             className={`flex-1 relative flex items-center justify-center bg-zinc-950 overflow-hidden ${modalZoom ? 'cursor-zoom-out' : 'cursor-zoom-in'}`}
                             onClick={() => setModalZoom(z => !z)}
                         >
-                            {/* Blurred background to fill letterbox areas */}
-                            <Image
-                                src={property.imageUrls[currentImageIndex]}
-                                fill
-                                className="object-cover blur-2xl opacity-30 scale-110 pointer-events-none"
-                                sizes="100vw"
-                                alt=""
-                                aria-hidden
-                            />
-                            {/* Sharp image centered */}
-                            <div className={`absolute inset-0 flex items-center justify-center transition-transform duration-300 ${modalZoom ? 'scale-[2]' : 'scale-100'}`}>
-                                <Image
-                                    src={property.imageUrls[currentImageIndex]}
-                                    alt={`Imagen ${currentImageIndex + 1}`}
-                                    fill
-                                    sizes="100vw"
-                                    className="object-contain"
-                                    priority
-                                />
-                            </div>
+                            {/* Stacked images — only render current ±1 to limit memory */}
+                            {property.imageUrls.map((url, idx) => {
+                                const dist = Math.min(Math.abs(idx - modalIdx), total - Math.abs(idx - modalIdx));
+                                if (dist > 1) return null;
+                                return (
+                                    <div
+                                        key={idx}
+                                        className={`absolute inset-0 transition-opacity duration-200 flex items-center justify-center ${idx === modalIdx ? 'opacity-100 z-[1]' : 'opacity-0 z-0 pointer-events-none'}`}
+                                    >
+                                        {/* Blurred background */}
+                                        <Image
+                                            src={url}
+                                            fill
+                                            className="object-cover blur-2xl opacity-30 scale-110 pointer-events-none"
+                                            sizes="100vw"
+                                            alt=""
+                                            aria-hidden
+                                        />
+                                        {/* Sharp image */}
+                                        <div className={`absolute inset-0 flex items-center justify-center transition-transform duration-300 ${modalZoom ? 'scale-[2]' : 'scale-100'}`}>
+                                            <Image
+                                                src={url}
+                                                alt={`Imagen ${idx + 1}`}
+                                                fill
+                                                sizes="100vw"
+                                                className="object-contain"
+                                                priority={dist === 0}
+                                            />
+                                        </div>
+                                    </div>
+                                );
+                            })}
 
                             {/* Navigation Arrows */}
-                            {!modalZoom && property.imageUrls.length > 1 && (
+                            {!modalZoom && total > 1 && (
                                 <>
                                     <button
-                                        onClick={(e) => { e.stopPropagation(); setCurrentImageIndex(prev => (prev - 1 + property.imageUrls.length) % property.imageUrls.length); }}
+                                        onClick={(e) => { e.stopPropagation(); setModalIdx((modalIdx - 1 + total) % total); }}
                                         className="absolute left-4 p-4 bg-black/40 hover:bg-black/80 rounded-full text-white transition backdrop-blur-md border border-white/10 z-10 group"
                                     >
                                         <ChevronLeft size={28} className="group-hover:-translate-x-0.5 transition-transform" />
                                     </button>
                                     <button
-                                        onClick={(e) => { e.stopPropagation(); setCurrentImageIndex(prev => (prev + 1) % property.imageUrls.length); }}
+                                        onClick={(e) => { e.stopPropagation(); setModalIdx((modalIdx + 1) % total); }}
                                         className="absolute right-4 p-4 bg-black/40 hover:bg-black/80 rounded-full text-white transition backdrop-blur-md border border-white/10 z-10 group"
                                     >
                                         <ChevronRight size={28} className="group-hover:translate-x-0.5 transition-transform" />
@@ -586,13 +649,13 @@ export default function PropertyDetailPage({ id: propId }: Props) {
                         </div>
 
                         {/* Thumbnails Strip */}
-                        {property.imageUrls.length > 1 && (
+                        {total > 1 && (
                             <div className="h-20 bg-zinc-950 p-2 shrink-0 flex gap-2 overflow-x-auto border-t border-white/10">
                                 {property.imageUrls.map((url, idx) => (
                                     <button
                                         key={idx}
-                                        onClick={(e) => { e.stopPropagation(); setCurrentImageIndex(idx); setModalZoom(false); }}
-                                        className={`relative h-full aspect-[4/3] rounded-lg overflow-hidden transition-all duration-200 border-2 shrink-0 ${idx === currentImageIndex
+                                        onClick={(e) => { e.stopPropagation(); setModalIdx(idx); }}
+                                        className={`relative h-full aspect-[4/3] rounded-lg overflow-hidden transition-all duration-200 border-2 shrink-0 ${idx === modalIdx
                                                 ? 'border-indigo-500 opacity-100 scale-105 shadow-lg shadow-indigo-500/20'
                                                 : 'border-transparent opacity-40 hover:opacity-80'
                                             }`}
@@ -604,7 +667,8 @@ export default function PropertyDetailPage({ id: propId }: Props) {
                         )}
                     </div>
                 </div>
-            )}
+                );
+            })()}
 
             <ContactModal
                 isOpen={showContactModal}

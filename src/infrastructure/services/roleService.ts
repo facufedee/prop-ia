@@ -17,7 +17,7 @@ export interface Role {
     isSystem?: boolean; // System roles cannot be deleted
 }
 
-export const PERMISSIONS: Permission[] = [
+export const DEFAULT_PERMISSIONS: Permission[] = [
     { id: "/dashboard", label: "Dashboard", description: "Acceso al panel principal" },
     { id: "/dashboard/tasacion", label: "Tasación Inteligente", description: "Acceso a herramientas de tasación" },
     { id: "/dashboard/propiedades", label: "Propiedades", description: "Gestión de propiedades" },
@@ -43,7 +43,7 @@ export const PERMISSIONS: Permission[] = [
     { id: "/dashboard/configuracion/backup", label: "Backup y Restauración", description: "Copias de seguridad de la base de datos (solo administradores)" },
     { id: "/dashboard/configuracion/suscripciones", label: "Planes y Suscripciones", description: "Gestión de planes de suscripción (solo administradores)" },
     { id: "/dashboard/sucursales", label: "Sucursales", description: "Gestión de sucursales (Multisucursal)" },
-    { id: "/dashboard/blog", label: "Gestión Blog", description: "Gestión de noticias y blog (Admin)" }, // Renaming old /dashboard/blog permission to avoid confusion if needed, or keep as is. The user said "Novedades" for clients.
+    { id: "/dashboard/blog", label: "Gestión Blog", description: "Gestión de noticias y blog (Admin)" },
     { id: "/dashboard/novedades", label: "Novedades Zeta", description: "Acceso a noticias y actualizaciones para clientes" },
     { id: "/dashboard/emprendimientos", label: "Emprendimientos", description: "Gestión de emprendimientos y desarrollos" },
     { id: "/dashboard/tutoriales", label: "Tutoriales", description: "Acceso a guías y tutoriales del sistema" },
@@ -53,8 +53,21 @@ export const PERMISSIONS: Permission[] = [
 
 const ROLES_COLLECTION = "roles";
 const USERS_COLLECTION = "users";
+const PERMISSIONS_COLLECTION = "permissions_list";
 
 export const roleService = {
+    // Get all available permissions dynamically
+    getAvailablePermissions: async (): Promise<Permission[]> => {
+        if (!db) return DEFAULT_PERMISSIONS;
+        const querySnapshot = await getDocs(collection(db, PERMISSIONS_COLLECTION));
+        if (querySnapshot.empty) {
+            // Auto-initialize permissions if empty
+            await Promise.all(DEFAULT_PERMISSIONS.map(p => setDoc(doc(db, PERMISSIONS_COLLECTION, p.id.replace(/\//g, "_")), p)));
+            return DEFAULT_PERMISSIONS;
+        }
+        return querySnapshot.docs.map(doc => doc.data() as Permission);
+    },
+
     // Get all roles
     getRoles: async (): Promise<Role[]> => {
         if (!db) throw new Error("Firestore not initialized");
@@ -216,7 +229,7 @@ export const roleService = {
             await roleService.createRole({
                 name: "Super Admin",
                 description: "Acceso total y configuración del sistema",
-                permissions: PERMISSIONS.map(p => p.id), // All permissions
+                permissions: DEFAULT_PERMISSIONS.map(p => p.id), // All permissions
                 isSystem: true
             });
         }
@@ -335,8 +348,8 @@ export const roleService = {
     },
     // Sync default roles: add missing permissions to existing roles without removing any
     syncDefaultRoles: async (): Promise<{ updated: string[] }> => {
-        const DEFAULT_PERMISSIONS: Record<string, string[]> = {
-            "Super Admin": PERMISSIONS.map(p => p.id),
+        const DEFAULT_PERM_MAP: Record<string, string[]> = {
+            "Super Admin": DEFAULT_PERMISSIONS.map(p => p.id),
             "Cliente Enterprise": [
                 "/dashboard", "/dashboard/propiedades", "/dashboard/tasacion",
                 "/dashboard/alquileres", "/dashboard/agenda-cobros", "/dashboard/liquidaciones",
@@ -375,7 +388,7 @@ export const roleService = {
         const updated: string[] = [];
 
         for (const role of roles) {
-            const defaultPerms = DEFAULT_PERMISSIONS[role.name];
+            const defaultPerms = DEFAULT_PERM_MAP[role.name];
             if (!defaultPerms) continue;
 
             const existing = new Set(role.permissions || []);

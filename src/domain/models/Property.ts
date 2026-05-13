@@ -89,6 +89,7 @@ export interface Property {
     branchId?: string;
     real_estate_id?: string; // ID de la inmobiliaria en el sistema externo
     seller?: SellerInfo;
+    customTag?: string;       // Custom label for site page filtering (e.g. "emprendimiento")
 }
 
 export interface PropertyImage {
