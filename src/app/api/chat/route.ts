@@ -66,9 +66,7 @@ async function hasActiveSub(userId: string): Promise<boolean> {
 }
 
 export async function POST(request: NextRequest) {
-    if (!apiKey) {
-        return NextResponse.json({ error: "Configuración incompleta del servidor" }, { status: 500 });
-    }
+
 
     // Verify authentication
     const authResult = await verifyAuth(request);
@@ -126,6 +124,10 @@ export async function POST(request: NextRequest) {
                     'x-vercel-ai-data-stream': 'v1'
                 }
             });
+        }
+
+        if (!apiKey) {
+            return NextResponse.json({ error: "La API Key de OpenAI no está configurada" }, { status: 500 });
         }
 
         const coreMessages = convertToCoreMessages(messages);
