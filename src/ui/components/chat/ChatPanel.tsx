@@ -2,16 +2,18 @@
 
 import { useRef, useEffect, useState } from "react";
 import { useChat } from "ai/react";
-import { Bot, Send, X, Minimize2, BarChart3, Home, FileText, DollarSign } from "lucide-react";
+import { Bot, Send, X, Minimize2, BarChart3, Home, FileText, DollarSign, PlusCircle, CreditCard, HelpCircle } from "lucide-react";
 import ReactMarkdown from "react-markdown";
 import remarkBreaks from "remark-breaks";
 import { auth } from "@/infrastructure/firebase/client";
 
 const QUICK_PROMPTS = [
-    { icon: BarChart3, label: "Mis estadísticas", prompt: "Dame un resumen de mis estadísticas: propiedades activas, alquileres y leads nuevos." },
     { icon: Home, label: "Mis propiedades", prompt: "¿Cuántas propiedades activas tengo?" },
-    { icon: FileText, label: "Alquileres activos", prompt: "Mostrá mis contratos de alquiler activos." },
-    { icon: DollarSign, label: "Ver planes", prompt: "¿Cuáles son los planes y precios disponibles?" },
+    { icon: PlusCircle, label: "Cargar propiedad", prompt: "¿Cómo cargo una propiedad?" },
+    { icon: CreditCard, label: "Cobrar alquiler", prompt: "¿Cómo cobro un alquiler?" },
+    { icon: BarChart3, label: "Estadísticas", prompt: "Resumen de mis estadísticas" },
+    { icon: DollarSign, label: "Ver planes", prompt: "Planes y precios" },
+    { icon: HelpCircle, label: "Soporte", prompt: "Necesito ayuda o soporte" },
 ];
 
 export default function ChatPanel() {

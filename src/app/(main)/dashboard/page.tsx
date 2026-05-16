@@ -34,6 +34,7 @@ import {
     Star,
     Camera,
     CreditCard,
+    Globe,
 } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -287,32 +288,64 @@ export default function DashboardPage() {
             <div className="max-w-7xl mx-auto space-y-8 pb-10">
                 <AnnouncementBanner />
 
-                {/* ─── 1. BANNER DE BIENVENIDA ──────────────────────────── */}
-                <div className="relative w-full bg-gradient-to-br from-indigo-900 via-indigo-800 to-indigo-950 rounded-3xl p-8 md:p-10 overflow-hidden shadow-xl shadow-indigo-900/20">
-                    <div className="relative z-10 md:w-2/3">
-                        <span className="inline-block px-3 py-1 mb-4 text-[10px] font-bold uppercase tracking-widest text-indigo-200 bg-white/10 rounded-full border border-white/20 backdrop-blur-md">
-                            Panel de Control
-                        </span>
-                        <h1 className="text-3xl md:text-4xl font-extrabold text-white tracking-tight mb-3">
-                            {getGreeting()}, {user?.displayName?.split(' ')[0] || 'Colega'} 👋
-                        </h1>
-                        <p className="text-indigo-200 text-sm md:text-base font-medium max-w-lg mb-8">
-                            {format(new Date(), "EEEE d 'de' MMMM, yyyy", { locale: es })}. Aquí tenés el resumen operativo de tu inmobiliaria listo para revisar.
-                        </p>
-                        <div className="flex flex-wrap gap-4">
-                            <Link href="/dashboard/propiedades/nueva" className="bg-white hover:bg-indigo-50 text-indigo-900 font-bold px-6 py-3.5 rounded-xl transition-all shadow-lg active:scale-95 flex items-center gap-2 text-sm">
-                                <Plus size={18} /> Nueva Propiedad
+                {/* ─── 1. BANNER DE BIENVENIDA Y GUÍA ─────────────────────── */}
+                <div className="grid grid-cols-1 lg:grid-cols-12 gap-5 lg:gap-6">
+                    {/* Tarjeta de Bienvenida */}
+                    <div className="lg:col-span-5 relative bg-gradient-to-br from-indigo-900 via-indigo-800 to-indigo-950 rounded-3xl p-8 overflow-hidden shadow-xl shadow-indigo-900/20 flex flex-col justify-between">
+                        <div className="relative z-10">
+                            <span className="inline-block px-3 py-1 mb-4 text-[10px] font-bold uppercase tracking-widest text-indigo-200 bg-white/10 rounded-full border border-white/20 backdrop-blur-md">
+                                Inicio
+                            </span>
+                            <h1 className="text-3xl font-extrabold text-white tracking-tight mb-3">
+                                {getGreeting()}, {user?.displayName?.split(' ')[0] || 'Colega'} 👋
+                            </h1>
+                            <p className="text-indigo-200 text-sm font-medium leading-relaxed mb-6">
+                                Estás en tu ecosistema inmobiliario digital. Diseñado para optimizar tu tiempo, ya seas profesional, inmobiliaria o un particular gestionando sus alquileres.
+                            </p>
+                        </div>
+                        <div className="relative z-10 flex gap-3">
+                            <Link href="/dashboard/propiedades/nueva" className="bg-white hover:bg-indigo-50 text-indigo-900 font-bold px-5 py-3 rounded-xl transition-all shadow-lg active:scale-95 flex items-center gap-2 text-sm flex-1 justify-center">
+                                <Plus size={18} /> Cargar Propiedad
                             </Link>
-                            <Link href="/dashboard/leads" className="bg-indigo-500/20 hover:bg-indigo-500/30 text-white font-bold px-6 py-3.5 rounded-xl transition-all border border-indigo-400/30 backdrop-blur-md active:scale-95 flex items-center gap-2 text-sm">
-                                Ver Consultas
-                            </Link>
+                        </div>
+                        <div className="absolute -right-10 top-0 bottom-0 w-2/3 opacity-20 pointer-events-none flex items-center justify-end">
+                            <Building2 size={240} className="text-white rotate-12" strokeWidth={0.5} />
                         </div>
                     </div>
 
-                    {/* Abstract illustration element */}
-                    <div className="absolute right-0 top-0 bottom-0 w-1/3 opacity-30 md:opacity-100 pointer-events-none flex items-center justify-center">
-                        <div className="absolute right-10 w-64 h-64 bg-indigo-500/50 rounded-full mix-blend-overlay filter blur-3xl opacity-80 animate-pulse"></div>
-                        <Building2 size={220} className="text-white/10 rotate-12 relative z-0" strokeWidth={0.5} />
+                    {/* Guía de Funcionalidades */}
+                    <div className="lg:col-span-7 grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <Link href="/dashboard/propiedades" className="bg-white p-5 rounded-3xl border border-gray-100 shadow-sm hover:border-indigo-300 hover:shadow-md transition-all group flex flex-col h-full">
+                            <div className="w-11 h-11 bg-indigo-50 rounded-2xl flex items-center justify-center mb-4 group-hover:scale-110 group-hover:bg-indigo-100 transition-all">
+                                <Home size={22} className="text-indigo-600" />
+                            </div>
+                            <h3 className="text-[15px] font-bold text-gray-900 mb-1.5">Gestión de Inventario</h3>
+                            <p className="text-[13px] text-gray-500 font-medium leading-relaxed">Publicá y administrá tus propiedades, subí fotos de alta calidad y ubicá todo en el mapa.</p>
+                        </Link>
+                        
+                        <Link href="/dashboard/leads" className="bg-white p-5 rounded-3xl border border-gray-100 shadow-sm hover:border-blue-300 hover:shadow-md transition-all group flex flex-col h-full">
+                            <div className="w-11 h-11 bg-blue-50 rounded-2xl flex items-center justify-center mb-4 group-hover:scale-110 group-hover:bg-blue-100 transition-all">
+                                <MessageSquare size={22} className="text-blue-600" />
+                            </div>
+                            <h3 className="text-[15px] font-bold text-gray-900 mb-1.5">CRM y Clientes</h3>
+                            <p className="text-[13px] text-gray-500 font-medium leading-relaxed">Respondé consultas, seguí tus ventas paso a paso y no pierdas ningún contacto potencial.</p>
+                        </Link>
+                        
+                        <Link href="/dashboard/alquileres" className="bg-white p-5 rounded-3xl border border-gray-100 shadow-sm hover:border-emerald-300 hover:shadow-md transition-all group flex flex-col h-full">
+                            <div className="w-11 h-11 bg-emerald-50 rounded-2xl flex items-center justify-center mb-4 group-hover:scale-110 group-hover:bg-emerald-100 transition-all">
+                                <Key size={22} className="text-emerald-600" />
+                            </div>
+                            <h3 className="text-[15px] font-bold text-gray-900 mb-1.5">Alquileres y Cobros</h3>
+                            <p className="text-[13px] text-gray-500 font-medium leading-relaxed">Controlá vencimientos, generá contratos automáticos y administrá los pagos mensuales.</p>
+                        </Link>
+                        
+                        <Link href="/dashboard/mi-sitio" className="bg-white p-5 rounded-3xl border border-gray-100 shadow-sm hover:border-violet-300 hover:shadow-md transition-all group flex flex-col h-full">
+                            <div className="w-11 h-11 bg-violet-50 rounded-2xl flex items-center justify-center mb-4 group-hover:scale-110 group-hover:bg-violet-100 transition-all">
+                                <Globe size={22} className="text-violet-600" />
+                            </div>
+                            <h3 className="text-[15px] font-bold text-gray-900 mb-1.5">Tu Inmobiliaria Web</h3>
+                            <p className="text-[13px] text-gray-500 font-medium leading-relaxed">Personalizá tu propia página web pública para que tus clientes vean tu catálogo y tu marca.</p>
+                        </Link>
                     </div>
                 </div>
 
@@ -515,14 +548,14 @@ export default function DashboardPage() {
                                         <div className="p-1.5 bg-amber-200/50 rounded-lg">
                                             <Star size={16} className="text-amber-600 fill-amber-600" />
                                         </div>
-                                        <span className="text-[11px] font-black uppercase tracking-widest text-amber-700">Zeta Tip</span>
+                                        <span className="text-[11px] font-black uppercase tracking-widest text-amber-700">Tip Inmobiliario</span>
                                     </div>
                                     <p className="text-[14px] font-bold text-gray-800 leading-relaxed mb-6">
-                                        ¿Sabías que las propiedades con <strong className="text-amber-700">fotos de alta calidad</strong> reciben hasta un 40% más de consultas directas?
+                                        ¿Sabías que responder a un contacto en los <strong className="text-amber-700">primeros 5 minutos</strong> aumenta un 80% tus chances de concretar una visita?
                                     </p>
                                     <div className="mt-auto">
-                                        <Link href="/dashboard/propiedades" className="inline-flex items-center gap-2.5 text-[13px] font-bold text-white bg-gray-900 hover:bg-black px-5 py-3 rounded-xl shadow-md transition-all active:scale-95 group-hover:shadow-xl w-max">
-                                            <Camera size={16} /> Mejorar Fotos
+                                        <Link href="/dashboard/leads" className="inline-flex items-center gap-2.5 text-[13px] font-bold text-white bg-gray-900 hover:bg-black px-5 py-3 rounded-xl shadow-md transition-all active:scale-95 group-hover:shadow-xl w-max">
+                                            <MessageSquare size={16} /> Responder Consultas
                                         </Link>
                                     </div>
                                 </div>

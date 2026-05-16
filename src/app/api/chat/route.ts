@@ -82,9 +82,38 @@ export async function POST(request: NextRequest) {
         // Gate: free users get canned responses — no Gemini calls
         const isPaid = await hasActiveSub(authResult.user.uid);
         if (!isPaid) {
-            const userMsgCount = messages.filter((m: any) => m.role === "user").length;
-            const content = userMsgCount <= 1 ? CANNED_FREE_INTRO : CANNED_FREE_UPGRADE;
-            return new Response(content, { status: 200 });
+            const userMsgs = messages.filter((m: any) => m.role === "user");
+            const lastUserMsg = userMsgs[userMsgs.length - 1];
+            const rawUserText = lastUserMsg ? String(lastUserMsg.content).toLowerCase() : "";
+            const userText = rawUserText.normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+            
+            let content = "";
+            
+            if (userText.includes("cuantas") && (userText.includes("casas") || userText.includes("propiedad"))) {
+                const props = await runChatTool("search_user_properties", { status: "active" }, authResult.user.uid);
+                content = `Actualmente tenés **${props.total || 0} propiedades activas** registradas en el sistema.\n\n*Para obtener reportes detallados y asistencia IA completa, actualizá tu plan.*`;
+            } else if ((userText.includes("como") && userText.includes("carg")) || userText.includes("agregar") || userText.includes("crear") || userText.includes("nueva")) {
+                content = `🏠 **Para cargar una propiedad:**\nAndá a la sección **Propiedades** y hacé clic en el botón "+ Nueva Propiedad". Ahí podés completar todos los datos, subir fotos y asignar la ubicación en el mapa.\n\n👉 [Ver Tutoriales](/dashboard/tutoriales)`;
+            } else if ((userText.includes("como") && userText.includes("cobr")) || userText.includes("pago") || userText.includes("recibo") || userText.includes("alquiler")) {
+                content = `💰 **Para gestionar cobros de alquileres:**\nAndá al módulo **Alquileres** > **Agenda de Cobros**. Desde ahí podés registrar los pagos mes a mes y llevar el control de morosos.\n\n👉 [Ver Tutoriales](/dashboard/tutoriales)`;
+            } else if (userText.includes("plan") || userText.includes("precio") || userText.includes("suscrip")) {
+                content = `💳 **Planes y Suscripciones:**\nTenemos planes adaptados al tamaño de cada inmobiliaria, desde el plan Básico (gratuito) hasta planes Profesionales con Inteligencia Artificial y funciones avanzadas.\n\n👉 [**Ver planes y precios**](/precios)`;
+            } else if (userText.includes("soporte") || userText.includes("ayuda") || userText.includes("contact")) {
+                content = `🎧 **Soporte Técnico:**\nPara comunicarte con nuestro equipo, podés ir a la sección de Soporte en el menú principal o enviarnos un email a zetaprop.com.ar@gmail.com.\n\n👉 [Ir a Soporte](/dashboard/soporte)`;
+            } else if (userMsgs.length <= 1 && userText.split(" ").length < 4 && !userText.includes("?")) {
+                content = CANNED_FREE_INTRO;
+            } else {
+                content = `Para responder esa consulta y ayudarte con un análisis más avanzado, podés usar nuestra Inteligencia Artificial impulsada por Gemini.\n\nActualizá tu plan para desbloquear consultas ilimitadas, lectura de documentos y tasación IA. 🚀\n\n👉 [**Ver planes y precios**](/precios)`;
+            }
+
+            const streamText = `0:${JSON.stringify(content)}\n`;
+            return new Response(streamText, { 
+                status: 200,
+                headers: {
+                    'Content-Type': 'text/plain; charset=utf-8',
+                    'x-vercel-ai-data-stream': 'v1'
+                }
+            });
         }
 
         // Limit conversation history to last 10 messages to control tokens
@@ -133,10 +162,24 @@ export async function POST(request: NextRequest) {
 
         const text = response.text();
         if (!text) {
-            return new Response("No pude generar una respuesta. Por favor intentá de nuevo.", { status: 200 });
+            const errText = `0:${JSON.stringify("No pude generar una respuesta. Por favor intentá de nuevo.")}\n`;
+            return new Response(errText, { 
+                status: 200,
+                headers: {
+                    'Content-Type': 'text/plain; charset=utf-8',
+                    'x-vercel-ai-data-stream': 'v1'
+                }
+            });
         }
 
-        return new Response(text, { status: 200 });
+        const streamText = `0:${JSON.stringify(text)}\n`;
+        return new Response(streamText, { 
+            status: 200,
+            headers: {
+                'Content-Type': 'text/plain; charset=utf-8',
+                'x-vercel-ai-data-stream': 'v1'
+            }
+        });
     } catch (error: any) {
         console.error("Chat API Error:", error.message);
         return NextResponse.json({ error: "Error procesando la respuesta" }, { status: 500 });
