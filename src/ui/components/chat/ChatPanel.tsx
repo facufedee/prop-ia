@@ -48,7 +48,7 @@ export default function ChatPanel() {
     const showQuickPrompts = messages.length <= 1;
 
     useEffect(() => {
-        if (isOpen) messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+        if (isOpen) messagesEndRef.current?.scrollIntoView({ behavior: "auto" });
     }, [messages, isLoading, isOpen]);
 
     const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {

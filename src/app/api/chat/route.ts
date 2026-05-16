@@ -9,6 +9,11 @@ const apiKey = process.env.OPENAI_API_KEY;
 
 const SYSTEM_PROMPT = `Sos el asistente virtual oficial de **Zeta Prop**, un CRM inmobiliario SaaS diseñado para inmobiliarias argentinas.
 
+## Regla de Oro / Límite Estricto (PROHIBIDO HABLAR DE OTROS TEMAS)
+**SOLO PODÉS RESPONDER SOBRE ZETA PROP Y EL SECTOR INMOBILIARIO.**
+Si el usuario pregunta cosas como "¿para qué sirve esto?" o "¿cómo funciona el sistema?", ASUMÍ QUE ESTÁ HABLANDO DE ZETA PROP y explicale los beneficios y módulos.
+PERO si el usuario intenta conversar sobre temas 100% ajenos (por ejemplo: recetas de cocina, turismo, deportes, programación general, tareas escolares, política, viajes, etc.), DEBÉS RECHAZAR LA CONSULTA INMEDIATAMENTE diciendo: "Lo siento, solo puedo ayudarte con temas relacionados al sistema Zeta Prop o al sector inmobiliario."
+
 ## Tu rol
 Ayudás a los usuarios de la plataforma con consultas sobre:
 - Funcionalidades y módulos de Zeta Prop
@@ -19,14 +24,11 @@ Ayudás a los usuarios de la plataforma con consultas sobre:
 - Propiedades disponibles en el sistema del usuario
 - Contratos de alquiler activos
 
-## Reglas estrictas
-1. **Solo respondés temas relacionados con Zeta Prop y el sector inmobiliario argentino.**
-2. Si el usuario pregunta algo completamente ajeno (recetas, clima, deportes, política, entretenimiento, etc.), respondés amablemente que solo podés ayudar con temas de Zeta Prop.
-3. Usás español rioplatense: "vos", "tenés", "podés", "hacé", etc.
-4. Sos conciso, profesional y cálido. Máximo 3-4 párrafos por respuesta salvo que se pida un listado.
-5. Cuando uses herramientas para buscar datos, presentá los resultados de forma clara y ordenada.
-6. No inventés precios, funciones ni datos. Si no tenés información, decilo y sugerí contactar soporte.
-7. No respondas preguntas sobre otras plataformas o competidores.
+## Reglas de estilo
+1. Usás español rioplatense: "vos", "tenés", "podés", "hacé", etc.
+2. Sos conciso, profesional y cálido. Máximo 3-4 párrafos por respuesta salvo que se pida un listado.
+3. Cuando uses herramientas para buscar datos, presentá los resultados de forma clara y ordenada.
+4. No inventés precios, funciones ni datos. Si no tenés información, decilo y sugerí contactar soporte.
 
 ## Información base de Zeta Prop
 - Sitio web: zetaprop.com.ar
@@ -80,39 +82,44 @@ export async function POST(request: NextRequest) {
             return NextResponse.json({ error: "Formato de mensajes inválido" }, { status: 400 });
         }
 
-        // Gate: free users get canned responses — no Gemini calls
-        const isPaid = await hasActiveSub(authResult.user.uid);
-        if (!isPaid) {
-            const userMsgs = messages.filter((m: any) => m.role === "user");
-            const lastUserMsg = userMsgs[userMsgs.length - 1];
-            const rawUserText = lastUserMsg ? String(lastUserMsg.content).toLowerCase() : "";
-            const userText = rawUserText.normalize("NFD").replace(/[\u0300-\u036f]/g, "");
-            
-            let content = "";
-            
-            if (userText.includes("cuantas") && (userText.includes("casas") || userText.includes("propiedad"))) {
-                const props = await searchUserProperties(authResult.user.uid, "active");
-                content = `Actualmente tenés **${props.total || 0} propiedades activas** registradas en el sistema.\n\n*Para obtener reportes detallados y asistencia IA completa, actualizá tu plan.*`;
-            } else if ((userText.includes("como") && userText.includes("carg")) || userText.includes("agregar") || userText.includes("crear") || userText.includes("nueva")) {
-                content = `🏠 **Para cargar una propiedad:**\nAndá a la sección **Propiedades** y hacé clic en el botón "+ Nueva Propiedad". Ahí podés completar todos los datos, subir fotos y asignar la ubicación en el mapa.\n\n👉 [Ver Tutoriales](/dashboard/tutoriales)`;
-            } else if ((userText.includes("como") && userText.includes("cobr")) || userText.includes("pago") || userText.includes("recibo") || userText.includes("alquiler")) {
-                content = `💰 **Para gestionar cobros de alquileres:**\nAndá al módulo **Alquileres** > **Agenda de Cobros**. Desde ahí podés registrar los pagos mes a mes y llevar el control de morosos.\n\n👉 [Ver Tutoriales](/dashboard/tutoriales)`;
-            } else if (userText.includes("plan") || userText.includes("precio") || userText.includes("suscrip")) {
-                content = `💳 **Planes y Suscripciones:**\nTenemos planes adaptados al tamaño de cada inmobiliaria, desde el plan Básico (gratuito) hasta planes Profesionales con Inteligencia Artificial y funciones avanzadas.\n\n👉 [**Ver planes y precios**](/precios)`;
-            } else if (userText.includes("soporte") || userText.includes("ayuda") || userText.includes("contact")) {
-                content = `🎧 **Soporte Técnico:**\nPara comunicarte con nuestro equipo, podés ir a la sección de Soporte en el menú principal o enviarnos un email a zetaprop.com.ar@gmail.com.\n\n👉 [Ir a Soporte](/dashboard/soporte)`;
-            } else if (userText.includes("lead") || userText.includes("cliente") || userText.includes("consulta")) {
-                content = `👥 **CRM y Consultas:**\nPodés ver todos los mensajes y clientes interesados en el módulo **Consultas**. Ahí funciona un tablero tipo Trello (Kanban) para que muevas a los clientes según su estado de negociación.\n\n👉 [Ir al CRM](/dashboard/leads)`;
-            } else if (userText.includes("web") || userText.includes("sitio") || userText.includes("pagina")) {
-                content = `🌐 **Tu Sitio Web:**\nDesde la sección **Mi Sitio** podés configurar el dominio, logo, colores y la información de tu inmobiliaria para que se genere tu página pública automáticamente.\n\n👉 [Configurar Sitio Web](/dashboard/mi-sitio)`;
-            } else if (userMsgs.length <= 1 && userText.split(" ").length < 4 && !userText.includes("?")) {
-                content = CANNED_FREE_INTRO;
-            } else {
-                content = `Para responder esa consulta y ayudarte con un análisis avanzado, podés usar nuestra Inteligencia Artificial.\n\nActualizá tu plan para desbloquear consultas ilimitadas, lectura de documentos y tasación IA. 🚀\n👉 [**Ver planes y precios**](/precios)\n\n💡 *Tip: Mientras tanto, te invito a utilizar las **Consultas Rápidas** que están en los botones de abajo para navegar velozmente por el sistema.*`;
-            }
+        const userMsgs = messages.filter((m: any) => m.role === "user");
+        const lastUserMsg = userMsgs[userMsgs.length - 1];
+        const rawUserText = lastUserMsg ? String(lastUserMsg.content).toLowerCase() : "";
+        const userText = rawUserText.normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+        
+        let cannedContent = "";
+        
+        // Fast-path: Predefined responses for BOTH free and paid users to save tokens and time
+        if (userText.includes("cuantas") && (userText.includes("casas") || userText.includes("propiedad"))) {
+            const props = await searchUserProperties(authResult.user.uid, "active");
+            cannedContent = `Actualmente tenés **${props.total || 0} propiedades activas** registradas en el sistema.`;
+        } else if ((userText.includes("como") && userText.includes("carg")) || userText.includes("agregar") || userText.includes("crear") || userText.includes("nueva")) {
+            cannedContent = `🏠 **Para cargar una propiedad:**\nAndá a la sección **Propiedades** y hacé clic en el botón "+ Nueva Propiedad". Ahí podés completar todos los datos, subir fotos y asignar la ubicación en el mapa.\n\n👉 [Ver Tutoriales](/dashboard/tutoriales)`;
+        } else if ((userText.includes("como") && userText.includes("cobr")) || userText.includes("pago") || userText.includes("recibo") || userText.includes("alquiler")) {
+            cannedContent = `💰 **Para gestionar cobros de alquileres:**\nAndá al módulo **Alquileres** > **Agenda de Cobros**. Desde ahí podés registrar los pagos mes a mes y llevar el control de morosos.\n\n👉 [Ver Tutoriales](/dashboard/tutoriales)`;
+        } else if (userText.includes("plan") || userText.includes("precio") || userText.includes("suscrip")) {
+            cannedContent = `💳 **Planes y Suscripciones:**\nTenemos planes adaptados al tamaño de cada inmobiliaria, desde el plan Básico (gratuito) hasta planes Profesionales con Inteligencia Artificial y funciones avanzadas.\n\n👉 [**Ver planes y precios**](/precios)`;
+        } else if (userText.includes("soporte") || userText.includes("ayuda") || userText.includes("contact")) {
+            cannedContent = `🎧 **Soporte Técnico:**\nPara comunicarte con nuestro equipo, podés ir a la sección de Soporte en el menú principal o enviarnos un email a zetaprop.com.ar@gmail.com.\n\n👉 [Ir a Soporte](/dashboard/soporte)`;
+        } else if (userText.includes("lead") || userText.includes("cliente") || userText.includes("consulta")) {
+            cannedContent = `👥 **CRM y Consultas:**\nPodés ver todos los mensajes y clientes interesados en el módulo **Consultas**. Ahí funciona un tablero tipo Trello (Kanban) para que muevas a los clientes según su estado de negociación.\n\n👉 [Ir al CRM](/dashboard/leads)`;
+        } else if (userText.includes("web") || userText.includes("sitio") || userText.includes("pagina")) {
+            cannedContent = `🌐 **Tu Sitio Web:**\nDesde la sección **Mi Sitio** podés configurar el dominio, logo, colores y la información de tu inmobiliaria para que se genere tu página pública automáticamente.\n\n👉 [Configurar Sitio Web](/dashboard/mi-sitio)`;
+        }
 
-            const streamText = `0:${JSON.stringify(content)}\n`;
-            return new Response(streamText, { 
+        const isPaid = await hasActiveSub(authResult.user.uid);
+        
+        if (!isPaid && !cannedContent) {
+            if (userMsgs.length <= 1 && userText.split(" ").length < 4 && !userText.includes("?")) {
+                cannedContent = CANNED_FREE_INTRO;
+            } else {
+                cannedContent = `Para responder esa consulta y ayudarte con un análisis avanzado, podés usar nuestra Inteligencia Artificial.\n\nActualizá tu plan para desbloquear consultas ilimitadas, lectura de documentos y tasación IA. 🚀\n👉 [**Ver planes y precios**](/precios)\n\n💡 *Tip: Mientras tanto, te invito a utilizar las **Consultas Rápidas** que están en los botones de abajo para navegar velozmente por el sistema.*`;
+            }
+        }
+
+        if (cannedContent) {
+            const streamTextResponse = `0:${JSON.stringify(cannedContent)}\n`;
+            return new Response(streamTextResponse, { 
                 status: 200,
                 headers: {
                     'Content-Type': 'text/plain; charset=utf-8',

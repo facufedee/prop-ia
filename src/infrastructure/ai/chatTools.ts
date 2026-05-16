@@ -238,6 +238,10 @@ export async function searchUserProperties(userId: string, status?: string, limi
         let q = adminDb.collection("properties").where("userId", "==", userId);
         if (status) q = q.where("status", "==", status) as any;
 
+        // Obtener el conteo real total primero
+        const countSnapshot = await (q as any).count().get();
+        const totalReal = countSnapshot.data().count;
+
         const snapshot = await (q as any).limit(max).get();
 
         if (snapshot.empty) {
@@ -256,7 +260,7 @@ export async function searchUserProperties(userId: string, status?: string, limi
             };
         });
 
-        return { propiedades: props, total: snapshot.size };
+        return { propiedades: props, total: totalReal };
     } catch {
         return { error: "No se pudieron cargar las propiedades." };
     }
