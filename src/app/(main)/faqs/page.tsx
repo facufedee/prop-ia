@@ -140,14 +140,26 @@ export default function FAQsPage() {
 
     return (
         <main className="bg-white min-h-screen">
-            {/* Hero */}
-            <section className="bg-gray-50 border-b border-gray-100 py-16 sm:py-20 px-5 sm:px-6">
-                <div className="max-w-3xl mx-auto text-center">
-                    <div className="inline-flex items-center justify-center p-3 bg-white border border-gray-200 shadow-sm rounded-xl mb-5">
-                        <HelpCircle className="w-6 h-6 text-indigo-600" />
+            {/* ── Hero ── */}
+            <section className="relative overflow-hidden pt-32 pb-24 px-5 sm:px-6 bg-[#080810]">
+                <div className="absolute inset-0 bg-gradient-to-br from-indigo-950/80 via-[#080810] to-purple-950/60 pointer-events-none" />
+                <div className="absolute top-0 right-0 w-[600px] h-[600px] bg-indigo-600/10 rounded-full blur-3xl pointer-events-none" />
+                <div className="absolute bottom-0 left-0 w-[400px] h-[400px] bg-purple-600/10 rounded-full blur-3xl pointer-events-none" />
+
+                <div className="max-w-4xl mx-auto text-center relative z-10">
+                    <div className="inline-block px-4 py-1.5 bg-indigo-500/20 border border-indigo-500/30 text-indigo-300 rounded-full text-sm font-semibold mb-6">
+                        <div className="flex items-center gap-2">
+                            <HelpCircle className="w-4 h-4" />
+                            FAQs
+                        </div>
                     </div>
-                    <h1 className="text-4xl sm:text-5xl font-bold text-gray-900 mb-4">Preguntas Frecuentes</h1>
-                    <p className="text-xl text-gray-500">
+                    <h1 className="text-4xl md:text-6xl font-extrabold mb-6 leading-tight text-white">
+                        Preguntas
+                        <span className="block text-transparent bg-clip-text bg-gradient-to-r from-indigo-400 to-purple-400">
+                            Frecuentes
+                        </span>
+                    </h1>
+                    <p className="text-xl text-gray-400 max-w-2xl mx-auto leading-relaxed mb-10">
                         Todo lo que necesitás saber sobre Zeta Prop para gestionar tu inmobiliaria.
                     </p>
                 </div>

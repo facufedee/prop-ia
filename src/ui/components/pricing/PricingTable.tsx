@@ -136,45 +136,49 @@ export default function PricingTable() {
         <div className="bg-gray-50/50">
 
             {/* ── Hero ── */}
-            <section className="pt-32 pb-12 px-5 sm:px-6 text-center">
-                <div className="max-w-3xl mx-auto">
-                    <span className="inline-block px-4 py-2 bg-indigo-50 text-indigo-700 rounded-full text-sm font-semibold mb-6">
+            <section className="relative overflow-hidden pt-32 pb-24 px-5 sm:px-6 bg-[#080810]">
+                <div className="absolute inset-0 bg-gradient-to-br from-indigo-950/80 via-[#080810] to-purple-950/60 pointer-events-none" />
+                <div className="absolute top-0 right-0 w-[600px] h-[600px] bg-indigo-600/10 rounded-full blur-3xl pointer-events-none" />
+                <div className="absolute bottom-0 left-0 w-[400px] h-[400px] bg-purple-600/10 rounded-full blur-3xl pointer-events-none" />
+
+                <div className="max-w-3xl mx-auto text-center relative z-10">
+                    <span className="inline-block px-4 py-1.5 bg-indigo-500/20 border border-indigo-500/30 text-indigo-300 rounded-full text-sm font-semibold mb-6">
                         PLANES Y PRECIOS
                     </span>
-                    <h1 className="text-4xl sm:text-5xl font-extrabold text-gray-900 leading-tight tracking-tight mb-5">
+                    <h1 className="text-4xl sm:text-6xl font-extrabold mb-6 leading-tight text-white">
                         Invertí en tu inmobiliaria,{" "}
-                        <span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-600 to-purple-600">
+                        <span className="block text-transparent bg-clip-text bg-gradient-to-r from-indigo-400 to-purple-400">
                             no en software caro
                         </span>
                     </h1>
-                    <p className="text-lg text-gray-500 mb-10 max-w-xl mx-auto">
+                    <p className="text-xl text-gray-400 max-w-2xl mx-auto leading-relaxed mb-10">
                         Elegí el plan que acompaña el tamaño de tu negocio. Sin costos ocultos, sin contratos a largo plazo.
                     </p>
 
                     {/* Trust pills */}
                     <div className="flex flex-wrap items-center justify-center gap-3 mb-10">
                         {TRUST_PILLS.map(({ icon: Icon, label }) => (
-                            <div key={label} className="flex items-center gap-2 text-sm text-gray-600 bg-white border border-gray-200 rounded-full px-4 py-2 shadow-sm">
-                                <Icon className="w-4 h-4 text-indigo-500 shrink-0" />
+                            <div key={label} className="flex items-center gap-2 text-sm text-indigo-200 bg-white/5 border border-white/10 rounded-full px-4 py-2 shadow-sm">
+                                <Icon className="w-4 h-4 text-indigo-400 shrink-0" />
                                 {label}
                             </div>
                         ))}
                     </div>
 
                     {/* Billing toggle */}
-                    <div className="inline-flex items-center bg-white rounded-full p-1 shadow-sm border border-gray-200">
+                    <div className="inline-flex items-center bg-white/5 rounded-full p-1 shadow-sm border border-white/10">
                         <button
                             onClick={() => setBillingPeriod("monthly")}
-                            className={`px-6 py-2 rounded-full text-sm font-semibold transition-all ${billingPeriod === "monthly" ? "bg-indigo-600 text-white shadow-sm" : "text-gray-500 hover:text-gray-800"}`}
+                            className={`px-6 py-2 rounded-full text-sm font-semibold transition-all ${billingPeriod === "monthly" ? "bg-indigo-600 text-white shadow-sm" : "text-gray-400 hover:text-white"}`}
                         >
                             Mensual
                         </button>
                         <button
                             onClick={() => setBillingPeriod("yearly")}
-                            className={`relative px-6 py-2 rounded-full text-sm font-semibold transition-all ${billingPeriod === "yearly" ? "bg-indigo-600 text-white shadow-sm" : "text-gray-500 hover:text-gray-800"}`}
+                            className={`relative px-6 py-2 rounded-full text-sm font-semibold transition-all ${billingPeriod === "yearly" ? "bg-indigo-600 text-white shadow-sm" : "text-gray-400 hover:text-white"}`}
                         >
                             Anual
-                            <span className={`absolute -top-3 -right-2 text-[10px] font-bold px-2 py-0.5 rounded-full shadow-sm transition-all ${billingPeriod === "yearly" ? "bg-emerald-400 text-white" : "bg-emerald-100 text-emerald-700"}`}>
+                            <span className={`absolute -top-3 -right-2 text-[10px] font-bold px-2 py-0.5 rounded-full shadow-sm transition-all ${billingPeriod === "yearly" ? "bg-emerald-400 text-white" : "bg-emerald-500/20 text-emerald-400 border border-emerald-500/30"}`}>
                                 -17%
                             </span>
                         </button>

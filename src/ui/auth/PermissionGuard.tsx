@@ -33,6 +33,18 @@ export default function PermissionGuard({ children }: { children: React.ReactNod
             return;
         }
 
+        // Check Email Verification for new users (created after May 16, 2026)
+        if (user.metadata.creationTime) {
+            const creationDate = new Date(user.metadata.creationTime);
+            const cutoffDate = new Date("2026-05-16T00:00:00Z");
+            if (creationDate >= cutoffDate && !user.emailVerified) {
+                setAuthorized(false);
+                setChecking(false);
+                router.push("/verify-email");
+                return;
+            }
+        }
+
         // Role not yet loaded — keep waiting (AuthContext onSnapshot is async)
         if (!userRole) return;
 

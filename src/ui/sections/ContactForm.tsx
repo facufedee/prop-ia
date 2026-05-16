@@ -118,24 +118,12 @@ export default function ContactForm() {
     }
 
     return (
-        <section id="contacto" className="py-14 sm:py-20 lg:py-24 bg-gradient-to-br from-indigo-50 via-purple-50 to-pink-50">
+        <section id="contacto" className="py-16 sm:py-20 bg-transparent">
             <div className="max-w-7xl mx-auto px-5 sm:px-6">
                 <div className="grid lg:grid-cols-2 gap-12 items-center">
                     {/* Left: Info */}
                     <div>
-                        <span className="inline-block px-4 py-2 bg-indigo-100 text-indigo-700 rounded-full text-sm font-semibold mb-4">
-                            CONTACTO
-                        </span>
-                        <h2 className="text-4xl md:text-5xl font-bold text-gray-900 mb-6">
-                            ¿Listo para transformar
-                            <span className="block bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent">
-                                tu inmobiliaria?
-                            </span>
-                        </h2>
-                        <p className="text-xl text-gray-600 mb-8">
-                            Hablemos sobre cómo Zeta Prop puede ayudarte a automatizar procesos,
-                            ahorrar tiempo y aumentar tus ventas.
-                        </p>
+                        <h2 className="text-3xl font-bold text-gray-900 mb-8">Información de Contacto</h2>
 
                         {/* Contact Info */}
                         <div className="space-y-6">

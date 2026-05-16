@@ -9,6 +9,7 @@ import { BranchProvider } from "@/infrastructure/context/BranchContext";
 import TrialEnforcer from "@/ui/components/subscription/TrialEnforcer";
 import AccountLockEnforcer from "@/ui/components/subscription/AccountLockEnforcer";
 import PaymentWelcomeListener from "@/ui/components/subscription/PaymentWelcomeListener";
+import OnboardingModal from "@/ui/components/dashboard/OnboardingModal";
 
 export default function DashboardLayout({
   children,
@@ -42,6 +43,7 @@ export default function DashboardLayout({
               <PaymentWelcomeListener />
               <TrialEnforcer />
               <AccountLockEnforcer />
+              <OnboardingModal />
               {children}
             </DashboardShell>
           </BranchProvider>

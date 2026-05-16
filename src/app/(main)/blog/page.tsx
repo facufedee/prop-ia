@@ -20,20 +20,27 @@ export default async function BlogPage() {
 
     return (
         <main className="bg-gray-50 min-h-screen pb-24">
-            {/* Header */}
-            <div className="bg-white border-b border-gray-200 pt-32 pb-16 md:pt-40 md:pb-24">
-                <div className="max-w-7xl mx-auto px-6 text-center">
-                    <span className="inline-block px-4 py-2 bg-indigo-100 text-indigo-700 rounded-full text-sm font-semibold mb-4">
+            {/* ── Hero ── */}
+            <section className="relative overflow-hidden pt-32 pb-24 px-5 sm:px-6 bg-[#080810]">
+                <div className="absolute inset-0 bg-gradient-to-br from-indigo-950/80 via-[#080810] to-purple-950/60 pointer-events-none" />
+                <div className="absolute top-0 right-0 w-[600px] h-[600px] bg-indigo-600/10 rounded-full blur-3xl pointer-events-none" />
+                <div className="absolute bottom-0 left-0 w-[400px] h-[400px] bg-purple-600/10 rounded-full blur-3xl pointer-events-none" />
+
+                <div className="max-w-4xl mx-auto text-center relative z-10">
+                    <div className="inline-block px-4 py-1.5 bg-indigo-500/20 border border-indigo-500/30 text-indigo-300 rounded-full text-sm font-semibold mb-6">
                         BLOG & NOVEDADES
-                    </span>
-                    <h1 className="text-4xl md:text-5xl font-bold text-gray-900 mb-6 tracking-tight">
-                        Insights del Mercado Inmobiliario
+                    </div>
+                    <h1 className="text-4xl md:text-6xl font-extrabold mb-6 leading-tight text-white">
+                        Insights del
+                        <span className="block text-transparent bg-clip-text bg-gradient-to-r from-indigo-400 to-purple-400">
+                            Mercado Inmobiliario
+                        </span>
                     </h1>
-                    <p className="text-xl text-gray-600 max-w-2xl mx-auto">
+                    <p className="text-xl text-gray-400 max-w-2xl mx-auto leading-relaxed mb-10">
                         Descubre las últimas tendencias, tutoriales de la plataforma y noticias del sector.
                     </p>
                 </div>
-            </div>
+            </section>
 
             {/* Content */}
             <div className="max-w-7xl mx-auto px-6 mt-12">

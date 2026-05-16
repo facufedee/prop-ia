@@ -52,7 +52,8 @@ export default function Navbar() {
   // On /propiedades (landing), always show white background so dark text/logo are readable over the hero
   const isHeroPage = pathname === "/propiedades";
   // Dark hero = home page NOT yet scrolled
-  const isDarkHero = pathname === "/" && !scrolled;
+  const darkHeroPaths = ["/", "/servicios", "/nosotros", "/precios", "/blog", "/faqs", "/contacto"];
+  const isDarkHero = darkHeroPaths.includes(pathname) && !scrolled;
 
   return (
     <nav
@@ -134,7 +135,7 @@ export default function Navbar() {
                   : 'bg-black text-white hover:bg-gray-800 shadow-gray-900/10'
                   }`}
               >
-                Comenzar
+                Probar ZETA Prop
               </Link>
             </>
           ) : (
@@ -278,7 +279,7 @@ export default function Navbar() {
                   className="block w-full bg-indigo-600 hover:bg-indigo-500 text-white px-4 py-3 rounded-xl text-center font-semibold shadow-lg"
                   onClick={() => setOpen(false)}
                 >
-                  Comenzar
+                  Probar ZETA Prop
                 </Link>
               </div>
             ) : (

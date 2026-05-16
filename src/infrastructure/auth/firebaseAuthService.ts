@@ -16,7 +16,7 @@ import { auditLogService } from "@/infrastructure/services/auditLogService";
 // ============================================================================
 // BREAKPOINT 5: Save User to Firestore
 // ============================================================================
-export const saveUserToFirestore = async (user: User, additionalData?: { agencyName?: string }) => {
+export const saveUserToFirestore = async (user: User, additionalData?: { agencyName?: string; socialLink?: string }) => {
     try {
         const userRef = doc(db, "users", user.uid);
         const userSnap = await getDoc(userRef);
@@ -43,6 +43,8 @@ export const saveUserToFirestore = async (user: User, additionalData?: { agencyN
                 email: user.email,
                 displayName: user.displayName || additionalData?.agencyName || "",
                 agencyName: additionalData?.agencyName || "",
+                socialLink: additionalData?.socialLink || "",
+                onboardingSkips: 0,
                 photoURL: user.photoURL || "",
                 roleId: defaultRole?.id || null, // Can be null if really failed
                 createdAt: new Date(),
@@ -137,13 +139,13 @@ export const loginWithGoogle = async () => {
 // ============================================================================
 // BREAKPOINT 7: Email Registration
 // ============================================================================
-export const registerEmail = async (email: string, pass: string, displayName: string, agencyName: string) => {
+export const registerEmail = async (email: string, pass: string, displayName: string, agencyName: string, socialLink?: string) => {
     if (!auth) throw new Error('Auth not available');
 
     const result = await createUserWithEmailAndPassword(auth, email, pass);
 
     // Await this to ensure role is assigned before UI redirects
-    await saveUserToFirestore(result.user, { agencyName });
+    await saveUserToFirestore(result.user, { agencyName, socialLink });
 
     await auditLogService.logAuth(
         result.user.uid,
