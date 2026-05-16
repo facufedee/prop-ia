@@ -100,10 +100,14 @@ export async function POST(request: NextRequest) {
                 content = `💳 **Planes y Suscripciones:**\nTenemos planes adaptados al tamaño de cada inmobiliaria, desde el plan Básico (gratuito) hasta planes Profesionales con Inteligencia Artificial y funciones avanzadas.\n\n👉 [**Ver planes y precios**](/precios)`;
             } else if (userText.includes("soporte") || userText.includes("ayuda") || userText.includes("contact")) {
                 content = `🎧 **Soporte Técnico:**\nPara comunicarte con nuestro equipo, podés ir a la sección de Soporte en el menú principal o enviarnos un email a zetaprop.com.ar@gmail.com.\n\n👉 [Ir a Soporte](/dashboard/soporte)`;
+            } else if (userText.includes("lead") || userText.includes("cliente") || userText.includes("consulta")) {
+                content = `👥 **CRM y Consultas:**\nPodés ver todos los mensajes y clientes interesados en el módulo **Consultas**. Ahí funciona un tablero tipo Trello (Kanban) para que muevas a los clientes según su estado de negociación.\n\n👉 [Ir al CRM](/dashboard/leads)`;
+            } else if (userText.includes("web") || userText.includes("sitio") || userText.includes("pagina")) {
+                content = `🌐 **Tu Sitio Web:**\nDesde la sección **Mi Sitio** podés configurar el dominio, logo, colores y la información de tu inmobiliaria para que se genere tu página pública automáticamente.\n\n👉 [Configurar Sitio Web](/dashboard/mi-sitio)`;
             } else if (userMsgs.length <= 1 && userText.split(" ").length < 4 && !userText.includes("?")) {
                 content = CANNED_FREE_INTRO;
             } else {
-                content = `Para responder esa consulta y ayudarte con un análisis más avanzado, podés usar nuestra Inteligencia Artificial impulsada por Gemini.\n\nActualizá tu plan para desbloquear consultas ilimitadas, lectura de documentos y tasación IA. 🚀\n\n👉 [**Ver planes y precios**](/precios)`;
+                content = `Para responder esa consulta y ayudarte con un análisis avanzado, podés usar nuestra Inteligencia Artificial impulsada por Gemini.\n\nActualizá tu plan para desbloquear consultas ilimitadas, lectura de documentos y tasación IA. 🚀\n👉 [**Ver planes y precios**](/precios)\n\n💡 *Tip: Mientras tanto, te invito a utilizar las **Consultas Rápidas** que están en los botones de abajo para navegar velozmente por el sistema.*`;
             }
 
             const streamText = `0:${JSON.stringify(content)}\n`;
@@ -119,7 +123,7 @@ export async function POST(request: NextRequest) {
         // Limit conversation history to last 10 messages to control tokens
         const recentMessages = messages.slice(-10);
         const history = recentMessages.slice(0, -1).map((m: any) => ({
-            role: m.sender === "user" ? "user" : "model",
+            role: m.role === "user" ? "user" : "model",
             parts: [{ text: String(m.content).substring(0, 2000) }],
         }));
 
@@ -128,7 +132,7 @@ export async function POST(request: NextRequest) {
 
         const genAI = new GoogleGenerativeAI(apiKey);
         const model = genAI.getGenerativeModel({
-            model: "gemini-2.0-flash",
+            model: "gemini-1.5-flash",
             tools: [{ functionDeclarations: chatTools }],
             systemInstruction: SYSTEM_PROMPT,
             generationConfig: {
