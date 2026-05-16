@@ -32,6 +32,7 @@ interface DashboardHeaderProps {
 export default function DashboardHeader({ onMobileMenuClick }: DashboardHeaderProps) {
     const [user, setUser] = useState<FirebaseUser | null>(null);
     const [userRole, setUserRole] = useState<Role | null>(null);
+    const [userData, setUserData] = useState<any>(null);
     const [subscription, setSubscription] = useState<any>(null);
     const [profileOpen, setProfileOpen] = useState(false);
     const profileRef = useRef<HTMLDivElement>(null);
@@ -62,10 +63,11 @@ export default function DashboardHeader({ onMobileMenuClick }: DashboardHeaderPr
         const userRef = doc(db, "users", user.uid);
         const unsubscribe = onSnapshot(userRef, async (docSnap) => {
             if (docSnap.exists()) {
-                const userData = docSnap.data();
-                if (userData.roleId) {
+                const data = docSnap.data();
+                setUserData(data);
+                if (data.roleId) {
                     try {
-                        const role = await roleService.getRoleById(userData.roleId);
+                        const role = await roleService.getRoleById(data.roleId);
                         setUserRole(role);
                     } catch (error) {
                         console.error('Error fetching role details:', error);
@@ -314,7 +316,9 @@ export default function DashboardHeader({ onMobileMenuClick }: DashboardHeaderPr
                             className="flex items-center gap-3 p-1.5 rounded-xl hover:bg-gray-50 dark:hover:bg-white/8 transition-colors border border-transparent hover:border-gray-200 dark:hover:border-white/10"
                         >
                             <div className="w-9 h-9 rounded-full bg-gradient-to-br from-indigo-500 to-violet-500 flex items-center justify-center text-white overflow-hidden ring-2 ring-white shadow-sm">
-                                {user.photoURL ? (
+                                {userData?.logoUrl ? (
+                                    <img src={userData.logoUrl} alt="Logo Inmobiliaria" className="w-full h-full object-cover bg-white" referrerPolicy="no-referrer" />
+                                ) : user.photoURL ? (
                                     <img src={user.photoURL} alt="Profile" className="w-full h-full object-cover" referrerPolicy="no-referrer" />
                                 ) : (
                                     <span className="font-bold text-sm">{user.displayName?.charAt(0).toUpperCase() || user.email?.charAt(0).toUpperCase()}</span>
