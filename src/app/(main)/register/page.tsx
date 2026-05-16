@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
@@ -35,12 +35,14 @@ export default function RegisterPage() {
     const strengthLabels = ["Débil", "Regular", "Buena", "Fuerte", "Excelente"];
     const strengthColors = ["bg-red-500", "bg-orange-500", "bg-yellow-500", "bg-green-400", "bg-green-600"];
 
+    const isSubmitting = useRef(false);
+
     // Redirect if already logged in
     useEffect(() => {
         if (!auth) return;
 
         const unsubscribe = onAuthStateChanged(auth, (user) => {
-            if (user) {
+            if (user && !isSubmitting.current) {
                 router.push("/dashboard");
             }
         });
@@ -50,6 +52,7 @@ export default function RegisterPage() {
 
     const handleRegister = async (e: React.FormEvent) => {
         e.preventDefault();
+        isSubmitting.current = true;
         setLoading(true);
         setError(null);
 
@@ -86,10 +89,12 @@ export default function RegisterPage() {
             }
         } finally {
             setLoading(false);
+            isSubmitting.current = false;
         }
     };
 
     const handleGoogleLogin = async () => {
+        isSubmitting.current = true;
         setLoading(true);
         setError(null);
         try {
@@ -103,6 +108,7 @@ export default function RegisterPage() {
             setError("Error al iniciar sesión con Google.");
         } finally {
             setLoading(false);
+            isSubmitting.current = false;
         }
     };
 

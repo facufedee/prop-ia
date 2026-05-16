@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, Suspense } from "react";
+import { useState, useEffect, Suspense, useRef } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
@@ -19,12 +19,14 @@ function LoginContent() {
     const [error, setError] = useState<string | null>(null);
     const [showPassword, setShowPassword] = useState(false);
 
+    const isSubmitting = useRef(false);
+
     // Redirect if already logged in
     useEffect(() => {
         if (!auth) return;
 
         const unsubscribe = onAuthStateChanged(auth, (user) => {
-            if (user) {
+            if (user && !isSubmitting.current) {
                 router.push(redirectTo);
             }
         });
@@ -34,6 +36,7 @@ function LoginContent() {
 
     const handleLogin = async (e: React.FormEvent) => {
         e.preventDefault();
+        isSubmitting.current = true;
         setLoading(true);
         setError(null);
 
@@ -51,10 +54,12 @@ function LoginContent() {
             }
         } finally {
             setLoading(false);
+            isSubmitting.current = false;
         }
     };
 
     const handleGoogleLogin = async () => {
+        isSubmitting.current = true;
         setLoading(true);
         setError(null);
         try {
@@ -69,6 +74,7 @@ function LoginContent() {
             setError(`Error: ${err.code} - ${err.message}`);
         } finally {
             setLoading(false);
+            isSubmitting.current = false;
         }
     };
 
