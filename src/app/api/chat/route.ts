@@ -1,10 +1,11 @@
-import { GoogleGenerativeAI } from "@google/generative-ai";
+import { openai } from "@ai-sdk/openai";
+import { streamText, convertToCoreMessages } from "ai";
 import { NextRequest, NextResponse } from "next/server";
 import { verifyAuth } from "@/lib/apiAuth";
-import { chatTools, runChatTool } from "@/infrastructure/ai/chatTools";
+import { getChatTools } from "@/infrastructure/ai/chatTools";
 import { adminDb } from "@/infrastructure/firebase/admin";
 
-const apiKey = process.env.GOOGLE_API_KEY;
+const apiKey = process.env.OPENAI_API_KEY;
 
 const SYSTEM_PROMPT = `Sos el asistente virtual oficial de **Zeta Prop**, un CRM inmobiliario SaaS diseñado para inmobiliarias argentinas.
 
@@ -107,7 +108,7 @@ export async function POST(request: NextRequest) {
             } else if (userMsgs.length <= 1 && userText.split(" ").length < 4 && !userText.includes("?")) {
                 content = CANNED_FREE_INTRO;
             } else {
-                content = `Para responder esa consulta y ayudarte con un análisis avanzado, podés usar nuestra Inteligencia Artificial impulsada por Gemini.\n\nActualizá tu plan para desbloquear consultas ilimitadas, lectura de documentos y tasación IA. 🚀\n👉 [**Ver planes y precios**](/precios)\n\n💡 *Tip: Mientras tanto, te invito a utilizar las **Consultas Rápidas** que están en los botones de abajo para navegar velozmente por el sistema.*`;
+                content = `Para responder esa consulta y ayudarte con un análisis avanzado, podés usar nuestra Inteligencia Artificial.\n\nActualizá tu plan para desbloquear consultas ilimitadas, lectura de documentos y tasación IA. 🚀\n👉 [**Ver planes y precios**](/precios)\n\n💡 *Tip: Mientras tanto, te invito a utilizar las **Consultas Rápidas** que están en los botones de abajo para navegar velozmente por el sistema.*`;
             }
 
             const streamText = `0:${JSON.stringify(content)}\n`;
@@ -120,70 +121,18 @@ export async function POST(request: NextRequest) {
             });
         }
 
-        // Limit conversation history to last 10 messages to control tokens
-        const recentMessages = messages.slice(-10);
-        const history = recentMessages.slice(0, -1).map((m: any) => ({
-            role: m.role === "user" ? "user" : "model",
-            parts: [{ text: String(m.content).substring(0, 2000) }],
-        }));
+        const coreMessages = convertToCoreMessages(messages);
 
-        const lastMsg = recentMessages[recentMessages.length - 1];
-        const userText = String(lastMsg.content).substring(0, 1000); // Limit user input
-
-        const genAI = new GoogleGenerativeAI(apiKey);
-        const model = genAI.getGenerativeModel({
-            model: "gemini-1.5-flash",
-            tools: [{ functionDeclarations: chatTools }],
-            systemInstruction: SYSTEM_PROMPT,
-            generationConfig: {
-                maxOutputTokens: 800,
-                temperature: 0.7,
-            },
+        const result = streamText({
+            model: openai("gpt-4o-mini"),
+            system: SYSTEM_PROMPT,
+            messages: coreMessages,
+            tools: getChatTools(authResult.user.uid),
+            maxSteps: 3,
+            temperature: 0.7,
         });
 
-        const chat = model.startChat({ history });
-        let result = await chat.sendMessage(userText);
-        let response = result.response;
-
-        // Tool-call loop (max 3 steps)
-        let steps = 0;
-        while (steps < 3) {
-            const calls = response.functionCalls();
-            if (!calls?.length) break;
-
-            const parts: any[] = [];
-            for (const call of calls) {
-                const toolResult = await runChatTool(call.name, call.args, authResult.user.uid);
-                parts.push({
-                    functionResponse: { name: call.name, response: { result: toolResult } },
-                });
-            }
-
-            result = await chat.sendMessage(parts);
-            response = result.response;
-            steps++;
-        }
-
-        const text = response.text();
-        if (!text) {
-            const errText = `0:${JSON.stringify("No pude generar una respuesta. Por favor intentá de nuevo.")}\n`;
-            return new Response(errText, { 
-                status: 200,
-                headers: {
-                    'Content-Type': 'text/plain; charset=utf-8',
-                    'x-vercel-ai-data-stream': 'v1'
-                }
-            });
-        }
-
-        const streamText = `0:${JSON.stringify(text)}\n`;
-        return new Response(streamText, { 
-            status: 200,
-            headers: {
-                'Content-Type': 'text/plain; charset=utf-8',
-                'x-vercel-ai-data-stream': 'v1'
-            }
-        });
+        return result.toDataStreamResponse();
     } catch (error: any) {
         console.error("Chat API Error:", error.message);
         return NextResponse.json({ error: "Error procesando la respuesta" }, { status: 500 });

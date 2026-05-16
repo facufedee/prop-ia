@@ -1,94 +1,49 @@
-import { SchemaType, FunctionDeclaration } from "@google/generative-ai";
+import { tool } from "ai";
+import { z } from "zod";
 import { adminDb } from "@/infrastructure/firebase/admin";
 import { PLANS } from "@/infrastructure/data/plans";
 
-export const chatTools: FunctionDeclaration[] = [
-    {
-        name: "get_plans_info",
-        description: "Obtiene información sobre los planes y precios de suscripción de Zeta Prop. Usá esto cuando el usuario pregunte sobre precios, planes, funciones incluidas, límites, diferencias entre planes, etc.",
-        parameters: {
-            type: SchemaType.OBJECT,
-            properties: {
-                plan_name: {
-                    type: SchemaType.STRING,
-                    description: "Nombre del plan específico a consultar: 'basico', 'profesional', 'enterprise'. Omitir para obtener todos.",
-                },
-            },
-        },
-    },
-    {
-        name: "get_blog_posts",
-        description: "Obtiene artículos recientes del blog de Zeta Prop. Usá esto cuando el usuario pregunte por noticias, novedades, artículos o el blog.",
-        parameters: {
-            type: SchemaType.OBJECT,
-            properties: {
-                limit: {
-                    type: SchemaType.NUMBER,
-                    description: "Cantidad de artículos a retornar (máximo 5)",
-                },
-            },
-        },
-    },
-    {
-        name: "get_contact_info",
-        description: "Obtiene información de contacto y soporte de Zeta Prop.",
-        parameters: {
-            type: SchemaType.OBJECT,
-            properties: {},
-        },
-    },
-    {
-        name: "get_platform_features",
-        description: "Obtiene información detallada sobre las funcionalidades y módulos de la plataforma Zeta Prop.",
-        parameters: {
-            type: SchemaType.OBJECT,
-            properties: {
-                module: {
-                    type: SchemaType.STRING,
-                    description: "Módulo específico: 'propiedades', 'alquileres', 'leads', 'tasacion', 'portal_inquilinos', 'sitio_web', 'marketing'. Omitir para obtener todos.",
-                },
-            },
-        },
-    },
-    {
-        name: "search_user_properties",
-        description: "Busca propiedades del usuario en el sistema. Usá esto cuando el usuario pregunte por sus propiedades cargadas.",
-        parameters: {
-            type: SchemaType.OBJECT,
-            properties: {
-                status: {
-                    type: SchemaType.STRING,
-                    description: "Estado: 'active', 'inactive', 'reserved', 'sold'",
-                },
-                limit: {
-                    type: SchemaType.NUMBER,
-                    description: "Cantidad máxima de resultados (máximo 5)",
-                },
-            },
-        },
-    },
-];
+export function getChatTools(userId: string) {
+    return {
+        get_plans_info: tool({
+            description: "Obtiene información sobre los planes y precios de suscripción de Zeta Prop. Usá esto cuando el usuario pregunte sobre precios, planes, funciones incluidas, límites, diferencias entre planes, etc.",
+            parameters: z.object({
+                plan_name: z.string().optional().describe("Nombre del plan específico a consultar: 'basico', 'profesional', 'enterprise'. Omitir para obtener todos."),
+            }),
+            execute: async ({ plan_name }) => getPlansInfo(plan_name),
+        }),
 
-export async function runChatTool(name: string, args: any, userId: string): Promise<any> {
-    try {
-        switch (name) {
-            case "get_plans_info":
-                return getPlansInfo(args.plan_name);
-            case "get_blog_posts":
-                return getBlogPosts(args.limit);
-            case "get_contact_info":
-                return getContactInfo();
-            case "get_platform_features":
-                return getPlatformFeatures(args.module);
-            case "search_user_properties":
-                return searchUserProperties(userId, args.status, args.limit);
-            default:
-                return { error: "Herramienta no encontrada" };
-        }
-    } catch (error: any) {
-        console.error(`Tool error [${name}]:`, error.message);
-        return { error: "Error al ejecutar la herramienta" };
-    }
+        get_blog_posts: tool({
+            description: "Obtiene artículos recientes del blog de Zeta Prop. Usá esto cuando el usuario pregunte por noticias, novedades, artículos o el blog.",
+            parameters: z.object({
+                limit: z.number().optional().describe("Cantidad de artículos a retornar (máximo 5)"),
+            }),
+            execute: async ({ limit }) => getBlogPosts(limit),
+        }),
+
+        get_contact_info: tool({
+            description: "Obtiene información de contacto y soporte de Zeta Prop.",
+            parameters: z.object({}),
+            execute: async () => getContactInfo(),
+        }),
+
+        get_platform_features: tool({
+            description: "Obtiene información detallada sobre las funcionalidades y módulos de la plataforma Zeta Prop.",
+            parameters: z.object({
+                module: z.string().optional().describe("Módulo específico: 'propiedades', 'alquileres', 'leads', 'tasacion', 'portal_inquilinos', 'sitio_web', 'marketing'. Omitir para obtener todos."),
+            }),
+            execute: async ({ module }) => getPlatformFeatures(module),
+        }),
+
+        search_user_properties: tool({
+            description: "Busca propiedades del usuario en el sistema. Usá esto cuando el usuario pregunte por sus propiedades cargadas.",
+            parameters: z.object({
+                status: z.string().optional().describe("Estado: 'active', 'inactive', 'reserved', 'sold'"),
+                limit: z.number().optional().describe("Cantidad máxima de resultados (máximo 5)"),
+            }),
+            execute: async ({ status, limit }) => searchUserProperties(userId, status, limit),
+        }),
+    };
 }
 
 function getPlansInfo(planName?: string) {
