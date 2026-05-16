@@ -84,7 +84,7 @@ export async function POST(request: NextRequest) {
         if (!isPaid) {
             const userMsgCount = messages.filter((m: any) => m.role === "user").length;
             const content = userMsgCount <= 1 ? CANNED_FREE_INTRO : CANNED_FREE_UPGRADE;
-            return NextResponse.json({ role: "assistant", content });
+            return new Response(content, { status: 200 });
         }
 
         // Limit conversation history to last 10 messages to control tokens
@@ -133,10 +133,10 @@ export async function POST(request: NextRequest) {
 
         const text = response.text();
         if (!text) {
-            return NextResponse.json({ content: "No pude generar una respuesta. Por favor intentá de nuevo." });
+            return new Response("No pude generar una respuesta. Por favor intentá de nuevo.", { status: 200 });
         }
 
-        return NextResponse.json({ role: "assistant", content: text });
+        return new Response(text, { status: 200 });
     } catch (error: any) {
         console.error("Chat API Error:", error.message);
         return NextResponse.json({ error: "Error procesando la respuesta" }, { status: 500 });
