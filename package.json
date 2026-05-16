@@ -10,7 +10,8 @@
     "test": "vitest"
   },
   "dependencies": {
-    "@ai-sdk/openai": "^3.0.64",
+    "@ai-sdk/openai": "^0.0.44",
+    "@ai-sdk/react": "^0.0.3",
     "@google/generative-ai": "^0.24.1",
     "@hello-pangea/dnd": "^18.0.1",
     "@hookform/resolvers": "^5.2.2",

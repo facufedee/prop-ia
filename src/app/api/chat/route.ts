@@ -2,7 +2,7 @@ import { openai } from "@ai-sdk/openai";
 import { streamText, convertToCoreMessages } from "ai";
 import { NextRequest, NextResponse } from "next/server";
 import { verifyAuth } from "@/lib/apiAuth";
-import { getChatTools } from "@/infrastructure/ai/chatTools";
+import { getChatTools, searchUserProperties } from "@/infrastructure/ai/chatTools";
 import { adminDb } from "@/infrastructure/firebase/admin";
 
 const apiKey = process.env.OPENAI_API_KEY;
@@ -91,7 +91,7 @@ export async function POST(request: NextRequest) {
             let content = "";
             
             if (userText.includes("cuantas") && (userText.includes("casas") || userText.includes("propiedad"))) {
-                const props = await runChatTool("search_user_properties", { status: "active" }, authResult.user.uid);
+                const props = await searchUserProperties(authResult.user.uid, "active");
                 content = `Actualmente tenés **${props.total || 0} propiedades activas** registradas en el sistema.\n\n*Para obtener reportes detallados y asistencia IA completa, actualizá tu plan.*`;
             } else if ((userText.includes("como") && userText.includes("carg")) || userText.includes("agregar") || userText.includes("crear") || userText.includes("nueva")) {
                 content = `🏠 **Para cargar una propiedad:**\nAndá a la sección **Propiedades** y hacé clic en el botón "+ Nueva Propiedad". Ahí podés completar todos los datos, subir fotos y asignar la ubicación en el mapa.\n\n👉 [Ver Tutoriales](/dashboard/tutoriales)`;

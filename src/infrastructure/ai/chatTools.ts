@@ -232,7 +232,7 @@ function getPlatformFeatures(module?: string) {
     };
 }
 
-async function searchUserProperties(userId: string, status?: string, limitCount?: number) {
+export async function searchUserProperties(userId: string, status?: string, limitCount?: number) {
     const max = Math.min(limitCount || 5, 5);
     try {
         let q = adminDb.collection("properties").where("userId", "==", userId);
