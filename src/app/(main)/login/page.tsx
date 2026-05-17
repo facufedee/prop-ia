@@ -20,12 +20,17 @@ function LoginContent() {
     const [showPassword, setShowPassword] = useState(false);
 
     const isSubmitting = useRef(false);
+    const [authChecking, setAuthChecking] = useState(true);
 
     // Redirect if already logged in
     useEffect(() => {
-        if (!auth) return;
+        if (!auth) {
+            setAuthChecking(false);
+            return;
+        }
 
         const unsubscribe = onAuthStateChanged(auth, (user) => {
+            setAuthChecking(false);
             if (user && !isSubmitting.current) {
                 router.push(redirectTo);
             }
@@ -33,6 +38,14 @@ function LoginContent() {
 
         return () => unsubscribe();
     }, [router, redirectTo]);
+
+    if (authChecking) {
+        return (
+            <div className="min-h-screen flex items-center justify-center bg-gray-50">
+                <div className="w-8 h-8 border-2 border-indigo-600 border-t-transparent rounded-full animate-spin" />
+            </div>
+        );
+    }
 
     const handleLogin = async (e: React.FormEvent) => {
         e.preventDefault();

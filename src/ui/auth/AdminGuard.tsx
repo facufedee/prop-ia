@@ -2,59 +2,58 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { onAuthStateChanged } from "firebase/auth";
-import { auth } from "@/infrastructure/firebase/client";
-import { roleService, Role } from "@/infrastructure/services/roleService";
+import { useAuth } from "@/ui/context/AuthContext";
+
+const OWNER_EMAIL = "facundoflores8@gmail.com";
 
 export default function AdminGuard({ children }: { children: React.ReactNode }) {
     const router = useRouter();
-    const [loading, setLoading] = useState(true);
+    const { user, userRole, loading } = useAuth();
     const [authorized, setAuthorized] = useState(false);
+    const [checked, setChecked] = useState(false);
 
     useEffect(() => {
-        if (!auth) {
-            setLoading(false);
+        // user=null + loading=true → onAuthStateChanged hasn't fired yet, wait
+        if (!user && loading) return;
+
+        // Auth fired but no user → not logged in
+        if (!user) {
+            router.push("/login");
+            setChecked(true);
             return;
         }
 
-        const unsubscribe = onAuthStateChanged(auth, async (user) => {
-            if (!user) {
-                router.push("/login");
-                return;
-            }
+        // Owner bypass — no need to wait for role
+        if (user.email === OWNER_EMAIL) {
+            setAuthorized(true);
+            setChecked(true);
+            return;
+        }
 
-            try {
-                const role = await roleService.getUserRole(user.uid);
+        // For non-owners: Super Admin or Administrador bypass
+        if (userRole?.name === "Super Admin" || userRole?.name === "Administrador") {
+            setAuthorized(true);
+            setChecked(true);
+            return;
+        }
 
-                // Check if role is 'Administrador' or has admin privileges
-                // Using name check for simplicity as per roleService definition
-                if (role && role.name === "Administrador") {
-                    setAuthorized(true);
-                } else {
-                    router.push("/access-denied");
-                }
-            } catch (error) {
-                console.error("Error verifying admin role:", error);
-                router.push("/dashboard");
-            } finally {
-                setLoading(false);
-            }
-        });
+        // Role not yet loaded → keep waiting
+        if (!userRole) return;
 
-        return () => unsubscribe();
-    }, [router]);
+        // Role loaded but insufficient → redirect
+        router.push("/access-denied");
+        setChecked(true);
+    }, [user, userRole, loading, router]);
 
-    if (loading) {
+    if (!checked) {
         return (
             <div className="fixed inset-0 bg-white z-50 flex items-center justify-center">
-                <div className="w-8 h-8 border-4 border-indigo-600 border-t-transparent rounded-full animate-spin"></div>
+                <div className="w-8 h-8 border-4 border-indigo-600 border-t-transparent rounded-full animate-spin" />
             </div>
         );
     }
 
-    if (!authorized) {
-        return null; // Will redirect
-    }
+    if (!authorized) return null;
 
     return <>{children}</>;
 }

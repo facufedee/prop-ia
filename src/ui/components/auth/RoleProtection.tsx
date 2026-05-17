@@ -2,92 +2,63 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { auth, db } from "@/infrastructure/firebase/client";
-import { onAuthStateChanged } from "firebase/auth";
-import { doc, getDoc } from "firebase/firestore";
-import { roleService } from "@/infrastructure/services/roleService";
+import { useAuth } from "@/ui/context/AuthContext";
 import { Loader2, ShieldAlert } from "lucide-react";
+
+const OWNER_EMAIL = "facundoflores8@gmail.com";
 
 interface RoleProtectionProps {
     children: React.ReactNode;
     requiredPermission?: string;
-    requiredRole?: string; // e.g. "Administrador"
+    requiredRole?: string;
 }
 
 export function RoleProtection({ children, requiredPermission, requiredRole }: RoleProtectionProps) {
     const router = useRouter();
-    const [loading, setLoading] = useState(true);
+    const { user, userRole, loading } = useAuth();
     const [authorized, setAuthorized] = useState(false);
+    const [checked, setChecked] = useState(false);
 
     useEffect(() => {
-        if (!auth) return;
+        // user=null + loading=true → onAuthStateChanged hasn't fired yet, wait
+        if (!user && loading) return;
 
-        const unsubscribe = onAuthStateChanged(auth, async (user) => {
-            if (!user) {
-                setLoading(false);
-                setAuthorized(false);
-                router.push("/login"); // or custom login path
-                return;
+        // Auth fired but no user → not logged in
+        if (!user) {
+            router.push("/login");
+            setChecked(true);
+            return;
+        }
+
+        // Owner bypass — immediate access, no need for role
+        if (user.email === OWNER_EMAIL) {
+            setAuthorized(true);
+            setChecked(true);
+            return;
+        }
+
+        // Role not yet loaded → wait
+        if (!userRole) return;
+
+        let hasAccess = true;
+
+        if (requiredRole && userRole.name !== requiredRole) {
+            hasAccess = false;
+        }
+
+        if (requiredPermission) {
+            if (userRole.name === "Super Admin") {
+                hasAccess = true;
+            } else if (!userRole.permissions.includes(requiredPermission)) {
+                hasAccess = false;
             }
+        }
 
-            try {
-                // Fetch User Docs to get roleId
-                const userRef = doc(db, "users", user.uid);
-                const userSnap = await getDoc(userRef);
+        setAuthorized(hasAccess);
+        setChecked(true);
+    }, [user, userRole, loading, router, requiredPermission, requiredRole]);
 
-                if (!userSnap.exists()) {
-                    setAuthorized(false);
-                    setLoading(false);
-                    return;
-                }
-
-                const userData = userSnap.data();
-                if (!userData.roleId) {
-                    setAuthorized(false);
-                    setLoading(false);
-                    return;
-                }
-
-                const role = await roleService.getRoleById(userData.roleId);
-
-                if (!role) {
-                    setAuthorized(false);
-                    setLoading(false);
-                    return;
-                }
-
-                // Check Logic
-                let hasAccess = true;
-
-                if (requiredRole && role.name !== requiredRole) {
-                    hasAccess = false;
-                }
-
-                if (requiredPermission && !role.permissions.includes(requiredPermission)) {
-                    // Bypass strict check only for "Super Admin"
-                    if (role.name !== "Super Admin") {
-                        hasAccess = false;
-                    } else {
-                        // Super Admin bypass: usually super admins have all permissions.
-                        // If they don't have it explicitly yet (e.g. newly added perm), we allow access anyway.
-                        hasAccess = true;
-                    }
-                }
-
-                setAuthorized(hasAccess);
-
-            } catch (error) {
-                console.error("Auth protection error:", error);
-                setAuthorized(false);
-            } finally {
-                setLoading(false);
-            }
-        });
-
-        return () => unsubscribe();
-    }, [router, requiredPermission, requiredRole]);
-
-    if (loading) {
+    if (!checked) {
         return (
             <div className="flex h-[50vh] w-full items-center justify-center">
                 <Loader2 className="h-8 w-8 animate-spin text-indigo-600" />

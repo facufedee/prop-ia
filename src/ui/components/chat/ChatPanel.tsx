@@ -60,15 +60,30 @@ export default function ChatPanel() {
 
     return (
         <>
-            {/* Floating button */}
+            {/* Floating button area */}
             {!isOpen && (
-                <button
-                    onClick={() => setIsOpen(true)}
-                    className="fixed bottom-6 right-6 z-[9998] w-14 h-14 bg-indigo-600 hover:bg-indigo-700 text-white rounded-full shadow-xl flex items-center justify-center transition-all hover:scale-110 active:scale-95"
-                    aria-label="Abrir asistente IA"
-                >
-                    <Bot className="w-6 h-6" />
-                </button>
+                <div className="fixed bottom-6 right-6 z-[9998] flex items-end gap-3">
+                    {/* Tooltip Bubble (hidden on very small screens so it doesn't overlap content) */}
+                    <div 
+                        onClick={() => setIsOpen(true)}
+                        className="mb-2 px-4 py-2.5 bg-white text-indigo-700 text-sm font-medium rounded-2xl rounded-br-sm shadow-xl border border-indigo-100 cursor-pointer hover:bg-indigo-50 transition-colors animate-in fade-in slide-in-from-bottom-2 duration-500 hidden sm:flex items-center gap-2"
+                    >
+                        <span>¡Hola! ¿Te ayudo?</span>
+                        <span className="relative flex h-2.5 w-2.5">
+                            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-indigo-400 opacity-75"></span>
+                            <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-indigo-500"></span>
+                        </span>
+                    </div>
+
+                    <button
+                        onClick={() => setIsOpen(true)}
+                        className="relative w-14 h-14 bg-indigo-600 hover:bg-indigo-700 text-white rounded-full shadow-xl shadow-indigo-600/30 flex items-center justify-center transition-all hover:scale-110 active:scale-95"
+                        aria-label="Abrir asistente IA"
+                    >
+                        <div className="absolute inset-0 rounded-full border-2 border-indigo-400 animate-ping opacity-20"></div>
+                        <Bot className="w-6 h-6" />
+                    </button>
+                </div>
             )}
 
             {/* Floating chat window */}

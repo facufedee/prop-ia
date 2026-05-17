@@ -145,7 +145,10 @@ export default function MarketingPage() {
     const fetchData = useCallback(async () => {
         setLoading(true);
         try {
-            const res = await fetch('/api/marketing/templates');
+            const token = await user?.getIdToken();
+            const res = await fetch('/api/marketing/templates', {
+                headers: { Authorization: `Bearer ${token}` },
+            });
             if (!res.ok) throw new Error('Error fetching marketing data');
             const data = await res.json();
             setTemplates(data.templates || []);
@@ -156,7 +159,7 @@ export default function MarketingPage() {
         } finally {
             setLoading(false);
         }
-    }, []);
+    }, [user]);
 
     useEffect(() => { fetchData(); }, [fetchData]);
 
@@ -205,9 +208,10 @@ export default function MarketingPage() {
 
         setSaving(true);
         try {
+            const token = await user?.getIdToken();
             const res = await fetch('/api/marketing/templates', {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
+                headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
                 body: JSON.stringify({
                     type: typeToSave,
                     name: nameToSave,
@@ -237,7 +241,11 @@ export default function MarketingPage() {
         if (!existing?.id) return;
         if (!confirm('¿Seguro que deseas eliminar/resetear este template?')) return;
         try {
-            await fetch(`/api/marketing/templates?id=${existing.id}`, { method: 'DELETE' });
+            const token = await user?.getIdToken();
+            await fetch(`/api/marketing/templates?id=${existing.id}`, {
+                method: 'DELETE',
+                headers: { Authorization: `Bearer ${token}` },
+            });
             await fetchData();
             if (DEFAULT_TEMPLATES[editingType]) {
                 setEditSubject('');
