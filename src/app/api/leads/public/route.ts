@@ -5,10 +5,10 @@ import { sendNewLeadNotificationEmail } from "@/lib/resendClient";
 import { z } from "zod";
 
 const leadSchema = z.object({
-    nombre: z.string().min(1).max(100).trim(),
-    email: z.string().email().max(200).optional().or(z.literal("")),
-    telefono: z.string().max(30).optional(),
-    mensaje: z.string().max(2000).optional(),
+    nombre: z.string().min(2, "Nombre demasiado corto").max(60, "Nombre demasiado largo").trim(),
+    email: z.string().email("Email inválido").max(100).optional().or(z.literal("")),
+    telefono: z.string().max(20).regex(/^[\d\s\+\-\(\)]*$/, "Teléfono inválido").optional(),
+    mensaje: z.string().max(500, "Mensaje demasiado largo").optional(),
     propertyId: z.string().max(100).optional().nullable(),
     propertyTitle: z.string().max(200).optional().nullable(),
     userId: z.string().min(1).max(128),
@@ -81,6 +81,18 @@ export async function POST(request: Request) {
             } catch (err) {
                 console.error("Failed to trigger lead email:", err);
             }
+
+            // Notificación in-app para la campanita del agente
+            adminDb.collection("notifications").add({
+                title: "Nueva consulta recibida",
+                message: `${nombre || "Un interesado"} consultó${propertyTitle ? ` por "${propertyTitle}"` : ""}`,
+                type: "info",
+                targetUserId: userId,
+                targetRole: null,
+                readBy: [],
+                createdAt: new Date(),
+                link: "/dashboard/leads",
+            }).catch((err: any) => console.error("[/api/leads/public] Failed to create notification:", err));
         };
 
         if (existingLeadSnap) {

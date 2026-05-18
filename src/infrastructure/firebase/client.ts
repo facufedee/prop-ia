@@ -21,11 +21,17 @@ const firebaseConfig = {
 // Initialize Firebase
 const app = getApps().length > 0 ? getApp() : initializeApp(firebaseConfig);
 
-// Initialize Firestore with specific settings to fix "Client Offline" issues
-const db = initializeFirestore(app, {
-  localCache: memoryLocalCache(),
-  experimentalForceLongPolling: true, // Force usage of long-polling instead of WebSockets
-}, "propia");
+// initializeFirestore throws if called more than once (e.g. hot-reload in dev).
+// Fall back to getFirestore() which returns the already-initialized instance.
+let db: ReturnType<typeof getFirestore>;
+try {
+  db = initializeFirestore(app, {
+    localCache: memoryLocalCache(),
+    experimentalForceLongPolling: true,
+  }, "propia");
+} catch {
+  db = getFirestore(app, "propia");
+}
 
 // Connect to Emulators in Development
 if (process.env.NODE_ENV === 'development' && typeof window !== 'undefined' && process.env.NEXT_PUBLIC_USE_EMULATORS === 'true') {

@@ -8,42 +8,36 @@ const OWNER_EMAIL = "facundoflores8@gmail.com";
 
 export default function AdminGuard({ children }: { children: React.ReactNode }) {
     const router = useRouter();
-    const { user, userRole, loading } = useAuth();
+    const { user, authReady, userRole } = useAuth();
     const [authorized, setAuthorized] = useState(false);
     const [checked, setChecked] = useState(false);
 
     useEffect(() => {
-        // user=null + loading=true → onAuthStateChanged hasn't fired yet, wait
-        if (!user && loading) return;
+        if (!authReady) return; // wait only for auth, not Firestore
 
-        // Auth fired but no user → not logged in
         if (!user) {
             router.push("/login");
             setChecked(true);
             return;
         }
 
-        // Owner bypass — no need to wait for role
+        // Owner email — immediate access, no role needed
         if (user.email === OWNER_EMAIL) {
             setAuthorized(true);
             setChecked(true);
             return;
         }
 
-        // For non-owners: Super Admin or Administrador bypass
-        if (userRole?.name === "Super Admin" || userRole?.name === "Administrador") {
-            setAuthorized(true);
-            setChecked(true);
-            return;
-        }
-
-        // Role not yet loaded → keep waiting
+        // Role-based check — wait if role not loaded yet
         if (!userRole) return;
 
-        // Role loaded but insufficient → redirect
-        router.push("/access-denied");
+        if (userRole.name === "Super Admin" || userRole.name === "Administrador") {
+            setAuthorized(true);
+        } else {
+            router.push("/access-denied");
+        }
         setChecked(true);
-    }, [user, userRole, loading, router]);
+    }, [user, authReady, userRole, router]);
 
     if (!checked) {
         return (
@@ -54,6 +48,5 @@ export default function AdminGuard({ children }: { children: React.ReactNode }) 
     }
 
     if (!authorized) return null;
-
     return <>{children}</>;
 }

@@ -57,7 +57,7 @@ export default function PublicMap({ lat, lng }: PublicMapProps) {
                 scrolling="no"
                 marginHeight={0}
                 marginWidth={0}
-                className="filter grayscale hover:grayscale-0 transition-all duration-500 w-full h-full"
+                className="w-full h-full"
             ></iframe>
         );
     }

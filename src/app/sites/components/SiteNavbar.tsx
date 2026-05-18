@@ -6,6 +6,7 @@ import Image from "next/image";
 import { Menu, X, MessageCircle, Home, Building2, Phone, Mail } from "lucide-react";
 import { Site } from "@/domain/models/Site";
 import { useSite } from "../[slug]/SiteProvider";
+import { trackContact } from "@/lib/trackContact";
 
 interface SiteNavbarProps {
   site: Site;
@@ -66,7 +67,7 @@ export default function SiteNavbar({ site, basePath: propBasePath }: SiteNavbarP
             </Link>
           ))}
           {site.email && (
-            <a href={`mailto:${site.email}`} className="hover:opacity-70 transition-opacity" style={{ color: navColor }}>
+            <a href={`mailto:${site.email}`} onClick={() => trackContact({ userId: site.userId, origen: "click-email" })} className="hover:opacity-70 transition-opacity" style={{ color: navColor }}>
               Contacto
             </a>
           )}
@@ -79,6 +80,7 @@ export default function SiteNavbar({ site, basePath: propBasePath }: SiteNavbarP
               href={`https://wa.me/${site.whatsapp.replace(/\D/g, "")}`}
               target="_blank"
               rel="noopener noreferrer"
+              onClick={() => trackContact({ userId: site.userId, origen: "click-whatsapp" })}
               className="hidden sm:flex items-center gap-2 px-5 py-2.5 rounded-xl text-white text-xs font-bold uppercase tracking-widest transition-all hover:scale-105 shadow-lg active:scale-95"
               style={{ backgroundColor: primary }}
             >
@@ -140,7 +142,7 @@ export default function SiteNavbar({ site, basePath: propBasePath }: SiteNavbarP
                 rel="noopener noreferrer"
                 className="flex items-center gap-3 p-4 rounded-xl text-white font-bold"
                 style={{ backgroundColor: primary }}
-                onClick={() => setOpen(false)}
+                onClick={() => { setOpen(false); trackContact({ userId: site.userId, origen: "click-whatsapp" }); }}
               >
                 <MessageCircle className="w-5 h-5" />
                 WhatsApp Directo
@@ -148,13 +150,13 @@ export default function SiteNavbar({ site, basePath: propBasePath }: SiteNavbarP
             )}
             <div className="grid grid-cols-2 gap-3 mt-2">
               {site.email && (
-                <a href={`mailto:${site.email}`} className="flex flex-col items-center gap-2 p-4 rounded-xl border" style={{ color: navColor, borderColor: `${navColor}20` }}>
+                <a href={`mailto:${site.email}`} onClick={() => { setOpen(false); trackContact({ userId: site.userId, origen: "click-email" }); }} className="flex flex-col items-center gap-2 p-4 rounded-xl border" style={{ color: navColor, borderColor: `${navColor}20` }}>
                   <Mail className="w-5 h-5" />
                   <span className="text-[10px] font-bold uppercase tracking-widest">Email</span>
                 </a>
               )}
               {site.whatsapp && (
-                <a href={`tel:${site.whatsapp}`} className="flex flex-col items-center gap-2 p-4 rounded-xl border" style={{ color: navColor, borderColor: `${navColor}20` }}>
+                <a href={`tel:${site.whatsapp}`} onClick={() => { setOpen(false); trackContact({ userId: site.userId, origen: "click-telefono" }); }} className="flex flex-col items-center gap-2 p-4 rounded-xl border" style={{ color: navColor, borderColor: `${navColor}20` }}>
                   <Phone className="w-5 h-5" />
                   <span className="text-[10px] font-bold uppercase tracking-widest">Llamar</span>
                 </a>

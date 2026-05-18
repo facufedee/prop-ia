@@ -10,18 +10,43 @@ interface SiteContactFormProps {
   propertyTitle?: string;
 }
 
+type FieldErrors = { nombre?: string; email?: string; tel?: string; mensaje?: string };
+
 export default function SiteContactForm({ site, propertyId, propertyTitle }: SiteContactFormProps) {
-  const [formData, setFormData] = useState({
-    nombre: "",
-    email: "",
-    tel: "",
-    mensaje: "",
-  });
+  const [formData, setFormData] = useState({ nombre: "", email: "", tel: "", mensaje: "" });
   const [status, setStatus] = useState<"idle" | "loading" | "success" | "error">("idle");
+  const [errors, setErrors] = useState<FieldErrors>({});
   const primary = site.colorPrimario || "#4f46e5";
+
+  const validate = (): boolean => {
+    const e: FieldErrors = {};
+    const nombre = formData.nombre.trim();
+    const tel = formData.tel.trim();
+
+    if (!nombre) e.nombre = "El nombre es requerido";
+    else if (nombre.length < 2) e.nombre = "Mínimo 2 caracteres";
+    else if (nombre.length > 60) e.nombre = "Máximo 60 caracteres";
+    else if (!/^[a-zA-ZáéíóúÁÉÍÓÚüÜñÑ\s'\-]+$/.test(nombre)) e.nombre = "Solo se permiten letras";
+
+    if (formData.email) {
+      if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) e.email = "Email inválido";
+      else if (formData.email.length > 100) e.email = "Email demasiado largo";
+    }
+
+    if (!tel) e.tel = "El teléfono es requerido";
+    else if (!/^[\d\s\+\-\(\)]+$/.test(tel)) e.tel = "Solo se permiten números";
+    else if (tel.replace(/\D/g, "").length < 6) e.tel = "Mínimo 6 dígitos";
+    else if (tel.length > 20) e.tel = "Máximo 20 caracteres";
+
+    if (formData.mensaje.length > 500) e.mensaje = "Máximo 500 caracteres";
+
+    setErrors(e);
+    return Object.keys(e).length === 0;
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!validate()) return;
     setStatus("loading");
 
     try {
@@ -29,10 +54,10 @@ export default function SiteContactForm({ site, propertyId, propertyTitle }: Sit
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          nombre: formData.nombre,
-          email: formData.email,
-          telefono: formData.tel,
-          mensaje: formData.mensaje,
+          nombre: formData.nombre.trim(),
+          email: formData.email.trim() || undefined,
+          telefono: formData.tel.trim(),
+          mensaje: formData.mensaje.trim().slice(0, 500) || undefined,
           userId: site.userId,
           origen: "web",
           propertyId,
@@ -46,6 +71,11 @@ export default function SiteContactForm({ site, propertyId, propertyTitle }: Sit
       console.error("Error sending lead:", error);
       setStatus("error");
     }
+  };
+
+  const setField = (field: keyof typeof formData, value: string) => {
+    setFormData(p => ({ ...p, [field]: value }));
+    if (errors[field]) setErrors(p => ({ ...p, [field]: undefined }));
   };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
@@ -111,60 +141,64 @@ export default function SiteContactForm({ site, propertyId, propertyTitle }: Sit
                 <form onSubmit={handleSubmit} className="space-y-6">
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
                         <div>
-                            <label className="block text-xs font-bold uppercase tracking-widest text-gray-400 mb-2 ml-1">Nombre</label>
-                            <input 
-                                required
+                            <label className="block text-xs font-bold uppercase tracking-widest text-gray-400 mb-2 ml-1">Nombre *</label>
+                            <input
                                 type="text"
-                                name="nombre"
                                 value={formData.nombre}
-                                onChange={handleChange}
-                                className="w-full px-5 py-4 bg-gray-50 border-none rounded-2xl text-gray-900 placeholder-gray-300 focus:ring-2 focus:ring-indigo-500 transition-all outline-none"
+                                onChange={e => setField("nombre", e.target.value)}
+                                maxLength={60}
+                                className={`w-full px-5 py-4 bg-gray-50 border rounded-2xl text-gray-900 placeholder-gray-300 focus:ring-2 focus:ring-indigo-500 transition-all outline-none ${errors.nombre ? "border-red-400 bg-red-50" : "border-transparent"}`}
                                 placeholder="Tu nombre completo"
                             />
+                            {errors.nombre && <p className="mt-1 text-xs text-red-500 ml-1">{errors.nombre}</p>}
                         </div>
                         <div>
                             <label className="block text-xs font-bold uppercase tracking-widest text-gray-400 mb-2 ml-1">Email</label>
-                            <input 
-                                required
-                                type="email"
-                                name="email"
+                            <input
+                                type="text"
                                 value={formData.email}
-                                onChange={handleChange}
-                                className="w-full px-5 py-4 bg-gray-50 border-none rounded-2xl text-gray-900 placeholder-gray-300 focus:ring-2 focus:ring-indigo-500 transition-all outline-none"
+                                onChange={e => setField("email", e.target.value)}
+                                maxLength={100}
+                                className={`w-full px-5 py-4 bg-gray-50 border rounded-2xl text-gray-900 placeholder-gray-300 focus:ring-2 focus:ring-indigo-500 transition-all outline-none ${errors.email ? "border-red-400 bg-red-50" : "border-transparent"}`}
                                 placeholder="ejemplo@correo.com"
                             />
+                            {errors.email && <p className="mt-1 text-xs text-red-500 ml-1">{errors.email}</p>}
                         </div>
                     </div>
                     <div>
-                        <label className="block text-xs font-bold uppercase tracking-widest text-gray-400 mb-2 ml-1">WhatsApp</label>
-                        <input 
-                            required
+                        <label className="block text-xs font-bold uppercase tracking-widest text-gray-400 mb-2 ml-1">WhatsApp *</label>
+                        <input
                             type="tel"
-                            name="tel"
                             value={formData.tel}
-                            onChange={handleChange}
-                            className="w-full px-5 py-4 bg-gray-50 border-none rounded-2xl text-gray-900 placeholder-gray-300 focus:ring-2 focus:ring-indigo-500 transition-all outline-none"
+                            onChange={e => setField("tel", e.target.value.replace(/[^0-9\s\+\-\(\)]/g, ""))}
+                            maxLength={20}
+                            className={`w-full px-5 py-4 bg-gray-50 border rounded-2xl text-gray-900 placeholder-gray-300 focus:ring-2 focus:ring-indigo-500 transition-all outline-none ${errors.tel ? "border-red-400 bg-red-50" : "border-transparent"}`}
                             placeholder="Ej: +54 9 11 1234-5678"
                         />
+                        {errors.tel && <p className="mt-1 text-xs text-red-500 ml-1">{errors.tel}</p>}
                     </div>
                     <div>
                         <label className="block text-xs font-bold uppercase tracking-widest text-gray-400 mb-2 ml-1">Mensaje</label>
-                        <textarea 
-                            required
-                            name="mensaje"
-                            value={formData.mensaje}
-                            onChange={handleChange}
-                            rows={4}
-                            className="w-full px-5 py-4 bg-gray-50 border-none rounded-2xl text-gray-900 placeholder-gray-300 focus:ring-2 focus:ring-indigo-500 transition-all outline-none resize-none"
-                            placeholder="¿En qué podemos ayudarte?"
-                        />
+                        <div className="relative">
+                            <textarea
+                                value={formData.mensaje}
+                                onChange={e => setField("mensaje", e.target.value)}
+                                maxLength={500}
+                                rows={4}
+                                className={`w-full px-5 py-4 bg-gray-50 border rounded-2xl text-gray-900 placeholder-gray-300 focus:ring-2 focus:ring-indigo-500 transition-all outline-none resize-none ${errors.mensaje ? "border-red-400 bg-red-50" : "border-transparent"}`}
+                                placeholder="¿En qué podemos ayudarte?"
+                            />
+                            <span className="absolute bottom-3 right-4 text-[11px] text-gray-400">{formData.mensaje.length}/500</span>
+                        </div>
+                        {errors.mensaje && <p className="mt-1 text-xs text-red-500 ml-1">{errors.mensaje}</p>}
                     </div>
-                    
+
                     {status === "error" && (
                       <p className="text-red-500 text-sm font-medium text-center">Hubo un error al enviar el mensaje. Reintentá en unos segundos.</p>
                     )}
 
                     <button
+                        type="submit"
                         disabled={status === "loading"}
                         className="w-full py-5 rounded-2xl text-white font-bold uppercase tracking-[0.2em] text-sm shadow-xl hover:scale-[1.02] active:scale-[0.98] transition-all disabled:opacity-50"
                         style={{ backgroundColor: primary }}

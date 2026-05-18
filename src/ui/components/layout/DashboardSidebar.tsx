@@ -166,32 +166,34 @@ export default function DashboardSidebar({ isOpen = false, onClose }: DashboardS
   const [unreadCount, setUnreadCount] = useState(0); // State for unread messages badge
   const [ticketCount, setTicketCount] = useState(0); // Tickets badge
 
-  // Fetch unread messages for Super Admin
+  // Fetch badge counts for leads and tickets
   useEffect(() => {
-    const fetchNotifications = async () => {
-      if (userRole?.name === 'Super Admin') {
-        try {
-          // Fetch Leads
-          const { leadsService } = await import("@/infrastructure/services/leadsService");
+    if (!user?.uid && userRole?.name !== 'Super Admin') return;
+
+    const fetchBadges = async () => {
+      try {
+        const { leadsService } = await import("@/infrastructure/services/leadsService");
+
+        if (userRole?.name === 'Super Admin') {
           const newLeads = await leadsService.getLeadsByEstado('SYSTEM_ZETA_PROP', 'nuevo');
           setUnreadCount(newLeads.length);
 
-          // Fetch Tickets
           const { ticketsService } = await import("@/infrastructure/services/ticketsService");
           const pendingTickets = await ticketsService.getAdminPendingTickets();
           setTicketCount(pendingTickets.length);
-        } catch (e) {
-          console.error("Error fetching notifications", e);
+        } else if (user?.uid) {
+          const newLeads = await leadsService.getLeadsByEstado(user.uid, 'nuevo');
+          setUnreadCount(newLeads.length);
         }
+      } catch (e) {
+        console.error("Error fetching badge counts", e);
       }
     };
 
-    fetchNotifications();
-
-    // Optional: Poll every minute
-    const interval = setInterval(fetchNotifications, 60000);
+    fetchBadges();
+    const interval = setInterval(fetchBadges, 60000);
     return () => clearInterval(interval);
-  }, [userRole]);
+  }, [user?.uid, userRole]);
 
 
   const handleLogout = async () => {

@@ -1,14 +1,17 @@
 "use client";
 
 import { createContext, useContext, useEffect, useState } from "react";
-import { app, auth, db } from "@/infrastructure/firebase/client"; // Added db
+import { auth, db } from "@/infrastructure/firebase/client";
 import { onAuthStateChanged, type User } from "firebase/auth";
-import { doc, onSnapshot } from "firebase/firestore"; // Added firestore imports
+import { doc, onSnapshot } from "firebase/firestore";
 import Cookies from "js-cookie";
-import { roleService, Role } from "@/infrastructure/services/roleService"; // Import Role service
+import { roleService, Role } from "@/infrastructure/services/roleService";
 
 interface AuthContextType {
   user: User | null;
+  /** true once onAuthStateChanged has fired at least once — does NOT wait for Firestore */
+  authReady: boolean;
+  /** true while role/userData are still loading from Firestore */
   loading: boolean;
   userRole: Role | null;
   userPermissions: string[];
@@ -19,40 +22,47 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [user, setUser] = useState<User | null>(null);
+  const [authReady, setAuthReady] = useState(false);
   const [loading, setLoading] = useState(true);
   const [userRole, setUserRole] = useState<Role | null>(null);
   const [userData, setUserData] = useState<any | null>(null);
 
   useEffect(() => {
     if (!auth) {
+      setAuthReady(true);
       setLoading(false);
       return;
     }
+
     const unsub = onAuthStateChanged(auth, async (u) => {
       setUser(u);
+      setAuthReady(true); // auth state is known — guards can act immediately
 
       if (u) {
         try {
           const token = await u.getIdToken();
-          Cookies.set("authToken", token, { expires: 7, secure: true, sameSite: 'strict' });
-        } catch (error) {
-          console.error("Error getting ID token:", error);
-          Cookies.set("authToken", "logged", { expires: 7 }); // Fallback
+          Cookies.set("authToken", token, { expires: 7, secure: true, sameSite: "strict" });
+        } catch {
+          Cookies.set("authToken", "logged", { expires: 7 });
         }
       } else {
         Cookies.remove("authToken");
         setUserRole(null);
         setUserData(null);
-        setLoading(false); // If no user, stop loading
+        setLoading(false);
       }
     });
 
     return () => unsub();
   }, []);
 
-  // Effect to fetch Role when user changes
+  // Fetch role + userData from Firestore when user is known
   useEffect(() => {
-    if (!user || !db) return;
+    if (!user || !db) {
+      // If there's no user or no db, nothing to load — unblock loading
+      if (!user) setLoading(false);
+      return;
+    }
 
     const userRef = doc(db, "users", user.uid);
     const unsubSnapshot = onSnapshot(
@@ -69,18 +79,14 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
                 (role as any).logoUrl = data.logoUrl;
               }
               setUserRole(role);
-            } catch (error) {
-              console.error("Error fetching role:", error);
-              // Don't leave loading stuck — unblock with null role
+            } catch {
               setUserRole(null);
             }
           }
-          // If no roleId, userRole stays null — PermissionGuard handles this case
         }
         setLoading(false);
       },
       (error) => {
-        // Firestore snapshot error (e.g. permission denied) — unblock loading
         console.error("AuthContext snapshot error:", error);
         setLoading(false);
       }
@@ -89,11 +95,10 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     return () => unsubSnapshot();
   }, [user]);
 
-  // Derived permissions
   const userPermissions = userRole?.permissions || [];
 
   return (
-    <AuthContext.Provider value={{ user, loading, userRole, userPermissions, userData }}>
+    <AuthContext.Provider value={{ user, authReady, loading, userRole, userPermissions, userData }}>
       {children}
     </AuthContext.Provider>
   );

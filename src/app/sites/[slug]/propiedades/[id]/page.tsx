@@ -38,25 +38,62 @@ interface SidebarContactCardProps {
     propertyTitle: string;
 }
 
+import { trackContact } from "@/lib/trackContact";
+
+type FormErrors = { nombre?: string; email?: string; telefono?: string; mensaje?: string };
+
 function SidebarContactCard({ site, primary, waUrl, propertyId, propertyTitle }: SidebarContactCardProps) {
     const [tab, setTab] = useState<"contacto" | "form">("contacto");
     const [form, setForm] = useState({ nombre: "", email: "", telefono: "", mensaje: "" });
     const [status, setStatus] = useState<"idle" | "loading" | "success" | "error">("idle");
+    const [errors, setErrors] = useState<FormErrors>({});
 
     if (!site) return null;
 
+    const setField = (field: keyof typeof form, value: string) => {
+        setForm(p => ({ ...p, [field]: value }));
+        if (errors[field]) setErrors(p => ({ ...p, [field]: undefined }));
+    };
+
+    const validate = (): boolean => {
+        const e: FormErrors = {};
+        const nombre = form.nombre.trim();
+        const tel = form.telefono.trim();
+
+        if (!nombre) e.nombre = "El nombre es requerido";
+        else if (nombre.length < 2) e.nombre = "Mínimo 2 caracteres";
+        else if (nombre.length > 60) e.nombre = "Máximo 60 caracteres";
+        else if (!/^[a-zA-ZáéíóúÁÉÍÓÚüÜñÑ\s'\-]+$/.test(nombre)) e.nombre = "Solo se permiten letras";
+
+        if (form.email) {
+            if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email)) e.email = "Email inválido";
+            else if (form.email.length > 100) e.email = "Email demasiado largo";
+        }
+
+        if (!tel) e.telefono = "El teléfono es requerido";
+        else if (!/^[\d\s\+\-\(\)]+$/.test(tel)) e.telefono = "Solo se permiten números";
+        else if (tel.replace(/\D/g, "").length < 6) e.telefono = "Mínimo 6 dígitos";
+        else if (tel.length > 20) e.telefono = "Máximo 20 caracteres";
+
+        if (form.mensaje.length > 500) e.mensaje = "Máximo 500 caracteres";
+
+        setErrors(e);
+        return Object.keys(e).length === 0;
+    };
+
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
+        if (!validate()) return;
         setStatus("loading");
         try {
             const res = await fetch("/api/leads", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({
-                    nombre: form.nombre,
-                    email: form.email,
-                    telefono: form.telefono,
-                    mensaje: form.mensaje || `Consulta sobre: ${propertyTitle}`,
+                    nombre: form.nombre.trim(),
+                    email: form.email.trim() || undefined,
+                    telefono: form.telefono.trim(),
+                    mensaje: (form.mensaje.trim() || `Consulta sobre: ${propertyTitle}`).slice(0, 500),
                     userId: site.userId,
                     propertyId,
                     propertyTitle,
@@ -110,12 +147,14 @@ function SidebarContactCard({ site, primary, waUrl, propertyId, propertyTitle }:
                     <div className="space-y-3">
                         {waUrl && (
                             <a href={waUrl} target="_blank" rel="noopener noreferrer"
+                                onClick={() => trackContact({ userId: site.userId, origen: "click-whatsapp", propertyId, propertyTitle })}
                                 className="flex items-center justify-center gap-3 w-full py-4 bg-[#25D366] hover:bg-[#1fb354] text-white rounded-2xl font-black text-sm uppercase tracking-widest transition-all active:scale-95 shadow-lg shadow-green-100">
                                 <MessageCircle size={20} /> WhatsApp
                             </a>
                         )}
                         {site.email && (
                             <a href={`mailto:${site.email}?subject=Consulta: ${propertyTitle}`}
+                                onClick={() => trackContact({ userId: site.userId, origen: "click-email", propertyId, propertyTitle })}
                                 className="flex items-center justify-center gap-3 w-full py-4 bg-white border-2 rounded-2xl font-black text-sm uppercase tracking-widest transition-all active:scale-95 hover:bg-gray-50"
                                 style={{ color: primary, borderColor: primary }}>
                                 <Mail size={20} /> Enviar Email
@@ -123,6 +162,7 @@ function SidebarContactCard({ site, primary, waUrl, propertyId, propertyTitle }:
                         )}
                         {site.whatsapp && (
                             <a href={`tel:${site.whatsapp.replace(/\D/g, "")}`}
+                                onClick={() => trackContact({ userId: site.userId, origen: "click-telefono", propertyId, propertyTitle })}
                                 className="flex items-center justify-center gap-3 w-full py-4 text-gray-500 font-bold text-sm tracking-wide">
                                 <Phone size={18} /> {site.whatsapp}
                             </a>
@@ -147,19 +187,36 @@ function SidebarContactCard({ site, primary, waUrl, propertyId, propertyTitle }:
                             className="mt-4 text-xs text-gray-400 hover:text-gray-600 underline">Volver</button>
                     </div>
                 ) : (
-                    <form onSubmit={handleSubmit} className="space-y-3">
-                        <input required type="text" placeholder="Tu nombre *" value={form.nombre}
-                            onChange={e => setForm(p => ({ ...p, nombre: e.target.value }))}
-                            className="w-full px-4 py-3 bg-gray-50 rounded-xl text-sm text-gray-900 outline-none focus:ring-2 focus:ring-indigo-300 placeholder-gray-400" />
-                        <input type="email" placeholder="Email" value={form.email}
-                            onChange={e => setForm(p => ({ ...p, email: e.target.value }))}
-                            className="w-full px-4 py-3 bg-gray-50 rounded-xl text-sm text-gray-900 outline-none focus:ring-2 focus:ring-indigo-300 placeholder-gray-400" />
-                        <input required type="tel" placeholder="Teléfono / WhatsApp *" value={form.telefono}
-                            onChange={e => setForm(p => ({ ...p, telefono: e.target.value }))}
-                            className="w-full px-4 py-3 bg-gray-50 rounded-xl text-sm text-gray-900 outline-none focus:ring-2 focus:ring-indigo-300 placeholder-gray-400" />
-                        <textarea placeholder="¿Alguna pregunta? (opcional)" value={form.mensaje} rows={3}
-                            onChange={e => setForm(p => ({ ...p, mensaje: e.target.value }))}
-                            className="w-full px-4 py-3 bg-gray-50 rounded-xl text-sm text-gray-900 outline-none focus:ring-2 focus:ring-indigo-300 resize-none placeholder-gray-400" />
+                    <form onSubmit={handleSubmit} className="space-y-2.5">
+                        <div>
+                            <input type="text" placeholder="Tu nombre *" value={form.nombre}
+                                onChange={e => setField("nombre", e.target.value)}
+                                maxLength={60}
+                                className={`w-full px-4 py-3 rounded-xl text-sm text-gray-900 outline-none focus:ring-2 focus:ring-indigo-300 placeholder-gray-400 border ${errors.nombre ? "border-red-400 bg-red-50" : "bg-gray-50 border-transparent"}`} />
+                            {errors.nombre && <p className="mt-1 text-[11px] text-red-500 ml-1">{errors.nombre}</p>}
+                        </div>
+                        <div>
+                            <input type="text" placeholder="Email (opcional)" value={form.email}
+                                onChange={e => setField("email", e.target.value)}
+                                maxLength={100}
+                                className={`w-full px-4 py-3 rounded-xl text-sm text-gray-900 outline-none focus:ring-2 focus:ring-indigo-300 placeholder-gray-400 border ${errors.email ? "border-red-400 bg-red-50" : "bg-gray-50 border-transparent"}`} />
+                            {errors.email && <p className="mt-1 text-[11px] text-red-500 ml-1">{errors.email}</p>}
+                        </div>
+                        <div>
+                            <input type="tel" placeholder="Teléfono / WhatsApp *" value={form.telefono}
+                                onChange={e => setField("telefono", e.target.value.replace(/[^0-9\s\+\-\(\)]/g, ""))}
+                                maxLength={20}
+                                className={`w-full px-4 py-3 rounded-xl text-sm text-gray-900 outline-none focus:ring-2 focus:ring-indigo-300 placeholder-gray-400 border ${errors.telefono ? "border-red-400 bg-red-50" : "bg-gray-50 border-transparent"}`} />
+                            {errors.telefono && <p className="mt-1 text-[11px] text-red-500 ml-1">{errors.telefono}</p>}
+                        </div>
+                        <div className="relative">
+                            <textarea placeholder="¿Alguna pregunta? (opcional)" value={form.mensaje} rows={3}
+                                onChange={e => setField("mensaje", e.target.value)}
+                                maxLength={500}
+                                className={`w-full px-4 py-3 rounded-xl text-sm text-gray-900 outline-none focus:ring-2 focus:ring-indigo-300 resize-none placeholder-gray-400 border ${errors.mensaje ? "border-red-400 bg-red-50" : "bg-gray-50 border-transparent"}`} />
+                            <span className="absolute bottom-2 right-3 text-[10px] text-gray-400">{form.mensaje.length}/500</span>
+                            {errors.mensaje && <p className="mt-1 text-[11px] text-red-500 ml-1">{errors.mensaje}</p>}
+                        </div>
                         {status === "error" && <p className="text-xs text-red-500 text-center">Hubo un error. Intentá de nuevo.</p>}
                         <button type="submit" disabled={status === "loading"}
                             className="w-full py-4 rounded-2xl text-white font-black text-sm uppercase tracking-widest transition-all hover:opacity-90 active:scale-95 disabled:opacity-50"
@@ -184,6 +241,7 @@ export default function PropiedadDetailPage() {
     const [currentImageIndex, setCurrentImageIndex] = useState(0);
     const [isSaved, setIsSaved] = useState(false);
     const [lightboxOpen, setLightboxOpen] = useState(false);
+    const [otherProperties, setOtherProperties] = useState<PublicProperty[]>([]);
     const touchStartX = useRef(0);
 
     useEffect(() => {
@@ -192,11 +250,17 @@ export default function PropiedadDetailPage() {
             setProperty(p);
             setLoading(false);
 
-            // Check if saved
             const saved = localStorage.getItem(`saved_${params.id}`);
             if (saved) setIsSaved(true);
         }).catch(() => setLoading(false));
     }, [params?.id]);
+
+    useEffect(() => {
+        if (!site?.userId) return;
+        publicService.getPropertiesByUserId(site.userId).then((props) => {
+            setOtherProperties(props.filter(p => p.id !== params?.id && p.status === "active").slice(0, 8));
+        }).catch(() => {});
+    }, [site?.userId, params?.id]);
 
     // Keyboard nav for lightbox — must be before any early returns (Rules of Hooks)
     useEffect(() => {
@@ -299,10 +363,12 @@ export default function PropiedadDetailPage() {
                 <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 pt-24 lg:pt-28">
                     {/* ── Breadcrumbs & Actions ── */}
                     <div className="flex flex-col md:flex-row md:items-center justify-between mb-8 gap-4">
-                        <nav className="flex items-center gap-2 text-sm text-gray-400 font-medium">
-                            <Link href={`${basePath}/propiedades`} className="hover:text-gray-900 transition-colors">Propiedades</Link>
+                        <nav className="flex items-center gap-3 text-sm text-gray-400 font-medium">
+                            <Link href={`${basePath}/propiedades`} className="flex items-center gap-1.5 px-3 py-1.5 bg-white border border-gray-200 rounded-xl text-gray-600 hover:bg-gray-50 hover:text-gray-900 transition-all font-bold shadow-sm active:scale-95">
+                                <ChevronLeft className="w-4 h-4" /> Todas las propiedades
+                            </Link>
                             <ChevronRight className="w-4 h-4" />
-                            <span className="text-gray-900 font-bold truncate max-w-[200px] md:max-w-md">{property.title}</span>
+                            <span className="text-gray-900 font-bold truncate max-w-[160px] md:max-w-md">{property.title}</span>
                         </nav>
 
                         <div className="flex items-center gap-3">
@@ -479,7 +545,7 @@ export default function PropiedadDetailPage() {
                                     {property.operation_type}
                                 </span>
                                 <h2 className="text-4xl font-black text-gray-900 mb-2">
-                                    {property.hidePrice ? "Consultar Precio" : `${property.currency} ${property.price.toLocaleString("es-AR")}`}
+                                    {property.hidePrice ? "Consultar Precio" : `${property.currency} ${Number(property.price).toLocaleString("es-AR")}`}
                                 </h2>
                                 {property.expenses && (
                                     <p className="text-gray-400 font-bold uppercase text-[10px] tracking-widest">+ ${property.expenses.toLocaleString("es-AR")} expensas</p>
@@ -509,6 +575,68 @@ export default function PropiedadDetailPage() {
                     <SiteContactForm site={site} propertyId={property.id} propertyTitle={property.title} />
                 </div>
 
+                {/* ── Otras propiedades ── */}
+                {otherProperties.length > 0 && (
+                    <section className="py-20 px-4 sm:px-6 lg:px-8 bg-gray-50 border-t border-gray-100">
+                        <div className="max-w-7xl mx-auto">
+                            <div className="flex items-center justify-between mb-8">
+                                <h2 className="text-2xl font-black text-gray-900 tracking-tight">Otras propiedades</h2>
+                                <Link
+                                    href={`${basePath}/propiedades`}
+                                    className="flex items-center gap-1.5 text-sm font-bold text-gray-500 hover:text-gray-900 transition-colors"
+                                    style={{ color: primary }}
+                                >
+                                    Ver todas <ChevronRight className="w-4 h-4" />
+                                </Link>
+                            </div>
+
+                            <div className="flex gap-5 overflow-x-auto pb-4 snap-x snap-mandatory scrollbar-hide -mx-4 px-4">
+                                {otherProperties.map((p) => (
+                                    <Link
+                                        key={p.id}
+                                        href={`${basePath}/propiedades/${p.id}`}
+                                        className="flex-shrink-0 w-72 snap-start bg-white rounded-[24px] border border-gray-100 shadow-sm hover:shadow-md transition-all overflow-hidden group"
+                                    >
+                                        <div className="relative h-44 bg-gray-100 overflow-hidden">
+                                            {p.imageUrls?.[0] ? (
+                                                <img
+                                                    src={p.imageUrls[0]}
+                                                    alt={p.title}
+                                                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                                                />
+                                            ) : (
+                                                <div className="w-full h-full flex items-center justify-center text-gray-300">
+                                                    <Building2 size={40} />
+                                                </div>
+                                            )}
+                                            <span className="absolute top-3 left-3 px-2.5 py-1 rounded-full text-[10px] font-black uppercase tracking-widest text-white" style={{ backgroundColor: primary }}>
+                                                {p.operation_type}
+                                            </span>
+                                        </div>
+                                        <div className="p-5">
+                                            <p className="font-black text-gray-900 text-sm leading-tight mb-1 line-clamp-2">{p.title}</p>
+                                            {p.localidad && <p className="text-xs text-gray-400 font-medium mb-3">{p.localidad}</p>}
+                                            <p className="text-base font-black text-gray-900">
+                                                {p.hidePrice || !p.price ? "Consultar" : `${p.currency} ${Number(p.price).toLocaleString("es-AR")}`}
+                                            </p>
+                                        </div>
+                                    </Link>
+                                ))}
+                            </div>
+
+                            <div className="flex justify-center mt-8">
+                                <Link
+                                    href={`${basePath}/propiedades`}
+                                    className="flex items-center gap-2 px-6 py-3 rounded-2xl font-bold text-sm border-2 text-gray-700 hover:bg-gray-100 transition-all active:scale-95"
+                                    style={{ borderColor: primary, color: primary }}
+                                >
+                                    <ChevronLeft className="w-4 h-4" /> Volver a todas las propiedades
+                                </Link>
+                            </div>
+                        </div>
+                    </section>
+                )}
+
                 <SiteFooter site={site} basePath={basePath} />
 
                 {/* ── Mobile Sticky Contact Bar ── */}
@@ -516,6 +644,7 @@ export default function PropiedadDetailPage() {
                     {waUrl ? (
                         <a
                             href={waUrl} target="_blank" rel="noopener noreferrer"
+                            onClick={() => trackContact({ userId: site.userId, origen: "click-whatsapp", propertyId: property?.id, propertyTitle: property?.title })}
                             className="text-white font-black py-3.5 px-6 rounded-xl active:scale-95 transition-transform text-sm shadow-sm shadow-green-900/20 flex items-center gap-2 uppercase tracking-widest"
                             style={{ backgroundColor: "#25D366" }}
                         >

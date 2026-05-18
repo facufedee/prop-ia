@@ -11,22 +11,22 @@ const OWNER_EMAIL = "facundoflores8@gmail.com";
 export default function PermissionGuard({ children }: { children: React.ReactNode }) {
     const router = useRouter();
     const pathname = usePathname();
-    const { user, userRole, loading: authLoading } = useAuth();
+    const { user, authReady, userRole } = useAuth();
     const [authorized, setAuthorized] = useState(false);
     const [checking, setChecking] = useState(true);
 
     useEffect(() => {
-        // Wait for auth state to resolve
-        if (authLoading) return;
+        // Wait only for auth (not Firestore) before making auth decisions
+        if (!authReady) return;
 
-        // Not authenticated → redirect to login
+        // Not authenticated
         if (!user) {
             setAuthorized(false);
             setChecking(false);
             return;
         }
 
-        // Owner email bypass — never blocked, regardless of Firestore role state
+        // Owner email bypass — immediate, no Firestore needed
         if (user.email === OWNER_EMAIL) {
             setAuthorized(true);
             setChecking(false);
@@ -84,10 +84,10 @@ export default function PermissionGuard({ children }: { children: React.ReactNod
         }
 
         setChecking(false);
-    }, [user, userRole, authLoading, pathname, router]);
+    }, [user, authReady, userRole, pathname, router]);
 
-    // While auth is loading
-    if (authLoading) {
+    // Auth not resolved yet — show splash
+    if (!authReady) {
         return (
             <div className="fixed inset-0 bg-white z-50 flex flex-col items-center justify-center gap-4">
                 <div className="w-8 h-8 border-4 border-indigo-600 border-t-transparent rounded-full animate-spin" />
@@ -96,8 +96,7 @@ export default function PermissionGuard({ children }: { children: React.ReactNod
         );
     }
 
-    // Auth loaded but role hasn't resolved yet — only for non-owner users
-    // Show spinner briefly; if it never resolves, the snapshot/network is broken
+    // Role hasn't resolved yet — only for non-owner users
     if (user && !userRole && user.email !== OWNER_EMAIL) {
         return (
             <div className="fixed inset-0 bg-white z-50 flex flex-col items-center justify-center gap-4">

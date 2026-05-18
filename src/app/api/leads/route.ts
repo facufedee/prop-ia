@@ -6,10 +6,17 @@ import { sendNewLeadNotificationEmail } from "@/lib/resendClient";
 export async function POST(req: NextRequest) {
     try {
         const body = await req.json();
-        const { nombre, email, telefono, mensaje, userId, propertyId, propertyTitle, origen = "web" } = body;
+        const { userId, propertyId, propertyTitle, origen = "web" } = body;
+        const nombre = body.nombre?.trim().slice(0, 60) || "";
+        const email = body.email?.trim().slice(0, 100) || "";
+        const telefono = (body.telefono || "").replace(/[^0-9\s\+\-\(\)]/g, "").slice(0, 20);
+        const mensaje = body.mensaje?.trim().slice(0, 500) || "";
 
-        if (!nombre || !userId) {
+        if (!nombre || nombre.length < 2 || !userId) {
             return NextResponse.json({ error: "Faltan campos requeridos" }, { status: 400 });
+        }
+        if (telefono && telefono.replace(/\D/g, "").length < 6) {
+            return NextResponse.json({ error: "Teléfono inválido" }, { status: 400 });
         }
 
         const leadsRef = adminDb.collection("leads");
@@ -93,6 +100,18 @@ export async function POST(req: NextRequest) {
 
             leadId = ref.id;
         }
+
+        // Notificación in-app para la campanita del agente (fire-and-forget)
+        adminDb.collection("notifications").add({
+            title: "Nueva consulta recibida",
+            message: `${nombre} consultó${propertyTitle ? ` por "${propertyTitle}"` : ""}`,
+            type: "info",
+            targetUserId: userId,
+            targetRole: null,
+            readBy: [],
+            createdAt: new Date(),
+            link: "/dashboard/leads",
+        }).catch((err: any) => console.error("[/api/leads] Failed to create notification:", err));
 
         // Email directo al agente (fire-and-forget)
         (async () => {

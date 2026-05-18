@@ -15,29 +15,27 @@ interface RoleProtectionProps {
 
 export function RoleProtection({ children, requiredPermission, requiredRole }: RoleProtectionProps) {
     const router = useRouter();
-    const { user, userRole, loading } = useAuth();
+    const { user, authReady, userRole } = useAuth();
     const [authorized, setAuthorized] = useState(false);
     const [checked, setChecked] = useState(false);
 
     useEffect(() => {
-        // user=null + loading=true → onAuthStateChanged hasn't fired yet, wait
-        if (!user && loading) return;
+        if (!authReady) return; // wait only for auth, not Firestore
 
-        // Auth fired but no user → not logged in
         if (!user) {
             router.push("/login");
             setChecked(true);
             return;
         }
 
-        // Owner bypass — immediate access, no need for role
+        // Owner email — immediate access
         if (user.email === OWNER_EMAIL) {
             setAuthorized(true);
             setChecked(true);
             return;
         }
 
-        // Role not yet loaded → wait
+        // Role not yet loaded — keep waiting
         if (!userRole) return;
 
         let hasAccess = true;
@@ -56,7 +54,7 @@ export function RoleProtection({ children, requiredPermission, requiredRole }: R
 
         setAuthorized(hasAccess);
         setChecked(true);
-    }, [user, userRole, loading, router, requiredPermission, requiredRole]);
+    }, [user, authReady, userRole, router, requiredPermission, requiredRole]);
 
     if (!checked) {
         return (
@@ -74,7 +72,7 @@ export function RoleProtection({ children, requiredPermission, requiredRole }: R
                 </div>
                 <h2 className="text-2xl font-bold text-gray-900 mb-2">Acceso Restringido</h2>
                 <p className="text-gray-500 max-w-md mb-6">
-                    No tienes los permisos necesarios para ver esta página. Si crees que es un error, contacta al administrador.
+                    No tenés los permisos necesarios para ver esta página.
                 </p>
                 <button
                     onClick={() => router.push("/dashboard")}

@@ -2,6 +2,7 @@
 
 import { MessageCircle } from "lucide-react";
 import { Site } from "@/domain/models/Site";
+import { trackContact } from "@/lib/trackContact";
 
 export default function SiteWhatsAppFloat({ site }: { site: Site }) {
     if (!site.whatsapp || !site.whatsappFloat) return null;
@@ -15,6 +16,7 @@ export default function SiteWhatsAppFloat({ site }: { site: Site }) {
             href={href}
             target="_blank"
             rel="noopener noreferrer"
+            onClick={() => trackContact({ userId: site.userId, origen: "click-whatsapp" })}
             aria-label="Contactar por WhatsApp"
             className="fixed bottom-6 right-6 z-50 flex items-center gap-3 group"
         >
