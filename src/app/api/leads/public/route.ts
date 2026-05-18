@@ -61,34 +61,6 @@ export async function POST(request: Request) {
             origen: origen || 'web'
         };
 
-        const host = request.headers.get('host');
-        const forwardedProto = request.headers.get('x-forwarded-proto');
-        const inferredProtocol = forwardedProto || (host?.includes('localhost') ? 'http' : 'https');
-        const baseUrl = process.env.NEXT_PUBLIC_APP_URL || (host ? `${inferredProtocol}://${host}` : 'http://localhost:3000');
-
-        const triggerNotification = async (leadId: string) => {
-            try {
-                await fetch(`${baseUrl}/api/notifications/trigger`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        title: 'Nueva consulta web',
-                        message: `Has recibido una nueva consulta de ${nombre || 'un cliente'} por ${propertyTitle || 'una propiedad'}.`,
-                        type: 'info',
-                        targetUserId: userId,
-                        link: `/dashboard/leads`
-                    })
-                });
-            } catch (err) {
-                console.error("Failed to trigger notification for new lead:", err);
-            }
-        };
-
-        /**
-         * Trigger email to the agent (userId) informing them of the new lead via Resend.
-         * Fetches the agent's email from Firestore and sends a direct Resend email.
-         * If no agent email is found, falls back to Facundo's email.
-         */
         const triggerLeadEmail = async () => {
             try {
                 const agentSnap = await adminDb.collection('users').doc(userId).get();
@@ -97,7 +69,7 @@ export async function POST(request: Request) {
                 const agentEmail =
                     agentData?.email ||
                     agentData?.contactEmail ||
-                    "zetaprop.com.ar@gmail.com";
+                    "facundoflores8@gmail.com";
 
                 await sendNewLeadNotificationEmail({
                     to: agentEmail,
@@ -138,8 +110,7 @@ export async function POST(request: Request) {
                 propertyTitle: propertyTitle || existingData.propertyTitle,
             });
 
-            // Trigger notification & email (fire-and-forget)
-            await triggerNotification(existingLeadSnap.id);
+            // Email directo al agente (fire-and-forget)
             triggerLeadEmail().catch(console.error);
 
             return NextResponse.json({ id: existingLeadSnap.id, success: true, unified: true });
@@ -167,8 +138,7 @@ export async function POST(request: Request) {
 
             const docRef = await leadsRef.add(leadData);
 
-            // Trigger notification & email (fire-and-forget)
-            await triggerNotification(docRef.id);
+            // Email directo al agente (fire-and-forget)
             triggerLeadEmail().catch(console.error);
 
             return NextResponse.json({ id: docRef.id, success: true, unified: false });

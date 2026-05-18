@@ -298,7 +298,7 @@ export default function PropertyCard({ property, onDelete, onUpdate, onDuplicate
                                 className="flex-1 flex items-center justify-center gap-1.5 px-3 py-2 rounded-lg bg-gray-100 text-gray-700 font-bold hover:bg-gray-200 transition-colors text-xs border border-gray-200"
                                 title="Pausar publicación"
                             >
-                                <Power size={14} /> Despublicar
+                                <Power size={14} /> Pausar Propiedad
                             </button>
                         ) : property.status === 'inactive' ? (
                             <button
@@ -306,7 +306,7 @@ export default function PropertyCard({ property, onDelete, onUpdate, onDuplicate
                                 className="flex-1 flex items-center justify-center gap-1.5 px-3 py-2 rounded-lg bg-green-50 text-green-700 font-bold hover:bg-green-100 transition-colors text-xs border border-green-200"
                                 title="Activar publicación"
                             >
-                                <Check size={14} /> Publicar
+                                <Check size={14} /> Publicar Propiedad
                             </button>
                         ) : (
                             <div className="flex-1 text-center py-2 text-xs font-bold text-gray-400 select-none">

@@ -341,7 +341,7 @@ export default function PropertiesTable({ properties, loading, onDelete, onUpdat
                                                         }}
                                                         className="w-full text-left px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 flex items-center gap-2"
                                                     >
-                                                        <EyeOff size={14} className="text-gray-400" /> Despublicar
+                                                        <EyeOff size={14} className="text-gray-400" /> Pausar Propiedad
                                                     </button>
                                                 ) : (
                                                     <button
@@ -351,7 +351,7 @@ export default function PropertiesTable({ properties, loading, onDelete, onUpdat
                                                         }}
                                                         className="w-full text-left px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 flex items-center gap-2"
                                                     >
-                                                        <Eye size={14} className="text-gray-400" /> Publicar
+                                                        <Eye size={14} className="text-gray-400" /> Publicar Propiedad
                                                     </button>
                                                 )}
 

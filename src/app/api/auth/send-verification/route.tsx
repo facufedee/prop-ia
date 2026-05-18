@@ -39,7 +39,7 @@ export async function POST(req: Request) {
 
         // 5. Send email via Postmark
         await postmarkClient.sendEmail({
-            "From": "facundo@zetaprop.com.ar",
+            "From": "notificaciones@zetaprop.com.ar",
             "To": email,
             "Subject": "Verifica tu cuenta en ZetaProp",
             "HtmlBody": emailHtml,

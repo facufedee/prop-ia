@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { adminDb } from "@/infrastructure/firebase/admin";
 import { FieldValue } from "firebase-admin/firestore";
+import { sendNewLeadNotificationEmail } from "@/lib/resendClient";
 
 export async function POST(req: NextRequest) {
     try {
@@ -93,22 +94,24 @@ export async function POST(req: NextRequest) {
             leadId = ref.id;
         }
 
-        // Fire-and-forget email notification
-        const siteOrigin = req.headers.get("origin") || req.headers.get("referer") || "";
-        const baseUrl = siteOrigin.startsWith("http")
-            ? new URL(siteOrigin).origin
-            : process.env.NEXT_PUBLIC_APP_URL || "https://zetaprop.com.ar";
+        // Email directo al agente (fire-and-forget)
+        (async () => {
+            try {
+                const agentSnap = await adminDb.collection("users").doc(userId).get();
+                const agentData = agentSnap.exists ? agentSnap.data() : null;
+                const agentEmail = agentData?.email || agentData?.contactEmail || "facundoflores8@gmail.com";
 
-        fetch(`${baseUrl}/api/notifications/trigger`, {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-                event: "newLead",
-                data: { nombre, email, telefono, mensaje, propertyTitle, userId, id: leadId },
-                subject: `Nueva consulta de ${nombre}${propertyTitle ? ` — ${propertyTitle}` : ""}`,
-                message: `Recibiste una nueva consulta de <strong>${nombre}</strong>${propertyTitle ? ` para <strong>${propertyTitle}</strong>` : ""}.`,
-            }),
-        }).catch(() => {});
+                await sendNewLeadNotificationEmail({
+                    to: agentEmail,
+                    leadName: nombre || "Un interesado",
+                    leadEmail: email || undefined,
+                    message: mensaje || undefined,
+                    propertyTitle: propertyTitle || undefined,
+                });
+            } catch (err) {
+                console.error("[/api/leads] Failed to send lead email:", err);
+            }
+        })();
 
         return NextResponse.json({ success: true, leadId });
     } catch (err: any) {

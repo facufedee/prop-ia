@@ -1,5 +1,5 @@
 import { initializeApp, getApps, getApp } from "firebase/app";
-import { getPerformance } from "firebase/performance";
+import { initializePerformance } from "firebase/performance";
 import { getAuth, connectAuthEmulator } from "firebase/auth";
 import { getFirestore, initializeFirestore, connectFirestoreEmulator, memoryLocalCache } from "firebase/firestore";
 import { getStorage } from "firebase/storage";
@@ -52,14 +52,12 @@ if (process.env.NODE_ENV === 'development' && typeof window !== 'undefined' && p
 const storage = getStorage(app);
 const auth = typeof window !== "undefined" ? getAuth(app) : undefined;
 
-// Initialize Performance Monitoring
-// instrumentationEnabled = false: prevents auto-tracing DOM elements,
-// which causes "invalid attribute value" errors with Tailwind fractional
-// classes like py-1.5, px-2.5, etc. (they contain dots → invalid CSS selectors).
+// instrumentationEnabled: false from the start prevents Firebase Performance from
+// auto-tracing DOM elements — Geist/Tailwind class names with dots (e.g. py-1.5)
+// are invalid CSS selectors and trigger "invalid attribute value" errors.
 let perf: any = null;
 if (typeof window !== "undefined") {
-  perf = getPerformance(app);
-  perf.instrumentationEnabled = false;
+  perf = initializePerformance(app, { instrumentationEnabled: false });
 }
 
 export { app, auth, db, storage, perf };
