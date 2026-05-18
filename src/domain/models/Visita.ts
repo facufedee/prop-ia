@@ -26,7 +26,8 @@ export interface Visita {
     proximosPasos?: string;
     checkInHora?: Date;
     checkOutHora?: Date;
-    recordatorioEnviado: boolean;
+    recordatorioEnviado: boolean;           // recordatorio 24h antes
+    recordatorioMismoDiaEnviado?: boolean;  // recordatorio mismo día
     userId: string;
     createdAt: Date;
     updatedAt: Date;

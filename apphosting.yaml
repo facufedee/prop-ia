@@ -75,3 +75,7 @@ env:
     value: f6a3972ae232f5d02d41cc2055efbb7289a73cc9a32442570b84eba5b68ae20f
     availability:
       - RUNTIME
+  - variable: CRON_SECRET
+    value: f637a6c0f35252fff3529a1b88641479e4d82a37045b56a25534d1ec70db717e
+    availability:
+      - RUNTIME

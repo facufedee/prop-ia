@@ -135,6 +135,7 @@ export default function NuevaVisitaPage() {
                 estado: 'programada',
                 notasPrevias: formData.notasPrevias,
                 recordatorioEnviado: false,
+                recordatorioMismoDiaEnviado: false,
                 userId: auth.currentUser.uid,
             });
 

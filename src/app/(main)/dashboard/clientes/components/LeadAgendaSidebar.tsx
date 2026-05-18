@@ -128,6 +128,7 @@ export default function LeadAgendaSidebar({ lead, onVisitCreated }: LeadAgendaSi
                 estado: 'programada',
                 notasPrevias: `Agendado desde el perfil del lead ${lead.nombre}`,
                 recordatorioEnviado: false,
+                recordatorioMismoDiaEnviado: false,
                 userId: auth.currentUser.uid,
             } as any);
 
