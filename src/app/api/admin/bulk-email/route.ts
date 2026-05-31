@@ -24,7 +24,7 @@ export async function POST(req: NextRequest) {
         }
 
         // Fetch emails for selected user IDs
-        const emailsToSend: { uid: string; email: string }[] = [];
+        const emailsToSend: { uid: string; email: string; displayName: string }[] = [];
         const chunks: string[][] = [];
         for (let i = 0; i < userIds.length; i += 10) {
             chunks.push(userIds.slice(i, i + 10));
@@ -40,7 +40,7 @@ export async function POST(req: NextRequest) {
                     const email = data.email;
                     const unsubscribed = data.unsubscribedMarketing === true;
                     if (email && !unsubscribed) {
-                        emailsToSend.push({ uid: snap.id, email });
+                        emailsToSend.push({ uid: snap.id, email, displayName: data.displayName || data.name || "" });
                     }
                 }
             });
@@ -50,9 +50,12 @@ export async function POST(req: NextRequest) {
         let sent = 0;
         let failed = 0;
 
-        for (const { uid, email } of emailsToSend) {
+        for (const { uid, email, displayName } of emailsToSend) {
             try {
-                await sendEmailWithResend({ to: email, subject, html });
+                const personalizedHtml = html
+                    .replace(/\{\{nombre\}\}/g, displayName || "Usuario")
+                    .replace(/\{\{email\}\}/g, email);
+                await sendEmailWithResend({ to: email, subject, html: personalizedHtml });
                 await adminDb.collection("emailLogs").add({
                     type: "bulk_campaign",
                     to: email,

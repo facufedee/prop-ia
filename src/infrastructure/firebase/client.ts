@@ -58,12 +58,15 @@ if (process.env.NODE_ENV === 'development' && typeof window !== 'undefined' && p
 const storage = getStorage(app);
 const auth = typeof window !== "undefined" ? getAuth(app) : undefined;
 
-// instrumentationEnabled: false from the start prevents Firebase Performance from
-// auto-tracing DOM elements — Geist/Tailwind class names with dots (e.g. py-1.5)
-// are invalid CSS selectors and trigger "invalid attribute value" errors.
+// Both flags must be false to stop Firebase Performance from auto-tracing DOM
+// elements — Tailwind class names with dots/brackets (e.g. py-1.5, text-[2.75rem])
+// are invalid attribute values and throw uncaught FirebaseErrors at runtime.
 let perf: any = null;
 if (typeof window !== "undefined") {
-  perf = initializePerformance(app, { instrumentationEnabled: false });
+  perf = initializePerformance(app, {
+    instrumentationEnabled: false,
+    dataCollectionEnabled: false,
+  });
 }
 
 export { app, auth, db, storage, perf };

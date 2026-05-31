@@ -11,11 +11,12 @@ import {
     CheckCircle, Clock, Eye, AlertCircle, ChevronUp, ChevronDown,
     ChevronsUpDown, MailX, Home, Key, BarChart3, Users, TrendingUp,
     DollarSign, Activity, Send, Megaphone, Plus, X, CheckCircle2,
-    Loader2, RefreshCw, Bell, Info, AlertTriangle, XCircle,
+    Loader2, RefreshCw, Bell, Info, AlertTriangle, XCircle, FileText,
 } from "lucide-react";
 import { toast } from "sonner";
 import { PlanTier } from "@/domain/models/Subscription";
 import { useRouter } from "next/navigation";
+import { useAuth } from "@/ui/context/AuthContext";
 import {
     BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer,
     PieChart, Pie, Cell, Legend,
@@ -101,6 +102,7 @@ function KpiCard({ label, value, sub, icon: Icon, color }: {
 
 export default function PlatformManagementPage() {
     const router = useRouter();
+    const { user } = useAuth();
     const [activeTab, setActiveTab] = useState<Tab>("dashboard");
 
     // ── Shared user list ────────────────────────────────────────────────────
@@ -125,6 +127,10 @@ export default function PlatformManagementPage() {
     const [emailSegment, setEmailSegment] = useState<"all" | "active" | "expired" | "trial" | "basic" | "professional" | "enterprise">("all");
     const [sending, setSending] = useState(false);
     const [emailSearch, setEmailSearch] = useState("");
+    const [emailPreviewMode, setEmailPreviewMode] = useState(false);
+    const [availableTemplates, setAvailableTemplates] = useState<{ id?: string; name: string; type: string; subject: string; html: string }[]>([]);
+    const [templatesLoading, setTemplatesLoading] = useState(false);
+    const [showTemplateDropdown, setShowTemplateDropdown] = useState(false);
 
     // ── Anuncios tab ────────────────────────────────────────────────────────
     const [announcements, setAnnouncements] = useState<Announcement[]>([]);
@@ -155,6 +161,21 @@ export default function PlatformManagementPage() {
         } catch { toast.error("Error al cargar el dashboard"); }
         finally { setDashLoading(false); }
     }, []);
+
+    const loadAvailableTemplates = useCallback(async () => {
+        setTemplatesLoading(true);
+        try {
+            const token = await user?.getIdToken();
+            const res = await fetch("/api/marketing/templates", {
+                headers: { Authorization: `Bearer ${token}` },
+            });
+            if (res.ok) {
+                const data = await res.json();
+                setAvailableTemplates(data.templates || []);
+            }
+        } catch {}
+        finally { setTemplatesLoading(false); }
+    }, [user]);
 
     const loadAnnouncements = useCallback(async () => {
         setAnnLoading(true);
@@ -298,7 +319,7 @@ export default function PlatformManagementPage() {
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({
                     subject: emailSubject,
-                    html: emailBody.replace(/\n/g, "<br>"),
+                    html: emailBody,
                     userIds: Array.from(selectedUserIds),
                     campaignName: campaignName || "Campaña manual",
                 }),
@@ -375,7 +396,7 @@ export default function PlatformManagementPage() {
                 {/* ── Tabs ── */}
                 <div className="flex bg-gray-100 dark:bg-gray-800 rounded-xl p-1 gap-1 w-fit">
                     {TABS.map(({ id, label, icon: Icon }) => (
-                        <button key={id} onClick={() => setActiveTab(id)}
+                        <button key={id} onClick={() => { setActiveTab(id); if (id === "emails" && availableTemplates.length === 0) loadAvailableTemplates(); }}
                             className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-semibold transition-all ${
                                 activeTab === id
                                     ? "bg-white dark:bg-gray-700 text-gray-900 dark:text-white shadow-sm"
@@ -696,11 +717,50 @@ export default function PlatformManagementPage() {
                         {/* Right: composer */}
                         <div className="lg:col-span-3 space-y-4">
                             <div className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-200 dark:border-gray-700 p-5 space-y-4">
-                                <p className="text-sm font-semibold text-gray-700 dark:text-gray-300">Redactar campaña</p>
+
+                                {/* Header + template loader */}
+                                <div className="flex items-center justify-between">
+                                    <p className="text-sm font-semibold text-gray-700 dark:text-gray-300">Redactar campaña</p>
+                                    <div className="relative">
+                                        <button
+                                            onClick={() => { setShowTemplateDropdown(p => !p); if (!availableTemplates.length) loadAvailableTemplates(); }}
+                                            className="flex items-center gap-1.5 px-3 py-1.5 text-xs text-gray-600 dark:text-gray-400 border border-gray-200 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
+                                        >
+                                            <FileText className="w-3.5 h-3.5" />
+                                            Cargar template
+                                            <ChevronDown className="w-3 h-3" />
+                                        </button>
+                                        {showTemplateDropdown && (
+                                            <>
+                                                <div className="fixed inset-0 z-[9]" onClick={() => setShowTemplateDropdown(false)} />
+                                                <div className="absolute right-0 top-full mt-1 w-72 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl shadow-xl z-10 overflow-hidden">
+                                                    {templatesLoading ? (
+                                                        <div className="p-4 text-center"><Loader2 className="w-4 h-4 animate-spin mx-auto text-indigo-400" /></div>
+                                                    ) : availableTemplates.length === 0 ? (
+                                                        <p className="p-4 text-xs text-gray-400 dark:text-gray-500 text-center">No hay templates guardados en Marketing</p>
+                                                    ) : (
+                                                        availableTemplates.map(t => (
+                                                            <button key={t.id || t.type} onClick={() => {
+                                                                setEmailSubject(t.subject);
+                                                                setEmailBody(t.html);
+                                                                setEmailPreviewMode(false);
+                                                                setShowTemplateDropdown(false);
+                                                                toast.success(`Template "${t.name}" cargado`);
+                                                            }} className="w-full text-left px-4 py-3 text-xs hover:bg-gray-50 dark:hover:bg-gray-700 border-b border-gray-100 dark:border-gray-700 last:border-0 transition-colors">
+                                                                <p className="font-semibold text-gray-800 dark:text-gray-200">{t.name}</p>
+                                                                <p className="text-gray-400 dark:text-gray-500 truncate mt-0.5">{t.subject}</p>
+                                                            </button>
+                                                        ))
+                                                    )}
+                                                </div>
+                                            </>
+                                        )}
+                                    </div>
+                                </div>
 
                                 <div>
                                     <label className="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1.5">Nombre de la campaña</label>
-                                    <input type="text" value={campaignName} onChange={e => setCampaignName(e.target.value)} placeholder="Ej: Newsletter marzo 2026"
+                                    <input type="text" value={campaignName} onChange={e => setCampaignName(e.target.value)} placeholder="Ej: Newsletter mayo 2026"
                                         className="w-full px-3 py-2.5 text-sm border border-gray-200 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-800 text-gray-900 dark:text-white outline-none focus:ring-2 focus:ring-indigo-500" />
                                 </div>
 
@@ -710,11 +770,53 @@ export default function PlatformManagementPage() {
                                         className="w-full px-3 py-2.5 text-sm border border-gray-200 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-800 text-gray-900 dark:text-white outline-none focus:ring-2 focus:ring-indigo-500" />
                                 </div>
 
+                                {/* Variable hints */}
+                                <div className="flex items-center gap-2 flex-wrap">
+                                    <span className="text-[10px] text-gray-400 dark:text-gray-500 font-medium">Variables:</span>
+                                    {([["{{nombre}}", "Nombre del usuario"], ["{{email}}", "Email del usuario"]] as [string, string][]).map(([v, hint]) => (
+                                        <button key={v} title={hint} onClick={() => setEmailBody(p => p + v)}
+                                            className="font-mono text-[10px] px-2 py-0.5 bg-indigo-50 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-400 border border-indigo-200 dark:border-indigo-700 rounded hover:bg-indigo-100 dark:hover:bg-indigo-900/50 transition-colors">
+                                            {v}
+                                        </button>
+                                    ))}
+                                    <span className="text-[10px] text-gray-400 dark:text-gray-500">Se reemplazan por usuario al enviar</span>
+                                </div>
+
+                                {/* Editor: code / preview toggle */}
                                 <div>
-                                    <label className="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1.5">Cuerpo del mensaje *</label>
-                                    <textarea value={emailBody} onChange={e => setEmailBody(e.target.value)} rows={10} placeholder={"Hola {nombre},\n\nEscribí tu mensaje acá...\n\nSaludos,\nEl equipo de Zeta Prop"}
-                                        className="w-full px-3 py-2.5 text-sm border border-gray-200 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-800 text-gray-900 dark:text-white outline-none focus:ring-2 focus:ring-indigo-500 resize-none font-mono" />
-                                    <p className="text-[10px] text-gray-400 dark:text-gray-500 mt-1">Los saltos de línea se convierten a &lt;br&gt; automáticamente.</p>
+                                    <div className="flex items-center justify-between mb-1.5">
+                                        <label className="block text-xs font-medium text-gray-600 dark:text-gray-400">
+                                            {emailPreviewMode ? "Vista previa" : "HTML del email *"}
+                                        </label>
+                                        <button onClick={() => setEmailPreviewMode(p => !p)}
+                                            className="flex items-center gap-1.5 px-2.5 py-1 text-xs text-gray-600 dark:text-gray-400 border border-gray-200 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors">
+                                            <Eye className="w-3 h-3" />
+                                            {emailPreviewMode ? "Ver código" : "Vista previa"}
+                                        </button>
+                                    </div>
+
+                                    {emailPreviewMode ? (
+                                        <div className="border border-gray-200 dark:border-gray-700 rounded-xl overflow-hidden bg-white" style={{ minHeight: "380px" }}>
+                                            {emailBody ? (
+                                                <iframe srcDoc={emailBody} className="w-full h-[380px] border-0" title="Preview del email" />
+                                            ) : (
+                                                <div className="flex items-center justify-center h-[380px] text-gray-400 dark:text-gray-600 text-sm">
+                                                    Escribí HTML para ver la vista previa
+                                                </div>
+                                            )}
+                                        </div>
+                                    ) : (
+                                        <textarea
+                                            value={emailBody}
+                                            onChange={e => setEmailBody(e.target.value)}
+                                            rows={14}
+                                            placeholder={"<html>\n  <body style=\"font-family: sans-serif;\">\n    <p>Hola {{nombre}},</p>\n    <p>Tu mensaje acá...</p>\n  </body>\n</html>"}
+                                            className="w-full px-3 py-2.5 text-sm border border-gray-200 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-800 text-gray-900 dark:text-white outline-none focus:ring-2 focus:ring-indigo-500 resize-none font-mono"
+                                        />
+                                    )}
+                                    <p className="text-[10px] text-gray-400 dark:text-gray-500 mt-1">
+                                        Escribí HTML directamente o cargá un template guardado desde Marketing.
+                                    </p>
                                 </div>
 
                                 <div className="flex items-center justify-between pt-2 border-t border-gray-100 dark:border-gray-800">
