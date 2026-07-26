@@ -3,7 +3,7 @@ import Hero from "@/ui/sections/Hero";
 
 export const metadata: Metadata = {
     title: "Zeta Prop | El CRM Inmobiliario que se Adapta a tu Inmobiliaria",
-    description: "Zeta Prop es el CRM inmobiliario integral de Argentina: gestioná propiedades, alquileres, clientes, emprendimientos y cobranzas desde un solo lugar. Probalo gratis 14 días.",
+    description: "Zeta Prop es el CRM inmobiliario integral de Argentina: gestioná propiedades, alquileres, clientes, emprendimientos y cobranzas desde un solo lugar. Probalo gratis 7 días.",
     keywords: [
         "CRM inmobiliario argentina",
         "software inmobiliario",
@@ -38,13 +38,13 @@ export const metadata: Metadata = {
     twitter: {
         card: "summary_large_image",
         title: "Zeta Prop | CRM Inmobiliario para Argentina",
-        description: "Gestioná propiedades, alquileres y clientes desde un solo sistema. Probalo gratis 14 días.",
+        description: "Gestioná propiedades, alquileres y clientes desde un solo sistema. Probalo gratis 7 días.",
         images: ["/assets/img/og-landing.png"],
     },
 };
 
 import Features from "@/ui/sections/Features";
-import Testimonials from "@/ui/sections/Testimonials";
+import { Pricing } from "@/ui/sections/Pricing";
 import HumanPromise from "@/ui/sections/HumanPromise";
 import PropertyNetworkCTA from "@/ui/sections/PropertyNetworkCTA";
 import ContactForm from "@/ui/sections/ContactForm";
@@ -73,7 +73,7 @@ export default function LandingPage() {
                             "@type": "Offer",
                             "price": "0",
                             "priceCurrency": "ARS",
-                            "description": "14 días de prueba gratis, sin tarjeta de crédito",
+                            "description": "7 días de prueba gratis, sin tarjeta de crédito",
                             "availability": "https://schema.org/InStock"
                         },
                         "description": "CRM Inmobiliario integral para gestión de propiedades, alquileres, clientes y emprendimientos en Argentina.",
@@ -114,7 +114,7 @@ export default function LandingPage() {
                                 "name": "¿Cuánto cuesta Zeta Prop?",
                                 "acceptedAnswer": {
                                     "@type": "Answer",
-                                    "text": "Zeta Prop ofrece 14 días de prueba gratis sin necesidad de tarjeta de crédito. Luego podés elegir el plan que mejor se adapte a tu inmobiliaria. Consultá nuestros planes en zetaprop.com.ar/precios."
+                                    "text": "Zeta Prop ofrece 7 días de prueba gratis sin necesidad de tarjeta de crédito. Luego podés elegir el plan que mejor se adapte a tu inmobiliaria. Consultá nuestros planes en zetaprop.com.ar/precios."
                                 }
                             },
                             {
@@ -148,6 +148,7 @@ export default function LandingPage() {
 
             <Hero />
             <Features />
+            <Pricing />
             <HumanPromise />
             <PropertyNetworkCTA />
             <LatestBlogPosts />

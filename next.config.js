@@ -2,6 +2,11 @@
 // Trigger redeploy
 const nextConfig = {
     // swcMinify: true, // Deprecated in Next.js 15+ (enabled by default)
+    experimental: {
+        // Needed behind corporate TLS-inspecting proxies (Zscaler/Netskope/etc.),
+        // otherwise Turbopack's own HTTP client fails to fetch next/font/google files.
+        turbopackUseSystemTlsCerts: true,
+    },
     images: {
         formats: ['image/avif', 'image/webp'],
         remotePatterns: [

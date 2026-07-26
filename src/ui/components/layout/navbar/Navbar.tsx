@@ -51,37 +51,29 @@ export default function Navbar() {
 
   // On /propiedades (landing), always show white background so dark text/logo are readable over the hero
   const isHeroPage = pathname === "/propiedades";
-  // Dark hero = home page NOT yet scrolled
-  const darkHeroPaths = ["/", "/servicios", "/nosotros", "/precios", "/blog", "/faqs", "/contacto"];
+  // Dark hero = still on a page whose hero hasn't scrolled past yet.
+  // "/" now ships a light hero (see Hero.tsx), so it's intentionally excluded here.
+  const darkHeroPaths = ["/servicios", "/nosotros", "/precios", "/blog", "/faqs", "/contacto"];
   const isDarkHero = darkHeroPaths.includes(pathname) && !scrolled;
 
+  const navBg = scrolled || isHeroPage
+    ? "bg-white/90 backdrop-blur-md shadow-sm border-b border-gray-100/50 py-3"
+    : isDarkHero
+      ? "bg-[#0b0b14] border-b border-white/10 py-4 md:bg-transparent md:border-transparent md:py-6"
+      : "bg-white/95 backdrop-blur-md border-b border-gray-100 py-4 md:bg-white/0 md:backdrop-blur-none md:border-transparent md:py-6";
+
   return (
-    <nav
-      className={`
-        fixed top-0 left-0 w-full z-50 transition-all duration-300
-        md:${scrolled || isHeroPage
-          ? "bg-white/90 backdrop-blur-md shadow-sm border-b border-gray-100/50 py-3"
-          : isDarkHero
-            ? "bg-transparent border-b border-transparent py-5"
-            : "bg-transparent border-b border-transparent py-5"}
-        ${scrolled || isHeroPage
-          ? "bg-white/90 backdrop-blur-md shadow-sm border-b border-gray-100/50 py-3 md:bg-white/90"
-          : isDarkHero
-            ? "bg-[#080810] border-b border-white/10 py-3 md:bg-transparent md:border-transparent md:py-5"
-            : "bg-[#080810] border-b border-white/10 py-3 md:bg-transparent md:border-transparent md:py-5"}
-      `}
-    >
+    <nav className={`fixed top-0 left-0 w-full z-50 transition-all duration-300 ${navBg}`}>
       <div className="flex items-center justify-between max-w-[1400px] mx-auto px-4 sm:px-8">
 
         {/* Logo */}
-        <Link href="/" className="flex items-center gap-2 hover:opacity-80 transition-opacity">
-          <div className={`relative h-10 w-32 lg:h-12 lg:w-48 xl:h-16 xl:w-64 transition-transform duration-300 ${scrolled ? 'scale-95' : 'scale-100'}`}>
-            {/* On mobile: always dark bg → always use white/dark logo. On desktop: respect scroll/page state */}
+        <Link href="/" className="flex items-center gap-2 transition-opacity duration-200 hover:opacity-70">
+          <div className={`relative h-8 w-28 lg:h-9 lg:w-32 xl:h-10 xl:w-36 transition-[transform] duration-300 ease-out ${scrolled ? 'scale-90' : 'scale-100'}`}>
             <Image
               src="/assets/img/logo_zeta_prop_transparent.png"
               alt="Zeta Prop Logo"
               fill
-              sizes="(max-width: 768px) 160px, 256px"
+              sizes="(max-width: 768px) 112px, 144px"
               className="object-contain object-left"
               priority
             />
@@ -243,7 +235,7 @@ export default function Navbar() {
 
         {/* Mobile Toggle */}
         <button
-          className={`md:hidden p-2 ${isDarkHero ? 'text-white' : scrolled || isHeroPage ? 'text-gray-700' : 'text-white'}`}
+          className={`md:hidden p-2 ${isDarkHero ? 'text-white' : 'text-gray-700'}`}
           onClick={() => setOpen(!open)}
           aria-label={open ? "Cerrar menú principal" : "Abrir menú principal"}
         >

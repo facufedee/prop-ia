@@ -56,17 +56,34 @@ if (process.env.NODE_ENV === 'development' && typeof window !== 'undefined' && p
 // console.log('✅ Firebase initialized successfully');
 
 const storage = getStorage(app);
-const auth = typeof window !== "undefined" ? getAuth(app) : undefined;
+
+// getAuth() validates the config eagerly and throws synchronously (e.g.
+// auth/invalid-api-key) when NEXT_PUBLIC_FIREBASE_* env vars are missing.
+// That throw happens at module-evaluation time, outside React's render
+// cycle, so no error boundary can catch it — it white-screens the whole
+// app. Degrade to `auth = undefined` instead; callers already handle that.
+let auth: ReturnType<typeof getAuth> | undefined;
+if (typeof window !== "undefined") {
+  try {
+    auth = getAuth(app);
+  } catch (error) {
+    console.error("🔥 [FIREBASE] Failed to initialize Auth — check NEXT_PUBLIC_FIREBASE_* env vars:", error);
+  }
+}
 
 // Both flags must be false to stop Firebase Performance from auto-tracing DOM
 // elements — Tailwind class names with dots/brackets (e.g. py-1.5, text-[2.75rem])
 // are invalid attribute values and throw uncaught FirebaseErrors at runtime.
 let perf: any = null;
 if (typeof window !== "undefined") {
-  perf = initializePerformance(app, {
-    instrumentationEnabled: false,
-    dataCollectionEnabled: false,
-  });
+  try {
+    perf = initializePerformance(app, {
+      instrumentationEnabled: false,
+      dataCollectionEnabled: false,
+    });
+  } catch (error) {
+    console.error("🔥 [FIREBASE] Failed to initialize Performance:", error);
+  }
 }
 
 export { app, auth, db, storage, perf };
