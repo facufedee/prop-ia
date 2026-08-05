@@ -60,12 +60,16 @@ export const roleService = {
     getAvailablePermissions: async (): Promise<Permission[]> => {
         if (!db) return DEFAULT_PERMISSIONS;
         const querySnapshot = await getDocs(collection(db, PERMISSIONS_COLLECTION));
-        if (querySnapshot.empty) {
-            // Auto-initialize permissions if empty
-            await Promise.all(DEFAULT_PERMISSIONS.map(p => setDoc(doc(db, PERMISSIONS_COLLECTION, p.id.replace(/\//g, "_")), p)));
-            return DEFAULT_PERMISSIONS;
+        const existingIds = new Set(querySnapshot.docs.map(d => (d.data() as Permission).id));
+        const missing = DEFAULT_PERMISSIONS.filter(p => !existingIds.has(p.id));
+
+        if (missing.length > 0) {
+            // Backfill permissions added to DEFAULT_PERMISSIONS after this collection was seeded
+            await Promise.all(missing.map(p => setDoc(doc(db, PERMISSIONS_COLLECTION, p.id.replace(/\//g, "_")), p)));
         }
-        return querySnapshot.docs.map(doc => doc.data() as Permission);
+
+        if (querySnapshot.empty) return DEFAULT_PERMISSIONS;
+        return [...querySnapshot.docs.map(doc => doc.data() as Permission), ...missing];
     },
 
     // Get all roles
@@ -350,6 +354,7 @@ export const roleService = {
     syncDefaultRoles: async (): Promise<{ updated: string[] }> => {
         const DEFAULT_PERM_MAP: Record<string, string[]> = {
             "Super Admin": DEFAULT_PERMISSIONS.map(p => p.id),
+            "Administrador": DEFAULT_PERMISSIONS.map(p => p.id),
             "Cliente Enterprise": [
                 "/dashboard", "/dashboard/propiedades", "/dashboard/tasacion",
                 "/dashboard/alquileres", "/dashboard/agenda-cobros", "/dashboard/liquidaciones",

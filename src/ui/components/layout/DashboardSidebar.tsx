@@ -191,8 +191,17 @@ export default function DashboardSidebar({ isOpen = false, onClose }: DashboardS
     };
 
     fetchBadges();
-    const interval = setInterval(fetchBadges, 60000);
-    return () => clearInterval(interval);
+    // Skip polling while the tab is in the background — refresh immediately
+    // when it becomes visible again instead of wasting reads while unattended.
+    const interval = setInterval(() => {
+      if (!document.hidden) fetchBadges();
+    }, 60000);
+    const handleVisibility = () => { if (!document.hidden) fetchBadges(); };
+    document.addEventListener("visibilitychange", handleVisibility);
+    return () => {
+      clearInterval(interval);
+      document.removeEventListener("visibilitychange", handleVisibility);
+    };
   }, [user?.uid, userRole]);
 
 
@@ -221,6 +230,10 @@ export default function DashboardSidebar({ isOpen = false, onClose }: DashboardS
   const hasPermission = (item: MenuItem) => {
     // Always allow Tutorials
     if (item.href === "/dashboard/tutoriales") return true;
+
+    // Full access roles bypass the permissions array, consistent with
+    // PermissionGuard/AdminGuard/RoleProtection
+    if (userRole?.name === "Super Admin" || userRole?.name === "Administrador") return true;
 
     // First check if user has permission for this specific route
     const requiredPermission = item.permission || item.href;

@@ -40,9 +40,15 @@ export async function verifyAuth(
     }
 }
 
+// Owner email always has full access, consistent with the client-side guards
+// (PermissionGuard, AdminGuard, RoleProtection)
+const OWNER_EMAIL = "facundoflores8@gmail.com";
+
 /**
  * Verifies that the authenticated user has admin role.
- * Checks Firestore users/{uid}.roleId == 'admin'
+ * Resolves users/{uid}.roleId -> roles/{roleId}.name and checks it's
+ * "Super Admin" or "Administrador" — roleId is a Firestore-generated
+ * document id (see roleService.createRole), never the literal string "admin".
  */
 export async function verifyAdmin(
     request: NextRequest
@@ -50,10 +56,18 @@ export async function verifyAdmin(
     const authResult = await verifyAuth(request);
     if (authResult.error) return authResult;
 
+    if (authResult.user.email === OWNER_EMAIL) {
+        return authResult;
+    }
+
     const { adminDb } = await import("@/infrastructure/firebase/admin");
     const userSnap = await adminDb.collection("users").doc(authResult.user.uid).get();
+    const roleId = userSnap.exists ? userSnap.data()?.roleId : null;
 
-    if (!userSnap.exists || userSnap.data()?.roleId !== "admin") {
+    const roleSnap = roleId ? await adminDb.collection("roles").doc(roleId).get() : null;
+    const roleName = roleSnap?.exists ? roleSnap.data()?.name : null;
+
+    if (roleName !== "Super Admin" && roleName !== "Administrador") {
         return {
             user: null,
             error: NextResponse.json({ error: "Forbidden" }, { status: 403 }),

@@ -3,9 +3,11 @@
 import { useState, useEffect, useCallback } from "react";
 import {
     Mail, Send, FileText, BarChart2, RefreshCw, Save, Eye,
-    CheckCircle, XCircle, Clock, Sparkles, Trash2, Plus
+    CheckCircle, XCircle, Clock, Sparkles, Trash2, Plus, Wand2
 } from "lucide-react";
 import { useAuth } from "@/ui/context/AuthContext";
+import { toast } from "sonner";
+import { PREMIUM_TEMPLATES } from "./premiumTemplates";
 
 // ======= Types =======
 type EmailTemplateType = string;
@@ -141,6 +143,7 @@ export default function MarketingPage() {
     const [previewMode, setPreviewMode] = useState(false);
     const [testEmail, setTestEmail] = useState('');
     const [saveSuccess, setSaveSuccess] = useState(false);
+    const [seedingTemplates, setSeedingTemplates] = useState(false);
 
     const fetchData = useCallback(async () => {
         setLoading(true);
@@ -230,8 +233,45 @@ export default function MarketingPage() {
             setTimeout(() => setSaveSuccess(false), 3000);
         } catch (err) {
             console.error('Error saving template:', err);
+            toast.error('No se pudo guardar el template. Probá de nuevo.');
         } finally {
             setSaving(false);
+        }
+    };
+
+    const handleSeedPremiumTemplates = async () => {
+        setSeedingTemplates(true);
+        try {
+            const token = await user?.getIdToken();
+            const existingTypes = new Set(templates.map(t => t.type));
+            const toSeed = PREMIUM_TEMPLATES.filter(t => !existingTypes.has(t.type));
+
+            if (toSeed.length === 0) {
+                toast.info('Ya tenés todos los templates premium cargados.');
+                return;
+            }
+
+            let failed = 0;
+            for (const t of toSeed) {
+                const res = await fetch('/api/marketing/templates', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+                    body: JSON.stringify({ type: t.type, name: t.name, subject: t.subject, html: t.html, updatedBy: user?.email || 'admin' }),
+                });
+                if (!res.ok) failed++;
+            }
+
+            await fetchData();
+            if (failed === 0) {
+                toast.success(`${toSeed.length} templates premium cargados correctamente.`);
+            } else {
+                toast.error(`${toSeed.length - failed} cargados, ${failed} fallaron.`);
+            }
+        } catch (err) {
+            console.error('Error seeding premium templates:', err);
+            toast.error('No se pudieron cargar los templates premium.');
+        } finally {
+            setSeedingTemplates(false);
         }
     };
 
@@ -265,9 +305,10 @@ export default function MarketingPage() {
 
         setTestSending(true);
         try {
-            await fetch('/api/marketing/send', {
+            const token = await user?.getIdToken();
+            const res = await fetch('/api/marketing/send', {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
+                headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
                 body: JSON.stringify({
                     type: typeToTest,
                     to: testEmail,
@@ -285,9 +326,13 @@ export default function MarketingPage() {
                     },
                 }),
             });
-            alert(`✅ Email de prueba enviado a ${testEmail}`);
-        } catch (err) {
-            alert('❌ Error enviando email de prueba');
+            if (!res.ok) {
+                const data = await res.json().catch(() => ({}));
+                throw new Error(data.error || `Error ${res.status}`);
+            }
+            toast.success(`Email de prueba enviado a ${testEmail}`);
+        } catch (err: any) {
+            toast.error(`Error enviando email de prueba: ${err.message || ''}`);
         } finally {
             setTestSending(false);
         }
@@ -437,6 +482,15 @@ export default function MarketingPage() {
                         >
                             <Plus size={18} />
                             Crear nuevo template
+                        </button>
+
+                        <button
+                            onClick={handleSeedPremiumTemplates}
+                            disabled={seedingTemplates}
+                            className="w-full text-center p-3 rounded-xl border border-indigo-200 bg-indigo-50/50 text-indigo-700 hover:bg-indigo-50 transition-all flex items-center justify-center gap-2 text-sm font-medium disabled:opacity-60"
+                        >
+                            {seedingTemplates ? <RefreshCw size={16} className="animate-spin" /> : <Wand2 size={16} />}
+                            Cargar Templates Premium
                         </button>
                     </div>
 

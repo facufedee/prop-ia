@@ -1,10 +1,14 @@
 "use client";
 
 import { useState } from "react";
+import dynamic from "next/dynamic";
 import DashboardSidebar from "./DashboardSidebar";
 import DashboardHeader from "./DashboardHeader";
 import DashboardFooter from "./DashboardFooter";
-import ChatPanel from "@/ui/components/chat/ChatPanel";
+
+// Pulls in the AI SDK + react-markdown — only needed once the user opens the
+// chat widget, so keep it out of the initial bundle for every dashboard page.
+const ChatPanel = dynamic(() => import("@/ui/components/chat/ChatPanel"), { ssr: false });
 
 export default function DashboardShell({ children }: { children: React.ReactNode }) {
   const [sidebarOpen, setSidebarOpen] = useState(false);

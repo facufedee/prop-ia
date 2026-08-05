@@ -45,7 +45,7 @@ export function RoleProtection({ children, requiredPermission, requiredRole }: R
         }
 
         if (requiredPermission) {
-            if (userRole.name === "Super Admin") {
+            if (userRole.name === "Super Admin" || userRole.name === "Administrador") {
                 hasAccess = true;
             } else if (!userRole.permissions.includes(requiredPermission)) {
                 hasAccess = false;

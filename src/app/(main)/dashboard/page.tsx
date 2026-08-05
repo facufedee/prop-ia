@@ -71,6 +71,18 @@ export default function DashboardPage() {
     });
     const [loading, setLoading] = useState(true);
 
+    // Data that does NOT depend on the selected branch (leads, alquileres, subscription,
+    // inquilinos, propietarios) — fetched once per user session instead of on every
+    // branch switch, since it was previously being re-read from Firestore in full on
+    // each change even though only the properties count actually varies by branch.
+    const [baseData, setBaseData] = useState<{
+        leads: Lead[];
+        alquileres: Alquiler[];
+        subDocData: any;
+        planData: any;
+        totalClientes: number;
+    } | null>(null);
+
     useEffect(() => {
         if (!auth) { setLoading(false); return; }
         const unsub = onAuthStateChanged(auth, async (u) => {
@@ -81,27 +93,71 @@ export default function DashboardPage() {
     }, [router]);
 
     useEffect(() => {
-        if (user) fetchStats(user.uid, selectedBranchId);
-    }, [user, selectedBranchId]);
+        if (user) fetchBaseData(user.uid);
+    }, [user]);
 
-    const fetchStats = async (userId: string, branchId: string) => {
+    useEffect(() => {
+        if (user && baseData) computeStats(user.uid, selectedBranchId, baseData);
+    }, [user, selectedBranchId, baseData]);
+
+    const fetchBaseData = async (userId: string) => {
         if (!db) return;
         try {
-            let propsQuery = query(collection(db, "properties"), where("userId", "==", userId));
-            if (branchId !== 'all') propsQuery = query(propsQuery, where("branchId", "==", branchId));
-
             const subQuery = query(collection(db, "subscriptions"), where("userId", "==", userId), where("status", "==", "active"), orderBy("createdAt", "desc"));
             const inquilinosQuery = query(collection(db, "inquilinos"), where("userId", "==", userId));
             const propietariosQuery = query(collection(db, "propietarios"), where("userId", "==", userId));
 
-            const [propsSnapshot, leads, alquileres, subSnapshot, inquilinosSnap, propietariosSnap] = await Promise.all([
-                getDocs(propsQuery),
+            const [leads, alquileres, subSnapshot, inquilinosSnap, propietariosSnap] = await Promise.all([
                 leadsService.getLeads(userId),
                 alquileresService.getAlquileres(userId),
                 getDocs(subQuery),
                 getDocs(inquilinosQuery),
                 getDocs(propietariosQuery),
             ]);
+
+            let planData = null;
+            const rawSub = !subSnapshot.empty ? subSnapshot.docs[0].data() : null;
+            const subDocData: any = rawSub ? {
+                ...rawSub,
+                endDate: rawSub.endDate?.toDate ? rawSub.endDate.toDate() : rawSub.endDate,
+                startDate: rawSub.startDate?.toDate ? rawSub.startDate.toDate() : rawSub.startDate,
+            } : null;
+            if (subDocData?.planId) {
+                const planSnap = await getDoc(doc(db, "plans", subDocData.planId));
+                if (planSnap.exists()) {
+                    planData = planSnap.data();
+                } else if (subDocData?.planTier) {
+                    const qPlan = query(collection(db, "plans"), where("tier", "==", subDocData.planTier));
+                    const planSnaps = await getDocs(qPlan);
+                    if (!planSnaps.empty) planData = planSnaps.docs[0].data();
+                }
+            } else if (subDocData?.planTier) {
+                const qPlan = query(collection(db, "plans"), where("tier", "==", subDocData.planTier));
+                const planSnaps = await getDocs(qPlan);
+                if (!planSnaps.empty) planData = planSnaps.docs[0].data();
+            }
+
+            setBaseData({
+                leads,
+                alquileres,
+                subDocData,
+                planData,
+                totalClientes: inquilinosSnap.size + propietariosSnap.size,
+            });
+        } catch (error) {
+            console.error("Error fetching dashboard base data:", error);
+            setLoading(false);
+        }
+    };
+
+    const computeStats = async (userId: string, branchId: string, baseSnapshot: NonNullable<typeof baseData>) => {
+        if (!db) return;
+        try {
+            let propsQuery = query(collection(db, "properties"), where("userId", "==", userId));
+            if (branchId !== 'all') propsQuery = query(propsQuery, where("branchId", "==", branchId));
+
+            const propsSnapshot = await getDocs(propsQuery);
+            const { leads, alquileres, subDocData, planData, totalClientes } = baseSnapshot;
 
             const propertyIds = new Set(propsSnapshot.docs.map(d => d.id));
 
@@ -166,33 +222,6 @@ export default function DashboardPage() {
                 })
                 .slice(0, 5);
 
-            let planData = null;
-            const rawSub = !subSnapshot.empty ? subSnapshot.docs[0].data() : null;
-            const subDocData: any = rawSub ? {
-                ...rawSub,
-                endDate: rawSub.endDate?.toDate ? rawSub.endDate.toDate() : rawSub.endDate,
-                startDate: rawSub.startDate?.toDate ? rawSub.startDate.toDate() : rawSub.startDate,
-            } : null;
-            if (subDocData?.planId) {
-                const planSnap = await getDoc(doc(db, "plans", subDocData.planId));
-                if (planSnap.exists()) {
-                    planData = planSnap.data();
-                } else if (subDocData?.planTier) {
-                    // Fallback to querying by tier if the specific ID wasn't found
-                    const qPlan = query(collection(db, "plans"), where("tier", "==", subDocData.planTier));
-                    const planSnaps = await getDocs(qPlan);
-                    if (!planSnaps.empty) {
-                        planData = planSnaps.docs[0].data();
-                    }
-                }
-            } else if (subDocData?.planTier) {
-                const qPlan = query(collection(db, "plans"), where("tier", "==", subDocData.planTier));
-                const planSnaps = await getDocs(qPlan);
-                if (!planSnaps.empty) {
-                    planData = planSnaps.docs[0].data();
-                }
-            }
-
             setStats({
                 totalProperties: propsSnapshot.size,
                 totalAlquileres: filteredAlquileres.length,
@@ -201,7 +230,7 @@ export default function DashboardPage() {
                 honorariosMonth,
                 recentLeads,
                 proximosVencimientos: proximosVencimientos.slice(0, 5),
-                totalClientes: inquilinosSnap.size + propietariosSnap.size,
+                totalClientes,
                 subscription: subDocData,
                 plan: planData,
             });

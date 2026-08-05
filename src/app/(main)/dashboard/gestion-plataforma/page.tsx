@@ -172,8 +172,12 @@ export default function PlatformManagementPage() {
             if (res.ok) {
                 const data = await res.json();
                 setAvailableTemplates(data.templates || []);
+            } else {
+                toast.error("No se pudieron cargar los templates de Marketing");
             }
-        } catch {}
+        } catch {
+            toast.error("Error de conexión al cargar templates");
+        }
         finally { setTemplatesLoading(false); }
     }, [user]);
 
@@ -314,9 +318,10 @@ export default function PlatformManagementPage() {
         if (!confirm(`¿Enviar email a ${selectedUserIds.size} usuario${selectedUserIds.size !== 1 ? "s" : ""}?`)) return;
         setSending(true);
         try {
+            const token = await user?.getIdToken();
             const res = await fetch("/api/admin/bulk-email", {
                 method: "POST",
-                headers: { "Content-Type": "application/json" },
+                headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
                 body: JSON.stringify({
                     subject: emailSubject,
                     html: emailBody,
@@ -341,11 +346,13 @@ export default function PlatformManagementPage() {
         if (!newAnn.title.trim() || !newAnn.message.trim()) { toast.error("Completá título y mensaje"); return; }
         setSavingAnn(true);
         try {
-            await fetch("/api/admin/announcements", {
+            const token = await user?.getIdToken();
+            const res = await fetch("/api/admin/announcements", {
                 method: "POST",
-                headers: { "Content-Type": "application/json" },
+                headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
                 body: JSON.stringify(newAnn),
             });
+            if (!res.ok) throw new Error();
             toast.success("Anuncio publicado");
             setNewAnn({ title: "", message: "", type: "info", expiresAt: "" });
             loadAnnouncements();
@@ -355,11 +362,13 @@ export default function PlatformManagementPage() {
 
     const handleDeleteAnnouncement = async (id: string) => {
         try {
-            await fetch("/api/admin/announcements", {
+            const token = await user?.getIdToken();
+            const res = await fetch("/api/admin/announcements", {
                 method: "DELETE",
-                headers: { "Content-Type": "application/json" },
+                headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
                 body: JSON.stringify({ id }),
             });
+            if (!res.ok) throw new Error();
             setAnnouncements(prev => prev.filter(a => a.id !== id));
             toast.success("Anuncio desactivado");
         } catch { toast.error("Error al desactivar"); }

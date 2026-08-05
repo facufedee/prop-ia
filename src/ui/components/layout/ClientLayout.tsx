@@ -9,6 +9,8 @@ import { ThemeProvider } from "@/ui/context/ThemeContext";
 export default function ClientLayout({ children }: { children: React.ReactNode }) {
     const pathname = usePathname();
     const isDashboard = pathname?.startsWith("/dashboard");
+    const isLogin = pathname === "/login";
+    const hideChrome = isDashboard || isLogin;
     // On the home page ("/") the Hero section already handles its own top padding
     // for the fixed navbar. For all other public pages we need to push content down.
     const isHome = pathname === "/";
@@ -16,11 +18,11 @@ export default function ClientLayout({ children }: { children: React.ReactNode }
     return (
         <ThemeProvider>
         <AuthProvider>
-            {!isDashboard && <Navbar />}
-            <div className={!isDashboard && !isHome ? "pt-16 md:pt-0" : ""}>
+            {!hideChrome && <Navbar />}
+            <div className={!hideChrome && !isHome ? "pt-16 md:pt-0" : ""}>
                 {children}
             </div>
-            {!isDashboard && <Footer />}
+            {!hideChrome && <Footer />}
         </AuthProvider>
         </ThemeProvider>
     );

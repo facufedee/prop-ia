@@ -324,13 +324,17 @@ export default function PropiedadesPage() {
                     {viewMode === 'grid' ? (
                         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                             {filteredProperties.map(property => (
-                                <PropertyCard
-                                    key={property.id}
-                                    property={property}
-                                    onDelete={handleDeleteClick}
-                                    onUpdate={handleUpdateProperty}
-                                    onDuplicate={handleDuplicateProperty}
-                                />
+                                // content-visibility skips layout/paint work for cards scrolled out of
+                                // view — cuts render cost on accounts with hundreds of properties without
+                                // changing what's fetched or how search/filtering works.
+                                <div key={property.id} style={{ contentVisibility: 'auto', containIntrinsicSize: '0 420px' }}>
+                                    <PropertyCard
+                                        property={property}
+                                        onDelete={handleDeleteClick}
+                                        onUpdate={handleUpdateProperty}
+                                        onDuplicate={handleDuplicateProperty}
+                                    />
+                                </div>
                             ))}
                         </div>
                     ) : (

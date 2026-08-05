@@ -77,9 +77,37 @@ function ClientesContent() {
         return () => unsub();
     }, [fetchAllData]);
 
-    const handleSuccess = (type: TabType) => {
-        if (auth?.currentUser) {
-            switchTab(type);
+    // Refreshes only the single record that was created/edited instead of
+    // re-fetching all inquilinos + propietarios + leads from scratch.
+    const handleSuccess = async (type: TabType, id?: string) => {
+        if (!auth?.currentUser) return;
+        switchTab(type);
+
+        if (!id) {
+            // No id to target a single-record refresh — fall back to a full reload.
+            fetchAllData(auth.currentUser.uid);
+            return;
+        }
+
+        try {
+            if (type === "inquilinos") {
+                const updated = await inquilinosService.getInquilinoById(id);
+                if (updated) setInquilinos((prev) => prev.some((i) => i.id === id)
+                    ? prev.map((i) => (i.id === id ? updated : i))
+                    : [updated, ...prev]);
+            } else if (type === "propietarios") {
+                const updated = await propietariosService.getPropietarioById(id);
+                if (updated) setPropietarios((prev) => prev.some((p) => p.id === id)
+                    ? prev.map((p) => (p.id === id ? updated : p))
+                    : [updated, ...prev]);
+            } else if (type === "leads") {
+                const updated = await leadsService.getLeadById(id);
+                if (updated) setLeads((prev) => prev.some((l) => l.id === id)
+                    ? prev.map((l) => (l.id === id ? updated : l))
+                    : [updated, ...prev]);
+            }
+        } catch (err) {
+            console.error("Error refreshing client after save:", err);
             fetchAllData(auth.currentUser.uid);
         }
     };
@@ -111,7 +139,7 @@ function ClientesContent() {
     const handleConvertLead = async (id: string) => {
         if (!confirm("¿Marcar como convertido?")) return;
         await leadsService.convertLead(id);
-        if (auth?.currentUser) fetchAllData(auth.currentUser.uid);
+        setLeads((prev) => prev.map((l) => (l.id === id ? { ...l, estado: "cerrado" } : l)));
     };
 
     // ── Filtered lists ────────────────────────────────────────────────────────

@@ -46,7 +46,7 @@ export interface NotificationSettings {
 
 const DEFAULT_SETTINGS: NotificationSettings = {
     enabled: true,
-    recipients: ['facundoflores8@gmail.com'],
+    recipients: ['zetaprop.com.ar@gmail.com'],
     events: {
         newUser: true,
         newPayment: true,
