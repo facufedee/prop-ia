@@ -3,6 +3,14 @@ import { z } from "zod";
 import { adminDb } from "@/infrastructure/firebase/admin";
 import { PLANS } from "@/infrastructure/data/plans";
 
+// Live plan data as edited by the admin in /dashboard/configuracion/suscripciones,
+// falling back to the local seed data only if the "plans" collection is empty.
+async function fetchPlans() {
+    const snapshot = await adminDb.collection("plans").get();
+    if (snapshot.empty) return PLANS;
+    return snapshot.docs.map((d) => ({ id: d.id, ...d.data() })) as (typeof PLANS)[number][];
+}
+
 export function getChatTools(userId: string) {
     return {
         get_plans_info: tool({
@@ -10,7 +18,7 @@ export function getChatTools(userId: string) {
             parameters: z.object({
                 plan_name: z.string().optional().describe("Nombre del plan específico a consultar: 'basico', 'profesional', 'enterprise'. Omitir para obtener todos."),
             }),
-            execute: async ({ plan_name }) => getPlansInfo(plan_name),
+            execute: async ({ plan_name }) => await getPlansInfo(plan_name),
         }),
 
         get_blog_posts: tool({
@@ -46,19 +54,20 @@ export function getChatTools(userId: string) {
     };
 }
 
-function getPlansInfo(planName?: string) {
+async function getPlansInfo(planName?: string) {
     const formatPrice = (n: number) =>
         new Intl.NumberFormat("es-AR", { style: "currency", currency: "ARS", maximumFractionDigits: 0 }).format(n);
 
     const formatLimit = (v: number | string) => (v === "unlimited" || (typeof v === "number" && v > 900000) ? "Ilimitado" : String(v));
 
-    const plans = PLANS.map((p) => ({
+    const livePlans = await fetchPlans();
+    const plans = livePlans.map((p: any) => ({
         nombre: p.name,
         tier: p.tier,
         descripcion: p.description,
         precio_mensual: formatPrice(p.price.monthly),
         precio_anual: formatPrice(p.price.yearly),
-        funciones: p.featuresList,
+        funciones: p.featuresList || p.features,
         limites: {
             propiedades: formatLimit(p.limits.properties),
             usuarios: formatLimit(p.limits.users),

@@ -214,11 +214,14 @@ export default function AlquileresPage() {
                     {viewMode === 'grid' ? (
                         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                             {filteredContracts.map(contract => (
-                                <RentalCard
-                                    key={contract.id}
-                                    contract={contract}
-                                    onDelete={handleDelete}
-                                />
+                                // content-visibility skips layout/paint work for cards scrolled out of
+                                // view — same technique already applied to the Propiedades grid.
+                                <div key={contract.id} style={{ contentVisibility: 'auto', containIntrinsicSize: '0 280px' }}>
+                                    <RentalCard
+                                        contract={contract}
+                                        onDelete={handleDelete}
+                                    />
+                                </div>
                             ))}
                         </div>
                     ) : (

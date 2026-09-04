@@ -49,6 +49,7 @@ export const DEFAULT_PERMISSIONS: Permission[] = [
     { id: "/dashboard/tutoriales", label: "Tutoriales", description: "Acceso a guías y tutoriales del sistema" },
     { id: "/dashboard/marketing", label: "Marketing", description: "Módulo de marketing, emails automáticos y campañas" },
     { id: "/dashboard/mi-sitio", label: "Mi Sitio Web", description: "Portal inmobiliario público propio con subdominio" },
+    { id: "/dashboard/carteleria", label: "Cartelería", description: "Inventario y seguimiento de carteles físicos de venta/alquiler" },
 ];
 
 const ROLES_COLLECTION = "roles";
@@ -268,7 +269,8 @@ export const roleService = {
                     "/dashboard/emprendimientos",
                     "/dashboard/tutoriales",
                     "/dashboard/marketing",
-                    "/dashboard/mi-sitio"
+                    "/dashboard/mi-sitio",
+                    "/dashboard/carteleria"
                 ],
                 isSystem: false
             });
@@ -302,7 +304,8 @@ export const roleService = {
                     "/dashboard/emprendimientos",
                     "/dashboard/tutoriales",
                     "/dashboard/marketing",
-                    "/dashboard/mi-sitio"
+                    "/dashboard/mi-sitio",
+                    "/dashboard/carteleria"
                 ],
                 isSystem: false
             });
@@ -324,7 +327,8 @@ export const roleService = {
                     "/dashboard/finanzas",
                     "/dashboard/soporte",
                     "/dashboard/tutoriales",
-                    "/dashboard/mi-sitio"
+                    "/dashboard/mi-sitio",
+                    "/dashboard/carteleria"
                 ],
                 isSystem: false
             });
@@ -344,7 +348,8 @@ export const roleService = {
                     "/dashboard/cuenta",
                     "/dashboard/blog",
                     "/dashboard/novedades",
-                    "/dashboard/tutoriales"
+                    "/dashboard/tutoriales",
+                    "/dashboard/carteleria"
                 ],
                 isSystem: true
             });
@@ -364,7 +369,7 @@ export const roleService = {
                 "/dashboard/soporte", "/dashboard/sucursales", "/dashboard/blog",
                 "/dashboard/cuenta", "/dashboard/configuracion", "/dashboard/novedades",
                 "/dashboard/emprendimientos", "/dashboard/tutoriales", "/dashboard/marketing",
-                "/dashboard/mi-sitio",
+                "/dashboard/mi-sitio", "/dashboard/carteleria",
             ],
             "Cliente Pro": [
                 "/dashboard", "/dashboard/propiedades", "/dashboard/tasacion",
@@ -374,18 +379,20 @@ export const roleService = {
                 "/dashboard/publicaciones", "/dashboard/finanzas", "/dashboard/calendario",
                 "/dashboard/sucursales", "/dashboard/blog", "/dashboard/cuenta",
                 "/dashboard/novedades", "/dashboard/emprendimientos", "/dashboard/tutoriales",
-                "/dashboard/marketing", "/dashboard/mi-sitio",
+                "/dashboard/marketing", "/dashboard/mi-sitio", "/dashboard/carteleria",
             ],
             "Cliente Básico": [
                 "/dashboard", "/dashboard/propiedades", "/dashboard/alquileres",
                 "/dashboard/agenda-cobros", "/dashboard/liquidaciones",
                 "/dashboard/ventas", "/dashboard/clientes", "/dashboard/finanzas",
                 "/dashboard/soporte", "/dashboard/tutoriales", "/dashboard/mi-sitio",
+                "/dashboard/carteleria",
             ],
             "Agente": [
                 "/dashboard", "/dashboard/propiedades", "/dashboard/alquileres",
                 "/dashboard/leads", "/dashboard/calendario", "/dashboard/cuenta",
                 "/dashboard/blog", "/dashboard/novedades", "/dashboard/tutoriales",
+                "/dashboard/carteleria",
             ],
         };
 

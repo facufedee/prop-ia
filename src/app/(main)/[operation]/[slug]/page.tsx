@@ -3,6 +3,7 @@ import type { Metadata, ResolvingMetadata } from 'next'
 import PropertyDetailClient from '@/app/(main)/propiedades/p/[id]/PropertyDetailClient'
 import { publicService } from "@/infrastructure/services/publicService"
 import { notFound, permanentRedirect } from "next/navigation"
+import { formatPropertyPrice } from "@/ui/utils/propertyPrice"
 
 type Props = {
     params: Promise<{ operation: string; slug: string }>
@@ -49,7 +50,8 @@ export async function generateMetadata(
         coverImage = property.imageUrls[0];
     }
 
-    const price = property.currency + ' ' + property.price.toLocaleString('es-AR');
+    const price = formatPropertyPrice(property.price, property.currency, property.hidePrice);
+    const hasRealPrice = !property.hidePrice && Number(property.price) > 0;
 
     // Schema Markups
     const getType = (t: string = '') => {
@@ -76,13 +78,17 @@ export async function generateMetadata(
             'addressRegion': property.provincia,
             'addressCountry': 'AR'
         },
-        'offers': {
-            '@type': 'Offer',
-            'price': property.price,
-            'priceCurrency': property.currency,
-            'priceValidUntil': new Date(new Date().setMonth(new Date().getMonth() + 3)).toISOString().split('T')[0],
-            'availability': 'https://schema.org/InStock'
-        }
+        // Omit the Offer entirely when there's no real price — a schema.org
+        // Offer with price: 0 is semantically wrong and misleading for SEO.
+        ...(hasRealPrice ? {
+            'offers': {
+                '@type': 'Offer',
+                'price': property.price,
+                'priceCurrency': property.currency,
+                'priceValidUntil': new Date(new Date().setMonth(new Date().getMonth() + 3)).toISOString().split('T')[0],
+                'availability': 'https://schema.org/InStock'
+            }
+        } : {})
     };
 
     return {

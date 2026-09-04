@@ -8,6 +8,7 @@ import Link from "next/link";
 import Image from "next/image";
 import dynamic from 'next/dynamic';
 import SimilarPropertyCard from "@/ui/components/properties/public/SimilarPropertyCard";
+import { formatPropertyPrice } from "@/ui/utils/propertyPrice";
 
 const PublicMap = dynamic(() => import("@/ui/components/properties/public/PublicMap"), {
     ssr: false,
@@ -440,7 +441,7 @@ export default function PropertyDetailPage({ id: propId }: Props) {
                             {/* Price & Actions Card */}
                             <div className="bg-white rounded-2xl p-6 shadow-lg border border-gray-100">
                                 <p className="text-3xl font-bold text-gray-900 mb-6 text-center">
-                                    {property.hidePrice ? "Consultar Precio" : `${property.currency} ${Number(property.price)?.toLocaleString('es-AR')}`}
+                                    {formatPropertyPrice(property.price, property.currency, property.hidePrice)}
                                 </p>
                                 <div className="flex gap-3">
                                     <button
@@ -546,7 +547,7 @@ export default function PropertyDetailPage({ id: propId }: Props) {
                 </button>
                 <div className="flex flex-col items-end text-right">
                     <span className="text-xl font-bold text-gray-900 leading-none">
-                        {property.hidePrice ? "Consultar" : `${property.currency} ${Number(property.price)?.toLocaleString('es-AR')}`}
+                        {property.hidePrice || Number(property.price) === 0 ? "Consultar" : `${property.currency} ${Number(property.price)?.toLocaleString('es-AR')}`}
                     </span>
                     <span className="text-xs text-gray-500 font-medium mt-1.5 max-w-[160px] truncate">
                         {property.agency?.displayName ? `Por ${property.agency.displayName}` : property.operation_type}

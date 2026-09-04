@@ -71,7 +71,7 @@ export default function HumanPromise() {
                                 href="/register"
                                 className="group inline-flex items-center justify-center gap-3 px-8 py-4 bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-base rounded-2xl transition-all duration-200 hover:shadow-2xl hover:shadow-indigo-500/30 hover:-translate-y-1 active:scale-95 mb-3"
                             >
-                                Empezá tu prueba gratuita de 7 días
+                                Empezá tu prueba gratuita de 14 días
                                 <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
                             </Link>
                             <p className="text-sm text-gray-500 flex items-center gap-1.5 mt-3">

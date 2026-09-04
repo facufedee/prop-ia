@@ -44,14 +44,13 @@ export const subscriptionService = {
             return PLANS as Plan[];
         }
 
+        // Firestore is the single source of truth once seeded — never overwrite
+        // admin-edited limits/features with the hardcoded local PLANS array.
         return snapshot.docs.map(doc => {
             const data = doc.data();
-            const localPlan = PLANS.find((p: any) => p.id === doc.id) as Plan | undefined;
             return {
                 id: doc.id,
                 ...data,
-                limits: localPlan ? localPlan.limits : data.limits,
-                features: localPlan ? localPlan.features : data.features,
                 createdAt: data.createdAt?.toDate() || new Date(),
                 updatedAt: data.updatedAt?.toDate() || new Date(),
             };
@@ -63,9 +62,10 @@ export const subscriptionService = {
         const docRef = doc(db, PLANS_COLLECTION, id);
         const docSnap = await getDoc(docRef);
 
-        const localPlan = PLANS.find((p: any) => p.id === id) as Plan | undefined;
-
         if (!docSnap.exists()) {
+            // Fallback to the local seed data only when the plan hasn't been
+            // seeded into Firestore yet — never once a Firestore doc exists.
+            const localPlan = PLANS.find((p: any) => p.id === id) as Plan | undefined;
             return localPlan || null;
         }
 
@@ -74,8 +74,6 @@ export const subscriptionService = {
         return {
             id: docSnap.id,
             ...data,
-            limits: localPlan ? localPlan.limits : data.limits,
-            features: localPlan ? localPlan.features : data.features,
             createdAt: data.createdAt?.toDate() || new Date(),
             updatedAt: data.updatedAt?.toDate() || new Date(),
         } as Plan;

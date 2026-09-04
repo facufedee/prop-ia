@@ -5,10 +5,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { ArrowRight, Building2, MapPin, BedDouble, Bath } from "lucide-react";
 import { publicService, PublicProperty } from "@/infrastructure/services/publicService";
-
-function formatPrice(price: number, currency: string) {
-    return `${currency} ${price.toLocaleString("es-AR")}`;
-}
+import { formatPropertyPrice } from "@/ui/utils/propertyPrice";
 
 export default function PropertyNetworkCTA() {
     const [properties, setProperties] = useState<PublicProperty[]>([]);
@@ -104,11 +101,9 @@ export default function PropertyNetworkCTA() {
 
                                 {/* Info */}
                                 <div className="p-4">
-                                    {!prop.hidePrice && (
-                                        <p className="text-base font-bold text-gray-900 mb-1">
-                                            {formatPrice(prop.price, prop.currency)}
-                                        </p>
-                                    )}
+                                    <p className="text-base font-bold text-gray-900 mb-1">
+                                        {formatPropertyPrice(prop.price, prop.currency, prop.hidePrice)}
+                                    </p>
                                     <p className="text-sm text-gray-600 line-clamp-1 mb-2">{prop.title}</p>
                                     {prop.localidad && (
                                         <p className="flex items-center gap-1 text-xs text-gray-400 mb-3">

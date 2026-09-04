@@ -9,11 +9,11 @@ import { ThemeProvider } from "@/ui/context/ThemeContext";
 export default function ClientLayout({ children }: { children: React.ReactNode }) {
     const pathname = usePathname();
     const isDashboard = pathname?.startsWith("/dashboard");
-    const isLogin = pathname === "/login";
-    const hideChrome = isDashboard || isLogin;
-    // On the home page ("/") the Hero section already handles its own top padding
-    // for the fixed navbar. For all other public pages we need to push content down.
+    const isAuthPage = pathname === "/login" || pathname === "/register";
     const isHome = pathname === "/";
+    // The home page ships its own dark-theme nav/footer (LandingNav/LandingFooter) —
+    // the global light-theme Navbar/Footer would visually clash with it.
+    const hideChrome = isDashboard || isAuthPage || isHome;
 
     return (
         <ThemeProvider>

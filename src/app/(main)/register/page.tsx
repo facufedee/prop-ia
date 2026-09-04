@@ -143,7 +143,7 @@ export default function RegisterPage() {
                 
                 <div className="max-w-md w-full relative z-10 py-8">
                     <div className="text-center bg-white/70 backdrop-blur-xl p-8 sm:p-10 rounded-3xl shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-white/50">
-                        <div className="flex justify-center mb-6">
+                        <Link href="/" className="flex justify-center mb-6 transition-opacity hover:opacity-80">
                             <Image
                                 src="/assets/img/logo_web_ZetaProp.png"
                                 alt="Zeta Prop Logo"
@@ -151,7 +151,7 @@ export default function RegisterPage() {
                                 height={60}
                                 className="h-14 w-auto object-contain"
                             />
-                        </div>
+                        </Link>
                         <h2 className="text-2xl font-bold text-gray-900 tracking-tight">
                             Únete a Zeta Prop
                         </h2>

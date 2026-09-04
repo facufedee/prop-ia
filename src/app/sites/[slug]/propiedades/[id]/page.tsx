@@ -39,6 +39,7 @@ interface SidebarContactCardProps {
 }
 
 import { trackContact } from "@/lib/trackContact";
+import { formatPropertyPrice } from "@/ui/utils/propertyPrice";
 
 type FormErrors = { nombre?: string; email?: string; telefono?: string; mensaje?: string };
 
@@ -545,7 +546,7 @@ export default function PropiedadDetailPage() {
                                     {property.operation_type}
                                 </span>
                                 <h2 className="text-4xl font-black text-gray-900 mb-2">
-                                    {property.hidePrice ? "Consultar Precio" : `${property.currency} ${Number(property.price).toLocaleString("es-AR")}`}
+                                    {formatPropertyPrice(property.price, property.currency, property.hidePrice)}
                                 </h2>
                                 {property.expenses && (
                                     <p className="text-gray-400 font-bold uppercase text-[10px] tracking-widest">+ ${property.expenses.toLocaleString("es-AR")} expensas</p>

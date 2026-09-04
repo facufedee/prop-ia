@@ -431,12 +431,16 @@ export default function LeadsPage() {
                             </div>
                         ) : (
                             filteredLeads.map((lead) => (
-                                <LeadCard
-                                    key={lead.id}
-                                    lead={lead}
-                                    onStatusChange={handleStatusChange}
-                                    onDelete={handleDelete}
-                                />
+                                // content-visibility skips layout/paint work for cards scrolled out of
+                                // view. Only applied to this static grid, never the Kanban drag view
+                                // above — drag-and-drop needs accurate layout for off-screen cards too.
+                                <div key={lead.id} style={{ contentVisibility: 'auto', containIntrinsicSize: '0 220px' }}>
+                                    <LeadCard
+                                        lead={lead}
+                                        onStatusChange={handleStatusChange}
+                                        onDelete={handleDelete}
+                                    />
+                                </div>
                             ))
                         )}
                     </div>

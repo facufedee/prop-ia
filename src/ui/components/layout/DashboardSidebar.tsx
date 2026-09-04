@@ -39,6 +39,7 @@ import {
   TrendingUp,
   Globe,
   Palette,
+  Signpost,
 } from "lucide-react";
 import Link from "next/link";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
@@ -102,6 +103,7 @@ const MENU_ITEMS: MenuItem[] = [
   },
   { href: "/dashboard/leads", label: "Consultas", icon: MessageSquare, description: "Central de consultas y mensajes (Leads)" },
   { href: "/dashboard/calendario", label: "Agenda", icon: Calendar, description: "Calendario de citas y eventos" },
+  { href: "/dashboard/carteleria", label: "Cartelería", icon: Signpost, permission: "/dashboard/carteleria", description: "Inventario y seguimiento de carteles" },
 
   // Divider
   { href: "divider-1", label: "", icon: LayoutDashboard, isDivider: true },

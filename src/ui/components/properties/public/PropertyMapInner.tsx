@@ -17,7 +17,8 @@ if (typeof window !== "undefined") {
     });
 }
 
-function fmtPrice(price: number, currency: string): string {
+function fmtPrice(price: number, currency: string, hidePrice?: boolean): string {
+    if (hidePrice || !price) return "Consultar";
     const n = Math.abs(price);
     const sym = currency === "USD" ? "U$S" : "$";
     if (n >= 1_000_000) return `${sym} ${(n / 1_000_000).toFixed(n % 1_000_000 === 0 ? 0 : 1)}M`;
@@ -25,8 +26,8 @@ function fmtPrice(price: number, currency: string): string {
     return `${sym} ${n.toLocaleString("es-AR")}`;
 }
 
-function makePriceIcon(price: number, currency: string, active: boolean): L.DivIcon {
-    const label = fmtPrice(price, currency);
+function makePriceIcon(price: number, currency: string, active: boolean, hidePrice?: boolean): L.DivIcon {
+    const label = fmtPrice(price, currency, hidePrice);
     const bg = active ? "#1e1b4b" : "#4f46e5";
     const scale = active ? "scale(1.18)" : "scale(1)";
     return L.divIcon({
@@ -108,7 +109,7 @@ export default function PropertyMapInner({ properties, hoveredId, onHover }: Pro
                 <Marker
                     key={p.id}
                     position={[Number(p.lat), Number(p.lng)]}
-                    icon={makePriceIcon(p.price, p.currency, hoveredId === p.id)}
+                    icon={makePriceIcon(p.price, p.currency, hoveredId === p.id, p.hidePrice)}
                     eventHandlers={{
                         mouseover: () => onHover?.(p.id),
                         mouseout: () => onHover?.(null),
@@ -146,7 +147,7 @@ export default function PropertyMapInner({ properties, hoveredId, onHover }: Pro
                             </div>
                             {/* Price */}
                             <div style={{ fontSize: "16px", fontWeight: "800", color: "#4f46e5", marginBottom: "7px" }}>
-                                {p.hidePrice ? "Consultar precio" : `${p.currency === "USD" ? "U$S" : "$"} ${Number(p.price).toLocaleString("es-AR")}`}
+                                {p.hidePrice || !Number(p.price) ? "Consultar precio" : `${p.currency === "USD" ? "U$S" : "$"} ${Number(p.price).toLocaleString("es-AR")}`}
                             </div>
                             {/* Specs */}
                             <div style={{ display: "flex", gap: "10px", fontSize: "11px", color: "#374151", marginBottom: "10px", flexWrap: "wrap" }}>

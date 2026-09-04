@@ -3,7 +3,7 @@ import Hero from "@/ui/sections/Hero";
 
 export const metadata: Metadata = {
     title: "Zeta Prop | El CRM Inmobiliario que se Adapta a tu Inmobiliaria",
-    description: "Zeta Prop es el CRM inmobiliario integral de Argentina: gestioná propiedades, alquileres, clientes, emprendimientos y cobranzas desde un solo lugar. Probalo gratis 7 días.",
+    description: "Zeta Prop es el CRM inmobiliario integral de Argentina: gestioná propiedades, alquileres, clientes, emprendimientos y cobranzas desde un solo lugar. Probalo gratis 14 días.",
     keywords: [
         "CRM inmobiliario argentina",
         "software inmobiliario",
@@ -38,7 +38,7 @@ export const metadata: Metadata = {
     twitter: {
         card: "summary_large_image",
         title: "Zeta Prop | CRM Inmobiliario para Argentina",
-        description: "Gestioná propiedades, alquileres y clientes desde un solo sistema. Probalo gratis 7 días.",
+        description: "Gestioná propiedades, alquileres y clientes desde un solo sistema. Probalo gratis 14 días.",
         images: ["/assets/img/og-landing.png"],
     },
 };
@@ -51,10 +51,14 @@ import ContactForm from "@/ui/sections/ContactForm";
 
 import LatestBlogPosts from "@/ui/sections/LatestBlogPosts";
 import GoogleAuthPromptLazy from "@/ui/components/auth/GoogleAuthPromptLazy";
+import LandingNav from "@/ui/components/landing/LandingNav";
+import LandingFooter from "@/ui/components/landing/LandingFooter";
+import "@/ui/sections/landing-theme.css";
 
 export default function LandingPage() {
     return (
-        <main className="bg-white min-h-screen flex flex-col gap-0">
+        <main className="landing-page min-h-screen flex flex-col gap-0">
+            <LandingNav />
             <GoogleAuthPromptLazy />
 
             {/* Structured Data — SoftwareApplication */}
@@ -73,7 +77,7 @@ export default function LandingPage() {
                             "@type": "Offer",
                             "price": "0",
                             "priceCurrency": "ARS",
-                            "description": "7 días de prueba gratis, sin tarjeta de crédito",
+                            "description": "14 días de prueba gratis, sin tarjeta de crédito",
                             "availability": "https://schema.org/InStock"
                         },
                         "description": "CRM Inmobiliario integral para gestión de propiedades, alquileres, clientes y emprendimientos en Argentina.",
@@ -114,7 +118,7 @@ export default function LandingPage() {
                                 "name": "¿Cuánto cuesta Zeta Prop?",
                                 "acceptedAnswer": {
                                     "@type": "Answer",
-                                    "text": "Zeta Prop ofrece 7 días de prueba gratis sin necesidad de tarjeta de crédito. Luego podés elegir el plan que mejor se adapte a tu inmobiliaria. Consultá nuestros planes en zetaprop.com.ar/precios."
+                                    "text": "Zeta Prop ofrece 14 días de prueba gratis sin necesidad de tarjeta de crédito. Luego podés elegir el plan que mejor se adapte a tu inmobiliaria. Consultá nuestros planes en zetaprop.com.ar/precios."
                                 }
                             },
                             {
@@ -153,6 +157,7 @@ export default function LandingPage() {
             <PropertyNetworkCTA />
             <LatestBlogPosts />
             <ContactForm />
+            <LandingFooter />
 
         </main>
     );

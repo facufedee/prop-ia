@@ -2,6 +2,14 @@ import { tool, jsonSchema } from "ai";
 import { adminDb } from "@/infrastructure/firebase/admin";
 import { PLANS } from "@/infrastructure/data/plans";
 
+// Live plan data as edited by the admin in /dashboard/configuracion/suscripciones,
+// falling back to the local seed data only if the "plans" collection is empty.
+async function fetchPlans() {
+    const snapshot = await adminDb.collection("plans").get();
+    if (snapshot.empty) return PLANS;
+    return snapshot.docs.map((d) => ({ id: d.id, ...d.data() })) as (typeof PLANS)[number][];
+}
+
 export function buildAgentTools(userId: string) {
     return {
         get_plans_info: tool({
@@ -12,7 +20,7 @@ export function buildAgentTools(userId: string) {
                     plan_name: { type: "string", description: "'basico', 'profesional' o 'enterprise'. Omitir para todos." },
                 },
             }),
-            execute: async ({ plan_name }) => getPlansInfo(plan_name),
+            execute: async ({ plan_name }) => await getPlansInfo(plan_name),
         }),
 
         get_blog_posts: tool({
@@ -89,18 +97,19 @@ export function buildAgentTools(userId: string) {
 
 // ─── Implementations ──────────────────────────────────────────────────────────
 
-function getPlansInfo(planName?: string) {
+async function getPlansInfo(planName?: string) {
     const fmt = (n: number) =>
         new Intl.NumberFormat("es-AR", { style: "currency", currency: "ARS", maximumFractionDigits: 0 }).format(n);
     const fmtLimit = (v: number | string) =>
         v === "unlimited" || (typeof v === "number" && v > 900000) ? "Ilimitado" : String(v);
 
-    const plans = PLANS.map((p) => ({
+    const livePlans = await fetchPlans();
+    const plans = livePlans.map((p: any) => ({
         nombre: p.name,
         tier: p.tier,
         precio_mensual: fmt(p.price.monthly),
         precio_anual: fmt(p.price.yearly),
-        funciones: p.featuresList,
+        funciones: p.featuresList || p.features,
         limites: {
             propiedades: fmtLimit(p.limits.properties),
             usuarios: fmtLimit(p.limits.users),

@@ -2,6 +2,7 @@
 import type { Metadata, ResolvingMetadata } from 'next'
 import PropertyDetailClient from './PropertyDetailClient'
 import { publicService } from "@/infrastructure/services/publicService"
+import { formatPropertyPrice } from "@/ui/utils/propertyPrice"
 
 type Props = {
     params: Promise<{ id: string }>
@@ -36,7 +37,7 @@ export async function generateMetadata(
         coverImage = property.imageUrls[0];
     }
 
-    const price = property.currency + ' ' + property.price.toLocaleString('es-AR');
+    const price = formatPropertyPrice(property.price, property.currency, property.hidePrice);
 
     return {
         title: `${property.operation_type} de ${property.title} en ${property.localidad} | Zeta Prop`,

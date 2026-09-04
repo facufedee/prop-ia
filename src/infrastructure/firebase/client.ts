@@ -1,5 +1,4 @@
 import { initializeApp, getApps, getApp } from "firebase/app";
-import { initializePerformance } from "firebase/performance";
 import { getAuth, connectAuthEmulator } from "firebase/auth";
 import { getFirestore, initializeFirestore, connectFirestoreEmulator, memoryLocalCache } from "firebase/firestore";
 import { getStorage } from "firebase/storage";
@@ -71,19 +70,12 @@ if (typeof window !== "undefined") {
   }
 }
 
-// Both flags must be false to stop Firebase Performance from auto-tracing DOM
-// elements — Tailwind class names with dots/brackets (e.g. py-1.5, text-[2.75rem])
-// are invalid attribute values and throw uncaught FirebaseErrors at runtime.
-let perf: any = null;
-if (typeof window !== "undefined") {
-  try {
-    perf = initializePerformance(app, {
-      instrumentationEnabled: false,
-      dataCollectionEnabled: false,
-    });
-  } catch (error) {
-    console.error("🔥 [FIREBASE] Failed to initialize Performance:", error);
-  }
-}
-
-export { app, auth, db, storage, perf };
+// Firebase Performance Monitoring is intentionally NOT initialized here.
+// Even with instrumentationEnabled/dataCollectionEnabled both false, its
+// automatic DOM auto-tracing still reads element attributes (e.g. `<body>`'s
+// className, which next/font fills with values like
+// "geist_xxx-module__yyy__variable antialiased") and throws an uncaught
+// FirebaseError('performance/invalid-attribute-value') because those values
+// don't pass its attribute-value validation — a real Turbopack build. It
+// isn't consumed anywhere in the app, so removing it is a straight win.
+export { app, auth, db, storage };
