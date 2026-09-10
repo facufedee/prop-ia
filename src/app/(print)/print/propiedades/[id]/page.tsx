@@ -8,17 +8,19 @@ import { Property } from "@/ui/components/tables/PropertiesTable";
 import { Loader2, ArrowLeft, Printer, Share2, Download } from "lucide-react";
 import HorizontalFlyer from "../components/HorizontalFlyer";
 import VerticalFlyer from "../components/VerticalFlyer";
+import FichaTemplate from "../components/ficha/FichaTemplate";
 import { useAuth } from "@/ui/context/AuthContext";
 
 export default function PrintPage() {
     const { id } = useParams();
     const searchParams = useSearchParams();
     const router = useRouter();
+    const fichaId = searchParams.get("ficha");
     const mode = searchParams.get("mode") === "vertical" ? "vertical" : "horizontal";
 
     const [property, setProperty] = useState<Property | null>(null);
     const [loading, setLoading] = useState(true);
-    const { userRole, user } = useAuth(); // Assuming we use auth context to get current agent info roughly?
+    const { userRole, user, userData } = useAuth(); // Assuming we use auth context to get current agent info roughly?
     // Actually, ideally we should fetch the USER who OWNS the property, or the current logged in user if they are the agent.
     // For now, let's assume the logged-in user IS the agent/broker printing it.
 
@@ -71,6 +73,13 @@ export default function PrintPage() {
         instagram: "zetaprop_arg" // Mock/Placeholder or from user profile if added
     };
 
+    // Ficha-specific agent info (agency name / office address, not needed by the flyers)
+    const fichaAgentData = {
+        ...agentData,
+        agencyName: userData?.agencyName || undefined,
+        address: userData?.address || undefined,
+    };
+
     return (
         <div className="min-h-screen bg-gray-100 print:bg-white flex flex-col items-center py-8 print:py-0 print:block">
             {/* Toolbar - Hidden in Print */}
@@ -84,26 +93,28 @@ export default function PrintPage() {
                         <ArrowLeft size={20} />
                     </button>
                     <h1 className="font-bold text-gray-800 hidden md:block">
-                        Vista Previa de Impresión - {mode === 'horizontal' ? 'Cartelera' : 'Digital'}
+                        {fichaId ? "Vista Previa de Impresión - Ficha" : `Vista Previa de Impresión - ${mode === 'horizontal' ? 'Cartelera' : 'Digital'}`}
                     </h1>
                 </div>
 
                 <div className="flex items-center gap-3">
-                    {/* Mode Switcher */}
-                    <div className="bg-gray-100 p-1 rounded-lg flex items-center mr-4">
-                        <button
-                            onClick={() => router.push(`/print/propiedades/${id}?mode=horizontal`)}
-                            className={`px-3 py-1.5 text-xs font-medium rounded-md transition-all ${mode === 'horizontal' ? 'bg-white shadow text-indigo-600' : 'text-gray-500 hover:text-gray-900'}`}
-                        >
-                            Horizontal
-                        </button>
-                        <button
-                            onClick={() => router.push(`/print/propiedades/${id}?mode=vertical`)}
-                            className={`px-3 py-1.5 text-xs font-medium rounded-md transition-all ${mode === 'vertical' ? 'bg-white shadow text-indigo-600' : 'text-gray-500 hover:text-gray-900'}`}
-                        >
-                            Vertical
-                        </button>
-                    </div>
+                    {/* Mode Switcher — only relevant for the marketing flyers, not fichas */}
+                    {!fichaId && (
+                        <div className="bg-gray-100 p-1 rounded-lg flex items-center mr-4">
+                            <button
+                                onClick={() => router.push(`/print/propiedades/${id}?mode=horizontal`)}
+                                className={`px-3 py-1.5 text-xs font-medium rounded-md transition-all ${mode === 'horizontal' ? 'bg-white shadow text-indigo-600' : 'text-gray-500 hover:text-gray-900'}`}
+                            >
+                                Horizontal
+                            </button>
+                            <button
+                                onClick={() => router.push(`/print/propiedades/${id}?mode=vertical`)}
+                                className={`px-3 py-1.5 text-xs font-medium rounded-md transition-all ${mode === 'vertical' ? 'bg-white shadow text-indigo-600' : 'text-gray-500 hover:text-gray-900'}`}
+                            >
+                                Vertical
+                            </button>
+                        </div>
+                    )}
 
                     <button
                         onClick={handlePrint}
@@ -119,7 +130,9 @@ export default function PrintPage() {
             <div className="h-20 print:hidden"></div>
 
             {/* Preview Area */}
-            {mode === 'horizontal' ? (
+            {fichaId ? (
+                <FichaTemplate property={property} agent={fichaAgentData} templateId={fichaId} />
+            ) : mode === 'horizontal' ? (
                 <HorizontalFlyer property={property} agent={agentData} />
             ) : (
                 <VerticalFlyer property={property} agent={agentData} />

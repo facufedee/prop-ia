@@ -4,6 +4,7 @@ import { Property } from "@/ui/components/tables/PropertiesTable";
 import Link from "next/link";
 import Image from "next/image";
 import { MapPin, Ruler, BedDouble, Bath, Car, Trash2, Edit, Printer, Share2, Eye, LayoutGrid, Check, X, MoreVertical, Copy, Power, DollarSign, RefreshCw } from "lucide-react";
+import FichasPdfModal from "@/ui/components/properties/ficha/FichasPdfModal";
 
 interface PropertyCardProps {
     property: Property;
@@ -22,6 +23,7 @@ export default function PropertyCard({ property, onDelete, onUpdate, onDuplicate
     });
     const [showMenu, setShowMenu] = useState(false);
     const [isDuplicating, setIsDuplicating] = useState(false);
+    const [showFichasModal, setShowFichasModal] = useState(false);
     const menuRef = useRef<HTMLDivElement>(null);
 
     useEffect(() => {
@@ -315,15 +317,14 @@ export default function PropertyCard({ property, onDelete, onUpdate, onDuplicate
                         )}
 
                         <div className="flex items-center gap-1 border-l pl-3 border-gray-100 pointer-events-auto">
-                            <Link
-                                href={`/print/propiedades/${property.id}`}
-                                target="_blank" rel="noopener noreferrer"
-                                onClick={(e) => e.stopPropagation()}
+                            <button
+                                type="button"
+                                onClick={(e) => { e.preventDefault(); e.stopPropagation(); setShowFichasModal(true); }}
                                 className="p-2 rounded-lg text-gray-500 hover:bg-gray-100 hover:text-indigo-600 transition-colors"
-                                title="Imprimir Ficha"
+                                title="Fichas en PDF"
                             >
                                 <Printer className="w-4 h-4" />
-                            </Link>
+                            </button>
                             <Link
                                 href={`/dashboard/propiedades/editar/${property.id}`}
                                 onClick={(e) => e.stopPropagation()}
@@ -345,6 +346,10 @@ export default function PropertyCard({ property, onDelete, onUpdate, onDuplicate
                     </div>
                 )}
             </div>
+
+            {showFichasModal && (
+                <FichasPdfModal propertyId={property.id} onClose={() => setShowFichasModal(false)} />
+            )}
         </div>
     );
 }

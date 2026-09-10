@@ -51,12 +51,21 @@ function applySecurityHeaders(response: NextResponse, request: NextRequest): Nex
     return response;
 }
 
-function getClientIp(req: NextRequest): string {
-    return (
-        req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ||
-        req.headers.get("x-real-ip") ||
-        "127.0.0.1"
-    );
+// Returns null when no real client IP can be determined from the request
+// headers — the caller must treat that as "skip rate limiting for this
+// request", never as a shared fallback identity. A hardcoded fallback like
+// "127.0.0.1" would bucket every visitor whose real IP can't be read into
+// the SAME counter, and that one shared bucket filling up from the site's
+// combined traffic is what took the whole site down for every visitor at
+// once (this is exactly what happened in production).
+function getClientIp(req: NextRequest): string | null {
+    const forwardedFor = req.headers.get("x-forwarded-for")?.split(",")[0]?.trim();
+    if (forwardedFor) return forwardedFor;
+
+    const realIp = req.headers.get("x-real-ip");
+    if (realIp) return realIp;
+
+    return null;
 }
 
 // ── Middleware ───────────────────────────────────────────────────────────────
@@ -79,11 +88,16 @@ export async function proxy(request: NextRequest) {
         // 1. RATE LIMITING (Global & API Specific)
         if (process.env.NODE_ENV !== 'development') {
             const ip = getClientIp(request);
-            try {
-                // Global limit
-                await globalLimiter.check(ip, 120); // 120 req/min
-            } catch {
-                return new NextResponse('Too Many Requests', { status: 429 });
+            // Only rate-limit requests where we could identify a real client IP.
+            // Skipping when it's unknown avoids collapsing every such visitor
+            // into one shared counter (see getClientIp for why that's dangerous).
+            if (ip) {
+                try {
+                    // Global limit
+                    await globalLimiter.check(ip, 120); // 120 req/min per IP
+                } catch {
+                    return new NextResponse('Too Many Requests', { status: 429 });
+                }
             }
         }
 

@@ -29,6 +29,10 @@ export interface Property {
     calle?: string;
     altura?: string;
     code?: string;
+    description?: string;
+    area_total?: number | string;
+    lat?: number;
+    lng?: number;
 }
 
 interface PropertiesTableProps {
