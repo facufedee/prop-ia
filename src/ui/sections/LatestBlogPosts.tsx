@@ -1,6 +1,6 @@
 import Link from "next/link";
 import Image from "next/image";
-import { ArrowRight, Calendar, Clock } from "lucide-react";
+import { ArrowRight, Calendar, Clock, Newspaper } from "lucide-react";
 import { adminDb } from "@/infrastructure/firebase/admin";
 import { Timestamp } from "firebase-admin/firestore";
 
@@ -67,27 +67,23 @@ export default async function LatestBlogPosts() {
     if (posts.length === 0) return null;
 
     return (
-        <section className="py-14 sm:py-20 lg:py-24 bg-white">
-            <div className="max-w-7xl mx-auto px-5 sm:px-6">
-                <div className="flex flex-col md:flex-row justify-between items-end mb-12 gap-6">
+        <section className="l-section l-section--tight">
+            <div className="l-container">
+                <div className="l-blog__head">
                     <div>
-                        <span className="inline-block px-4 py-2 bg-indigo-50 text-indigo-700 rounded-full text-sm font-semibold mb-4">
-                            BLOG & NOVEDADES
+                        <span className="l-kicker">
+                            <Newspaper size={14} />
+                            Blog & novedades
                         </span>
-                        <h2 className="text-4xl font-bold text-gray-900">
-                            Últimas publicaciones
-                        </h2>
+                        <h2 className="l-section__title" style={{ marginBottom: 0 }}>Últimas publicaciones</h2>
                     </div>
-                    <Link
-                        href="/blog"
-                        className="group flex items-center gap-2 text-indigo-600 font-semibold hover:text-indigo-800 transition-colors"
-                    >
+                    <Link href="/blog" className="l-blog__see-all">
                         Ver todos los artículos
-                        <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
+                        <ArrowRight size={18} />
                     </Link>
                 </div>
 
-                <div className="grid md:grid-cols-3 gap-8">
+                <div className="l-blog__grid">
                     {posts.map((post) => {
                         const words = post.content.split(/\s+/).length;
                         const readTime = Math.ceil(words / 200);
@@ -96,65 +92,45 @@ export default async function LatestBlogPosts() {
                             : "";
 
                         return (
-                            <Link key={post.id} href={`/blog/${post.slug}`} className="group flex flex-col h-full bg-white border border-gray-100 rounded-2xl overflow-hidden hover:shadow-lg transition-all duration-300">
-                                {/* Image */}
-                                <div className="relative aspect-[16/10] overflow-hidden">
+                            <Link key={post.id} href={`/blog/${post.slug}`} className="l-blog-card">
+                                <div className="l-blog-card__image">
                                     {post.imageUrl ? (
                                         <Image
                                             src={post.imageUrl}
                                             alt={post.title}
                                             fill
-                                            className="object-cover group-hover:scale-105 transition-transform duration-500"
+                                            className="object-cover"
                                             sizes="(max-width: 768px) 100vw, 33vw"
                                         />
                                     ) : (
-                                        <div className="w-full h-full bg-gray-100 flex items-center justify-center text-gray-400">
-                                            Sin imagen
-                                        </div>
+                                        <div className="l-blog-card__placeholder">Sin imagen</div>
                                     )}
-                                    <div className="absolute top-4 left-4 bg-white/90 backdrop-blur-sm px-3 py-1 text-xs font-bold text-gray-900 rounded-full">
-                                        {post.category}
-                                    </div>
+                                    <span className="l-blog-card__category">{post.category}</span>
                                 </div>
 
-                                {/* Content */}
-                                <div className="flex flex-col flex-1 p-6">
-                                    <div className="flex items-center gap-4 text-xs text-gray-500 mb-3">
+                                <div className="l-blog-card__body">
+                                    <div className="l-blog-card__meta">
                                         {dateStr && (
-                                            <span className="flex items-center gap-1">
-                                                <Calendar size={14} />
-                                                {dateStr}
-                                            </span>
+                                            <span><Calendar size={13} /> {dateStr}</span>
                                         )}
-                                        <span className="flex items-center gap-1">
-                                            <Clock size={14} />
-                                            {readTime} min
-                                        </span>
+                                        <span><Clock size={13} /> {readTime} min</span>
                                     </div>
 
-                                    <h3 className="text-xl font-bold text-gray-900 mb-3 line-clamp-2 group-hover:text-indigo-600 transition-colors">
-                                        {post.title}
-                                    </h3>
+                                    <h3 className="l-blog-card__title">{post.title}</h3>
 
-                                    <p className="text-gray-600 text-sm mb-4 flex-1">
+                                    <p className="l-blog-card__excerpt">
                                         {post.excerpt.length > 100 ? `${post.excerpt.substring(0, 100)}... ` : post.excerpt}
-                                        <span className="text-indigo-600 font-medium hover:underline inline-block ml-1">
-                                            Leer mas
-                                        </span>
+                                        <span className="l-blog-card__read-more">Leer más</span>
                                     </p>
 
                                     {post.author?.name && (
-                                        <div className="flex items-center gap-2 pt-4 border-t border-gray-50 mt-auto">
-                                            <div className="relative w-6 h-6 rounded-full bg-gray-200 overflow-hidden">
-                                                {post.author.photo ? (
+                                        <div className="l-blog-card__author">
+                                            <div className="l-blog-card__avatar">
+                                                {post.author.photo && (
                                                     <Image src={post.author.photo} alt={post.author.name} fill className="object-cover" sizes="24px" />
-                                                ) : (
-                                                    <div className="w-full h-full bg-indigo-100" />
                                                 )}
                                             </div>
-                                            <span className="text-xs font-medium text-gray-700">
-                                                {post.author.name}
-                                            </span>
+                                            <span className="l-blog-card__author-name">{post.author.name}</span>
                                         </div>
                                     )}
                                 </div>

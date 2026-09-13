@@ -1,7 +1,9 @@
 "use client";
 
 import { useState } from "react";
-import { Check, ChevronRight, AlertCircle, Building2, ExternalLink } from "lucide-react";
+import { Check, ChevronRight, AlertCircle, ExternalLink } from "lucide-react";
+import { useAuth } from "@/ui/context/AuthContext";
+import { portalIntegrationService, PortalId } from "@/infrastructure/services/portalIntegrationService";
 
 type Portal = {
     id: string;
@@ -10,6 +12,9 @@ type Portal = {
     bgColor: string;
 };
 
+// Only Zonaprop and Argenprop actually support the "código de inmobiliaria"
+// flow below — La Voz/Cadena3/Facebook stay listed for later but aren't
+// wired to anything yet.
 const PORTALS: Portal[] = [
     { id: 'argenprop', name: 'Argenprop', color: 'text-orange-500', bgColor: 'bg-orange-50' },
     { id: 'zonaprop', name: 'Zonaprop', color: 'text-orange-600', bgColor: 'bg-orange-50' },
@@ -19,22 +24,31 @@ const PORTALS: Portal[] = [
 ];
 
 export default function PortalesTab() {
+    const { user, userData } = useAuth();
     const [selectedPortalId, setSelectedPortalId] = useState('zonaprop');
     const [showLinkModal, setShowLinkModal] = useState(false);
     const [loading, setLoading] = useState(false);
-    const [isLinked, setIsLinked] = useState(false);
+    const [codeInput, setCodeInput] = useState('');
+    const [error, setError] = useState<string | null>(null);
 
     const selectedPortal = PORTALS.find(p => p.id === selectedPortalId) || PORTALS[1];
+    const isIntegrable = selectedPortalId === 'zonaprop' || selectedPortalId === 'argenprop';
+    const savedCode: string | undefined = userData?.portalIds?.[selectedPortalId];
 
-    const handleLinkAccount = (e: React.FormEvent) => {
+    const handleLinkAccount = async (e: React.FormEvent) => {
         e.preventDefault();
+        if (!user || !codeInput.trim()) return;
         setLoading(true);
-        // Simulate API call
-        setTimeout(() => {
-            setLoading(false);
+        setError(null);
+        try {
+            await portalIntegrationService.saveCode(user.uid, selectedPortalId as PortalId, codeInput);
             setShowLinkModal(false);
-            setIsLinked(true);
-        }, 1500);
+            setCodeInput('');
+        } catch {
+            setError("No se pudo guardar el código. Probá de nuevo.");
+        } finally {
+            setLoading(false);
+        }
     };
 
     return (
@@ -73,82 +87,82 @@ export default function PortalesTab() {
                         <h2 className="text-2xl font-bold text-gray-900">{selectedPortal.name}</h2>
                         <p className="text-gray-500 text-sm mt-1">Configuración de integración y sincronización</p>
                     </div>
-                    {isLinked && (
-                        <span className="px-3 py-1 bg-green-100 text-green-700 text-sm font-medium rounded-full flex items-center gap-2">
-                            <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
-                            Conectado
+                    {isIntegrable && savedCode && (
+                        <span className="px-3 py-1 bg-blue-100 text-blue-700 text-sm font-medium rounded-full flex items-center gap-2">
+                            <Check className="w-4 h-4" />
+                            Código guardado
                         </span>
                     )}
                 </div>
 
                 <div className="flex flex-col items-center">
 
-                    {/* Main Connect Card */}
-                    <div className="w-full max-w-2xl bg-gray-50 rounded-2xl border border-gray-200 p-8 flex flex-col items-center text-center transition-all hover:shadow-md">
-
-                        <h3 className="text-lg font-medium text-gray-500 mb-6">¿Cómo conectar?</h3>
-
-                        {/* Logo Area */}
-                        <div className={`w-64 h-32 ${selectedPortal.bgColor} rounded-xl flex items-center justify-center mb-8 border border-dashed border-gray-300 relative group`}>
-                            <span className={`text-3xl font-extrabold ${selectedPortal.color} tracking-tight`}>{selectedPortal.name}</span>
-
-                            <div className="absolute inset-0 bg-white/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center rounded-xl backdrop-blur-sm">
-                                <ExternalLink className="text-gray-600 w-6 h-6" />
-                            </div>
+                    {!isIntegrable ? (
+                        <div className="w-full max-w-2xl bg-gray-50 rounded-2xl border border-gray-200 p-8 flex flex-col items-center text-center">
+                            <h3 className="text-lg font-medium text-gray-500 mb-2">Próximamente</h3>
+                            <p className="text-gray-500 text-sm max-w-md">
+                                La integración con {selectedPortal.name} todavía no está disponible.
+                            </p>
                         </div>
+                    ) : (
+                        <div className="w-full max-w-2xl bg-gray-50 rounded-2xl border border-gray-200 p-8 flex flex-col items-center text-center transition-all hover:shadow-md">
 
-                        <p className="text-gray-600 text-sm mb-8 max-w-md leading-relaxed">
-                            Para conectarte con un usuario existente ingresa tu email de <strong>{selectedPortal.name}</strong>.
-                            <br />
-                            Si no tienes una cuenta puedes registrarte ingresando <a href="#" className="text-indigo-600 hover:text-indigo-800 font-medium underline decoration-indigo-200 underline-offset-4">aquí</a>.
-                        </p>
+                            <h3 className="text-lg font-medium text-gray-500 mb-6">¿Cómo funciona?</h3>
 
-                        {/* Connection Action Box */}
-                        {!isLinked ? (
-                            <div className="w-full bg-white rounded-xl p-6 shadow-lg border border-gray-100 flex flex-col sm:flex-row items-center justify-between gap-4 transform transition-all hover:scale-[1.01]">
-                                <div className="text-left flex items-center gap-4">
-                                    <div className="p-3 bg-gray-100 rounded-lg">
-                                        <Building2 className="w-6 h-6 text-gray-600" />
-                                    </div>
-                                    <div>
-                                        <p className="text-xs text-gray-400 uppercase font-bold tracking-wider">Oficina</p>
-                                        <p className="text-gray-900 font-bold text-lg">Ituzaingo Nº 647</p>
-                                    </div>
+                            {/* Logo Area */}
+                            <div className={`w-64 h-32 ${selectedPortal.bgColor} rounded-xl flex items-center justify-center mb-8 border border-dashed border-gray-300 relative group`}>
+                                <span className={`text-3xl font-extrabold ${selectedPortal.color} tracking-tight`}>{selectedPortal.name}</span>
+
+                                <div className="absolute inset-0 bg-white/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center rounded-xl backdrop-blur-sm">
+                                    <ExternalLink className="text-gray-600 w-6 h-6" />
                                 </div>
-                                <button
-                                    onClick={() => setShowLinkModal(true)}
-                                    className="w-full sm:w-auto bg-green-600 hover:bg-green-700 text-white font-bold py-3 px-8 rounded-xl transition-all shadow-lg shadow-green-600/20 active:scale-95 flex items-center justify-center gap-2"
-                                >
-                                    Vincular cuenta
-                                    <ChevronRight className="w-4 h-4" />
-                                </button>
                             </div>
-                        ) : (
-                            <div className="w-full bg-white rounded-xl p-6 shadow-sm border border-green-200 flex items-center justify-between gap-4">
-                                <div className="text-left">
-                                    <h4 className="font-bold text-green-800 flex items-center gap-2">
-                                        <Check className="w-5 h-5" /> Integración Activa
-                                    </h4>
-                                    <p className="text-sm text-green-600 mt-1">Tus propiedades se están sincronizando correctamente.</p>
+
+                            <div className="bg-amber-50 text-amber-800 p-4 rounded-xl text-sm text-left flex gap-3 items-start border border-amber-100 mb-8 max-w-md">
+                                <AlertCircle className="w-5 h-5 flex-shrink-0 mt-0.5" />
+                                <p className="leading-relaxed">
+                                    La publicación automática hacia {selectedPortal.name} todavía no está activa — Zeta Prop está gestionando la integración oficial con el portal.
+                                    Por ahora podés guardar tu <strong>código de inmobiliaria</strong> para tenerlo listo apenas se habilite, y mientras tanto usar el feed XML manual (más abajo, en Publicaciones).
+                                </p>
+                            </div>
+
+                            {/* Connection Action Box */}
+                            {!savedCode ? (
+                                <div className="w-full bg-white rounded-xl p-6 shadow-lg border border-gray-100 flex flex-col sm:flex-row items-center justify-between gap-4 transform transition-all hover:scale-[1.01]">
+                                    <p className="text-left text-sm text-gray-500">Todavía no guardaste un código para este portal.</p>
+                                    <button
+                                        onClick={() => setShowLinkModal(true)}
+                                        className="w-full sm:w-auto bg-gray-900 hover:bg-gray-800 text-white font-bold py-3 px-8 rounded-xl transition-all shadow-lg active:scale-95 flex items-center justify-center gap-2"
+                                    >
+                                        Guardar código
+                                        <ChevronRight className="w-4 h-4" />
+                                    </button>
                                 </div>
-                                <button
-                                    onClick={() => setIsLinked(false)}
-                                    className="text-red-900 hover:text-red-700 text-sm font-medium underline px-4"
-                                >
-                                    Desvincular
-                                </button>
-                            </div>
-                        )}
-                    </div>
+                            ) : (
+                                <div className="w-full bg-white rounded-xl p-6 shadow-sm border border-gray-200 flex items-center justify-between gap-4">
+                                    <div className="text-left">
+                                        <p className="text-xs text-gray-400 uppercase font-bold tracking-wider">Código de inmobiliaria</p>
+                                        <p className="text-gray-900 font-bold text-lg">{savedCode}</p>
+                                    </div>
+                                    <button
+                                        onClick={() => { setCodeInput(savedCode); setShowLinkModal(true); }}
+                                        className="text-gray-600 hover:text-gray-900 text-sm font-medium underline px-4"
+                                    >
+                                        Editar
+                                    </button>
+                                </div>
+                            )}
+                        </div>
+                    )}
 
                 </div>
 
-                {/* Modal "Link Account" */}
+                {/* Modal "Save portal code" */}
                 {showLinkModal && (
                     <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 animate-in fade-in duration-200">
                         <div className="bg-white rounded-2xl shadow-2xl max-w-md w-full overflow-hidden animate-in zoom-in-95 duration-200">
                             <div className="bg-gray-50 px-6 py-4 border-b border-gray-100 flex justify-between items-center">
-                                <h3 className="font-bold text-gray-900 text-lg">Vincular {selectedPortal.name}</h3>
+                                <h3 className="font-bold text-gray-900 text-lg">{selectedPortal.name}</h3>
                                 <button onClick={() => setShowLinkModal(false)} className="text-gray-400 hover:text-gray-600 p-1 hover:bg-gray-200 rounded-full transition-colors">
                                     <span className="text-xl leading-none">&times;</span>
                                 </button>
@@ -157,20 +171,24 @@ export default function PortalesTab() {
                             <form onSubmit={handleLinkAccount} className="p-6 space-y-5">
                                 <div className="bg-indigo-50 text-indigo-800 p-4 rounded-xl text-sm flex gap-3 items-start border border-indigo-100">
                                     <AlertCircle className="w-5 h-5 flex-shrink-0 mt-0.5" />
-                                    <p className="leading-relaxed">Ingresá las credenciales de tu cuenta de <strong>{selectedPortal.name}</strong> para activar la sincronización automática de tu inventario.</p>
+                                    <p className="leading-relaxed">
+                                        Ingresá el código de inmobiliaria que <strong>{selectedPortal.name}</strong> te asignó. Nunca te vamos a pedir tu usuario o contraseña de {selectedPortal.name}.
+                                    </p>
                                 </div>
 
-                                <div className="space-y-4">
-                                    <div>
-                                        <label className="block text-sm font-semibold text-gray-700 mb-1.5">Usuario / Email</label>
-                                        <input required type="text" className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:bg-white focus:ring-2 focus:ring-black focus:border-transparent outline-none transition-all font-medium" placeholder="ejemplo@inmobiliaria.com" />
-                                    </div>
-
-                                    <div>
-                                        <label className="block text-sm font-semibold text-gray-700 mb-1.5">Contraseña</label>
-                                        <input required type="password" className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:bg-white focus:ring-2 focus:ring-black focus:border-transparent outline-none transition-all font-medium" placeholder="••••••••" />
-                                    </div>
+                                <div>
+                                    <label className="block text-sm font-semibold text-gray-700 mb-1.5">Código de inmobiliaria</label>
+                                    <input
+                                        required
+                                        type="text"
+                                        value={codeInput}
+                                        onChange={(e) => setCodeInput(e.target.value)}
+                                        className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:bg-white focus:ring-2 focus:ring-black focus:border-transparent outline-none transition-all font-medium"
+                                        placeholder="Ej: 123456"
+                                    />
                                 </div>
+
+                                {error && <p className="text-sm text-red-600">{error}</p>}
 
                                 <div className="pt-2 flex gap-3">
                                     <button type="button" onClick={() => setShowLinkModal(false)} className="flex-1 px-4 py-3 bg-white text-gray-700 border border-gray-200 rounded-xl font-bold hover:bg-gray-50 hover:border-gray-300 transition-colors">
@@ -180,11 +198,11 @@ export default function PortalesTab() {
                                         {loading ? (
                                             <>
                                                 <div className="animate-spin rounded-full h-5 w-5 border-t-2 border-b-2 border-white"></div>
-                                                <span>Procesando...</span>
+                                                <span>Guardando...</span>
                                             </>
                                         ) : (
                                             <>
-                                                <span>Activar integración</span>
+                                                <span>Guardar</span>
                                                 <Check className="w-4 h-4" />
                                             </>
                                         )}

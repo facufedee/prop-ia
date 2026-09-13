@@ -99,199 +99,175 @@ export default function ContactForm() {
 
     if (submitted) {
         return (
-            <section id="contacto" className="py-14 sm:py-20 lg:py-24 bg-gradient-to-br from-green-50 to-emerald-50">
-                <div className="max-w-7xl mx-auto px-5 sm:px-6">
-                    <div className="max-w-2xl mx-auto text-center">
-                        <div className="w-20 h-20 bg-green-500 rounded-full flex items-center justify-center mx-auto mb-6 animate-bounce">
-                            <CheckCircle className="w-10 h-10 text-white" />
-                        </div>
-                        <h2 className="text-3xl font-bold text-gray-900 mb-4">
-                            ¡Mensaje Enviado!
-                        </h2>
-                        <p className="text-lg text-gray-600">
-                            Gracias por contactarnos. Nuestro equipo te responderá en menos de 24 horas.
-                        </p>
+            <section id="contacto" className="l-section l-section--tight">
+                <div className="l-container l-contact__success">
+                    <div className="l-contact__success-icon">
+                        <CheckCircle size={36} />
                     </div>
+                    <h2>¡Mensaje enviado!</h2>
+                    <p>Gracias por contactarnos. Nuestro equipo te responderá en menos de 24 horas.</p>
                 </div>
             </section>
         );
     }
 
     return (
-        <section id="contacto" className="py-16 sm:py-20 bg-transparent">
-            <div className="max-w-7xl mx-auto px-5 sm:px-6">
-                <div className="grid lg:grid-cols-2 gap-12 items-center">
-                    {/* Left: Info */}
-                    <div>
-                        <h2 className="text-3xl font-bold text-gray-900 mb-8">Información de Contacto</h2>
+        <section id="contacto" className="l-section l-section--tight">
+            <div className="l-container l-contact__grid">
+                {/* Left: Info */}
+                <div>
+                    <h2 className="l-contact__title">Información de contacto</h2>
 
-                        {/* Contact Info */}
-                        <div className="space-y-6">
-                            <div className="flex items-start gap-4">
-                                <div className="w-12 h-12 bg-gradient-to-r from-indigo-500 to-purple-500 rounded-xl flex items-center justify-center flex-shrink-0">
-                                    <Mail className="w-6 h-6 text-white" />
-                                </div>
-                                <div>
-                                    <h3 className="font-semibold text-gray-900 mb-1">Email</h3>
-                                    <p className="text-gray-600">zetaprop.com.ar@gmail.com</p>
-                                    <p className="text-sm text-gray-500">Respuesta rápida</p>
-                                </div>
+                    <div className="l-contact__list">
+                        <div className="l-contact__item">
+                            <div className="l-contact__icon">
+                                <Mail size={20} />
                             </div>
-
-                            <div className="flex items-start gap-4">
-                                <div className="w-12 h-12 bg-gradient-to-r from-green-500 to-emerald-500 rounded-xl flex items-center justify-center flex-shrink-0">
-                                    <WhatsAppIcon className="w-6 h-6 text-white" />
-                                </div>
-                                <div>
-                                    <h3 className="font-semibold text-gray-900 mb-1">WhatsApp</h3>
-                                    <a href="https://wa.me/5491123889745" target="_blank" rel="noopener noreferrer" className="text-gray-600 hover:text-green-600 transition-colors">
-                                        +54 9 11 2388-9745
-                                    </a>
-                                    <p className="text-sm text-gray-500">Facundo</p>
-                                </div>
-                            </div>
-
-                            <div className="flex items-start gap-4">
-                                <div className="w-12 h-12 bg-gradient-to-r from-blue-500 to-cyan-500 rounded-xl flex items-center justify-center flex-shrink-0">
-                                    <Building className="w-6 h-6 text-white" />
-                                </div>
-                                <div>
-                                    <h3 className="font-semibold text-gray-900 mb-1">Oficina</h3>
-                                    <p className="text-gray-600">Oeste de Buenos Aires, Argentina</p>
-                                    <p className="text-sm text-gray-500">Visitas con cita previa</p>
-                                </div>
+                            <div>
+                                <h3>Email</h3>
+                                <p>zetaprop.com.ar@gmail.com</p>
+                                <p className="l-contact__hint">Respuesta rápida</p>
                             </div>
                         </div>
-                    </div>
 
-                    {/* Right: Form */}
-                    <div className="bg-white rounded-3xl shadow-2xl p-8 md:p-10">
-                        <div className="flex items-center gap-3 mb-6">
-                            <div className="w-10 h-10 bg-gradient-to-r from-indigo-500 to-purple-500 rounded-lg flex items-center justify-center">
-                                <MessageSquare className="w-5 h-5 text-white" />
+                        <div className="l-contact__item">
+                            <div className="l-contact__icon l-contact__icon--positive">
+                                <WhatsAppIcon className="w-5 h-5" />
                             </div>
-                            <h3 className="text-2xl font-bold text-gray-900">Envíanos un mensaje</h3>
-                        </div>
-
-                        <form onSubmit={handleSubmit} className="space-y-6">
                             <div>
-                                <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-2">
-                                    Nombre completo *
-                                </label>
-                                <input
-                                    id="name"
-                                    type="text"
-                                    name="name"
-                                    required
-                                    maxLength={50}
-                                    value={formData.name}
-                                    onChange={handleChange}
-                                    className={`w-full px-4 py-3 border rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all ${errors.name ? 'border-red-500 bg-red-50' : 'border-gray-300'}`}
-                                    placeholder="Juan Pérez"
-                                />
-                                {errors.name && <p className="mt-1 text-xs text-red-500 flex items-center gap-1"><AlertCircle size={12} /> {errors.name}</p>}
-                            </div>
-
-                            <div>
-                                <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-2">
-                                    Email *
-                                </label>
-                                <input
-                                    id="email"
-                                    type="email"
-                                    name="email"
-                                    required
-                                    maxLength={100}
-                                    value={formData.email}
-                                    onChange={handleChange}
-                                    className={`w-full px-4 py-3 border rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all ${errors.email ? 'border-red-500 bg-red-50' : 'border-gray-300'}`}
-                                    placeholder="juan@inmobiliaria.com"
-                                />
-                                {errors.email && <p className="mt-1 text-xs text-red-500 flex items-center gap-1"><AlertCircle size={12} /> {errors.email}</p>}
-                            </div>
-
-                            <div>
-                                <label htmlFor="phone" className="block text-sm font-medium text-gray-700 mb-2">
-                                    Teléfono
-                                </label>
-                                <input
-                                    id="phone"
-                                    type="tel"
-                                    name="phone"
-                                    maxLength={20}
-                                    value={formData.phone}
-                                    onChange={handleChange}
-                                    className={`w-full px-4 py-3 border rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all ${errors.phone ? 'border-red-500 bg-red-50' : 'border-gray-300'}`}
-                                    placeholder="+54 9 11 1234-5678"
-                                />
-                                {errors.phone && <p className="mt-1 text-xs text-red-500 flex items-center gap-1"><AlertCircle size={12} /> {errors.phone}</p>}
-                            </div>
-
-                            <div>
-                                <label htmlFor="company" className="block text-sm font-medium text-gray-700 mb-2">
-                                    Inmobiliaria
-                                </label>
-                                <input
-                                    id="company"
-                                    type="text"
-                                    name="company"
-                                    maxLength={50}
-                                    value={formData.company}
-                                    onChange={handleChange}
-                                    className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all"
-                                    placeholder="Mi Inmobiliaria"
-                                />
-                            </div>
-
-                            <div>
-                                <div className="flex justify-between mb-2">
-                                    <label htmlFor="message" className="block text-sm font-medium text-gray-700">
-                                        Mensaje *
-                                    </label>
-                                    <span className={`text-xs ${formData.message.length > 450 ? 'text-red-500' : 'text-gray-500'}`}>
-                                        {formData.message.length}/500
-                                    </span>
-                                </div>
-                                <textarea
-                                    id="message"
-                                    name="message"
-                                    required
-                                    maxLength={500}
-                                    value={formData.message}
-                                    onChange={handleChange}
-                                    rows={4}
-                                    className={`w-full px-4 py-3 border rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all resize-none ${errors.message ? 'border-red-500 bg-red-50' : 'border-gray-300'}`}
-                                    placeholder="Cuéntanos cómo podemos ayudarte..."
-                                />
-                                {errors.message && <p className="mt-1 text-xs text-red-500 flex items-center gap-1"><AlertCircle size={12} /> {errors.message}</p>}
-                            </div>
-
-                            <button
-                                type="submit"
-                                disabled={loading || !!errors.name || !!errors.email || !!errors.phone || !!errors.message}
-                                className="w-full px-6 py-4 bg-gradient-to-r from-indigo-600 to-purple-600 text-white rounded-xl font-semibold hover:shadow-lg transform hover:scale-105 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
-                            >
-                                {loading ? (
-                                    <>
-                                        <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-                                        Enviando...
-                                    </>
-                                ) : (
-                                    <>
-                                        Enviar Mensaje
-                                        <Send className="w-5 h-5" />
-                                    </>
-                                )}
-                            </button>
-
-                            <p className="text-xs text-gray-500 text-center">
-                                Al enviar este formulario, aceptas nuestra{" "}
-                                <a href="/privacidad" className="text-indigo-600 underline hover:text-indigo-700">
-                                    Política de Privacidad
+                                <h3>WhatsApp</h3>
+                                <a href="https://wa.me/5491123889745" target="_blank" rel="noopener noreferrer">
+                                    +54 9 11 2388-9745
                                 </a>
-                            </p>
-                        </form>
+                                <p className="l-contact__hint">Facundo</p>
+                            </div>
+                        </div>
+
+                        <div className="l-contact__item">
+                            <div className="l-contact__icon">
+                                <Building size={20} />
+                            </div>
+                            <div>
+                                <h3>Oficina</h3>
+                                <p>Oeste de Buenos Aires, Argentina</p>
+                                <p className="l-contact__hint">Visitas con cita previa</p>
+                            </div>
+                        </div>
                     </div>
+                </div>
+
+                {/* Right: Form */}
+                <div className="l-contact__panel">
+                    <div className="l-contact__panel-head">
+                        <div className="l-contact__icon">
+                            <MessageSquare size={18} />
+                        </div>
+                        <h3>Envianos un mensaje</h3>
+                    </div>
+
+                    <form onSubmit={handleSubmit}>
+                        <div className="l-field">
+                            <label htmlFor="name">Nombre completo *</label>
+                            <input
+                                id="name"
+                                type="text"
+                                name="name"
+                                required
+                                maxLength={50}
+                                value={formData.name}
+                                onChange={handleChange}
+                                className={`l-input ${errors.name ? 'l-input--error' : ''}`}
+                                placeholder="Juan Pérez"
+                            />
+                            {errors.name && <p className="l-field__error"><AlertCircle size={12} /> {errors.name}</p>}
+                        </div>
+
+                        <div className="l-field">
+                            <label htmlFor="email">Email *</label>
+                            <input
+                                id="email"
+                                type="email"
+                                name="email"
+                                required
+                                maxLength={100}
+                                value={formData.email}
+                                onChange={handleChange}
+                                className={`l-input ${errors.email ? 'l-input--error' : ''}`}
+                                placeholder="juan@inmobiliaria.com"
+                            />
+                            {errors.email && <p className="l-field__error"><AlertCircle size={12} /> {errors.email}</p>}
+                        </div>
+
+                        <div className="l-field">
+                            <label htmlFor="phone">Teléfono</label>
+                            <input
+                                id="phone"
+                                type="tel"
+                                name="phone"
+                                maxLength={20}
+                                value={formData.phone}
+                                onChange={handleChange}
+                                className={`l-input ${errors.phone ? 'l-input--error' : ''}`}
+                                placeholder="+54 9 11 1234-5678"
+                            />
+                            {errors.phone && <p className="l-field__error"><AlertCircle size={12} /> {errors.phone}</p>}
+                        </div>
+
+                        <div className="l-field">
+                            <label htmlFor="company">Inmobiliaria</label>
+                            <input
+                                id="company"
+                                type="text"
+                                name="company"
+                                maxLength={50}
+                                value={formData.company}
+                                onChange={handleChange}
+                                className="l-input"
+                                placeholder="Mi Inmobiliaria"
+                            />
+                        </div>
+
+                        <div className="l-field">
+                            <div className="l-field__row">
+                                <label htmlFor="message" style={{ margin: 0 }}>Mensaje *</label>
+                                <span className={`l-field__counter ${formData.message.length > 450 ? 'l-field__counter--warn' : ''}`}>
+                                    {formData.message.length}/500
+                                </span>
+                            </div>
+                            <textarea
+                                id="message"
+                                name="message"
+                                required
+                                maxLength={500}
+                                value={formData.message}
+                                onChange={handleChange}
+                                rows={4}
+                                className={`l-input l-input--textarea ${errors.message ? 'l-input--error' : ''}`}
+                                placeholder="Cuéntanos cómo podemos ayudarte..."
+                            />
+                            {errors.message && <p className="l-field__error"><AlertCircle size={12} /> {errors.message}</p>}
+                        </div>
+
+                        <button
+                            type="submit"
+                            disabled={loading || !!errors.name || !!errors.email || !!errors.phone || !!errors.message}
+                            className="l-btn l-btn--primary l-btn--block"
+                        >
+                            {loading ? (
+                                <>Enviando...</>
+                            ) : (
+                                <>
+                                    Enviar mensaje
+                                    <Send size={18} />
+                                </>
+                            )}
+                        </button>
+
+                        <p className="l-contact__legal">
+                            Al enviar este formulario, aceptás nuestra{" "}
+                            <a href="/privacidad">Política de Privacidad</a>
+                        </p>
+                    </form>
                 </div>
             </div>
         </section>

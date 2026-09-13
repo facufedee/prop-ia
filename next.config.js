@@ -15,6 +15,15 @@ const nextConfig = {
                 hostname: 'firebasestorage.googleapis.com',
             },
             {
+                // Public GCS URLs (storage.googleapis.com/<bucket>/<path>) —
+                // used by the blog cover images uploaded via
+                // scripts/publish_blog_batch_sept2026.js, a different URL
+                // shape than the firebasestorage.googleapis.com one the
+                // client SDK's getDownloadURL() returns elsewhere.
+                protocol: 'https',
+                hostname: 'storage.googleapis.com',
+            },
+            {
                 protocol: 'https',
                 hostname: 'lh3.googleusercontent.com',
             },

@@ -7,6 +7,12 @@
       "runtimeArgs": ["run", "dev"],
       "port": 3000,
       "autoPort": true
+    },
+    {
+      "name": "zetaprop-mobile-web",
+      "runtimeExecutable": "cmd",
+      "runtimeArgs": ["/c", "cd /d C:\\Users\\VWAROHL\\Desktop\\Proyectos_App\\zetaprop-mobile && npx expo start --web --port 8099"],
+      "port": 8099
     }
   ]
 }
