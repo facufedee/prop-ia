@@ -167,15 +167,16 @@ export default function RootLayout({
           }}
         />
         <Script
-          src="https://www.googletagmanager.com/gtag/js?id=AW-17943485669"
+          src="https://www.googletagmanager.com/gtag/js?id=G-W7RMLDXWYQ"
           strategy="lazyOnload"
         />
-        <Script id="google-ads-tag" strategy="lazyOnload">
+        <Script id="google-analytics-tag" strategy="lazyOnload">
           {`
             window.dataLayer = window.dataLayer || [];
             function gtag(){dataLayer.push(arguments);}
             gtag('js', new Date());
 
+            gtag('config', 'G-W7RMLDXWYQ');
             gtag('config', 'AW-17943485669', {
               cookie_domain: 'zetaprop.com.ar',
               cookie_flags: 'SameSite=None;Secure'
