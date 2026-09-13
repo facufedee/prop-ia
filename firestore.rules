@@ -17,12 +17,6 @@ service cloud.firestore {
              get(/databases/$(database)/documents/users/$(request.auth.uid)).data.roleId == 'admin';
     }
     
-    function hasRole(role) {
-      return isAuthenticated() && 
-             exists(/databases/$(database)/documents/users/$(request.auth.uid)) &&
-             get(/databases/$(database)/documents/users/$(request.auth.uid)).data.roleId == role;
-    }
-    
     function validateString(value, minLen, maxLen) {
       return value is string && 
              value.size() >= minLen && 
