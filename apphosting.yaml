@@ -79,3 +79,7 @@ env:
     value: f637a6c0f35252fff3529a1b88641479e4d82a37045b56a25534d1ec70db717e
     availability:
       - RUNTIME
+  - variable: BLOG_AUTOPUBLISH_SECRET
+    value: ef1eeecd603f8906f937fc149c1390330a674f7c63b7735fc7b36d1d3eae313a
+    availability:
+      - RUNTIME

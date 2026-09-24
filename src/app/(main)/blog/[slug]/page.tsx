@@ -28,7 +28,17 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
             type: "article",
             publishedTime: post.publishedAt instanceof Date ? post.publishedAt.toISOString() : (post.publishedAt as any)?.toDate?.().toISOString(),
             authors: [post.author?.name || "Zeta Prop"],
-        }
+        },
+        // Without this, Next.js inherits the root layout's site-wide `twitter` block
+        // wholesale (it only merges metadata per top-level key, not per sub-field), so
+        // every blog post shared on X/Twitter showed the generic logo instead of its
+        // own cover image.
+        twitter: {
+            card: "summary_large_image",
+            title: post.title,
+            description: post.excerpt,
+            images: post.imageUrl ? [post.imageUrl] : [],
+        },
     };
 }
 
