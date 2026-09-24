@@ -56,30 +56,30 @@ env:
       - BUILD
       - RUNTIME
   - variable: RESEND_API_KEY
-    value: re_aCwT31Cj_8FoLaP78CfSzYmDPKSaMbLgL
+    secret: RESEND_API_KEY
     availability:
       - RUNTIME
   - variable: MP_ACCESS_TOKEN
-    value: APP_USR-3109570285020652-120215-f2139e859c9ab0fc6159e75176949812-99348769
+    secret: MP_ACCESS_TOKEN
     availability:
       - RUNTIME
   - variable: GOOGLE_API_KEY
-    value: AIzaSyCv2GiYtX7eovuh3Pw2ekcdlKwbyqQ8qk8
+    secret: GOOGLE_API_KEY
     availability:
       - RUNTIME
   - variable: POSTMARK_API_TOKEN
-    value: f875918c-6ad7-4673-8a13-145db7ed28b7
+    secret: POSTMARK_API_TOKEN
     availability:
       - RUNTIME
   - variable: MP_WEBHOOK_SECRET
-    value: f6a3972ae232f5d02d41cc2055efbb7289a73cc9a32442570b84eba5b68ae20f
+    secret: MP_WEBHOOK_SECRET
     availability:
       - RUNTIME
   - variable: CRON_SECRET
-    value: f637a6c0f35252fff3529a1b88641479e4d82a37045b56a25534d1ec70db717e
+    secret: CRON_SECRET
     availability:
       - RUNTIME
   - variable: BLOG_AUTOPUBLISH_SECRET
-    value: ef1eeecd603f8906f937fc149c1390330a674f7c63b7735fc7b36d1d3eae313a
+    secret: BLOG_AUTOPUBLISH_SECRET
     availability:
       - RUNTIME
