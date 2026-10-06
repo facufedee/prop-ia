@@ -18,10 +18,18 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
     if (!post) return { title: "Artículo no encontrado" };
 
+    const url = `https://zetaprop.com.ar/blog/${post.slug}`;
+
     return {
         title: `${post.title} - Blog Zeta Prop`,
         description: post.excerpt,
+        // The (main) layout sets canonical to the homepage; without overriding it here,
+        // LinkedIn/WhatsApp/Facebook resolve the shared link to the homepage instead of the post.
+        alternates: { canonical: url },
         openGraph: {
+            url,
+            siteName: "Zeta Prop",
+            locale: "es_AR",
             title: post.title,
             description: post.excerpt,
             images: post.imageUrl ? [post.imageUrl] : [],
@@ -131,7 +139,7 @@ export default async function BlogPostPage({ params }: Props) {
                 <article className="bg-white rounded-2xl p-8 md:p-12 shadow-xl border border-gray-100">
 
                     {/* Share Buttons (Top) */}
-                    <ShareButtons title={post.title} slug={post.slug} />
+                    <ShareButtons title={post.title} slug={post.slug} excerpt={post.excerpt} />
 
                     {/* Excerpt */}
                     <p className="text-xl md:text-2xl text-gray-600 font-serif leading-relaxed mb-10 italic border-l-4 border-indigo-500 pl-6">

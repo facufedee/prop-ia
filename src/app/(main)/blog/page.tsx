@@ -5,6 +5,7 @@ import { Metadata } from "next";
 import Image from "next/image";
 
 export const metadata: Metadata = {
+    alternates: { canonical: "https://zetaprop.com.ar/blog" },
     title: "Blog | CRM Inmobiliario | Gestión de Propiedades | Alquileres | Compra y Venta | Zeta Prop",
     description: "Noticias y tutoriales de Zeta Prop. Descubre las últimas tendencias en tecnología inmobiliaria, gestión de alquileres y automatización para tu inmobiliaria.",
     keywords: "blog inmobiliario, crm inmobiliario, gestión propiedades, alquileres argentina, software inmobiliario, zeta prop, real estate crm",

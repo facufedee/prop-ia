@@ -1,28 +1,44 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import { Share2, Link as LinkIcon } from "lucide-react";
 import { toast } from "sonner";
 
 interface ShareButtonsProps {
     title: string;
     slug: string;
+    excerpt?: string;
 }
 
-export default function ShareButtons({ title, slug }: ShareButtonsProps) {
+export default function ShareButtons({ title, slug, excerpt }: ShareButtonsProps) {
     // Use fixed production URL to prevent hydration mismatch and ensure shared links point to live site
     const url = `https://zetaprop.com.ar/blog/${slug}`;
     const encodedTitle = encodeURIComponent(title);
     const encodedUrl = encodeURIComponent(url);
+    const message = [`*${title}*`, excerpt, url].filter(Boolean).join("\n\n");
 
     const handleCopyLink = () => {
         navigator.clipboard.writeText(url);
         toast.success("Enlace copiado al portapapeles");
     };
 
+    const handleNativeShare = async () => {
+        try {
+            await navigator.share({ title, text: excerpt || title, url });
+        } catch {
+            // user cancelled the share sheet
+        }
+    };
+
+    const [canNativeShare, setCanNativeShare] = useState(false);
+    useEffect(() => {
+        setCanNativeShare(typeof navigator.share === "function");
+    }, []);
+
     const shareLinks = [
         {
             name: "WhatsApp",
-            url: `https://wa.me/?text=${encodedTitle}%20${encodedUrl}`,
+            url: `https://wa.me/?text=${encodeURIComponent(message)}`,
             color: "hover:text-green-600",
             icon: (
                 <svg viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" strokeWidth="2" fill="none" strokeLinecap="round" strokeLinejoin="round" className="w-5 h-5">
@@ -72,6 +88,15 @@ export default function ShareButtons({ title, slug }: ShareButtonsProps) {
                         {link.icon}
                     </a>
                 ))}
+                {canNativeShare && (
+                    <button
+                        onClick={handleNativeShare}
+                        className="p-2 rounded-full bg-gray-50 text-gray-600 hover:text-indigo-600 transition-colors"
+                        title="Compartir"
+                    >
+                        <Share2 size={20} />
+                    </button>
+                )}
                 <button
                     onClick={handleCopyLink}
                     className="p-2 rounded-full bg-gray-50 text-gray-600 hover:text-indigo-600 transition-colors"
