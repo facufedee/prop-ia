@@ -142,12 +142,12 @@ export default function PaymentEditModal({ isOpen, onClose, payment, rental, onS
 
     const [services, setServices] = useState<{ concepto: string; monto: number }[]>([]);
 
-    // IPC Indices state
+    // IPC / ICL indices state
     const [ipcIndices, setIpcIndices] = useState<any>(null); // Optimization: could be context or prop
 
     // Load Indices if needed
     useEffect(() => {
-        if (rental.ajusteTipo === 'IPC') {
+        if (rental.ajusteTipo === 'IPC' || rental.ajusteTipo === 'ICL') {
             fetch('/api/config/indices')
                 .then(res => res.json())
                 .then(data => setIpcIndices(data))
@@ -176,8 +176,8 @@ export default function PaymentEditModal({ isOpen, onClose, payment, rental, onS
                 montoAlquiler: payment.montoAlquiler || rental.montoMensual // Default to static value initially
             });
 
-            // If it's a new payment (no ID) and IPC is enabled, calculate the updated rent
-            if (!payment.id && rental.ajusteTipo === 'IPC' && ipcIndices) {
+            // If it's a new payment (no ID) and IPC/ICL is enabled, calculate the updated rent
+            if (!payment.id && (rental.ajusteTipo === 'IPC' || rental.ajusteTipo === 'ICL') && ipcIndices) {
                 // Calculate based on the payment month (e.g. "2026-04")
                 const paymentDate = payment.mes ? parseISO(`${payment.mes}-01`) : new Date();
                 const { currentRent } = calculateCurrentRent(rental, ipcIndices, paymentDate);

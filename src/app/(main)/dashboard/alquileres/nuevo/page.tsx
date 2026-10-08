@@ -735,9 +735,14 @@ export default function NuevoAlquilerPage() {
                                             </div>
                                         </>
                                     )}
-                                    {(contractData.ajusteTipo === 'ICL' || contractData.ajusteTipo === 'IPC' || contractData.ajusteTipo === 'casa_propia') && (
+                                    {(contractData.ajusteTipo === 'ICL' || contractData.ajusteTipo === 'IPC') && (
                                         <div className="flex items-center text-sm text-gray-500">
-                                            El valor se calculará automáticamente según el índice seleccionado.
+                                            El valor se calculará automáticamente con el índice oficial ({contractData.ajusteTipo === 'ICL' ? 'BCRA' : 'INDEC'}).
+                                        </div>
+                                    )}
+                                    {contractData.ajusteTipo === 'casa_propia' && (
+                                        <div className="flex items-center text-sm text-gray-500">
+                                            Este índice todavía no se calcula solo: ajustá el monto a mano al generar cada pago.
                                         </div>
                                     )}
                                 </div>

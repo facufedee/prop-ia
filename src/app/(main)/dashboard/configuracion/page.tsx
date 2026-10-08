@@ -108,13 +108,8 @@ import PortalesTab from "./components/PortalesTab";
 import MercadoPagoTab from "./components/MercadoPagoTab";
 import NotificationsTab from "./components/NotificationsTab";
 import InmobiliariaTab from "./components/InmobiliariaTab";
-// IndicesTab removed in favor of inline logic as seen below
-
-// Let's inline the content for now or add the component logic here to keep it self-contained as requested.
-
-interface IndicesConfig {
-    years: Record<number, Record<number, number>>; // year -> month (1-12) -> value
-}
+import { IndicesData } from "@/lib/financial/indices";
+import { auth } from "@/infrastructure/firebase/client";
 
 // Helper to get month name
 const MONTHS = [
@@ -122,9 +117,8 @@ const MONTHS = [
     "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"
 ];
 
-const START_YEAR = 2026;
-const END_YEAR = 2030;
-const YEARS = Array.from({ length: END_YEAR - START_YEAR + 1 }, (_, i) => START_YEAR + i);
+const CURRENT_YEAR = new Date().getFullYear();
+const INDEX_YEARS = [CURRENT_YEAR, CURRENT_YEAR - 1];
 
 export default function ConfiguracionPage() {
     const [activeTab, setActiveTab] = useState("tasaciones");
@@ -137,12 +131,12 @@ export default function ConfiguracionPage() {
     const [isEditingExample, setIsEditingExample] = useState(false);
     const [tempExample, setTempExample] = useState<ExampleProperty>(initialExampleProperty);
 
-    // Indices State
-    const [indices, setIndices] = useState<IndicesConfig>({ years: {} });
-    const [indicesSaved, setIndicesSaved] = useState(false);
+    // Indices State (IPC from INDEC, ICL from BCRA — read-only, synced automatically)
+    const [indices, setIndices] = useState<IndicesData>({ years: {} });
+    const [indicesRefreshing, setIndicesRefreshing] = useState(false);
+    const [indicesError, setIndicesError] = useState<string | null>(null);
 
     useEffect(() => {
-        // Load indices
         fetch('/api/config/indices')
             .then(res => res.json())
             .then(data => {
@@ -153,31 +147,28 @@ export default function ConfiguracionPage() {
             .catch(err => console.error("Error loading indices:", err));
     }, []);
 
-    const handleIndicesChange = (year: number, month: number, value: string) => {
-        const numValue = parseFloat(value);
-        if (isNaN(numValue)) return; // Allow empty? No, maybe 0.
-
-        setIndices(prev => {
-            const newYears = { ...prev.years };
-            if (!newYears[year]) newYears[year] = {};
-            newYears[year][month] = numValue;
-            return { ...prev, years: newYears };
-        });
+    const refreshIndices = async () => {
+        setIndicesRefreshing(true);
+        setIndicesError(null);
+        try {
+            const token = await auth?.currentUser?.getIdToken();
+            const res = await fetch('/api/config/indices', {
+                method: 'POST',
+                headers: token ? { Authorization: `Bearer ${token}` } : {},
+            });
+            const data = await res.json();
+            if (!res.ok) throw new Error(data.error || "No se pudo actualizar");
+            setIndices(data);
+        } catch (err: any) {
+            setIndicesError(err.message || "No se pudo actualizar");
+        } finally {
+            setIndicesRefreshing(false);
+        }
     };
 
-    const saveIndices = async () => {
-        try {
-            await fetch('/api/config/indices', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(indices)
-            });
-            setIndicesSaved(true);
-            setTimeout(() => setIndicesSaved(false), 2000);
-        } catch (err) {
-            console.error("Error saving indices:", err);
-        }
-    }
+    const iclDates = Object.keys(indices.icl ?? {}).sort();
+    const latestIclDate = iclDates[iclDates.length - 1];
+    const latestIcl = latestIclDate ? indices.icl![latestIclDate] : null;
 
     useEffect(() => {
         // Load config from server API
@@ -528,47 +519,55 @@ export default function ConfiguracionPage() {
                 <div className="bg-white p-8 rounded-xl shadow-sm border border-gray-200">
                     <div className="flex justify-between items-start mb-8">
                         <div>
-                            <h2 className="text-xl font-bold text-gray-900">Índices de Ajuste (IPC)</h2>
+                            <h2 className="text-xl font-bold text-gray-900">Índices de Ajuste (IPC e ICL)</h2>
                             <p className="text-sm text-gray-500 mt-1">
-                                Cargue los porcentajes de incremento mensual del IPC. Estos valores se utilizarán para calcular
-                                automáticamente los ajustes de los alquileres.
+                                Se actualizan solos desde las fuentes oficiales: el IPC desde el INDEC y el ICL desde el BCRA.
+                                Los usamos para calcular los ajustes de los contratos.
+                            </p>
+                            <p className="text-xs text-gray-400 mt-2">
+                                {indices.syncedAt
+                                    ? `Última actualización: ${new Date(indices.syncedAt).toLocaleString('es-AR')}`
+                                    : 'Todavía no se actualizó.'}
                             </p>
                         </div>
                         <button
-                            onClick={saveIndices}
-                            className={`px-6 py-2 bg-black text-white text-sm font-medium rounded-lg hover:bg-gray-800 transition-all flex items-center gap-2 ${indicesSaved ? 'bg-green-600 hover:bg-green-700' : ''}`}
+                            onClick={refreshIndices}
+                            disabled={indicesRefreshing}
+                            className="px-6 py-2 bg-black text-white text-sm font-medium rounded-lg hover:bg-gray-800 transition-all flex items-center gap-2 disabled:opacity-60"
                         >
-                            {indicesSaved ? <Check className="w-4 h-4" /> : <Save className="w-4 h-4" />}
-                            {indicesSaved ? 'Guardado' : 'Guardar Cambios'}
+                            <RotateCcw className={`w-4 h-4 ${indicesRefreshing ? 'animate-spin' : ''}`} />
+                            {indicesRefreshing ? 'Actualizando...' : 'Actualizar ahora'}
                         </button>
                     </div>
 
+                    {indicesError && (
+                        <p className="mb-6 text-sm text-red-600 bg-red-50 border border-red-100 rounded-lg px-4 py-3">{indicesError}</p>
+                    )}
+
+                    {latestIcl !== null && (
+                        <div className="mb-8 border rounded-xl px-6 py-4 bg-gray-50 flex flex-wrap items-baseline gap-x-3">
+                            <span className="text-xs text-gray-500 uppercase tracking-wider">ICL al {latestIclDate.split('-').reverse().join('/')}</span>
+                            <span className="text-2xl font-bold text-gray-900">{latestIcl.toLocaleString('es-AR', { minimumFractionDigits: 2 })}</span>
+                            <span className="text-xs text-gray-400">base 30/6/2020 = 1</span>
+                        </div>
+                    )}
+
                     <div className="space-y-8">
-                        {YEARS.map(year => (
+                        {INDEX_YEARS.map(year => (
                             <div key={year} className="border rounded-xl overflow-hidden">
                                 <div className="bg-gray-50 px-6 py-3 border-b flex items-center gap-2">
                                     <span className="font-bold text-gray-900">{year}</span>
-                                    <span className="text-xs text-gray-500 uppercase tracking-wider">Ajuste Mensual (%)</span>
+                                    <span className="text-xs text-gray-500 uppercase tracking-wider">IPC mensual INDEC (%)</span>
                                 </div>
                                 <div className="p-6 grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4">
                                     {MONTHS.map((monthName, idx) => {
-                                        const monthNum = idx + 1;
-                                        const value = indices.years[year]?.[monthNum] ?? 0;
+                                        const value = indices.years[year]?.[idx + 1];
                                         return (
-                                            <div key={monthNum}>
-                                                <label className="block text-xs font-medium text-gray-600 mb-1">{monthName}</label>
-                                                <div className="relative">
-                                                    <input
-                                                        type="number"
-                                                        step="0.01"
-                                                        min="0"
-                                                        className="w-full pl-3 pr-8 py-2 border rounded-lg text-sm focus:ring-2 focus:ring-black outline-none"
-                                                        placeholder="0.0"
-                                                        value={value || ''}
-                                                        onChange={(e) => handleIndicesChange(year, monthNum, e.target.value)}
-                                                    />
-                                                    <span className="absolute right-3 top-2 text-gray-400 text-sm pointer-events-none">%</span>
-                                                </div>
+                                            <div key={idx}>
+                                                <span className="block text-xs font-medium text-gray-600 mb-1">{monthName}</span>
+                                                <span className={`block px-3 py-2 border rounded-lg text-sm ${value === undefined ? 'text-gray-300 bg-gray-50' : 'text-gray-900'}`}>
+                                                    {value === undefined ? 'Sin publicar' : `${value.toLocaleString('es-AR', { minimumFractionDigits: 1 })} %`}
+                                                </span>
                                             </div>
                                         );
                                     })}

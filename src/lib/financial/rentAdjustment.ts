@@ -1,16 +1,15 @@
 import { Alquiler } from "@/domain/models/Alquiler";
-import { parseISO, differenceInMonths, addMonths, isBefore, isSameMonth } from "date-fns";
+import { parseISO, differenceInMonths, addMonths } from "date-fns";
+import { IndicesData, iclAt } from "@/lib/financial/indices";
 
-interface IndicesConfig {
-    years: Record<number, Record<number, number>>; // year -> month (1-12) -> value
-}
-
-// Helper to fetch indices (in a real app, might want to cache or pass from component)
-// For this utility, we'll assume indices are passed in or fetched if needed. 
-// Given the context of usage (likely in components), we'll make it pure logic first.
+type IndicesConfig = IndicesData;
 
 /**
- * Calculates the current rent based on IPC adjustments.
+ * Calculates the current rent based on IPC or ICL adjustments.
+ *
+ * ICL: the rent is the initial rent times ICL(last adjustment date) / ICL(start date).
+ * Adjustments chain multiplicatively, so this equals compounding each period.
+ * Default frequency for ICL is 12 months.
  * 
  * Logic:
  * 1. Identify "Base Date" and "Base Amount".
@@ -42,12 +41,36 @@ export const calculateCurrentRent = (
         accumulatedPercentage: 0
     };
 
-    if (rental.ajusteTipo !== 'IPC' || !rental.montoMensual) {
+    if ((rental.ajusteTipo !== 'IPC' && rental.ajusteTipo !== 'ICL') || !rental.montoMensual) {
         return defaultResult;
     }
 
-    const frequency = rental.ajusteFrecuencia || 3; // Default 3 months
+    const isIcl = rental.ajusteTipo === 'ICL';
+    const frequency = rental.ajusteFrecuencia || (isIcl ? 12 : 3);
     const startDate = typeof rental.fechaInicio === 'string' ? parseISO(rental.fechaInicio) : rental.fechaInicio;
+
+    if (isIcl) {
+        const periods = Math.floor(differenceInMonths(targetDate, startDate) / frequency);
+        const nextFromStart = addMonths(startDate, (periods + 1) * frequency);
+        if (periods < 1) {
+            return { ...defaultResult, nextAdjustmentDate: nextFromStart };
+        }
+
+        const lastAdjDate = addMonths(startDate, periods * frequency);
+        const iclStart = iclAt(indices.icl, startDate);
+        const iclLast = iclAt(indices.icl, lastAdjDate);
+        if (!iclStart || !iclLast) {
+            return { ...defaultResult, lastAdjustmentDate: lastAdjDate, nextAdjustmentDate: nextFromStart };
+        }
+
+        const ratio = iclLast / iclStart;
+        return {
+            currentRent: Math.ceil(rental.montoMensual * ratio),
+            lastAdjustmentDate: lastAdjDate,
+            nextAdjustmentDate: nextFromStart,
+            accumulatedPercentage: (ratio - 1) * 100,
+        };
+    }
 
     // Determine how many full periods have passed
     // Period 0: Months 0-2 (Pay initial rent)

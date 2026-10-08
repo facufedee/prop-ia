@@ -1,41 +1,32 @@
-import { NextResponse } from 'next/server';
-import fs from 'fs/promises';
-import path from 'path';
+import { NextRequest, NextResponse } from "next/server";
+import { verifyAdmin } from "@/lib/apiAuth";
+import { getIndices, syncIndices } from "@/infrastructure/services/indicesSyncService";
 
-const IPC_FILE_PATH = path.join(process.cwd(), 'data', 'indices_ipc.json');
-
-// Ensure data directory exists
-async function ensureDirectory() {
-    const dir = path.join(process.cwd(), 'data');
-    try {
-        await fs.access(dir);
-    } catch {
-        await fs.mkdir(dir, { recursive: true });
-    }
-}
-
+// IPC (INDEC) and ICL (BCRA) are official public data shared by every tenant, so
+// reading is open and nobody can overwrite them: the values come only from the
+// official APIs and are refreshed automatically when older than 12 hours.
 export async function GET() {
     try {
-        await ensureDirectory();
-        try {
-            const data = await fs.readFile(IPC_FILE_PATH, 'utf-8');
-            return NextResponse.json(JSON.parse(data));
-        } catch {
-            // Return empty configuration if file doesn't exist
-            return NextResponse.json({ years: {} });
-        }
+        const indices = await getIndices();
+        return NextResponse.json(indices, {
+            headers: { "Cache-Control": "public, max-age=300, s-maxage=3600" },
+        });
     } catch (error) {
-        return NextResponse.json({ error: 'Failed to read IPC config' }, { status: 500 });
+        console.error("[indices] GET failed:", error);
+        return NextResponse.json({ error: "Failed to load indices" }, { status: 500 });
     }
 }
 
-export async function POST(request: Request) {
+// Lets an administrator force a refresh from the official sources.
+export async function POST(request: NextRequest) {
+    const auth = await verifyAdmin(request);
+    if (auth.error) return auth.error;
+
     try {
-        const body = await request.json();
-        await ensureDirectory();
-        await fs.writeFile(IPC_FILE_PATH, JSON.stringify(body, null, 2));
-        return NextResponse.json({ success: true });
-    } catch (error) {
-        return NextResponse.json({ error: 'Failed to save IPC config' }, { status: 500 });
+        const indices = await syncIndices({ force: true });
+        return NextResponse.json(indices);
+    } catch (error: any) {
+        console.error("[indices] forced sync failed:", error);
+        return NextResponse.json({ error: error?.message ?? "No se pudo actualizar" }, { status: 502 });
     }
 }
