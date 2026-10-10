@@ -36,3 +36,32 @@ describe('sendEmailWithResend', () => {
         ).rejects.toThrow('API key is invalid');
     });
 });
+
+describe('resendClient helpers', () => {
+    beforeEach(() => {
+        vi.resetModules();
+        sendMock.mockReset();
+        process.env.RESEND_API_KEY = 're_test_key';
+    });
+
+    it('returns the Resend response when the send succeeds', async () => {
+        sendMock.mockResolvedValue({ data: { id: 'email_456' }, error: null });
+        const { sendNewLeadNotificationEmail } = await import('../lib/resendClient');
+
+        const result = await sendNewLeadNotificationEmail({ to: 'agent@b.com', leadName: 'Ana' });
+
+        expect(result?.data?.id).toBe('email_456');
+    });
+
+    it('throws when Resend returns an error instead of data', async () => {
+        sendMock.mockResolvedValue({
+            data: null,
+            error: { name: 'validation_error', message: 'API key is invalid' },
+        });
+        const { sendNewLeadNotificationEmail } = await import('../lib/resendClient');
+
+        await expect(
+            sendNewLeadNotificationEmail({ to: 'agent@b.com', leadName: 'Ana' })
+        ).rejects.toThrow('API key is invalid');
+    });
+});

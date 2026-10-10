@@ -46,6 +46,16 @@ interface PropertyInquiryEmailParams extends BaseEmailParams {
 
 const FROM_DEFAULT = 'Zeta Prop <notificaciones@zetaprop.com.ar>';
 
+// The Resend SDK reports API failures (invalid key, unverified domain, etc.)
+// in `error` instead of throwing, so surface them explicitly.
+async function sendOrThrow(client: Resend, payload: Parameters<Resend['emails']['send']>[0]) {
+  const result = await client.emails.send(payload);
+  if (result.error) {
+    throw new Error(`Resend API error (${result.error.name}): ${result.error.message}`);
+  }
+  return result;
+}
+
 export async function sendPropertyInquiryEmail(params: PropertyInquiryEmailParams) {
   if (!resend) {
     if (process.env.NODE_ENV === 'development') {
@@ -55,7 +65,7 @@ export async function sendPropertyInquiryEmail(params: PropertyInquiryEmailParam
     throw new Error('Resend client not configured');
   }
 
-  return resend.emails.send({
+  return sendOrThrow(resend, {
     from: FROM_DEFAULT,
     to: Array.isArray(params.to) ? params.to : [params.to],
     subject: `Consulta sobre ${params.propertyName}`,
@@ -80,7 +90,7 @@ export async function sendWelcomeEmail(params: WelcomeEmailParams) {
 
   const name = params.name ?? '¡Bienvenido!';
 
-  return resend.emails.send({
+  return sendOrThrow(resend, {
     from: FROM_DEFAULT,
     to: Array.isArray(params.to) ? params.to : [params.to],
     subject: 'Bienvenido a Zeta Prop',
@@ -107,7 +117,7 @@ export async function sendPaymentEmail(params: PaymentEmailParams) {
   const { amount, planName, billingPeriod } = params;
   const currency = params.currency ?? 'ARS';
 
-  return resend.emails.send({
+  return sendOrThrow(resend, {
     from: FROM_DEFAULT,
     to: Array.isArray(params.to) ? params.to : [params.to],
     subject: `Pago recibido - Plan ${planName}`,
@@ -138,7 +148,7 @@ export async function sendPaymentReminderEmail(params: PaymentReminderEmailParam
     day: 'numeric',
   });
 
-  return resend.emails.send({
+  return sendOrThrow(resend, {
     from: FROM_DEFAULT,
     to: Array.isArray(params.to) ? params.to : [params.to],
     subject: `Recordatorio de pago - Plan ${planName}`,
@@ -164,7 +174,7 @@ export async function sendNewLeadNotificationEmail(params: NewLeadNotificationEm
 
   const { leadName, leadEmail, message, propertyTitle } = params;
 
-  return resend.emails.send({
+  return sendOrThrow(resend, {
     from: FROM_DEFAULT,
     to: Array.isArray(params.to) ? params.to : [params.to],
     subject: '¡Tenés una nueva consulta en Zeta Prop!',
