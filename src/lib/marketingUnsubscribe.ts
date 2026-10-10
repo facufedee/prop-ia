@@ -5,7 +5,7 @@ import { buildOneClickUnsubscribeUrl } from '@/lib/unsubscribeToken';
  * Unsubscribe handling for marketing emails.
  *
  * Templates (in the repo and copies stored in Firestore `emailTemplates`) may
- * still carry the legacy unsigned `/unsubscribe?email=...` link, which the
+ * still carry the legacy unsigned unsubscribe link (an `email` query param), which the
  * unsubscribe page rejects. Links are therefore rewritten at send time to the
  * signed URL from `unsubscribeToken.ts`, or to the `{{unsubscribeUrl}}`
  * placeholder's value for templates that already use it.

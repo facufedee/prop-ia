@@ -1,5 +1,6 @@
 import { adminDb } from '@/infrastructure/firebase/admin';
-import { sendEmailWithResend } from '@/lib/resend';
+import { sendEmailWithResend, isSkippedEmail } from '@/lib/resend';
+import { rewriteUnsubscribeLinks, UNSUBSCRIBE_PAGE_URL } from '@/lib/marketingUnsubscribe';
 import * as admin from 'firebase-admin';
 
 const Timestamp = admin.firestore.Timestamp;
@@ -23,7 +24,7 @@ export interface EmailLog {
     type: EmailTemplateType;
     to: string;
     subject: string;
-    status: 'sent' | 'failed';
+    status: 'sent' | 'failed' | 'skipped_unsubscribed';
     error?: string;
     sentAt: Date;
     metadata?: Record<string, any>;
@@ -49,6 +50,15 @@ async function logEmail(log: Omit<EmailLog, 'id'>): Promise<void> {
     } catch (err) {
         console.error('[MarketingEmailService] Failed to log email:', err);
     }
+}
+
+/**
+ * Transactional emails are not marketing and are always sent, but their custom
+ * templates may share the marketing footer; point its unsubscribe link at the
+ * generic page instead of leaving a placeholder or an unsigned link.
+ */
+function withGenericUnsubscribeLink(html: string): string {
+    return rewriteUnsubscribeLinks(html, UNSUBSCRIBE_PAGE_URL);
 }
 
 // ======= Get Custom Template =======
@@ -89,13 +99,13 @@ export const marketingEmailService = {
                 html = await renderTemplate(WelcomeEmail, data);
             }
 
-            await sendEmailWithResend({ to, subject, html });
+            const result = await sendEmailWithResend({ to, subject, html, marketing: {} });
 
             await logEmail({
                 type: 'welcome',
                 to,
                 subject,
-                status: 'sent',
+                status: isSkippedEmail(result) ? 'skipped_unsubscribed' : 'sent',
                 sentAt: new Date(),
                 metadata: { userName: data.userName },
             });
@@ -134,7 +144,7 @@ export const marketingEmailService = {
                 html = await renderTemplate(PaymentConfirmedEmail, data);
             }
 
-            await sendEmailWithResend({ to, subject, html });
+            await sendEmailWithResend({ to, subject, html: withGenericUnsubscribeLink(html) });
 
             await logEmail({
                 type: 'payment_confirmed',
@@ -178,7 +188,7 @@ export const marketingEmailService = {
                 html = await renderTemplate(PaymentExpiringEmail, data);
             }
 
-            await sendEmailWithResend({ to, subject, html });
+            await sendEmailWithResend({ to, subject, html: withGenericUnsubscribeLink(html) });
 
             await logEmail({
                 type: 'payment_expiring',
@@ -230,7 +240,7 @@ export const marketingEmailService = {
                 html = await renderTemplate(NewLeadEmail, data);
             }
 
-            await sendEmailWithResend({ to, subject, html });
+            await sendEmailWithResend({ to, subject, html: withGenericUnsubscribeLink(html) });
 
             await logEmail({
                 type: 'new_lead',
@@ -272,17 +282,18 @@ export const marketingEmailService = {
 
             const subject = template.subject || 'Notificación de ZetaProp';
 
-            await sendEmailWithResend({ to, subject, html });
+            const result = await sendEmailWithResend({ to, subject, html, marketing: {} });
+            const skipped = isSkippedEmail(result);
 
             await logEmail({
                 type,
                 to,
                 subject,
-                status: 'sent',
+                status: skipped ? 'skipped_unsubscribed' : 'sent',
                 sentAt: new Date(),
                 metadata: data,
             });
-            return { success: true };
+            return skipped ? { success: true, skipped: 'unsubscribed' as const } : { success: true };
         } catch (error: any) {
             console.error('[MarketingEmailService] sendCustomEmail failed for type', type, ':', error);
             await logEmail({

@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { adminDb } from "@/infrastructure/firebase/admin";
-import { sendEmailWithResend } from "@/lib/resend";
+import { sendEmailWithResend, isSkippedEmail } from "@/lib/resend";
 import * as admin from "firebase-admin";
 import { verifyAdmin } from "@/lib/apiAuth";
 
@@ -49,23 +49,33 @@ export async function POST(req: NextRequest) {
         // Send emails and log results
         let sent = 0;
         let failed = 0;
+        let skipped = 0;
 
         for (const { uid, email, displayName } of emailsToSend) {
             try {
                 const personalizedHtml = html
                     .replace(/\{\{nombre\}\}/g, displayName || "Usuario")
                     .replace(/\{\{email\}\}/g, email);
-                await sendEmailWithResend({ to: email, subject, html: personalizedHtml });
+                // `marketing` re-checks the unsubscribe flag at send time and fills
+                // {{unsubscribeUrl}} / legacy links with the user's signed link.
+                const result = await sendEmailWithResend({
+                    to: email,
+                    subject,
+                    html: personalizedHtml,
+                    marketing: { userId: uid },
+                });
+                const wasSkipped = isSkippedEmail(result);
                 await adminDb.collection("emailLogs").add({
                     type: "bulk_campaign",
                     to: email,
                     userId: uid,
                     subject,
                     campaignName: campaignName || "Campaña manual",
-                    status: "sent",
+                    status: wasSkipped ? "skipped_unsubscribed" : "sent",
                     sentAt: admin.firestore.Timestamp.now(),
                 });
-                sent++;
+                if (wasSkipped) skipped++;
+                else sent++;
             } catch {
                 await adminDb.collection("emailLogs").add({
                     type: "bulk_campaign",
@@ -80,7 +90,7 @@ export async function POST(req: NextRequest) {
             }
         }
 
-        return NextResponse.json({ success: true, sent, failed, total: emailsToSend.length });
+        return NextResponse.json({ success: true, sent, failed, skipped, total: emailsToSend.length });
     } catch (error: any) {
         console.error("[bulk-email]", error);
         return NextResponse.json({ error: "Error interno" }, { status: 500 });

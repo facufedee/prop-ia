@@ -4,7 +4,7 @@
 const saasWrapper = (content: string) => `
 <div style="font-family: 'Segoe UI', Arial, sans-serif; color: #333; line-height: 1.6; max-width: 600px; margin: 0 auto; background-color: #ffffff; padding: 30px; border-radius: 12px; border: 1px solid #e2e8f0; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);">
     <div style="text-align: center; margin-bottom: 25px;">
-        <img src="https://zetaprop.com.ar/assets/img/logo_zeta_prop_marzo.jpeg" alt="Zeta Prop" style="height: 45px; margin-bottom: 10px;" />
+        <img src="https://zetaprop.com.ar/assets/img/logo_zeta_prop_transparent.png" alt="Zeta Prop" width="174" height="45" style="height: 45px; width: 174px; margin-bottom: 10px;" />
     </div>
     <div style="font-size: 16px;">
         ${content}
@@ -18,7 +18,7 @@ const saasWrapper = (content: string) => `
         Ingresá al portal: <a href="https://zetaprop.com.ar/login" style="color: #2563eb; text-decoration: none; font-weight: bold;">zetaprop.com.ar/login</a>
     </div>
     <div style="font-size: 0.75em; color: #94a3b8; margin-top: 15px; text-align: center;">
-        ¿No querés recibir más estos correos? <a href="https://zetaprop.com.ar/unsubscribe?email={{email}}" style="color: #94a3b8; text-decoration: underline;">Darse de baja de la lista</a>
+        ¿No querés recibir más estos correos? <a href="{{unsubscribeUrl}}" style="color: #94a3b8; text-decoration: underline;">Darse de baja de la lista</a>
     </div>
 </div>
 `;

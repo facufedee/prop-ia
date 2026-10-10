@@ -56,3 +56,35 @@ describe('buildListUnsubscribeHeaders', () => {
         expect(headers['List-Unsubscribe-Post']).toBe('List-Unsubscribe=One-Click');
     });
 });
+
+describe('repository email templates', () => {
+    const SOURCES = [
+        'src/app/(main)/dashboard/marketing/premiumTemplates.ts',
+        'src/infrastructure/services/emailNotificationService.ts',
+        'src/infrastructure/services/marketingEmailService.ts',
+        'src/app/api/admin/bulk-email/route.ts',
+        'scripts/seed_marketing_templates.js',
+    ];
+
+    it('contain no unsigned unsubscribe links or the missing logo', async () => {
+        const { readFileSync } = await import('fs');
+        const { resolve } = await import('path');
+
+        for (const file of SOURCES) {
+            const source = readFileSync(resolve(process.cwd(), file), 'utf-8');
+            expect(source, file).not.toMatch(/unsubscribe\?email=/);
+            expect(source, file).not.toContain('logo_zeta_prop_marzo');
+        }
+    });
+
+    it('premium templates use the {{unsubscribeUrl}} placeholder and the working logo', async () => {
+        const { PREMIUM_TEMPLATES } = await import('../app/(main)/dashboard/marketing/premiumTemplates');
+
+        for (const template of PREMIUM_TEMPLATES) {
+            expect(template.html, template.type).toContain('href="{{unsubscribeUrl}}"');
+            expect(template.html, template.type).toContain(
+                'https://zetaprop.com.ar/assets/img/logo_zeta_prop_transparent.png'
+            );
+        }
+    });
+});
