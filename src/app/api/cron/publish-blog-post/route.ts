@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { adminDb } from "@/infrastructure/firebase/admin";
 import { getStorage } from "firebase-admin/storage";
 import { Timestamp } from "firebase-admin/firestore";
+import { sendNewsletter } from "@/lib/newsletter/sendNewsletter";
 import os from "os";
 import path from "path";
 import fs from "fs/promises";
@@ -22,6 +23,10 @@ import fs from "fs/promises";
  *     project's own Storage bucket — it is never hot-linked, matching the
  *     existing manual publish scripts' convention.
  */
+
+// Publishing may also send the newsletter (batched Resend calls), so allow the
+// same budget as /api/cron/send-newsletter.
+export const maxDuration = 300;
 
 const BUCKET_NAME = "prop-ia.firebasestorage.app";
 const AUTHOR = { name: "Facundo Zeta" };
@@ -122,10 +127,24 @@ export async function POST(request: NextRequest) {
         });
 
         console.log(`[publish-blog-post] Published "${title}" (${docRef.id})`);
+
+        // Every publish checks whether enough unsent posts have piled up for a
+        // newsletter (sendNewsletter is a no-op below its threshold and is
+        // idempotent). A newsletter failure never fails the publish itself.
+        let newsletter: unknown;
+        try {
+            newsletter = await sendNewsletter();
+        } catch (err: unknown) {
+            const message = err instanceof Error ? err.message : String(err);
+            console.error("[publish-blog-post] Newsletter trigger failed:", message);
+            newsletter = { status: "error", error: message };
+        }
+
         return NextResponse.json({
             success: true,
             id: docRef.id,
             url: `https://zetaprop.com.ar/blog/${slug}`,
+            newsletter,
         });
     } catch (err: any) {
         console.error("[publish-blog-post] Firestore write failed:", err.message);
