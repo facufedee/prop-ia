@@ -17,7 +17,7 @@ function UnsubscribeContent() {
     let linkError: string | null = null;
     if (!userId || !token) {
         linkError = legacyEmail
-            ? "Este enlace de baja ya no es válido. Usá el enlace que figura en un correo reciente de Zeta Prop o escribinos a contacto@zetaprop.com.ar y te damos de baja."
+            ? "Este enlace de baja ya no es válido. Usá el enlace que figura en un correo reciente de Zeta Prop o escribinos a zetaprop.com.ar@gmail.com y te damos de baja."
             : "El enlace de baja está incompleto. Usá el enlace que figura en un correo reciente de Zeta Prop.";
     }
     const status = linkError ? 'error' : requestStatus;

@@ -204,10 +204,10 @@ describe('sendNewsletter', () => {
         const listUnsub = new Set<string>();
         for (const email of emails) {
             expect(email.from).toBe('Zeta Prop <newsletter@zetaprop.com.ar>');
-            expect(email.replyTo).toBe('contacto@zetaprop.com.ar');
+            expect(email.replyTo).toBe('zetaprop.com.ar@gmail.com');
             expect(email.headers['List-Unsubscribe-Post']).toBe('List-Unsubscribe=One-Click');
             expect(email.headers['List-Unsubscribe']).toMatch(
-                /^<https:\/\/zetaprop\.com\.ar\/api\/newsletter\/unsubscribe\?u=[^>]+>, <mailto:contacto@zetaprop\.com\.ar\?subject=unsubscribe>$/
+                /^<https:\/\/zetaprop\.com\.ar\/api\/newsletter\/unsubscribe\?u=[^>]+>, <mailto:zetaprop\.com\.ar@gmail\.com\?subject=unsubscribe>$/
             );
             expect(email.text).toContain('https://zetaprop.com.ar/unsubscribe?u=');
             expect(email.html).toContain('https://zetaprop.com.ar/unsubscribe?u=');

@@ -7,7 +7,7 @@ import { renderNewsletter, type NewsletterPost } from './template';
 
 export const NEWSLETTER_FROM = 'Zeta Prop <newsletter@zetaprop.com.ar>';
 /** Monitored inbox for replies and mailto unsubscribes. Change here only. */
-export const NEWSLETTER_REPLY_TO = 'contacto@zetaprop.com.ar';
+export const NEWSLETTER_REPLY_TO = 'zetaprop.com.ar@gmail.com';
 
 const MIN_POSTS = 2;
 /** Upper bound of posts per issue, so a backlog never produces a giant email. */
