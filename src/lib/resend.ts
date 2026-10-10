@@ -37,6 +37,12 @@ export async function sendEmailWithResend(options: SendEmailOptions) {
             html,
         });
 
+        // The Resend SDK reports API failures (invalid key, unverified domain, etc.)
+        // in `error` instead of throwing, so surface them explicitly.
+        if (data.error) {
+            throw new Error(`Resend API error (${data.error.name}): ${data.error.message}`);
+        }
+
         console.log(`[Resend] Email sent to ${Array.isArray(to) ? to.join(', ') : to} - ID: ${data.data?.id}`);
         return data;
     } catch (error) {
