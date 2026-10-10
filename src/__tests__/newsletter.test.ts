@@ -158,6 +158,22 @@ describe('renderNewsletter', () => {
         expect(result.text).toContain('Segunda nota');
         expect(result.subject).toBe('Nuevas notas: <script>alert(1)</script> y Segunda nota');
     });
+
+    it('links a logo that exists in public/ and crops covers to a fixed height', async () => {
+        const { renderNewsletter } = await import('../lib/newsletter/template');
+        const { existsSync } = await import('node:fs');
+        const { join } = await import('node:path');
+
+        const { html } = renderNewsletter({
+            posts: [{ title: 'Uno', slug: 'uno', imageUrl: 'https://img/x.jpg' }],
+            unsubscribeUrl: 'https://zetaprop.com.ar/unsubscribe?u=a&t=b',
+        });
+
+        const logoPath = html.match(/https:\/\/zetaprop\.com\.ar(\/assets\/img\/[^"]+)/)?.[1];
+        expect(logoPath).toBeDefined();
+        expect(existsSync(join(process.cwd(), 'public', logoPath!))).toBe(true);
+        expect(html).toMatch(/height: \d+px; max-height: \d+px; overflow: hidden;[^>]*><a [^>]*><img src="https:\/\/img\/x\.jpg"/);
+    });
 });
 
 // ── sendNewsletter ──────────────────────────────────────────────────────────

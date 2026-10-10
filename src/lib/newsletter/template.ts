@@ -4,7 +4,10 @@
  */
 
 export const SITE_URL = 'https://zetaprop.com.ar';
-const LOGO_URL = `${SITE_URL}/assets/img/logo_zeta_prop_marzo.jpeg`;
+const LOGO_URL = `${SITE_URL}/assets/img/logo_zeta_prop_transparent.png`;
+// Covers are cropped to this height with an overflow:hidden wrapper, since Gmail
+// ignores object-fit and tall (portrait) covers would otherwise dominate the email.
+const COVER_HEIGHT_PX = 260;
 const BRAND_BLUE = '#2563eb';
 
 export interface NewsletterPost {
@@ -54,7 +57,7 @@ export function buildSubject(posts: NewsletterPost[]): string {
 function renderPostHtml(post: NewsletterPost): string {
     const url = escapeHtml(postUrl(post.slug));
     const image = post.imageUrl
-        ? `<a href="${url}"><img src="${escapeHtml(post.imageUrl)}" alt="${escapeHtml(post.title)}" width="100%" style="width: 100%; max-width: 540px; height: auto; border-radius: 10px; display: block; margin-bottom: 16px;" /></a>`
+        ? `<div style="height: ${COVER_HEIGHT_PX}px; max-height: ${COVER_HEIGHT_PX}px; overflow: hidden; border-radius: 10px; margin-bottom: 16px;"><a href="${url}"><img src="${escapeHtml(post.imageUrl)}" alt="${escapeHtml(post.title)}" width="540" style="width: 100%; max-width: 540px; height: auto; display: block;" /></a></div>`
         : '';
     const category = post.category
         ? `<div style="font-size: 12px; font-weight: bold; text-transform: uppercase; letter-spacing: 0.05em; color: ${BRAND_BLUE}; margin-bottom: 6px;">${escapeHtml(post.category)}</div>`
@@ -92,7 +95,7 @@ export function renderNewsletter({ posts, unsubscribeUrl, recipientName }: Rende
 <body style="margin: 0; padding: 20px 10px; background-color: #f1f5f9;">
 <div style="font-family: 'Segoe UI', Arial, sans-serif; color: #333; line-height: 1.6; max-width: 600px; margin: 0 auto; background-color: #ffffff; padding: 30px; border-radius: 12px; border: 1px solid #e2e8f0;">
     <div style="text-align: center; margin-bottom: 25px;">
-        <a href="${SITE_URL}"><img src="${LOGO_URL}" alt="Zeta Prop" style="height: 45px; margin-bottom: 10px;" /></a>
+        <a href="${SITE_URL}"><img src="${LOGO_URL}" alt="Zeta Prop" width="174" height="45" style="width: 174px; height: 45px; margin-bottom: 10px; border: 0;" /></a>
     </div>
     <div style="font-size: 16px;">
         <p style="margin: 0 0 8px;">${escapeHtml(greeting)}</p>
