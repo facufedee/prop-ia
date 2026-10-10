@@ -10,6 +10,11 @@ export const resendClient = resendApiKey ? new Resend(resendApiKey) : null;
 
 export const FROM_EMAIL = 'ZetaProp <notificaciones@zetaprop.com.ar>';
 
+// Templates stored in Firestore (emailTemplates) still reference a logo file that
+// no longer exists, so it is swapped at send time instead of migrating the data.
+const RETIRED_LOGO_URL = 'https://zetaprop.com.ar/assets/img/logo_zeta_prop_marzo.jpeg';
+const CURRENT_LOGO_URL = 'https://zetaprop.com.ar/assets/img/logo_zeta_prop_transparent.png';
+
 export interface MarketingSendOptions {
     /** Recipient's user id; when omitted the user is looked up by email. */
     userId?: string;
@@ -79,7 +84,8 @@ export async function sendEmailWithResend(options: SendEmailOptions) {
 
     const { subject, from = FROM_EMAIL, marketing } = options;
     const to = Array.isArray(options.to) ? options.to : [options.to];
-    let { html, text } = options;
+    let { text } = options;
+    let html = options.html.split(RETIRED_LOGO_URL).join(CURRENT_LOGO_URL);
     let headers: Record<string, string> | undefined;
 
     try {

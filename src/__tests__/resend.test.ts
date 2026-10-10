@@ -38,6 +38,21 @@ describe('sendEmailWithResend', () => {
         process.env.RESEND_API_KEY = 're_test_key';
     });
 
+    it('replaces the retired logo URL in stored templates with the current logo', async () => {
+        sendMock.mockResolvedValue({ data: { id: 'email_logo' }, error: null });
+        const { sendEmailWithResend } = await import('../lib/resend');
+
+        await sendEmailWithResend({
+            to: 'a@b.com',
+            subject: 'Hi',
+            html: '<img src="https://zetaprop.com.ar/assets/img/logo_zeta_prop_marzo.jpeg" alt="Zeta Prop" />',
+        });
+
+        const sentHtml = sendMock.mock.calls[0][0].html as string;
+        expect(sentHtml).not.toContain('logo_zeta_prop_marzo.jpeg');
+        expect(sentHtml).toContain('https://zetaprop.com.ar/assets/img/logo_zeta_prop_transparent.png');
+    });
+
     it('returns the Resend response when the send succeeds', async () => {
         sendMock.mockResolvedValue({ data: { id: 'email_123' }, error: null });
         const { sendEmailWithResend } = await import('../lib/resend');
