@@ -1,55 +1,54 @@
 "use client";
 
-import { useEffect, useState, Suspense } from "react";
+import { useState, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
-import { db } from "@/infrastructure/firebase/client";
-import { collection, query, where, getDocs, updateDoc, doc } from "firebase/firestore";
 import Link from "next/link";
 import { CheckCircle2, XCircle, Loader2, Mail } from "lucide-react";
 
 function UnsubscribeContent() {
     const searchParams = useSearchParams();
-    const email = searchParams.get("email");
-    const [status, setStatus] = useState<'loading' | 'confirm' | 'success' | 'error'>('loading');
-    const [errorMsg, setErrorMsg] = useState("");
+    const userId = searchParams.get("u");
+    const token = searchParams.get("t");
+    // Legacy links (`?email=`) are unsigned, so they can no longer unsubscribe anyone.
+    const legacyEmail = searchParams.get("email");
+    const [requestStatus, setRequestStatus] = useState<'loading' | 'confirm' | 'success' | 'error'>('confirm');
+    const [requestError, setRequestError] = useState("");
 
-    useEffect(() => {
-        if (!email) {
-            setStatus('error');
-            setErrorMsg("No se proporcionó un correo electrónico válido.");
-            return;
-        }
-        setStatus('confirm');
-    }, [email]);
+    let linkError: string | null = null;
+    if (!userId || !token) {
+        linkError = legacyEmail
+            ? "Este enlace de baja ya no es válido. Usá el enlace que figura en un correo reciente de Zeta Prop o escribinos a contacto@zetaprop.com.ar y te damos de baja."
+            : "El enlace de baja está incompleto. Usá el enlace que figura en un correo reciente de Zeta Prop.";
+    }
+    const status = linkError ? 'error' : requestStatus;
+    const errorMsg = linkError ?? requestError;
 
     const handleUnsubscribe = async () => {
-        if (!email || !db) return;
-        setStatus('loading');
+        if (!userId || !token) return;
+        setRequestStatus('loading');
 
         try {
-            const q = query(collection(db, "users"), where("email", "==", email));
-            const querySnapshot = await getDocs(q);
+            const res = await fetch("/api/newsletter/unsubscribe", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ u: userId, t: token }),
+            });
 
-            if (querySnapshot.empty) {
-                setStatus('error');
-                setErrorMsg("No encontramos una cuenta asociada a este correo.");
+            if (res.ok) {
+                setRequestStatus('success');
                 return;
             }
 
-            // Update all users found with this email (usually just one)
-            const promises = querySnapshot.docs.map(userDoc =>
-                updateDoc(doc(db, "users", userDoc.id), {
-                    unsubscribedMarketing: true,
-                    unsubscribedAt: new Date().toISOString()
-                })
+            setRequestStatus('error');
+            setRequestError(
+                res.status === 403 || res.status === 400
+                    ? "El enlace de baja no es válido o expiró. Usá el enlace de un correo reciente de Zeta Prop."
+                    : "Ocurrió un error al procesar tu solicitud. Por favor intentá de nuevo más tarde."
             );
-
-            await Promise.all(promises);
-            setStatus('success');
         } catch (error) {
             console.error("Unsubscribe error:", error);
-            setStatus('error');
-            setErrorMsg("Ocurrió un error al procesar tu solicitud. Por favor intenta de nuevo más tarde.");
+            setRequestStatus('error');
+            setRequestError("Ocurrió un error al procesar tu solicitud. Por favor intentá de nuevo más tarde.");
         }
     };
 
@@ -74,9 +73,9 @@ function UnsubscribeContent() {
 
                 {status === 'confirm' && (
                     <div className="space-y-6">
-                        <h2 className="text-2xl font-bold text-gray-900">¿Confirmas la baja?</h2>
+                        <h2 className="text-2xl font-bold text-gray-900">¿Confirmás la baja?</h2>
                         <p className="text-gray-500 leading-relaxed">
-                            Vas a dejar de recibir correos de marketing y novedades de <span className="font-semibold text-gray-900">Zeta Prop</span> para la dirección <span className="font-medium text-indigo-600 break-all">{email}</span>.
+                            Vas a dejar de recibir correos de marketing y novedades de <span className="font-semibold text-gray-900">Zeta Prop</span>.
                         </p>
                         <div className="flex flex-col gap-3">
                             <button
@@ -104,7 +103,7 @@ function UnsubscribeContent() {
                         </div>
                         <h2 className="text-2xl font-bold text-gray-900">Suscripción cancelada</h2>
                         <p className="text-gray-500 leading-relaxed">
-                            Listo. Ya no recibirás más correos de marketing en <span className="font-medium text-gray-900">{email}</span>. Lamentamos verte partir, pero respetamos tu decisión.
+                            Listo. Ya no vas a recibir más correos de marketing de Zeta Prop. Lamentamos verte partir, pero respetamos tu decisión.
                         </p>
                         <Link
                             href="/"
