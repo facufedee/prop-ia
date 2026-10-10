@@ -182,8 +182,8 @@ export default function PrivacyPage() {
                             <p className="text-sm text-gray-600 leading-relaxed mb-4">
                                 Si tiene dudas, inquietudes o desea ejercer sus derechos de privacidad, nuestro equipo de Protección de Datos está a su disposición.
                             </p>
-                            <a href="mailto:facundo@zeta-prop.com.ar" className="text-indigo-600 font-bold text-sm hover:underline">
-                                facundo@zeta-prop.com.ar
+                            <a href="mailto:zetaprop.com.ar@gmail.com" className="text-indigo-600 font-bold text-sm hover:underline">
+                                zetaprop.com.ar@gmail.com
                             </a>
                         </section>
                     </div>

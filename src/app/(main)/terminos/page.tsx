@@ -201,7 +201,7 @@ export default function TermsPage() {
                             <li>c) cuando medie autorización expresa del Usuario.</li>
                         </ul>
                         <p className="text-gray-600">
-                            El Usuario podrá ejercer sus derechos de acceso, rectificación, actualización o supresión de datos conforme a la normativa vigente, contactando a facundo@zeta-prop.com.ar.
+                            El Usuario podrá ejercer sus derechos de acceso, rectificación, actualización o supresión de datos conforme a la normativa vigente, contactando a zetaprop.com.ar@gmail.com.
                         </p>
                     </section>
 
@@ -342,8 +342,8 @@ export default function TermsPage() {
                         <p className="text-gray-600 mb-4">
                             Para consultas, reclamos o ejercicio de derechos, el usuario puede escribir a:
                         </p>
-                        <a href="mailto:facundo@zeta-prop.com.ar" className="text-indigo-600 font-bold text-sm hover:underline">
-                            facundo@zeta-prop.com.ar
+                        <a href="mailto:zetaprop.com.ar@gmail.com" className="text-indigo-600 font-bold text-sm hover:underline">
+                            zetaprop.com.ar@gmail.com
                         </a>
                     </section>
 
