@@ -2823,3 +2823,26 @@
     color: var(--color-accent);
   }
 }
+
+.l-tool__pitch {
+  max-width: 34rem;
+  font-size: var(--text-base);
+  line-height: 1.6;
+  color: var(--color-ink-2);
+}
+
+.l-tool--featured .l-tool__tagline {
+  color: var(--color-ink);
+  font-weight: 500;
+}
+
+.l-tool--featured .l-tool__photo {
+  object-position: 62% 35%;
+}
+
+/* The featured photo is a bright interior: a stronger left scrim keeps the copy readable. */
+.l-tool--featured .l-tool__scrim {
+  background:
+    linear-gradient(180deg, transparent 30%, oklch(10% 0.005 70 / 0.5) 65%, oklch(10% 0.005 70 / 0.9) 100%),
+    linear-gradient(90deg, oklch(10% 0.005 70 / 0.88) 0%, oklch(10% 0.005 70 / 0.55) 38%, transparent 68%);
+}

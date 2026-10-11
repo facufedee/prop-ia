@@ -21,6 +21,13 @@ export const LANDING_PHOTOS = {
         author: "Zeta Prop",
         page: "",
     },
+    rentalsOffice: {
+        id: "",
+        src: "/assets/img/alquileres.webp",
+        alt: "Agente inmobiliaria entregando un contrato de alquiler y las llaves a una pareja",
+        author: "Zeta Prop",
+        page: "",
+    },
     dusk: {
         id: "1728721647044-fd8a9c830531",
         alt: "Casa moderna iluminada al anochecer, con el piso mojado por la lluvia",

@@ -9,6 +9,8 @@ import { LANDING_PHOTOS, photoSrc, type LandingPhoto } from "./landingPhotos";
 interface Tool {
     name: string;
     tagline: string;
+    /** Short sales pitch, shown on the featured block only. */
+    pitch?: string;
     highlights: string[];
     href: string;
     photo: LandingPhoto;
@@ -19,9 +21,10 @@ const TOOLS: Tool[] = [
     {
         name: "Gestión de alquileres",
         tagline: "Dejá de perseguir cobros con planillas.",
+        pitch: "Cargás el contrato una vez y Zeta Prop calcula cada aumento, te muestra quién está atrasado y te deja el recibo y la liquidación listos. Vos solo cobrás.",
         highlights: ["Ajustes por ICL e IPC", "Recibos en PDF", "Liquidaciones a propietarios"],
         href: "/alquileres",
-        photo: LANDING_PHOTOS.rentals,
+        photo: LANDING_PHOTOS.rentalsOffice,
         featured: true,
     },
     {
@@ -62,6 +65,7 @@ export default function Modules() {
                                 <span className="l-tool__body">
                                     <span className="l-tool__name">{tool.name}</span>
                                     <span className="l-tool__tagline">{tool.tagline}</span>
+                                    {tool.pitch && <span className="l-tool__pitch">{tool.pitch}</span>}
                                     <span className="l-tool__tags">
                                         {tool.highlights.map((highlight) => (
                                             <span key={highlight}>{highlight}</span>
