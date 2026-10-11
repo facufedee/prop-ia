@@ -2846,3 +2846,108 @@
     linear-gradient(180deg, transparent 30%, oklch(10% 0.005 70 / 0.5) 65%, oklch(10% 0.005 70 / 0.9) 100%),
     linear-gradient(90deg, oklch(10% 0.005 70 / 0.88) 0%, oklch(10% 0.005 70 / 0.55) 38%, transparent 68%);
 }
+
+/* ============================================================
+   Mobile pass — tighter rhythm, compact blocks, touch targets
+   ============================================================ */
+
+@media (max-width: 48rem) {
+  .l-section {
+    padding-block: clamp(3.25rem, 12vw, 4.5rem);
+  }
+
+  .l-section--tight {
+    padding-block: clamp(2.5rem, 9vw, 3.5rem);
+  }
+
+  .l-tools {
+    padding-top: 2rem;
+  }
+
+  .l-tool {
+    min-height: 21rem;
+  }
+
+  .l-tool--featured {
+    min-height: 38rem;
+  }
+
+  /* Narrow screens: photo on top, copy below, so only a vertical scrim is needed. */
+  .l-tool--featured .l-tool__scrim {
+    background: linear-gradient(180deg, transparent 0%, transparent 22%, oklch(10% 0.005 70 / 0.78) 48%, oklch(10% 0.005 70 / 0.96) 100%);
+  }
+
+  .l-tool--featured .l-tool__photo {
+    object-position: 68% 0%;
+  }
+
+  .l-tool__link {
+    padding: 1.375rem;
+  }
+
+  .l-tool__pitch {
+    font-size: var(--text-sm);
+  }
+
+  .l-compare__row {
+    padding: 1.125rem 0;
+  }
+
+  .l-modules__head {
+    padding-bottom: var(--space-lg);
+  }
+
+  /* Small inline links get a 44px touch target without changing their look. */
+  .l-footer__links a,
+  .l-pricing__footnote a,
+  .l-blog__see-all,
+  [class*="l-contact"] a {
+    display: inline-flex;
+    align-items: center;
+    min-height: 2.75rem;
+  }
+}
+
+/* Module landing heroes sit on brighter photos: stronger scrim than the home statement hero. */
+.l-hero--default .l-hero__scrim {
+  background:
+    linear-gradient(180deg, oklch(10% 0.005 70 / 0.55) 0%, oklch(10% 0.005 70 / 0.25) 35%, oklch(10% 0.005 70 / 0.6) 70%, oklch(10% 0.005 70 / 0.92) 100%),
+    linear-gradient(90deg, oklch(10% 0.005 70 / 0.82) 0%, oklch(10% 0.005 70 / 0.5) 45%, transparent 75%);
+}
+
+@media (max-width: 64rem) {
+  /* Copy and mockup stack over the whole photo on narrow screens. */
+  .l-hero--default .l-hero__scrim {
+    background:
+      linear-gradient(180deg, oklch(10% 0.005 70 / 0.62) 0%, oklch(10% 0.005 70 / 0.72) 45%, oklch(10% 0.005 70 / 0.94) 100%);
+  }
+}
+
+@media (max-width: 48rem) {
+  .l-module {
+    padding-block: 2.75rem;
+    gap: 1.75rem;
+  }
+
+  .l-module__body {
+    font-size: var(--text-base);
+    margin-bottom: var(--space-md);
+  }
+
+  .l-module__points {
+    margin-bottom: 0;
+  }
+
+  .l-module__visual {
+    padding: 0.875rem;
+    border-radius: 14px;
+  }
+
+  .l-hero__frame {
+    padding-top: 7rem;
+  }
+
+  .l-steps {
+    gap: var(--space-lg);
+  }
+}

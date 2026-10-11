@@ -34,12 +34,6 @@ export const LANDING_PHOTOS = {
         author: "islam allam",
         page: "https://unsplash.com/photos/BIoLZTSra78",
     },
-    rentals: {
-        id: "1776702879021-7875264157bf",
-        alt: "Fachada de un edificio de departamentos con balcones y toldos",
-        author: "Alpha Perspective",
-        page: "https://unsplash.com/photos/xumPysHICwk",
-    },
     properties: {
         id: "1494526585095-c41746248156",
         alt: "Casa moderna con garaje y luces encendidas al anochecer",
