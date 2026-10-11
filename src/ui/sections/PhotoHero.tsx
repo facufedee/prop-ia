@@ -6,25 +6,20 @@ import { photoSrc, type LandingPhoto } from "./landingPhotos";
 interface PhotoHeroProps {
     photo: LandingPhoto;
     labelledBy: string;
-    /** Oversized decorative brand word behind the content (home only). */
-    wordmark?: string;
+    /** "statement": larger headline for a short, single-promise hero (home). */
+    variant?: "default" | "statement";
     /** Replaces the default photo layer (e.g. an animated backdrop). */
     backdrop?: ReactNode;
     children: ReactNode;
     aside?: ReactNode;
 }
 
-export function PhotoHero({ photo, labelledBy, wordmark, backdrop, children, aside }: PhotoHeroProps) {
+export function PhotoHero({ photo, labelledBy, variant = "default", backdrop, children, aside }: PhotoHeroProps) {
     return (
-        <section className="l-hero" aria-labelledby={labelledBy}>
+        <section className={`l-hero l-hero--${variant}`} aria-labelledby={labelledBy}>
             <div className="l-hero__frame">
                 {backdrop ?? <Image src={photoSrc(photo)} alt="" fill priority sizes="100vw" className="l-hero__photo" />}
                 <div className="l-hero__scrim" aria-hidden="true" />
-                {wordmark && (
-                    <p className="l-hero__wordmark" aria-hidden="true">
-                        {wordmark}
-                    </p>
-                )}
                 <div className="l-hero__grid">
                     <div className="l-reveal" style={{ ["--i" as string]: 0 }}>
                         {children}
