@@ -78,3 +78,12 @@ export function buildBlogLayout<T extends { category: string }>(
         categories: ranked.map(([category]) => category),
     };
 }
+
+/** Related posts: same category first, then the most recent others. Input is newest-first. */
+export function pickRelatedPosts<T extends { slug: string; category: string }>(posts: T[], currentSlug: string, limit = 3): T[] {
+    const current = posts.find((post) => post.slug === currentSlug);
+    const others = posts.filter((post) => post.slug !== currentSlug);
+    const sameCategory = current ? others.filter((post) => post.category === current.category) : [];
+    const rest = others.filter((post) => !sameCategory.includes(post));
+    return [...sameCategory, ...rest].slice(0, limit);
+}

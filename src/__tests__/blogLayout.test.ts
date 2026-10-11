@@ -5,6 +5,7 @@ import {
     toPostDate,
     formatPostDate,
     buildBlogLayout,
+    pickRelatedPosts,
 } from '@/lib/blog/blogLayout';
 
 describe('getReadingMinutes', () => {
@@ -82,5 +83,19 @@ describe('buildBlogLayout', () => {
     it('lists unique categories sorted by post count', () => {
         const posts = [post('1', 'B'), post('2', 'A'), post('3', 'A'), post('4', '')];
         expect(buildBlogLayout(posts).categories).toEqual(['A', 'B']);
+    });
+});
+
+describe("pickRelatedPosts", () => {
+    const posts = [
+        post("cur", "A"), post("b1", "B"), post("a1", "A"), post("b2", "B"), post("a2", "A"), post("c1", "C"),
+    ];
+
+    it("excludes the current post and prefers the same category, then fills by recency", () => {
+        expect(pickRelatedPosts(posts, "cur", 3).map((p) => p.slug)).toEqual(["a1", "a2", "b1"]);
+    });
+
+    it("returns fewer when there are not enough posts", () => {
+        expect(pickRelatedPosts([post("cur", "A"), post("x", "B")], "cur", 3).map((p) => p.slug)).toEqual(["x"]);
     });
 });
