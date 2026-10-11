@@ -135,7 +135,7 @@ export default function LandingPage() {
                                 "name": "¿Zeta Prop tiene sitio web para mi inmobiliaria?",
                                 "acceptedAnswer": {
                                     "@type": "Answer",
-                                    "text": "Sí. Cada inmobiliaria obtiene su propio sitio web profesional con dominio personalizado donde se publican automáticamente todas las propiedades activas."
+                                    "text": "Sí. Cada inmobiliaria obtiene su propio sitio web, en un subdominio gratuito, donde se publican automáticamente todas las propiedades activas."
                                 }
                             },
                             {

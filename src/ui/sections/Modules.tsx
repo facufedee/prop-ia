@@ -136,12 +136,13 @@ const MODULES = [
     {
         name: "Página web propia",
         title: "Tu inmobiliaria con su web, sin contratar a nadie.",
-        body: "Un sitio con tu marca y tu dominio donde se publican tus propiedades activas. Lo que cambiás en el sistema, aparece en la web.",
+        body: "Un sitio con tu marca donde se publican tus propiedades activas. Lo que cambiás en el sistema, aparece en la web.",
         points: [
             "Propiedades publicadas y actualizadas solas",
-            "Tu logo, tus colores y tu dominio",
+            "Tu logo, tus colores y tu propio subdominio",
             "Lista para compartir en redes y WhatsApp",
         ],
+        href: "/pagina-web",
         Visual: WebsiteVisual,
     },
 ];

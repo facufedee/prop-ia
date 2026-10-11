@@ -12,7 +12,7 @@ export default function ClientLayout({ children }: { children: React.ReactNode }
     const isAuthPage = pathname === "/login" || pathname === "/register";
     const isHome = pathname === "/";
     // Module landing pages share the home landing nav/footer.
-    const isLanding = isHome || pathname === "/alquileres";
+    const isLanding = isHome || pathname === "/alquileres" || pathname === "/pagina-web";
     // The home page ships its own dark-theme nav/footer (LandingNav/LandingFooter) —
     // the global light-theme Navbar/Footer would visually clash with it.
     const hideChrome = isDashboard || isAuthPage || isLanding;
