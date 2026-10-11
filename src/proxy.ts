@@ -3,6 +3,7 @@ import type { NextRequest } from 'next/server';
 import { jwtVerify, createRemoteJWKSet } from "jose";
 import { InMemoryRateLimiter } from './infrastructure/security/InMemoryRateLimiter';
 import { domainLookupService } from './infrastructure/services/domainLookup';
+import { canonicalLinkHeader } from './lib/seo/canonical';
 
 // ── Configuration ────────────────────────────────────────────────────────────
 
@@ -37,16 +38,18 @@ async function verifyFirebaseToken(token: string): Promise<boolean> {
     }
 }
 
-function applySecurityHeaders(response: NextResponse, request: NextRequest): NextResponse {
-    const url = request.nextUrl.clone();
+function applySecurityHeaders(response: NextResponse, request: NextRequest, isAgencySite = false): NextResponse {
     response.headers.set('Strict-Transport-Security', 'max-age=31536000; includeSubDomains; preload');
     response.headers.set('X-Content-Type-Options', 'nosniff');
     response.headers.set('X-Frame-Options', 'SAMEORIGIN');
     response.headers.set('Referrer-Policy', 'strict-origin-when-cross-origin');
     response.headers.set('Permissions-Policy', 'camera=(), microphone=(), geolocation=(self), payment=(self)');
     
-    if (url.hostname !== MAIN_DOMAIN && process.env.NODE_ENV === 'production') {
-        response.headers.set('Link', `<https://${MAIN_DOMAIN}${url.pathname}>; rel="canonical"`);
+    if (process.env.NODE_ENV === 'production') {
+        const host = request.headers.get('x-forwarded-host') || request.headers.get('host') || '';
+        // request.nextUrl.pathname is the public path; the /sites/{slug} rewrite happens on a clone.
+        const link = canonicalLinkHeader({ host, pathname: request.nextUrl.pathname, mainDomain: MAIN_DOMAIN, isAgencySite });
+        if (link) response.headers.set('Link', link);
     }
     return response;
 }
@@ -159,7 +162,7 @@ export async function proxy(request: NextRequest) {
                 const response = NextResponse.rewrite(url);
                 response.headers.set('X-Debug-Host', host);
                 response.headers.set('X-Debug-Target', targetSlug);
-                return applySecurityHeaders(response, request);
+                return applySecurityHeaders(response, request, true);
             }
         }
 
