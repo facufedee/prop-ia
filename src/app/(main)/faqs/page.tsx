@@ -1,7 +1,8 @@
 "use client";
 
 import { useState } from "react";
-import { ChevronDown, ChevronUp, HelpCircle } from "lucide-react";
+import { ChevronDown } from "lucide-react";
+import { PrimaryCta } from "@/ui/sections/PhotoHero";
 
 const categories = [
     {
@@ -139,66 +140,50 @@ export default function FAQsPage() {
     const toggle = (key: string) => setOpenKey(openKey === key ? null : key);
 
     return (
-        <main className="bg-white min-h-screen">
-            {/* ── Hero ── */}
-            <section className="relative overflow-hidden pt-32 pb-24 px-5 sm:px-6 bg-[#080810]">
-                <div className="absolute inset-0 bg-gradient-to-br from-indigo-950/80 via-[#080810] to-purple-950/60 pointer-events-none" />
-                <div className="absolute top-0 right-0 w-[600px] h-[600px] bg-indigo-600/10 rounded-full blur-3xl pointer-events-none" />
-                <div className="absolute bottom-0 left-0 w-[400px] h-[400px] bg-purple-600/10 rounded-full blur-3xl pointer-events-none" />
-
-                <div className="max-w-4xl mx-auto text-center relative z-10">
-                    <div className="inline-block px-4 py-1.5 bg-indigo-500/20 border border-indigo-500/30 text-indigo-300 rounded-full text-sm font-semibold mb-6">
-                        <div className="flex items-center gap-2">
-                            <HelpCircle className="w-4 h-4" />
-                            FAQs
-                        </div>
+        <main className="flex-1">
+            {/* ── Page header ── */}
+            <section className="l-section s-page-head" aria-labelledby="faqs-title">
+                <div className="l-container">
+                    <div className="s-page-head__inner">
+                        <p className="l-eyebrow">FAQs</p>
+                        <h1 id="faqs-title" className="s-page-title">
+                            Preguntas Frecuentes
+                        </h1>
+                        <p className="s-page-lede">
+                            Todo lo que necesitás saber sobre Zeta Prop para gestionar tu inmobiliaria.
+                        </p>
                     </div>
-                    <h1 className="text-4xl md:text-6xl font-extrabold mb-6 leading-tight text-white">
-                        Preguntas
-                        <span className="block text-transparent bg-clip-text bg-gradient-to-r from-indigo-400 to-purple-400">
-                            Frecuentes
-                        </span>
-                    </h1>
-                    <p className="text-xl text-gray-400 max-w-2xl mx-auto leading-relaxed mb-10">
-                        Todo lo que necesitás saber sobre Zeta Prop para gestionar tu inmobiliaria.
-                    </p>
                 </div>
             </section>
 
             {/* FAQ Categories */}
-            <section className="py-14 sm:py-20 px-5 sm:px-6">
-                <div className="max-w-3xl mx-auto space-y-14">
+            <section className="l-section l-section--tight">
+                <div className="l-container">
                     {categories.map((cat) => (
-                        <div key={cat.title}>
-                            <h2 className="text-lg font-bold text-indigo-600 uppercase tracking-wide mb-5">
-                                {cat.title}
-                            </h2>
-                            <div className="space-y-3">
+                        <div key={cat.title} className="s-faq-group l-faq">
+                            <h2 className="l-section__title">{cat.title}</h2>
+                            <div className="s-faq-list">
                                 {cat.faqs.map((faq, i) => {
                                     const key = `${cat.title}-${i}`;
                                     const isOpen = openKey === key;
+                                    const panelId = `faq-panel-${key.replace(/\s+/g, "-")}`;
                                     return (
-                                        <div
-                                            key={key}
-                                            className="bg-white border border-gray-200 rounded-2xl overflow-hidden transition-all duration-200 hover:border-indigo-200 hover:shadow-md"
-                                        >
+                                        <div key={key} className="s-faq-item">
                                             <button
+                                                type="button"
                                                 onClick={() => toggle(key)}
-                                                className="w-full flex items-center justify-between p-6 text-left bg-white transition-colors"
+                                                className="s-faq-item__button"
+                                                aria-expanded={isOpen}
+                                                aria-controls={panelId}
                                             >
-                                                <span className="font-semibold text-base text-gray-900 pr-8">{faq.question}</span>
-                                                {isOpen ? (
-                                                    <ChevronUp className="w-5 h-5 text-indigo-500 flex-shrink-0" />
-                                                ) : (
-                                                    <ChevronDown className="w-5 h-5 text-gray-400 flex-shrink-0" />
-                                                )}
+                                                <span>{faq.question}</span>
+                                                <ChevronDown className="s-faq-item__icon" size={20} aria-hidden="true" />
                                             </button>
                                             <div
+                                                id={panelId}
                                                 className={`overflow-hidden transition-all duration-300 ease-in-out ${isOpen ? "max-h-[400px] opacity-100" : "max-h-0 opacity-0"}`}
                                             >
-                                                <div className="p-6 pt-0 text-gray-600 leading-relaxed text-sm">
-                                                    {faq.answer}
-                                                </div>
+                                                <p className="s-faq-item__answer">{faq.answer}</p>
                                             </div>
                                         </div>
                                     );
@@ -210,16 +195,11 @@ export default function FAQsPage() {
             </section>
 
             {/* CTA */}
-            <section className="py-14 px-5 sm:px-6 bg-gray-50 border-t border-gray-100">
-                <div className="max-w-xl mx-auto text-center">
-                    <p className="text-gray-900 font-semibold text-lg mb-2">¿No encontrás lo que buscás?</p>
-                    <p className="text-gray-500 text-sm mb-6">Escribinos y te respondemos a la brevedad.</p>
-                    <a
-                        href="/contacto"
-                        className="inline-block px-6 py-3 bg-indigo-600 text-white rounded-xl font-semibold text-sm hover:bg-indigo-500 transition-colors"
-                    >
-                        Contactanos
-                    </a>
+            <section className="l-section l-section--tight" aria-labelledby="faqs-cta-title">
+                <div className="l-container l-cta-band">
+                    <h2 id="faqs-cta-title">¿No encontrás lo que buscás?</h2>
+                    <p>Escribinos y te respondemos a la brevedad.</p>
+                    <PrimaryCta href="/contacto">Contactanos</PrimaryCta>
                 </div>
             </section>
         </main>

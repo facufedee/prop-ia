@@ -1,3 +1,541 @@
 /* Site pages (everything public except the landing sections) — styles built on the
  * landing theme tokens defined on `.landing-page` in landing-theme.css.
  * Prefix: `s-` (site). Never redefine tokens here; never use light grays or indigo. */
+
+/* ============================================================
+   Page header — eyebrow + display heading + lede, left-aligned.
+   Top padding clears the fixed floating nav pill.
+   ============================================================ */
+
+.s-page-head {
+  padding-top: calc(var(--space-3xl) + var(--space-sm));
+  padding-bottom: var(--space-md);
+}
+
+.s-page-head__inner {
+  max-width: 52rem;
+}
+
+.s-page-title {
+  font-family: var(--font-heading);
+  font-weight: 500;
+  font-size: var(--text-display-s);
+  letter-spacing: -0.03em;
+  line-height: 1.04;
+  text-wrap: balance;
+  color: var(--color-ink);
+  margin: 0 0 var(--space-md);
+}
+
+.s-page-lede {
+  font-size: var(--text-md);
+  line-height: 1.6;
+  color: var(--color-ink-2);
+  max-width: 56ch;
+  margin: 0;
+}
+
+.s-page-head__actions {
+  margin-top: var(--space-xl);
+}
+
+/* Spacing between an `.l-modules__head` and the content that follows it. */
+.s-after-head {
+  margin-top: var(--space-xl);
+}
+
+/* Long-form prose block (e.g. /nosotros story). */
+.s-prose {
+  max-width: 44rem;
+}
+
+.s-prose p {
+  font-size: var(--text-md);
+  line-height: 1.7;
+  color: var(--color-ink-2);
+  margin: 0 0 var(--space-md);
+}
+
+.s-prose p:last-child {
+  margin-bottom: 0;
+}
+
+.s-prose strong {
+  color: var(--color-ink);
+  font-weight: 600;
+}
+
+/* ============================================================
+   Cards & grids
+   ============================================================ */
+
+.s-grid {
+  display: grid;
+  gap: var(--space-md);
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 18rem), 1fr));
+}
+
+.s-grid--2 {
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 22rem), 1fr));
+}
+
+.s-grid--4 {
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 14rem), 1fr));
+}
+
+.s-card {
+  display: flex;
+  flex-direction: column;
+  background: var(--color-paper-2);
+  border: 1px solid var(--color-rule);
+  border-radius: var(--radius-card);
+  padding: clamp(1.5rem, 3vw, 2rem);
+}
+
+.s-card--quiet {
+  background: transparent;
+  border-style: dashed;
+}
+
+.s-card__title {
+  font-family: var(--font-heading);
+  font-weight: 600;
+  font-size: var(--text-lg);
+  letter-spacing: -0.02em;
+  line-height: 1.2;
+  color: var(--color-ink);
+  margin: 0 0 var(--space-2xs);
+}
+
+.s-card__body {
+  font-size: var(--text-sm);
+  line-height: 1.6;
+  color: var(--color-ink-2);
+  margin: 0;
+}
+
+.s-card__body + .s-check-list {
+  margin-top: var(--space-md);
+  padding-top: var(--space-md);
+  border-top: 1px solid var(--color-rule);
+}
+
+.s-card__role {
+  font-size: var(--text-sm);
+  font-weight: 500;
+  color: var(--color-accent);
+  margin: 0 0 var(--space-sm);
+}
+
+.s-label {
+  font-size: var(--text-xs);
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--color-muted);
+  margin: 0 0 var(--space-sm);
+}
+
+.s-tag {
+  align-self: flex-start;
+  display: inline-flex;
+  align-items: center;
+  font-size: var(--text-xs);
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--color-ink-2);
+  border: 1px solid var(--color-rule);
+  border-radius: var(--radius-pill);
+  padding: 0.25rem 0.625rem;
+  margin-bottom: var(--space-md);
+}
+
+.s-check-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.625rem;
+}
+
+.s-check-list li {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.625rem;
+  font-size: var(--text-sm);
+  line-height: 1.5;
+  color: var(--color-ink-2);
+}
+
+.s-check-list svg {
+  flex-shrink: 0;
+  margin-top: 0.15em;
+  color: var(--color-accent);
+}
+
+.s-check-list strong {
+  color: var(--color-ink);
+  font-weight: 600;
+}
+
+.s-check-list--md li {
+  font-size: var(--text-base);
+}
+
+/* Callout with a thin accent rule. */
+.s-note {
+  display: flex;
+  gap: var(--space-xs);
+  align-items: flex-start;
+  border-left: 2px solid var(--color-accent);
+  background: var(--color-paper-2);
+  border-radius: 0 12px 12px 0;
+  padding: var(--space-sm) var(--space-md);
+  font-size: var(--text-sm);
+  line-height: 1.6;
+  color: var(--color-ink-2);
+  margin: 0;
+}
+
+.s-note strong {
+  color: var(--color-ink);
+}
+
+.s-note svg {
+  flex-shrink: 0;
+  margin-top: 0.2em;
+  color: var(--color-warning);
+}
+
+.s-note--warning {
+  border-left-color: var(--color-warning);
+}
+
+/* ============================================================
+   Split layout (text + figure) — /modelo
+   ============================================================ */
+
+.s-split {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  gap: clamp(2rem, 6vw, 5rem);
+  align-items: center;
+}
+
+@media (max-width: 52rem) {
+  .s-split {
+    grid-template-columns: 1fr;
+  }
+
+  .s-split__figure--first-mobile {
+    order: -1;
+  }
+}
+
+.s-split + .s-split {
+  margin-top: clamp(3.5rem, 8vw, 6rem);
+  padding-top: clamp(3.5rem, 8vw, 6rem);
+  border-top: 1px solid var(--color-rule);
+}
+
+.s-split__text > * + * {
+  margin-top: var(--space-md);
+}
+
+.s-split__title {
+  font-family: var(--font-heading);
+  font-weight: 500;
+  font-size: clamp(1.5rem, 1vw + 1.1rem, 2rem);
+  letter-spacing: -0.03em;
+  line-height: 1.1;
+  color: var(--color-ink);
+  margin: 0;
+}
+
+.s-split__text > p {
+  font-size: var(--text-base);
+  line-height: 1.7;
+  color: var(--color-ink-2);
+}
+
+.s-split__text > p strong {
+  color: var(--color-ink);
+}
+
+.s-figure {
+  position: relative;
+  width: 100%;
+  height: 20rem;
+  border: 1px solid var(--color-rule);
+  border-radius: var(--radius-card);
+  background: var(--color-paper-2);
+  overflow: hidden;
+}
+
+.s-figure--tall {
+  height: 24rem;
+}
+
+.s-stats {
+  margin: 0;
+  border: 1px solid var(--color-rule);
+  border-radius: var(--radius-card);
+  background: var(--color-paper-2);
+  padding: var(--space-xs) var(--space-lg);
+}
+
+.s-stats > div {
+  display: flex;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: var(--space-2xs) var(--space-md);
+  padding-block: var(--space-md);
+}
+
+.s-stats > div + div {
+  border-top: 1px solid var(--color-rule);
+}
+
+.s-stats dt {
+  font-size: var(--text-sm);
+  color: var(--color-ink-2);
+}
+
+.s-stats dd {
+  margin: 0;
+  font-family: var(--font-heading);
+  font-weight: 600;
+  font-size: var(--text-xl);
+  letter-spacing: -0.02em;
+  color: var(--color-ink);
+  font-variant-numeric: tabular-nums;
+}
+
+/* ============================================================
+   Team (/nosotros)
+   ============================================================ */
+
+.s-person {
+  align-items: flex-start;
+}
+
+.s-person__photo {
+  position: relative;
+  width: 4.5rem;
+  height: 4.5rem;
+  border-radius: 50%;
+  overflow: hidden;
+  border: 1px solid var(--color-rule);
+  background: var(--color-paper-3);
+  margin-bottom: var(--space-md);
+}
+
+.s-person .s-card__body {
+  margin-bottom: var(--space-md);
+}
+
+.s-person .l-btn {
+  margin-top: auto;
+}
+
+/* ============================================================
+   Accordion driven by React state (button + panel)
+   Visually matches `.l-faq` details/summary.
+   ============================================================ */
+
+.s-faq-group + .s-faq-group {
+  margin-top: var(--space-2xl);
+}
+
+.s-faq-list {
+  margin: 0;
+}
+
+.s-faq-item {
+  border-bottom: 1px solid var(--color-rule);
+}
+
+.s-faq-item:first-child {
+  border-top: 1px solid var(--color-rule);
+}
+
+.s-faq-item__button {
+  display: flex;
+  width: 100%;
+  min-height: 2.75rem;
+  justify-content: space-between;
+  align-items: center;
+  gap: var(--space-md);
+  padding: 1.25rem 0;
+  background: none;
+  border: 0;
+  font-family: inherit;
+  font-size: var(--text-md);
+  font-weight: 600;
+  line-height: 1.4;
+  text-align: left;
+  color: var(--color-ink);
+  cursor: pointer;
+}
+
+.s-faq-item__icon {
+  flex-shrink: 0;
+  color: var(--color-muted);
+  transition: transform var(--dur-short) var(--ease-out), color var(--dur-short) var(--ease-out);
+}
+
+.s-faq-item__button:hover .s-faq-item__icon,
+.s-faq-item__button[aria-expanded="true"] .s-faq-item__icon {
+  color: var(--color-ink);
+}
+
+.s-faq-item__button[aria-expanded="true"] .s-faq-item__icon {
+  transform: rotate(180deg);
+}
+
+.s-faq-item__answer {
+  margin: 0 0 1.25rem;
+  max-width: 40rem;
+  font-size: var(--text-base);
+  line-height: 1.65;
+  color: var(--color-ink-2);
+}
+
+/* ============================================================
+   Pricing page (/precios)
+   ============================================================ */
+
+.s-trust {
+  list-style: none;
+  margin: var(--space-lg) 0 0;
+  padding: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2xs) var(--space-lg);
+  font-size: var(--text-sm);
+  color: var(--color-ink-2);
+}
+
+.s-trust li {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.s-trust svg {
+  flex-shrink: 0;
+  color: var(--color-accent);
+}
+
+.s-toggle {
+  display: inline-flex;
+  gap: 0.25rem;
+  margin-top: var(--space-xl);
+  padding: 0.25rem;
+  border: 1px solid var(--color-rule);
+  border-radius: var(--radius-pill);
+  background: var(--color-paper-2);
+}
+
+.s-toggle__option {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  min-height: 2.75rem;
+  padding: 0 1.25rem;
+  border: 0;
+  border-radius: var(--radius-pill);
+  background: transparent;
+  font-family: inherit;
+  font-size: var(--text-sm);
+  font-weight: 600;
+  color: var(--color-ink-2);
+  cursor: pointer;
+  transition: background var(--dur-short) var(--ease-out), color var(--dur-short) var(--ease-out);
+}
+
+.s-toggle__option:hover {
+  color: var(--color-ink);
+}
+
+.s-toggle__option[aria-pressed="true"] {
+  background: var(--color-ink);
+  color: var(--color-accent-ink);
+}
+
+.s-toggle__save {
+  font-size: var(--text-xs);
+  font-weight: 600;
+  padding: 0.125rem 0.5rem;
+  border-radius: var(--radius-pill);
+  background: var(--color-positive-soft);
+  color: var(--color-positive);
+}
+
+.s-toggle__option[aria-pressed="true"] .s-toggle__save {
+  background: var(--color-accent-ink);
+}
+
+.s-price-free {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: var(--text-2xl);
+  letter-spacing: -0.02em;
+  color: var(--color-ink);
+}
+
+.s-price-billed {
+  font-size: var(--text-xs);
+  font-weight: 500;
+  line-height: 1.5;
+  color: var(--color-positive);
+  margin: calc(var(--space-md) * -0.5) 0 var(--space-md);
+}
+
+.s-price-limits {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2xs) var(--space-md);
+  padding-bottom: var(--space-md);
+  margin-bottom: var(--space-md);
+  border-bottom: 1px solid var(--color-rule);
+  font-size: var(--text-sm);
+  color: var(--color-ink-2);
+}
+
+.s-price-limits strong {
+  color: var(--color-ink);
+  font-weight: 600;
+}
+
+/* `.l-price-card__cta` rendered as a <button>: reset native chrome, keep the theme look. */
+.s-price-cta {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  width: 100%;
+  min-height: 2.75rem;
+  margin-bottom: var(--space-lg);
+  border: 0;
+  background: transparent;
+  font-family: inherit;
+  cursor: pointer;
+}
+
+/* Buttons that wear `.l-btn` / `.l-link-arrow` styles. */
+.s-btn-reset {
+  border: 0;
+  font-family: inherit;
+  cursor: pointer;
+}
+
+.s-link-btn {
+  min-height: 2.75rem;
+  padding: 0;
+  background: none;
+  font-size: var(--text-base);
+}
