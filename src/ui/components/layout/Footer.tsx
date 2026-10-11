@@ -2,6 +2,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { Facebook, Twitter, Instagram, Linkedin, Github, Mail, ArrowRight } from "lucide-react";
 import { WhatsAppIcon } from "@/ui/icons/WhatsAppIcon";
+import NewsletterSignupForm from "./NewsletterSignupForm";
 
 export default function Footer() {
     return (
@@ -63,19 +64,7 @@ export default function Footer() {
                         <p className="text-gray-400 text-sm mb-4">
                             Suscribite para recibir las últimas novedades del mercado y actualizaciones de la plataforma.
                         </p>
-                        <form className="space-y-3" onSubmit={(e) => e.preventDefault()}>
-                            <div className="relative">
-                                <Mail className="absolute left-3 top-2.5 h-5 w-5 text-gray-500" />
-                                <input
-                                    type="email"
-                                    placeholder="Tu email"
-                                    className="w-full bg-gray-900 border border-gray-800 rounded-lg py-2 pl-10 pr-4 text-sm text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all"
-                                />
-                            </div>
-                            <button className="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-medium py-2 px-4 rounded-lg text-sm transition-colors">
-                                Suscribirme
-                            </button>
-                        </form>
+                        <NewsletterSignupForm />
                     </div>
                 </div>
 

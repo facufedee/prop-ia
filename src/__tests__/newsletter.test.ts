@@ -8,6 +8,7 @@ type Data = Record<string, unknown>;
 const state = {
     posts: [] as { id: string; data: Data }[],
     users: [] as { id: string; data: Data }[],
+    subscribers: [] as { id: string; data: Data }[],
     newsletters: new Map<string, Data>(),
 };
 const postUpdateMock = vi.fn();
@@ -48,6 +49,17 @@ const fakeDb = {
         if (name === 'users') {
             return {
                 get: async () => ({ docs: state.users.map((u) => ({ id: u.id, data: () => u.data })) }),
+            };
+        }
+        if (name === 'newsletter_subscribers') {
+            return {
+                where: (field: string, _op: string, value: unknown) => ({
+                    get: async () => ({
+                        docs: state.subscribers
+                            .filter((sub) => sub.data[field] === value)
+                            .map((sub) => ({ id: sub.id, data: () => sub.data })),
+                    }),
+                }),
             };
         }
         if (name === 'newsletters') {
@@ -119,6 +131,7 @@ beforeEach(() => {
     process.env.CRON_SECRET = 'test-secret';
     state.posts = [];
     state.users = [];
+    state.subscribers = [];
     state.newsletters = new Map();
     postUpdateMock.mockReset();
     newsletterWriteMock.mockReset();
@@ -157,6 +170,20 @@ describe('renderNewsletter', () => {
         expect(result.text).toContain('https://zetaprop.com.ar/blog/dos');
         expect(result.text).toContain('Segunda nota');
         expect(result.subject).toBe('Nuevas notas: <script>alert(1)</script> y Segunda nota');
+    });
+
+    it('explains the subscription instead of an account to newsletter subscribers', async () => {
+        const { renderNewsletter } = await import('../lib/newsletter/template');
+
+        const result = renderNewsletter({
+            posts: [{ title: 'Uno', slug: 'uno' }],
+            unsubscribeUrl: 'https://zetaprop.com.ar/unsubscribe?u=sub%3Aabc&t=x',
+            recipientKind: 'subscriber',
+        });
+
+        expect(result.html).toContain('Recibís este correo porque te suscribiste al newsletter de Zeta Prop.');
+        expect(result.text).toContain('Recibís este correo porque te suscribiste al newsletter de Zeta Prop.');
+        expect(result.html).not.toContain('tenés una cuenta');
     });
 
     it('links a logo that exists in public/ and crops covers to a fixed height', async () => {
@@ -255,6 +282,42 @@ describe('sendNewsletter', () => {
             .flatMap((c) => c[0] as SentEmail[])
             .flatMap((e) => e.to);
         expect(recipients.sort()).toEqual(['one@example.com', 'two@example.com']);
+    });
+
+    it('adds confirmed subscribers, excluding pending/unsubscribed ones and addresses of users', async () => {
+        state.users = [
+            { id: 'u1', data: { email: 'one@example.com' } },
+            { id: 'u2', data: { email: 'gone@example.com', unsubscribedMarketing: true } },
+        ];
+        state.subscribers = [
+            { id: 's1', data: { email: 'sub@example.com', status: 'confirmed' } },
+            { id: 's2', data: { email: 'ONE@example.com', status: 'confirmed' } },
+            { id: 's3', data: { email: 'gone@example.com', status: 'confirmed' } },
+            { id: 's4', data: { email: 'pending@example.com', status: 'pending' } },
+            { id: 's5', data: { email: 'left@example.com', status: 'unsubscribed' } },
+        ];
+        const { getRecipients } = await load();
+
+        const recipients = await getRecipients();
+
+        expect(recipients.map((r) => [r.email, r.userId, r.kind])).toEqual([
+            ['one@example.com', 'u1', 'user'],
+            ['sub@example.com', 'sub:s1', 'subscriber'],
+        ]);
+    });
+
+    it('sends subscribers a sub: unsubscribe link and the subscriber footer line', async () => {
+        state.posts = [post('a', '2026-10-01'), post('b', '2026-10-02')];
+        state.subscribers = [{ id: 's1', data: { email: 'sub@example.com', status: 'confirmed' } }];
+        const { sendNewsletter } = await load();
+
+        await sendNewsletter({});
+
+        const [email] = batchSendMock.mock.calls.flatMap((c) => c[0] as SentEmail[]);
+        expect(email.to).toEqual(['sub@example.com']);
+        expect(email.headers['List-Unsubscribe']).toContain('u=sub%3As1');
+        expect(email.text).toContain('https://zetaprop.com.ar/unsubscribe?u=sub%3As1');
+        expect(email.text).toContain('porque te suscribiste al newsletter de Zeta Prop');
     });
 
     it('skips when the idempotency doc is already marked sent', async () => {

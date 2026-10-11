@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { adminDb } from "@/infrastructure/firebase/admin";
-import { verifyUnsubscribeToken } from "@/lib/unsubscribeToken";
+import { SUBSCRIBERS_COLLECTION } from "@/lib/newsletter/subscriberCollection";
+import { parseSubscriberSubject, verifyUnsubscribeToken } from "@/lib/unsubscribeToken";
 
 /**
  * POST /api/newsletter/unsubscribe?u=<userId>&t=<token>
@@ -10,7 +11,10 @@ import { verifyUnsubscribeToken } from "@/lib/unsubscribeToken";
  *   query string and the body is ignored.
  * - The /unsubscribe page posts a JSON body `{ u, t }`.
  *
- * The signed token is the only authorization. Unknown users still get 200 so
+ * `u` is a user id, or `sub:<docId>` for a newsletter subscriber without an
+ * account (the doc is marked `status: 'unsubscribed'`).
+ *
+ * The signed token is the only authorization. Unknown ids still get 200 so
  * the endpoint does not reveal which ids exist.
  */
 export async function POST(request: NextRequest) {
@@ -44,12 +48,23 @@ export async function POST(request: NextRequest) {
     }
 
     try {
+        const unsubscribedAt = new Date().toISOString();
+        const subscriberId = parseSubscriberSubject(userId);
+        if (subscriberId) {
+            const subscriberRef = adminDb.collection(SUBSCRIBERS_COLLECTION).doc(subscriberId);
+            const snap = await subscriberRef.get();
+            if (snap.exists) {
+                await subscriberRef.update({ status: "unsubscribed", unsubscribedAt });
+            }
+            return NextResponse.json({ ok: true });
+        }
+
         const userRef = adminDb.collection("users").doc(userId);
         const snap = await userRef.get();
         if (snap.exists) {
             await userRef.update({
                 unsubscribedMarketing: true,
-                unsubscribedAt: new Date().toISOString(),
+                unsubscribedAt,
             });
         }
         return NextResponse.json({ ok: true });

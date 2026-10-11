@@ -5,6 +5,7 @@ import { resolveMarketingRecipient } from '@/lib/marketingUnsubscribe';
 import { sendEmailWithResend } from '@/lib/resend';
 import { createConfirmToken } from '@/lib/unsubscribeToken';
 import { renderConfirmationEmail } from './confirmationEmail';
+import { SUBSCRIBERS_COLLECTION } from './subscriberCollection';
 import { SITE_URL } from './template';
 
 /**
@@ -15,7 +16,7 @@ import { SITE_URL } from './template';
  * Doc id = sha256 hex of the normalized email, so re-subscribing is idempotent.
  */
 
-export const SUBSCRIBERS_COLLECTION = 'newsletter_subscribers';
+export { SUBSCRIBERS_COLLECTION };
 /** Same sender as the blog newsletter. Kept here to avoid importing sendNewsletter. */
 const CONFIRMATION_FROM = 'Zeta Prop <newsletter@zetaprop.com.ar>';
 /** A pending address gets at most one confirmation email per window. */

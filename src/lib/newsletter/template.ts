@@ -18,10 +18,15 @@ export interface NewsletterPost {
     category?: string;
 }
 
+/** Registered user, or footer-form subscriber without an account. */
+export type NewsletterRecipientKind = 'user' | 'subscriber';
+
 export interface RenderNewsletterInput {
     posts: NewsletterPost[];
     unsubscribeUrl: string;
     recipientName?: string;
+    /** Decides the "why you get this email" line. Defaults to 'user'. */
+    recipientKind?: NewsletterRecipientKind;
 }
 
 export interface RenderedNewsletter {
@@ -78,12 +83,22 @@ function renderPostHtml(post: NewsletterPost): string {
     </div>`;
 }
 
-export function renderNewsletter({ posts, unsubscribeUrl, recipientName }: RenderNewsletterInput): RenderedNewsletter {
+const REASON_BY_KIND: Record<NewsletterRecipientKind, string> = {
+    user: 'Recibís este correo porque tenés una cuenta en Zeta Prop.',
+    subscriber: 'Recibís este correo porque te suscribiste al newsletter de Zeta Prop.',
+};
+
+export function renderNewsletter({
+    posts,
+    unsubscribeUrl,
+    recipientName,
+    recipientKind = 'user',
+}: RenderNewsletterInput): RenderedNewsletter {
     const subject = buildSubject(posts);
     const name = recipientName?.trim();
     const greeting = name ? `Hola ${name},` : 'Hola,';
     const intro = 'Publicamos nuevas notas en el blog de Zeta Prop. Te las dejamos acá:';
-    const reason = 'Recibís este correo porque tenés una cuenta en Zeta Prop.';
+    const reason = REASON_BY_KIND[recipientKind];
 
     const html = `<!DOCTYPE html>
 <html lang="es">

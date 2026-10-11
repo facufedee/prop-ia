@@ -81,6 +81,27 @@ describe('POST /api/newsletter/unsubscribe', () => {
         expect(updateMock).not.toHaveBeenCalled();
     });
 
+    it('unsubscribes a newsletter subscriber for a sub: id', async () => {
+        const { POST, createUnsubscribeToken } = await load();
+        const t = createUnsubscribeToken('sub:abc');
+        const res = await POST(new NextRequest(`${BASE}?u=${encodeURIComponent('sub:abc')}&t=${t}`, { method: 'POST' }));
+
+        expect(res.status).toBe(200);
+        expect(collectionMock).toHaveBeenCalledWith('newsletter_subscribers');
+        expect(collectionMock).not.toHaveBeenCalledWith('users');
+        expect(docMock).toHaveBeenCalledWith('abc');
+        expect(updateMock).toHaveBeenCalledWith({ status: 'unsubscribed', unsubscribedAt: expect.any(String) });
+    });
+
+    it('rejects a token signed for the user id when used for the sub: id', async () => {
+        const { POST, createUnsubscribeToken } = await load();
+        const t = createUnsubscribeToken('abc');
+        const res = await POST(new NextRequest(`${BASE}?u=${encodeURIComponent('sub:abc')}&t=${t}`, { method: 'POST' }));
+
+        expect(res.status).toBe(403);
+        expect(updateMock).not.toHaveBeenCalled();
+    });
+
     it('returns 200 without writing when the user does not exist', async () => {
         getMock.mockResolvedValue({ exists: false });
         const { POST, createUnsubscribeToken } = await load();

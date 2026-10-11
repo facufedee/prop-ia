@@ -2,8 +2,9 @@ import { createHash } from 'crypto';
 import { Timestamp, type DocumentData, type DocumentReference } from 'firebase-admin/firestore';
 import { adminDb } from '@/infrastructure/firebase/admin';
 import { resendClient } from '@/lib/resend';
-import { buildOneClickUnsubscribeUrl, buildUnsubscribeUrl } from '@/lib/unsubscribeToken';
-import { renderNewsletter, type NewsletterPost } from './template';
+import { buildOneClickUnsubscribeUrl, buildUnsubscribeUrl, subscriberSubject } from '@/lib/unsubscribeToken';
+import { SUBSCRIBERS_COLLECTION } from './subscriberCollection';
+import { renderNewsletter, type NewsletterPost, type NewsletterRecipientKind } from './template';
 
 export const NEWSLETTER_FROM = 'Zeta Prop <newsletter@zetaprop.com.ar>';
 /** Monitored inbox for replies and mailto unsubscribes. Change here only. */
@@ -24,9 +25,11 @@ interface PendingPost extends NewsletterPost {
 }
 
 interface Recipient {
+    /** Unsubscribe subject: a user id, or `sub:<docId>` for a newsletter subscriber. */
     userId: string;
     email: string;
     name?: string;
+    kind: NewsletterRecipientKind;
 }
 
 export type SendNewsletterResult =
@@ -81,27 +84,57 @@ async function loadUsers(): Promise<{ id: string; data: DocumentData }[]> {
     return snap.docs.map((doc) => ({ id: doc.id, data: doc.data() }));
 }
 
-function toRecipients(users: { id: string; data: DocumentData }[]): Recipient[] {
+async function loadConfirmedSubscribers(): Promise<{ id: string; data: DocumentData }[]> {
+    const snap = await adminDb.collection(SUBSCRIBERS_COLLECTION).where('status', '==', 'confirmed').get();
+    return snap.docs.map((doc) => ({ id: doc.id, data: doc.data() }));
+}
+
+function emailOf(data: DocumentData): string {
+    return typeof data.email === 'string' ? data.email.trim() : '';
+}
+
+function toRecipients(
+    users: { id: string; data: DocumentData }[],
+    subscribers: { id: string; data: DocumentData }[]
+): Recipient[] {
     const byEmail = new Map<string, Recipient>();
+    // Every user address, including unsubscribed ones: the user record wins over a
+    // subscriber entry with the same address, so an unsubscribe is never bypassed.
+    const userEmails = new Set<string>();
+
     for (const { id, data } of users) {
-        const email = typeof data.email === 'string' ? data.email.trim() : '';
-        if (!email || data.unsubscribedMarketing === true) continue;
+        const email = emailOf(data);
+        if (!email) continue;
 
         const key = email.toLowerCase();
-        if (byEmail.has(key)) continue;
+        userEmails.add(key);
+        if (data.unsubscribedMarketing === true || byEmail.has(key)) continue;
         byEmail.set(key, {
             userId: id,
             email,
             name: typeof data.displayName === 'string' ? data.displayName : undefined,
+            kind: 'user',
         });
     }
+
+    for (const { id, data } of subscribers) {
+        const email = emailOf(data);
+        const key = email.toLowerCase();
+        if (!email || userEmails.has(key) || byEmail.has(key)) continue;
+        byEmail.set(key, { userId: subscriberSubject(id), email, kind: 'subscriber' });
+    }
+
     // Deterministic order keeps batch chunks (and their idempotency keys) stable across retries.
     return [...byEmail.values()].sort((a, b) => a.email.toLowerCase().localeCompare(b.email.toLowerCase()));
 }
 
-/** Users with a non-empty email who did not unsubscribe, deduped by lowercase email. */
+/**
+ * Users with a non-empty email who did not unsubscribe, plus confirmed newsletter
+ * subscribers whose address is not a user's, deduped by lowercase email.
+ */
 export async function getRecipients(): Promise<Recipient[]> {
-    return toRecipients(await loadUsers());
+    const [users, subscribers] = await Promise.all([loadUsers(), loadConfirmedSubscribers()]);
+    return toRecipients(users, subscribers);
 }
 
 function buildEmail(posts: NewsletterPost[], recipient: Recipient) {
@@ -109,6 +142,7 @@ function buildEmail(posts: NewsletterPost[], recipient: Recipient) {
         posts,
         unsubscribeUrl: buildUnsubscribeUrl(recipient.userId),
         recipientName: recipient.name,
+        recipientKind: recipient.kind,
     });
     const oneClickUrl = buildOneClickUnsubscribeUrl(recipient.userId);
 
@@ -150,6 +184,7 @@ async function sendTest(posts: PendingPost[], testTo: string): Promise<SendNewsl
         userId: match?.id ?? TEST_USER_ID,
         email: testTo,
         name: typeof match?.data.displayName === 'string' ? match.data.displayName : undefined,
+        kind: 'user',
     });
     const { data, error } = await client.emails.send(email);
     if (error) {
