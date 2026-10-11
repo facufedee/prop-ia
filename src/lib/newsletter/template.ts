@@ -4,11 +4,11 @@
  */
 
 export const SITE_URL = 'https://zetaprop.com.ar';
-const LOGO_URL = `${SITE_URL}/assets/img/logo_zeta_prop_transparent.png`;
+export const LOGO_URL = `${SITE_URL}/assets/img/logo_zeta_prop_transparent.png`;
 // Covers are cropped to this height with an overflow:hidden wrapper, since Gmail
 // ignores object-fit and tall (portrait) covers would otherwise dominate the email.
 const COVER_HEIGHT_PX = 260;
-const BRAND_BLUE = '#2563eb';
+export const BRAND_BLUE = '#2563eb';
 
 export interface NewsletterPost {
     title: string;

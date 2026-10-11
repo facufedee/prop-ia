@@ -1,7 +1,12 @@
 // @vitest-environment node
 import { describe, it, expect, beforeEach, afterEach } from 'vitest';
+import { createHmac } from 'crypto';
 import {
+    createConfirmToken,
     createUnsubscribeToken,
+    parseSubscriberSubject,
+    subscriberSubject,
+    verifyConfirmToken,
     verifyUnsubscribeToken,
     buildUnsubscribeUrl,
     buildOneClickUnsubscribeUrl,
@@ -46,6 +51,32 @@ describe('unsubscribeToken', () => {
     it('throws when CRON_SECRET is not set', () => {
         delete process.env.CRON_SECRET;
         expect(() => createUnsubscribeToken('user-1')).toThrow(/CRON_SECRET/);
+    });
+
+    it('keeps user unsubscribe tokens byte-for-byte stable for already sent emails', () => {
+        const legacy = createHmac('sha256', 'test-secret').update('newsletter-unsubscribe:user-1').digest('base64url');
+        expect(createUnsubscribeToken('user-1')).toBe(legacy);
+    });
+
+    it('verifies confirm tokens only for the same subscriber', () => {
+        const token = createConfirmToken('abc');
+        expect(verifyConfirmToken('abc', token)).toBe(true);
+        expect(verifyConfirmToken('abd', token)).toBe(false);
+        expect(verifyConfirmToken('abc', '')).toBe(false);
+    });
+
+    it('keeps confirm and unsubscribe token namespaces apart', () => {
+        expect(verifyConfirmToken('abc', createUnsubscribeToken('sub:abc'))).toBe(false);
+        expect(verifyConfirmToken('abc', createUnsubscribeToken('abc'))).toBe(false);
+        expect(verifyUnsubscribeToken('sub:abc', createConfirmToken('abc'))).toBe(false);
+        expect(verifyUnsubscribeToken('abc', createConfirmToken('abc'))).toBe(false);
+    });
+
+    it('maps subscriber ids to and from the sub: namespace', () => {
+        expect(subscriberSubject('abc')).toBe('sub:abc');
+        expect(parseSubscriberSubject('sub:abc')).toBe('abc');
+        expect(parseSubscriberSubject('user-1')).toBeNull();
+        expect(parseSubscriberSubject('sub:')).toBeNull();
     });
 
     it('builds page and one-click URLs with encoded params', () => {
