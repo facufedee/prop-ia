@@ -153,8 +153,8 @@ export default function LandingPage() {
             />
 
             <Hero />
-            <Intro />
             <Modules />
+            <Intro />
             <Pricing />
             <HumanPromise />
             <PropertyNetworkCTA />

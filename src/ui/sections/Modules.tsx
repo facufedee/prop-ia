@@ -1,28 +1,40 @@
 import Image from "next/image";
 import Link from "next/link";
 import { ArrowRight } from "lucide-react";
-import { LANDING_PHOTOS, photoSrc } from "./landingPhotos";
+import { LANDING_PHOTOS, photoSrc, type LandingPhoto } from "./landingPhotos";
 
-// Short pitch per module; each card links to its landing page, where every claim is detailed.
-const MODULES = [
+// One large block per tool, right after the hero. Rentals is featured (full width).
+// Each block links to its landing page, where every claim is detailed and verified.
+
+interface Tool {
+    name: string;
+    tagline: string;
+    highlights: string[];
+    href: string;
+    photo: LandingPhoto;
+    featured?: boolean;
+}
+
+const TOOLS: Tool[] = [
     {
         name: "Gestión de alquileres",
-        title: "Dejá de perseguir cobros con planillas.",
-        body: "Contratos, ajustes por índice, cobros, recibos y liquidaciones a propietarios.",
+        tagline: "Dejá de perseguir cobros con planillas.",
+        highlights: ["Ajustes por ICL e IPC", "Recibos en PDF", "Liquidaciones a propietarios"],
         href: "/alquileres",
         photo: LANDING_PHOTOS.rentals,
+        featured: true,
     },
     {
         name: "Administración de propiedades",
-        title: "Toda tu cartera, ordenada y a mano.",
-        body: "Fichas, interesados, visitas y ventas, desde la captación hasta la escritura.",
+        tagline: "Tu cartera, de la captación al cierre.",
+        highlights: ["Fichas en PDF", "Interesados y visitas", "Ventas hasta la escritura"],
         href: "/propiedades-gestion",
         photo: LANDING_PHOTOS.properties,
     },
     {
         name: "Página web propia",
-        title: "Tu inmobiliaria con su web, sin contratar a nadie.",
-        body: "Tus propiedades se publican solas y las consultas llegan directo a tu panel.",
+        tagline: "Tus propiedades se publican solas.",
+        highlights: ["Tres plantillas", "Consultas a tu panel", "En todos los planes"],
         href: "/pagina-web",
         photo: LANDING_PHOTOS.website,
     },
@@ -30,41 +42,32 @@ const MODULES = [
 
 export default function Modules() {
     return (
-        <section className="l-section" aria-labelledby="modules-title">
+        <section className="l-section l-tools" aria-labelledby="tools-title">
             <div className="l-container">
-                <div className="l-modules__head">
-                    <div>
-                        <p className="l-eyebrow">Qué incluye</p>
-                        <h2 id="modules-title" className="l-section__title">
-                            Tres herramientas que trabajan juntas.
-                        </h2>
-                    </div>
-                    <p className="l-section__lede">
-                        Empezá por la que más te urge. Las otras ya están ahí cuando las necesites.
-                    </p>
-                </div>
-
-                <ol className="l-cards">
-                    {MODULES.map((module, i) => (
-                        <li key={module.href}>
-                            <Link href={module.href} className="l-card">
-                                <span className="l-card__media">
-                                    <Image
-                                        src={photoSrc(module.photo, 1200)}
-                                        alt={module.photo.alt}
-                                        fill
-                                        sizes="(max-width: 56rem) 100vw, 33vw"
-                                        className="l-card__photo"
-                                    />
-                                    <span className="l-card__index" aria-hidden="true">
-                                        {String(i + 1).padStart(2, "0")}
+                <h2 id="tools-title" className="l-eyebrow">
+                    Herramientas
+                </h2>
+                <ul className="l-tools__grid">
+                    {TOOLS.map((tool) => (
+                        <li key={tool.href} className={tool.featured ? "l-tool l-tool--featured" : "l-tool"}>
+                            <Link href={tool.href} className="l-tool__link">
+                                <Image
+                                    src={photoSrc(tool.photo, tool.featured ? 2000 : 1400)}
+                                    alt=""
+                                    fill
+                                    sizes={tool.featured ? "(max-width: 78rem) 100vw, 78rem" : "(max-width: 56rem) 100vw, 39rem"}
+                                    className="l-tool__photo"
+                                />
+                                <span className="l-tool__scrim" aria-hidden="true" />
+                                <span className="l-tool__body">
+                                    <span className="l-tool__name">{tool.name}</span>
+                                    <span className="l-tool__tagline">{tool.tagline}</span>
+                                    <span className="l-tool__tags">
+                                        {tool.highlights.map((highlight) => (
+                                            <span key={highlight}>{highlight}</span>
+                                        ))}
                                     </span>
-                                </span>
-                                <span className="l-card__body">
-                                    <span className="l-module__name">{module.name}</span>
-                                    <span className="l-card__title">{module.title}</span>
-                                    <span className="l-card__text">{module.body}</span>
-                                    <span className="l-card__more">
+                                    <span className="l-tool__more">
                                         Conocer más
                                         <ArrowRight size={16} aria-hidden />
                                     </span>
@@ -72,7 +75,7 @@ export default function Modules() {
                             </Link>
                         </li>
                     ))}
-                </ol>
+                </ul>
             </div>
         </section>
     );
