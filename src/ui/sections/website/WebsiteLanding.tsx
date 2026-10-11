@@ -1,11 +1,13 @@
 import Link from "next/link";
 import { ArrowRight } from "lucide-react";
+import { PhotoHero, PrimaryCta } from "../PhotoHero";
+import { LANDING_PHOTOS, photoThumb } from "../landingPhotos";
 
 // Every claim on this page maps to an implemented capability of the agency website
 // (see odd/tasks/landing-light-redesign.md, "Website feature inventory").
 // Product compositions use illustrative sample data, not real customers.
 
-const THUMBS = ["oklch(86% 0.03 60)", "oklch(84% 0.03 150)", "oklch(85% 0.025 250)"];
+const THUMBS = [photoThumb(LANDING_PHOTOS.properties), photoThumb(LANDING_PHOTOS.interior2), photoThumb(LANDING_PHOTOS.dusk)];
 
 function SitePreview({ compact = false }: { compact?: boolean }) {
     const cards = [
@@ -49,40 +51,38 @@ function SitePreview({ compact = false }: { compact?: boolean }) {
 
 export function WebsiteHero() {
     return (
-        <section className="l-hero" aria-labelledby="website-title">
-            <div className="l-hero__grid">
-                <div className="l-reveal" style={{ ["--i" as string]: 0 }}>
-                    <p className="l-hero__eyebrow">Página web para inmobiliarias</p>
-                    <h1 id="website-title">
-                        Una web con tu marca que se <em>actualiza sola.</em>
-                    </h1>
-                    <p className="l-hero__lede">
-                        Elegís una plantilla, subís tu logo y tus colores, y publicás. Cada propiedad activa que cargás en
-                        Zeta Prop aparece en tu sitio, y cada consulta que llega por la web entra directo a tu panel.
-                    </p>
-                    <div className="l-hero__ctas">
-                        <Link href="/register" className="l-btn l-btn--primary">
-                            Crear mi web gratis
-                        </Link>
-                        <Link href="/precios" className="l-link-arrow">
-                            Ver precios
-                            <ArrowRight size={16} aria-hidden />
-                        </Link>
-                    </div>
-                    <p className="l-hero__fineprint">Incluida en todos los planes. 14 días gratis, sin tarjeta.</p>
-                </div>
-
-                <div className="l-hero__visual l-reveal" style={{ ["--i" as string]: 1 }} aria-hidden="true">
-                    <SitePreview />
-                    <div className="l-hero__note">
-                        <p>Nueva consulta desde tu web</p>
-                        <p>
-                            <strong>Carla Ruiz</strong> pregunta por la casa de Castelar. Ya está en tus consultas.
-                        </p>
-                    </div>
-                </div>
+        <PhotoHero photo={LANDING_PHOTOS.website} labelledBy="website-title" aside={<WebsiteHeroVisual />}>
+            <p className="l-hero__eyebrow">Página web para inmobiliarias</p>
+            <h1 id="website-title">
+                Una web con tu marca que se <em>actualiza sola.</em>
+            </h1>
+            <p className="l-hero__lede">
+                Elegís una plantilla, subís tu logo y tus colores, y publicás. Cada propiedad activa que cargás en
+                Zeta Prop aparece en tu sitio, y cada consulta que llega por la web entra directo a tu panel.
+            </p>
+            <div className="l-hero__ctas">
+                <PrimaryCta href="/register">Crear mi web gratis</PrimaryCta>
+                <Link href="/precios" className="l-link-arrow">
+                    Ver precios
+                    <ArrowRight size={16} aria-hidden />
+                </Link>
             </div>
-        </section>
+            <p className="l-hero__fineprint">Incluida en todos los planes. 14 días gratis, sin tarjeta.</p>
+        </PhotoHero>
+    );
+}
+
+function WebsiteHeroVisual() {
+    return (
+        <div aria-hidden="true">
+            <SitePreview />
+            <div className="l-hero__note">
+                <p>Nueva consulta desde tu web</p>
+                <p>
+                    <strong>Carla Ruiz</strong> pregunta por la casa de Castelar. Ya está en tus consultas.
+                </p>
+            </div>
+        </div>
     );
 }
 
@@ -186,9 +186,9 @@ function LeadVisual() {
 
 function BrandVisual() {
     const templates = [
-        { name: "Moderno", primary: "oklch(45% 0.12 250)", secondary: "oklch(92% 0.02 250)" },
-        { name: "Clásico", primary: "oklch(38% 0.07 150)", secondary: "oklch(93% 0.02 85)" },
-        { name: "Minimalista", primary: "oklch(22% 0.01 275)", secondary: "oklch(97% 0.004 85)" },
+        { name: "Moderno", primary: "oklch(62% 0.12 250)", secondary: photoThumb(LANDING_PHOTOS.dusk) },
+        { name: "Clásico", primary: "oklch(60% 0.08 150)", secondary: photoThumb(LANDING_PHOTOS.interior) },
+        { name: "Minimalista", primary: "oklch(90% 0.01 85)", secondary: photoThumb(LANDING_PHOTOS.interior2) },
     ];
     return (
         <div className="l-templates">

@@ -1,5 +1,7 @@
 import Link from "next/link";
 import { ArrowRight } from "lucide-react";
+import { PhotoHero, PrimaryCta } from "../PhotoHero";
+import { LANDING_PHOTOS } from "../landingPhotos";
 
 // Every claim on this page maps to an implemented capability of the rentals module
 // (see odd/tasks/landing-light-redesign.md, "Rentals feature inventory").
@@ -14,65 +16,63 @@ const AGENDA = [
 
 export function RentalsHero() {
     return (
-        <section className="l-hero" aria-labelledby="rentals-title">
-            <div className="l-hero__grid">
-                <div className="l-reveal" style={{ ["--i" as string]: 0 }}>
-                    <p className="l-hero__eyebrow">Gestión de alquileres</p>
-                    <h1 id="rentals-title">
-                        Cobrá, ajustá y liquidá alquileres <em>sin planillas.</em>
-                    </h1>
-                    <p className="l-hero__lede">
-                        Cargás cada contrato una vez. Zeta Prop arma el plan de pagos, calcula los ajustes por ICL o IPC
-                        con valores oficiales y te deja el recibo y la liquidación listos en PDF.
-                    </p>
-                    <div className="l-hero__ctas">
-                        <Link href="/register" className="l-btn l-btn--primary">
-                            Probar 14 días gratis
-                        </Link>
-                        <Link href="/precios" className="l-link-arrow">
-                            Ver precios
-                            <ArrowRight size={16} aria-hidden />
-                        </Link>
-                    </div>
-                    <p className="l-hero__fineprint">Sin tarjeta de crédito ni pagos anticipados.</p>
-                </div>
-
-                <div className="l-hero__visual l-reveal" style={{ ["--i" as string]: 1 }} aria-hidden="true">
-                    <div className="l-sheet">
-                        <div className="l-sheet__head">
-                            <p className="l-sheet__title">Agenda de cobros</p>
-                            <p className="l-sheet__meta">Octubre</p>
-                        </div>
-                        <div className="l-tabs">
-                            <span className="is-active">Vencidos 2</span>
-                            <span>Hoy 3</span>
-                            <span>7 días 11</span>
-                            <span>30 días 38</span>
-                        </div>
-                        <ul className="l-sheet__rows">
-                            {AGENDA.map((row) => (
-                                <li key={row.tenant} className="l-sheet__row">
-                                    <div className="l-sheet__address">
-                                        <p>{row.tenant}</p>
-                                        <p>
-                                            {row.address} · {row.due}
-                                        </p>
-                                    </div>
-                                    <span className="l-sheet__amount">{row.amount}</span>
-                                    <span className={`l-status l-status--${row.status}`}>{row.label}</span>
-                                </li>
-                            ))}
-                        </ul>
-                    </div>
-                    <div className="l-hero__note">
-                        <p>Recibo N° 0001-00482</p>
-                        <p>
-                            PDF con tu logo, listo para compartir por WhatsApp con <strong>Lucía Fernández</strong>.
-                        </p>
-                    </div>
-                </div>
+        <PhotoHero photo={LANDING_PHOTOS.rentals} labelledBy="rentals-title" aside={<RentalsHeroVisual />}>
+            <p className="l-hero__eyebrow">Gestión de alquileres</p>
+            <h1 id="rentals-title">
+                Cobrá, ajustá y liquidá alquileres <em>sin planillas.</em>
+            </h1>
+            <p className="l-hero__lede">
+                Cargás cada contrato una vez. Zeta Prop arma el plan de pagos, calcula los ajustes por ICL o IPC
+                con valores oficiales y te deja el recibo y la liquidación listos en PDF.
+            </p>
+            <div className="l-hero__ctas">
+                <PrimaryCta href="/register">Probar 14 días gratis</PrimaryCta>
+                <Link href="/precios" className="l-link-arrow">
+                    Ver precios
+                    <ArrowRight size={16} aria-hidden />
+                </Link>
             </div>
-        </section>
+            <p className="l-hero__fineprint">Sin tarjeta de crédito ni pagos anticipados.</p>
+        </PhotoHero>
+    );
+}
+
+function RentalsHeroVisual() {
+    return (
+        <div aria-hidden="true">
+            <div className="l-sheet">
+                <div className="l-sheet__head">
+                    <p className="l-sheet__title">Agenda de cobros</p>
+                    <p className="l-sheet__meta">Octubre</p>
+                </div>
+                <div className="l-tabs">
+                    <span className="is-active">Vencidos 2</span>
+                    <span>Hoy 3</span>
+                    <span>7 días 11</span>
+                    <span>30 días 38</span>
+                </div>
+                <ul className="l-sheet__rows">
+                    {AGENDA.map((row) => (
+                        <li key={row.tenant} className="l-sheet__row">
+                            <div className="l-sheet__address">
+                                <p>{row.tenant}</p>
+                                <p>
+                                    {row.address} · {row.due}
+                                </p>
+                            </div>
+                            <span className="l-sheet__amount">{row.amount}</span>
+                            <span className={`l-status l-status--${row.status}`}>{row.label}</span>
+                        </li>
+                    ))}
+                </ul>
+            </div>
+            <div className="l-hero__note">
+                <p>Recibo N° 0001-00482</p>
+                <p>
+                    PDF con tu logo, listo para compartir por WhatsApp con <strong>Lucía Fernández</strong>.
+                </p>
+            </div>
+        </div>
     );
 }
 

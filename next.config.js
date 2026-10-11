@@ -31,6 +31,11 @@ const nextConfig = {
                 protocol: 'https',
                 hostname: 'img.youtube.com',
             },
+            {
+                // Landing photography (free Unsplash License), see src/ui/sections/landingPhotos.ts
+                protocol: 'https',
+                hostname: 'images.unsplash.com',
+            },
         ],
     },
 

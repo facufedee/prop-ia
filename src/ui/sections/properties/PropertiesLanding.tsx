@@ -1,5 +1,7 @@
 import Link from "next/link";
 import { ArrowRight } from "lucide-react";
+import { PhotoHero, PrimaryCta } from "../PhotoHero";
+import { LANDING_PHOTOS, photoThumb } from "../landingPhotos";
 
 // Every claim on this page maps to an implemented capability of the property module
 // (see odd/tasks/landing-light-redesign.md, "Properties feature inventory").
@@ -15,60 +17,58 @@ const PIPELINE = [
 
 export function PropertiesHero() {
     return (
-        <section className="l-hero" aria-labelledby="properties-title">
-            <div className="l-hero__grid">
-                <div className="l-reveal" style={{ ["--i" as string]: 0 }}>
-                    <p className="l-hero__eyebrow">Administración de propiedades</p>
-                    <h1 id="properties-title">
-                        Tu cartera ordenada, <em>de la captación al cierre.</em>
-                    </h1>
-                    <p className="l-hero__lede">
-                        Cargás cada propiedad en cinco pasos, seguís a cada interesado en un tablero, agendás las visitas
-                        y llevás cada venta desde la oferta hasta la escritura.
-                    </p>
-                    <div className="l-hero__ctas">
-                        <Link href="/register" className="l-btn l-btn--primary">
-                            Probar 14 días gratis
-                        </Link>
-                        <Link href="/precios" className="l-link-arrow">
-                            Ver precios
-                            <ArrowRight size={16} aria-hidden />
-                        </Link>
-                    </div>
-                    <p className="l-hero__fineprint">Sin tarjeta de crédito ni pagos anticipados.</p>
-                </div>
+        <PhotoHero photo={LANDING_PHOTOS.properties} labelledBy="properties-title" aside={<PropertiesHeroVisual />}>
+            <p className="l-hero__eyebrow">Administración de propiedades</p>
+            <h1 id="properties-title">
+                Tu cartera ordenada, <em>de la captación al cierre.</em>
+            </h1>
+            <p className="l-hero__lede">
+                Cargás cada propiedad en cinco pasos, seguís a cada interesado en un tablero, agendás las visitas
+                y llevás cada venta desde la oferta hasta la escritura.
+            </p>
+            <div className="l-hero__ctas">
+                <PrimaryCta href="/register">Probar 14 días gratis</PrimaryCta>
+                <Link href="/precios" className="l-link-arrow">
+                    Ver precios
+                    <ArrowRight size={16} aria-hidden />
+                </Link>
+            </div>
+            <p className="l-hero__fineprint">Sin tarjeta de crédito ni pagos anticipados.</p>
+        </PhotoHero>
+    );
+}
 
-                <div className="l-hero__visual l-reveal" style={{ ["--i" as string]: 1 }} aria-hidden="true">
-                    <div className="l-sheet">
-                        <div className="l-sheet__head">
-                            <p className="l-sheet__title">Interesados</p>
-                            <p className="l-sheet__meta">15 en curso · 3 cerrados este mes</p>
-                        </div>
-                        <div className="l-board">
-                            {PIPELINE.map((col) => (
-                                <div key={col.stage} className="l-board__col">
-                                    <p className="l-board__head">
-                                        {col.stage} <span>{col.count}</span>
-                                    </p>
-                                    {col.cards.map((card) => (
-                                        <div key={card.name} className="l-board__card">
-                                            <p>{card.name}</p>
-                                            <p>{card.detail}</p>
-                                        </div>
-                                    ))}
+function PropertiesHeroVisual() {
+    return (
+        <div aria-hidden="true">
+            <div className="l-sheet">
+                <div className="l-sheet__head">
+                    <p className="l-sheet__title">Interesados</p>
+                    <p className="l-sheet__meta">15 en curso · 3 cerrados este mes</p>
+                </div>
+                <div className="l-board">
+                    {PIPELINE.map((col) => (
+                        <div key={col.stage} className="l-board__col">
+                            <p className="l-board__head">
+                                {col.stage} <span>{col.count}</span>
+                            </p>
+                            {col.cards.map((card) => (
+                                <div key={card.name} className="l-board__card">
+                                    <p>{card.name}</p>
+                                    <p>{card.detail}</p>
                                 </div>
                             ))}
                         </div>
-                    </div>
-                    <div className="l-hero__note">
-                        <p>Visita agendada · sábado 11:00</p>
-                        <p>
-                            <strong>Carla Ruiz</strong> visita la casa de Castelar con Martín.
-                        </p>
-                    </div>
+                    ))}
                 </div>
             </div>
-        </section>
+            <div className="l-hero__note">
+                <p>Visita agendada · sábado 11:00</p>
+                <p>
+                    <strong>Carla Ruiz</strong> visita la casa de Castelar con Martín.
+                </p>
+            </div>
+        </div>
     );
 }
 
@@ -123,12 +123,12 @@ function WizardVisual() {
                 ))}
             </ol>
             <div className="l-photos">
-                <span className="is-cover" style={{ ["--thumb" as string]: "oklch(86% 0.03 60)" }}>
+                <span className="is-cover" style={{ ["--thumb" as string]: photoThumb(LANDING_PHOTOS.properties) }}>
                     Portada
                 </span>
-                <span style={{ ["--thumb" as string]: "oklch(84% 0.03 150)" }} />
-                <span style={{ ["--thumb" as string]: "oklch(85% 0.025 250)" }} />
-                <span style={{ ["--thumb" as string]: "oklch(88% 0.015 85)" }} />
+                <span style={{ ["--thumb" as string]: photoThumb(LANDING_PHOTOS.interior) }} />
+                <span style={{ ["--thumb" as string]: photoThumb(LANDING_PHOTOS.interior2) }} />
+                <span style={{ ["--thumb" as string]: photoThumb(LANDING_PHOTOS.website) }} />
             </div>
             <dl className="l-ledger">
                 <div>

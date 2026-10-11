@@ -1,7 +1,7 @@
 import { Metadata } from "next";
 import LandingNav from "@/ui/components/landing/LandingNav";
 import LandingFooter from "@/ui/components/landing/LandingFooter";
-import { landingSans, landingSerif } from "@/ui/sections/landingFonts";
+import { landingHeading, landingSans } from "@/ui/sections/landingFonts";
 import {
     PROPERTIES_FAQ,
     PropertiesCta,
@@ -60,7 +60,7 @@ const faqJsonLd = {
 
 export default function PropertiesManagementPage() {
     return (
-        <main className={`landing-page ${landingSans.variable} ${landingSerif.variable} min-h-screen flex flex-col gap-0`}>
+        <main className={`landing-page ${landingSans.variable} ${landingHeading.variable} min-h-screen flex flex-col gap-0`}>
             <LandingNav />
             <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(faqJsonLd) }} />
             <PropertiesHero />
