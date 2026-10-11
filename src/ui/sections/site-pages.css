@@ -1,0 +1,3 @@
+/* Site pages (everything public except the landing sections) — styles built on the
+ * landing theme tokens defined on `.landing-page` in landing-theme.css.
+ * Prefix: `s-` (site). Never redefine tokens here; never use light grays or indigo. */

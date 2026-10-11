@@ -7,6 +7,7 @@ import { AuthProvider } from "@/ui/context/AuthContext";
 import { ThemeProvider } from "@/ui/context/ThemeContext";
 import { landingHeading, landingSans } from "@/ui/sections/landingFonts";
 import "@/ui/sections/landing-theme.css";
+import "@/ui/sections/site-pages.css";
 
 export default function ClientLayout({ children }: { children: React.ReactNode }) {
     const pathname = usePathname();
