@@ -8,15 +8,17 @@ interface PhotoHeroProps {
     labelledBy: string;
     /** Oversized decorative brand word behind the content (home only). */
     wordmark?: string;
+    /** Replaces the default photo layer (e.g. an animated backdrop). */
+    backdrop?: ReactNode;
     children: ReactNode;
     aside?: ReactNode;
 }
 
-export function PhotoHero({ photo, labelledBy, wordmark, children, aside }: PhotoHeroProps) {
+export function PhotoHero({ photo, labelledBy, wordmark, backdrop, children, aside }: PhotoHeroProps) {
     return (
         <section className="l-hero" aria-labelledby={labelledBy}>
             <div className="l-hero__frame">
-                <Image src={photoSrc(photo)} alt="" fill priority sizes="100vw" className="l-hero__photo" />
+                {backdrop ?? <Image src={photoSrc(photo)} alt="" fill priority sizes="100vw" className="l-hero__photo" />}
                 <div className="l-hero__scrim" aria-hidden="true" />
                 {wordmark && (
                     <p className="l-hero__wordmark" aria-hidden="true">

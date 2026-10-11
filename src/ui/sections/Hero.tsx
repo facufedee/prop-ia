@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { ArrowRight } from "lucide-react";
 import { PhotoHero, PrimaryCta } from "./PhotoHero";
+import { LitHouseBackdrop } from "./LitHouseBackdrop";
 import { LANDING_PHOTOS } from "./landingPhotos";
 
 // Every fact below is verifiable in the product (trial terms, official indices, website in all plans).
@@ -16,6 +17,7 @@ export default function Hero() {
             photo={LANDING_PHOTOS.hero}
             labelledBy="hero-title"
             wordmark="ZETA PROP"
+            backdrop={<LitHouseBackdrop />}
             aside={
                 <ul className="l-facts">
                     {FACTS.map((fact) => (
