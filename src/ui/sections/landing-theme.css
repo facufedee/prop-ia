@@ -2310,3 +2310,132 @@
   border-radius: 4px;
   background: color-mix(in oklch, var(--tp) 22%, var(--color-paper));
 }
+
+.l-plan-tag {
+  display: inline-block;
+  margin-left: 0.5rem;
+  padding: 0.125rem 0.5rem;
+  border: 1px solid var(--color-rule);
+  border-radius: 999px;
+  font-size: 0.6875rem;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+  color: var(--color-ink-2);
+  vertical-align: 0.125em;
+}
+
+.l-board {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 0.5rem;
+  padding: 0.875rem;
+  background: var(--color-paper-2);
+  border-radius: 0 0 14px 14px;
+}
+
+@media (max-width: 40rem) {
+  .l-board {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+.l-board__col {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  min-width: 0;
+}
+
+.l-board__head {
+  display: flex;
+  justify-content: space-between;
+  margin: 0 0 0.125rem;
+  font-size: var(--text-xs);
+  font-weight: 600;
+  color: var(--color-ink-2);
+}
+
+.l-board__head span {
+  color: var(--color-muted);
+  font-weight: 500;
+}
+
+.l-board__card {
+  padding: 0.625rem;
+  background: var(--color-paper);
+  border: 1px solid var(--color-rule);
+  border-radius: 8px;
+  font-size: var(--text-xs);
+}
+
+.l-board__card p {
+  margin: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.l-board__card p:first-child {
+  font-weight: 600;
+  color: var(--color-ink);
+}
+
+.l-board__card p + p {
+  color: var(--color-muted);
+  margin-top: 0.125rem;
+}
+
+.l-stepper {
+  list-style: none;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.375rem;
+  margin: 0;
+  padding: 0.875rem 1.25rem;
+  border-bottom: 1px solid var(--color-rule);
+  font-size: var(--text-xs);
+  color: var(--color-muted);
+}
+
+.l-stepper li {
+  padding: 0.25rem 0.625rem;
+  border-radius: 999px;
+  border: 1px solid var(--color-rule);
+}
+
+.l-stepper li.is-done {
+  color: var(--color-ink-2);
+  background: var(--color-paper-2);
+  border-color: var(--color-paper-2);
+}
+
+.l-stepper li.is-current {
+  color: var(--color-accent-ink);
+  background: var(--color-ink);
+  border-color: var(--color-ink);
+  font-weight: 600;
+}
+
+.l-photos {
+  display: grid;
+  grid-template-columns: 2fr 1fr 1fr 1fr;
+  gap: 0.5rem;
+  padding: 1rem 1.25rem 0.25rem;
+}
+
+.l-photos span {
+  aspect-ratio: 4 / 3;
+  border-radius: 6px;
+  background: var(--thumb, var(--color-paper-3));
+}
+
+.l-photos .is-cover {
+  grid-row: span 2;
+  aspect-ratio: auto;
+  display: flex;
+  align-items: flex-end;
+  padding: 0.5rem;
+  font-size: 0.6875rem;
+  font-weight: 600;
+  color: var(--color-ink);
+}

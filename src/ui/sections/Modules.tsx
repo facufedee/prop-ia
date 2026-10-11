@@ -125,12 +125,13 @@ const MODULES = [
     {
         name: "Administración de propiedades",
         title: "Toda tu cartera, ordenada y a mano.",
-        body: "Cada propiedad con su ficha, sus dueños, sus interesados y su historia. Sabés en qué estado está todo sin abrir cinco archivos distintos.",
+        body: "Cada propiedad con su ficha, sus interesados, sus visitas y su historia. Sabés en qué estado está todo sin abrir cinco archivos distintos.",
         points: [
             "Fichas con fotos, características y estado",
             "Consultas y visitas de interesados en un solo lugar",
             "Tasación asistida para definir el precio",
         ],
+        href: "/propiedades-gestion",
         Visual: PropertiesVisual,
     },
     {
@@ -176,8 +177,8 @@ export default function Modules() {
                                         <li key={point}>{point}</li>
                                     ))}
                                 </ul>
-                                <Link href={href ?? "/register"} className="l-link-arrow">
-                                    {href ? `Conocer ${name.toLowerCase()}` : `Empezar con ${name.toLowerCase()}`}
+                                <Link href={href} className="l-link-arrow">
+                                    Conocer {name.toLowerCase()}
                                     <ArrowRight size={16} aria-hidden />
                                 </Link>
                             </div>
