@@ -43,7 +43,8 @@ export const metadata: Metadata = {
     },
 };
 
-import Features from "@/ui/sections/Features";
+import Modules from "@/ui/sections/Modules";
+import { landingSans, landingSerif } from "@/ui/sections/landingFonts";
 import { Pricing } from "@/ui/sections/Pricing";
 import HumanPromise from "@/ui/sections/HumanPromise";
 import PropertyNetworkCTA from "@/ui/sections/PropertyNetworkCTA";
@@ -57,7 +58,7 @@ import "@/ui/sections/landing-theme.css";
 
 export default function LandingPage() {
     return (
-        <main className="landing-page min-h-screen flex flex-col gap-0">
+        <main className={`landing-page ${landingSans.variable} ${landingSerif.variable} min-h-screen flex flex-col gap-0`}>
             <LandingNav />
             <GoogleAuthPromptLazy />
 
@@ -151,7 +152,7 @@ export default function LandingPage() {
             />
 
             <Hero />
-            <Features />
+            <Modules />
             <Pricing />
             <HumanPromise />
             <PropertyNetworkCTA />
