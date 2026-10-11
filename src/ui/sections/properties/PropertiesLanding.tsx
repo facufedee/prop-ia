@@ -235,7 +235,7 @@ const FEATURES = [
         points: [
             "Tablero por etapas, de la primera consulta al cierre",
             "Origen de cada consulta, notas y todo el historial",
-            "Visitas con recordatorio al agente y notas de cómo fue",
+            "Visitas con su agente, sus notas y el nivel de interés",
         ],
         Visual: LeadVisual,
     },
