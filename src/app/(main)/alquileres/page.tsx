@@ -1,7 +1,4 @@
 import { Metadata } from "next";
-import LandingNav from "@/ui/components/landing/LandingNav";
-import LandingFooter from "@/ui/components/landing/LandingFooter";
-import { landingHeading, landingSans } from "@/ui/sections/landingFonts";
 import {
     RENTALS_FAQ,
     RentalsCta,
@@ -11,7 +8,6 @@ import {
     RentalsIncluded,
     RentalsSteps,
 } from "@/ui/sections/rentals/RentalsLanding";
-import "@/ui/sections/landing-theme.css";
 
 const url = "https://zetaprop.com.ar/alquileres";
 const description =
@@ -61,8 +57,7 @@ const faqJsonLd = {
 
 export default function RentalsPage() {
     return (
-        <main className={`landing-page ${landingSans.variable} ${landingHeading.variable} min-h-screen flex flex-col gap-0`}>
-            <LandingNav />
+        <main className="flex flex-col gap-0">
             <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(faqJsonLd) }} />
             <RentalsHero />
             <RentalsSteps />
@@ -70,7 +65,6 @@ export default function RentalsPage() {
             <RentalsIncluded />
             <RentalsFaq />
             <RentalsCta />
-            <LandingFooter />
         </main>
     );
 }

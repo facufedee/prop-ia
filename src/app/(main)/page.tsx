@@ -45,7 +45,6 @@ export const metadata: Metadata = {
 
 import Intro from "@/ui/sections/Intro";
 import Modules from "@/ui/sections/Modules";
-import { landingHeading, landingSans } from "@/ui/sections/landingFonts";
 import { Pricing } from "@/ui/sections/Pricing";
 import HumanPromise from "@/ui/sections/HumanPromise";
 import PropertyNetworkCTA from "@/ui/sections/PropertyNetworkCTA";
@@ -53,14 +52,10 @@ import ContactForm from "@/ui/sections/ContactForm";
 
 import LatestBlogPosts from "@/ui/sections/LatestBlogPosts";
 import GoogleAuthPromptLazy from "@/ui/components/auth/GoogleAuthPromptLazy";
-import LandingNav from "@/ui/components/landing/LandingNav";
-import LandingFooter from "@/ui/components/landing/LandingFooter";
-import "@/ui/sections/landing-theme.css";
 
 export default function LandingPage() {
     return (
-        <main className={`landing-page ${landingSans.variable} ${landingHeading.variable} min-h-screen flex flex-col gap-0`}>
-            <LandingNav />
+        <main className="flex flex-col gap-0">
             <GoogleAuthPromptLazy />
 
             {/* Structured Data — SoftwareApplication */}
@@ -160,7 +155,6 @@ export default function LandingPage() {
             <PropertyNetworkCTA />
             <LatestBlogPosts />
             <ContactForm />
-            <LandingFooter />
 
         </main>
     );

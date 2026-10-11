@@ -1,7 +1,4 @@
 import { Metadata } from "next";
-import LandingNav from "@/ui/components/landing/LandingNav";
-import LandingFooter from "@/ui/components/landing/LandingFooter";
-import { landingHeading, landingSans } from "@/ui/sections/landingFonts";
 import {
     PROPERTIES_FAQ,
     PropertiesCta,
@@ -11,7 +8,6 @@ import {
     PropertiesIncluded,
     PropertiesSteps,
 } from "@/ui/sections/properties/PropertiesLanding";
-import "@/ui/sections/landing-theme.css";
 
 const url = "https://zetaprop.com.ar/propiedades-gestion";
 const description =
@@ -60,8 +56,7 @@ const faqJsonLd = {
 
 export default function PropertiesManagementPage() {
     return (
-        <main className={`landing-page ${landingSans.variable} ${landingHeading.variable} min-h-screen flex flex-col gap-0`}>
-            <LandingNav />
+        <main className="flex flex-col gap-0">
             <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(faqJsonLd) }} />
             <PropertiesHero />
             <PropertiesSteps />
@@ -69,7 +64,6 @@ export default function PropertiesManagementPage() {
             <PropertiesIncluded />
             <PropertiesFaq />
             <PropertiesCta />
-            <LandingFooter />
         </main>
     );
 }

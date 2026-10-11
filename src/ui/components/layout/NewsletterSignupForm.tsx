@@ -49,7 +49,7 @@ export default function NewsletterSignupForm() {
 
     if (status === "success") {
         return (
-            <p className="text-sm text-green-400" role="status">
+            <p className="text-sm text-[var(--color-positive)]" role="status">
                 ¡Listo! Revisá tu correo para confirmar la suscripción.
             </p>
         );
@@ -72,7 +72,7 @@ export default function NewsletterSignupForm() {
                 </label>
             </div>
             <div className="relative">
-                <Mail className="absolute left-3 top-2.5 h-5 w-5 text-gray-500" />
+                <Mail className="absolute left-3 top-3 h-5 w-5 text-[var(--color-muted)]" aria-hidden />
                 <input
                     type="email"
                     name="email"
@@ -82,18 +82,18 @@ export default function NewsletterSignupForm() {
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     disabled={status === "submitting"}
-                    className="w-full bg-gray-900 border border-gray-800 rounded-lg py-2 pl-10 pr-4 text-sm text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all"
+                    className="w-full rounded-full border border-[var(--color-rule)] bg-[var(--color-paper-3)] py-2.5 pl-10 pr-4 text-sm text-[var(--color-ink)] placeholder:text-[var(--color-muted)] transition-colors focus:border-[var(--color-accent)] focus:outline-none"
                 />
             </div>
             <button
                 type="submit"
                 disabled={status === "submitting"}
-                className="w-full bg-indigo-600 hover:bg-indigo-700 disabled:opacity-60 disabled:cursor-not-allowed text-white font-medium py-2 px-4 rounded-lg text-sm transition-colors"
+                className="w-full rounded-full bg-[var(--color-ink)] px-4 py-2.5 text-sm font-semibold text-[var(--color-accent-ink)] transition-colors hover:bg-[var(--color-accent-2)] disabled:cursor-not-allowed disabled:opacity-60"
             >
                 {status === "submitting" ? "Enviando..." : "Suscribirme"}
             </button>
             {status === "error" && (
-                <p className="text-sm text-red-400" role="alert">
+                <p className="text-sm text-[var(--color-danger)]" role="alert">
                     {errorMsg}
                 </p>
             )}
