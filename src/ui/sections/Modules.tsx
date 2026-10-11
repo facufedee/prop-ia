@@ -117,8 +117,9 @@ const MODULES = [
         points: [
             "Ajustes por índice calculados automáticamente",
             "Cobros, recibos y liquidaciones a propietarios",
-            "Portal del inquilino con sus pagos y recibos",
+            "Portal del inquilino con vencimientos e historial de pagos",
         ],
+        href: "/alquileres",
         Visual: RentalsVisual,
     },
     {
@@ -160,7 +161,7 @@ export default function Modules() {
                 </div>
 
                 <ol className="l-modules__list">
-                    {MODULES.map(({ name, title, body, points, Visual }, i) => (
+                    {MODULES.map(({ name, title, body, points, href, Visual }, i) => (
                         <li key={name} className="l-module">
                             <div>
                                 <span className="l-module__index" aria-hidden="true">
@@ -174,8 +175,8 @@ export default function Modules() {
                                         <li key={point}>{point}</li>
                                     ))}
                                 </ul>
-                                <Link href="/register" className="l-link-arrow">
-                                    Empezar con {name.toLowerCase()}
+                                <Link href={href ?? "/register"} className="l-link-arrow">
+                                    {href ? `Conocer ${name.toLowerCase()}` : `Empezar con ${name.toLowerCase()}`}
                                     <ArrowRight size={16} aria-hidden />
                                 </Link>
                             </div>
