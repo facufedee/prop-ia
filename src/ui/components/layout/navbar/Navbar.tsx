@@ -53,7 +53,8 @@ export default function Navbar() {
   const isHeroPage = pathname === "/propiedades";
   // Dark hero = still on a page whose hero hasn't scrolled past yet.
   // "/" now ships a light hero (see Hero.tsx), so it's intentionally excluded here.
-  const darkHeroPaths = ["/servicios", "/nosotros", "/precios", "/blog", "/faqs", "/contacto"];
+  // "/blog" also ships a light header (see blog/page.tsx).
+  const darkHeroPaths = ["/servicios", "/nosotros", "/precios", "/faqs", "/contacto"];
   const isDarkHero = darkHeroPaths.includes(pathname) && !scrolled;
 
   const navBg = scrolled || isHeroPage

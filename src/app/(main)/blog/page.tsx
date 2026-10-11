@@ -34,11 +34,13 @@ export default async function BlogPage() {
 
     return (
         <main className="min-h-screen bg-gray-50 pb-24">
-            <div className="mx-auto max-w-7xl space-y-12 px-5 pt-28 sm:px-6 md:pt-32">
-                <header className="max-w-2xl">
-                    <p className="mb-3 text-sm font-semibold uppercase tracking-wider text-indigo-600">Blog & novedades</p>
-                    <h1 className="text-3xl font-bold leading-tight text-gray-900 md:text-5xl">Insights del mercado inmobiliario</h1>
-                    <p className="mt-4 text-lg text-gray-600">
+            <div className="mx-auto max-w-7xl space-y-10 px-5 pt-24 sm:px-6 md:pt-28">
+                <header className="flex flex-col gap-3 border-b border-gray-200 pb-6 md:flex-row md:items-end md:justify-between md:gap-10">
+                    <div>
+                        <p className="mb-2 text-xs font-semibold uppercase tracking-wider text-indigo-600">Blog & novedades</p>
+                        <h1 className="text-3xl font-bold leading-tight text-gray-900 md:text-4xl">Insights del mercado inmobiliario</h1>
+                    </div>
+                    <p className="max-w-sm text-base text-gray-600 md:text-right">
                         Tendencias, tutoriales de la plataforma y noticias del sector.
                     </p>
                 </header>
