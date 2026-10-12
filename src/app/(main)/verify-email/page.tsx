@@ -5,6 +5,7 @@ import { auth } from '@/infrastructure/firebase/client';
 import { useRouter } from 'next/navigation';
 import { onAuthStateChanged } from 'firebase/auth'; // Import this
 import { toast } from 'sonner';
+import { Mail } from 'lucide-react';
 
 export default function VerifyEmailPage() {
     const [sending, setSending] = useState(false);
@@ -46,28 +47,30 @@ export default function VerifyEmailPage() {
     };
 
     return (
-        <div className="flex min-h-screen flex-col items-center justify-center bg-gray-50 p-4">
-            <div className="w-full max-w-md space-y-8 rounded-lg bg-white p-8 shadow-md text-center">
-                <h2 className="text-2xl font-bold text-gray-900">Verifica tu correo electrónico</h2>
-                <p className="text-gray-600">
+        <main className="s-util s-util--center">
+            <section className="s-util-card" aria-labelledby="verify-email-title">
+                <div className="s-util-mark">
+                    <Mail aria-hidden="true" />
+                </div>
+                <h1 id="verify-email-title" className="s-util-title">Verifica tu correo electrónico</h1>
+                <p className="s-util-text">
                     Te hemos enviado un enlace de confirmación a tu correo.
                     Por favor, revísalo para activar tu cuenta.
                 </p>
-                <div className="mt-6">
+                <div className="s-util-actions">
                     <button
+                        type="button"
                         onClick={handleResend}
                         disabled={sending}
-                        className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
+                        className="s-auth-submit"
                     >
                         {sending ? 'Enviando...' : 'Reenviar Email'}
                     </button>
-                </div>
-                <div className="mt-4 text-sm">
-                    <button onClick={() => router.push('/login')} className="text-blue-600 hover:underline">
+                    <button type="button" onClick={() => router.push('/login')} className="s-util-link">
                         Volver al login
                     </button>
                 </div>
-            </div>
-        </div>
+            </section>
+        </main>
     );
 }

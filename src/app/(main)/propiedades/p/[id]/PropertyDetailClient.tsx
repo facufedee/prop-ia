@@ -1,9 +1,12 @@
 "use client";
 
 import { useEffect, useState, useRef } from "react";
-import { useParams } from "next/navigation";
-import { PublicProperty, PublicAgency, publicService } from "@/infrastructure/services/publicService";
-import { MapPin, Bath, Bed, Maximize, Home, ChevronLeft, ChevronRight, Share2, Heart, ArrowRight, PlayCircle } from "lucide-react";
+import { useParams, useRouter } from "next/navigation";
+import { PublicProperty, publicService } from "@/infrastructure/services/publicService";
+import {
+    MapPin, Bath, DoorOpen, Ruler, Home, ChevronLeft, ChevronRight, Share2, Heart,
+    ArrowLeft, ArrowRight, PlayCircle, Phone, MessageCircle, Send, X,
+} from "lucide-react";
 import Link from "next/link";
 import Image from "next/image";
 import dynamic from 'next/dynamic';
@@ -12,7 +15,7 @@ import { formatPropertyPrice } from "@/ui/utils/propertyPrice";
 
 const PublicMap = dynamic(() => import("@/ui/components/properties/public/PublicMap"), {
     ssr: false,
-    loading: () => <div className="w-full h-full bg-gray-100 animate-pulse rounded-xl" />
+    loading: () => <div className="s-map-loading animate-pulse" />
 });
 
 import ContactModal from "@/ui/components/properties/public/ContactModal";
@@ -27,21 +30,40 @@ function getYouTubeId(url: string) {
     return match ? match[2] : null;
 }
 
+type MediaItem =
+    | { type: 'image'; url: string }
+    | { type: 'video'; url: string; videoId: string; thumbnail: string };
+
+/** Desktop gallery shows the main photo plus up to four side tiles. */
+const GRID_SIDE_TILES = 4;
+
+const SECTIONS = [
+    { id: "descripcion", label: "Descripción" },
+    { id: "caracteristicas", label: "Características" },
+    { id: "ubicacion", label: "Ubicación" },
+] as const;
+
 interface Props {
     id?: string;
+    /** Server-loaded, JSON-serializable property. When given, the detail renders on the server. */
+    initialProperty?: PublicProperty | null;
 }
 
-export default function PropertyDetailPage({ id: propId }: Props) {
+export default function PropertyDetailPage({ id: propId, initialProperty }: Props) {
     const params = useParams();
+    const router = useRouter();
     const id = propId || (params.id as string);
 
-    const [property, setProperty] = useState<PublicProperty | null>(null);
+    const [property, setProperty] = useState<PublicProperty | null>(initialProperty ?? null);
     const [similarProperties, setSimilarProperties] = useState<PublicProperty[]>([]);
-    const [loading, setLoading] = useState(true);
+    const [loading, setLoading] = useState(!initialProperty);
     const [currentImageIndex, setCurrentImageIndex] = useState(0);
     const [showGalleryModal, setShowGalleryModal] = useState(false);
     const [modalZoom, setModalZoom] = useState(false);
     const [showContactModal, setShowContactModal] = useState(false);
+    const [activeVideoId, setActiveVideoId] = useState<string | null>(null);
+    const [slideIndex, setSlideIndex] = useState(0);
+    const [activeSection, setActiveSection] = useState<string>(SECTIONS[0].id);
 
     const [isSaved, setIsSaved] = useState(false);
     const touchStartX = useRef(0);
@@ -50,9 +72,11 @@ export default function PropertyDetailPage({ id: propId }: Props) {
         const load = async () => {
             if (!id) return;
             try {
-                // 1. Get current property
-                const data = await publicService.getPropertyById(id);
-                setProperty(data);
+                // 1. Get current property (fallback only: the canonical route passes it from the server)
+                if (!initialProperty) {
+                    const data = await publicService.getPropertyById(id);
+                    setProperty(data);
+                }
 
                 // 2. Get similar properties (Mock: fetch all and take 5 random/first ones excluding current)
                 // In a real app, this would be a specific endpoint 'getSimilarProperties(id)'
@@ -72,11 +96,12 @@ export default function PropertyDetailPage({ id: propId }: Props) {
             }
         };
         load();
-    }, [id]);
+    }, [id, initialProperty]);
 
-    // Keyboard navigation for modal
+    // Keyboard navigation for the lightbox and the video overlay
     useEffect(() => {
         const handleKey = (e: KeyboardEvent) => {
+            if (activeVideoId && e.key === 'Escape') { setActiveVideoId(null); return; }
             if (!showGalleryModal) return;
             if (e.key === 'Escape') { setShowGalleryModal(false); setModalZoom(false); }
             const total = property?.imageUrls?.length || 1;
@@ -85,7 +110,7 @@ export default function PropertyDetailPage({ id: propId }: Props) {
         };
         window.addEventListener('keydown', handleKey);
         return () => window.removeEventListener('keydown', handleKey);
-    }, [showGalleryModal, property?.imageUrls?.length]);
+    }, [showGalleryModal, activeVideoId, property?.imageUrls?.length]);
 
     // Preload adjacent images for instant transitions
     useEffect(() => {
@@ -131,8 +156,8 @@ export default function PropertyDetailPage({ id: propId }: Props) {
         }
     };
 
-    const handleContact = () => {
-        const phoneNumber = property?.agency?.phoneNumber || "5491112345678"; // Fallback to generic if missing
+    // WhatsApp link to the publishing agency. Only rendered when the agency has a phone.
+    const handleWhatsApp = (phoneNumber: string) => {
         const cleanPhone = phoneNumber.replace(/\D/g, '');
         const title = property?.calle ? `${property.calle} ${property.altura || ''}` : property?.title;
         const message = `Hola, estoy interesado en la propiedad "${title}" que vi en Zeta Prop.`;
@@ -147,6 +172,15 @@ export default function PropertyDetailPage({ id: propId }: Props) {
         window.open(waLink, '_blank');
     };
 
+    // Back keeps the visitor's listing filters when they came from inside the site.
+    const handleBack = (e: React.MouseEvent<HTMLAnchorElement>) => {
+        const cameFromSite = document.referrer.startsWith(window.location.origin);
+        if (cameFromSite && window.history.length > 1) {
+            e.preventDefault();
+            router.back();
+        }
+    };
+
     // Parse createdAt date safely
     const getPublishedTimeAgo = () => {
         if (!property?.createdAt) return 'Publicado recientemente';
@@ -155,7 +189,7 @@ export default function PropertyDetailPage({ id: propId }: Props) {
             let dateVal: Date;
             // Handle Firestore Timestamp
             if (typeof property.createdAt === 'object' && property.createdAt !== null && 'seconds' in property.createdAt) {
-                dateVal = new Date((property.createdAt as any).seconds * 1000);
+                dateVal = new Date((property.createdAt as { seconds: number }).seconds * 1000);
             } else {
                 // Try parsing string or other formats
                 dateVal = new Date(property.createdAt);
@@ -165,260 +199,328 @@ export default function PropertyDetailPage({ id: propId }: Props) {
             if (isNaN(dateVal.getTime())) return 'Publicado recientemente';
 
             return 'Publicado ' + formatDistanceToNow(dateVal, { addSuffix: true, locale: es });
-        } catch (error) {
+        } catch {
             return 'Publicado recientemente';
         }
     };
 
-    if (loading) return <div className="min-h-screen bg-white" />;
-    if (!property) return <div className="min-h-screen flex items-center justify-center">Propiedad no encontrada</div>;
+    if (loading) return <main className="flex-1 min-h-screen" />;
+    if (!property) return <main className="flex-1 s-status"><p className="s-page-lede">Propiedad no encontrada</p></main>;
 
-    const nextImage = () => {
-        if (!property.imageUrls?.length) return;
-        setCurrentImageIndex((prev) => (prev + 1) % property.imageUrls.length);
+    // ---- Derived view data ----
+    const displayTitle = property.calle ? `${property.calle} ${property.altura || ''}`.trim() : property.title;
+    const isSold = property.status === 'sold';
+    const operationLabel = isSold ? 'Vendida' : property.operation_type;
+    const priceLabel = formatPropertyPrice(property.price, property.currency, property.hidePrice);
+    const hasExpenses = Number(property.expenses) > 0;
+    const expensesLabel = hasExpenses ? `$ ${Number(property.expenses).toLocaleString('es-AR')}` : null;
+    const agencyPhone = property.agency?.phoneNumber?.replace(/\D/g, '') ? property.agency.phoneNumber : undefined;
+    const agencyHref = property.agency ? `/propiedades/${property.agency.slug || property.userId}` : null;
+
+    // Images first, then the video, so an image's media index equals its imageUrls index.
+    const mediaItems: MediaItem[] = property.imageUrls ? property.imageUrls.map(url => ({ type: 'image' as const, url })) : [];
+    if (property.video_url) {
+        const videoId = getYouTubeId(property.video_url);
+        if (videoId) {
+            mediaItems.push({
+                type: 'video',
+                url: property.video_url,
+                videoId,
+                thumbnail: `https://img.youtube.com/vi/${videoId}/0.jpg`
+            });
+        }
+    }
+
+    const openMedia = (idx: number) => {
+        const item = mediaItems[idx];
+        if (!item) return;
+        if (item.type === 'video') {
+            setActiveVideoId(item.videoId);
+            return;
+        }
+        setCurrentImageIndex(idx);
+        setModalZoom(false);
+        setShowGalleryModal(true);
     };
 
-    const prevImage = () => {
-        if (!property.imageUrls?.length) return;
-        setCurrentImageIndex((prev) => (prev - 1 + property.imageUrls.length) % property.imageUrls.length);
-    };
+    const sideTiles = mediaItems.slice(1, 1 + GRID_SIDE_TILES);
+    const hiddenCount = Math.max(0, mediaItems.length - (1 + GRID_SIDE_TILES));
+
+    const specs = [
+        Number(property.area_covered) > 0 && { key: 'area', icon: Ruler, value: `${property.area_covered} m²`, label: 'Superficie' },
+        Number(property.rooms) > 0 && { key: 'rooms', icon: DoorOpen, value: `${property.rooms}`, label: Number(property.rooms) === 1 ? 'Ambiente' : 'Ambientes' },
+        Number(property.bathrooms) > 0 && { key: 'baths', icon: Bath, value: `${property.bathrooms}`, label: Number(property.bathrooms) === 1 ? 'Baño' : 'Baños' },
+    ].filter(Boolean) as { key: string; icon: typeof Ruler; value: string; label: string }[];
+
+    const features = [
+        property.type && { label: 'Tipo de inmueble', value: property.type },
+        { label: 'Operación', value: operationLabel },
+        Number(property.area_covered) > 0 && { label: 'Superficie cubierta', value: `${property.area_covered} m²` },
+        Number(property.rooms) > 0 && { label: 'Ambientes', value: `${property.rooms}` },
+        Number(property.bathrooms) > 0 && { label: 'Baños', value: `${property.bathrooms}` },
+        expensesLabel && { label: 'Expensas', value: expensesLabel },
+        property.code && { label: 'Código', value: property.code },
+    ].filter(Boolean) as { label: string; value: string }[];
+
+    const renderTileMedia = (item: MediaItem, idx: number, sizes: string, priority = false) => (
+        <>
+            <Image
+                src={item.type === 'video' ? item.thumbnail : item.url}
+                alt={item.type === 'video' ? `Video de ${displayTitle}` : `${displayTitle} - Foto ${idx + 1}`}
+                fill
+                sizes={sizes}
+                className="object-cover"
+                priority={priority}
+            />
+            {item.type === 'video' && (
+                <span className="s-pd-tile__play" aria-hidden="true">
+                    <PlayCircle size={40} />
+                </span>
+            )}
+        </>
+    );
 
     return (
-        <div className="min-h-screen bg-white pb-32 lg:pb-20 pt-24">
-            <main className="container mx-auto px-4">
-                {/* Header (Title & Price) */}
-                <div className="flex flex-col md:flex-row justify-between items-start mb-8 gap-4">
-                    <div className="md:max-w-[70%]">
-                        <div className="flex items-center gap-2 mb-3">
-                            <span className={`px-2.5 py-0.5 rounded-md text-xs font-bold uppercase tracking-wider border ${property.status === 'sold'
-                                ? 'bg-red-100 text-red-600 border-red-200'
-                                : property.operation_type === 'Venta'
-                                    ? 'bg-green-100 text-green-700 border-green-200'
-                                    : property.operation_type === 'Alquiler'
-                                        ? 'bg-blue-100 text-blue-700 border-blue-200'
-                                        : 'bg-purple-100 text-purple-700 border-purple-200'
-                                }`}>
-                                {property.status === 'sold' ? 'VENDIDA' : property.operation_type}
-                            </span>
-                            <span className="flex items-center gap-1 text-sm text-gray-500">
-                                <MapPin size={14} /> {property.localidad}, {property.provincia}
-                            </span>
-                        </div>
-                        <h1 className="text-2xl md:text-3xl font-bold text-gray-900 mb-1">
-                            {property.calle ? `${property.calle} ${property.altura || ''}` : property.title}
-                        </h1>
-                        <div className="flex items-center gap-2 text-sm text-gray-500">
-                            {property.code && <span className="font-mono bg-gray-100 px-2 py-0.5 rounded text-xs text-gray-600 mr-2">{property.code}</span>}
-                            <span>{getPublishedTimeAgo()}</span>
-                        </div>
+        <main className="flex-1 s-portal s-portal--detail">
+            <div className="l-container">
+                {/* Top row: back + context, share + save */}
+                <div className="s-pd-top">
+                    <div className="s-pd-top__left">
+                        <Link href="/propiedades" onClick={handleBack} aria-label="Volver" className="s-icon-btn">
+                            <ArrowLeft size={18} aria-hidden="true" />
+                        </Link>
+                        <nav aria-label="Ruta de navegación" className="s-pd-crumbs">
+                            <Link href="/propiedades">Propiedades</Link>
+                            <span aria-hidden="true">/</span>
+                            <span>{property.localidad}</span>
+                        </nav>
                     </div>
-
-
+                    <div className="s-pd-top__actions">
+                        <button type="button" onClick={handleShare} aria-label="Compartir propiedad" className="s-icon-btn">
+                            <Share2 size={18} aria-hidden="true" />
+                        </button>
+                        <button
+                            type="button"
+                            onClick={handleSave}
+                            aria-label={isSaved ? 'Quitar de guardados' : 'Guardar propiedad'}
+                            aria-pressed={isSaved}
+                            data-active={isSaved}
+                            className="s-icon-btn"
+                        >
+                            <Heart size={18} className={isSaved ? 'fill-current' : ''} aria-hidden="true" />
+                        </button>
+                    </div>
                 </div>
 
-                <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-20">
-                    {/* Main Content Column */}
-                    <div className="lg:col-span-2 space-y-8">
+                {/* Gallery */}
+                {mediaItems.length === 0 ? (
+                    <div className="s-pd-empty">
+                        <Home size={48} aria-hidden="true" />
+                        <span>Sin contenido multimedia</span>
+                    </div>
+                ) : (
+                    <>
+                        {/* Desktop: main photo + side grid */}
+                        <div
+                            className={`s-pd-gallery ${isSold ? 's-pd-gallery--sold' : ''}`}
+                            data-count={Math.min(mediaItems.length, 1 + GRID_SIDE_TILES)}
+                        >
+                            <button type="button" className="s-pd-tile s-pd-tile--main" onClick={() => openMedia(0)} aria-label="Abrir galería">
+                                {renderTileMedia(mediaItems[0], 0, "(max-width: 768px) 100vw, 60vw", true)}
+                            </button>
+                            {sideTiles.length > 0 && (
+                                <div className="s-pd-gallery__side">
+                                    {sideTiles.map((item, i) => {
+                                        const idx = i + 1;
+                                        const isLast = i === sideTiles.length - 1;
+                                        const showMore = isLast && hiddenCount > 0;
+                                        return (
+                                            <button
+                                                key={idx}
+                                                type="button"
+                                                className="s-pd-tile"
+                                                onClick={() => openMedia(showMore ? Math.min(idx, property.imageUrls.length - 1) : idx)}
+                                                aria-label={showMore ? `Ver ${hiddenCount} fotos más` : `Ver foto ${idx + 1}`}
+                                            >
+                                                {renderTileMedia(item, idx, "(max-width: 768px) 50vw, 20vw")}
+                                                {showMore && (
+                                                    <span className="s-pd-tile__more" aria-hidden="true">+{hiddenCount}</span>
+                                                )}
+                                            </button>
+                                        );
+                                    })}
+                                </div>
+                            )}
+                        </div>
 
-                        {/* Interactive Gallery Slider */}
-                        <div className="flex flex-col gap-4">
-                            {(() => {
-                                type MediaItem =
-                                    | { type: 'image'; url: string }
-                                    | { type: 'video'; url: string; videoId: string; thumbnail: string };
+                        {/* Mobile: one swipeable image with a counter */}
+                        <div className={`s-pd-swipe ${isSold ? 's-pd-gallery--sold' : ''}`}>
+                            <div
+                                className="s-pd-swipe__track"
+                                onScroll={(e) => {
+                                    const el = e.currentTarget;
+                                    const idx = Math.round(el.scrollLeft / Math.max(el.clientWidth, 1));
+                                    if (idx !== slideIndex) setSlideIndex(idx);
+                                }}
+                            >
+                                {mediaItems.map((item, idx) => (
+                                    <button
+                                        key={idx}
+                                        type="button"
+                                        className="s-pd-tile s-pd-swipe__slide"
+                                        onClick={() => openMedia(idx)}
+                                        aria-label={item.type === 'video' ? 'Reproducir video' : `Ampliar foto ${idx + 1}`}
+                                    >
+                                        {renderTileMedia(item, idx, "(max-width: 768px) 100vw, 60vw", idx === 0)}
+                                    </button>
+                                ))}
+                            </div>
+                            {mediaItems.length > 1 && (
+                                <span className="s-glass-pill s-pd-swipe__count" aria-hidden="true">
+                                    {Math.min(slideIndex, mediaItems.length - 1) + 1} / {mediaItems.length}
+                                </span>
+                            )}
+                        </div>
+                    </>
+                )}
 
-                                // Prepare media items
-                                const mediaItems: MediaItem[] = property.imageUrls ? property.imageUrls.map(url => ({ type: 'image', url })) : [];
+                {/* Body: info + sticky price/contact card */}
+                <div className="s-pd-layout">
+                    <div className="s-pd-head">
+                        <div className="s-detail-meta">
+                            <span className={`s-op-badge ${isSold ? 's-op-badge--sold' : ''}`}>
+                                {isSold ? 'VENDIDA' : property.operation_type}
+                            </span>
+                            {property.code && <span className="s-code">{property.code}</span>}
+                            <span className="s-pd-head__time" suppressHydrationWarning>{getPublishedTimeAgo()}</span>
+                        </div>
+                        <h1 className="s-detail-title">{displayTitle}</h1>
+                        <p className="s-pd-loc">
+                            <MapPin size={16} aria-hidden="true" />
+                            <span>{property.localidad}, {property.provincia}</span>
+                        </p>
 
-                                if (property.video_url) {
-                                    const videoId = getYouTubeId(property.video_url);
-                                    if (videoId) {
-                                        mediaItems.push({
-                                            type: 'video',
-                                            url: property.video_url,
-                                            videoId,
-                                            thumbnail: `https://img.youtube.com/vi/${videoId}/0.jpg`
-                                        });
-                                    }
-                                }
+                        {specs.length > 0 && (
+                            <ul className="s-pd-specs" aria-label="Datos principales">
+                                {specs.map(({ key, icon: Icon, value, label }) => (
+                                    <li key={key}>
+                                        <Icon size={18} strokeWidth={1.5} aria-hidden="true" />
+                                        <span className="s-pd-specs__value">{value}</span>
+                                        <span className="s-pd-specs__label">{label}</span>
+                                    </li>
+                                ))}
+                            </ul>
+                        )}
+                    </div>
 
-                                const currentItem = mediaItems[currentImageIndex]; // Utilize state index
+                    <aside className="s-pd-aside" aria-label="Precio y contacto">
+                        <div className="s-pd-card">
+                            <p className="s-pd-card__op">{operationLabel}</p>
+                            <p className="s-pd-card__price">{priceLabel}</p>
+                            {expensesLabel && (
+                                <p className="s-pd-card__sub">Expensas {expensesLabel}</p>
+                            )}
 
-                                return (
-                                    <>
-                                        {/* Main Stage — 16:9 container shows landscape photos fully */}
-                                        <div
-                                            className={`relative w-full aspect-[4/3] md:aspect-[16/9] bg-gray-900 rounded-2xl overflow-hidden group ${property.status === 'sold' ? 'grayscale opacity-90' : ''}`}
-                                            onTouchStart={(e) => { touchStartX.current = e.touches[0].clientX; }}
-                                            onTouchEnd={(e) => {
-                                                const diff = touchStartX.current - e.changedTouches[0].clientX;
-                                                if (Math.abs(diff) > 40) {
-                                                    diff > 0
-                                                        ? setCurrentImageIndex(prev => (prev + 1) % mediaItems.length)
-                                                        : setCurrentImageIndex(prev => (prev - 1 + mediaItems.length) % mediaItems.length);
-                                                }
-                                            }}
-                                        >
-                                            {mediaItems.length > 0 && currentItem ? (
-                                                <>
-                                                    {/* Stacked layers — CSS opacity transition for instant, smooth switching */}
-                                                    {mediaItems.map((item, idx) => (
-                                                        <div
-                                                            key={idx}
-                                                            className={`absolute inset-0 transition-opacity duration-200 ${idx === currentImageIndex ? 'opacity-100 z-[1]' : 'opacity-0 z-0 pointer-events-none'}`}
-                                                        >
-                                                            {item.type === 'video' ? (
-                                                                idx === currentImageIndex ? (
-                                                                    <div className="absolute inset-0 flex items-center justify-center bg-black">
-                                                                        <iframe
-                                                                            width="100%"
-                                                                            height="100%"
-                                                                            src={`https://www.youtube.com/embed/${item.videoId}?autoplay=1`}
-                                                                            title="YouTube video player"
-                                                                            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                                                                            allowFullScreen
-                                                                            className="w-full h-full"
-                                                                        />
-                                                                    </div>
-                                                                ) : null
-                                                            ) : (
-                                                                <Image
-                                                                    src={item.url}
-                                                                    fill
-                                                                    alt="Vista Principal"
-                                                                    className="object-cover cursor-zoom-in"
-                                                                    sizes="(max-width: 1024px) 100vw, 66vw"
-                                                                    priority={idx === 0}
-                                                                    onClick={() => setShowGalleryModal(true)}
-                                                                />
-                                                            )}
-                                                        </div>
-                                                    ))}
-
-                                                    {/* Navigation Controls */}
-                                                    {mediaItems.length > 1 && (
-                                                        <>
-                                                            <button
-                                                                onClick={(e) => {
-                                                                    e.stopPropagation();
-                                                                    setCurrentImageIndex((prev) => (prev - 1 + mediaItems.length) % mediaItems.length);
-                                                                }}
-                                                                className="absolute left-4 top-1/2 -translate-y-1/2 p-2 bg-white/10 hover:bg-white/20 backdrop-blur-md rounded-full shadow-lg text-white transition-all duration-200 z-10"
-                                                            >
-                                                                <ChevronLeft size={24} />
-                                                            </button>
-                                                            <button
-                                                                onClick={(e) => {
-                                                                    e.stopPropagation();
-                                                                    setCurrentImageIndex((prev) => (prev + 1) % mediaItems.length);
-                                                                }}
-                                                                className="absolute right-4 top-1/2 -translate-y-1/2 p-2 bg-white/10 hover:bg-white/20 backdrop-blur-md rounded-full shadow-lg text-white transition-all duration-200 z-10"
-                                                            >
-                                                                <ChevronRight size={24} />
-                                                            </button>
-
-                                                            {/* Counter Badge */}
-                                                            <div className="absolute bottom-4 right-4 bg-black/60 text-white text-xs font-medium px-3 py-1 rounded-full backdrop-blur-md border border-white/10 z-10">
-                                                                {currentImageIndex + 1} / {mediaItems.length}
-                                                            </div>
-                                                        </>
-                                                    )}
-                                                </>
-                                            ) : (
-                                                <div className="w-full h-full flex items-center justify-center text-gray-400">
-                                                    <Home size={64} opacity={0.2} />
-                                                    <span className="ml-4 text-lg font-medium">Sin contenido multimedia</span>
-                                                </div>
-                                            )}
-                                        </div>
-
-                                        {/* Thumbnails Strip */}
-                                        {mediaItems.length > 1 && (
-                                            <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-hide">
-                                                {mediaItems.map((item, idx) => (
-                                                    <button
-                                                        key={idx}
-                                                        onClick={() => setCurrentImageIndex(idx)}
-                                                        className={`relative w-24 h-20 flex-shrink-0 rounded-lg overflow-hidden transition-all duration-200 group ${idx === currentImageIndex
-                                                            ? 'ring-2 ring-indigo-600 ring-offset-2 opacity-100'
-                                                            : 'opacity-60 hover:opacity-100 grayscale hover:grayscale-0'
-                                                            }`}
-                                                    >
-                                                        <Image
-                                                            src={item.type === 'video' ? item.thumbnail : item.url}
-                                                            alt={`Thumbnail ${idx}`}
-                                                            fill
-                                                            sizes="96px"
-                                                            className="object-cover"
-                                                        />
-                                                        {item.type === 'video' && (
-                                                            <div className="absolute inset-0 flex items-center justify-center bg-black/30 group-hover:bg-black/10 transition-colors">
-                                                                <PlayCircle className="text-white drop-shadow-md w-8 h-8" />
-                                                            </div>
-                                                        )}
-                                                    </button>
-                                                ))}
-                                            </div>
+                            {property.agency && agencyHref && (
+                                <div className="s-pd-agent">
+                                    <div className="s-avatar s-pd-agent__avatar">
+                                        {property.agency.photoURL ? (
+                                            <Image src={property.agency.photoURL} alt={property.agency.displayName} fill sizes="48px" className="object-cover" />
+                                        ) : (
+                                            property.agency.displayName.substring(0, 2).toUpperCase()
                                         )}
-                                    </>
-                                );
-                            })()}
+                                    </div>
+                                    <div className="s-pd-agent__text">
+                                        <span className="s-pd-agent__label">Publicado por</span>
+                                        <Link href={agencyHref} className="s-pd-agent__name">
+                                            {property.agency.displayName}
+                                        </Link>
+                                    </div>
+                                </div>
+                            )}
+
+                            <div className="s-pd-card__actions">
+                                <button
+                                    type="button"
+                                    onClick={() => setShowContactModal(true)}
+                                    className="l-btn l-btn--primary l-btn--block s-btn-reset s-btn-plain"
+                                >
+                                    <Send size={16} aria-hidden="true" /> Enviar consulta
+                                </button>
+                                {agencyPhone && (
+                                    <div className="s-pd-card__row">
+                                        <button type="button" onClick={() => handleWhatsApp(agencyPhone)} className="s-ghost-btn">
+                                            <MessageCircle size={16} aria-hidden="true" /> WhatsApp
+                                        </button>
+                                        <a href={`tel:${agencyPhone.replace(/[^\d+]/g, '')}`} className="s-ghost-btn">
+                                            <Phone size={16} aria-hidden="true" /> Llamar
+                                        </a>
+                                    </div>
+                                )}
+                                {agencyHref && (
+                                    <Link href={agencyHref} className="l-link-arrow s-pd-card__more">
+                                        Ver más propiedades de la inmobiliaria <ArrowRight size={16} aria-hidden="true" />
+                                    </Link>
+                                )}
+                            </div>
+
+                            <div className="s-report">
+                                <button type="button" onClick={handleReport}>
+                                    Denunciar o Reclamar Propiedad
+                                </button>
+                            </div>
                         </div>
+                    </aside>
 
-                        {/* Specs Bar */}
-                        <div className="flex items-center justify-between border-y border-gray-100 py-6">
-                            <div className="flex items-center gap-3">
-                                <div className="p-2 bg-gray-50 rounded-lg text-gray-700">
-                                    <Maximize size={20} />
-                                </div>
-                                <div>
-                                    <p className="text-sm font-bold text-gray-900">{property.area_covered} m²</p>
-                                    <p className="text-xs text-gray-500">Totales</p>
-                                </div>
-                            </div>
-                            <div className="h-8 w-px bg-gray-100" />
-                            <div className="flex items-center gap-3">
-                                <div className="p-2 bg-gray-50 rounded-lg text-gray-700">
-                                    <Bed size={20} />
-                                </div>
-                                <div>
-                                    <p className="text-sm font-bold text-gray-900">{property.rooms || '-'} Amb.</p>
-                                    <p className="text-xs text-gray-500">Dormitorios</p>
-                                </div>
-                            </div>
-                            <div className="h-8 w-px bg-gray-100" />
-                            <div className="flex items-center gap-3">
-                                <div className="p-2 bg-gray-50 rounded-lg text-gray-700">
-                                    <Bath size={20} />
-                                </div>
-                                <div>
-                                    <p className="text-sm font-bold text-gray-900">{property.bathrooms || '-'} Baños</p>
-                                    <p className="text-xs text-gray-500">Completos</p>
-                                </div>
-                            </div>
-                        </div>
+                    <div className="s-pd-body">
+                        <nav className="s-pd-tabs" aria-label="Secciones de la propiedad">
+                            {SECTIONS.map(s => (
+                                <a
+                                    key={s.id}
+                                    href={`#${s.id}`}
+                                    onClick={() => setActiveSection(s.id)}
+                                    aria-current={activeSection === s.id ? 'true' : undefined}
+                                    className="s-pd-tabs__item"
+                                >
+                                    {s.label}
+                                </a>
+                            ))}
+                        </nav>
 
-
-
-                        {/* Description */}
-                        <div className="bg-white rounded-2xl p-8 shadow-sm border border-gray-100">
-                            <h2 className="text-xl font-bold text-gray-900 mb-4">Descripción</h2>
-                            <div className="prose prose-gray max-w-none text-gray-600 whitespace-pre-wrap">
+                        <section id="descripcion" className="s-pd-section">
+                            <h2 className="s-pd-section__title">Descripción</h2>
+                            <div className="s-pd-section__text">
                                 {property.description || "Sin descripción disponible."}
                             </div>
-                        </div>
+                        </section>
 
-                        {/* Location Map */}
-                        <div className="bg-white rounded-2xl p-8 shadow-sm border border-gray-100">
-                            <h2 className="text-xl font-bold text-gray-900 mb-4">Ubicación</h2>
-                            <div className="w-full h-[300px] rounded-xl overflow-hidden bg-gray-100 relative z-0">
+                        <section id="caracteristicas" className="s-pd-section">
+                            <h2 className="s-pd-section__title">Características</h2>
+                            <dl className="s-pd-features">
+                                {features.map(f => (
+                                    <div key={f.label}>
+                                        <dt>{f.label}</dt>
+                                        <dd>{f.value}</dd>
+                                    </div>
+                                ))}
+                            </dl>
+                        </section>
+
+                        <section id="ubicacion" className="s-pd-section">
+                            <h2 className="s-pd-section__title">Ubicación</h2>
+                            <p className="s-pd-loc">
+                                <MapPin size={16} aria-hidden="true" />
+                                <span>{property.localidad}, {property.provincia}</span>
+                            </p>
+                            <div className="s-map-frame s-pd-map">
                                 {property.lat && property.lng ? (
-                                    <PublicMap lat={property.lat} lng={property.lng} />
+                                    <PublicMap lat={property.lat} lng={property.lng} tone="dark" />
                                 ) : (
                                     <iframe
                                         width="100%"
                                         height="100%"
                                         id="gmap_canvas"
+                                        title={`Mapa de ${property.localidad}`}
                                         src={`https://maps.google.com/maps?q=${encodeURIComponent(`${property.title.replace(/^(ALQUILER|VENTA|ALQUILER TEMPORAL)\s*-\s*/i, '')}, ${property.localidad}, ${property.provincia}, Argentina`)}&t=&z=15&ie=UTF8&iwloc=&output=embed`}
                                         frameBorder="0"
                                         scrolling="no"
@@ -428,103 +530,22 @@ export default function PropertyDetailPage({ id: propId }: Props) {
                                     ></iframe>
                                 )}
                             </div>
-                            <div className="mt-2 flex items-center gap-2 text-sm text-gray-500">
-                                <MapPin size={16} />
-                                <p>{property.localidad}, {property.provincia}</p>
-                            </div>
-                        </div>
-                    </div>
-
-                    {/* Sidebar / Agency Info (Sticky) */}
-                    <div className="lg:col-span-1">
-                        <div className="sticky top-24 space-y-6">
-                            {/* Price & Actions Card */}
-                            <div className="bg-white rounded-2xl p-6 shadow-lg border border-gray-100">
-                                <p className="text-3xl font-bold text-gray-900 mb-6 text-center">
-                                    {formatPropertyPrice(property.price, property.currency, property.hidePrice)}
-                                </p>
-                                <div className="flex gap-3">
-                                    <button
-                                        onClick={handleShare}
-                                        className="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl border border-gray-200 hover:bg-gray-50 text-sm font-bold text-gray-700 transition"
-                                    >
-                                        <Share2 className="w-4 h-4" /> Compartir
-                                    </button>
-                                    <button
-                                        onClick={handleSave}
-                                        className={`flex-1 flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl border transition group text-sm font-bold ${isSaved
-                                            ? 'bg-red-50 border-red-200 text-red-600'
-                                            : 'border-gray-200 hover:border-red-200 hover:bg-red-50 text-gray-700'
-                                            }`}
-                                    >
-                                        <Heart className={`w-4 h-4 ${isSaved ? 'fill-current' : 'group-hover:text-red-500'}`} />
-                                        {isSaved ? 'Guardado' : 'Guardar'}
-                                    </button>
-                                </div>
-                            </div>
-                            {property.agency && (
-                                <div className="bg-white rounded-2xl p-6 shadow-lg border border-gray-100 hover:shadow-xl transition-shadow duration-300">
-                                    <div className="flex items-center gap-4 mb-8">
-                                        <div className="relative w-20 h-20 rounded-full bg-gray-100 overflow-hidden shrink-0 border border-gray-200 p-0.5">
-                                            {property.agency.photoURL ? (
-                                                <Image src={property.agency.photoURL} alt={property.agency.displayName} fill sizes="80px" className="object-cover rounded-full p-0.5" />
-                                            ) : (
-                                                <div className="w-full h-full flex items-center justify-center font-bold text-indigo-600 text-2xl bg-indigo-50 rounded-full">
-                                                    {property.agency.displayName.substring(0, 2).toUpperCase()}
-                                                </div>
-                                            )}
-                                        </div>
-                                        <div className="overflow-hidden">
-                                            <p className="text-xs text-gray-500 uppercase tracking-wider font-bold mb-1">Publicado por</p>
-                                            <h3 className="font-bold text-gray-900 text-xl leading-tight truncate">
-                                                <Link href={`/propiedades/${property.agency.slug || property.userId}`} className="hover:underline hover:text-indigo-600 transition">
-                                                    {property.agency.displayName}
-                                                </Link>
-                                            </h3>
-                                            {(property.agency as any).rating && (property.agency as any).rating >= 5 ? (
-                                                <div className="flex text-amber-500 text-xs mt-1">
-                                                    ★★★★★ <span className="text-gray-400 ml-1">(5.0)</span>
-                                                </div>
-                                            ) : null}
-                                        </div>
-                                    </div>
-
-                                    <button
-                                        onClick={() => setShowContactModal(true)}
-                                        className="w-full bg-gray-900 hover:bg-black text-white font-bold py-4 px-4 rounded-xl transition shadow-xl shadow-gray-200/50 mb-3 flex items-center justify-center gap-3 text-lg"
-                                    >
-                                        <span>Contactar Inmobiliaria</span>
-                                    </button>
-                                    <Link
-                                        href={`/propiedades/${property.agency.slug || property.userId}`}
-                                        className="block w-full text-center bg-white border border-gray-200 hover:bg-gray-50 text-gray-700 font-bold py-3 px-4 rounded-xl transition text-sm mb-4"
-                                    >
-                                        Ver más propiedades
-                                    </Link>
-
-                                    <div className="pt-4 border-t border-gray-100 text-center">
-                                        <button onClick={handleReport} className="text-xs text-gray-400 hover:text-red-500 hover:underline transition font-medium">
-                                            Denunciar o Reclamar Propiedad
-                                        </button>
-                                    </div>
-                                </div>
-                            )}
-                        </div>
+                        </section>
                     </div>
                 </div>
 
                 {/* Similar Properties Section */}
                 {similarProperties.length > 0 && (
-                    <div className="border-t border-gray-100 pt-16 mt-16">
-                        <div className="flex items-center justify-between mb-8">
-                            <h2 className="text-2xl font-bold text-gray-900">Encontrá propiedades similares</h2>
-                            <Link href="/propiedades" className="flex items-center gap-2 text-indigo-600 font-bold text-sm hover:underline">
-                                Ver más recomendaciones <ArrowRight size={16} />
+                    <div className="s-similar">
+                        <div className="s-row-head">
+                            <h2 className="s-h2">Encontrá propiedades similares</h2>
+                            <Link href="/propiedades" className="l-link-arrow">
+                                Ver más recomendaciones <ArrowRight size={16} aria-hidden="true" />
                             </Link>
                         </div>
 
-                        <div className="relative -mx-4 px-4 overflow-x-auto pb-8 scrollbar-hide">
-                            <div className="flex gap-6 w-max">
+                        <div className="relative overflow-x-auto pb-4 scrollbar-hide">
+                            <div className="flex gap-5 w-max">
                                 {similarProperties.map((prop) => (
                                     <SimilarPropertyCard key={prop.id} property={prop} />
                                 ))}
@@ -535,25 +556,51 @@ export default function PropertyDetailPage({ id: propId }: Props) {
 
                 {/* Legal Disclaimer */}
                 <PropertyDisclaimer />
-            </main>
+            </div>
 
             {/* Mobile Sticky Contact Bar */}
-            <div className="fixed bottom-0 left-0 w-full bg-white border-t border-gray-100 px-5 py-4 lg:hidden z-[45] flex items-center justify-between shadow-[0_-4px_20px_rgba(0,0,0,0.04)] sm:pb-4 pb-[max(1rem,env(safe-area-inset-bottom))]">
+            <div className="s-sticky-bar">
                 <button
+                    type="button"
                     onClick={() => setShowContactModal(true)}
-                    className="bg-gray-900 text-white font-semibold py-3.5 px-7 rounded-xl active:scale-95 transition-transform text-[15px] shadow-sm shadow-gray-900/20"
+                    className="l-btn l-btn--primary s-btn-reset s-btn-plain"
                 >
                     Contactar
                 </button>
-                <div className="flex flex-col items-end text-right">
-                    <span className="text-xl font-bold text-gray-900 leading-none">
+                <div className="s-sticky-bar__info">
+                    <span className="s-sticky-bar__price">
                         {property.hidePrice || Number(property.price) === 0 ? "Consultar" : `${property.currency} ${Number(property.price)?.toLocaleString('es-AR')}`}
                     </span>
-                    <span className="text-xs text-gray-500 font-medium mt-1.5 max-w-[160px] truncate">
+                    <span className="s-sticky-bar__sub">
                         {property.agency?.displayName ? `Por ${property.agency.displayName}` : property.operation_type}
                     </span>
                 </div>
             </div>
+
+            {/* Video overlay */}
+            {activeVideoId && (
+                <div
+                    className="s-lightbox s-lightbox--video"
+                    role="dialog"
+                    aria-modal="true"
+                    aria-label="Video de la propiedad"
+                    onClick={(e) => { if (e.target === e.currentTarget) setActiveVideoId(null); }}
+                >
+                    <button type="button" onClick={() => setActiveVideoId(null)} aria-label="Cerrar video" className="s-icon-btn s-lightbox__close">
+                        <X size={18} aria-hidden="true" />
+                    </button>
+                    <div className="s-lightbox__video">
+                        <iframe
+                            width="100%"
+                            height="100%"
+                            src={`https://www.youtube.com/embed/${activeVideoId}?autoplay=1`}
+                            title="YouTube video player"
+                            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                            allowFullScreen
+                        />
+                    </div>
+                </div>
+            )}
 
             {/* Gallery Modal */}
             {showGalleryModal && property && property.imageUrls?.length > 0 && (() => {
@@ -564,37 +611,38 @@ export default function PropertyDetailPage({ id: propId }: Props) {
 
                 return (
                 <div
-                    className="fixed inset-0 z-[60] bg-black/98 flex items-center justify-center animate-in fade-in duration-200"
+                    className="s-lightbox"
+                    role="dialog"
+                    aria-modal="true"
+                    aria-label="Galería de fotos"
                     onClick={(e) => { if (e.target === e.currentTarget) { setShowGalleryModal(false); setModalZoom(false); } }}
                     onTouchStart={(e) => { touchStartX.current = e.touches[0].clientX; }}
                     onTouchEnd={(e) => {
                         const diff = touchStartX.current - e.changedTouches[0].clientX;
-                        if (Math.abs(diff) > 40) {
-                            diff > 0
-                                ? setModalIdx((modalIdx + 1) % total)
-                                : setModalIdx((modalIdx - 1 + total) % total);
-                        }
+                        if (diff > 40) setModalIdx((modalIdx + 1) % total);
+                        else if (diff < -40) setModalIdx((modalIdx - 1 + total) % total);
                     }}
                 >
                     <div className="w-full h-full flex flex-col">
                         {/* Header */}
-                        <div className="flex items-center justify-between px-4 py-3 bg-black/60 shrink-0 border-b border-white/10">
-                            <span className="text-sm font-medium text-white/70">
+                        <div className="s-lightbox__head">
+                            <span className="s-lightbox__count">
                                 {modalIdx + 1} / {total}
                             </span>
-                            <span className="text-xs text-white/40">{modalZoom ? 'Zoom activo · Clic para ajustar' : 'Clic en la imagen para zoom'}</span>
+                            <span className="s-lightbox__hint">{modalZoom ? 'Zoom activo · Clic para ajustar' : 'Clic en la imagen para zoom'}</span>
                             <button
+                                type="button"
                                 onClick={() => { setShowGalleryModal(false); setModalZoom(false); }}
-                                className="flex items-center gap-2 px-4 py-2 bg-white/10 hover:bg-white/20 rounded-lg transition text-white text-sm font-semibold border border-white/20"
+                                className="s-ghost-btn"
                             >
-                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+                                <X size={16} aria-hidden="true" />
                                 Cerrar
                             </button>
                         </div>
 
                         {/* Main Image with click-to-zoom */}
                         <div
-                            className={`flex-1 relative flex items-center justify-center bg-zinc-950 overflow-hidden ${modalZoom ? 'cursor-zoom-out' : 'cursor-zoom-in'}`}
+                            className={`s-lightbox__stage ${modalZoom ? 'cursor-zoom-out' : 'cursor-zoom-in'}`}
                             onClick={() => setModalZoom(z => !z)}
                         >
                             {/* Stacked images — only render current ±1 to limit memory */}
@@ -634,16 +682,20 @@ export default function PropertyDetailPage({ id: propId }: Props) {
                             {!modalZoom && total > 1 && (
                                 <>
                                     <button
+                                        type="button"
+                                        aria-label="Imagen anterior"
                                         onClick={(e) => { e.stopPropagation(); setModalIdx((modalIdx - 1 + total) % total); }}
-                                        className="absolute left-4 p-4 bg-black/40 hover:bg-black/80 rounded-full text-white transition backdrop-blur-md border border-white/10 z-10 group"
+                                        className="s-glass-btn s-glass-btn--lg absolute left-4 z-10"
                                     >
-                                        <ChevronLeft size={28} className="group-hover:-translate-x-0.5 transition-transform" />
+                                        <ChevronLeft size={22} />
                                     </button>
                                     <button
+                                        type="button"
+                                        aria-label="Siguiente imagen"
                                         onClick={(e) => { e.stopPropagation(); setModalIdx((modalIdx + 1) % total); }}
-                                        className="absolute right-4 p-4 bg-black/40 hover:bg-black/80 rounded-full text-white transition backdrop-blur-md border border-white/10 z-10 group"
+                                        className="s-glass-btn s-glass-btn--lg absolute right-4 z-10"
                                     >
-                                        <ChevronRight size={28} className="group-hover:translate-x-0.5 transition-transform" />
+                                        <ChevronRight size={22} />
                                     </button>
                                 </>
                             )}
@@ -651,17 +703,17 @@ export default function PropertyDetailPage({ id: propId }: Props) {
 
                         {/* Thumbnails Strip */}
                         {total > 1 && (
-                            <div className="h-20 bg-zinc-950 p-2 shrink-0 flex gap-2 overflow-x-auto border-t border-white/10">
+                            <div className="s-lightbox__thumbs">
                                 {property.imageUrls.map((url, idx) => (
                                     <button
                                         key={idx}
+                                        type="button"
+                                        aria-label={`Ver imagen ${idx + 1}`}
+                                        aria-current={idx === modalIdx}
                                         onClick={(e) => { e.stopPropagation(); setModalIdx(idx); }}
-                                        className={`relative h-full aspect-[4/3] rounded-lg overflow-hidden transition-all duration-200 border-2 shrink-0 ${idx === modalIdx
-                                                ? 'border-indigo-500 opacity-100 scale-105 shadow-lg shadow-indigo-500/20'
-                                                : 'border-transparent opacity-40 hover:opacity-80'
-                                            }`}
+                                        className="s-lightbox__thumb"
                                     >
-                                        <Image src={url} alt={`Thumbnail ${idx}`} fill sizes="100px" className="object-cover" />
+                                        <Image src={url} alt="" fill sizes="100px" className="object-cover" />
                                     </button>
                                 ))}
                             </div>
@@ -675,10 +727,10 @@ export default function PropertyDetailPage({ id: propId }: Props) {
                 isOpen={showContactModal}
                 onClose={() => setShowContactModal(false)}
                 propertyId={property.id}
-                propertyTitle={property.calle ? `${property.calle} ${property.altura || ''}` : property.title}
+                propertyTitle={displayTitle}
                 ownerId={property.userId}
                 agencyId={property.agency?.uid}
             />
-        </div>
+        </main>
     );
 }

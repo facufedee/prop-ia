@@ -1,12 +1,63 @@
 import { blogService } from "@/infrastructure/services/blogService";
 import Link from "next/link";
-import { ArrowLeft, Calendar, User, Clock } from "lucide-react";
+import { ArrowLeft, ArrowRight, User } from "lucide-react";
 import { notFound } from "next/navigation";
 import Image from "next/image";
 import { Metadata } from "next";
-import ReactMarkdown from "react-markdown";
-import remarkBreaks from "remark-breaks";
+import { formatPostDate, getReadingMinutes, pickRelatedPosts, toPostDate } from "@/lib/blog/blogLayout";
 import ShareButtons from "../components/ShareButtons";
+import { ArticleMarkdown } from "../components/ArticleMarkdown";
+import { CategoryBadge, PostCard } from "../components/BlogCards";
+import { toCardData } from "../toCardData";
+import JsonLd, { breadcrumbList, ORGANIZATION_ID, SITE_ORIGIN } from "@/ui/seo/JsonLd";
+
+interface ModuleCta {
+    heading: string;
+    text: string;
+    href: string;
+    label: string;
+}
+
+const RENTALS_CTA: ModuleCta = {
+    heading: "¿Administrás alquileres?",
+    text: "Zeta Prop arma el plan de pagos, calcula los ajustes por ICL o IPC y te deja recibos y liquidaciones listos.",
+    href: "/alquileres",
+    label: "Conocé la gestión de alquileres",
+};
+
+const WEBSITE_CTA: ModuleCta = {
+    heading: "¿Querés una web para tu inmobiliaria?",
+    text: "Publicás tus propiedades en un sitio con tu marca y cada consulta llega directo a tu panel.",
+    href: "/pagina-web",
+    label: "Conocé la página web para inmobiliarias",
+};
+
+const PROPERTIES_CTA: ModuleCta = {
+    heading: "¿Querés ordenar tu cartera?",
+    text: "Cargás cada propiedad, seguís a cada interesado en un tablero y llevás cada operación hasta el cierre.",
+    href: "/propiedades-gestion",
+    label: "Conocé la gestión de propiedades",
+};
+
+const DEFAULT_CTA: ModuleCta = {
+    heading: "Tu inmobiliaria, en orden",
+    text: "Alquileres, propiedades y tu página web en un solo lugar.",
+    href: "/",
+    label: "Conocé Zeta Prop",
+};
+
+// Keyword match on category + tags; the first matching module wins.
+const MODULE_KEYWORDS: [RegExp, ModuleCta][] = [
+    [/alquil|inquilin|contrato|icl|ipc|locaci|garant/, RENTALS_CTA],
+    [/crm|captaci|tasaci|interesad/, PROPERTIES_CTA],
+    [/web|sitio|seo|marketing|redes/, WEBSITE_CTA],
+    [/venta|propiedad|cartera/, PROPERTIES_CTA],
+];
+
+function pickModuleCta(category: string | undefined, tags: string[] | undefined): ModuleCta {
+    const haystack = [category ?? "", ...(tags ?? [])].join(" ").toLowerCase();
+    return MODULE_KEYWORDS.find(([pattern]) => pattern.test(haystack))?.[1] ?? DEFAULT_CTA;
+}
 
 interface Props {
     params: Promise<{ slug: string }>;
@@ -21,10 +72,10 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     const url = `https://zetaprop.com.ar/blog/${post.slug}`;
 
     return {
-        title: `${post.title} - Blog Zeta Prop`,
+        // The (main) layout template appends the brand.
+        title: post.title,
         description: post.excerpt,
-        // The (main) layout sets canonical to the homepage; without overriding it here,
-        // LinkedIn/WhatsApp/Facebook resolve the shared link to the homepage instead of the post.
+        // Self-canonical so shares (LinkedIn/WhatsApp/Facebook) and search resolve to the post.
         alternates: { canonical: url },
         openGraph: {
             url,
@@ -32,9 +83,10 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
             locale: "es_AR",
             title: post.title,
             description: post.excerpt,
-            images: post.imageUrl ? [post.imageUrl] : [],
+            // No cover: omit so the file-based opengraph-image applies.
+            ...(post.imageUrl ? { images: [post.imageUrl] } : {}),
             type: "article",
-            publishedTime: post.publishedAt instanceof Date ? post.publishedAt.toISOString() : (post.publishedAt as any)?.toDate?.().toISOString(),
+            publishedTime: toPostDate(post.publishedAt)?.toISOString(),
             authors: [post.author?.name || "Zeta Prop"],
         },
         // Without this, Next.js inherits the root layout's site-wide `twitter` block
@@ -45,7 +97,8 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
             card: "summary_large_image",
             title: post.title,
             description: post.excerpt,
-            images: post.imageUrl ? [post.imageUrl] : [],
+            // No cover: omit so the file-based opengraph-image applies.
+            ...(post.imageUrl ? { images: [post.imageUrl] } : {}),
         },
     };
 }
@@ -60,154 +113,151 @@ export default async function BlogPostPage({ params }: Props) {
         notFound();
     }
 
-    // Suggested posts (excluding current)
-    const relatedPosts = await blogService.getRelatedPosts(post.slug, 3);
-    // Wait, getRelatedPosts expects ID or similar. Currently implementation passes string. 
-    // But getPostBySlug returns ID inside post object. 
-    // And getRelatedPosts in service filters by ID. 
-    // Let's pass post.id if available, but service signature currently takes string currentId
-    // I need to make sure I am passing the ID to filter out correctly. 
-    // The previous implementation used `filter(post => post.id !== currentId)`. 
-    // So I should pass the ID.
-    const related = post.id ? await blogService.getRelatedPosts(post.id) : [];
+    const allPosts = (await blogService.getPublishedPosts().catch(() => [])).map(toCardData);
+    const related = pickRelatedPosts(allPosts, post.slug, 3);
 
-    // Simple reading time calc
-    const words = post.content.split(/\s+/).length;
-    const readTime = Math.ceil(words / 200);
+    const date = toPostDate(post.publishedAt) ?? toPostDate(post.createdAt);
+    const readingMinutes = getReadingMinutes(post.content);
+    const moduleCta = pickModuleCta(post.category, post.tags);
+    const authorName = post.author?.name || "Equipo Zeta Prop";
+    const postUrl = `${SITE_ORIGIN}/blog/${post.slug}`;
+    const modified = toPostDate(post.updatedAt) ?? date;
+    const jsonLd = {
+        "@context": "https://schema.org",
+        "@graph": [
+            {
+                "@type": "BlogPosting",
+                headline: post.title,
+                description: post.excerpt,
+                ...(post.imageUrl ? { image: [post.imageUrl] } : {}),
+                ...(date ? { datePublished: date.toISOString() } : {}),
+                ...(modified ? { dateModified: modified.toISOString() } : {}),
+                // Named authors are people; posts without one are signed by the organization.
+                author: post.author?.name
+                    ? { "@type": "Person", name: post.author.name }
+                    : { "@id": ORGANIZATION_ID },
+                publisher: { "@id": ORGANIZATION_ID },
+                mainEntityOfPage: { "@type": "WebPage", "@id": postUrl },
+                inLanguage: "es-AR",
+                ...(post.category ? { articleSection: post.category } : {}),
+            },
+            breadcrumbList([
+                { name: "Blog", path: "/blog" },
+                { name: post.title, path: postUrl },
+            ]),
+        ],
+    };
 
     return (
-        <main className="bg-white min-h-screen pb-24">
+        <main className="flex-1 pb-24">
+            <JsonLd data={jsonLd} />
+            {/* Header */}
+            <header className="mx-auto max-w-3xl px-5 pt-28 sm:px-6 md:pt-32">
+                <Link href="/blog" className="inline-flex min-h-11 items-center gap-2 text-sm font-medium text-[var(--color-ink-2)] transition-colors hover:text-[var(--color-ink)]">
+                    <ArrowLeft size={16} />
+                    Blog
+                </Link>
 
-            {/* Header / Hero */}
-            <div className="relative h-[400px] md:h-[500px] w-full bg-gray-900 flex items-center justify-center overflow-hidden">
-                {post.imageUrl && (
-                    <>
-                        <div className="absolute inset-0 bg-black/60 z-10" />
-                        <Image
-                            src={post.imageUrl}
-                            alt={post.title}
-                            fill
-                            priority
-                            className="object-cover z-0"
-                            sizes="100vw"
-                        />
-                    </>
-                )}
+                <div className="mt-4">
+                    <CategoryBadge category={post.category} />
+                </div>
 
-                <div className="relative z-20 max-w-4xl mx-auto px-6 text-center text-white space-y-6">
-                    <span className="inline-block px-4 py-1.5 bg-indigo-500/20 border border-indigo-400/30 text-indigo-200 backdrop-blur-sm rounded-full text-sm font-medium">
-                        {post.category}
-                    </span>
-                    <h1 className="text-3xl md:text-5xl font-bold leading-tight">
-                        {post.title}
-                    </h1>
+                <h1 className="mt-4 font-[family-name:var(--font-heading)] text-3xl font-medium leading-[1.1] tracking-[-0.03em] text-balance text-[var(--color-ink)] sm:text-4xl md:text-5xl">{post.title}</h1>
 
-                    <div className="flex items-center justify-center gap-6 text-gray-300 text-sm md:text-base">
-                        <div className="flex items-center gap-2">
-                            {post.author?.photo ? (
-                                <Image
-                                    src={post.author.photo}
-                                    alt={post.author.name}
-                                    width={32}
-                                    height={32}
-                                    className="rounded-full border border-gray-500 object-cover"
-                                />
-                            ) : (
-                                <div className="w-8 h-8 rounded-full bg-gray-700 flex items-center justify-center">
-                                    <User size={14} />
-                                </div>
-                            )}
-                            <span className="font-medium text-white">{post.author?.name}</span>
+                {post.excerpt && <p className="mt-5 text-lg leading-relaxed text-[var(--color-ink-2)] md:text-xl">{post.excerpt}</p>}
+
+                <div className="mt-8 flex flex-wrap items-center justify-between gap-4 border-y border-[var(--color-rule)] py-4">
+                    <div className="flex items-center gap-3">
+                        {post.author?.photo ? (
+                            <Image src={post.author.photo} alt="" width={40} height={40} className="h-10 w-10 rounded-full border border-[var(--color-rule)] object-cover" />
+                        ) : (
+                            <div className="flex h-10 w-10 items-center justify-center rounded-full border border-[var(--color-rule)] bg-[var(--color-paper-3)] text-[var(--color-ink-2)]">
+                                <User size={18} aria-hidden />
+                            </div>
+                        )}
+                        <div className="text-sm">
+                            <p className="font-medium text-[var(--color-ink)]">{authorName}</p>
+                            <p className="flex flex-wrap items-center gap-2 text-[var(--color-muted)]">
+                                {date && <time dateTime={date.toISOString()}>{formatPostDate(date)}</time>}
+                                {date && <span aria-hidden className="h-1 w-1 rounded-full bg-current opacity-60" />}
+                                <span>{readingMinutes} min de lectura</span>
+                            </p>
                         </div>
-                        <div className="flex items-center gap-1.5">
-                            <Calendar size={16} />
-                            {post.publishedAt
-                                ? (post.publishedAt instanceof Date ? post.publishedAt.toLocaleDateString() : (post.publishedAt as any)?.toDate?.().toLocaleDateString())
-                                : "-"
-                            }
-                        </div>
-                        <div className="flex items-center gap-1.5">
-                            <Clock size={16} />
-                            {readTime} min lectura
-                        </div>
+                    </div>
+                    <div className="lg:hidden">
+                        <ShareButtons title={post.title} slug={post.slug} excerpt={post.excerpt} />
                     </div>
                 </div>
-            </div>
+            </header>
 
-            {/* Content Body */}
-            <div className="max-w-3xl mx-auto px-6 -mt-20 relative z-30">
-                <article className="bg-white rounded-2xl p-8 md:p-12 shadow-xl border border-gray-100">
-
-                    {/* Share Buttons (Top) */}
-                    <ShareButtons title={post.title} slug={post.slug} excerpt={post.excerpt} />
-
-                    {/* Excerpt */}
-                    <p className="text-xl md:text-2xl text-gray-600 font-serif leading-relaxed mb-10 italic border-l-4 border-indigo-500 pl-6">
-                        {post.excerpt}
-                    </p>
-
-                    {/* Main Text */}
-                    <div className="prose prose-lg prose-indigo max-w-none text-gray-700 whitespace-pre-wrap">
-                        <ReactMarkdown remarkPlugins={[remarkBreaks]}>
-                            {post.content}
-                        </ReactMarkdown>
-                    </div>
-
-                    {/* Tags */}
-                    {post.tags && post.tags.length > 0 && (
-                        <div className="mt-8 flex flex-wrap gap-2">
-                            {post.tags.map(tag => (
-                                <span key={tag} className="px-3 py-1 bg-gray-100 text-gray-600 text-sm rounded-full font-medium shadow-sm">
-                                    #{tag}
-                                </span>
-                            ))}
-                        </div>
-                    )}
-
-                    <div className="mt-12 pt-8 border-t border-gray-100 flex justify-between items-center">
-                        <Link href="/blog" className="text-gray-500 hover:text-indigo-600 font-medium flex items-center gap-2 transition-colors">
-                            <ArrowLeft size={18} />
-                            Volver al Blog
-                        </Link>
-                    </div>
-
-                </article>
-            </div>
-
-            {/* Related Posts */}
-            {related.length > 0 && (
-                <div className="max-w-7xl mx-auto px-6 mt-24">
-                    <h3 className="text-2xl font-bold text-gray-900 mb-8">Artículos Relacionados</h3>
-                    <div className="grid md:grid-cols-3 gap-8">
-                        {related.map((p) => (
-                            <Link key={p.id} href={`/blog/${p.slug}`} className="group">
-                                <div className="bg-white rounded-xl overflow-hidden shadow-sm border border-gray-100 hover:shadow-md transition-all">
-                                    <div className="aspect-video overflow-hidden relative">
-                                        {p.imageUrl ? (
-                                            <Image
-                                                src={p.imageUrl}
-                                                alt={p.title}
-                                                fill
-                                                className="object-cover group-hover:scale-105 transition-transform"
-                                                sizes="(max-width: 768px) 100vw, 33vw"
-                                            />
-                                        ) : (
-                                            <div className="w-full h-full bg-gray-100" />
-                                        )}
-                                    </div>
-                                    <div className="p-4">
-                                        <div className="text-xs text-indigo-600 font-semibold mb-2">{p.category}</div>
-                                        <h4 className="font-bold text-gray-900 line-clamp-2 group-hover:text-indigo-600 transition-colors">
-                                            {p.title}
-                                        </h4>
-                                    </div>
-                                </div>
-                            </Link>
-                        ))}
+            {/* Cover */}
+            {post.imageUrl && (
+                <div className="mx-auto mt-10 max-w-5xl px-5 sm:px-6">
+                    <div className="relative aspect-[16/9] overflow-hidden rounded-3xl border border-[var(--color-rule-2)] bg-[var(--color-paper-2)]">
+                        <Image src={post.imageUrl} alt={post.title} fill priority sizes="(max-width: 1024px) 100vw, 1024px" className="object-cover" />
                     </div>
                 </div>
             )}
 
+            {/* Body with sticky share rail on desktop */}
+            <div className="relative mx-auto mt-12 max-w-3xl px-5 sm:px-6">
+                <aside className="absolute inset-y-0 -left-20 hidden lg:block" aria-label="Compartir artículo">
+                    <div className="sticky top-32">
+                        <ShareButtons title={post.title} slug={post.slug} excerpt={post.excerpt} variant="rail" />
+                    </div>
+                </aside>
+
+                <article>
+                    <ArticleMarkdown content={post.content} fallbackAlt={post.title} />
+                </article>
+
+                {post.tags && post.tags.length > 0 && (
+                    <ul className="mt-10 flex flex-wrap gap-2" aria-label="Etiquetas">
+                        {post.tags.map((tag) => (
+                            <li key={tag} className="rounded-full border border-[var(--color-rule)] bg-[var(--color-paper-2)] px-3 py-1 text-sm font-medium text-[var(--color-ink-2)]">
+                                #{tag}
+                            </li>
+                        ))}
+                    </ul>
+                )}
+
+                <aside className="s-post-cta" aria-labelledby="post-cta-title">
+                    <p id="post-cta-title" className="s-post-cta__title">{moduleCta.heading}</p>
+                    <p className="s-post-cta__text">{moduleCta.text}</p>
+                    <Link href={moduleCta.href} className="l-link-arrow min-h-11 text-sm">
+                        {moduleCta.label}
+                        <ArrowRight size={16} />
+                    </Link>
+                </aside>
+
+                <div className="mt-12 flex flex-col gap-4 rounded-3xl border border-[var(--color-rule-2)] bg-[var(--color-paper-2)] p-6 sm:flex-row sm:items-center sm:justify-between">
+                    <div>
+                        <p className="font-[family-name:var(--font-heading)] font-semibold text-[var(--color-ink)]">¿Te resultó útil?</p>
+                        <p className="text-sm text-[var(--color-ink-2)]">Compartilo con tu equipo o con un colega.</p>
+                    </div>
+                    <ShareButtons title={post.title} slug={post.slug} excerpt={post.excerpt} />
+                </div>
+            </div>
+
+            {/* Related */}
+            {related.length > 0 && (
+                <section aria-labelledby="related-posts" className="mx-auto mt-24 max-w-7xl px-5 sm:px-6">
+                    <div className="s-blog-section mb-8 flex flex-wrap items-end justify-between gap-4">
+                        <h2 id="related-posts" className="s-blog-h2">Seguí leyendo</h2>
+                        <Link href="/blog" className="l-link-arrow min-h-11 text-sm">
+                            Ver todo el blog
+                            <ArrowRight size={16} />
+                        </Link>
+                    </div>
+                    <ul className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+                        {related.map((p) => (
+                            <li key={p.slug}>
+                                <PostCard post={p} />
+                            </li>
+                        ))}
+                    </ul>
+                </section>
+            )}
         </main>
     );
 }

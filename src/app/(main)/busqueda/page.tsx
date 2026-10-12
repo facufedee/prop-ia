@@ -19,9 +19,9 @@ const PropertyMapInner = dynamic(
 
 function MapPlaceholder() {
     return (
-        <div className="w-full h-full bg-gray-100 flex flex-col items-center justify-center gap-3 text-gray-400">
-            <Map className="w-10 h-10 animate-pulse" />
-            <p className="text-sm font-medium">Cargando mapa...</p>
+        <div className="s-map-loading">
+            <Map className="w-10 h-10 animate-pulse" aria-hidden="true" />
+            <p>Cargando mapa...</p>
         </div>
     );
 }
@@ -66,19 +66,19 @@ const FilterSection = ({ title, children, defaultOpen = true, onClear }: {
 }) => {
     const [isOpen, setIsOpen] = useState(defaultOpen);
     return (
-        <div className="border-b border-gray-100 py-4 last:border-0">
-            <div className="flex items-center justify-between mb-3">
-                <button onClick={() => setIsOpen(!isOpen)} className="flex items-center gap-2 text-left group flex-1">
-                    <h3 className="text-sm font-bold text-gray-900 uppercase tracking-wide group-hover:text-indigo-600 transition">{title}</h3>
-                    <ChevronDown size={15} className={`text-gray-400 transition-transform ${isOpen ? "rotate-180" : ""}`} />
+        <div className="s-filter-sec">
+            <div className="s-filter-sec__head">
+                <button type="button" onClick={() => setIsOpen(!isOpen)} aria-expanded={isOpen} className="s-filter-sec__toggle">
+                    {title}
+                    <ChevronDown size={15} aria-hidden="true" />
                 </button>
                 {onClear && (
-                    <button onClick={onClear} className="text-[10px] uppercase font-bold text-gray-400 hover:text-red-500 transition px-2 py-1 rounded bg-gray-50 hover:bg-red-50">
+                    <button type="button" onClick={onClear} className="s-text-btn s-text-btn--quiet">
                         Borrar
                     </button>
                 )}
             </div>
-            {isOpen && <div className="mt-2">{children}</div>}
+            {isOpen && <div className="s-filter-sec__body">{children}</div>}
         </div>
     );
 };
@@ -105,87 +105,84 @@ function FilterPanel({
     hasActiveFilters, clearAllFilters,
 }: FilterPanelProps) {
     return (
-        <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
-            <div className="p-4 bg-gray-50 border-b border-gray-100 flex items-center justify-between">
-                <span className="font-bold text-gray-900 flex items-center gap-2"><Filter size={16} /> Filtros</span>
+        <div className="s-filter">
+            <div className="s-filter__head">
+                <span className="s-filter__title"><Filter size={16} aria-hidden="true" /> Filtros</span>
                 {hasActiveFilters && (
-                    <button onClick={clearAllFilters} className="text-xs text-indigo-600 hover:text-indigo-800 font-medium flex items-center gap-1">
-                        <RotateCcw size={11} /> Limpiar
+                    <button type="button" onClick={clearAllFilters} className="s-text-btn">
+                        <RotateCcw size={11} aria-hidden="true" /> Limpiar
                     </button>
                 )}
             </div>
-            <div className="p-4 overflow-y-auto max-h-[calc(100vh-12rem)]">
-                <div className="mb-5">
-                    <label className="text-xs font-bold text-gray-500 uppercase mb-2 block">Ubicación</label>
-                    <div className="relative">
+            <div className="s-filter__body overflow-y-auto max-h-[calc(100vh-12rem)]">
+                <div className="mb-2">
+                    <label htmlFor="busqueda-ubicacion" className="s-filter__label">Ubicación</label>
+                    <div className="s-field-wrap">
                         <input
+                            id="busqueda-ubicacion"
                             type="text" placeholder="Barrio, ciudad..."
                             value={searchQuery}
                             onChange={e => { setSearchQuery(e.target.value); setCurrentPage(1); }}
-                            className="w-full pl-9 pr-3 py-2 bg-gray-50 border border-gray-200 rounded-lg text-sm focus:outline-none focus:border-indigo-500 transition"
+                            className="s-input s-input--sm s-input--icon"
                         />
-                        <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 w-4 h-4" />
+                        <Search className="s-field-wrap__icon w-4 h-4" aria-hidden="true" />
                     </div>
                 </div>
 
                 <FilterSection title="Tipo de Propiedad" onClear={propertyType !== "Todos" ? () => setPropertyType("Todos") : undefined}>
-                    <div className="space-y-1.5">
+                    <div className="s-radio-list">
                         {["Todos", ...PROPERTY_TYPES].map(t => (
-                            <label key={t} className="flex items-center gap-3 cursor-pointer group">
-                                <div className={`w-4 h-4 rounded-full border flex items-center justify-center transition ${propertyType === t ? "border-indigo-600 bg-indigo-50" : "border-gray-300 group-hover:border-indigo-300"}`}>
-                                    {propertyType === t && <div className="w-2 h-2 rounded-full bg-indigo-600" />}
-                                </div>
-                                <input type="radio" className="hidden" checked={propertyType === t} onChange={() => { setPropertyType(t); setCurrentPage(1); }} />
-                                <span className={`text-sm ${propertyType === t ? "font-bold text-indigo-700" : "text-gray-600"}`}>{t}</span>
+                            <label key={t} className="s-radio">
+                                <input type="radio" checked={propertyType === t} onChange={() => { setPropertyType(t); setCurrentPage(1); }} />
+                                <span className="s-radio__dot" aria-hidden="true" />
+                                <span className="s-radio__text">{t}</span>
                             </label>
                         ))}
                     </div>
                 </FilterSection>
 
                 <FilterSection title="Operación" onClear={operationType !== "Todos" ? () => setOperationType("Todos") : undefined}>
-                    <div className="space-y-1.5">
+                    <div className="s-radio-list">
                         {["Todos", "Venta", "Alquiler", "Alquiler Temporal"].map(type => (
-                            <label key={type} className="flex items-center gap-3 cursor-pointer group">
-                                <div className={`w-4 h-4 rounded-full border flex items-center justify-center transition ${operationType === type ? "border-indigo-600 bg-indigo-50" : "border-gray-300 group-hover:border-indigo-300"}`}>
-                                    {operationType === type && <div className="w-2 h-2 rounded-full bg-indigo-600" />}
-                                </div>
-                                <input type="radio" className="hidden" checked={operationType === type} onChange={() => { setOperationType(type); setCurrentPage(1); }} />
-                                <span className={`text-sm ${operationType === type ? "font-bold text-indigo-700" : "text-gray-600"}`}>{type}</span>
+                            <label key={type} className="s-radio">
+                                <input type="radio" checked={operationType === type} onChange={() => { setOperationType(type); setCurrentPage(1); }} />
+                                <span className="s-radio__dot" aria-hidden="true" />
+                                <span className="s-radio__text">{type}</span>
                             </label>
                         ))}
                     </div>
                 </FilterSection>
 
                 <FilterSection title="Precio" onClear={(priceMin || priceMax) ? () => { setPriceMin(""); setPriceMax(""); } : undefined}>
-                    <div className="flex gap-2 mb-3">
-                        <div className="relative w-full">
-                            <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-xs font-bold">$</span>
-                            <input type="number" placeholder="Min" value={priceMin} onChange={e => { setPriceMin(e.target.value); setCurrentPage(1); }} className="w-full pl-6 pr-3 py-2 bg-white border border-gray-200 rounded-lg text-sm focus:outline-none focus:border-indigo-500 transition" />
+                    <div className="s-input-pair">
+                        <div className="s-field-wrap w-full">
+                            <span className="s-field-wrap__prefix" aria-hidden="true">$</span>
+                            <input type="number" placeholder="Min" aria-label="Precio mínimo" value={priceMin} onChange={e => { setPriceMin(e.target.value); setCurrentPage(1); }} className="s-input s-input--sm s-input--prefix" />
                         </div>
-                        <div className="relative w-full">
-                            <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-xs font-bold">$</span>
-                            <input type="number" placeholder="Max" value={priceMax} onChange={e => { setPriceMax(e.target.value); setCurrentPage(1); }} className="w-full pl-6 pr-3 py-2 bg-white border border-gray-200 rounded-lg text-sm focus:outline-none focus:border-indigo-500 transition" />
+                        <div className="s-field-wrap w-full">
+                            <span className="s-field-wrap__prefix" aria-hidden="true">$</span>
+                            <input type="number" placeholder="Max" aria-label="Precio máximo" value={priceMax} onChange={e => { setPriceMax(e.target.value); setCurrentPage(1); }} className="s-input s-input--sm s-input--prefix" />
                         </div>
                     </div>
-                    <div className="flex bg-gray-100 p-1 rounded-lg">
+                    <div className="s-seg">
                         {["Todos", "USD", "ARS"].map(c => (
-                            <button key={c} onClick={() => setCurrency(c)} className={`flex-1 py-1 text-xs font-bold rounded-md transition ${currency === c ? "bg-white text-indigo-600 shadow-sm" : "text-gray-500"}`}>{c}</button>
+                            <button key={c} type="button" onClick={() => setCurrency(c)} aria-pressed={currency === c} className="s-seg__opt">{c}</button>
                         ))}
                     </div>
                 </FilterSection>
 
                 <FilterSection title="Ambientes" onClear={rooms !== "Todos" ? () => setRooms("Todos") : undefined}>
-                    <div className="flex flex-wrap gap-2">
+                    <div className="s-chip-row">
                         {["Todos", "1", "2", "3", "4+"].map(r => (
-                            <button key={r} onClick={() => { setRooms(r); setCurrentPage(1); }} className={`w-10 h-10 flex items-center justify-center text-sm rounded-lg border transition ${rooms === r ? "bg-indigo-600 text-white border-indigo-600" : "bg-white text-gray-600 border-gray-200 hover:border-gray-300"}`}>{r}</button>
+                            <button key={r} type="button" onClick={() => { setRooms(r); setCurrentPage(1); }} aria-pressed={rooms === r} className="s-chip s-chip--square">{r}</button>
                         ))}
                     </div>
                 </FilterSection>
 
                 <FilterSection title="Superficie (m²)" onClear={(areaMin || areaMax) ? () => { setAreaMin(""); setAreaMax(""); } : undefined}>
-                    <div className="flex gap-2">
-                        <input type="number" placeholder="Min" value={areaMin} onChange={e => { setAreaMin(e.target.value); setCurrentPage(1); }} className="w-full px-3 py-2 bg-white border border-gray-200 rounded-lg text-sm focus:outline-none focus:border-indigo-500 transition" />
-                        <input type="number" placeholder="Max" value={areaMax} onChange={e => { setAreaMax(e.target.value); setCurrentPage(1); }} className="w-full px-3 py-2 bg-white border border-gray-200 rounded-lg text-sm focus:outline-none focus:border-indigo-500 transition" />
+                    <div className="s-input-pair">
+                        <input type="number" placeholder="Min" aria-label="Superficie mínima" value={areaMin} onChange={e => { setAreaMin(e.target.value); setCurrentPage(1); }} className="s-input s-input--sm" />
+                        <input type="number" placeholder="Max" aria-label="Superficie máxima" value={areaMax} onChange={e => { setAreaMax(e.target.value); setCurrentPage(1); }} className="s-input s-input--sm" />
                     </div>
                 </FilterSection>
             </div>
@@ -291,27 +288,30 @@ function BusquedaContent() {
 
     // ── Main layout (list + optional desktop map) ─────────────────────────────
     return (
-        <>
+        <main className="flex-1">
             {/* ── Mobile full-screen map ──────────────────────────────────────────────── */}
             {showMap && (
-                <div className="fixed inset-0 z-40 bg-white lg:hidden flex flex-col">
+                <div className="s-overlay fixed inset-0 z-[250] lg:hidden flex flex-col">
                     {/* Mobile map header */}
-                    <div className="flex items-center justify-between px-4 py-3 bg-white border-b border-gray-100 shadow-sm flex-shrink-0">
+                    <div className="s-overlay__head flex-shrink-0">
                         <button
+                            type="button"
                             onClick={() => setShowMap(false)}
-                            className="flex items-center gap-2 text-sm font-semibold text-gray-700"
+                            className="s-ghost-btn"
                         >
-                            <List className="w-4 h-4" /> Ver lista
+                            <List className="w-4 h-4" aria-hidden="true" /> Ver lista
                         </button>
-                        <span className="text-sm font-bold text-gray-900">
+                        <span className="s-overlay__title">
                             {withCoords.length} en el mapa
                         </span>
                         <button
+                            type="button"
                             onClick={() => setShowMobileFilter(true)}
-                            className="flex items-center gap-1.5 text-sm font-semibold text-indigo-600"
+                            aria-label="Filtros"
+                            className="s-icon-btn"
                         >
-                            <SlidersHorizontal className="w-4 h-4" />
-                            {hasActiveFilters && <span className="w-2 h-2 rounded-full bg-indigo-600 inline-block" />}
+                            <SlidersHorizontal className="w-4 h-4" aria-hidden="true" />
+                            {hasActiveFilters && <span className="s-dot ml-1" />}
                         </button>
                     </div>
                     <div className="flex-1 relative" style={{ minHeight: 0 }}>
@@ -324,16 +324,16 @@ function BusquedaContent() {
 
                     {/* Mobile filter drawer */}
                     {showMobileFilter && (
-                        <div className="fixed inset-0 z-50 flex">
-                            <div className="absolute inset-0 bg-black/40" onClick={() => setShowMobileFilter(false)} />
-                            <div className="relative ml-auto w-[320px] h-full bg-white shadow-2xl overflow-y-auto">
-                                <div className="flex items-center justify-between p-4 border-b border-gray-100 sticky top-0 bg-white z-10">
-                                    <span className="font-bold text-gray-900 flex items-center gap-2"><Filter size={16} /> Filtros</span>
-                                    <button onClick={() => setShowMobileFilter(false)} className="p-2 rounded-lg hover:bg-gray-100 transition"><X size={18} /></button>
+                        <div className="fixed inset-0 z-[1100] flex">
+                            <div className="s-backdrop" onClick={() => setShowMobileFilter(false)} />
+                            <div className="s-drawer">
+                                <div className="s-drawer__head">
+                                    <span className="s-filter__title"><Filter size={16} aria-hidden="true" /> Filtros</span>
+                                    <button type="button" onClick={() => setShowMobileFilter(false)} aria-label="Cerrar filtros" className="s-icon-btn"><X size={18} /></button>
                                 </div>
-                                <div className="p-4"><FilterPanel {...filterPanelProps} /></div>
-                                <div className="sticky bottom-0 bg-white p-4 border-t border-gray-100">
-                                    <button onClick={() => setShowMobileFilter(false)} className="w-full py-3 bg-indigo-600 text-white font-semibold rounded-xl hover:bg-indigo-700 transition-colors">
+                                <div className="s-drawer__body"><FilterPanel {...filterPanelProps} /></div>
+                                <div className="s-drawer__foot">
+                                    <button type="button" onClick={() => setShowMobileFilter(false)} className="l-btn l-btn--primary l-btn--block s-btn-reset s-btn-plain">
                                         Ver {filteredProperties.length} resultados
                                     </button>
                                 </div>
@@ -343,16 +343,16 @@ function BusquedaContent() {
                 </div>
             )}
 
-            <div className="min-h-screen bg-gray-50 pb-28 pt-24">
-            <div className={`mx-auto px-4 ${showMap ? "max-w-[1600px]" : "container max-w-7xl"}`}>
+            <div className="s-portal">
+            <div className={showMap ? "s-portal__wide" : "l-container"}>
 
                 {/* Breadcrumbs */}
-                <nav className="flex items-center gap-1.5 text-xs text-gray-400 mb-5">
-                    <Link href="/" className="hover:text-indigo-600 transition flex items-center gap-1"><Home size={12} /> Inicio</Link>
+                <nav aria-label="Migas de pan" className="s-crumbs">
+                    <Link href="/"><Home size={12} aria-hidden="true" /> Inicio</Link>
                     {breadcrumbs.slice(1).map((crumb, i) => (
-                        <span key={i} className="flex items-center gap-1.5">
-                            <ChevronRight size={12} />
-                            <Link href={crumb.href} className="hover:text-indigo-600 transition font-medium text-gray-600">{crumb.label}</Link>
+                        <span key={i} className="s-crumbs__sep">
+                            <ChevronRight size={12} aria-hidden="true" />
+                            <Link href={crumb.href}>{crumb.label}</Link>
                         </span>
                     ))}
                 </nav>
@@ -366,51 +366,57 @@ function BusquedaContent() {
                     </div>
 
                     {/* ── Property list ─────────────────────────────────── */}
-                    <div className={showMap ? "lg:overflow-y-auto lg:max-h-[calc(100vh-96px)]" : "lg:col-span-9"}>
+                    <div className={`min-w-0 ${showMap ? "lg:overflow-y-auto lg:max-h-[calc(100vh-96px)]" : "lg:col-span-9"}`}>
 
                         {/* Results header */}
-                        <div className="flex items-center justify-between mb-5 gap-3 flex-wrap">
+                        <div className="flex items-center justify-between mb-6 gap-3 flex-wrap">
                             <div>
-                                <h1 className="text-xl font-bold text-gray-900">
+                                <h1 className="s-results-title">
                                     {loading ? "Cargando..." : `${filteredProperties.length} inmuebles encontrados`}
                                 </h1>
-                                {hasActiveFilters && <p className="text-xs text-gray-400 mt-0.5">Con los filtros aplicados</p>}
+                                {hasActiveFilters && <p className="s-results-sub">Con los filtros aplicados</p>}
                             </div>
                             <div className="flex items-center gap-2">
                                 {/* Map/List toggle — desktop */}
+                                <span className="hidden lg:inline-flex">
                                 <button
+                                    type="button"
                                     onClick={() => setShowMap(v => !v)}
-                                    className="hidden lg:flex items-center gap-2 px-4 py-2 border border-gray-200 bg-white rounded-xl text-sm font-semibold text-gray-700 shadow-sm hover:bg-gray-50 transition"
+                                    className="s-ghost-btn"
                                 >
-                                    {showMap ? <List className="w-4 h-4" /> : <Map className="w-4 h-4" />}
+                                    {showMap ? <List className="w-4 h-4" aria-hidden="true" /> : <Map className="w-4 h-4" aria-hidden="true" />}
                                     {showMap ? "Ocultar mapa" : "Ver mapa"}
                                     {withCoords.length > 0 && !showMap && (
-                                        <span className="text-xs text-indigo-600 font-bold ml-0.5">({withCoords.length})</span>
+                                        <span className="s-ghost-btn__count">({withCoords.length})</span>
                                     )}
                                 </button>
+                                </span>
                                 {/* Mobile filter button */}
+                                <span className="lg:hidden">
                                 <button
+                                    type="button"
                                     onClick={() => setShowMobileFilter(true)}
-                                    className="lg:hidden flex items-center gap-2 px-4 py-2 bg-white border border-gray-200 rounded-xl text-sm font-semibold text-gray-700 shadow-sm hover:bg-gray-50"
+                                    className="s-ghost-btn"
                                 >
-                                    <SlidersHorizontal size={16} />
+                                    <SlidersHorizontal size={16} aria-hidden="true" />
                                     Filtrar
-                                    {hasActiveFilters && <span className="ml-1 w-2 h-2 rounded-full bg-indigo-600 inline-block" />}
+                                    {hasActiveFilters && <span className="s-dot" />}
                                 </button>
+                                </span>
                             </div>
                         </div>
 
                         {loading ? (
-                            <div className="flex flex-col items-center justify-center py-20">
-                                <Loader2 className="w-10 h-10 text-indigo-600 animate-spin mb-3" />
-                                <p className="text-gray-500 text-sm">Buscando las mejores propiedades...</p>
+                            <div className="s-loading">
+                                <Loader2 className="w-10 h-10 animate-spin" aria-hidden="true" />
+                                <p>Buscando las mejores propiedades...</p>
                             </div>
                         ) : filteredProperties.length === 0 ? (
-                            <div className="flex flex-col items-center justify-center py-20 bg-white rounded-2xl border border-dashed border-gray-200">
-                                <Search className="w-12 h-12 text-gray-200 mb-4" />
-                                <p className="text-lg text-gray-800 font-semibold">No encontramos resultados</p>
-                                <p className="text-gray-400 text-sm mt-1">Probá con otros filtros o una búsqueda más amplia</p>
-                                <button onClick={clearAllFilters} className="mt-5 px-5 py-2 bg-indigo-600 text-white font-semibold rounded-xl hover:bg-indigo-700 transition-colors text-sm">
+                            <div className="s-empty">
+                                <Search className="w-12 h-12" aria-hidden="true" />
+                                <p className="s-empty__title">No encontramos resultados</p>
+                                <p className="s-empty__text">Probá con otros filtros o una búsqueda más amplia</p>
+                                <button type="button" onClick={clearAllFilters} className="l-btn l-btn--primary s-btn-reset s-btn-plain">
                                     Limpiar Filtros
                                 </button>
                             </div>
@@ -423,25 +429,26 @@ function BusquedaContent() {
                                             key={p.id}
                                             onMouseEnter={() => setHoveredId(p.id)}
                                             onMouseLeave={() => setHoveredId(null)}
-                                            className={`rounded-2xl transition-shadow ${hoveredId === p.id ? "shadow-lg ring-2 ring-indigo-300" : ""}`}
+                                            data-active={hoveredId === p.id}
+                                            className="s-hover-wrap"
                                         >
-                                            <PropertyPublicCard property={p} />
+                                            <PropertyPublicCard property={p} tone="dark" />
                                         </div>
                                     ))}
                                 </div>
 
                                 {/* Pagination */}
                                 {totalPages > 1 && (
-                                    <div className="flex items-center justify-center gap-3 mt-10">
-                                        <button onClick={() => setCurrentPage(p => Math.max(1, p - 1))} disabled={currentPage === 1}
-                                            className="px-5 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-200 rounded-xl hover:bg-gray-50 hover:text-indigo-600 disabled:opacity-40 disabled:cursor-not-allowed transition">
+                                    <div className="s-pager">
+                                        <button type="button" onClick={() => setCurrentPage(p => Math.max(1, p - 1))} disabled={currentPage === 1}
+                                            className="s-ghost-btn">
                                             Anterior
                                         </button>
-                                        <span className="text-sm text-gray-500">
+                                        <span>
                                             Página <strong>{currentPage}</strong> de <strong>{totalPages}</strong>
                                         </span>
-                                        <button onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))} disabled={currentPage === totalPages}
-                                            className="px-5 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-200 rounded-xl hover:bg-gray-50 hover:text-indigo-600 disabled:opacity-40 disabled:cursor-not-allowed transition">
+                                        <button type="button" onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))} disabled={currentPage === totalPages}
+                                            className="s-ghost-btn">
                                             Siguiente
                                         </button>
                                     </div>
@@ -449,12 +456,12 @@ function BusquedaContent() {
 
                                 {/* Related searches — only when map is hidden */}
                                 {!showMap && (
-                                    <div className="mt-14 p-6 bg-white rounded-2xl border border-gray-100">
-                                        <p className="text-sm font-bold text-gray-700 mb-3">Búsquedas relacionadas</p>
-                                        <div className="flex flex-wrap gap-2">
+                                    <div className="s-related">
+                                        <p className="s-label">Búsquedas relacionadas</p>
+                                        <div className="s-chip-row">
                                             {RELATED_ZONES.filter(z => z.toLowerCase() !== searchQuery.toLowerCase()).slice(0, 8).map(zona => (
                                                 <Link key={zona} href={`/busqueda?loc=${encodeURIComponent(zona)}`}
-                                                    className="px-3 py-1.5 bg-gray-50 hover:bg-indigo-50 border border-gray-200 hover:border-indigo-300 text-xs font-medium text-gray-600 hover:text-indigo-700 rounded-full transition-all">
+                                                    className="s-chip s-chip--link">
                                                     Propiedades en {zona}
                                                 </Link>
                                             ))}
@@ -467,15 +474,15 @@ function BusquedaContent() {
 
                     {/* ── Desktop Map (sticky right panel) ───────────────── */}
                     {showMap && (
-                        <div className="hidden lg:block sticky top-24 h-[calc(100vh-96px)] rounded-2xl overflow-hidden border border-gray-200 shadow-md">
+                        <div className="s-map-frame hidden lg:block sticky top-24 h-[calc(100vh-96px)]">
                             <PropertyMapInner
                                 properties={filteredProperties}
                                 hoveredId={hoveredId}
                                 onHover={setHoveredId}
                             />
                             {withCoords.length < filteredProperties.length && (
-                                <div className="absolute bottom-3 left-1/2 -translate-x-1/2 z-[1000] bg-black/70 text-white text-xs px-3 py-1.5 rounded-full font-medium flex items-center gap-1.5 pointer-events-none">
-                                    <MapPin className="w-3 h-3" />
+                                <div className="s-map-note absolute bottom-3 left-1/2 -translate-x-1/2 z-[1000] pointer-events-none">
+                                    <MapPin className="w-3 h-3" aria-hidden="true" />
                                     {withCoords.length} de {filteredProperties.length} tienen coordenadas
                                 </div>
                             )}
@@ -483,15 +490,17 @@ function BusquedaContent() {
                     )}
                 </div>
             </div>
+            </div>
 
             {/* ── Mobile: floating "Ver mapa" button ───────────────────────── */}
             {!loading && filteredProperties.length > 0 && withCoords.length > 0 && (
                 <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-40 lg:hidden">
                     <button
+                        type="button"
                         onClick={() => setShowMap(true)}
-                        className="flex items-center gap-2 px-6 py-3 bg-gray-900 text-white rounded-full shadow-xl text-sm font-bold hover:bg-black active:scale-95 transition-all"
+                        className="l-btn l-btn--primary s-btn-reset s-btn-plain shadow-xl"
                     >
-                        <Map className="w-4 h-4" />
+                        <Map className="w-4 h-4" aria-hidden="true" />
                         Ver mapa · {withCoords.length} propiedades
                     </button>
                 </div>
@@ -499,33 +508,32 @@ function BusquedaContent() {
 
             {/* Mobile Filter Drawer */}
             {showMobileFilter && (
-                <div className="fixed inset-0 z-50 flex lg:hidden">
-                    <div className="absolute inset-0 bg-black/40" onClick={() => setShowMobileFilter(false)} />
-                    <div className="relative ml-auto w-[320px] h-full bg-white shadow-2xl overflow-y-auto">
-                        <div className="flex items-center justify-between p-4 border-b border-gray-100 sticky top-0 bg-white z-10">
-                            <span className="font-bold text-gray-900 flex items-center gap-2"><Filter size={16} /> Filtros</span>
-                            <button onClick={() => setShowMobileFilter(false)} className="p-2 rounded-lg hover:bg-gray-100 transition"><X size={18} /></button>
+                <div className="fixed inset-0 z-[250] flex lg:hidden">
+                    <div className="s-backdrop" onClick={() => setShowMobileFilter(false)} />
+                    <div className="s-drawer">
+                        <div className="s-drawer__head">
+                            <span className="s-filter__title"><Filter size={16} aria-hidden="true" /> Filtros</span>
+                            <button type="button" onClick={() => setShowMobileFilter(false)} aria-label="Cerrar filtros" className="s-icon-btn"><X size={18} /></button>
                         </div>
-                        <div className="p-4"><FilterPanel {...filterPanelProps} /></div>
-                        <div className="sticky bottom-0 bg-white p-4 border-t border-gray-100">
-                            <button onClick={() => setShowMobileFilter(false)} className="w-full py-3 bg-indigo-600 text-white font-semibold rounded-xl hover:bg-indigo-700 transition-colors">
+                        <div className="s-drawer__body"><FilterPanel {...filterPanelProps} /></div>
+                        <div className="s-drawer__foot">
+                            <button type="button" onClick={() => setShowMobileFilter(false)} className="l-btn l-btn--primary l-btn--block s-btn-reset s-btn-plain">
                                 Ver {filteredProperties.length} resultados
                             </button>
                         </div>
                     </div>
                 </div>
             )}
-        </div>
-        </>
+        </main>
     );
 }
 
 export default function BusquedaPage() {
     return (
         <Suspense fallback={
-            <div className="flex justify-center items-center min-h-screen">
-                <Loader2 className="w-10 h-10 text-indigo-600 animate-spin" />
-            </div>
+            <main className="flex-1 s-loading min-h-screen">
+                <Loader2 className="w-10 h-10 animate-spin" aria-hidden="true" />
+            </main>
         }>
             <BusquedaContent />
         </Suspense>

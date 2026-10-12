@@ -29,6 +29,8 @@ interface PropertyHeroProps {
     /** Pass true when used inside a site template (custom domain or subdomain).
      *  Ensures the search routes to /propiedades (site listing) instead of /busqueda (main portal). */
     isSite?: boolean;
+    /** "dark" renders the Zeta Prop portal theme. Agency sites keep the default "light". */
+    tone?: "light" | "dark";
 }
 
 export default function PropertyHero({
@@ -37,6 +39,7 @@ export default function PropertyHero({
     coverUrl = "/hero-propiedades.png",
     basePath: propBasePath,
     isSite = false,
+    tone = "light",
 }: PropertyHeroProps) {
     const router = useRouter();
     const { basePath: contextBasePath } = useSite();
@@ -60,6 +63,92 @@ export default function PropertyHero({
         const searchPath = isSite ? `${basePath}/propiedades` : basePath ? `${basePath}/propiedades` : "/busqueda";
         router.push(`${searchPath}?${params.toString()}`);
     };
+
+    if (tone === "dark") {
+        return (
+            <section aria-label="Buscador de propiedades" className="l-hero">
+                <div className="l-hero__frame s-portal-hero">
+                    <Image
+                        src={coverUrl}
+                        alt={title}
+                        fill
+                        className="l-hero__photo"
+                        priority
+                        sizes="100vw"
+                    />
+                    <div className="l-hero__scrim" aria-hidden="true" />
+
+                    <div className="s-portal-hero__content l-reveal">
+                        <h1>{title}</h1>
+                        <p className="l-hero__lede">{subtitle}</p>
+
+                        <div className="s-search">
+                            <div className="s-search__tabs" role="tablist">
+                                {(["Comprar", "Alquiler"] as const).map(op => (
+                                    <button
+                                        key={op}
+                                        type="button"
+                                        onClick={() => setOperacion(op)}
+                                        role="tab"
+                                        aria-selected={operacion === op}
+                                        aria-label={`Operación de ${op}`}
+                                        className="s-search__tab"
+                                    >
+                                        {op}
+                                    </button>
+                                ))}
+                            </div>
+
+                            <div className="s-search__row">
+                                <div>
+                                    <label htmlFor="property-type-select" className="sr-only">Tipo de inmueble</label>
+                                    <select
+                                        id="property-type-select"
+                                        value={tipo}
+                                        onChange={e => setTipo(e.target.value)}
+                                        aria-label="Seleccionar tipo de inmueble"
+                                        className="s-input s-select"
+                                    >
+                                        <option value="">Tipo de inmueble</option>
+                                        {PROPERTY_TYPES.map(t => (
+                                            <option key={t} value={t}>{t}</option>
+                                        ))}
+                                    </select>
+                                </div>
+
+                                <div className="s-field-wrap">
+                                    <label htmlFor="location-search-input" className="sr-only">Ubicación o características</label>
+                                    <Search className="s-field-wrap__icon" width={18} height={18} aria-hidden="true" />
+                                    <input
+                                        id="location-search-input"
+                                        type="text"
+                                        placeholder="Buscar ubicación o características..."
+                                        value={ubicacion}
+                                        onChange={e => setUbicacion(e.target.value)}
+                                        onKeyDown={e => e.key === "Enter" && handleSearch()}
+                                        aria-label="Buscar ubicación o características"
+                                        className="s-input s-input--icon"
+                                    />
+                                </div>
+
+                                <button
+                                    type="button"
+                                    onClick={handleSearch}
+                                    aria-label="Ejecutar búsqueda"
+                                    className="l-btn l-btn--primary s-btn-reset s-search__submit"
+                                >
+                                    Buscar
+                                    <span className="l-btn__icon" aria-hidden="true">
+                                        <Search width={16} height={16} />
+                                    </span>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        );
+    }
 
     return (
         <section

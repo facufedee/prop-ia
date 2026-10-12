@@ -3,6 +3,7 @@
 import { MapPin, Ruler, DoorOpen, Bath, Car, Maximize } from "lucide-react";
 import { Property } from "@/ui/components/tables/PropertiesTable";
 import { getFichaTemplate } from "./fichaTemplates";
+import { absolutePropertyUrl } from "@/lib/seo/propertyUrl";
 
 export interface FichaAgentInfo {
     name: string;
@@ -35,7 +36,7 @@ const propertyAddress = (property: Property) =>
 const propertyLocation = (property: Property) =>
     [property.localidad, property.provincia].filter(Boolean).join(", ");
 
-const propertyUrl = (property: Property) => `https://zetaprop.com.ar/propiedades/p/${property.id}`;
+const propertyUrl = (property: Property) => absolutePropertyUrl(property);
 
 // ============================================================
 // Shared building blocks

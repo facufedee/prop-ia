@@ -83,7 +83,7 @@ export default function GoogleAuthPrompt() {
                     <button
                         onClick={handleClose}
                         aria-label="Cerrar prompt de inicio de sesión"
-                        className="text-gray-400 hover:text-white transition-colors"
+                        className="-my-2 -mr-3 flex h-11 w-11 shrink-0 items-center justify-center rounded-full text-gray-400 transition-colors hover:bg-white/10 hover:text-white"
                     >
                         <X size={18} />
                     </button>

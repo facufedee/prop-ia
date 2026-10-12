@@ -81,78 +81,82 @@ export default function ContactModal({ isOpen, onClose, propertyId, propertyTitl
     };
 
     return (
-        <div className="fixed inset-0 z-[70] bg-black/50 flex items-center justify-center p-4 backdrop-blur-sm animate-in fade-in">
-            <div className="bg-white rounded-2xl w-full max-w-md shadow-2xl relative overflow-hidden">
+        <div className="fixed inset-0 z-[300] bg-black/60 flex items-center justify-center p-4 backdrop-blur-sm animate-in fade-in">
+            <div className="s-modal" role="dialog" aria-modal="true" aria-labelledby="contact-modal-title">
                 {/* Header */}
-                <div className="px-6 py-4 border-b flex justify-between items-center bg-gray-50">
-                    <h3 className="font-bold text-lg text-gray-900">Consultar por esta propiedad</h3>
-                    <button onClick={onClose} className="text-gray-400 hover:text-gray-900 transition">
-                        <X size={20} />
+                <div className="s-modal__head">
+                    <h3 id="contact-modal-title" className="s-modal__title">Consultar por esta propiedad</h3>
+                    <button type="button" onClick={onClose} aria-label="Cerrar" className="s-icon-btn">
+                        <X size={18} />
                     </button>
                 </div>
 
                 {/* Body */}
-                <div className="p-6">
+                <div className="s-modal__body">
                     {success ? (
-                        <div className="text-center py-8">
-                            <div className="w-16 h-16 bg-green-100 text-green-600 rounded-full flex items-center justify-center mx-auto mb-4">
-                                <Send size={32} />
+                        <div className="s-success">
+                            <div className="s-success__icon">
+                                <Send size={28} />
                             </div>
-                            <h4 className="text-xl font-bold text-gray-900 mb-2">¡Consulta enviada!</h4>
-                            <p className="text-gray-600">El agente se pondrá en contacto contigo a la brevedad.</p>
+                            <h4 className="s-success__title">¡Consulta enviada!</h4>
+                            <p className="s-success__text">El agente se pondrá en contacto contigo a la brevedad.</p>
                         </div>
                     ) : (
-                        <form onSubmit={handleSubmit} className="space-y-4">
-                            <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-1">Nombre</label>
+                        <form onSubmit={handleSubmit}>
+                            <div className="l-field">
+                                <label htmlFor="contact-nombre">Nombre</label>
                                 <input
+                                    id="contact-nombre"
                                     type="text"
                                     required
-                                    className="w-full px-4 py-2 border border-gray-200 rounded-xl focus:ring-2 focus:ring-black focus:border-transparent outline-none transition"
+                                    className="l-input"
                                     placeholder="Tu nombre completo"
                                     value={formData.nombre}
                                     onChange={e => setFormData({ ...formData, nombre: e.target.value })}
                                 />
                             </div>
-                            <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-1">Email</label>
+                            <div className="l-field">
+                                <label htmlFor="contact-email">Email</label>
                                 <input
+                                    id="contact-email"
                                     type="email"
                                     required
-                                    className="w-full px-4 py-2 border border-gray-200 rounded-xl focus:ring-2 focus:ring-black focus:border-transparent outline-none transition"
+                                    className="l-input"
                                     placeholder="tu@email.com"
                                     value={formData.email}
                                     onChange={e => setFormData({ ...formData, email: e.target.value })}
                                 />
                             </div>
-                            <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-1">Teléfono</label>
+                            <div className="l-field">
+                                <label htmlFor="contact-telefono">Teléfono</label>
                                 <input
+                                    id="contact-telefono"
                                     type="tel"
                                     required
-                                    className="w-full px-4 py-2 border border-gray-200 rounded-xl focus:ring-2 focus:ring-black focus:border-transparent outline-none transition"
+                                    className="l-input"
                                     placeholder="Cod. Área + Número"
                                     value={formData.telefono}
                                     onChange={e => setFormData({ ...formData, telefono: e.target.value })}
                                 />
                             </div>
-                            <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-1">Mensaje</label>
+                            <div className="l-field">
+                                <label htmlFor="contact-mensaje">Mensaje</label>
                                 <textarea
+                                    id="contact-mensaje"
                                     required
                                     rows={4}
-                                    className="w-full px-4 py-2 border border-gray-200 rounded-xl focus:ring-2 focus:ring-black focus:border-transparent outline-none transition resize-none"
+                                    className="l-input l-input--textarea"
                                     value={formData.mensaje}
                                     onChange={e => setFormData({ ...formData, mensaje: e.target.value })}
                                 />
                             </div>
 
-                            {error && <p className="text-sm text-red-600 font-medium">{error}</p>}
+                            {error && <p className="s-form-error" role="alert">{error}</p>}
 
                             <button
                                 type="submit"
                                 disabled={loading}
-                                className="w-full bg-black hover:bg-gray-800 text-white font-bold py-3 rounded-xl transition flex items-center justify-center gap-2"
+                                className="l-btn l-btn--primary l-btn--block s-btn-reset s-btn-plain"
                             >
                                 {loading ? <Loader2 className="w-5 h-5 animate-spin" /> : "Enviar Consulta"}
                             </button>

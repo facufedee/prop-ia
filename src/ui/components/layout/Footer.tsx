@@ -1,80 +1,90 @@
 import Link from "next/link";
-import Image from "next/image";
-import { Facebook, Twitter, Instagram, Linkedin, Github, Mail, ArrowRight } from "lucide-react";
+import { Instagram, Linkedin, Mail } from "lucide-react";
 import { WhatsAppIcon } from "@/ui/icons/WhatsAppIcon";
 import NewsletterSignupForm from "./NewsletterSignupForm";
 
+const EXPLORE = [
+    { href: "/alquileres", label: "Gestión de alquileres" },
+    { href: "/propiedades-gestion", label: "Administración de propiedades" },
+    { href: "/pagina-web", label: "Página web" },
+    { href: "/precios", label: "Precios" },
+    { href: "/blog", label: "Blog" },
+];
+
+const COMPANY = [
+    { href: "/nosotros", label: "Nosotros" },
+    { href: "/contacto", label: "Contacto" },
+    { href: "/faqs", label: "Preguntas frecuentes" },
+];
+
+const LEGAL = [
+    { href: "/terminos", label: "Términos de uso" },
+    { href: "/privacidad", label: "Privacidad" },
+    { href: "/cookies", label: "Cookies" },
+];
+
+function Column({ title, links }: { title: string; links: { href: string; label: string }[] }) {
+    return (
+        <div>
+            <h2 className="l-site-footer__title">{title}</h2>
+            <ul className="l-site-footer__list">
+                {links.map((link) => (
+                    <li key={link.href}>
+                        <Link href={link.href}>{link.label}</Link>
+                    </li>
+                ))}
+            </ul>
+        </div>
+    );
+}
+
 export default function Footer() {
     return (
-        <footer className="bg-black border-t border-gray-800 pt-16 pb-8">
-            <div className="max-w-7xl mx-auto px-6">
-                <div className="grid grid-cols-1 md:grid-cols-4 gap-12 mb-12">
-                    {/* Brand & Description */}
-                    <div className="space-y-6">
-                        <Image
-                            src="/assets/img/logo_web_ZetaProp_fondonegro.png"
-                            alt="Zeta Prop Logo"
-                            className="h-10 w-auto"
-                            width={200}
-                            height={40}
-                        />
-                        <p className="text-gray-400 text-sm leading-relaxed">
-                            Impulsando el futuro del Real Estate con tecnología avanzada. Potenciamos inmobiliarias con Inteligencia Artificial, automatización y herramientas de gestión integral para escalar tu negocio.
-                        </p>
-                        <div className="flex flex-col gap-4">
-                            <div className="flex gap-4">
-                                <a href="https://www.instagram.com/zeta_prop" target="_blank" rel="noopener noreferrer" aria-label="Instagram" className="text-gray-400 hover:text-white transition"><Instagram className="w-5 h-5" /></a>
-                                <a href="https://www.linkedin.com/company/zetaprop" target="_blank" rel="noopener noreferrer" aria-label="LinkedIn" className="text-gray-400 hover:text-white transition"><Linkedin className="w-5 h-5" /></a>
-                            </div>
-                            <div className="space-y-2 text-sm text-gray-400">
-                                <a href="mailto:zetaprop.com.ar@gmail.com" className="flex items-center gap-2 hover:text-white transition">
-                                    <Mail size={16} /> zetaprop.com.ar@gmail.com
-                                </a>
-                                <a href="https://wa.me/5491123889745" target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 hover:text-white transition">
-                                    <WhatsAppIcon className="w-4 h-4 opacity-70 hover:opacity-100 transition-all text-gray-400 hover:text-green-500" /> +54 9 11 2388-9745
-                                </a>
-                            </div>
+        <footer className="l-site-footer">
+            <div className="l-site-footer__inner">
+                <div className="l-site-footer__grid">
+                    <div className="l-site-footer__brand">
+                        <Link href="/" className="l-nav__word">
+                            Zeta<span>Prop</span>
+                        </Link>
+                        <p>Software para inmobiliarias: alquileres, propiedades y tu propia web en un solo lugar.</p>
+                        <div className="l-site-footer__contact">
+                            <a href="mailto:zetaprop.com.ar@gmail.com">
+                                <Mail size={16} aria-hidden /> zetaprop.com.ar@gmail.com
+                            </a>
+                            <a href="https://wa.me/5491123889745" target="_blank" rel="noopener noreferrer">
+                                <WhatsAppIcon className="h-4 w-4" /> +54 9 11 2388-9745
+                            </a>
+                        </div>
+                        <div className="l-site-footer__social">
+                            <a href="https://www.instagram.com/zeta_prop" target="_blank" rel="noopener noreferrer" aria-label="Instagram">
+                                <Instagram size={18} />
+                            </a>
+                            <a href="https://www.linkedin.com/company/zetaprop" target="_blank" rel="noopener noreferrer" aria-label="LinkedIn">
+                                <Linkedin size={18} />
+                            </a>
                         </div>
                     </div>
 
-                    {/* Navigation */}
-                    <div>
-                        <h4 className="font-bold text-white mb-6">Explorar</h4>
-                        <ul className="space-y-4 text-sm text-gray-400">
-                            <li><Link href="/servicios" className="hover:text-white transition flex items-center gap-2"><ArrowRight size={12} className="opacity-0 group-hover:opacity-100 transition-opacity" /> Servicios</Link></li>
-                            <li><Link href="/precios" className="hover:text-white transition flex items-center gap-2"><ArrowRight size={12} className="opacity-0 group-hover:opacity-100 transition-opacity" /> Precios</Link></li>
-                            <li><Link href="/nosotros" className="hover:text-white transition flex items-center gap-2"><ArrowRight size={12} className="opacity-0 group-hover:opacity-100 transition-opacity" /> Nosotros</Link></li>
-                            <li><Link href="/contacto" className="hover:text-white transition flex items-center gap-2"><ArrowRight size={12} className="opacity-0 group-hover:opacity-100 transition-opacity" /> Contacto</Link></li>
-                        </ul>
-                    </div>
+                    <Column title="Producto" links={EXPLORE} />
+                    <Column title="Empresa" links={COMPANY} />
 
-                    {/* Legal */}
                     <div>
-                        <h4 className="font-bold text-white mb-6">Legal</h4>
-                        <ul className="space-y-4 text-sm text-gray-400">
-                            <li><Link href="/privacidad" className="hover:text-white transition">Privacidad</Link></li>
-                            <li><Link href="/terminos" className="hover:text-white transition">Términos de Uso</Link></li>
-                            <li><Link href="/cookies" className="hover:text-white transition">Política de Cookies</Link></li>
-                        </ul>
-                    </div>
-
-                    {/* Newsletter */}
-                    <div>
-                        <h4 className="font-bold text-white mb-6">Newsletter</h4>
-                        <p className="text-gray-400 text-sm mb-4">
-                            Suscribite para recibir las últimas novedades del mercado y actualizaciones de la plataforma.
-                        </p>
+                        <h2 className="l-site-footer__title">Newsletter</h2>
+                        <p className="l-site-footer__note">Novedades del mercado y de la plataforma, sin spam.</p>
                         <NewsletterSignupForm />
                     </div>
                 </div>
 
-                <div className="border-t border-gray-800 pt-8 flex flex-col md:flex-row justify-between items-center gap-4">
-                    <p className="text-sm text-gray-400">
-                        © {new Date().getFullYear()} Zeta Prop. Todos los derechos reservados.
-                    </p>
-                    <div className="text-sm text-gray-400 text-center md:text-right">
-                        Hecho con ❤️ en Ituzaingó, Buenos Aires
-                    </div>
+                <div className="l-site-footer__bottom">
+                    <p>© {new Date().getFullYear()} Zeta Prop. Hecho en Ituzaingó, Buenos Aires.</p>
+                    <ul className="l-site-footer__legal">
+                        {LEGAL.map((link) => (
+                            <li key={link.href}>
+                                <Link href={link.href}>{link.label}</Link>
+                            </li>
+                        ))}
+                    </ul>
                 </div>
             </div>
         </footer>

@@ -4,6 +4,7 @@ import { useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { PublicProperty } from "@/infrastructure/services/publicService";
+import { propertyPath } from "@/lib/seo/propertyUrl";
 import { MapPin, Bath, Bed, Maximize, Heart, Share2, ChevronLeft, ChevronRight, MessageCircle } from "lucide-react";
 
 interface PropertyHorizontalCardProps {
@@ -30,7 +31,7 @@ export default function PropertyHorizontalCard({ property }: PropertyHorizontalC
     };
 
     return (
-        <Link href={`/propiedades/p/${property.id}`} className="group flex flex-col sm:flex-row bg-white rounded-2xl overflow-hidden border border-gray-200 hover:shadow-xl hover:border-indigo-200 transition-all duration-300 h-auto sm:h-[280px]">
+        <Link href={propertyPath(property)} className="group flex flex-col sm:flex-row bg-white rounded-2xl overflow-hidden border border-gray-200 hover:shadow-xl hover:border-indigo-200 transition-all duration-300 h-auto sm:h-[280px]">
             {/* Image Slider (Left Side) */}
             <div className="relative w-full sm:w-[320px] lg:w-[360px] h-[240px] sm:h-full bg-gray-200 shrink-0">
                 {property.imageUrls && property.imageUrls.length > 0 ? (

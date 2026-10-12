@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { adminDb } from "@/infrastructure/firebase/admin";
 import { xmlFeedService } from "@/infrastructure/services/xmlFeedService";
 import { Property, PropertyOperation, PropertyType } from "@/domain/models/Property";
+import { absolutePropertyUrl } from "@/lib/seo/propertyUrl";
 
 // Revalidate every 1 hour (3600 seconds) or as needed
 export const revalidate = 3600;
@@ -47,7 +48,7 @@ export async function GET(
                 // Basic
                 title: data.title || 'Propiedad sin título',
                 content: data.description || data.content || '',
-                url: `https://zetaprop.com.ar/propiedades/p/${doc.id}`,
+                url: absolutePropertyUrl({ id: doc.id, title: data.title, operation_type: data.operation_type }),
 
                 // Classifications - Data might be string, mapping is key.
                 // Assuming data stored fits the enum or is close.
