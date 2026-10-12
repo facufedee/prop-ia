@@ -4,7 +4,7 @@ import { PrimaryCta } from '@/ui/sections/PhotoHero';
 
 export const metadata = {
     title: "Servicios | Zeta Prop",
-    description: "Todo lo que incluye Zeta Prop: CRM inmobiliario, gestión de alquileres, contratos digitales, agenda, finanzas y más. Conocé lo que tenemos hoy y lo que viene.",
+    description: "Todo lo que incluye Zeta Prop: CRM inmobiliario, gestión de alquileres, contratos de alquiler, agenda, finanzas y más. Conocé lo que tenemos hoy y lo que viene.",
     alternates: {
         canonical: 'https://zetaprop.com.ar/servicios',
     },
@@ -13,43 +13,48 @@ export const metadata = {
 const available = [
     {
         title: "Gestión de Propiedades",
-        description: "Fichas completas con fotos, ubicación en mapa, precios y estados en tiempo real. Generación automática de ficha PDF para compartir con clientes.",
-        items: ["Catálogo digital ilimitado", "Publicación al portal federal", "Fichas PDF automáticas", "Historial de cambios de precio"],
+        description: "Fichas completas con fotos, video, ubicación en mapa, precio y estado. Ficha imprimible para compartir con clientes.",
+        items: ["Catálogo digital según el límite de tu plan", "Publicación al portal federal", "Fichas para imprimir y compartir", "Asignación por sucursal (plan Profesional)"],
     },
     {
-        title: "CRM de Clientes",
-        description: "Seguimiento completo de cada lead: perfil de búsqueda, historial de interacciones, pipeline visual y alertas de matching automático con propiedades.",
-        items: ["Pipeline visual de oportunidades", "Matching automático", "Perfiles de búsqueda", "Scoring y etiquetas de clientes"],
+        title: "CRM de Consultas",
+        description: "Desde el plan Profesional: cada interesado con sus datos, zona, presupuesto, notas e interacciones, organizado en un tablero por etapas.",
+        items: ["Pipeline visual de oportunidades", "Historial de interacciones", "Prioridad por consulta", "Tasa de conversión del pipeline"],
     },
     {
         title: "Administración de Alquileres",
-        description: "El ciclo completo del alquiler automatizado: contratos, vencimientos, recibos, punitorios y liquidaciones. Sin Excel, sin errores.",
-        items: ["Recibos automáticos mensuales", "Punitorios por mora día a día", "Ajustes ICL / IPC / % fijo", "Liquidaciones a propietarios en PDF"],
+        description: "El ciclo del alquiler en un solo lugar: contratos, calendario de vencimientos, recibos, punitorios y liquidaciones.",
+        items: ["Recibo en PDF al registrar cada cobro", "Recargo por mora fijo o porcentual", "Ajustes ICL / IPC / % fijo", "Liquidaciones a propietarios en PDF"],
     },
     {
-        title: "Contratos Digitales",
-        description: "Generación automática de contratos de alquiler y venta con los datos del sistema. Listos para descargar e imprimir en segundos.",
-        items: ["Contratos de alquiler y venta", "Plantillas actualizadas", "Descarga PDF inmediata", "Datos precargados del sistema"],
+        title: "Contratos de Alquiler",
+        description: "Generación del contrato de alquiler con los datos cargados en el sistema, listo para descargar en Word, revisar e imprimir.",
+        items: ["Contrato de alquiler", "Descarga en Word (.docx)", "Datos precargados del sistema", "Editable antes de imprimir"],
     },
     {
-        title: "Agenda Inteligente",
-        description: "Coordiná visitas sin solapamientos. Sincronización con Google Calendar, recordatorios automáticos y vista de disponibilidad por agente.",
-        items: ["Sincronización con Google Calendar", "Recordatorios automáticos", "Vista de equipo", "Gestión de visitas por propiedad"],
+        title: "Agenda de Visitas",
+        description: "Desde el plan Profesional: agendá visitas en un calendario con el cliente, la propiedad y el agente asignado.",
+        items: ["Calendario de visitas", "Asignación a agentes", "Próximas visitas en el inicio del panel", "Gestión de visitas por propiedad"],
     },
     {
         title: "Gestión Financiera",
-        description: "Control total de la caja: comisiones, gastos operativos y reportes por período. Todo lo que necesitás para saber cómo está tu negocio.",
-        items: ["Cálculo de comisiones por operación", "Control de caja y gastos", "Alertas de pagos pendientes", "Exportación a Excel"],
+        description: "Cobros a inquilinos y pagos a propietarios por período, y cálculo de comisiones en cada venta.",
+        items: ["Cálculo de comisiones por venta", "Cobros y liquidaciones por período", "Pagos vencidos marcados en el panel", "Reportes de contrato en PDF"],
     },
     {
         title: "Portal del Inquilino",
-        description: "Acceso exclusivo para cada inquilino donde puede ver su contrato, el monto del mes, pagos realizados y punitorios. Sin app, sin registro.",
-        items: ["Acceso por link único", "Resumen de contrato", "Historial de pagos", "Transparencia total"],
+        description: "Acceso para cada inquilino donde puede ver su contrato y el historial de sus pagos. Sin app, sin registro.",
+        items: ["Acceso con código de contrato y DNI", "Resumen de contrato", "Historial de pagos", "Sin usuario ni contraseña"],
     },
     {
-        title: "Dashboard y Analytics",
-        description: "Métricas en tiempo real de tu cartera: propiedades activas, pagos del mes, vencimientos próximos y rendimiento por agente.",
-        items: ["Dashboard en tiempo real", "Métricas de rendimiento", "Alertas de vencimientos", "Reportes exportables"],
+        title: "Panel de Inicio",
+        description: "Un resumen de tu cartera al entrar: propiedades, alquileres, próximos vencimientos, próximas visitas y nuevas consultas.",
+        items: ["Resumen por módulo", "Próximos vencimientos", "Comisiones por agente", "Reportes de ventas"],
+    },
+    {
+        title: "Mi Sitio — Web de tu inmobiliaria",
+        description: "Tu propia web inmobiliaria bajo un subdominio de Zeta Prop, con tus propiedades publicadas.",
+        items: ["Subdominio tuinmobiliaria.zetaprop.com.ar", "Plantillas de diseño", "Tus propiedades publicadas", "Contacto directo con la agencia"],
     },
     {
         title: "Red Inmobiliaria Federal",
@@ -60,10 +65,6 @@ const available = [
 
 const coming = [
     {
-        title: "Mi Sitio — Portal Propio",
-        description: "Tu propia web inmobiliaria bajo un subdominio de Zeta Prop. Con tu logo, tus colores y tus propiedades publicadas automáticamente.",
-    },
-    {
         title: "Pago Online del Alquiler",
         description: "Integración con MercadoPago para que los inquilinos paguen el alquiler directamente desde su portal, sin transferencias manuales.",
     },
@@ -73,7 +74,7 @@ const coming = [
     },
     {
         title: "Integración con Portales",
-        description: "Publicación automática en Argenprop, MercadoLibre y otros portales desde un solo lugar, sin cargar la propiedad dos veces.",
+        description: "Publicación en Zonaprop y Argenprop desde Zeta Prop, sin cargar la propiedad dos veces.",
     },
     {
         title: "App Móvil",
@@ -147,14 +148,14 @@ export default function ServicesPage() {
                             <h2 id="coming-title" className="l-section__title">Lo que viene</h2>
                         </div>
                         <p className="l-section__lede">
-                            Funcionalidades en desarrollo que van a estar disponibles próximamente.
+                            Ideas en las que estamos trabajando. Todavía no tienen fecha de lanzamiento confirmada.
                         </p>
                     </div>
 
                     <div className="s-grid s-after-head">
                         {coming.map((s) => (
                             <article key={s.title} className="s-card s-card--quiet">
-                                <span className="s-tag">Próximamente</span>
+                                <span className="s-tag">En evaluación</span>
                                 <h3 className="s-card__title">{s.title}</h3>
                                 <p className="s-card__body">{s.description}</p>
                             </article>
@@ -168,7 +169,7 @@ export default function ServicesPage() {
                 <div className="l-container l-cta-band">
                     <h2 id="servicios-cta-title">Empezá hoy, sin compromiso</h2>
                     <p>
-                        Probá todas las funcionalidades gratis y sumate a las inmobiliarias que ya trabajan con Zeta Prop.
+                        Probá Zeta Prop gratis durante 14 días, sin tarjeta de crédito.
                     </p>
                     <div className="l-hero__ctas">
                         <PrimaryCta href="/register">Crear cuenta gratis</PrimaryCta>

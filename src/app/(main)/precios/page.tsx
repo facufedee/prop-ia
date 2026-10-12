@@ -1,14 +1,15 @@
 import { Metadata } from "next";
 import PricingTable from "@/ui/components/pricing/PricingTable";
+import { PRICING_FAQS } from "@/ui/components/pricing/pricingFaqs";
 
 export const metadata: Metadata = {
     title: "Planes y Precios | CRM Inmobiliario sin costos ocultos",
-    description: "Elegí el plan de Zeta Prop que se adapta a tu inmobiliaria. Desde la opción gratuita hasta soluciones Enterprise con IA, multi-sucursal y soporte prioritario. 14 días de prueba sin tarjeta.",
+    description: "Elegí el plan de Zeta Prop que se adapta a tu inmobiliaria: Básico, Profesional o Enterprise. 14 días de prueba gratis, sin tarjeta.",
     keywords: [
         "precios CRM inmobiliario",
         "planes software inmobiliario",
         "cuánto cuesta Zeta Prop",
-        "plan gratuito inmobiliaria",
+        "prueba gratis CRM inmobiliario",
         "software inmobiliario precio argentina",
         "CRM inmobiliario mensual",
         "gestión de alquileres precio",
@@ -51,48 +52,11 @@ export default function PreciosPage() {
                     __html: JSON.stringify({
                         "@context": "https://schema.org",
                         "@type": "FAQPage",
-                        mainEntity: [
-                            {
-                                "@type": "Question",
-                                name: "¿Puedo cambiar de plan en cualquier momento?",
-                                acceptedAnswer: {
-                                    "@type": "Answer",
-                                    text: "Sí. Podés hacer upgrade o downgrade de tu plan en cualquier momento desde el panel de configuración. Los cambios se aplican de forma inmediata y el cobro se prorratea según los días restantes del período.",
-                                },
-                            },
-                            {
-                                "@type": "Question",
-                                name: "¿Qué pasa cuando termina la prueba gratuita de 14 días?",
-                                acceptedAnswer: {
-                                    "@type": "Answer",
-                                    text: "Al finalizar la prueba, tu cuenta pasa a modo lectura: podés ver todo pero no agregar nuevos datos. No se te cobra nada automáticamente. Elegís el plan que mejor se adapte y continuás donde lo dejaste.",
-                                },
-                            },
-                            {
-                                "@type": "Question",
-                                name: "¿Necesito tarjeta de crédito para registrarme?",
-                                acceptedAnswer: {
-                                    "@type": "Answer",
-                                    text: "No. El registro y los 14 días de prueba son completamente gratis y no requieren ningún método de pago.",
-                                },
-                            },
-                            {
-                                "@type": "Question",
-                                name: "¿Qué métodos de pago aceptan?",
-                                acceptedAnswer: {
-                                    "@type": "Answer",
-                                    text: "Aceptamos todas las tarjetas de crédito y débito (Visa, Mastercard, American Express), transferencia bancaria y MercadoPago.",
-                                },
-                            },
-                            {
-                                "@type": "Question",
-                                name: "¿Funciona para inmobiliarias con varias sucursales?",
-                                acceptedAnswer: {
-                                    "@type": "Answer",
-                                    text: "Sí. Los planes Profesional y Enterprise incluyen gestión multisucursal.",
-                                },
-                            },
-                        ],
+                        mainEntity: PRICING_FAQS.map(({ q, a }) => ({
+                            "@type": "Question",
+                            name: q,
+                            acceptedAnswer: { "@type": "Answer", text: a },
+                        })),
                     }),
                 }}
             />

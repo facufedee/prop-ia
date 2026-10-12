@@ -10,11 +10,11 @@ const categories = [
         faqs: [
             {
                 question: "¿Cómo empiezo a usar Zeta Prop?",
-                answer: "Es muy simple. Entrás a zetaprop.com.ar, hacés clic en \"Comenzar\" y creás tu cuenta con tu email o con Google. Una vez adentro, el dashboard te guía para configurar tu inmobiliaria: nombre, logo, datos de contacto. Después ya podés empezar a cargar propiedades, clientes y contratos. Todo el proceso lleva menos de 10 minutos."
+                answer: "Es muy simple. Entrás a zetaprop.com.ar, hacés clic en \"Comenzar\" y creás tu cuenta con tu email o con Google. Una vez adentro, el dashboard te guía para configurar tu inmobiliaria: nombre, logo, datos de contacto. Después ya podés empezar a cargar propiedades, clientes y contratos."
             },
             {
                 question: "¿Hay un período de prueba?",
-                answer: "Sí. Tenés un período de prueba gratuito para explorar todas las funcionalidades sin necesidad de ingresar datos de pago. Podés cargar propiedades, gestionar contratos y probar el sistema completo antes de decidir."
+                answer: "Sí. Tenés 14 días de prueba gratis con el plan Básico, sin ingresar datos de pago. Podés cargar propiedades, gestionar contratos y alquileres y probar el sistema antes de decidir."
             },
             {
                 question: "¿Qué es lo primero que tengo que configurar?",
@@ -22,7 +22,7 @@ const categories = [
             },
             {
                 question: "¿Puedo cargar mi cartera actual de propiedades y contratos?",
-                answer: "Sí. Podés cargar propiedades, clientes y contratos que ya están en curso. Para los alquileres activos, indicás la fecha de inicio y el sistema ajusta automáticamente los vencimientos y montos desde ese punto. Si querés, también podés cargar el historial de pagos anteriores."
+                answer: "Sí. Podés cargar propiedades, clientes y contratos que ya están en curso. Para los alquileres activos, indicás la fecha de inicio y el sistema arma el calendario de vencimientos desde ese punto. Los meses que ya se cobraron los podés marcar como pagados."
             },
             {
                 question: "¿Necesito conocimientos técnicos para usar la plataforma?",
@@ -30,7 +30,7 @@ const categories = [
             },
             {
                 question: "¿Funciona para inmobiliarias pequeñas o también para equipos grandes?",
-                answer: "Para los dos. Escala según tu operación: desde un agente independiente con unas pocas propiedades hasta una inmobiliaria con múltiples colaboradores. Podés agregar miembros del equipo, asignarles roles y ver la actividad de cada uno desde el dashboard."
+                answer: "Para los dos. El plan Básico es para un usuario; desde el plan Profesional podés sumar miembros del equipo y asignarles roles. Los límites de usuarios y propiedades de cada plan están en la página de precios."
             },
         ]
     },
@@ -39,15 +39,11 @@ const categories = [
         faqs: [
             {
                 question: "¿Cómo gestiono mi inventario de propiedades?",
-                answer: "Desde el módulo de propiedades podés crear fichas completas con fotos, videos, ubicación en mapa, precios y estado (disponible, reservado, vendido, alquilado). El sistema genera automáticamente una ficha PDF lista para compartir con clientes o publicar."
+                answer: "Desde el módulo de propiedades podés crear fichas completas con fotos, video, ubicación en mapa, precio y estado (activa, inactiva, reservada, vendida). Además podés generar una ficha para imprimir o compartir con clientes."
             },
             {
                 question: "¿Cómo funciona el CRM de clientes?",
-                answer: "El CRM te permite llevar un seguimiento detallado de cada lead desde que entra hasta que cierra. Podés registrar el perfil de búsqueda de cada cliente, hacer el matching con las propiedades disponibles y recibir alertas cuando hay una nueva propiedad que coincide. También tenés un pipeline visual para ver en qué etapa está cada oportunidad."
-            },
-            {
-                question: "¿Puedo hacer matching automático entre clientes y propiedades?",
-                answer: "Sí. Al cargar el perfil de búsqueda de un cliente (zona, tipo de propiedad, rango de precio, ambientes), el sistema cruza esa información con tu inventario y te alerta cuando hay propiedades que coinciden. Así no se te escapa ninguna oportunidad."
+                answer: "Desde el plan Profesional tenés el módulo de consultas: cada interesado queda registrado con sus datos, zona, presupuesto, notas e interacciones. Lo movés por etapas en un tablero visual y ves la tasa de conversión de tu pipeline."
             },
         ]
     },
@@ -56,23 +52,23 @@ const categories = [
         faqs: [
             {
                 question: "¿Cómo cargo un contrato de alquiler?",
-                answer: "Completás un formulario con los datos del contrato: partes, monto inicial, fecha de inicio, duración, tipo de ajuste (IPC, porcentaje fijo, manual, etc.) y periodicidad. En minutos el contrato queda registrado y el sistema se encarga de los vencimientos, aumentos y punitorios automáticamente."
+                answer: "Completás un formulario con los datos del contrato: partes, monto inicial, fecha de inicio, duración, tipo de ajuste (ICL, IPC, porcentaje fijo, manual, etc.) y periodicidad. El contrato queda registrado y el sistema arma el calendario de vencimientos y calcula los aumentos."
             },
             {
                 question: "¿El sistema calcula los aumentos e índices de ajuste?",
-                answer: "Sí. Podés configurar distintos tipos de ajuste: porcentaje fijo, índice ICL/IPC, manual o sin ajuste. El sistema aplica el aumento en la fecha correspondiente sin que tengas que hacer nada. Es lo suficientemente flexible para adaptarse a cualquier contrato vigente en Argentina."
+                answer: "Sí. Podés configurar ajuste por ICL, IPC, porcentaje fijo o manual, y cada cuántos meses se aplica. Para ICL e IPC el sistema calcula el nuevo monto con los índices oficiales publicados."
             },
             {
                 question: "¿Cómo se generan los recibos?",
-                answer: "Los recibos se generan automáticamente cada mes. Solo tenés que marcar el pago como realizado y el sistema crea el recibo con todos los datos: monto, período, ajustes y punitorios si los hubiera. Podés descargarlo en PDF o compartírselo al inquilino directamente."
+                answer: "Cuando marcás un pago como cobrado, el sistema genera el recibo en PDF con los datos del contrato, el período, el monto y los punitorios si los hubiera. Lo descargás y se lo enviás al inquilino."
             },
             {
                 question: "¿La plataforma calcula punitorios por mora?",
-                answer: "Sí. Si activás la opción, la plataforma calcula los punitorios día a día en caso de demora en el pago, según el porcentaje que hayas configurado en el contrato. Todo queda registrado y visible tanto para vos como para el inquilino en su portal."
+                answer: "Sí. En el contrato configurás el recargo por mora (monto fijo o porcentaje). Cuando un pago está vencido, calculás el recargo con un clic y queda sumado al pago y al recibo."
             },
             {
-                question: "¿Puedo generar contratos en PDF desde la plataforma?",
-                answer: "Sí. Zeta Prop genera contratos de alquiler y venta automáticamente con los datos cargados en el sistema. El documento queda listo para descargar e imprimir. No requiere firma digital: lo imprimís, firmás y listo."
+                question: "¿Puedo generar contratos desde la plataforma?",
+                answer: "Sí, para alquileres. Zeta Prop arma el contrato de alquiler con los datos cargados en el sistema y lo descargás en Word (.docx) para revisarlo, imprimirlo y firmarlo."
             },
         ]
     },
@@ -81,11 +77,11 @@ const categories = [
         faqs: [
             {
                 question: "¿Qué es el portal del inquilino?",
-                answer: "Es un acceso exclusivo que podés compartirle a cada inquilino para que vea su información de forma transparente: monto del mes, pagos realizados, punitorios si los hubiera y el resumen de su contrato. No necesita instalar nada ni registrarse con usuario y contraseña."
+                answer: "Es un acceso para que cada inquilino vea su contrato y el historial de sus pagos. Entra con el código del contrato y su DNI: no necesita instalar nada ni crear un usuario."
             },
             {
                 question: "¿El uso del portal es obligatorio para el inquilino?",
-                answer: "No. Es completamente opcional. Vos podés gestionar todo desde tu cuenta y, si querés, compartirle el link al inquilino. Muchos inquilinos valoran tener esa visibilidad, pero no es un requisito."
+                answer: "No. Es completamente opcional. Vos podés gestionar todo desde tu cuenta y, si querés, compartirle el código de acceso al inquilino."
             },
         ]
     },
@@ -93,8 +89,8 @@ const categories = [
         title: "Agenda y equipo",
         faqs: [
             {
-                question: "¿Cómo funciona la agenda inteligente?",
-                answer: "Podés coordinar visitas, reuniones y tareas directamente desde la plataforma. La agenda se sincroniza con Google Calendar para que no te solapés y envía recordatorios automáticos. Si tenés equipo, podés ver la disponibilidad de cada agente y asignar visitas sin conflictos."
+                question: "¿Cómo funciona la agenda?",
+                answer: "Desde el plan Profesional podés agendar visitas a tus propiedades en un calendario, con el cliente, la propiedad y el agente asignado. Las próximas visitas también aparecen en el inicio del panel."
             },
             {
                 question: "¿Puedo agregar colaboradores a mi cuenta?",
@@ -107,15 +103,15 @@ const categories = [
         faqs: [
             {
                 question: "¿Puedo hacer liquidaciones a propietarios desde la plataforma?",
-                answer: "Sí. La plataforma calcula automáticamente la liquidación mensual para cada propietario: alquiler cobrado, comisiones y gastos descontados, neto a transferir. Podés descargarla en PDF para enviársela."
+                answer: "Sí. A partir de los pagos cobrados, la plataforma arma la liquidación de cada mes para el propietario: alquiler cobrado, honorarios y otros descuentos, y neto a transferir. Podés descargarla en PDF para enviársela."
             },
             {
                 question: "¿Cómo se gestionan las comisiones?",
-                answer: "Podés configurar el porcentaje de comisión por operación y el sistema lo calcula automáticamente al cerrar un alquiler o venta. También podés asignar comisiones a agentes específicos y llevar el control desde los reportes financieros."
+                answer: "En cada venta cargás el porcentaje de comisión y cómo se reparte, y el sistema calcula el monto. En alquileres, los honorarios de la inmobiliaria se descuentan en la liquidación al propietario. En la ficha de cada agente ves el total de sus comisiones."
             },
             {
                 question: "¿Qué reportes y métricas tengo disponibles?",
-                answer: "El dashboard te muestra en tiempo real el estado de tu cartera: propiedades activas, pagos del mes, vencimientos próximos y leads en pipeline. También tenés analytics de rendimiento por agente, propiedades más consultadas y métricas de conversión. Los datos se pueden exportar a Excel."
+                answer: "El inicio del panel resume tu cartera: propiedades, alquileres, próximos vencimientos, próximas visitas y nuevas consultas. En Finanzas ves cobros y pagos a propietarios por período, y podés descargar en PDF el reporte de un contrato y el historial de sus liquidaciones."
             },
         ]
     },
@@ -124,11 +120,11 @@ const categories = [
         faqs: [
             {
                 question: "¿Qué tan segura es la información en Zeta Prop?",
-                answer: "Usamos infraestructura de Google Firebase con estándares de seguridad de nivel empresarial. Tu información y la de tus clientes está cifrada, respaldada en la nube y no se comparte con terceros."
+                answer: "Usamos la infraestructura de Google Firebase: la información viaja cifrada y se guarda en la nube de Google."
             },
             {
                 question: "¿Tienen soporte técnico?",
-                answer: "Sí. Contamos con mesa de ayuda con soporte prioritario, base de conocimientos con tutoriales en video y un gestor de cuenta para los planes más completos. Si tenés algún problema, podés escribirnos y te respondemos a la brevedad."
+                answer: "Sí. Desde el panel podés abrir un ticket de soporte y seguir su estado, consultar la sección Tutoriales y escribirnos por WhatsApp o por el chat del sitio."
             },
         ]
     },

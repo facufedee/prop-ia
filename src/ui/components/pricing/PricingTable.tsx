@@ -3,42 +3,12 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { Check, ChevronDown, ArrowRight, Shield, CreditCard, RefreshCw } from "lucide-react";
+import { PRICING_FAQS } from "./pricingFaqs";
 
 const TRUST_PILLS = [
     { icon: Shield, label: "14 días gratis" },
     { icon: CreditCard, label: "Sin tarjeta de crédito" },
-    { icon: RefreshCw, label: "Cancelá cuando quieras" },
-];
-
-const FAQS = [
-    {
-        q: "¿Puedo cambiar de plan en cualquier momento?",
-        a: "Sí. Podés hacer upgrade o downgrade de tu plan en cualquier momento desde el panel de configuración. Los cambios se aplican de forma inmediata y el cobro se prorratea según los días restantes del período.",
-    },
-    {
-        q: "¿Qué pasa cuando termina la prueba gratuita de 14 días?",
-        a: "Al finalizar la prueba, tu cuenta pasa a modo lectura: podés ver todo pero no agregar nuevos datos. No se te cobra nada automáticamente. Elegís el plan que mejor se adapte y continuás donde lo dejaste.",
-    },
-    {
-        q: "¿Necesito tarjeta de crédito para registrarme?",
-        a: "No. El registro y los 14 días de prueba son completamente gratis y no requieren ningún método de pago. Solo pedimos email y contraseña.",
-    },
-    {
-        q: "¿Qué métodos de pago aceptan?",
-        a: "Aceptamos todas las tarjetas de crédito y débito (Visa, Mastercard, American Express), transferencia bancaria y MercadoPago.",
-    },
-    {
-        q: "¿Funciona para inmobiliarias con varias sucursales?",
-        a: "Sí. Los planes Profesional y Enterprise incluyen gestión multisucursal, lo que te permite administrar propiedades, agentes y reportes por sucursal desde una única cuenta.",
-    },
-    {
-        q: "¿Puedo importar mi cartera de propiedades existente?",
-        a: "Sí. Ofrecemos importación masiva desde Excel/CSV y también integración con los principales portales inmobiliarios de Argentina.",
-    },
-    {
-        q: "¿El soporte está incluido en todos los planes?",
-        a: "Todos los planes incluyen soporte por email. El plan Profesional suma soporte prioritario por WhatsApp, y el Enterprise cuenta con un ejecutivo de cuenta dedicado.",
-    },
+    { icon: RefreshCw, label: "Sin débito automático" },
 ];
 
 function FaqItem({ q, a }: { q: string; a: string }) {
@@ -108,6 +78,15 @@ export default function PricingTable() {
         fetchPlans();
     }, []);
 
+    // Yearly badge is derived from plan prices (same formula as checkout) and
+    // hidden when no plan is actually cheaper on yearly billing.
+    const maxYearlyDiscount = plans.reduce((max, plan) => {
+        const monthly = plan.price?.monthly ?? 0;
+        const yearly = plan.price?.yearly ?? 0;
+        if (monthly <= 0 || yearly <= 0) return max;
+        return Math.max(max, Math.round((1 - yearly / (monthly * 12)) * 100));
+    }, 0);
+
     const formatPrice = (price: number) =>
         new Intl.NumberFormat("es-AR", { style: "currency", currency: "ARS", minimumFractionDigits: 0 }).format(price);
 
@@ -153,7 +132,9 @@ export default function PricingTable() {
                                 aria-pressed={billingPeriod === "yearly"}
                             >
                                 Anual
-                                <span className="s-toggle__save">-17%</span>
+                                {maxYearlyDiscount > 0 && (
+                                    <span className="s-toggle__save">-{maxYearlyDiscount}%</span>
+                                )}
                             </button>
                         </div>
                     </div>
@@ -198,9 +179,10 @@ export default function PricingTable() {
                                                     <span className="l-price-card__amount">{formatPrice(pricePerMonth)}</span>
                                                     <span className="l-price-card__period">/mes</span>
                                                 </div>
-                                                {billingPeriod === "yearly" && (
+                                                {billingPeriod === "yearly" && price > 0 && (
                                                     <p className="s-price-billed">
-                                                        Facturado {formatPrice(price)}/año · Ahorrás {formatPrice(plan.price.monthly * 12 - price)}
+                                                        Facturado {formatPrice(price)}/año
+                                                        {plan.price.monthly * 12 - price > 0 && ` · Ahorrás ${formatPrice(plan.price.monthly * 12 - price)}`}
                                                     </p>
                                                 )}
                                             </>
@@ -251,7 +233,7 @@ export default function PricingTable() {
                         <p className="l-section__lede">Si no encontrás lo que buscás, escribinos al chat o por WhatsApp.</p>
                     </div>
                     <div className="s-faq-list">
-                        {FAQS.map((faq) => (
+                        {PRICING_FAQS.map((faq) => (
                             <FaqItem key={faq.q} q={faq.q} a={faq.a} />
                         ))}
                     </div>
@@ -264,7 +246,7 @@ export default function PricingTable() {
                     <span className="l-eyebrow">Enterprise</span>
                     <h2 id="enterprise-title">¿Tenés una red grande o franquicia?</h2>
                     <p>
-                        Diseñamos una solución a medida con API dedicada, integraciones personalizadas, SLA garantizado y soporte 24/7.
+                        Si tenés varias oficinas o un equipo grande, escribinos y vemos juntos qué plan y qué configuración de sucursales, usuarios y roles te conviene.
                     </p>
                     <div className="l-hero__ctas">
                         <button
