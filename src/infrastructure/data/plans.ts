@@ -1,4 +1,6 @@
-import { Plan } from "@/domain/models/Subscription";
+// Type-only import so scripts/clean_plan_claims.ts can load this file with
+// Node type stripping (the "@/" alias is not resolvable at runtime there).
+import type { Plan } from "@/domain/models/Subscription";
 
 export interface UIPlan extends Plan {
     featuresList: string[];
@@ -17,7 +19,7 @@ export const PLANS: UIPlan[] = [
         features: [
             "Gestión de Propiedades",
             "Gestión de Alquileres",
-            "Reporte de Inquilinos (historial web)"
+            "Portal de inquilinos (vencimientos e historial de pagos)"
         ],
         limits: {
             properties: 25,
@@ -28,15 +30,13 @@ export const PLANS: UIPlan[] = [
             storage: "10GB",
         },
         featuresList: [
-            "Gestión completa de alquileres",
-            "Alta y administración de contratos",
+            "Gestión de alquileres con ajuste automático por ICL/IPC",
+            "Alta y administración de contratos de alquiler",
             "Control de vencimientos de alquiler",
             "Registro de pagos y estado de cobros",
             "Gestión de propiedades",
             "Gestión básica de clientes (propietarios e inquilinos)",
-            "Portal de inquilinos (informativo)",
-            "Publicación de propiedades en portales",
-            "Gestión de documentación y archivos",
+            "Portal de inquilinos de consulta (vencimientos e historial de pagos)",
             "1 usuario",
             "Hasta 25 propiedades",
             "Hasta 80 clientes",
@@ -57,11 +57,11 @@ export const PLANS: UIPlan[] = [
         features: [
             "Gestión de Propiedades",
             "Gestión de Alquileres",
-            "Reporte de Inquilinos (historial web)",
-            "Liquidacion a Inquilinos",
+            "Portal de inquilinos (vencimientos e historial de pagos)",
+            "Cobros a inquilinos con recibo PDF",
             "Liquidacion a Propietarios",
             "Calculo de Comisiones",
-            "Portal de Ventas",
+            "Pipeline de ventas",
             "Agenda"
         ],
         limits: {
@@ -73,14 +73,11 @@ export const PLANS: UIPlan[] = [
             storage: "50GB",
         },
         featuresList: [
-            "Agenda automática y gestión de tareas",
-            "Notificaciones automáticas de vencimientos",
-            "Tasador online de propiedades",
-            "Bot WhatsApp con respuestas automáticas",
+            "Agenda de visitas y eventos",
+            "Tasación de propiedades con IA",
             "Gestión de emprendimientos inmobiliarios",
             "Multi-sucursal",
-            "Portal de inquilinos avanzado",
-            "Historial completo de interacciones con clientes",
+            "CRM de consultas con notas e historial",
             "Hasta 5 usuarios",
             "Hasta 150 propiedades",
             "Clientes ilimitados",
@@ -100,17 +97,16 @@ export const PLANS: UIPlan[] = [
         features: [
             "Gestión de Propiedades",
             "Gestión de Alquileres",
-            "Reporte de Inquilinos (historial web)",
-            "Liquidacion a Inquilinos",
+            "Portal de inquilinos (vencimientos e historial de pagos)",
+            "Cobros a inquilinos con recibo PDF",
             "Liquidacion a Propietarios",
             "Calculo de Comisiones",
             "Recibos con logo de la Inmobiliaria",
-            "Portal de Ventas",
+            "Pipeline de ventas",
             "Agenda",
             "Consultas",
-            "Agente IA",
-            "Chat Zeta Prop",
-            "Integracion Whatsapp",
+            "Chat Zeta Prop (asistente con IA)",
+            "Recordatorios de pago por WhatsApp (envío manual)",
             "Multi-sucursal",
             "Gestion de Agentes Inmobiliarios"
         ],
@@ -123,13 +119,10 @@ export const PLANS: UIPlan[] = [
             storage: "Unlimited",
         },
         featuresList: [
-            "Marca propia (White Label)",
-            "Dominio personalizado",
-            "Reportes avanzados y KPIs de gestión",
-            "Automatizaciones avanzadas de procesos",
-            "Integraciones con sistemas externos / API",
+            "Sitio web con tu logo y colores (subdominio)",
+            "Reportes de ventas y finanzas",
             "Usuarios ilimitados",
-            "Soporte prioritario",
+            "Soporte por tickets desde el panel",
             "Propiedades ilimitadas",
         ],
         createdAt: new Date(),
