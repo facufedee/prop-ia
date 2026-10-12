@@ -20,26 +20,29 @@ const FilterSection = ({
 }) => {
     const [isOpen, setIsOpen] = useState(defaultOpen);
     return (
-        <div className="border-b border-gray-100 py-4 last:border-0">
-            <div className="flex items-center justify-between mb-2">
+        <div className="s-filter-sec">
+            <div className="s-filter-sec__head">
                 <button
+                    type="button"
                     onClick={() => setIsOpen(!isOpen)}
-                    className="flex items-center gap-2 text-left group flex-1"
+                    aria-expanded={isOpen}
+                    className="s-filter-sec__toggle"
                 >
-                    <h3 className="text-sm font-bold text-gray-900 uppercase tracking-wide group-hover:text-indigo-600 transition">{title}</h3>
-                    <ChevronDown size={16} className={`text-gray-400 transition-transform ${isOpen ? 'rotate-180' : ''}`} />
+                    {title}
+                    <ChevronDown size={16} aria-hidden="true" />
                 </button>
                 {onClear && (
                     <button
+                        type="button"
                         onClick={onClear}
-                        className="text-[10px] uppercase font-bold text-gray-400 hover:text-red-500 transition px-2 py-1 rounded bg-gray-50 hover:bg-red-50"
+                        className="s-text-btn s-text-btn--quiet"
                         title="Limpiar esta sección"
                     >
                         Borrar
                     </button>
                 )}
             </div>
-            {isOpen && <div className="mt-2 animate-in slide-in-from-top-2 duration-200">{children}</div>}
+            {isOpen && <div className="s-filter-sec__body animate-in slide-in-from-top-2 duration-200">{children}</div>}
         </div>
     );
 };
@@ -157,71 +160,63 @@ export default function AgencyPropertiesPage() {
     const hasActiveFilters = operationType !== "Todos" || currency !== "Todos" || rooms !== "Todos" || bathrooms !== "Todos" || priceMin || priceMax || areaMin || areaMax;
 
     if (loading) {
-        return <div className="min-h-screen bg-gray-50 flex items-center justify-center"><Loader2 className="animate-spin text-gray-400 w-8 h-8" /></div>;
+        return <main className="flex-1 s-loading min-h-screen"><Loader2 className="animate-spin w-8 h-8" aria-hidden="true" /></main>;
     }
 
     if (error || !agency) {
-        return <div className="min-h-screen bg-gray-50 flex items-center justify-center">Inmobiliaria no encontrada</div>;
+        return <main className="flex-1 s-status"><p className="s-page-lede">Inmobiliaria no encontrada</p></main>;
     }
 
     return (
-        <div className="min-h-screen bg-gray-50 pb-20 pt-24">
-            {/* Agency Banner / Header */}
-            <div className="bg-white border-b border-gray-200 mb-8">
-                <div className="container mx-auto px-4 py-8">
-                    <div className="flex flex-col md:flex-row items-center md:items-start gap-6">
-                        <div className="w-24 h-24 rounded-2xl bg-gray-100 overflow-hidden border-4 border-white shadow-lg shrink-0">
-                            {agency.logoUrl ? (
-                                <img src={agency.logoUrl} alt={agency.agencyName || agency.displayName} className="w-full h-full object-cover" />
-                            ) : agency.photoURL ? (
-                                <img src={agency.photoURL} alt={agency.displayName} className="w-full h-full object-cover" />
-                            ) : (
-                                <div className="w-full h-full bg-indigo-100 flex items-center justify-center text-3xl font-bold text-indigo-600">
-                                    {(agency.agencyName || agency.displayName).substring(0, 2).toUpperCase()}
-                                </div>
-                            )}
-                        </div>
-                        <div className="flex-1 text-center md:text-left">
-                            <h1 className="text-3xl font-bold text-gray-900 mb-2">{agency.agencyName || agency.displayName}</h1>
-                            <div className="flex flex-wrap items-center justify-center md:justify-start gap-4 text-gray-600 px-4 md:px-0">
-                                {agency.email && <div className="flex items-center gap-1.5"><Mail size={16} /><span>{agency.email}</span></div>}
-                                {agency.phoneNumber && <div className="flex items-center gap-1.5"><span>{agency.phoneNumber}</span></div>}
-                            </div>
+        <main className="flex-1 s-portal">
+            <div className="l-container">
+                {/* Agency Banner / Header */}
+                <div className="s-agency-head">
+                    <div className="s-avatar s-avatar--square">
+                        {agency.logoUrl ? (
+                            <img src={agency.logoUrl} alt={agency.agencyName || agency.displayName} className="w-full h-full object-cover" />
+                        ) : agency.photoURL ? (
+                            <img src={agency.photoURL} alt={agency.displayName} className="w-full h-full object-cover" />
+                        ) : (
+                            (agency.agencyName || agency.displayName).substring(0, 2).toUpperCase()
+                        )}
+                    </div>
+                    <div className="flex-1 min-w-0">
+                        <h1 className="s-page-title">{agency.agencyName || agency.displayName}</h1>
+                        <div className="s-agency-head__contact">
+                            {agency.email && <span><Mail size={16} aria-hidden="true" />{agency.email}</span>}
+                            {agency.phoneNumber && <span>{agency.phoneNumber}</span>}
                         </div>
                     </div>
                 </div>
-            </div>
 
-            <div className="container mx-auto px-4">
                 <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
 
                     {/* LEFT COLUMN: FILTERS (3 cols) */}
-                    <div className="lg:col-span-3">
-                        <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden sticky top-24 max-h-[calc(100vh-8rem)] flex flex-col">
+                    <div className="lg:col-span-3 lg:sticky lg:top-24">
+                        <div className="s-filter flex flex-col max-h-[calc(100vh-8rem)]">
                             {/* Header (Fixed) */}
-                            <div className="p-4 bg-gray-50 border-b border-gray-100 flex items-center justify-between shrink-0">
-                                <span className="font-bold text-gray-900 flex items-center gap-2"><Filter size={18} /> Filtros</span>
+                            <div className="s-filter__head shrink-0">
+                                <span className="s-filter__title"><Filter size={18} aria-hidden="true" /> Filtros</span>
                                 {hasActiveFilters && (
-                                    <button onClick={clearAllFilters} className="text-xs text-indigo-600 hover:text-indigo-800 font-medium hover:underline flex items-center gap-1">
-                                        <RotateCcw size={12} /> Limpiar Todo
+                                    <button type="button" onClick={clearAllFilters} className="s-text-btn">
+                                        <RotateCcw size={12} aria-hidden="true" /> Limpiar Todo
                                     </button>
                                 )}
                             </div>
 
                             {/* Scrollable Content */}
-                            <div className="p-4 overflow-y-auto custom-scrollbar">
+                            <div className="s-filter__body overflow-y-auto custom-scrollbar">
                                 <FilterSection
                                     title="Operación"
                                     onClear={operationType !== "Todos" ? () => setOperationType("Todos") : undefined}
                                 >
-                                    <div className="space-y-2">
+                                    <div className="s-radio-list">
                                         {['Todos', 'Venta', 'Alquiler', 'Alquiler Temporal'].map(type => (
-                                            <label key={type} className="flex items-center gap-3 cursor-pointer group">
-                                                <div className={`w-4 h-4 rounded-full border flex items-center justify-center transition ${operationType === type ? 'border-indigo-600 bg-indigo-50' : 'border-gray-300 bg-white group-hover:border-indigo-300'}`}>
-                                                    {operationType === type && <div className="w-2 h-2 rounded-full bg-indigo-600" />}
-                                                </div>
-                                                <input type="radio" className="hidden" name="operation" checked={operationType === type} onChange={() => setOperationType(type)} />
-                                                <span className={`text-sm ${operationType === type ? 'font-bold text-indigo-700' : 'text-gray-600 group-hover:text-gray-900'}`}>{type}</span>
+                                            <label key={type} className="s-radio">
+                                                <input type="radio" name="operation" checked={operationType === type} onChange={() => setOperationType(type)} />
+                                                <span className="s-radio__dot" aria-hidden="true" />
+                                                <span className="s-radio__text">{type}</span>
                                             </label>
                                         ))}
                                     </div>
@@ -231,12 +226,14 @@ export default function AgencyPropertiesPage() {
                                     title="Moneda"
                                     onClear={currency !== "Todos" ? () => setCurrency("Todos") : undefined}
                                 >
-                                    <div className="flex bg-gray-100 p-1 rounded-lg">
+                                    <div className="s-seg">
                                         {['Todos', 'USD', 'ARS'].map(c => (
                                             <button
                                                 key={c}
+                                                type="button"
                                                 onClick={() => setCurrency(c)}
-                                                className={`flex-1 py-1.5 text-xs font-bold rounded-md transition ${currency === c ? 'bg-white text-indigo-600 shadow-sm' : 'text-gray-500 hover:text-gray-700'}`}
+                                                aria-pressed={currency === c}
+                                                className="s-seg__opt"
                                             >
                                                 {c}
                                             </button>
@@ -248,14 +245,14 @@ export default function AgencyPropertiesPage() {
                                     title="Precio"
                                     onClear={(priceMin || priceMax) ? () => { setPriceMin(""); setPriceMax(""); } : undefined}
                                 >
-                                    <div className="flex gap-2">
-                                        <div className="relative w-full">
-                                            <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-xs">$</span>
-                                            <input type="number" placeholder="Min" value={priceMin} onChange={(e) => setPriceMin(e.target.value)} className="w-full pl-6 pr-3 py-2 bg-gray-50 border border-gray-200 rounded-lg text-sm focus:outline-none focus:border-indigo-500 transition" />
+                                    <div className="s-input-pair">
+                                        <div className="s-field-wrap w-full">
+                                            <span className="s-field-wrap__prefix" aria-hidden="true">$</span>
+                                            <input type="number" placeholder="Min" aria-label="Precio mínimo" value={priceMin} onChange={(e) => setPriceMin(e.target.value)} className="s-input s-input--sm s-input--prefix" />
                                         </div>
-                                        <div className="relative w-full">
-                                            <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-xs">$</span>
-                                            <input type="number" placeholder="Max" value={priceMax} onChange={(e) => setPriceMax(e.target.value)} className="w-full pl-6 pr-3 py-2 bg-gray-50 border border-gray-200 rounded-lg text-sm focus:outline-none focus:border-indigo-500 transition" />
+                                        <div className="s-field-wrap w-full">
+                                            <span className="s-field-wrap__prefix" aria-hidden="true">$</span>
+                                            <input type="number" placeholder="Max" aria-label="Precio máximo" value={priceMax} onChange={(e) => setPriceMax(e.target.value)} className="s-input s-input--sm s-input--prefix" />
                                         </div>
                                     </div>
                                 </FilterSection>
@@ -264,9 +261,9 @@ export default function AgencyPropertiesPage() {
                                     title="Ambientes"
                                     onClear={rooms !== "Todos" ? () => setRooms("Todos") : undefined}
                                 >
-                                    <div className="flex flex-wrap gap-2">
+                                    <div className="s-chip-row">
                                         {['Todos', '1', '2', '3', '4+'].map(r => (
-                                            <button key={r} onClick={() => setRooms(r)} className={`w-8 h-8 flex items-center justify-center text-sm rounded-lg border transition ${rooms === r ? 'bg-indigo-600 text-white border-indigo-600 shadow-md shadow-indigo-200' : 'bg-white text-gray-600 border-gray-200 hover:border-gray-300 hover:bg-gray-50'}`}>{r}</button>
+                                            <button key={r} type="button" onClick={() => setRooms(r)} aria-pressed={rooms === r} className="s-chip s-chip--square">{r}</button>
                                         ))}
                                     </div>
                                 </FilterSection>
@@ -275,9 +272,9 @@ export default function AgencyPropertiesPage() {
                                     title="Baños"
                                     onClear={bathrooms !== "Todos" ? () => setBathrooms("Todos") : undefined}
                                 >
-                                    <div className="flex flex-wrap gap-2">
+                                    <div className="s-chip-row">
                                         {['Todos', '1', '2', '3+'].map(b => (
-                                            <button key={b} onClick={() => setBathrooms(b)} className={`w-8 h-8 flex items-center justify-center text-sm rounded-lg border transition ${bathrooms === b ? 'bg-indigo-600 text-white border-indigo-600 shadow-md shadow-indigo-200' : 'bg-white text-gray-600 border-gray-200 hover:border-gray-300 hover:bg-gray-50'}`}>{b}</button>
+                                            <button key={b} type="button" onClick={() => setBathrooms(b)} aria-pressed={bathrooms === b} className="s-chip s-chip--square">{b}</button>
                                         ))}
                                     </div>
                                 </FilterSection>
@@ -286,9 +283,9 @@ export default function AgencyPropertiesPage() {
                                     title="Superficie (m²)"
                                     onClear={(areaMin || areaMax) ? () => { setAreaMin(""); setAreaMax(""); } : undefined}
                                 >
-                                    <div className="flex gap-2">
-                                        <input type="number" placeholder="Min" value={areaMin} onChange={(e) => setAreaMin(e.target.value)} className="w-full px-3 py-2 bg-gray-50 border border-gray-200 rounded-lg text-sm focus:outline-none focus:border-indigo-500 transition" />
-                                        <input type="number" placeholder="Max" value={areaMax} onChange={(e) => setAreaMax(e.target.value)} className="w-full px-3 py-2 bg-gray-50 border border-gray-200 rounded-lg text-sm focus:outline-none focus:border-indigo-500 transition" />
+                                    <div className="s-input-pair">
+                                        <input type="number" placeholder="Min" aria-label="Superficie mínima" value={areaMin} onChange={(e) => setAreaMin(e.target.value)} className="s-input s-input--sm" />
+                                        <input type="number" placeholder="Max" aria-label="Superficie máxima" value={areaMax} onChange={(e) => setAreaMax(e.target.value)} className="s-input s-input--sm" />
                                     </div>
                                 </FilterSection>
                             </div>
@@ -296,9 +293,9 @@ export default function AgencyPropertiesPage() {
                     </div>
 
                     {/* RIGHT COLUMN: LISTING (9 cols) */}
-                    <div className="lg:col-span-9">
+                    <div className="lg:col-span-9 min-w-0">
                         <div className="flex items-center justify-between mb-6">
-                            <h2 className="text-xl font-bold text-gray-900">{filteredProperties.length} Propiedades Encontradas</h2>
+                            <h2 className="s-results-title">{filteredProperties.length} Propiedades Encontradas</h2>
                             {/* Sorting could go here */}
                         </div>
 
@@ -310,6 +307,6 @@ export default function AgencyPropertiesPage() {
                     </div>
                 </div>
             </div>
-        </div>
+        </main>
     );
 }

@@ -10,6 +10,8 @@ import { useSite } from "@/app/sites/[slug]/SiteProvider";
 interface PropertyPublicCardProps {
     property: PublicProperty;
     basePath?: string;
+    /** "dark" renders the Zeta Prop portal theme. Agency sites keep the default "light". */
+    tone?: "light" | "dark";
 }
 
 function getYouTubeId(url: string) {
@@ -17,7 +19,7 @@ function getYouTubeId(url: string) {
     return m ? m[1] : null;
 }
 
-export default function PropertyPublicCard({ property, basePath: propBasePath }: PropertyPublicCardProps) {
+export default function PropertyPublicCard({ property, basePath: propBasePath, tone = "light" }: PropertyPublicCardProps) {
     const { basePath: contextBasePath } = useSite();
     const basePath = propBasePath || contextBasePath || "";
     const [currentImageIndex, setCurrentImageIndex] = useState(0);
@@ -91,6 +93,149 @@ export default function PropertyPublicCard({ property, basePath: propBasePath }:
         new Intl.NumberFormat("es-AR", { style: "currency", currency, maximumFractionDigits: 0 }).format(price);
 
     const currentMedia = mediaItems[currentImageIndex];
+
+    if (tone === "dark") {
+        const hasArea = Number(property.area_covered) > 0;
+        const hasRooms = Number(property.rooms) > 0;
+        const hasBaths = Number(property.bathrooms) > 0;
+
+        return (
+            <Link href={basePath ? `${basePath}/propiedades/${property.id}` : `/propiedades/${property.id}`}
+                className="group s-prop-card">
+
+                {/* Image Container */}
+                <div className="s-prop-card__media"
+                    onTouchStart={onTouchStart}
+                    onTouchEnd={onTouchEnd}
+                >
+                    {total > 0 ? (
+                        <>
+                            <div
+                                className="flex h-full transition-transform duration-300 ease-out"
+                                style={{ transform: `translateX(-${currentImageIndex * 100}%)` }}
+                            >
+                                {mediaItems.map((item, idx) => (
+                                    <div key={idx} className="relative w-full h-full flex-shrink-0">
+                                        <NextImage
+                                            src={item.url}
+                                            alt={`${property.title} - Foto ${idx + 1}`}
+                                            fill
+                                            className={`object-cover ${property.status === "sold" ? "grayscale opacity-90" : ""}`}
+                                            sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
+                                            priority={idx === 0}
+                                        />
+                                        {item.type === "video" && (
+                                            <div className="absolute inset-0 flex items-center justify-center bg-black/30">
+                                                <PlayCircle className="w-12 h-12 text-white" />
+                                            </div>
+                                        )}
+                                    </div>
+                                ))}
+                            </div>
+
+                            {total > 1 && (
+                                <>
+                                    <button
+                                        type="button"
+                                        onClick={prevImage}
+                                        aria-label="Imagen anterior"
+                                        className="s-glass-btn absolute left-2 top-1/2 -translate-y-1/2 z-10 opacity-0 group-hover:opacity-100 focus-visible:opacity-100"
+                                    >
+                                        <ChevronLeft className="w-4 h-4" />
+                                    </button>
+                                    <button
+                                        type="button"
+                                        onClick={nextImage}
+                                        aria-label="Siguiente imagen"
+                                        className="s-glass-btn absolute right-2 top-1/2 -translate-y-1/2 z-10 opacity-0 group-hover:opacity-100 focus-visible:opacity-100"
+                                    >
+                                        <ChevronRight className="w-4 h-4" />
+                                    </button>
+
+                                    {/* Dots — always visible on mobile */}
+                                    <div className="absolute bottom-3 left-1/2 -translate-x-1/2 flex gap-1 z-10
+                                        opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity" aria-hidden="true">
+                                        {mediaItems.slice(0, 6).map((_, idx) => (
+                                            <div
+                                                key={idx}
+                                                className={`w-1.5 h-1.5 rounded-full transition-colors ${idx === currentImageIndex ? "bg-white" : "bg-white/50"}`}
+                                            />
+                                        ))}
+                                        {total > 6 && <div className="w-1.5 h-1.5 rounded-full bg-white/50" />}
+                                    </div>
+                                </>
+                            )}
+                        </>
+                    ) : (
+                        <div className="s-prop-card__empty">
+                            <Home className="w-10 h-10" aria-hidden="true" />
+                        </div>
+                    )}
+
+                    {/* Favorites button */}
+                    <button
+                        type="button"
+                        onClick={toggleFav}
+                        aria-label={isFav ? "Quitar de favoritos" : "Guardar en favoritos"}
+                        aria-pressed={isFav}
+                        data-active={isFav}
+                        className="s-glass-btn absolute top-3 right-3 z-10"
+                    >
+                        <Heart className={`w-4 h-4 ${isFav ? "fill-current" : ""}`} />
+                    </button>
+
+                    {/* Operation Tag */}
+                    <span className={`s-prop-badge ${property.status === "sold" ? "s-prop-badge--sold" : ""}`}>
+                        {property.status === "sold" ? "VENDIDA" : property.operation_type}
+                    </span>
+                </div>
+
+                {/* Content */}
+                <div className="s-prop-card__body">
+                    {property.agency && (
+                        <div className="s-prop-card__agency">
+                            <span className="s-prop-card__avatar">
+                                {property.agency.photoURL ? (
+                                    <NextImage src={property.agency.photoURL} alt={property.agency.displayName} fill className="object-cover" sizes="24px" />
+                                ) : (
+                                    property.agency.displayName.substring(0, 2).toUpperCase()
+                                )}
+                            </span>
+                            <span>Publicado por {property.agency.displayName}</span>
+                        </div>
+                    )}
+
+                    <p className="s-prop-card__price">
+                        {property.hidePrice || Number(property.price) === 0 ? "Consultar Precio" : `${property.currency} ${Number(property.price)?.toLocaleString("es-AR")}`}
+                    </p>
+
+                    <h3 className="s-prop-card__title">
+                        {property.calle ? `${property.calle} ${property.altura || ""}` : property.title}
+                    </h3>
+
+                    <p className="s-prop-card__loc">
+                        <MapPin className="w-3.5 h-3.5" aria-hidden="true" />
+                        <span>{property.localidad}, {property.provincia}</span>
+                        {property.code && <span className="s-code">{property.code}</span>}
+                    </p>
+
+                    {(hasArea || hasRooms || hasBaths) && (
+                        <ul className="s-prop-card__feats">
+                            {hasArea && (
+                                <li><Maximize className="w-3.5 h-3.5" aria-hidden="true" />{property.area_covered} m²</li>
+                            )}
+                            {hasRooms && (
+                                <li><Bed className="w-3.5 h-3.5" aria-hidden="true" />{property.rooms} Amb.</li>
+                            )}
+                            {hasBaths && (
+                                <li><Bath className="w-3.5 h-3.5" aria-hidden="true" />{property.bathrooms} Baños</li>
+                            )}
+                        </ul>
+                    )}
+                </div>
+            </Link>
+        );
+    }
 
     return (
         <Link href={basePath ? `${basePath}/propiedades/${property.id}` : `/propiedades/${property.id}`}

@@ -18,11 +18,13 @@ const containerStyle = {
 interface PublicMapProps {
     lat: number;
     lng: number;
+    /** "dark" renders the Zeta Prop portal theme. Agency sites keep the default "light". */
+    tone?: "light" | "dark";
 }
 
 const libraries: ("places" | "drawing" | "geometry" | "visualization")[] = ["places"];
 
-export default function PublicMap({ lat, lng }: PublicMapProps) {
+export default function PublicMap({ lat, lng, tone = "light" }: PublicMapProps) {
     const [mapError, setMapError] = useState(false);
     const apiKey = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY;
 
@@ -63,6 +65,13 @@ export default function PublicMap({ lat, lng }: PublicMapProps) {
     }
 
     if (!isLoaded) {
+        if (tone === "dark") {
+            return (
+                <div className="s-map-loading">
+                    <Loader2 className="w-8 h-8 animate-spin" aria-hidden="true" />
+                </div>
+            );
+        }
         return (
             <div className="w-full h-full flex items-center justify-center bg-gray-100">
                 <Loader2 className="w-8 h-8 text-indigo-600 animate-spin" />

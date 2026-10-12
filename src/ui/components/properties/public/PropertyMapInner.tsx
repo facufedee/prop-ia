@@ -28,16 +28,18 @@ function fmtPrice(price: number, currency: string, hidePrice?: boolean): string 
 
 function makePriceIcon(price: number, currency: string, active: boolean, hidePrice?: boolean): L.DivIcon {
     const label = fmtPrice(price, currency, hidePrice);
-    const bg = active ? "#1e1b4b" : "#4f46e5";
+    // Theme tokens resolve because the map renders inside `.landing-page`.
+    const bg = active ? "var(--color-accent)" : "var(--color-paper)";
+    const fg = active ? "var(--color-accent-ink)" : "var(--color-ink)";
     const scale = active ? "scale(1.18)" : "scale(1)";
     return L.divIcon({
         className: "",
         html: `<div style="
-            background:${bg};color:#fff;
+            background:${bg};color:${fg};
             padding:5px 10px;border-radius:20px;
-            font-size:12px;font-weight:700;white-space:nowrap;
-            border:2.5px solid #fff;
-            box-shadow:0 2px 10px rgba(0,0,0,0.22);
+            font-family:var(--font-body);font-size:12px;font-weight:600;white-space:nowrap;
+            border:1.5px solid var(--color-ink);
+            box-shadow:0 2px 10px rgba(0,0,0,0.28);
             transform:${scale};transition:transform .15s,background .15s;
             cursor:pointer;line-height:1.2;
         ">${label}</div>`,
@@ -94,6 +96,7 @@ export default function PropertyMapInner({ properties, hoveredId, onHover }: Pro
             center={[-34.6037, -58.3816]}
             zoom={12}
             style={{ width: "100%", height: "100%" }}
+            className="s-leaflet"
             zoomControl
         >
             <MapResizer />
@@ -117,10 +120,10 @@ export default function PropertyMapInner({ properties, hoveredId, onHover }: Pro
                     zIndexOffset={hoveredId === p.id ? 1000 : 0}
                 >
                     <Popup maxWidth={252} minWidth={220} autoPan={false}>
-                        <div style={{ width: "220px", fontFamily: "system-ui, sans-serif" }}>
+                        <div style={{ width: "220px", fontFamily: "var(--font-body)", color: "var(--color-ink)" }}>
                             {/* Image */}
                             {p.imageUrls?.[0] && (
-                                <div style={{ height: "110px", borderRadius: "8px", overflow: "hidden", marginBottom: "8px" }}>
+                                <div style={{ height: "110px", borderRadius: "8px", overflow: "hidden", marginBottom: "8px", background: "var(--color-paper-3)" }}>
                                     <img
                                         src={p.imageUrls[0]}
                                         alt=""
@@ -131,38 +134,38 @@ export default function PropertyMapInner({ properties, hoveredId, onHover }: Pro
                             {/* Operation badge */}
                             <span style={{
                                 display: "inline-block",
-                                background: p.operation_type === "Venta" ? "#dcfce7" : "#dbeafe",
-                                color: p.operation_type === "Venta" ? "#166534" : "#1e40af",
-                                fontSize: "10px", fontWeight: "700", padding: "2px 7px",
-                                borderRadius: "99px", marginBottom: "5px", textTransform: "uppercase",
+                                background: "var(--color-accent-soft)",
+                                color: "var(--color-accent)",
+                                fontSize: "10px", fontWeight: "600", padding: "2px 8px", letterSpacing: "0.08em",
+                                borderRadius: "99px", marginBottom: "6px", textTransform: "uppercase",
                             }}>
                                 {p.operation_type}
                             </span>
                             {/* Title */}
-                            <div style={{ fontSize: "13px", fontWeight: "700", color: "#111827", lineHeight: "1.3", marginBottom: "3px" }}>
+                            <div style={{ fontSize: "13px", fontWeight: "600", color: "var(--color-ink)", lineHeight: "1.3", marginBottom: "3px" }}>
                                 {p.calle ? `${p.calle}${p.altura ? ` ${p.altura}` : ""}` : p.title}
                             </div>
-                            <div style={{ fontSize: "11px", color: "#9ca3af", marginBottom: "7px" }}>
+                            <div style={{ fontSize: "11px", color: "var(--color-ink-2)", marginBottom: "7px" }}>
                                 {[p.localidad, p.provincia].filter(Boolean).join(", ")}
                             </div>
                             {/* Price */}
-                            <div style={{ fontSize: "16px", fontWeight: "800", color: "#4f46e5", marginBottom: "7px" }}>
+                            <div style={{ fontFamily: "var(--font-heading)", fontSize: "16px", fontWeight: "600", letterSpacing: "-0.02em", color: "var(--color-ink)", marginBottom: "7px" }}>
                                 {p.hidePrice || !Number(p.price) ? "Consultar precio" : `${p.currency === "USD" ? "U$S" : "$"} ${Number(p.price).toLocaleString("es-AR")}`}
                             </div>
                             {/* Specs */}
-                            <div style={{ display: "flex", gap: "10px", fontSize: "11px", color: "#374151", marginBottom: "10px", flexWrap: "wrap" }}>
-                                {p.rooms ? <span>🛏 {p.rooms} amb.</span> : null}
-                                {p.bathrooms ? <span>🚿 {p.bathrooms}</span> : null}
-                                {p.area_covered ? <span>📐 {p.area_covered} m²</span> : null}
+                            <div style={{ display: "flex", gap: "10px", fontSize: "11px", color: "var(--color-muted)", marginBottom: "10px", flexWrap: "wrap" }}>
+                                {p.rooms ? <span>{p.rooms} amb.</span> : null}
+                                {p.bathrooms ? <span>{p.bathrooms} baños</span> : null}
+                                {p.area_covered ? <span>{p.area_covered} m²</span> : null}
                             </div>
                             {/* CTA */}
                             <a
                                 href={`/propiedades/p/${p.id}`}
                                 style={{
                                     display: "block", textAlign: "center",
-                                    background: "#4f46e5", color: "#fff",
-                                    padding: "8px", borderRadius: "8px",
-                                    textDecoration: "none", fontSize: "12px", fontWeight: "700",
+                                    background: "var(--color-ink)", color: "var(--color-accent-ink)",
+                                    padding: "10px", borderRadius: "999px",
+                                    textDecoration: "none", fontSize: "12px", fontWeight: "600",
                                 }}
                             >
                                 Ver propiedad →
