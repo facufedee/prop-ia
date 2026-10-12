@@ -5,9 +5,9 @@
 // The cleaned lists live in src/infrastructure/data/plans.ts (the seed), which
 // this script imports, so the seed and Firestore stay identical.
 //
-// Only `features`, `featuresList` and `updatedAt` are written, with update(), on
-// the existing docs basic / professional / enterprise. Prices, limits, tier,
-// name and description are never touched; missing docs are skipped, not created.
+// Only `description`, `features`, `featuresList` and `updatedAt` are written, with
+// update(), on the existing docs basic / professional / enterprise. Prices, limits,
+// tier and name are never touched; missing docs are skipped, not created.
 // Re-running after --apply reports every plan as unchanged.
 //
 // Dry run (default, read-only — prints removed/added lines per plan):
@@ -93,18 +93,30 @@ async function main() {
             if (!sameList(current, target[field])) changes[field] = target[field];
         }
 
+        const currentDescription = snap.get("description");
+        const descriptionChanged = currentDescription !== plan.description;
+
         const changed = Object.keys(changes) as DisplayField[];
-        if (!changed.length) {
+        if (!changed.length && !descriptionChanged) {
             console.log(`[${id}] unchanged`);
             continue;
         }
 
         pending++;
         console.log(`[${id}]`);
+        if (descriptionChanged) {
+            console.log(`  description:
+    - ${currentDescription ?? "(empty)"}
+    + ${plan.description}`);
+        }
         changed.forEach((field) => printDiff(field, asStringList(snap.get(field)), target[field]));
 
         if (apply) {
-            await ref.update({ ...changes, updatedAt: FieldValue.serverTimestamp() });
+            await ref.update({
+                ...changes,
+                ...(descriptionChanged ? { description: plan.description } : {}),
+                updatedAt: FieldValue.serverTimestamp(),
+            });
             console.log(`  -> written`);
         }
     }

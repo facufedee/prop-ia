@@ -11,7 +11,7 @@ export const PLANS: UIPlan[] = [
         id: "basic",
         name: "Básico",
         tier: "basic",
-        description: "Gestión completa de alquileres y propiedades",
+        description: "Gestión de alquileres y propiedades",
         price: {
             monthly: 42000,
             yearly: 42000 * 12,
@@ -48,7 +48,7 @@ export const PLANS: UIPlan[] = [
         id: "professional",
         name: "Profesional",
         tier: "professional",
-        description: "Automatización y herramientas avanzadas",
+        description: "Alquileres, ventas, consultas y tasaciones con IA",
         popular: true,
         price: {
             monthly: 69000,
@@ -89,7 +89,7 @@ export const PLANS: UIPlan[] = [
         id: "enterprise",
         name: "Enterprise",
         tier: "enterprise",
-        description: "Solución integral con marca propia",
+        description: "Usuarios y propiedades ilimitados, con tu marca en recibos y sitio web",
         price: {
             monthly: 99000,
             yearly: 99000 * 12,
