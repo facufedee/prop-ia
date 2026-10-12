@@ -3,6 +3,7 @@
 import { Suspense, useEffect, useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { toast } from 'sonner';
+import { AlertCircle, Loader2 } from 'lucide-react';
 
 function VerifyContent() {
     const searchParams = useSearchParams();
@@ -48,26 +49,36 @@ function VerifyContent() {
 
     if (!token || !uid) {
         return (
-            <div className="text-center text-red-600">
-                Link inválido. Faltan parámetros.
-            </div>
+            <main className="s-util s-util--center">
+                <section className="s-util-card" role="alert">
+                    <div className="s-util-mark s-util-mark--danger">
+                        <AlertCircle aria-hidden="true" />
+                    </div>
+                    <h1 className="s-util-title">Link inválido. Faltan parámetros.</h1>
+                </section>
+            </main>
         );
     }
 
     return (
-        <div className="flex flex-col items-center justify-center min-h-screen">
-            {verifying ? (
-                <div className="text-xl">Verificando tu cuenta...</div>
-            ) : (
-                <div className="text-xl">Redirigiendo...</div>
-            )}
-        </div>
+        <main className="s-util s-util--center">
+            <section className="s-util-card" aria-live="polite">
+                <div className="s-util-mark">
+                    <Loader2 className="animate-spin" aria-hidden="true" />
+                </div>
+                {verifying ? (
+                    <h1 className="s-util-title">Verificando tu cuenta...</h1>
+                ) : (
+                    <h1 className="s-util-title">Redirigiendo...</h1>
+                )}
+            </section>
+        </main>
     );
 }
 
 export default function VerifyPage() {
     return (
-        <Suspense fallback={<div>Cargando...</div>}>
+        <Suspense fallback={<div className="s-util-loading">Cargando...</div>}>
             <VerifyContent />
         </Suspense>
     );

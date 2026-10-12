@@ -5,36 +5,30 @@ import Link from "next/link";
 
 export default function CheckoutFailurePage() {
     return (
-        <div className="min-h-screen bg-gradient-to-br from-red-50 to-pink-50 flex items-center justify-center p-4">
-            <div className="max-w-md w-full bg-white rounded-3xl shadow-2xl p-8 text-center">
-                <div className="w-20 h-20 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-6">
-                    <XCircle className="w-12 h-12 text-red-600" />
+        <main className="s-util s-util--center">
+            <section className="s-util-card" aria-labelledby="checkout-failure-title">
+                <div className="s-util-mark s-util-mark--danger">
+                    <XCircle aria-hidden="true" />
                 </div>
 
-                <h1 className="text-3xl font-bold text-gray-900 mb-4">
+                <h1 id="checkout-failure-title" className="s-util-title">
                     Pago Rechazado
                 </h1>
 
-                <p className="text-gray-600 mb-6">
+                <p className="s-util-text">
                     No pudimos procesar tu pago. Por favor, intentá nuevamente o probá con otro método de pago.
                 </p>
 
-                <div className="space-y-3">
-                    <Link
-                        href="/precios"
-                        className="block w-full py-3 bg-indigo-600 text-white rounded-xl font-bold hover:bg-indigo-700 transition-colors"
-                    >
+                <div className="s-util-actions">
+                    <Link href="/precios" className="s-auth-submit">
                         Intentar Nuevamente
                     </Link>
 
-                    <Link
-                        href="/contacto"
-                        className="block w-full py-3 bg-gray-100 text-gray-700 rounded-xl font-medium hover:bg-gray-200 transition-colors"
-                    >
+                    <Link href="/contacto" className="s-util-link">
                         Contactar Soporte
                     </Link>
                 </div>
-            </div>
-        </div>
+            </section>
+        </main>
     );
 }

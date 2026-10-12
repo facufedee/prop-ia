@@ -2,7 +2,7 @@
 
 import { useEffect, useState, Suspense, useRef } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
-import { Loader2, Check, CreditCard, ArrowRightLeft } from "lucide-react";
+import { Loader2, Check, CreditCard, ArrowRightLeft, ArrowLeft } from "lucide-react";
 import Link from "next/link";
 import { auth, db } from "@/infrastructure/firebase/client";
 import { onAuthStateChanged } from "firebase/auth";
@@ -228,10 +228,14 @@ function CheckoutContent() {
 
     if (!planId) {
         return (
-            <div className="text-center py-20">
-                <p>Plan no especificado.</p>
-                <Link href="/precios" className="text-indigo-600 hover:underline">Volver a planes</Link>
-            </div>
+            <main className="s-util s-util--center">
+                <section className="s-util-card">
+                    <h1 className="s-util-title">Plan no especificado.</h1>
+                    <div className="s-util-actions">
+                        <Link href="/precios" className="s-util-link">Volver a planes</Link>
+                    </div>
+                </section>
+            </main>
         );
     }
 
@@ -244,72 +248,71 @@ function CheckoutContent() {
     const savingsLabel = getSavingsLabel();
 
     return (
-        <div className="min-h-screen bg-gray-50 pt-24 pb-12 px-4 md:px-8 font-sans">
-            <div className="max-w-7xl mx-auto">
-                <div className="mb-8">
-                    <Link href="/precios" className="text-sm text-gray-500 hover:text-gray-900 mb-2 inline-block">
-                        ← Volver a planes
+        <main className="s-util">
+            <div className="s-checkout">
+                <header className="s-checkout__head">
+                    <Link href="/precios" className="s-util-link">
+                        <ArrowLeft className="w-4 h-4" aria-hidden="true" />
+                        Volver a planes
                     </Link>
-                    <h1 className="text-3xl font-bold text-gray-900">Finalizar Suscripción</h1>
-                    <p className="text-gray-500 mt-1">Revisá tu plan y completá el pago</p>
-                </div>
+                    <h1 className="s-page-title">Finalizar Suscripción</h1>
+                    <p className="s-page-lede">Revisá tu plan y completá el pago</p>
+                </header>
 
-                <div className="grid lg:grid-cols-12 gap-8">
+                <div className="s-checkout__grid">
 
                     {/* LEFT — Plan details */}
-                    <div className="lg:col-span-7 space-y-6">
+                    <div className="s-checkout__main">
                         {planData && (
                             <>
                                 {/* User */}
-                                <section className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
-                                    <div className="flex items-center justify-between mb-4">
-                                        <h2 className="text-lg font-semibold text-gray-900">Tus Datos</h2>
+                                <section className="s-checkout__panel">
+                                    <div className="s-checkout__row">
+                                        <h2 className="s-checkout__h2">Tus Datos</h2>
                                         {currentUser && (
-                                            <span className="bg-green-100 text-green-700 px-2 py-0.5 rounded text-xs font-bold uppercase tracking-wider">
+                                            <span className="s-checkout__badge s-checkout__badge--positive">
                                                 Verificado
                                             </span>
                                         )}
                                     </div>
-                                    <div className="flex items-center gap-4 p-3 bg-gray-50 rounded-xl border border-gray-200">
-                                        <div className="w-10 h-10 rounded-full bg-indigo-100 flex items-center justify-center text-indigo-600 font-bold text-lg">
+                                    <div className="s-checkout__user">
+                                        <div className="s-checkout__avatar" aria-hidden="true">
                                             {currentUser?.displayName?.[0]?.toUpperCase() ?? currentUser?.email?.[0]?.toUpperCase() ?? 'U'}
                                         </div>
                                         <div>
-                                            <p className="font-semibold text-gray-900">{currentUser?.displayName || "Usuario"}</p>
-                                            <p className="text-sm text-gray-500">{currentUser?.email}</p>
+                                            <p className="s-checkout__user-name">{currentUser?.displayName || "Usuario"}</p>
+                                            <p className="s-checkout__user-mail">{currentUser?.email}</p>
                                         </div>
                                     </div>
                                 </section>
 
                                 {/* Plan */}
-                                <section className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
-                                    <h2 className="text-lg font-semibold text-gray-900 mb-4">Detalle del Plan</h2>
-                                    <div className="mb-6 pb-6 border-b border-gray-100">
-                                        <div className="flex justify-between items-start">
-                                            <div>
-                                                <h3 className="text-xl font-bold text-gray-900">{planData.name}</h3>
-                                                <p className="text-gray-500 mt-1">{planData.description}</p>
-                                            </div>
-                                            <span className="bg-indigo-50 text-indigo-700 px-3 py-1 rounded-full text-sm font-medium">
-                                                {billing === 'monthly' ? 'Mensual' : billing === 'quarterly' ? '3 Meses' : 'Anual'}
-                                            </span>
+                                <section className="s-checkout__panel">
+                                    <h2 className="s-checkout__h2 s-checkout__row">Detalle del Plan</h2>
+                                    <div className="s-checkout__row s-checkout__row--plan">
+                                        <div>
+                                            <h3 className="s-checkout__plan-name">{planData.name}</h3>
+                                            <p className="s-checkout__plan-desc">{planData.description}</p>
                                         </div>
+                                        <span className="s-checkout__badge">
+                                            {billing === 'monthly' ? 'Mensual' : billing === 'quarterly' ? '3 Meses' : 'Anual'}
+                                        </span>
                                     </div>
-                                    <h4 className="text-sm font-semibold text-gray-500 uppercase tracking-wide mb-4">Incluye</h4>
-                                    <div className="grid sm:grid-cols-2 gap-4">
+                                    <h4 className="s-checkout__eyebrow">Incluye</h4>
+                                    <div className="s-checkout__features">
                                         {[
                                             { label: 'Propiedades', value: planData.limits.properties === 'unlimited' ? 'Ilimitadas' : `${planData.limits.properties} activas` },
                                             { label: 'Usuarios', value: planData.limits.users === 'unlimited' ? 'Ilimitados' : `${planData.limits.users} miembros` },
                                             { label: 'Soporte', value: 'Prioritario 24/7' },
                                             { label: 'Actualizaciones', value: 'Automáticas' },
                                         ].map(({ label, value }) => (
-                                            <div key={label} className="flex items-start gap-3 p-3 rounded-lg bg-gray-50">
-                                                <div className="p-1 bg-green-100 rounded-full flex-shrink-0">
-                                                    <Check className="w-4 h-4 text-green-600" />
-                                                </div>
+                                            <div key={label} className="s-checkout__feature">
+                                                <span className="s-checkout__check" aria-hidden="true">
+                                                    <Check />
+                                                </span>
                                                 <div>
-                                                    <p className="font-medium text-gray-900">{label}</p>
-                                                    <p className="text-sm text-gray-500">{value}</p>
+                                                    <p className="s-checkout__feature-label">{label}</p>
+                                                    <p className="s-checkout__feature-value">{value}</p>
                                                 </div>
                                             </div>
                                         ))}
@@ -320,205 +323,207 @@ function CheckoutContent() {
                     </div>
 
                     {/* RIGHT — Payment */}
-                    <div className="lg:col-span-5">
+                    <div className="s-checkout__aside">
                         {isPendingPayment ? (
-                            <div className="bg-green-50 rounded-2xl shadow-xl border border-green-200 p-8 text-center space-y-4">
-                                <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto">
-                                    <Check className="w-8 h-8 text-green-600" />
+                            <div className="s-checkout__panel s-checkout__panel--center">
+                                <div className="s-util-mark s-util-mark--positive">
+                                    <Check aria-hidden="true" />
                                 </div>
-                                <h3 className="text-2xl font-bold text-green-900">Pago en verificación</h3>
-                                <p className="text-green-800 font-medium">
+                                <h3 className="s-util-title">Pago en verificación</h3>
+                                <p className="s-util-text">
                                     Estamos habilitando tu cuenta con el plan elegido.
                                 </p>
-                                <p className="text-sm text-green-700">
+                                <p className="s-util-text">
                                     Te avisamos por aquí y por WhatsApp en menos de 10 minutos.
                                 </p>
                             </div>
                         ) : planData && (
-                            <div className="sticky top-8 bg-white rounded-2xl shadow-xl border border-gray-100 overflow-hidden">
-                                <div className="p-6 space-y-6">
+                            <div className="s-checkout__panel">
 
-                                    {/* 1. Billing period */}
-                                    <div>
-                                        <p className="text-sm font-semibold text-gray-700 mb-3">Período de facturación</p>
-                                        <div className="flex p-1 bg-gray-100 rounded-xl gap-1">
-                                            {billingOptions.map(opt => (
-                                                <button
-                                                    key={opt.value}
-                                                    onClick={() => { setBilling(opt.value); setMpInitPoint(null); }}
-                                                    className={`flex-1 py-2.5 px-2 rounded-lg text-sm font-bold transition-all flex flex-col items-center gap-0.5 ${billing === opt.value ? 'bg-white text-gray-900 shadow-sm' : 'text-gray-500 hover:text-gray-800'}`}
-                                                >
-                                                    {opt.label}
-                                                    {opt.badge && (
-                                                        <span className={`text-[9px] px-1.5 py-0.5 rounded font-extrabold ${opt.value === 'quarterly' ? 'bg-indigo-100 text-indigo-700 border border-indigo-200' : 'bg-green-100 text-green-700 border border-green-200'}`}>
-                                                            {opt.badge}
-                                                        </span>
-                                                    )}
-                                                </button>
-                                            ))}
-                                        </div>
-                                    </div>
-
-                                    {/* 2. Price */}
-                                    <div className="py-4 bg-gray-50 rounded-xl border border-gray-100 px-4 space-y-2">
-                                        {prorationCredit > 0 ? (
-                                            <>
-                                                <div className="flex justify-between text-sm text-gray-500">
-                                                    <span>Precio del plan</span>
-                                                    <span>{formatPrice(getPrice())}</span>
-                                                </div>
-                                                <div className="flex justify-between text-sm text-green-700 font-semibold">
-                                                    <span>Crédito por días no usados</span>
-                                                    <span>− {formatPrice(prorationCredit)}</span>
-                                                </div>
-                                                <div className="border-t border-gray-200 pt-2 flex justify-between items-center">
-                                                    <p className="text-xs text-gray-400">Total a pagar</p>
-                                                    <p className="text-3xl font-extrabold text-gray-900 tracking-tight">{formatPrice(getFinalPrice())}</p>
-                                                </div>
-                                                <div className="bg-green-50 border border-green-200 rounded-lg px-3 py-2 text-xs text-green-800 leading-relaxed">
-                                                    Tu suscripción actual tiene días sin usar. Ese valor se descuenta automáticamente del nuevo plan — solo pagás la diferencia.
-                                                </div>
-                                            </>
-                                        ) : (
-                                            <>
-                                                <p className="text-xs text-gray-400 text-center">Total a pagar</p>
-                                                <p className="text-4xl font-extrabold text-gray-900 tracking-tight text-center">
-                                                    {formatPrice(getPrice())}
-                                                </p>
-                                                <p className="text-sm text-gray-400 text-center">
-                                                    {billing === 'monthly' && 'por mes'}
-                                                    {billing === 'quarterly' && `por 3 meses · ${formatPrice(getMonthlyEquivalent())}/mes`}
-                                                    {billing === 'yearly' && `por año · ${formatPrice(getMonthlyEquivalent())}/mes`}
-                                                </p>
-                                                {savingsLabel && (
-                                                    <div className="flex justify-center">
-                                                        <div className="inline-flex items-center gap-1 bg-green-50 text-green-700 px-3 py-1 rounded-full text-xs font-bold border border-green-100">
-                                                            🎉 {savingsLabel}
-                                                        </div>
-                                                    </div>
-                                                )}
-                                            </>
-                                        )}
-                                    </div>
-
-                                    {/* 3. Payment method selector */}
-                                    <div>
-                                        <p className="text-sm font-semibold text-gray-700 mb-3">Método de pago</p>
-                                        <div className="grid grid-cols-2 gap-2">
+                                {/* 1. Billing period */}
+                                <div className="s-checkout__block">
+                                    <p className="s-checkout__label">Período de facturación</p>
+                                    <div className="s-checkout__seg">
+                                        {billingOptions.map(opt => (
                                             <button
-                                                onClick={() => setPaymentMethod('mercadopago')}
-                                                className={`flex flex-col items-center gap-1.5 p-3 rounded-xl border-2 text-sm font-semibold transition-all ${paymentMethod === 'mercadopago' ? 'border-indigo-500 bg-indigo-50 text-indigo-700' : 'border-gray-200 text-gray-500 hover:border-gray-300'}`}
+                                                key={opt.value}
+                                                type="button"
+                                                aria-pressed={billing === opt.value}
+                                                onClick={() => { setBilling(opt.value); setMpInitPoint(null); }}
+                                                className={`s-checkout__seg-btn ${billing === opt.value ? 'is-active' : ''}`}
                                             >
-                                                <CreditCard className="w-5 h-5" />
-                                                Tarjeta / MP
+                                                {opt.label}
+                                                {opt.badge && (
+                                                    <span className={`s-checkout__seg-badge ${opt.value === 'quarterly' ? '' : 's-checkout__seg-badge--positive'}`}>
+                                                        {opt.badge}
+                                                    </span>
+                                                )}
                                             </button>
-                                            <button
-                                                onClick={() => setPaymentMethod('transfer')}
-                                                className={`flex flex-col items-center gap-1.5 p-3 rounded-xl border-2 text-sm font-semibold transition-all ${paymentMethod === 'transfer' ? 'border-indigo-500 bg-indigo-50 text-indigo-700' : 'border-gray-200 text-gray-500 hover:border-gray-300'}`}
-                                            >
-                                                <ArrowRightLeft className="w-5 h-5" />
-                                                Transferencia
-                                            </button>
-                                        </div>
-                                    </div>
-
-                                    {/* 4. Payment form */}
-                                    <div className="pt-2 border-t border-gray-100">
-                                        {paymentMethod === 'mercadopago' ? (
-                                            <div className="space-y-4">
-                                                {authLoading && (
-                                                    <div className="flex items-center justify-center py-8 gap-3 text-sm text-gray-500">
-                                                        <Loader2 className="w-5 h-5 animate-spin text-indigo-500" />
-                                                        Verificando sesión...
-                                                    </div>
-                                                )}
-                                                {!authLoading && !currentUser && (
-                                                    <div className="text-center py-4 space-y-3">
-                                                        <p className="text-sm text-gray-500">Necesitás iniciar sesión para continuar.</p>
-                                                        <Link href={`/login?redirect=/checkout?plan=${planId}&billing=${billing}`} className="inline-block px-6 py-2.5 bg-indigo-600 text-white rounded-xl text-sm font-semibold hover:bg-indigo-500 transition-colors">
-                                                            Iniciar sesión
-                                                        </Link>
-                                                    </div>
-                                                )}
-                                                {!authLoading && currentUser && mpLoading && (
-                                                    <div className="flex items-center justify-center py-8 gap-3 text-sm text-gray-500">
-                                                        <Loader2 className="w-5 h-5 animate-spin text-indigo-500" />
-                                                        Preparando el pago...
-                                                    </div>
-                                                )}
-                                                {!authLoading && currentUser && mpError && (
-                                                    <div className="bg-red-50 border border-red-200 text-red-700 text-sm rounded-xl p-4">
-                                                        {mpError}
-                                                    </div>
-                                                )}
-                                                {!authLoading && currentUser && !mpLoading && !mpError && mpInitPoint && (
-                                                    <>
-                                                        <p className="text-sm text-gray-500 text-center">
-                                                            Vas a ser redirigido al sitio seguro de Mercado Pago para completar el pago.
-                                                        </p>
-                                                        <a
-                                                            href={mpInitPoint}
-                                                            className="w-full py-3.5 bg-[#009ee3] hover:bg-[#007eb5] text-white rounded-xl font-bold flex items-center justify-center gap-2 transition-colors shadow-sm"
-                                                        >
-                                                            <CreditCard className="w-5 h-5" />
-                                                            Pagar con Mercado Pago
-                                                        </a>
-                                                        <p className="text-xs text-gray-400 text-center">
-                                                            Podés pagar con tarjeta, débito o dinero en cuenta de MP
-                                                        </p>
-                                                    </>
-                                                )}
-                                            </div>
-                                        ) : (
-                                            <div className="space-y-4">
-                                                <div className="bg-blue-50 p-4 rounded-xl border border-blue-100 text-sm">
-                                                    <p className="font-semibold text-blue-900 mb-2">Datos para transferir:</p>
-                                                    <div className="space-y-1 text-gray-700">
-                                                        <div className="flex justify-between">
-                                                            <span>CUIL:</span>
-                                                            <span className="font-mono font-medium">20-35163401-5</span>
-                                                        </div>
-                                                        <div className="flex justify-between">
-                                                            <span>Alias:</span>
-                                                            <span className="font-bold text-indigo-600">ZETAPROP</span>
-                                                        </div>
-                                                        <div className="flex justify-between">
-                                                            <span>Monto:</span>
-                                                            <span className="font-bold text-gray-900">{formatPrice(getPrice())}</span>
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                                <p className="text-sm text-gray-500 text-center">
-                                                    Después de transferir, hacé clic abajo y envianos el comprobante por WhatsApp.
-                                                </p>
-                                                <button
-                                                    onClick={handleTransferSubmit}
-                                                    disabled={submittingPayment}
-                                                    className="w-full py-3 bg-green-600 hover:bg-green-700 text-white rounded-xl font-bold flex items-center justify-center gap-2 transition-colors shadow-sm disabled:opacity-50"
-                                                >
-                                                    {submittingPayment ? <Loader2 className="w-5 h-5 animate-spin" /> : 'Enviar Comprobante por WhatsApp'}
-                                                </button>
-                                            </div>
-                                        )}
-                                    </div>
-
-                                    <div className="flex items-center justify-center gap-1.5 text-[10px] text-gray-400">
-                                        <div className="w-1.5 h-1.5 bg-green-500 rounded-full" />
-                                        Pago protegido con cifrado SSL
+                                        ))}
                                     </div>
                                 </div>
+
+                                {/* 2. Price */}
+                                <div className="s-checkout__block">
+                                    {prorationCredit > 0 ? (
+                                        <div className="s-checkout__price">
+                                            <div className="s-checkout__line">
+                                                <span>Precio del plan</span>
+                                                <span>{formatPrice(getPrice())}</span>
+                                            </div>
+                                            <div className="s-checkout__line s-checkout__line--credit">
+                                                <span>Crédito por días no usados</span>
+                                                <span>− {formatPrice(prorationCredit)}</span>
+                                            </div>
+                                            <div className="s-checkout__total">
+                                                <p className="s-checkout__caption">Total a pagar</p>
+                                                <p className="s-checkout__amount">{formatPrice(getFinalPrice())}</p>
+                                            </div>
+                                            <div className="s-checkout__credit-note">
+                                                Tu suscripción actual tiene días sin usar. Ese valor se descuenta automáticamente del nuevo plan — solo pagás la diferencia.
+                                            </div>
+                                        </div>
+                                    ) : (
+                                        <div className="s-checkout__price s-checkout__price--center">
+                                            <p className="s-checkout__caption">Total a pagar</p>
+                                            <p className="s-checkout__amount">
+                                                {formatPrice(getPrice())}
+                                            </p>
+                                            <p className="s-checkout__per">
+                                                {billing === 'monthly' && 'por mes'}
+                                                {billing === 'quarterly' && `por 3 meses · ${formatPrice(getMonthlyEquivalent())}/mes`}
+                                                {billing === 'yearly' && `por año · ${formatPrice(getMonthlyEquivalent())}/mes`}
+                                            </p>
+                                            {savingsLabel && (
+                                                <span className="s-checkout__saving">
+                                                    {savingsLabel}
+                                                </span>
+                                            )}
+                                        </div>
+                                    )}
+                                </div>
+
+                                {/* 3. Payment method selector */}
+                                <div className="s-checkout__block">
+                                    <p className="s-checkout__label">Método de pago</p>
+                                    <div className="s-checkout__methods">
+                                        <button
+                                            type="button"
+                                            aria-pressed={paymentMethod === 'mercadopago'}
+                                            onClick={() => setPaymentMethod('mercadopago')}
+                                            className={`s-checkout__method ${paymentMethod === 'mercadopago' ? 'is-active' : ''}`}
+                                        >
+                                            <CreditCard aria-hidden="true" />
+                                            Tarjeta / MP
+                                        </button>
+                                        <button
+                                            type="button"
+                                            aria-pressed={paymentMethod === 'transfer'}
+                                            onClick={() => setPaymentMethod('transfer')}
+                                            className={`s-checkout__method ${paymentMethod === 'transfer' ? 'is-active' : ''}`}
+                                        >
+                                            <ArrowRightLeft aria-hidden="true" />
+                                            Transferencia
+                                        </button>
+                                    </div>
+                                </div>
+
+                                {/* 4. Payment form */}
+                                <div className="s-checkout__pay">
+                                    {paymentMethod === 'mercadopago' ? (
+                                        <>
+                                            {authLoading && (
+                                                <div className="s-checkout__wait">
+                                                    <Loader2 className="w-5 h-5 animate-spin" aria-hidden="true" />
+                                                    Verificando sesión...
+                                                </div>
+                                            )}
+                                            {!authLoading && !currentUser && (
+                                                <div className="s-checkout__login">
+                                                    <p className="s-checkout__hint">Necesitás iniciar sesión para continuar.</p>
+                                                    <Link href={`/login?redirect=/checkout?plan=${planId}&billing=${billing}`} className="s-auth-submit">
+                                                        Iniciar sesión
+                                                    </Link>
+                                                </div>
+                                            )}
+                                            {!authLoading && currentUser && mpLoading && (
+                                                <div className="s-checkout__wait">
+                                                    <Loader2 className="w-5 h-5 animate-spin" aria-hidden="true" />
+                                                    Preparando el pago...
+                                                </div>
+                                            )}
+                                            {!authLoading && currentUser && mpError && (
+                                                <p className="s-auth-alert" role="alert">
+                                                    {mpError}
+                                                </p>
+                                            )}
+                                            {!authLoading && currentUser && !mpLoading && !mpError && mpInitPoint && (
+                                                <>
+                                                    <p className="s-checkout__hint">
+                                                        Vas a ser redirigido al sitio seguro de Mercado Pago para completar el pago.
+                                                    </p>
+                                                    <a
+                                                        href={mpInitPoint}
+                                                        className="s-auth-submit"
+                                                    >
+                                                        <CreditCard className="w-5 h-5" aria-hidden="true" />
+                                                        Pagar con Mercado Pago
+                                                    </a>
+                                                    <p className="s-checkout__hint s-checkout__hint--fine">
+                                                        Podés pagar con tarjeta, débito o dinero en cuenta de MP
+                                                    </p>
+                                                </>
+                                            )}
+                                        </>
+                                    ) : (
+                                        <>
+                                            <div className="s-checkout__transfer">
+                                                <p className="s-checkout__transfer-title">Datos para transferir:</p>
+                                                <dl>
+                                                    <div>
+                                                        <dt>CUIL:</dt>
+                                                        <dd className="s-checkout__mono">20-35163401-5</dd>
+                                                    </div>
+                                                    <div>
+                                                        <dt>Alias:</dt>
+                                                        <dd className="s-checkout__alias">ZETAPROP</dd>
+                                                    </div>
+                                                    <div>
+                                                        <dt>Monto:</dt>
+                                                        <dd>{formatPrice(getPrice())}</dd>
+                                                    </div>
+                                                </dl>
+                                            </div>
+                                            <p className="s-checkout__hint">
+                                                Después de transferir, hacé clic abajo y envianos el comprobante por WhatsApp.
+                                            </p>
+                                            <button
+                                                type="button"
+                                                onClick={handleTransferSubmit}
+                                                disabled={submittingPayment}
+                                                className="s-auth-submit"
+                                            >
+                                                {submittingPayment ? <Loader2 className="w-5 h-5 animate-spin" aria-label="Enviando" /> : 'Enviar Comprobante por WhatsApp'}
+                                            </button>
+                                        </>
+                                    )}
+                                </div>
+
+                                <p className="s-checkout__secure">
+                                    Pago protegido con cifrado SSL
+                                </p>
                             </div>
                         )}
                     </div>
                 </div>
             </div>
-        </div>
+        </main>
     );
 }
 
 export default function CheckoutPage() {
     return (
-        <Suspense fallback={<div className="min-h-screen flex items-center justify-center"><Loader2 className="animate-spin" /></div>}>
+        <Suspense fallback={<div className="s-util-loading"><Loader2 className="animate-spin" aria-label="Cargando" /></div>}>
             <CheckoutContent />
         </Suspense>
     );

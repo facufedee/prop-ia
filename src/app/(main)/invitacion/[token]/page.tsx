@@ -151,89 +151,94 @@ export default function InvitationPage({ params }: { params: Promise<{ token: st
 
     if (loading) {
         return (
-            <div className="min-h-screen flex items-center justify-center bg-gray-50">
-                <Loader2 className="w-8 h-8 text-indigo-600 animate-spin" />
+            <div className="s-util-loading">
+                <Loader2 className="w-8 h-8 animate-spin" aria-label="Cargando" />
             </div>
         );
     }
 
     if (error) {
         return (
-            <div className="min-h-screen flex items-center justify-center bg-gray-50 p-4">
-                <div className="max-w-md w-full bg-white rounded-xl shadow-lg p-8 text-center">
-                    <div className="bg-red-100 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
-                        <AlertCircle className="w-8 h-8 text-red-600" />
+            <main className="s-util s-util--center">
+                <section className="s-util-card" aria-labelledby="invitation-title">
+                    <div className="s-util-mark s-util-mark--danger">
+                        <AlertCircle aria-hidden="true" />
                     </div>
-                    <h2 className="text-xl font-bold text-gray-900 mb-2">Invitación Inválida</h2>
-                    <p className="text-gray-600">{error}</p>
-                </div>
-            </div>
+                    <h1 id="invitation-title" className="s-util-title">Invitación Inválida</h1>
+                    <p className="s-util-text">{error}</p>
+                </section>
+            </main>
         );
     }
 
     if (activeUser) {
         return (
-            <div className="min-h-screen flex items-center justify-center bg-gray-50 p-4">
-                <div className="max-w-md w-full bg-white rounded-xl shadow-lg p-8 text-center">
-                    <div className="bg-blue-50 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
-                        <UserIcon className="w-8 h-8 text-blue-600" />
+            <main className="s-util s-util--center">
+                <section className="s-util-card" aria-labelledby="invitation-title">
+                    <div className="s-util-mark">
+                        <UserIcon aria-hidden="true" />
                     </div>
-                    <h2 className="text-xl font-bold text-gray-900 mb-2">Sesión Activa detectada</h2>
-                    <p className="text-gray-600 mb-6">
-                        Estás conectado como <br /><span className="font-semibold text-gray-800">{activeUser.email}</span>
+                    <h1 id="invitation-title" className="s-util-title">Sesión Activa detectada</h1>
+                    <p className="s-util-text">
+                        Estás conectado como <br /><strong>{activeUser.email}</strong>
                     </p>
-                    <div className="bg-gray-50 p-4 rounded-lg text-sm text-gray-600 mb-6">
+                    <div className="s-util-note">
                         Esta invitación es para: <br />
-                        <span className="font-semibold text-indigo-600">{invitation?.email}</span>
+                        <strong>{invitation?.email}</strong>
                     </div>
-                    <p className="text-sm text-gray-500 mb-6">
+                    <p className="s-util-fine">
                         Para continuar con el registro, necesitas cerrar tu sesión actual.
                     </p>
-                    <button
-                        onClick={() => auth && signOut(auth)}
-                        className="w-full py-3 bg-white border-2 border-red-100 text-red-600 rounded-lg hover:bg-red-50 font-medium transition-colors flex items-center justify-center gap-2"
-                    >
-                        <LogOut size={18} />
-                        Cerrar Sesión
-                    </button>
-                </div>
-            </div>
+                    <div className="s-util-actions">
+                        <button
+                            type="button"
+                            onClick={() => auth && signOut(auth)}
+                            className="s-util-ghost"
+                        >
+                            <LogOut size={18} aria-hidden="true" />
+                            Cerrar Sesión
+                        </button>
+                    </div>
+                </section>
+            </main>
         );
     }
 
     return (
-        <div className="min-h-screen flex items-center justify-center bg-gray-50 p-4">
-            <div className="max-w-md w-full bg-white rounded-xl shadow-lg p-8">
-                <div className="text-center mb-8">
-                    <h1 className="text-2xl font-bold text-gray-900">Bienvenido a Zeta Prop</h1>
-                    <p className="text-gray-600 mt-2">
+        <main className="s-util s-util--center">
+            <section className="s-util-card s-util-card--form" aria-labelledby="invitation-title">
+                <div className="s-util-head">
+                    <h1 id="invitation-title" className="s-util-title">Bienvenido a Zeta Prop</h1>
+                    <p className="s-util-text">
                         Has sido invitado para unirte al equipo. <br />
                         Configura tu contraseña para continuar.
                     </p>
                 </div>
 
-                <form onSubmit={handleRegister} className="space-y-6">
+                <form onSubmit={handleRegister} className="s-auth-form">
                     <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">
+                        <label htmlFor="invitation-email" className="s-auth-label">
                             Email
                         </label>
                         <input
+                            id="invitation-email"
                             type="email"
                             value={invitation?.email}
                             disabled
-                            className="w-full p-3 bg-gray-100 border border-gray-300 rounded-lg text-gray-500"
+                            className="s-auth-input s-auth-input--plain"
                         />
                     </div>
 
                     {/* Phone Input Addition */}
                     <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">
+                        <label htmlFor="invitation-phone" className="s-auth-label">
                             Teléfono
                         </label>
                         <input
+                            id="invitation-phone"
                             type="tel"
                             required
-                            className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500"
+                            className="s-auth-input s-auth-input--plain"
                             placeholder="+54 9 11 1234 5678"
                             name="phone"
                             value={phone}
@@ -242,14 +247,15 @@ export default function InvitationPage({ params }: { params: Promise<{ token: st
                     </div>
 
                     <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">
+                        <label htmlFor="invitation-password" className="s-auth-label">
                             Contraseña
                         </label>
                         <input
+                            id="invitation-password"
                             type="password"
                             required
                             minLength={6}
-                            className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500"
+                            className="s-auth-input s-auth-input--plain"
                             value={password}
                             onChange={(e) => setPassword(e.target.value)}
                             placeholder="Mínimo 6 caracteres"
@@ -257,14 +263,15 @@ export default function InvitationPage({ params }: { params: Promise<{ token: st
                     </div>
 
                     <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">
+                        <label htmlFor="invitation-confirm" className="s-auth-label">
                             Confirmar Contraseña
                         </label>
                         <input
+                            id="invitation-confirm"
                             type="password"
                             required
                             minLength={6}
-                            className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500"
+                            className="s-auth-input s-auth-input--plain"
                             value={confirmPassword}
                             onChange={(e) => setConfirmPassword(e.target.value)}
                             placeholder="Repite tu contraseña"
@@ -274,13 +281,12 @@ export default function InvitationPage({ params }: { params: Promise<{ token: st
                     <button
                         type="submit"
                         disabled={submitting}
-                        className="w-full py-3 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors disabled:opacity-50 font-medium"
+                        className="s-auth-submit"
                     >
                         {submitting ? "Registrando..." : "Completar Registro"}
                     </button>
                 </form>
-            </div>
-        </div>
+            </section>
+        </main>
     );
 }
-
