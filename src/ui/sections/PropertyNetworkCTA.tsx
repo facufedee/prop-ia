@@ -6,6 +6,7 @@ import Image from "next/image";
 import { ArrowRight, Building2, MapPin, BedDouble, Bath } from "lucide-react";
 import { publicService, PublicProperty } from "@/infrastructure/services/publicService";
 import { formatPropertyPrice } from "@/ui/utils/propertyPrice";
+import { propertyPath } from "@/lib/seo/propertyUrl";
 
 export default function PropertyNetworkCTA() {
     const [properties, setProperties] = useState<PublicProperty[]>([]);
@@ -61,7 +62,7 @@ export default function PropertyNetworkCTA() {
                         }}
                     >
                         {track.map((prop, i) => (
-                            <Link key={`${prop.id}-${i}`} href={`/propiedades/p/${prop.id}`} className="l-property-card">
+                            <Link key={`${prop.id}-${i}`} href={propertyPath(prop)} className="l-property-card">
                                 <div className="l-property-card__image">
                                     <Image
                                         src={prop.imageUrls[0]}

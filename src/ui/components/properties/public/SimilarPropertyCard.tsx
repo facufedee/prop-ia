@@ -2,6 +2,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { Heart } from "lucide-react";
 import { PublicProperty } from "@/infrastructure/services/publicService";
+import { propertyPath } from "@/lib/seo/propertyUrl";
 
 interface SimilarPropertyCardProps {
     property: PublicProperty;
@@ -18,7 +19,7 @@ export default function SimilarPropertyCard({ property }: SimilarPropertyCardPro
         }).format(property.price);
 
     return (
-        <Link href={`/propiedades/p/${property.id}`} className="s-prop-card s-prop-card--fixed">
+        <Link href={propertyPath(property)} className="s-prop-card s-prop-card--fixed">
             {/* Image Section */}
             <div className="s-prop-card__media">
                 <Image

@@ -6,6 +6,7 @@ import NextImage from "next/image";
 import { PublicProperty } from "@/infrastructure/services/publicService";
 import { MapPin, Bath, Bed, Maximize, Home, ChevronLeft, ChevronRight, Heart, PlayCircle } from "lucide-react";
 import { useSite } from "@/app/sites/[slug]/SiteProvider";
+import { propertyPath } from "@/lib/seo/propertyUrl";
 
 interface PropertyPublicCardProps {
     property: PublicProperty;
@@ -20,8 +21,12 @@ function getYouTubeId(url: string) {
 }
 
 export default function PropertyPublicCard({ property, basePath: propBasePath, tone = "light" }: PropertyPublicCardProps) {
-    const { basePath: contextBasePath } = useSite();
+    const { basePath: contextBasePath, site } = useSite();
     const basePath = propBasePath || contextBasePath || "";
+    // Agency sites (custom domains use basePath "") keep their own /propiedades/{id} detail;
+    // the main portal links straight to the canonical /{operation}/{slug}-{id} URL.
+    const isAgencySite = Boolean(propBasePath || site);
+    const detailHref = isAgencySite ? `${basePath}/propiedades/${property.id}` : propertyPath(property);
     const [currentImageIndex, setCurrentImageIndex] = useState(0);
     const [isFav, setIsFav] = useState(false);
     const touchStartX = useRef<number | null>(null);
@@ -100,7 +105,7 @@ export default function PropertyPublicCard({ property, basePath: propBasePath, t
         const hasBaths = Number(property.bathrooms) > 0;
 
         return (
-            <Link href={basePath ? `${basePath}/propiedades/${property.id}` : `/propiedades/${property.id}`}
+            <Link href={detailHref}
                 className="group s-prop-card">
 
                 {/* Image Container */}
@@ -238,7 +243,7 @@ export default function PropertyPublicCard({ property, basePath: propBasePath, t
     }
 
     return (
-        <Link href={basePath ? `${basePath}/propiedades/${property.id}` : `/propiedades/${property.id}`}
+        <Link href={detailHref}
             className="group block bg-white rounded-2xl overflow-hidden border border-gray-100 hover:shadow-xl transition-all duration-300">
 
             {/* Image Container */}

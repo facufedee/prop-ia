@@ -5,6 +5,7 @@ import { MapContainer, TileLayer, Marker, Popup, useMap } from "react-leaflet";
 import L from "leaflet";
 // leaflet/dist/leaflet.css is imported globally in globals.css
 import { PublicProperty } from "@/infrastructure/services/publicService";
+import { propertyPath } from "@/lib/seo/propertyUrl";
 
 // Fix Leaflet's broken default icon paths in webpack/Next.js
 if (typeof window !== "undefined") {
@@ -160,7 +161,7 @@ export default function PropertyMapInner({ properties, hoveredId, onHover }: Pro
                             </div>
                             {/* CTA */}
                             <a
-                                href={`/propiedades/p/${p.id}`}
+                                href={propertyPath(p)}
                                 style={{
                                     display: "block", textAlign: "center",
                                     background: "var(--color-ink)", color: "var(--color-accent-ink)",

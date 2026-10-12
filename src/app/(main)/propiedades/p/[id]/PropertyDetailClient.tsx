@@ -45,16 +45,18 @@ const SECTIONS = [
 
 interface Props {
     id?: string;
+    /** Server-loaded, JSON-serializable property. When given, the detail renders on the server. */
+    initialProperty?: PublicProperty | null;
 }
 
-export default function PropertyDetailPage({ id: propId }: Props) {
+export default function PropertyDetailPage({ id: propId, initialProperty }: Props) {
     const params = useParams();
     const router = useRouter();
     const id = propId || (params.id as string);
 
-    const [property, setProperty] = useState<PublicProperty | null>(null);
+    const [property, setProperty] = useState<PublicProperty | null>(initialProperty ?? null);
     const [similarProperties, setSimilarProperties] = useState<PublicProperty[]>([]);
-    const [loading, setLoading] = useState(true);
+    const [loading, setLoading] = useState(!initialProperty);
     const [currentImageIndex, setCurrentImageIndex] = useState(0);
     const [showGalleryModal, setShowGalleryModal] = useState(false);
     const [modalZoom, setModalZoom] = useState(false);
@@ -70,9 +72,11 @@ export default function PropertyDetailPage({ id: propId }: Props) {
         const load = async () => {
             if (!id) return;
             try {
-                // 1. Get current property
-                const data = await publicService.getPropertyById(id);
-                setProperty(data);
+                // 1. Get current property (fallback only: the canonical route passes it from the server)
+                if (!initialProperty) {
+                    const data = await publicService.getPropertyById(id);
+                    setProperty(data);
+                }
 
                 // 2. Get similar properties (Mock: fetch all and take 5 random/first ones excluding current)
                 // In a real app, this would be a specific endpoint 'getSimilarProperties(id)'
@@ -92,7 +96,7 @@ export default function PropertyDetailPage({ id: propId }: Props) {
             }
         };
         load();
-    }, [id]);
+    }, [id, initialProperty]);
 
     // Keyboard navigation for the lightbox and the video overlay
     useEffect(() => {
@@ -388,7 +392,7 @@ export default function PropertyDetailPage({ id: propId }: Props) {
                                 {isSold ? 'VENDIDA' : property.operation_type}
                             </span>
                             {property.code && <span className="s-code">{property.code}</span>}
-                            <span className="s-pd-head__time">{getPublishedTimeAgo()}</span>
+                            <span className="s-pd-head__time" suppressHydrationWarning>{getPublishedTimeAgo()}</span>
                         </div>
                         <h1 className="s-detail-title">{displayTitle}</h1>
                         <p className="s-pd-loc">

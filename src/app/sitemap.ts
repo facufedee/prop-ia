@@ -2,6 +2,7 @@ import { MetadataRoute } from 'next';
 import { publicService } from '@/infrastructure/services/publicService';
 import { blogService } from '@/infrastructure/services/blogService';
 import { toPostDate } from '@/lib/blog/blogLayout';
+import { absolutePropertyUrl } from '@/lib/seo/propertyUrl';
 
 // Listings in these states are not worth crawling (hidden or no longer available).
 const NON_INDEXABLE_PROPERTY_STATUSES = new Set(['inactive', 'sold']);
@@ -37,13 +38,8 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
         propertiesSitemap = properties
             .filter((property) => !NON_INDEXABLE_PROPERTY_STATUSES.has(property.status ?? 'active'))
             .map((property) => {
-                // Generate friendly slug: operation/slugified-title-ID
-                const operation = property.operation_type.toLowerCase() === 'venta' ? 'venta' :
-                    property.operation_type.toLowerCase() === 'alquiler' ? 'alquiler' :
-                        property.operation_type.toLowerCase().includes('temporal') ? 'temporal' : 'propiedad';
-
-                const slugTitle = publicService.slugify(property.title);
-                const friendlyUrl = `${baseUrl}/${operation}/${slugTitle}-${property.id}`;
+                // Same canonical URL the detail page declares and every internal link uses.
+                const friendlyUrl = absolutePropertyUrl(property);
                 const updatedAt = (property as { updatedAt?: unknown }).updatedAt;
                 const lastModified = toPostDate(updatedAt) ?? toPostDate(property.createdAt) ?? undefined;
 
