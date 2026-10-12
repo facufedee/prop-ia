@@ -1,15 +1,14 @@
 import { CheckCircle, AlertTriangle } from "lucide-react";
-import Image from "next/image";
 import type { Metadata } from "next";
 
 import { CTA } from "@/ui/sections/CTA";
 
 export const metadata: Metadata = {
-    title: "Cómo funciona nuestra IA | Zeta Prop",
-    description: "Entendé cómo nuestra Inteligencia Artificial calcula el valor de tu propiedad. Transparencia, datos masivos (+450k desde 2015) y Deep Learning.",
+    title: "Cómo funciona nuestra tasación | Zeta Prop",
+    description: "Qué hace la tasación con IA de Zeta Prop: una red neuronal entrenada con datos de propiedades de Argentina que da un valor estimado orientativo.",
     openGraph: {
-        title: "Cómo funciona la IA de Zeta Prop",
-        description: "Transparencia total: +450k propiedades analizadas y algoritmos de Deep Learning para tasaciones precisas.",
+        title: "Cómo funciona la tasación de Zeta Prop",
+        description: "Una red neuronal estima un valor orientativo a partir de las características y la ubicación de la propiedad.",
         url: 'https://zetaprop.com.ar/modelo',
     },
 };
@@ -21,9 +20,9 @@ export default function ModelExplanationPage() {
             <section className="l-section s-page-head" aria-labelledby="modelo-title">
                 <div className="l-container">
                     <div className="s-page-head__inner">
-                        <h1 id="modelo-title" className="s-page-title">Cómo funciona nuestra IA</h1>
+                        <h1 id="modelo-title" className="s-page-title">Cómo funciona nuestra tasación con IA</h1>
                         <p className="s-page-lede">
-                            Transparencia total sobre cómo Zeta Prop calcula el valor de tu propiedad utilizando tecnología de vanguardia.
+                            Te contamos qué hace la herramienta de tasación de Zeta Prop, qué datos usa y cuáles son sus límites.
                         </p>
                     </div>
                 </div>
@@ -31,94 +30,69 @@ export default function ModelExplanationPage() {
 
             <section className="l-section l-section--tight">
                 <div className="l-container">
-                    {/* Section 1: The Technology */}
+                    {/* Section 1: The model */}
                     <div className="s-split">
                         <div className="s-split__text">
-                            <h2 className="s-split__title">Entrenamiento Masivo</h2>
+                            <h2 className="s-split__title">Un modelo entrenado con datos reales</h2>
                             <p>
-                                Nuestro modelo no adivina; aprende. Hemos entrenado a nuestra Inteligencia Artificial con una base de datos masiva y actualizada:
+                                La tasación usa una red neuronal entrenada con datos históricos de propiedades de Argentina. A partir de lo que cargás, estima un valor de la propiedad:
                             </p>
                             <ul className="s-check-list s-check-list--md">
                                 <li>
                                     <CheckCircle size={18} aria-hidden="true" />
-                                    <span><strong>+450,000 propiedades</strong> históricas (desde 2015 a la actualidad).</span>
+                                    <span><strong>Ubicación:</strong> barrio, ciudad y provincia.</span>
                                 </li>
                                 <li>
                                     <CheckCircle size={18} aria-hidden="true" />
-                                    <span><strong>+25,000 publicaciones</strong> recientes (menos de 30 días).</span>
+                                    <span><strong>Características:</strong> tipo de propiedad, superficie total y cubierta, ambientes, dormitorios, baños, piso, año de construcción y expensas.</span>
                                 </li>
                                 <li>
                                     <CheckCircle size={18} aria-hidden="true" />
-                                    <span>Análisis periódicos para actualización constante del modelo.</span>
+                                    <span><strong>Descripción:</strong> el texto de la propiedad también se analiza como dato de entrada.</span>
                                 </li>
                             </ul>
                         </div>
                         <dl className="s-stats">
                             <div>
-                                <dt>Datos Históricos</dt>
-                                <dd>+450k</dd>
+                                <dt>Modelo</dt>
+                                <dd>Red neuronal</dd>
                             </div>
                             <div>
-                                <dt>Datos Recientes</dt>
-                                <dd>+25k</dd>
+                                <dt>Dónde corre</dt>
+                                <dd>En tu navegador</dd>
                             </div>
                             <div>
-                                <dt>Tecnología</dt>
-                                <dd>Deep Learning</dd>
+                                <dt>Disponible en</dt>
+                                <dd>Plan Pro</dd>
                             </div>
                         </dl>
                     </div>
 
-                    {/* Section 2: Learning Process */}
-                    <div className="s-split">
-                        <div className="s-figure">
-                            <Image
-                                src="/images/model/loss_curve.png"
-                                alt="Curva de Aprendizaje del Modelo"
-                                fill
-                                className="object-contain p-4"
-                            />
-                        </div>
-                        <div className="s-split__text">
-                            <h2 className="s-split__title">El Proceso de Aprendizaje</h2>
-                            <p>
-                                Al igual que un experto humano mejora con la experiencia, nuestra IA mejora con cada &quot;época&quot; de entrenamiento.
-                                El gráfico muestra cómo el <strong>Error (pérdida)</strong> disminuye drásticamente a medida que el modelo procesa más datos.
-                            </p>
-                            <div className="s-note">
-                                <div>
-                                    <strong>¿Qué significa esto?</strong><br />
-                                    La línea azul (Entrenamiento) y la naranja (Validación) bajan juntas, lo que indica que el modelo está aprendiendo patrones reales del mercado, no simplemente memorizando precios.
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    {/* Section 3: Accuracy */}
+                    {/* Section 2: What happens on each valuation + limits */}
                     <div className="s-split">
                         <div className="s-split__text">
-                            <h2 className="s-split__title">Precisión Comprobada</h2>
-                            <p>
-                                Sometemos a nuestro modelo a pruebas rigurosas. Comparamos sus predicciones con precios reales de venta que el modelo <strong>nunca había visto antes</strong>.
-                            </p>
-                            <p>
-                                En el gráfico, cada punto representa una propiedad. Si la predicción fuera perfecta, todos los puntos caerían sobre la línea punteada roja.
-                            </p>
-                            <div className="s-note s-note--warning">
-                                <AlertTriangle size={18} aria-hidden="true" />
-                                <p className="m-0">
-                                    <strong>Nota de Transparencia:</strong><br />
-                                    Existen desviaciones naturales debido a factores subjetivos (estado de conservación, urgencia de venta) que ninguna IA puede ver en fotos. Por eso, Zeta Prop es una herramienta de apoyo, no un reemplazo del criterio profesional.
-                                </p>
-                            </div>
+                            <h2 className="s-split__title">Qué pasa cuando tasás</h2>
+                            <ul className="s-check-list s-check-list--md">
+                                <li>
+                                    <CheckCircle size={18} aria-hidden="true" />
+                                    <span>Si dejás un dato numérico vacío, se completa con un valor de referencia (la mediana de los datos de entrenamiento).</span>
+                                </li>
+                                <li>
+                                    <CheckCircle size={18} aria-hidden="true" />
+                                    <span>El modelo calcula un valor estimado para la propiedad.</span>
+                                </li>
+                                <li>
+                                    <CheckCircle size={18} aria-hidden="true" />
+                                    <span>Sobre ese valor se aplican ajustes: un factor de corrección para casas y PH, un ajuste según la cantidad de baños y, si están configurados, ajustes porcentuales por características como pileta o cochera.</span>
+                                </li>
+                            </ul>
                         </div>
-                        <div className="s-figure s-figure--tall s-split__figure--first-mobile">
-                            <Image
-                                src="/images/model/scatter_plot.png"
-                                alt="Gráfico de Dispersión Predicción vs Realidad"
-                                fill
-                                className="object-contain p-4"
-                            />
+                        <div className="s-note s-note--warning">
+                            <AlertTriangle size={18} aria-hidden="true" />
+                            <p className="m-0">
+                                <strong>Nota de transparencia:</strong><br />
+                                El resultado es una estimación orientativa y no publicamos métricas de precisión del modelo. No ve el estado de conservación, la luminosidad ni la urgencia de venta. Es una herramienta de apoyo: no reemplaza el criterio profesional ni una tasación formal.
+                            </p>
                         </div>
                     </div>
                 </div>

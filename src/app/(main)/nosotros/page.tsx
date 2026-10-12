@@ -6,7 +6,7 @@ import { PrimaryCta } from '@/ui/sections/PhotoHero';
 
 export const metadata: Metadata = {
     title: 'Nosotros | Zeta Prop',
-    description: 'Conocé al equipo detrás de Zeta Prop. Construimos el CRM inmobiliario más completo de Argentina para que las inmobiliarias crezcan sin fricciones.',
+    description: 'Conocé al equipo detrás de Zeta Prop. Construimos un CRM pensado para la gestión diaria de las inmobiliarias argentinas.',
     alternates: {
         canonical: 'https://zetaprop.com.ar/nosotros',
     },
@@ -15,15 +15,15 @@ export const metadata: Metadata = {
 const values = [
     {
         title: "Velocidad",
-        desc: "Cada semana hay mejoras. Escuchamos a los usuarios y actualizamos la plataforma de forma constante."
+        desc: "Escuchamos a quienes usan la plataforma y la mejoramos de forma continua."
     },
     {
         title: "Confianza",
-        desc: "La información de nuestros clientes es sagrada. Infraestructura segura y backups automáticos."
+        desc: "La información de nuestros clientes es sagrada. Los administradores pueden generar copias de seguridad desde el panel."
     },
     {
         title: "Cercanía",
-        desc: "No somos una empresa anónima. Somos accesibles, respondemos rápido y tomamos cada feedback en serio."
+        desc: "No somos una empresa anónima. Somos accesibles y tomamos cada feedback en serio."
     },
     {
         title: "Crecimiento",
@@ -36,14 +36,14 @@ const team = [
         name: "Facundo Flores",
         role: "CEO & Fundador",
         photo: "/assets/img/facundo.jpg",
-        bio: "Ingeniero en Sistemas con experiencia en startups de tecnología. Lidera la estrategia, el producto y la visión de Zeta Prop.",
+        bio: "Lidera la estrategia, el producto y la visión de Zeta Prop.",
         linkedin: "https://www.linkedin.com/in/floreszamoranofacundo/",
     },
     {
         name: "Nahuel Serrano",
         role: "CTO",
         photo: "/assets/img/nahuel.jpg",
-        bio: "El arquitecto de la infraestructura tecnológica. Garantiza que la plataforma sea robusta, rápida y segura para cada usuario.",
+        bio: "Responsable de la arquitectura y la infraestructura técnica de la plataforma.",
         linkedin: "https://www.linkedin.com/in/nahuelserrano/",
     },
 ];
@@ -61,7 +61,7 @@ export default function AboutPage() {
                             Construimos el CRM que las inmobiliarias argentinas merecen
                         </h1>
                         <p className="s-page-lede">
-                            Nacimos para eliminar el Excel, los cuadernos y los recordatorios en papel. Hoy ayudamos a inmobiliarias de todo el país a operar con más orden, más velocidad y más profesionalismo.
+                            Nacimos para reemplazar el Excel, los cuadernos y los recordatorios en papel por un sistema que ayude a las inmobiliarias a operar con más orden.
                         </p>
                     </div>
                 </div>
@@ -74,19 +74,19 @@ export default function AboutPage() {
                         <div>
                             <p className="l-eyebrow">Nuestra historia</p>
                             <h2 id="historia-title" className="l-section__title">
-                                Todo empezó con una planilla de Excel que se cayó
+                                Por qué existe Zeta Prop
                             </h2>
                         </div>
                     </div>
                     <div className="s-prose s-after-head">
                         <p>
-                            Trabajando junto a inmobiliarias vimos de cerca un problema que se repetía: contratos en papel, pagos anotados a mano, liquidaciones calculadas en Excel y clientes perdidos por falta de seguimiento. El sector tenía mucho potencial y muy poca tecnología.
+                            En muchas inmobiliarias se repite el mismo problema: contratos en papel, pagos anotados a mano, liquidaciones calculadas en Excel y clientes perdidos por falta de seguimiento.
                         </p>
                         <p>
-                            Creamos Zeta Prop para cambiar eso. No con una herramienta genérica adaptada a la fuerza, sino con un sistema pensado desde cero para la realidad inmobiliaria argentina: contratos con ajuste ICL, punitorios automáticos, portal del inquilino, CRM de clientes y gestión financiera en un solo lugar.
+                            Creamos Zeta Prop para cambiar eso. No con una herramienta genérica adaptada a la fuerza, sino con un sistema pensado desde cero para la realidad inmobiliaria argentina: contratos con ajuste por ICL o IPC, cálculo de punitorios por mora, portal del inquilino, CRM de clientes y gestión financiera en un solo lugar.
                         </p>
                         <p>
-                            Hoy crecemos junto a las inmobiliarias que confían en nosotros, escuchando cada sugerencia y mejorando la plataforma semana a semana.
+                            Seguimos escuchando cada sugerencia y mejorando la plataforma de forma continua.
                         </p>
                     </div>
                 </div>
@@ -98,7 +98,7 @@ export default function AboutPage() {
                     <article className="s-card">
                         <h2 className="s-card__title">Nuestra Misión</h2>
                         <p className="s-card__body">
-                            Darle a cada inmobiliaria, sin importar su tamaño, las herramientas que antes solo tenían las grandes: automatización, datos en tiempo real y una experiencia profesional para sus clientes. Sin complicaciones, sin costos ocultos.
+                            Darle a cada inmobiliaria, sin importar su tamaño, herramientas para automatizar tareas administrativas y ofrecer una experiencia profesional a sus clientes, sin complicaciones.
                         </p>
                     </article>
                     <article className="s-card">
@@ -178,7 +178,7 @@ export default function AboutPage() {
             <section className="l-section l-section--tight" aria-labelledby="nosotros-cta-title">
                 <div className="l-container l-cta-band">
                     <h2 id="nosotros-cta-title">¿Querés ser parte del cambio?</h2>
-                    <p>Sumate a las inmobiliarias que ya gestionan su negocio con Zeta Prop.</p>
+                    <p>Probá Zeta Prop para gestionar tu inmobiliaria.</p>
                     <div className="l-hero__ctas">
                         <PrimaryCta href="/register">Comenzar gratis</PrimaryCta>
                         <Link href="/contacto" className="l-btn l-btn--secondary">
