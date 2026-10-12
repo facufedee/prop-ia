@@ -1,13 +1,13 @@
-import type { Metadata, ResolvingMetadata } from 'next'
+import type { Metadata } from 'next'
 import { notFound, permanentRedirect } from 'next/navigation'
 import PropertyDetailClient from '@/app/(main)/propiedades/p/[id]/PropertyDetailClient'
+import JsonLd from '@/ui/seo/JsonLd'
 import { absolutePropertyUrl, propertyIdFromSlug, propertyPath } from '@/lib/seo/propertyUrl'
 import {
     buildPropertyDescription,
     buildPropertyJsonLd,
     buildPropertyTitle,
     loadPublicProperty,
-    serializeJsonLd,
 } from './propertySeo'
 
 type Props = {
@@ -26,8 +26,7 @@ async function resolveProperty(params: Props['params']) {
 }
 
 export async function generateMetadata(
-    { params }: Props,
-    parent: ResolvingMetadata
+    { params }: Props
 ): Promise<Metadata> {
     const resolved = await resolveProperty(params)
     if (!resolved) {
@@ -35,8 +34,8 @@ export async function generateMetadata(
     }
     const { property } = resolved
 
-    const previousImages = (await parent).openGraph?.images || []
-    const coverImage = property.imageUrls?.[0] || '/assets/img/Logo ZetaProp Fondo Blanco 2.png'
+    // First listing photo; without one, omit images so the file-based opengraph-image applies.
+    const coverImage = property.imageUrls?.[0]
     const canonical = absolutePropertyUrl(property)
     const title = buildPropertyTitle(property)
     const description = buildPropertyDescription(property)
@@ -49,7 +48,7 @@ export async function generateMetadata(
             title,
             description,
             url: canonical,
-            images: [coverImage, ...previousImages],
+            ...(coverImage ? { images: [coverImage] } : {}),
             type: 'website',
         },
     }
@@ -65,10 +64,7 @@ export default async function Page({ params }: Props) {
 
     return (
         <>
-            <script
-                type="application/ld+json"
-                dangerouslySetInnerHTML={{ __html: serializeJsonLd(buildPropertyJsonLd(property)) }}
-            />
+            <JsonLd data={buildPropertyJsonLd(property)} />
             <PropertyDetailClient id={property.id} initialProperty={property} />
         </>
     )

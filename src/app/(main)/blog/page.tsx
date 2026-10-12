@@ -5,6 +5,7 @@ import { FeaturedPost, LatestPostItem } from "./components/BlogCards";
 import { toCardData } from "./toCardData";
 import { CategoryCarousel } from "./components/CategoryCarousel";
 import { AllPostsGrid } from "./components/AllPostsGrid";
+import JsonLd, { breadcrumbList, ORGANIZATION_ID, SITE_ORIGIN, WEBSITE_ID } from "@/ui/seo/JsonLd";
 
 export const metadata: Metadata = {
     alternates: { canonical: "https://zetaprop.com.ar/blog" },
@@ -15,12 +16,28 @@ export const metadata: Metadata = {
 
 export const revalidate = 60; // Revalidate every minute
 
+const blogJsonLd = {
+    "@context": "https://schema.org",
+    "@graph": [
+        {
+            "@type": "Blog",
+            name: "Blog de Zeta Prop",
+            url: `${SITE_ORIGIN}/blog`,
+            inLanguage: "es-AR",
+            publisher: { "@id": ORGANIZATION_ID },
+            isPartOf: { "@id": WEBSITE_ID },
+        },
+        breadcrumbList([{ name: "Blog", path: "/blog" }]),
+    ],
+};
+
 export default async function BlogPage() {
     const posts = (await blogService.getPublishedPosts()).map(toCardData);
     const { featured, latest, rest, carousels, categories } = buildBlogLayout(posts);
 
     return (
         <main className="flex-1">
+            <JsonLd data={blogJsonLd} />
             <section className="l-section s-page-head" aria-labelledby="blog-title">
                 <div className="l-container">
                     <header className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between md:gap-10">

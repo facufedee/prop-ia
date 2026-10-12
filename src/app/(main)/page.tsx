@@ -27,20 +27,11 @@ export const metadata: Metadata = {
         title: "Software para inmobiliarias: alquileres, propiedades y web",
         description: "Software para inmobiliarias: cobrá alquileres, ordená tus propiedades y recibí consultas desde tu propia página web, todo en un solo lugar. Probalo gratis.",
         siteName: "Zeta Prop",
-        images: [
-            {
-                url: "/assets/img/og-landing.png",
-                width: 1200,
-                height: 630,
-                alt: "Zeta Prop - CRM Inmobiliario Integral para Argentina",
-            },
-        ],
     },
     twitter: {
         card: "summary_large_image",
         title: "Software para inmobiliarias: alquileres, propiedades y web",
         description: "Software para inmobiliarias: cobrá alquileres, ordená tus propiedades y recibí consultas desde tu propia página web, todo en un solo lugar. Probalo gratis.",
-        images: ["/assets/img/og-landing.png"],
     },
 };
 
@@ -53,100 +44,40 @@ import ContactForm from "@/ui/sections/ContactForm";
 
 import LatestBlogPosts from "@/ui/sections/LatestBlogPosts";
 import GoogleAuthPromptLazy from "@/ui/components/auth/GoogleAuthPromptLazy";
+import JsonLd, { ORGANIZATION_ID, SITE_ORIGIN, SOFTWARE_ID } from "@/ui/seo/JsonLd";
+
+// The single SoftwareApplication node of the site. Offers live on /precios, which references
+// this node by @id and reads plan prices from the same source as the pricing table.
+const softwareJsonLd = {
+    "@context": "https://schema.org",
+    "@type": "SoftwareApplication",
+    "@id": SOFTWARE_ID,
+    name: "Zeta Prop",
+    url: SITE_ORIGIN,
+    applicationCategory: "BusinessApplication",
+    operatingSystem: "Web",
+    inLanguage: "es-AR",
+    description: "Software para inmobiliarias: gestión de alquileres, administración de propiedades, consultas y página web propia en un solo lugar.",
+    publisher: { "@id": ORGANIZATION_ID },
+    featureList: [
+        "Gestión de propiedades",
+        "Administración de alquileres",
+        "CRM de consultas",
+        "Emprendimientos inmobiliarios",
+        "Cobranzas y liquidaciones",
+        "Agenda",
+        "Portal del inquilino",
+        "Sitio web propio",
+        "Multisucursal",
+    ],
+};
 
 export default function LandingPage() {
     return (
         <main className="flex flex-col gap-0">
             <GoogleAuthPromptLazy />
 
-            {/* Structured Data — SoftwareApplication */}
-            <script
-                type="application/ld+json"
-                dangerouslySetInnerHTML={{
-                    __html: JSON.stringify({
-                        "@context": "https://schema.org",
-                        "@type": "SoftwareApplication",
-                        "name": "Zeta Prop",
-                        "url": "https://zetaprop.com.ar",
-                        "applicationCategory": "BusinessApplication",
-                        "operatingSystem": "Web",
-                        "inLanguage": "es-AR",
-                        "offers": {
-                            "@type": "Offer",
-                            "price": "0",
-                            "priceCurrency": "ARS",
-                            "description": "14 días de prueba gratis, sin tarjeta de crédito",
-                            "availability": "https://schema.org/InStock"
-                        },
-                        "description": "CRM Inmobiliario integral para gestión de propiedades, alquileres, clientes y emprendimientos en Argentina.",
-                        "screenshot": "https://zetaprop.com.ar/assets/img/og-landing.png",
-                        "featureList": [
-                            "Gestión de propiedades",
-                            "Administración de alquileres",
-                            "CRM de clientes",
-                            "Emprendimientos inmobiliarios",
-                            "Cobranzas y liquidaciones",
-                            "Agenda de cobros",
-                            "Portal del inquilino",
-                            "Sitio web propio",
-                            "Multisucursal"
-                        ]
-                    })
-                }}
-            />
-
-            {/* Structured Data — FAQPage */}
-            <script
-                type="application/ld+json"
-                dangerouslySetInnerHTML={{
-                    __html: JSON.stringify({
-                        "@context": "https://schema.org",
-                        "@type": "FAQPage",
-                        "mainEntity": [
-                            {
-                                "@type": "Question",
-                                "name": "¿Qué es Zeta Prop?",
-                                "acceptedAnswer": {
-                                    "@type": "Answer",
-                                    "text": "Zeta Prop es un CRM inmobiliario integral diseñado para inmobiliarias argentinas. Permite gestionar propiedades, alquileres, clientes, cobranzas, emprendimientos y mucho más desde un solo sistema."
-                                }
-                            },
-                            {
-                                "@type": "Question",
-                                "name": "¿Cuánto cuesta Zeta Prop?",
-                                "acceptedAnswer": {
-                                    "@type": "Answer",
-                                    "text": "Zeta Prop ofrece 14 días de prueba gratis sin necesidad de tarjeta de crédito. Luego podés elegir el plan que mejor se adapte a tu inmobiliaria. Consultá nuestros planes en zetaprop.com.ar/precios."
-                                }
-                            },
-                            {
-                                "@type": "Question",
-                                "name": "¿Puedo gestionar alquileres con Zeta Prop?",
-                                "acceptedAnswer": {
-                                    "@type": "Answer",
-                                    "text": "Sí. Zeta Prop incluye un módulo completo de gestión de alquileres: contratos, pagos, ajustes por inflación, liquidaciones para propietarios y portal del inquilino."
-                                }
-                            },
-                            {
-                                "@type": "Question",
-                                "name": "¿Zeta Prop tiene sitio web para mi inmobiliaria?",
-                                "acceptedAnswer": {
-                                    "@type": "Answer",
-                                    "text": "Sí. Cada inmobiliaria obtiene su propio sitio web, en un subdominio gratuito, donde se publican automáticamente todas las propiedades activas."
-                                }
-                            },
-                            {
-                                "@type": "Question",
-                                "name": "¿Funciona para inmobiliarias con varias sucursales?",
-                                "acceptedAnswer": {
-                                    "@type": "Answer",
-                                    "text": "Sí. Zeta Prop soporta gestión multisucursal, permitiendo administrar propiedades, agentes y reportes por sucursal desde una sola cuenta."
-                                }
-                            }
-                        ]
-                    })
-                }}
-            />
+            <JsonLd data={softwareJsonLd} />
 
             <Hero />
             <Modules />

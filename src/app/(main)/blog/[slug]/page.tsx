@@ -9,6 +9,7 @@ import ShareButtons from "../components/ShareButtons";
 import { ArticleMarkdown } from "../components/ArticleMarkdown";
 import { CategoryBadge, PostCard } from "../components/BlogCards";
 import { toCardData } from "../toCardData";
+import JsonLd, { breadcrumbList, ORGANIZATION_ID, SITE_ORIGIN } from "@/ui/seo/JsonLd";
 
 interface Props {
     params: Promise<{ slug: string }>;
@@ -34,7 +35,8 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
             locale: "es_AR",
             title: post.title,
             description: post.excerpt,
-            images: post.imageUrl ? [post.imageUrl] : [],
+            // No cover: omit so the file-based opengraph-image applies.
+            ...(post.imageUrl ? { images: [post.imageUrl] } : {}),
             type: "article",
             publishedTime: toPostDate(post.publishedAt)?.toISOString(),
             authors: [post.author?.name || "Zeta Prop"],
@@ -47,7 +49,8 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
             card: "summary_large_image",
             title: post.title,
             description: post.excerpt,
-            images: post.imageUrl ? [post.imageUrl] : [],
+            // No cover: omit so the file-based opengraph-image applies.
+            ...(post.imageUrl ? { images: [post.imageUrl] } : {}),
         },
     };
 }
@@ -68,9 +71,37 @@ export default async function BlogPostPage({ params }: Props) {
     const date = toPostDate(post.publishedAt) ?? toPostDate(post.createdAt);
     const readingMinutes = getReadingMinutes(post.content);
     const authorName = post.author?.name || "Equipo Zeta Prop";
+    const postUrl = `${SITE_ORIGIN}/blog/${post.slug}`;
+    const modified = toPostDate(post.updatedAt) ?? date;
+    const jsonLd = {
+        "@context": "https://schema.org",
+        "@graph": [
+            {
+                "@type": "BlogPosting",
+                headline: post.title,
+                description: post.excerpt,
+                ...(post.imageUrl ? { image: [post.imageUrl] } : {}),
+                ...(date ? { datePublished: date.toISOString() } : {}),
+                ...(modified ? { dateModified: modified.toISOString() } : {}),
+                // Named authors are people; posts without one are signed by the organization.
+                author: post.author?.name
+                    ? { "@type": "Person", name: post.author.name }
+                    : { "@id": ORGANIZATION_ID },
+                publisher: { "@id": ORGANIZATION_ID },
+                mainEntityOfPage: { "@type": "WebPage", "@id": postUrl },
+                inLanguage: "es-AR",
+                ...(post.category ? { articleSection: post.category } : {}),
+            },
+            breadcrumbList([
+                { name: "Blog", path: "/blog" },
+                { name: post.title, path: postUrl },
+            ]),
+        ],
+    };
 
     return (
         <main className="flex-1 pb-24">
+            <JsonLd data={jsonLd} />
             {/* Header */}
             <header className="mx-auto max-w-3xl px-5 pt-28 sm:px-6 md:pt-32">
                 <Link href="/blog" className="inline-flex min-h-11 items-center gap-2 text-sm font-medium text-[var(--color-ink-2)] transition-colors hover:text-[var(--color-ink)]">

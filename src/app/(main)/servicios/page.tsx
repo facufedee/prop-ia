@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import { CheckCircle2 } from 'lucide-react';
 import { PrimaryCta } from '@/ui/sections/PhotoHero';
+import JsonLd, { breadcrumbList } from '@/ui/seo/JsonLd';
 
 export const metadata = {
     title: "Servicios para inmobiliarias",
@@ -85,6 +86,7 @@ const coming = [
 export default function ServicesPage() {
     return (
         <main className="flex-1">
+            <JsonLd data={{ "@context": "https://schema.org", ...breadcrumbList([{ name: "Servicios", path: "/servicios" }]) }} />
 
             {/* ── Page header ── */}
             <section className="l-section s-page-head" aria-labelledby="servicios-title">

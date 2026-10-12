@@ -150,8 +150,3 @@ export function buildPropertyJsonLd(property: PublicProperty) {
 
     return { '@context': 'https://schema.org', '@graph': [listing, breadcrumbs] };
 }
-
-/** Safe for inline <script>: prevents "</script>" injection from listing text. */
-export function serializeJsonLd(data: unknown): string {
-    return JSON.stringify(data).replace(/</g, '\\u003c');
-}

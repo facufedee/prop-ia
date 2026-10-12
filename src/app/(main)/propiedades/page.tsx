@@ -8,13 +8,12 @@ import PropertyHero from "@/ui/components/properties/public/PropertyHero";
 import PropertyPublicCard from "@/ui/components/properties/public/PropertyPublicCard";
 import { PrimaryCta } from "@/ui/sections/PhotoHero";
 import type { Metadata } from "next";
+import JsonLd, { breadcrumbList, SITE_ORIGIN, WEBSITE_ID } from "@/ui/seo/JsonLd";
 
 const pageTitle = "Propiedades en venta y alquiler en Argentina";
 const pageDescription =
     "Propiedades en venta y alquiler publicadas por inmobiliarias en Zeta Prop: casas, departamentos, PH, terrenos y locales en Argentina.";
 
-// Page-level metadata overrides the propiedades layout (shared with detail routes), whose title
-// carried the brand suffix and would render it twice with the (main) template.
 export const metadata: Metadata = {
     title: pageTitle,
     description: pageDescription,
@@ -34,6 +33,21 @@ export const metadata: Metadata = {
         description: pageDescription,
         images: ["/hero-propiedades.png"],
     },
+};
+
+const listingJsonLd = {
+    "@context": "https://schema.org",
+    "@graph": [
+        {
+            "@type": "CollectionPage",
+            name: pageTitle,
+            description: pageDescription,
+            url: `${SITE_ORIGIN}/propiedades`,
+            inLanguage: "es-AR",
+            isPartOf: { "@id": WEBSITE_ID },
+        },
+        breadcrumbList([{ name: "Propiedades", path: "/propiedades" }]),
+    ],
 };
 
 const QUICK_CATEGORIES = [
@@ -63,6 +77,7 @@ export default async function PropiedadesLandingPage() {
 
     return (
         <main className="flex-1">
+            <JsonLd data={listingJsonLd} />
 
             {/* ═══ HERO ═══════════════════════════════════════════════════ */}
             <PropertyHero tone="dark" />

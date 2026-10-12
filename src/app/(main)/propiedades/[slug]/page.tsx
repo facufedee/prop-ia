@@ -32,8 +32,8 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     const description = `Propiedades en venta y alquiler publicadas por ${name} en Zeta Prop. Mirá fotos, precios y características, y contactá a la inmobiliaria.`
 
     return {
-        // The propiedades layout sets a plain-string title, which drops the root template.
-        title: { absolute: `${title} | Zeta Prop` },
+        // The (main) layout template appends the brand.
+        title,
         description,
         alternates: { canonical: url },
         openGraph: { title, description, url },

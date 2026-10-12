@@ -2,12 +2,14 @@ import { CheckCircle, AlertTriangle } from "lucide-react";
 import type { Metadata } from "next";
 
 import { CTA } from "@/ui/sections/CTA";
+import { DEFAULT_OG_IMAGE } from "@/lib/seo/ogImage";
 
 export const metadata: Metadata = {
     title: "Cómo funciona la tasación con IA",
     description: "Qué hace la tasación con IA de Zeta Prop: una red neuronal entrenada con datos de propiedades de Argentina que da un valor estimado orientativo.",
     alternates: { canonical: "/modelo" },
     openGraph: {
+        images: [DEFAULT_OG_IMAGE],
         title: "Cómo funciona la tasación de Zeta Prop",
         description: "Una red neuronal estima un valor orientativo a partir de las características y la ubicación de la propiedad.",
         url: 'https://zetaprop.com.ar/modelo',

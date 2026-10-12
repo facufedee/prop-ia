@@ -1,4 +1,6 @@
 import { Metadata } from "next";
+import JsonLd, { breadcrumbList } from "@/ui/seo/JsonLd";
+import { DEFAULT_OG_IMAGE } from "@/lib/seo/ogImage";
 import {
     WEBSITE_FAQ,
     WebsiteCta,
@@ -27,19 +29,19 @@ export const metadata: Metadata = {
     ],
     alternates: { canonical: url },
     openGraph: {
+        images: [DEFAULT_OG_IMAGE],
         type: "website",
         locale: "es_AR",
         url,
         siteName: "Zeta Prop",
         title: "Página web para inmobiliarias | Zeta Prop",
         description,
-        images: [{ url: "/assets/img/og-landing.png", width: 1200, height: 630, alt: "Zeta Prop · Página web para inmobiliarias" }],
     },
     twitter: {
+        images: [DEFAULT_OG_IMAGE.url],
         card: "summary_large_image",
         title: "Página web para inmobiliarias | Zeta Prop",
         description,
-        images: ["/assets/img/og-landing.png"],
     },
 };
 
@@ -56,7 +58,8 @@ const faqJsonLd = {
 export default function WebsitePage() {
     return (
         <main className="flex flex-col gap-0">
-            <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(faqJsonLd) }} />
+            <JsonLd data={{ "@context": "https://schema.org", ...breadcrumbList([{ name: "Página web", path: "/pagina-web" }]) }} />
+            <JsonLd data={faqJsonLd} />
             <WebsiteHero />
             <WebsiteSteps />
             <WebsiteFeatures />
