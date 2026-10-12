@@ -18,8 +18,8 @@ const PIPELINE = [
 export function PropertiesHero() {
     return (
         <PhotoHero photo={LANDING_PHOTOS.properties} labelledBy="properties-title" aside={<PropertiesHeroVisual />}>
-            <p className="l-hero__eyebrow">Administración de propiedades</p>
             <h1 id="properties-title">
+                <span className="l-hero__eyebrow l-h1-kicker">CRM inmobiliario y gestión de propiedades</span>{" "}
                 Tu cartera ordenada, <em>de la captación al cierre.</em>
             </h1>
             <p className="l-hero__lede">

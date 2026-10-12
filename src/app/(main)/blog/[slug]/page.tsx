@@ -11,6 +11,54 @@ import { CategoryBadge, PostCard } from "../components/BlogCards";
 import { toCardData } from "../toCardData";
 import JsonLd, { breadcrumbList, ORGANIZATION_ID, SITE_ORIGIN } from "@/ui/seo/JsonLd";
 
+interface ModuleCta {
+    heading: string;
+    text: string;
+    href: string;
+    label: string;
+}
+
+const RENTALS_CTA: ModuleCta = {
+    heading: "¿Administrás alquileres?",
+    text: "Zeta Prop arma el plan de pagos, calcula los ajustes por ICL o IPC y te deja recibos y liquidaciones listos.",
+    href: "/alquileres",
+    label: "Conocé la gestión de alquileres",
+};
+
+const WEBSITE_CTA: ModuleCta = {
+    heading: "¿Querés una web para tu inmobiliaria?",
+    text: "Publicás tus propiedades en un sitio con tu marca y cada consulta llega directo a tu panel.",
+    href: "/pagina-web",
+    label: "Conocé la página web para inmobiliarias",
+};
+
+const PROPERTIES_CTA: ModuleCta = {
+    heading: "¿Querés ordenar tu cartera?",
+    text: "Cargás cada propiedad, seguís a cada interesado en un tablero y llevás cada operación hasta el cierre.",
+    href: "/propiedades-gestion",
+    label: "Conocé la gestión de propiedades",
+};
+
+const DEFAULT_CTA: ModuleCta = {
+    heading: "Tu inmobiliaria, en orden",
+    text: "Alquileres, propiedades y tu página web en un solo lugar.",
+    href: "/",
+    label: "Conocé Zeta Prop",
+};
+
+// Keyword match on category + tags; the first matching module wins.
+const MODULE_KEYWORDS: [RegExp, ModuleCta][] = [
+    [/alquil|inquilin|contrato|icl|ipc|locaci|garant/, RENTALS_CTA],
+    [/crm|captaci|tasaci|interesad/, PROPERTIES_CTA],
+    [/web|sitio|seo|marketing|redes/, WEBSITE_CTA],
+    [/venta|propiedad|cartera/, PROPERTIES_CTA],
+];
+
+function pickModuleCta(category: string | undefined, tags: string[] | undefined): ModuleCta {
+    const haystack = [category ?? "", ...(tags ?? [])].join(" ").toLowerCase();
+    return MODULE_KEYWORDS.find(([pattern]) => pattern.test(haystack))?.[1] ?? DEFAULT_CTA;
+}
+
 interface Props {
     params: Promise<{ slug: string }>;
 }
@@ -70,6 +118,7 @@ export default async function BlogPostPage({ params }: Props) {
 
     const date = toPostDate(post.publishedAt) ?? toPostDate(post.createdAt);
     const readingMinutes = getReadingMinutes(post.content);
+    const moduleCta = pickModuleCta(post.category, post.tags);
     const authorName = post.author?.name || "Equipo Zeta Prop";
     const postUrl = `${SITE_ORIGIN}/blog/${post.slug}`;
     const modified = toPostDate(post.updatedAt) ?? date;
@@ -159,7 +208,7 @@ export default async function BlogPostPage({ params }: Props) {
                 </aside>
 
                 <article>
-                    <ArticleMarkdown content={post.content} />
+                    <ArticleMarkdown content={post.content} fallbackAlt={post.title} />
                 </article>
 
                 {post.tags && post.tags.length > 0 && (
@@ -171,6 +220,15 @@ export default async function BlogPostPage({ params }: Props) {
                         ))}
                     </ul>
                 )}
+
+                <aside className="s-post-cta" aria-labelledby="post-cta-title">
+                    <p id="post-cta-title" className="s-post-cta__title">{moduleCta.heading}</p>
+                    <p className="s-post-cta__text">{moduleCta.text}</p>
+                    <Link href={moduleCta.href} className="l-link-arrow min-h-11 text-sm">
+                        {moduleCta.label}
+                        <ArrowRight size={16} />
+                    </Link>
+                </aside>
 
                 <div className="mt-12 flex flex-col gap-4 rounded-3xl border border-[var(--color-rule-2)] bg-[var(--color-paper-2)] p-6 sm:flex-row sm:items-center sm:justify-between">
                     <div>

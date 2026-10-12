@@ -17,8 +17,8 @@ const AGENDA = [
 export function RentalsHero() {
     return (
         <PhotoHero photo={LANDING_PHOTOS.rentalsOffice} labelledBy="rentals-title" aside={<RentalsHeroVisual />}>
-            <p className="l-hero__eyebrow">Gestión de alquileres</p>
             <h1 id="rentals-title">
+                <span className="l-hero__eyebrow l-h1-kicker">Software de gestión de alquileres</span>{" "}
                 Cobrá, ajustá y liquidá alquileres <em>sin planillas.</em>
             </h1>
             <p className="l-hero__lede">

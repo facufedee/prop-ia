@@ -367,6 +367,12 @@
   text-wrap: balance;
 }
 
+/* Keyword kicker rendered inside the h1 (SEO); looks like the hero eyebrow, not the headline. */
+.l-hero h1 .l-h1-kicker {
+  line-height: 1.4;
+  max-width: none;
+}
+
 .l-hero h1 em {
   font-style: normal;
   color: var(--color-accent);

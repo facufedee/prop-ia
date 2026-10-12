@@ -39,14 +39,21 @@ const components: Components = {
     thead: ({ children }) => <thead className="bg-[var(--color-paper-3)] text-[var(--color-ink)]">{children}</thead>,
     th: ({ children }) => <th className="border-b border-[var(--color-rule)] px-4 py-3 font-semibold">{children}</th>,
     td: ({ children }) => <td className="border-b border-[var(--color-rule-2)] bg-[var(--color-paper-2)] px-4 py-3 align-top">{children}</td>,
-    // eslint-disable-next-line @next/next/no-img-element -- markdown images come from arbitrary hosts
-    img: ({ src, alt }) => <img src={typeof src === "string" ? src : undefined} alt={alt ?? ""} loading="lazy" className="my-8 w-full rounded-2xl" />,
 };
 
-export function ArticleMarkdown({ content }: { content: string }) {
+function withImageAlt(fallbackAlt: string | undefined): Components {
+    return {
+        ...components,
+        // Markdown images often ship without alt text; fall back to the article title so they stay described.
+        // eslint-disable-next-line @next/next/no-img-element -- markdown images come from arbitrary hosts
+        img: ({ src, alt }) => <img src={typeof src === "string" ? src : undefined} alt={alt?.trim() || fallbackAlt || ""} loading="lazy" className="my-8 w-full rounded-2xl" />,
+    };
+}
+
+export function ArticleMarkdown({ content, fallbackAlt }: { content: string; fallbackAlt?: string }) {
     return (
         <div className="text-[1.0625rem] text-[var(--color-ink-2)] md:text-lg [&>*:first-child]:mt-0">
-            <ReactMarkdown remarkPlugins={[remarkBreaks]} components={components}>
+            <ReactMarkdown remarkPlugins={[remarkBreaks]} components={withImageAlt(fallbackAlt)}>
                 {content}
             </ReactMarkdown>
         </div>

@@ -24,8 +24,8 @@ Make every public page (all routes except /dashboard) crawlable, canonical and c
 - [x] S1 — indexing basics: canonicals per page, robots, noindex for funnel/auth pages, delete /firebase-check, title template, descriptions 120–160, sitemap fixes, remove debug headers — delegated (2+ non-trivial files)
 - [x] S2 — property URLs: one `propertyUrl()` helper, canonical redirects, server-rendered detail, real JSON-LD, honest titles — delegated
 - [x] S3 — structured data + OG/icons: remove fake FAQPage, dedupe entities, offers on /precios, BlogPosting, FAQPage on /faqs, BreadcrumbList, OG image route, apple-icon, manifest, themeColor — delegated
-- [ ] S4 — keywords in h1s, blog → module CTAs, alt text — delegated
-- [ ] S5 — performance: unused fonts, home catalog download, hero responsive image — delegated
+- [x] S4 — keywords in h1s, blog → module CTAs, alt text — delegated
+- [~] S5 — performance: unused fonts, home catalog download, hero responsive image — delegated
 
 ## Checks per task
 `npx tsc --noEmit -p .`, `npx vitest run`, eslint on touched paths (no new errors), curl rendered HTML for canonical/robots/title/h1/JSON-LD.
@@ -64,3 +64,17 @@ Make every public page (all routes except /dashboard) crawlable, canonical and c
   - Evidence: tsc exit 0; vitest 19 files/134 tests pass; eslint on touched files: 1 pre-existing `any` (propiedades/page.tsx formatPostDate), none new.
   - Pending: curl verification of rendered JSON-LD/OG/icons NOT run — no dev server was listening on :3000 and starting one was denied. Parent must run the curl checks.
   - Parent follow-up: pages with their own openGraph lost the file-based image; added static `public/assets/img/og-default.png` via `src/lib/seo/ogImage.ts` on alquileres, propiedades-gestion, pagina-web, precios, modelo. Rendered check (Googlebot UA): JSON-LD types per page OK, all parse, FAQPage /faqs 22 = visible, og:image on all checked pages, icons/manifest 200.
+- S4 implemented (delegated writer, uncommitted; checkbox left for parent):
+  - H1 keyword kickers: `<span class="l-hero__eyebrow l-h1-kicker">` as first child of each h1 (+ `.l-hero h1 .l-h1-kicker` line-height rule). Home "Software para inmobiliarias"; the 3 module landings had an eyebrow `<p>` above the h1 → moved inside with the keyword text (alquileres "Software de gestión de alquileres", propiedades-gestion "CRM inmobiliario y gestión de propiedades", pagina-web "Página web para inmobiliarias"). Headlines unchanged. Home hero checked visually at 375 and 1440: no layout break.
+  - Blog post: `.s-post-cta` aside after the tags, before the share box. Keyword match on category + tags (order: rentals → CRM/captación/tasación → web/SEO/marketing → venta/propiedad → default "/" "Conocé Zeta Prop").
+  - `ArticleMarkdown` `fallbackAlt` prop (post title) for markdown images with empty alt. Public cards already use title / "title - Foto N".
+  - Pending/out of surface: `PropertyDetailClient.tsx` gallery images (lines ~663, ~716) still `alt=""`.
+  - Evidence (curl Googlebot): exactly 1 h1 on /, /alquileres, /propiedades-gestion, /pagina-web, each starting with its kicker; /blog/aumento-alquileres-octubre-2026 → /alquileres CTA, /blog/como-captar-mas-clientes-inmobiliaria → /propiedades-gestion, /blog/comprar-departamento-en-pozo-ventajas-riesgos (Inversión) → "/".
+- S5 implemented (delegated writer, uncommitted; checkbox left for parent):
+  - Home carousel: `publicService.getFeaturedProperties(8)` (same filter: publishToPortal, active, has photo, newest first) called on the server in `(main)/page.tsx`, mapped to plain `NetworkProperty` props with `href = propertyPath()`; `PropertyNetworkCTA` no longer imports the Firebase client service. Home `revalidate = 3600` (was static with no revalidation; no dynamic APIs found).
+  - Unsplash `photoSrc()` default width 2400 → 1600 (PhotoHero 100vw, AuthShell 50vw). Modules keeps its explicit 2000/1400 (out of surface).
+  - Hero image: kept as is. Re-encoding the 2400×1340 webp: 189,458 B → q72 173,396 B / q70 171,778 B (−9%, below the 20% rule, and lossy-on-lossy). A 1200px q72 variant is 62,110 B, but an SVG `<image>` has no srcset and two toggled SVGs may double-download, so it was not created.
+  - Fonts skipped: Geist is used on public pages (Tailwind `--font-sans`/`--font-mono` map to Geist in globals.css; `font-mono` in ArticleMarkdown code and PropertyPublicCard; html default font). Dashboard layout is `src/app/(main)/dashboard/layout.tsx`. Home HTML references 3 woff2 files (unchanged).
+  - Evidence: home SSR has 16 cards (8 × duplicated track), 8 unique links all `/{venta|alquiler}/{slug}-{id}`.
+- S4/S5 checks: tsc exit 0; vitest 19 files/134 tests pass; eslint touched files: only pre-existing `any` (publicService.ts 30, 50) + unused `orderBy` warning.
+  - S5 partial: Geist not scoped (globals.css maps Tailwind sans/mono to Geist; public pages use it); hero image kept (SVG <image> has no srcset; re-encode saves only ~9%). Done: home featured properties server-rendered (8, canonical links, revalidate 3600), Unsplash source width 1600.

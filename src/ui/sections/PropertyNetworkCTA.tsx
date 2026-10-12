@@ -1,24 +1,30 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { ArrowRight, Building2, MapPin, BedDouble, Bath } from "lucide-react";
-import { publicService, PublicProperty } from "@/infrastructure/services/publicService";
 import { formatPropertyPrice } from "@/ui/utils/propertyPrice";
-import { propertyPath } from "@/lib/seo/propertyUrl";
 
-export default function PropertyNetworkCTA() {
-    const [properties, setProperties] = useState<PublicProperty[]>([]);
+/** Plain, serializable card data; fetched on the server by the home page. */
+export interface NetworkProperty {
+    id: string;
+    href: string;
+    title: string;
+    image: string;
+    operation_type: string;
+    price: number;
+    currency: string;
+    hidePrice?: boolean;
+    localidad?: string;
+    provincia?: string;
+    rooms?: number;
+    bathrooms?: number;
+    area_covered?: number;
+}
+
+export default function PropertyNetworkCTA({ properties }: { properties: NetworkProperty[] }) {
     const [paused, setPaused] = useState(false);
-
-    useEffect(() => {
-        publicService.getAllProperties().then((all) => {
-            // Only those with at least one image, limit to 12
-            const withImages = all.filter((p) => p.imageUrls?.length > 0 && p.status === "active").slice(0, 12);
-            setProperties(withImages);
-        });
-    }, []);
 
     // Duplicate list for seamless infinite loop
     const track = [...properties, ...properties];
@@ -62,10 +68,10 @@ export default function PropertyNetworkCTA() {
                         }}
                     >
                         {track.map((prop, i) => (
-                            <Link key={`${prop.id}-${i}`} href={propertyPath(prop)} className="l-property-card">
+                            <Link key={`${prop.id}-${i}`} href={prop.href} className="l-property-card">
                                 <div className="l-property-card__image">
                                     <Image
-                                        src={prop.imageUrls[0]}
+                                        src={prop.image}
                                         alt={prop.title}
                                         fill
                                         className="object-cover"
@@ -86,13 +92,13 @@ export default function PropertyNetworkCTA() {
                                         </p>
                                     )}
                                     <div className="l-property-card__meta">
-                                        {prop.rooms > 0 && (
+                                        {(prop.rooms ?? 0) > 0 && (
                                             <span><BedDouble size={13} /> {prop.rooms} amb.</span>
                                         )}
-                                        {prop.bathrooms > 0 && (
+                                        {(prop.bathrooms ?? 0) > 0 && (
                                             <span><Bath size={13} /> {prop.bathrooms}</span>
                                         )}
-                                        {prop.area_covered > 0 && <span>{prop.area_covered} m²</span>}
+                                        {(prop.area_covered ?? 0) > 0 && <span>{prop.area_covered} m²</span>}
                                     </div>
                                 </div>
                             </Link>

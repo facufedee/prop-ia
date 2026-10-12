@@ -39,7 +39,9 @@ import Intro from "@/ui/sections/Intro";
 import Modules from "@/ui/sections/Modules";
 import { Pricing } from "@/ui/sections/Pricing";
 import HumanPromise from "@/ui/sections/HumanPromise";
-import PropertyNetworkCTA from "@/ui/sections/PropertyNetworkCTA";
+import PropertyNetworkCTA, { type NetworkProperty } from "@/ui/sections/PropertyNetworkCTA";
+import { publicService } from "@/infrastructure/services/publicService";
+import { propertyPath } from "@/lib/seo/propertyUrl";
 import ContactForm from "@/ui/sections/ContactForm";
 
 import LatestBlogPosts from "@/ui/sections/LatestBlogPosts";
@@ -72,7 +74,34 @@ const softwareJsonLd = {
     ],
 };
 
-export default function LandingPage() {
+// ISR: the featured listings and latest posts refresh hourly instead of on every visit.
+export const revalidate = 3600;
+
+const FEATURED_COUNT = 8;
+
+// Server-side so the home ships a few cards instead of the whole catalog to every visitor.
+async function getFeaturedProperties(): Promise<NetworkProperty[]> {
+    const properties = await publicService.getFeaturedProperties(FEATURED_COUNT).catch(() => []);
+    return properties.map((p) => ({
+        id: p.id,
+        href: propertyPath(p),
+        title: p.title,
+        image: p.imageUrls[0],
+        operation_type: p.operation_type,
+        price: p.price,
+        currency: p.currency,
+        hidePrice: p.hidePrice ?? false,
+        localidad: p.localidad ?? "",
+        provincia: p.provincia ?? "",
+        rooms: p.rooms ?? 0,
+        bathrooms: p.bathrooms ?? 0,
+        area_covered: p.area_covered ?? 0,
+    }));
+}
+
+export default async function LandingPage() {
+    const featuredProperties = await getFeaturedProperties();
+
     return (
         <main className="flex flex-col gap-0">
             <GoogleAuthPromptLazy />
@@ -84,7 +113,7 @@ export default function LandingPage() {
             <Intro />
             <Pricing />
             <HumanPromise />
-            <PropertyNetworkCTA />
+            <PropertyNetworkCTA properties={featuredProperties} />
             <LatestBlogPosts />
             <ContactForm />
 

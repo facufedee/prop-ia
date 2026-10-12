@@ -4219,3 +4219,27 @@ a.s-auth-submit {
   border-radius: 50%;
   background: var(--color-positive);
 }
+
+/* Contextual product link after a blog article. */
+.s-post-cta {
+  margin-top: var(--space-xl);
+  padding: var(--space-lg);
+  border: 1px solid var(--color-rule);
+  border-left: 2px solid var(--color-accent);
+  border-radius: 1.5rem;
+}
+
+.s-post-cta__title {
+  font-family: var(--font-heading);
+  font-weight: 600;
+  font-size: 1.125rem;
+  letter-spacing: -0.02em;
+  color: var(--color-ink);
+  margin: 0 0 0.25rem;
+}
+
+.s-post-cta__text {
+  font-size: 0.9375rem;
+  color: var(--color-ink-2);
+  margin: 0 0 0.5rem;
+}

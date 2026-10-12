@@ -91,6 +91,13 @@ export const publicService = {
         }
     },
 
+    // Newest active portal listings with at least one photo (home carousel). Reuses the cached catalog
+    // query, so it is meant for server rendering, not for client components.
+    getFeaturedProperties: async (count = 8): Promise<PublicProperty[]> => {
+        const all = await publicService.getAllProperties();
+        return all.filter((p) => p.imageUrls?.length > 0 && p.status === "active").slice(0, count);
+    },
+
     // Get properties by userId (efficient direct query — use this for site pages)
     getPropertiesByUserId: async (userId: string): Promise<PublicProperty[]> => {
         if (!db || !userId) return [];

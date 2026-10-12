@@ -7,6 +7,7 @@ export default function Hero() {
     return (
         <PhotoHero photo={LANDING_PHOTOS.hero} labelledBy="hero-title" variant="statement" backdrop={<LitHouseBackdrop />}>
             <h1 id="hero-title">
+                <span className="l-hero__eyebrow l-h1-kicker">Software para inmobiliarias</span>{" "}
                 Tu inmobiliaria, <em>en orden.</em>
             </h1>
             <p className="l-hero__lede">

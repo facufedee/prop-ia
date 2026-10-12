@@ -52,8 +52,8 @@ function SitePreview({ compact = false }: { compact?: boolean }) {
 export function WebsiteHero() {
     return (
         <PhotoHero photo={LANDING_PHOTOS.website} labelledBy="website-title" aside={<WebsiteHeroVisual />}>
-            <p className="l-hero__eyebrow">Página web para inmobiliarias</p>
             <h1 id="website-title">
+                <span className="l-hero__eyebrow l-h1-kicker">Página web para inmobiliarias</span>{" "}
                 Una web con tu marca que se <em>actualiza sola.</em>
             </h1>
             <p className="l-hero__lede">

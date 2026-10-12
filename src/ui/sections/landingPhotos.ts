@@ -60,8 +60,11 @@ export const LANDING_PHOTOS = {
     },
 } satisfies Record<string, LandingPhoto>;
 
-/** Source URL for next/image; capped so the optimizer never pulls the full-size original. */
-export function photoSrc(photo: LandingPhoto, width = 2400): string {
+/**
+ * Source URL for next/image; capped so the optimizer never pulls the full-size original.
+ * 1600px covers full-bleed heroes on common screens; next/image re-encodes it per device width.
+ */
+export function photoSrc(photo: LandingPhoto, width = 1600): string {
     if (photo.src) return photo.src;
     return `https://images.unsplash.com/photo-${photo.id}?auto=format&fit=crop&w=${width}&q=80`;
 }
