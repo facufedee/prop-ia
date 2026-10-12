@@ -70,36 +70,36 @@ export default async function BlogPostPage({ params }: Props) {
     const authorName = post.author?.name || "Equipo Zeta Prop";
 
     return (
-        <main className="min-h-screen bg-white pb-24">
+        <main className="flex-1 pb-24">
             {/* Header */}
-            <header className="mx-auto max-w-3xl px-5 pt-24 sm:px-6 md:pt-32">
-                <Link href="/blog" className="inline-flex items-center gap-2 text-sm font-medium text-gray-500 transition-colors hover:text-indigo-600">
+            <header className="mx-auto max-w-3xl px-5 pt-28 sm:px-6 md:pt-32">
+                <Link href="/blog" className="inline-flex min-h-11 items-center gap-2 text-sm font-medium text-[var(--color-ink-2)] transition-colors hover:text-[var(--color-ink)]">
                     <ArrowLeft size={16} />
                     Blog
                 </Link>
 
-                <div className="mt-6">
+                <div className="mt-4">
                     <CategoryBadge category={post.category} />
                 </div>
 
-                <h1 className="mt-4 text-3xl font-bold leading-[1.15] tracking-tight text-gray-900 sm:text-4xl md:text-5xl">{post.title}</h1>
+                <h1 className="mt-4 font-[family-name:var(--font-heading)] text-3xl font-medium leading-[1.1] tracking-[-0.03em] text-balance text-[var(--color-ink)] sm:text-4xl md:text-5xl">{post.title}</h1>
 
-                {post.excerpt && <p className="mt-5 text-lg leading-relaxed text-gray-600 md:text-xl">{post.excerpt}</p>}
+                {post.excerpt && <p className="mt-5 text-lg leading-relaxed text-[var(--color-ink-2)] md:text-xl">{post.excerpt}</p>}
 
-                <div className="mt-8 flex flex-wrap items-center justify-between gap-4 border-y border-gray-100 py-4">
+                <div className="mt-8 flex flex-wrap items-center justify-between gap-4 border-y border-[var(--color-rule)] py-4">
                     <div className="flex items-center gap-3">
                         {post.author?.photo ? (
-                            <Image src={post.author.photo} alt="" width={40} height={40} className="h-10 w-10 rounded-full object-cover" />
+                            <Image src={post.author.photo} alt="" width={40} height={40} className="h-10 w-10 rounded-full border border-[var(--color-rule)] object-cover" />
                         ) : (
-                            <div className="flex h-10 w-10 items-center justify-center rounded-full bg-indigo-50 text-indigo-600">
+                            <div className="flex h-10 w-10 items-center justify-center rounded-full border border-[var(--color-rule)] bg-[var(--color-paper-3)] text-[var(--color-ink-2)]">
                                 <User size={18} aria-hidden />
                             </div>
                         )}
                         <div className="text-sm">
-                            <p className="font-medium text-gray-900">{authorName}</p>
-                            <p className="flex items-center gap-2 text-gray-500">
+                            <p className="font-medium text-[var(--color-ink)]">{authorName}</p>
+                            <p className="flex flex-wrap items-center gap-2 text-[var(--color-muted)]">
                                 {date && <time dateTime={date.toISOString()}>{formatPostDate(date)}</time>}
-                                {date && <span aria-hidden className="h-1 w-1 rounded-full bg-gray-400" />}
+                                {date && <span aria-hidden className="h-1 w-1 rounded-full bg-current opacity-60" />}
                                 <span>{readingMinutes} min de lectura</span>
                             </p>
                         </div>
@@ -113,7 +113,7 @@ export default async function BlogPostPage({ params }: Props) {
             {/* Cover */}
             {post.imageUrl && (
                 <div className="mx-auto mt-10 max-w-5xl px-5 sm:px-6">
-                    <div className="relative aspect-[16/9] overflow-hidden rounded-3xl bg-gray-100">
+                    <div className="relative aspect-[16/9] overflow-hidden rounded-3xl border border-[var(--color-rule-2)] bg-[var(--color-paper-2)]">
                         <Image src={post.imageUrl} alt={post.title} fill priority sizes="(max-width: 1024px) 100vw, 1024px" className="object-cover" />
                     </div>
                 </div>
@@ -134,17 +134,17 @@ export default async function BlogPostPage({ params }: Props) {
                 {post.tags && post.tags.length > 0 && (
                     <ul className="mt-10 flex flex-wrap gap-2" aria-label="Etiquetas">
                         {post.tags.map((tag) => (
-                            <li key={tag} className="rounded-full bg-gray-100 px-3 py-1 text-sm font-medium text-gray-600">
+                            <li key={tag} className="rounded-full border border-[var(--color-rule)] bg-[var(--color-paper-2)] px-3 py-1 text-sm font-medium text-[var(--color-ink-2)]">
                                 #{tag}
                             </li>
                         ))}
                     </ul>
                 )}
 
-                <div className="mt-12 flex flex-col gap-4 rounded-3xl bg-gray-50 p-6 sm:flex-row sm:items-center sm:justify-between">
+                <div className="mt-12 flex flex-col gap-4 rounded-3xl border border-[var(--color-rule-2)] bg-[var(--color-paper-2)] p-6 sm:flex-row sm:items-center sm:justify-between">
                     <div>
-                        <p className="font-semibold text-gray-900">¿Te resultó útil?</p>
-                        <p className="text-sm text-gray-600">Compartilo con tu equipo o con un colega.</p>
+                        <p className="font-[family-name:var(--font-heading)] font-semibold text-[var(--color-ink)]">¿Te resultó útil?</p>
+                        <p className="text-sm text-[var(--color-ink-2)]">Compartilo con tu equipo o con un colega.</p>
                     </div>
                     <ShareButtons title={post.title} slug={post.slug} excerpt={post.excerpt} />
                 </div>
@@ -153,9 +153,9 @@ export default async function BlogPostPage({ params }: Props) {
             {/* Related */}
             {related.length > 0 && (
                 <section aria-labelledby="related-posts" className="mx-auto mt-24 max-w-7xl px-5 sm:px-6">
-                    <div className="mb-8 flex items-end justify-between gap-4 border-t border-gray-200 pt-10">
-                        <h2 id="related-posts" className="text-2xl font-semibold text-gray-900">Seguí leyendo</h2>
-                        <Link href="/blog" className="inline-flex items-center gap-1 text-sm font-medium text-indigo-600 hover:text-indigo-700">
+                    <div className="s-blog-section mb-8 flex flex-wrap items-end justify-between gap-4">
+                        <h2 id="related-posts" className="s-blog-h2">Seguí leyendo</h2>
+                        <Link href="/blog" className="l-link-arrow min-h-11 text-sm">
                             Ver todo el blog
                             <ArrowRight size={16} />
                         </Link>

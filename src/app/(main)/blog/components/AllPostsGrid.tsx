@@ -30,20 +30,15 @@ export function AllPostsGrid({ rest, all, categories }: AllPostsGridProps) {
 
     if (rest.length === 0 && categories.length < 2) return null;
 
-    const chipClass = (active: boolean) =>
-        `shrink-0 rounded-full px-4 py-2 text-sm font-medium transition-colors ${
-            active ? "bg-indigo-600 text-white" : "bg-white text-gray-700 ring-1 ring-gray-200 hover:ring-indigo-300 hover:text-indigo-600"
-        }`;
-
     return (
-        <section aria-labelledby="all-posts" className="border-t border-gray-200 pt-10">
+        <section aria-labelledby="all-posts" className="s-blog-section">
             <div className="mb-6 flex flex-col gap-4">
-                <h2 id="all-posts" className="text-2xl font-semibold text-gray-900">
+                <h2 id="all-posts" className="s-blog-h2">
                     {selected ?? "Más artículos"}
                 </h2>
                 {categories.length > 1 && (
                     <div role="group" aria-label="Filtrar por categoría" className="-mx-5 flex gap-2 overflow-x-auto px-5 pb-1 [scrollbar-width:none] sm:mx-0 sm:px-0 [&::-webkit-scrollbar]:hidden">
-                        <button type="button" aria-pressed={selected === null} onClick={() => selectCategory(null)} className={chipClass(selected === null)}>
+                        <button type="button" aria-pressed={selected === null} onClick={() => selectCategory(null)} className="s-chip">
                             Todos
                         </button>
                         {categories.map((category) => (
@@ -52,7 +47,7 @@ export function AllPostsGrid({ rest, all, categories }: AllPostsGridProps) {
                                 type="button"
                                 aria-pressed={selected === category}
                                 onClick={() => selectCategory(category)}
-                                className={chipClass(selected === category)}
+                                className="s-chip"
                             >
                                 {category}
                             </button>
@@ -62,7 +57,7 @@ export function AllPostsGrid({ rest, all, categories }: AllPostsGridProps) {
             </div>
 
             {visible.length === 0 ? (
-                <p className="py-12 text-center text-gray-500">Ya viste todos los artículos de arriba.</p>
+                <p className="py-12 text-center text-[var(--color-ink-2)]">Ya viste todos los artículos de arriba.</p>
             ) : (
                 <ul className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
                     {visible.map((post) => (
@@ -77,7 +72,7 @@ export function AllPostsGrid({ rest, all, categories }: AllPostsGridProps) {
                     <button
                         type="button"
                         onClick={() => setLimit((current) => current + PAGE_SIZE)}
-                        className="rounded-full bg-white px-6 py-3 text-sm font-medium text-gray-900 ring-1 ring-gray-200 transition-colors hover:text-indigo-600 hover:ring-indigo-300"
+                        className="l-btn l-btn--secondary min-h-11 cursor-pointer font-[inherit]"
                     >
                         Ver más artículos ({filtered.length - limit})
                     </button>

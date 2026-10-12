@@ -24,13 +24,13 @@ function CoverImage({ post, sizes, priority = false, className = "" }: { post: B
             className={`object-cover transition-transform duration-500 group-hover:scale-105 ${className}`}
         />
     ) : (
-        <div className="absolute inset-0 flex items-center justify-center bg-gradient-to-br from-indigo-100 to-purple-100 text-indigo-300">
+        <div className="s-blog-cover-empty">
             <ImageOff size={28} aria-hidden />
         </div>
     );
 }
 
-export function PostMeta({ post, className = "text-gray-500" }: { post: BlogCardData; className?: string }) {
+export function PostMeta({ post, className = "text-[var(--color-muted)]" }: { post: BlogCardData; className?: string }) {
     return (
         <p className={`flex items-center gap-2 text-xs ${className}`}>
             {post.dateLabel && <span>{post.dateLabel}</span>}
@@ -44,11 +44,11 @@ export function CategoryBadge({ category, inverted = false }: { category: string
     if (!category) return null;
     return (
         <span
-            className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-medium ${
-                inverted ? "bg-white/90 text-indigo-700 backdrop-blur" : "bg-indigo-50 text-indigo-700"
+            className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-medium text-[var(--color-accent)] ${
+                inverted ? "border border-[var(--color-rule)] bg-[var(--glass)] backdrop-blur" : "bg-[var(--color-accent-soft)]"
             }`}
         >
-            <span aria-hidden className="h-2 w-2 rounded-full bg-indigo-600" />
+            <span aria-hidden className="h-1.5 w-1.5 rounded-full bg-[var(--color-accent)]" />
             {category}
         </span>
     );
@@ -56,17 +56,17 @@ export function CategoryBadge({ category, inverted = false }: { category: string
 
 export function FeaturedPost({ post }: { post: BlogCardData }) {
     return (
-        <article className="group relative flex min-h-[340px] overflow-hidden rounded-3xl bg-gray-900 sm:min-h-[420px] lg:h-full">
+        <article className="group relative flex min-h-[340px] overflow-hidden rounded-3xl border border-[var(--color-rule-2)] bg-[var(--color-paper-2)] sm:min-h-[420px] lg:h-full">
             <CoverImage post={post} priority sizes="(max-width: 1024px) 100vw, 66vw" />
-            <div aria-hidden className="absolute inset-0 bg-gradient-to-t from-gray-950/90 via-gray-950/40 to-transparent" />
+            <div aria-hidden className="s-blog-scrim" />
             <div className="relative mt-auto w-full space-y-3 p-6 sm:p-8">
                 <CategoryBadge category={post.category} inverted />
-                <h2 className="max-w-2xl text-2xl font-semibold leading-tight text-white sm:text-3xl">
+                <h2 className="max-w-2xl font-[family-name:var(--font-heading)] text-2xl font-medium leading-tight tracking-[-0.03em] text-[var(--color-ink)] sm:text-3xl">
                     <Link href={`/blog/${post.slug}`} className="after:absolute after:inset-0 focus:outline-none focus-visible:underline">
                         {post.title}
                     </Link>
                 </h2>
-                <PostMeta post={post} className="text-gray-300" />
+                <PostMeta post={post} className="text-[var(--color-ink-2)]" />
             </div>
         </article>
     );
@@ -75,11 +75,11 @@ export function FeaturedPost({ post }: { post: BlogCardData }) {
 export function LatestPostItem({ post }: { post: BlogCardData }) {
     return (
         <article className="group relative flex gap-4">
-            <div className="relative h-20 w-24 shrink-0 overflow-hidden rounded-xl bg-gray-100">
+            <div className="relative h-20 w-24 shrink-0 overflow-hidden rounded-xl border border-[var(--color-rule-2)] bg-[var(--color-paper-3)]">
                 <CoverImage post={post} sizes="96px" />
             </div>
             <div className="min-w-0 space-y-1.5">
-                <h3 className="line-clamp-3 text-sm font-medium leading-snug text-gray-900 transition-colors group-hover:text-indigo-600">
+                <h3 className="line-clamp-3 text-sm font-medium leading-snug text-[var(--color-ink)] transition-colors group-hover:text-[var(--color-accent-2)]">
                     <Link href={`/blog/${post.slug}`} className="after:absolute after:inset-0 focus:outline-none focus-visible:underline">
                         {post.title}
                     </Link>
@@ -92,21 +92,21 @@ export function LatestPostItem({ post }: { post: BlogCardData }) {
 
 export function PostCard({ post }: { post: BlogCardData }) {
     return (
-        <article className="group relative flex h-full flex-col overflow-hidden rounded-2xl border border-gray-100 bg-white p-2 transition-shadow duration-300 hover:shadow-lg">
-            <div className="relative aspect-[16/10] overflow-hidden rounded-xl bg-gray-100">
+        <article className="group relative flex h-full flex-col overflow-hidden rounded-2xl border border-[var(--color-rule-2)] bg-[var(--color-paper-2)] p-2 transition-colors duration-300 hover:border-[var(--color-rule)] hover:bg-[var(--color-paper-3)]">
+            <div className="relative aspect-[16/10] overflow-hidden rounded-xl bg-[var(--color-paper-3)]">
                 <CoverImage post={post} sizes="(max-width: 640px) 85vw, (max-width: 1024px) 45vw, 30vw" />
             </div>
             <div className="flex flex-1 flex-col gap-3 p-4">
                 <div>
                     <CategoryBadge category={post.category} />
                 </div>
-                <h3 className="line-clamp-2 text-lg font-semibold leading-snug text-gray-900 transition-colors group-hover:text-indigo-600">
+                <h3 className="line-clamp-2 font-[family-name:var(--font-heading)] text-lg font-medium leading-snug tracking-[-0.02em] text-[var(--color-ink)] transition-colors group-hover:text-[var(--color-accent-2)]">
                     <Link href={`/blog/${post.slug}`} className="after:absolute after:inset-0 focus:outline-none focus-visible:underline">
                         {post.title}
                     </Link>
                 </h3>
-                <p className="line-clamp-3 text-sm leading-relaxed text-gray-600">{post.excerpt}</p>
-                <PostMeta post={post} className="mt-auto pt-2 text-gray-500" />
+                <p className="line-clamp-3 text-sm leading-relaxed text-[var(--color-ink-2)]">{post.excerpt}</p>
+                <PostMeta post={post} className="mt-auto pt-2 text-[var(--color-muted)]" />
             </div>
         </article>
     );

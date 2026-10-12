@@ -20,47 +20,53 @@ export default async function BlogPage() {
     const { featured, latest, rest, carousels, categories } = buildBlogLayout(posts);
 
     return (
-        <main className="min-h-screen bg-gray-50 pb-24">
-            <div className="mx-auto max-w-7xl space-y-10 px-5 pt-24 sm:px-6 md:pt-28">
-                <header className="flex flex-col gap-3 border-b border-gray-200 pb-6 md:flex-row md:items-end md:justify-between md:gap-10">
-                    <div>
-                        <p className="mb-2 text-xs font-semibold uppercase tracking-wider text-indigo-600">Blog & novedades</p>
-                        <h1 className="text-3xl font-bold leading-tight text-gray-900 md:text-4xl">Insights del mercado inmobiliario</h1>
-                    </div>
-                    <p className="max-w-sm text-base text-gray-600 md:text-right">
-                        Tendencias, tutoriales de la plataforma y noticias del sector.
-                    </p>
-                </header>
+        <main className="flex-1">
+            <section className="l-section s-page-head" aria-labelledby="blog-title">
+                <div className="l-container">
+                    <header className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between md:gap-10">
+                        <div className="s-page-head__inner">
+                            <p className="l-eyebrow">Blog & novedades</p>
+                            <h1 id="blog-title" className="s-page-title s-page-title--flush">Insights del mercado inmobiliario</h1>
+                        </div>
+                        <p className="s-page-lede s-blog-head__lede">
+                            Tendencias, tutoriales de la plataforma y noticias del sector.
+                        </p>
+                    </header>
+                </div>
+            </section>
 
-                {!featured ? (
-                    <p className="py-20 text-center text-lg text-gray-500">No hay artículos publicados aún.</p>
-                ) : (
-                    <>
-                        <section aria-label="Artículos recientes" className="grid gap-8 lg:grid-cols-3">
-                            <div className="lg:col-span-2">
-                                <FeaturedPost post={featured} />
-                            </div>
-                            {latest.length > 0 && (
-                                <div>
-                                    <h2 className="mb-5 text-xl font-semibold text-gray-900">Últimos artículos</h2>
-                                    <ul className="space-y-5">
-                                        {latest.map((post) => (
-                                            <li key={post.slug}>
-                                                <LatestPostItem post={post} />
-                                            </li>
-                                        ))}
-                                    </ul>
+            <div className="l-section s-flush-top">
+                <div className="l-container space-y-14">
+                    {!featured ? (
+                        <p className="py-20 text-center text-lg text-[var(--color-ink-2)]">No hay artículos publicados aún.</p>
+                    ) : (
+                        <>
+                            <section aria-label="Artículos recientes" className="grid gap-8 lg:grid-cols-3">
+                                <div className="lg:col-span-2">
+                                    <FeaturedPost post={featured} />
                                 </div>
-                            )}
-                        </section>
+                                {latest.length > 0 && (
+                                    <div>
+                                        <h2 className="s-blog-h2 mb-5">Últimos artículos</h2>
+                                        <ul className="space-y-5">
+                                            {latest.map((post) => (
+                                                <li key={post.slug}>
+                                                    <LatestPostItem post={post} />
+                                                </li>
+                                            ))}
+                                        </ul>
+                                    </div>
+                                )}
+                            </section>
 
-                        {carousels.map(({ category, posts: categoryPosts }) => (
-                            <CategoryCarousel key={category} title={category} posts={categoryPosts} />
-                        ))}
+                            {carousels.map(({ category, posts: categoryPosts }) => (
+                                <CategoryCarousel key={category} title={category} posts={categoryPosts} />
+                            ))}
 
-                        <AllPostsGrid rest={rest} all={posts} categories={categories} />
-                    </>
-                )}
+                            <AllPostsGrid rest={rest} all={posts} categories={categories} />
+                        </>
+                    )}
+                </div>
             </div>
         </main>
     );

@@ -29,13 +29,12 @@ export function CategoryCarousel({ title, posts }: { title: string; posts: BlogC
         el.scrollBy({ left: direction * el.clientWidth * 0.9, behavior: "smooth" });
     };
 
-    const buttonClass =
-        "flex h-10 w-10 items-center justify-center rounded-full border border-gray-200 text-gray-700 transition-colors hover:border-indigo-300 hover:text-indigo-600 disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:border-gray-200 disabled:hover:text-gray-700";
+    const buttonClass = "s-icon-btn";
 
     return (
-        <section aria-labelledby={headingId} className="border-t border-gray-200 pt-10">
+        <section aria-labelledby={headingId} className="s-blog-section">
             <div className="mb-6 flex items-center justify-between gap-4">
-                <h2 id={headingId} className="text-2xl font-semibold text-gray-900">
+                <h2 id={headingId} className="s-blog-h2">
                     {title}
                 </h2>
                 <div className="flex gap-2">
