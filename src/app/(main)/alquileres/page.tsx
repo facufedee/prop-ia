@@ -11,11 +11,11 @@ import {
 
 const url = "https://zetaprop.com.ar/alquileres";
 const description =
-    "Software de gestión de alquileres para inmobiliarias: plan de pagos, ajustes por ICL e IPC con valores oficiales, recibos en PDF y liquidaciones a propietarios. Probalo 14 días gratis.";
+    "Software de gestión de alquileres para inmobiliarias: plan de pagos, ajustes por ICL e IPC, recibos en PDF y liquidaciones a propietarios. Probalo gratis.";
 
 export const metadata: Metadata = {
     // The root layout template appends the brand suffix.
-    title: "Gestión de alquileres para inmobiliarias",
+    title: "Software de alquileres para inmobiliarias",
     description,
     keywords: [
         "gestión de alquileres",
@@ -33,13 +33,13 @@ export const metadata: Metadata = {
         locale: "es_AR",
         url,
         siteName: "Zeta Prop",
-        title: "Gestión de alquileres para inmobiliarias | Zeta Prop",
+        title: "Software de alquileres para inmobiliarias | Zeta Prop",
         description,
         images: [{ url: "/assets/img/og-landing.png", width: 1200, height: 630, alt: "Zeta Prop · Gestión de alquileres" }],
     },
     twitter: {
         card: "summary_large_image",
-        title: "Gestión de alquileres para inmobiliarias | Zeta Prop",
+        title: "Software de alquileres para inmobiliarias | Zeta Prop",
         description,
         images: ["/assets/img/og-landing.png"],
     },

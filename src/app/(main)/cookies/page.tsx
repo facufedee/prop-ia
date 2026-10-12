@@ -2,7 +2,7 @@ import { Metadata } from 'next';
 import Link from 'next/link';
 
 export const metadata: Metadata = {
-    title: 'Política de Cookies | Zeta Prop',
+    title: 'Política de cookies',
     description: 'Información detallada sobre el uso de cookies en Zeta Prop. Transparencia sobre cómo y por qué utilizamos tecnologías de rastreo.',
     alternates: {
         canonical: 'https://zetaprop.com.ar/cookies',

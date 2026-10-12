@@ -1,8 +1,8 @@
 import { Metadata } from 'next';
 
 export const metadata: Metadata = {
-    title: 'Términos y Condiciones | Zeta Prop',
-    description: 'Términos y condiciones de uso de la plataforma Zeta Prop. Derechos, obligaciones y marco legal del servicio.',
+    title: 'Términos y condiciones',
+    description: 'Términos y condiciones de uso de Zeta Prop: derechos y obligaciones de las inmobiliarias usuarias, condiciones del servicio y marco legal aplicable.',
     alternates: {
         canonical: 'https://zetaprop.com.ar/terminos',
     },

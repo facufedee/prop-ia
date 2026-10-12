@@ -11,7 +11,7 @@ import {
 
 const url = "https://zetaprop.com.ar/pagina-web";
 const description =
-    "Página web para inmobiliarias con tu logo y tus colores: tus propiedades se publican solas y las consultas llegan directo a tu panel. Incluida en todos los planes de Zeta Prop.";
+    "Página web para inmobiliarias con tu logo y tus colores: tus propiedades se publican solas y las consultas llegan directo a tu panel de Zeta Prop.";
 
 export const metadata: Metadata = {
     // The root layout template appends the brand suffix.

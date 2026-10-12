@@ -7,6 +7,34 @@ import { publicServerService } from "@/infrastructure/services/publicServerServi
 import PropertyHero from "@/ui/components/properties/public/PropertyHero";
 import PropertyPublicCard from "@/ui/components/properties/public/PropertyPublicCard";
 import { PrimaryCta } from "@/ui/sections/PhotoHero";
+import type { Metadata } from "next";
+
+const pageTitle = "Propiedades en venta y alquiler en Argentina";
+const pageDescription =
+    "Propiedades en venta y alquiler publicadas por inmobiliarias en Zeta Prop: casas, departamentos, PH, terrenos y locales en Argentina.";
+
+// Page-level metadata overrides the propiedades layout (shared with detail routes), whose title
+// carried the brand suffix and would render it twice with the (main) template.
+export const metadata: Metadata = {
+    title: pageTitle,
+    description: pageDescription,
+    alternates: { canonical: "/propiedades" },
+    openGraph: {
+        type: "website",
+        locale: "es_AR",
+        url: "/propiedades",
+        siteName: "Zeta Prop",
+        title: `${pageTitle} | Zeta Prop`,
+        description: pageDescription,
+        images: [{ url: "/hero-propiedades.png", width: 1200, height: 630, alt: pageTitle }],
+    },
+    twitter: {
+        card: "summary_large_image",
+        title: `${pageTitle} | Zeta Prop`,
+        description: pageDescription,
+        images: ["/hero-propiedades.png"],
+    },
+};
 
 const QUICK_CATEGORIES = [
     { label: "Casas", tipo: "Casa", icon: Home },

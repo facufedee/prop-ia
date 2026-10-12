@@ -3,8 +3,8 @@ import PricingTable from "@/ui/components/pricing/PricingTable";
 import { PRICING_FAQS } from "@/ui/components/pricing/pricingFaqs";
 
 export const metadata: Metadata = {
-    title: "Planes y Precios | CRM Inmobiliario sin costos ocultos",
-    description: "Elegí el plan de Zeta Prop que se adapta a tu inmobiliaria: Básico, Profesional o Enterprise. 14 días de prueba gratis, sin tarjeta.",
+    title: "Precios del software para inmobiliarias",
+    description: "Precios de Zeta Prop, el software para inmobiliarias: compará los planes y elegí el que se adapta a tu equipo. Probalo gratis, sin tarjeta de crédito.",
     keywords: [
         "precios CRM inmobiliario",
         "planes software inmobiliario",
@@ -21,8 +21,8 @@ export const metadata: Metadata = {
         type: "website",
         locale: "es_AR",
         url: "https://zetaprop.com.ar/precios",
-        title: "Planes y Precios | Zeta Prop",
-        description: "Sin costos ocultos ni contratos a largo plazo. Probá Zeta Prop gratis 14 días y elegí el plan que acompaña el crecimiento de tu inmobiliaria.",
+        title: "Precios del software para inmobiliarias | Zeta Prop",
+        description: "Precios de Zeta Prop, el software para inmobiliarias: compará los planes y elegí el que se adapta a tu equipo. Probalo gratis, sin tarjeta de crédito.",
         siteName: "Zeta Prop",
         images: [
             {
@@ -35,8 +35,8 @@ export const metadata: Metadata = {
     },
     twitter: {
         card: "summary_large_image",
-        title: "Planes y Precios | Zeta Prop",
-        description: "Probá Zeta Prop gratis 14 días. Sin tarjeta de crédito, sin contratos.",
+        title: "Precios del software para inmobiliarias | Zeta Prop",
+        description: "Precios de Zeta Prop, el software para inmobiliarias: compará los planes y elegí el que se adapta a tu equipo. Probalo gratis, sin tarjeta de crédito.",
         images: ["/assets/img/Logo%20ZetaProp%20Fondo%20Blanco%202.png"],
     },
     robots: { index: true, follow: true },

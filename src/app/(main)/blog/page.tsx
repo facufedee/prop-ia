@@ -8,8 +8,8 @@ import { AllPostsGrid } from "./components/AllPostsGrid";
 
 export const metadata: Metadata = {
     alternates: { canonical: "https://zetaprop.com.ar/blog" },
-    title: "Blog | CRM Inmobiliario | Gestión de Propiedades | Alquileres | Compra y Venta | Zeta Prop",
-    description: "Noticias y tutoriales de Zeta Prop. Descubre las últimas tendencias en tecnología inmobiliaria, gestión de alquileres y automatización para tu inmobiliaria.",
+    title: "Blog de gestión inmobiliaria",
+    description: "Blog de Zeta Prop sobre gestión inmobiliaria: guías y novedades sobre alquileres, administración de propiedades y tecnología para inmobiliarias.",
     keywords: "blog inmobiliario, crm inmobiliario, gestión propiedades, alquileres argentina, software inmobiliario, zeta prop, real estate crm",
 };
 

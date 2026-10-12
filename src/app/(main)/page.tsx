@@ -2,8 +2,9 @@ import { Metadata } from "next";
 import Hero from "@/ui/sections/Hero";
 
 export const metadata: Metadata = {
-    title: "Zeta Prop | El CRM Inmobiliario que se Adapta a tu Inmobiliaria",
-    description: "Zeta Prop es el CRM inmobiliario integral de Argentina: gestioná propiedades, alquileres, clientes, emprendimientos y cobranzas desde un solo lugar. Probalo gratis 14 días.",
+    // Absolute: the keyword-led home title would exceed 60 chars with the template suffix.
+    title: { absolute: "Software para inmobiliarias: alquileres, propiedades y web" },
+    description: "Software para inmobiliarias: cobrá alquileres, ordená tus propiedades y recibí consultas desde tu propia página web, todo en un solo lugar. Probalo gratis.",
     keywords: [
         "CRM inmobiliario argentina",
         "software inmobiliario",
@@ -17,14 +18,14 @@ export const metadata: Metadata = {
         "agenda inmobiliaria",
     ],
     alternates: {
-        canonical: "https://zetaprop.com.ar",
+        canonical: "/",
     },
     openGraph: {
         type: "website",
         locale: "es_AR",
         url: "https://zetaprop.com.ar",
-        title: "Zeta Prop | El CRM Inmobiliario que se Adapta a tu Inmobiliaria",
-        description: "Gestioná propiedades, alquileres, clientes y emprendimientos desde un solo sistema. Diseñado para inmobiliarias argentinas. Probalo gratis.",
+        title: "Software para inmobiliarias: alquileres, propiedades y web",
+        description: "Software para inmobiliarias: cobrá alquileres, ordená tus propiedades y recibí consultas desde tu propia página web, todo en un solo lugar. Probalo gratis.",
         siteName: "Zeta Prop",
         images: [
             {
@@ -37,8 +38,8 @@ export const metadata: Metadata = {
     },
     twitter: {
         card: "summary_large_image",
-        title: "Zeta Prop | CRM Inmobiliario para Argentina",
-        description: "Gestioná propiedades, alquileres y clientes desde un solo sistema. Probalo gratis 14 días.",
+        title: "Software para inmobiliarias: alquileres, propiedades y web",
+        description: "Software para inmobiliarias: cobrá alquileres, ordená tus propiedades y recibí consultas desde tu propia página web, todo en un solo lugar. Probalo gratis.",
         images: ["/assets/img/og-landing.png"],
     },
 };

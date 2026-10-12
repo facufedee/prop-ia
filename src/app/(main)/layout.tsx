@@ -11,10 +11,11 @@ import WhatsappButton from '@/ui/components/ui/WhatsappButton';
 export const metadata: Metadata = {
   metadataBase: new URL('https://zetaprop.com.ar'),
   title: {
-    default: 'Zeta Prop | Tu CRM Inmobiliario Integral',
-    template: '%s | Zeta Prop Argentina'
+    default: 'Zeta Prop: software para inmobiliarias',
+    // Page titles must not repeat the brand; this template appends it once.
+    template: '%s | Zeta Prop'
   },
-  description: 'Zeta Prop: el CRM inmobiliario más completo de Argentina. Administra propiedades, alquileres y clientes desde un ecosistema diseñado para tu éxito.',
+  description: 'Zeta Prop es un software para inmobiliarias: gestión de alquileres, administración de propiedades, consultas y página web propia en un solo lugar.',
   keywords: [
     'CRM inmobiliario',
     'gestión de propiedades',
@@ -37,9 +38,9 @@ export const metadata: Metadata = {
   openGraph: {
     type: 'website',
     locale: 'es_AR',
-    url: 'https://zetaprop.com.ar',
-    title: 'Zeta Prop | Tu Red Inmobiliaria de Confianza en Argentina',
-    description: 'Encontrá tu próximo hogar o inversión con Zeta Prop. Miles de propiedades en venta y alquiler en Buenos Aires y todo el país. Tasaciones profesionales y gestión integral.',
+    // No `url` here: pages without their own openGraph would otherwise inherit og:url = home.
+    title: 'Zeta Prop: software para inmobiliarias',
+    description: 'Zeta Prop es un software para inmobiliarias: gestión de alquileres, administración de propiedades, consultas y página web propia en un solo lugar.',
     siteName: 'Zeta Prop',
     images: [
       {
@@ -58,26 +59,23 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'Zeta Prop | El CRM de las Inmobiliarias Modernas',
-    description: 'Gestioná propiedades, alquileres y clientes de forma eficiente.',
+    title: 'Zeta Prop: software para inmobiliarias',
+    description: 'Zeta Prop es un software para inmobiliarias: gestión de alquileres, administración de propiedades, consultas y página web propia en un solo lugar.',
     images: ['/assets/img/Logo%20ZetaProp%20Fondo%20Blanco%202.png'],
     creator: '@zetaprop',
     site: '@zetaprop',
   },
+  // Indexing is the default; stating index/follow here would leak into 404 pages,
+  // which inherit layout metadata next to Next's own noindex.
   robots: {
-    index: true,
-    follow: true,
     googleBot: {
-      index: true,
-      follow: true,
       'max-video-preview': -1,
       'max-image-preview': 'large',
       'max-snippet': -1,
     },
   },
-  alternates: {
-    canonical: 'https://zetaprop.com.ar',
-  },
+  // No `alternates.canonical` here: it would be inherited by every page without its own,
+  // canonicalizing them all to the home. Each indexable page declares a self-canonical.
   category: 'business',
 
   // verification: {
@@ -86,7 +84,8 @@ export const metadata: Metadata = {
 };
 
 export const viewport = {
-  themeColor: '#4F46E5',
+  // Approximates --color-paper (oklch(17% 0.006 70)) from landing-theme.css.
+  themeColor: '#110f0d',
 };
 
 export default function RootLayout({

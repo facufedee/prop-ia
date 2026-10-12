@@ -2,7 +2,7 @@ import { Metadata } from 'next';
 import Link from 'next/link';
 
 export const metadata: Metadata = {
-    title: 'Política de Privacidad | Zeta Prop',
+    title: 'Política de privacidad',
     description: 'Política de privacidad detallada y protección de datos de Zeta Prop. Conozca sus derechos y cómo manejamos su información.',
     alternates: {
         canonical: 'https://zetaprop.com.ar/privacidad',

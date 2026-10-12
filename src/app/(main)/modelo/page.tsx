@@ -4,8 +4,9 @@ import type { Metadata } from "next";
 import { CTA } from "@/ui/sections/CTA";
 
 export const metadata: Metadata = {
-    title: "Cómo funciona nuestra tasación | Zeta Prop",
+    title: "Cómo funciona la tasación con IA",
     description: "Qué hace la tasación con IA de Zeta Prop: una red neuronal entrenada con datos de propiedades de Argentina que da un valor estimado orientativo.",
+    alternates: { canonical: "/modelo" },
     openGraph: {
         title: "Cómo funciona la tasación de Zeta Prop",
         description: "Una red neuronal estima un valor orientativo a partir de las características y la ubicación de la propiedad.",

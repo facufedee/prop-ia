@@ -11,11 +11,11 @@ import {
 
 const url = "https://zetaprop.com.ar/propiedades-gestion";
 const description =
-    "Software para administrar propiedades e interesados: carga en cinco pasos, fichas en PDF, tablero de consultas, agenda de visitas, tasación y seguimiento de ventas hasta la escritura.";
+    "CRM para inmobiliarias: cargá tus propiedades, seguí a cada interesado en un tablero, agendá visitas y llevá cada venta desde la oferta hasta la escritura.";
 
 export const metadata: Metadata = {
     // The root layout template appends the brand suffix.
-    title: "Administración de propiedades para inmobiliarias",
+    title: "CRM y gestión de propiedades para inmobiliarias",
     description,
     keywords: [
         "administración de propiedades",
@@ -32,13 +32,13 @@ export const metadata: Metadata = {
         locale: "es_AR",
         url,
         siteName: "Zeta Prop",
-        title: "Administración de propiedades para inmobiliarias | Zeta Prop",
+        title: "CRM y gestión de propiedades para inmobiliarias | Zeta Prop",
         description,
         images: [{ url: "/assets/img/og-landing.png", width: 1200, height: 630, alt: "Zeta Prop · Administración de propiedades" }],
     },
     twitter: {
         card: "summary_large_image",
-        title: "Administración de propiedades para inmobiliarias | Zeta Prop",
+        title: "CRM y gestión de propiedades para inmobiliarias | Zeta Prop",
         description,
         images: ["/assets/img/og-landing.png"],
     },

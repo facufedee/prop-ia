@@ -5,8 +5,8 @@ import { Linkedin } from 'lucide-react';
 import { PrimaryCta } from '@/ui/sections/PhotoHero';
 
 export const metadata: Metadata = {
-    title: 'Nosotros | Zeta Prop',
-    description: 'Conocé al equipo detrás de Zeta Prop. Construimos un CRM pensado para la gestión diaria de las inmobiliarias argentinas.',
+    title: 'Nosotros',
+    description: 'Conocé al equipo detrás de Zeta Prop: construimos un software pensado para la gestión diaria de las inmobiliarias argentinas, desde Ituzaingó, Buenos Aires.',
     alternates: {
         canonical: 'https://zetaprop.com.ar/nosotros',
     },

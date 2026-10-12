@@ -23,10 +23,10 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     const url = `https://zetaprop.com.ar/blog/${post.slug}`;
 
     return {
-        title: `${post.title} - Blog Zeta Prop`,
+        // The (main) layout template appends the brand.
+        title: post.title,
         description: post.excerpt,
-        // The (main) layout sets canonical to the homepage; without overriding it here,
-        // LinkedIn/WhatsApp/Facebook resolve the shared link to the homepage instead of the post.
+        // Self-canonical so shares (LinkedIn/WhatsApp/Facebook) and search resolve to the post.
         alternates: { canonical: url },
         openGraph: {
             url,

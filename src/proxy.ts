@@ -160,19 +160,15 @@ export async function proxy(request: NextRequest) {
                 console.log(`[Proxy] Rewriting ${host}${pathname} to /sites/${targetSlug}${originalPath}`);
                 url.pathname = `/sites/${targetSlug}${originalPath}`;
                 const response = NextResponse.rewrite(url);
-                response.headers.set('X-Debug-Host', host);
-                response.headers.set('X-Debug-Target', targetSlug);
                 return applySecurityHeaders(response, request, true);
             }
         }
 
-        const response = NextResponse.next();
-        response.headers.set('X-Debug-Host', host);
-        response.headers.set('X-Debug-Slug-Found', targetSlug || 'NULL');
         if (lookupError) {
-            response.headers.set('X-Debug-Lookup-Err', lookupError.replace(/\n/g, ' ').slice(0, 200));
+            // Logged server-side only; never exposed to clients as a response header.
+            console.error(`[Proxy] Custom domain lookup failed for ${host}:`, lookupError);
         }
-        return applySecurityHeaders(response, request);
+        return applySecurityHeaders(NextResponse.next(), request);
 
     } catch (e: any) {
         console.error("[Proxy] Critical Error:", e.message);

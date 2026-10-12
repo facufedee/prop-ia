@@ -3,8 +3,8 @@ import { CheckCircle2 } from 'lucide-react';
 import { PrimaryCta } from '@/ui/sections/PhotoHero';
 
 export const metadata = {
-    title: "Servicios | Zeta Prop",
-    description: "Todo lo que incluye Zeta Prop: CRM inmobiliario, gestión de alquileres, contratos de alquiler, agenda, finanzas y más. Conocé lo que tenemos hoy y lo que viene.",
+    title: "Servicios para inmobiliarias",
+    description: "Todo lo que incluye Zeta Prop: gestión de propiedades, CRM de consultas, alquileres, contratos, agenda, finanzas, portal del inquilino y tu web.",
     alternates: {
         canonical: 'https://zetaprop.com.ar/servicios',
     },

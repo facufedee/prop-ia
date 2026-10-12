@@ -33,8 +33,8 @@ export async function generateMetadata(
 
     if (!property) {
         return {
-            title: 'Propiedad no encontrada | Zeta Prop',
-            robots: { index: false }
+            title: 'Propiedad no encontrada',
+            robots: { index: false, follow: false }
         }
     }
 

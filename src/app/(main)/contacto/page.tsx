@@ -2,8 +2,9 @@ import ContactForm from "@/ui/sections/ContactForm";
 import { PrimaryCta } from "@/ui/sections/PhotoHero";
 
 export const metadata = {
-    title: "Contacto | CRM Inmobiliario | Gestión de Propiedades | Alquileres | Compra y Venta | Zeta Prop",
-    description: "Contacta con el equipo de Zeta Prop. Estamos para ayudarte a potenciar tu inmobiliaria con nuestra tecnología.",
+    title: "Contacto",
+    description: "Contactá al equipo de Zeta Prop por consultas sobre el software, los planes o cómo empezar con tu inmobiliaria. Escribinos por el formulario o WhatsApp.",
+    alternates: { canonical: "/contacto" },
 };
 
 export default function ContactPage() {
