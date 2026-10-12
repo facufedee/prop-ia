@@ -229,9 +229,6 @@
     grid-template-columns: 1fr;
   }
 
-  .s-split__figure--first-mobile {
-    order: -1;
-  }
 }
 
 .s-split + .s-split {
@@ -262,20 +259,6 @@
 
 .s-split__text > p strong {
   color: var(--color-ink);
-}
-
-.s-figure {
-  position: relative;
-  width: 100%;
-  height: 20rem;
-  border: 1px solid var(--color-rule);
-  border-radius: var(--radius-card);
-  background: var(--color-paper-2);
-  overflow: hidden;
-}
-
-.s-figure--tall {
-  height: 24rem;
 }
 
 .s-stats {

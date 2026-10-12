@@ -511,43 +511,6 @@
   margin: 0;
 }
 
-.l-sheet__summary {
-  padding: 1rem 1.25rem;
-  border-bottom: 1px solid var(--color-rule);
-}
-
-.l-sheet__figure {
-  display: flex;
-  align-items: baseline;
-  flex-wrap: wrap;
-  gap: 0.25rem 0.5rem;
-  margin: 0 0 0.625rem;
-  font-variant-numeric: tabular-nums;
-}
-
-.l-sheet__figure strong {
-  font-size: var(--text-xl);
-  font-weight: 600;
-  letter-spacing: -0.02em;
-}
-
-.l-sheet__figure span {
-  color: var(--color-muted);
-}
-
-.l-sheet__progress {
-  height: 4px;
-  border-radius: 999px;
-  background: var(--color-paper-3);
-  overflow: hidden;
-}
-
-.l-sheet__progress span {
-  display: block;
-  height: 100%;
-  background: var(--color-ink);
-}
-
 .l-sheet__rows {
   list-style: none;
   margin: 0;
@@ -983,10 +946,6 @@
   grid-column: span 3;
 }
 
-.l-bento__tile--full {
-  grid-column: span 6;
-}
-
 @media (max-width: 60rem) {
   .l-bento {
     grid-template-columns: 1fr;
@@ -994,8 +953,7 @@
   .l-bento__tile,
   .l-bento__tile--wide,
   .l-bento__tile--narrow,
-  .l-bento__tile--third,
-  .l-bento__tile--full {
+  .l-bento__tile--third {
     grid-column: span 1;
   }
 }
@@ -1055,47 +1013,6 @@
 /* ============================================================
    Ft2 · Footer
    ============================================================ */
-
-.l-footer {
-  border-top: 1px solid var(--color-rule);
-  padding-block: var(--space-lg);
-  padding-inline: clamp(1.25rem, 4vw, 3rem);
-}
-
-.l-footer__row {
-  max-width: 78rem;
-  margin-inline: auto;
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  justify-content: space-between;
-  gap: var(--space-sm);
-  font-size: var(--text-sm);
-  color: var(--color-muted);
-}
-
-.l-footer__word {
-  font-family: var(--font-display);
-  font-weight: 600;
-  color: var(--color-ink-2);
-}
-
-.l-footer__links {
-  display: flex;
-  gap: var(--space-md);
-  list-style: none;
-  margin: 0;
-  padding: 0;
-}
-
-.l-footer__links a {
-  color: var(--color-muted);
-  text-decoration: none;
-}
-
-.l-footer__links a:hover {
-  color: var(--color-ink);
-}
 
 /* ============================================================
    Pricing — real plan data from Firestore (subscriptionService)
@@ -2898,7 +2815,6 @@
   }
 
   /* Small inline links get a 44px touch target without changing their look. */
-  .l-footer__links a,
   .l-pricing__footnote a,
   .l-blog__see-all,
   [class*="l-contact"] a {
