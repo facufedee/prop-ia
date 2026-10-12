@@ -182,7 +182,7 @@ function CheckoutContent() {
         }
         if (billing === 'yearly') {
             const saving = Math.round((1 - getMonthlyEquivalent() / monthly) * 100);
-            return saving > 0 ? `Ahorrás ${saving}% — equivale a 2 meses gratis` : null;
+            return saving > 0 ? `Ahorrás ${saving}% vs mensual` : null;
         }
         return null;
     };
@@ -239,10 +239,14 @@ function CheckoutContent() {
         );
     }
 
+    // The yearly badge is derived from the plan prices so it can't drift from them.
+    const yearlySaving = planData
+        ? Math.round((1 - planData.price.yearly / (planData.price.monthly * 12)) * 100)
+        : 0;
     const billingOptions: { value: Billing; label: string; badge?: string }[] = [
         { value: 'monthly', label: 'Mensual' },
-        { value: 'quarterly', label: '3 Meses', badge: 'Popular' },
-        { value: 'yearly', label: 'Anual', badge: '-17%' },
+        { value: 'quarterly', label: '3 Meses' },
+        { value: 'yearly', label: 'Anual', badge: yearlySaving > 0 ? `-${yearlySaving}%` : undefined },
     ];
 
     const savingsLabel = getSavingsLabel();
@@ -303,8 +307,6 @@ function CheckoutContent() {
                                         {[
                                             { label: 'Propiedades', value: planData.limits.properties === 'unlimited' ? 'Ilimitadas' : `${planData.limits.properties} activas` },
                                             { label: 'Usuarios', value: planData.limits.users === 'unlimited' ? 'Ilimitados' : `${planData.limits.users} miembros` },
-                                            { label: 'Soporte', value: 'Prioritario 24/7' },
-                                            { label: 'Actualizaciones', value: 'Automáticas' },
                                         ].map(({ label, value }) => (
                                             <div key={label} className="s-checkout__feature">
                                                 <span className="s-checkout__check" aria-hidden="true">
@@ -334,7 +336,7 @@ function CheckoutContent() {
                                     Estamos habilitando tu cuenta con el plan elegido.
                                 </p>
                                 <p className="s-util-text">
-                                    Te avisamos por aquí y por WhatsApp en menos de 10 minutos.
+                                    Te avisamos por aquí y por WhatsApp cuando esté habilitada.
                                 </p>
                             </div>
                         ) : planData && (
@@ -510,7 +512,7 @@ function CheckoutContent() {
                                 </div>
 
                                 <p className="s-checkout__secure">
-                                    Pago protegido con cifrado SSL
+                                    Los pagos online se procesan en Mercado Pago.
                                 </p>
                             </div>
                         )}
