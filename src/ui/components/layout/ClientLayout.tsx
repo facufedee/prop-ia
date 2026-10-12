@@ -12,7 +12,7 @@ import "@/ui/sections/site-pages.css";
 export default function ClientLayout({ children }: { children: React.ReactNode }) {
     const pathname = usePathname();
     const isDashboard = pathname?.startsWith("/dashboard");
-    const isAuthPage = pathname === "/login" || pathname === "/register";
+    const isAuthPage = pathname === "/login" || pathname === "/register" || pathname === "/forgot-password";
 
     // The app keeps its own design system; every public page shares the site theme.
     if (isDashboard) {

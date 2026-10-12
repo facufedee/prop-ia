@@ -3459,3 +3459,18 @@
   align-items: center;
   min-height: 44px;
 }
+
+/* Confirmation box shown after a password reset email is requested. */
+.s-auth-notice {
+  padding: 1rem 1.125rem;
+  border: 1px solid var(--color-positive-soft);
+  border-radius: var(--radius-input);
+  background: var(--color-positive-soft);
+  color: var(--color-ink);
+  font-size: var(--text-sm);
+  line-height: 1.55;
+}
+
+.s-auth-notice p {
+  margin: 0;
+}

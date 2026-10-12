@@ -269,7 +269,9 @@ export default function RegisterPage() {
                         required
                     />
                     <label htmlFor="terms">
-                        Acepto los <a href="#">Términos y Condiciones</a> y la <a href="#">Política de Privacidad</a>
+                        Acepto los{" "}
+                        <Link href="/terminos" target="_blank">Términos y Condiciones</Link> y la{" "}
+                        <Link href="/privacidad" target="_blank">Política de Privacidad</Link>
                     </label>
                 </div>
 
