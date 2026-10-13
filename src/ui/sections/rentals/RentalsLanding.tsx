@@ -7,16 +7,9 @@ import { LANDING_PHOTOS } from "../landingPhotos";
 // (see odd/tasks/landing-light-redesign.md, "Rentals feature inventory").
 // Product compositions use illustrative sample data, not real customers.
 
-const AGENDA = [
-    { tenant: "Diego Acosta", address: "Belgrano 2215, 7° A", due: "Venció hace 3 días", amount: "$389.500", status: "late", label: "Vencido" },
-    { tenant: "Sofía Benítez", address: "Cnel. Paulino Rojas 390", due: "Vence hoy", amount: "$448.900", status: "due", label: "Hoy" },
-    { tenant: "Martín Rossi", address: "Gurruchaga 1130, PB", due: "Vence el 15", amount: "$735.000", status: "due", label: "Esta semana" },
-    { tenant: "Lucía Fernández", address: "Av. Rivadavia 4520, 3° B", due: "Pagó el 8", amount: "$612.400", status: "paid", label: "Cobrado" },
-] as const;
-
 export function RentalsHero() {
     return (
-        <PhotoHero photo={LANDING_PHOTOS.rentalsOffice} labelledBy="rentals-title" aside={<RentalsHeroVisual />}>
+        <PhotoHero photo={LANDING_PHOTOS.rentalsOffice} labelledBy="rentals-title" motion="zoom">
             <h1 id="rentals-title">
                 <span className="l-hero__eyebrow l-h1-kicker">Software de gestión de alquileres</span>{" "}
                 Cobrá, ajustá y liquidá alquileres <em>sin planillas.</em>
@@ -34,45 +27,6 @@ export function RentalsHero() {
             </div>
             <p className="l-hero__fineprint">Sin tarjeta de crédito ni pagos anticipados.</p>
         </PhotoHero>
-    );
-}
-
-function RentalsHeroVisual() {
-    return (
-        <div aria-hidden="true">
-            <div className="l-sheet">
-                <div className="l-sheet__head">
-                    <p className="l-sheet__title">Agenda de cobros</p>
-                    <p className="l-sheet__meta">Octubre</p>
-                </div>
-                <div className="l-tabs">
-                    <span className="is-active">Vencidos 2</span>
-                    <span>Hoy 3</span>
-                    <span>7 días 11</span>
-                    <span>30 días 38</span>
-                </div>
-                <ul className="l-sheet__rows">
-                    {AGENDA.map((row) => (
-                        <li key={row.tenant} className="l-sheet__row">
-                            <div className="l-sheet__address">
-                                <p>{row.tenant}</p>
-                                <p>
-                                    {row.address} · {row.due}
-                                </p>
-                            </div>
-                            <span className="l-sheet__amount">{row.amount}</span>
-                            <span className={`l-status l-status--${row.status}`}>{row.label}</span>
-                        </li>
-                    ))}
-                </ul>
-            </div>
-            <div className="l-hero__note">
-                <p>Recibo N° 0001-00482</p>
-                <p>
-                    PDF con tu logo, listo para compartir por WhatsApp con <strong>Lucía Fernández</strong>.
-                </p>
-            </div>
-        </div>
     );
 }
 

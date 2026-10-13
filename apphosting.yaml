@@ -83,3 +83,11 @@ env:
     secret: BLOG_AUTOPUBLISH_SECRET
     availability:
       - RUNTIME
+  - variable: MAKE_SOCIAL_WEBHOOK_URL
+    secret: MAKE_SOCIAL_WEBHOOK_URL
+    availability:
+      - RUNTIME
+  - variable: MAKE_SOCIAL_WEBHOOK_SECRET
+    secret: MAKE_SOCIAL_WEBHOOK_SECRET
+    availability:
+      - RUNTIME

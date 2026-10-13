@@ -7,6 +7,7 @@ import { auth, db } from "@/infrastructure/firebase/client";
 import { doc, getDoc, Timestamp } from "firebase/firestore";
 import { Save, Image as ImageIcon, X, Calendar, User } from "lucide-react";
 import { toast } from "sonner";
+import { announceMessage, requestAnnounce } from "@/lib/social/requestAnnounce";
 
 interface BlogFormProps {
     initialData?: BlogPost;
@@ -143,6 +144,19 @@ export default function BlogForm({ initialData, isEditing = false }: BlogFormPro
         }
     };
 
+    // Fire-and-forget: a social failure never blocks saving the post.
+    const announceToSocial = (postId: string) => {
+        const user = auth?.currentUser;
+        if (!user) return;
+        user.getIdToken()
+            .then((token) => requestAnnounce(postId, token))
+            .then((result) => {
+                const { kind, text } = announceMessage(result);
+                toast[kind](text);
+            })
+            .catch(() => toast.error(announceMessage({ status: "failed" }).text));
+    };
+
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         setLoading(true);
@@ -155,13 +169,18 @@ export default function BlogForm({ initialData, isEditing = false }: BlogFormPro
                 return;
             }
 
+            let savedId: string;
             if (isEditing && initialData?.id) {
                 await blogService.updatePost(initialData.id, formData);
+                savedId = initialData.id;
                 toast.success("Post actualizado correctamente");
             } else {
-                await blogService.createPost(formData as BlogPost);
+                savedId = await blogService.createPost(formData as BlogPost);
                 toast.success("Post creado correctamente");
             }
+            // Only the draft -> published transition goes to social media.
+            const wasPublished = isEditing && initialData?.published === true;
+            if (formData.published && !wasPublished) announceToSocial(savedId);
             router.push("/dashboard/blog");
             router.refresh();
         } catch (error) {

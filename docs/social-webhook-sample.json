@@ -1,0 +1,27 @@
+{
+  "event": "blog.published",
+  "post": {
+    "id": "fyEEArgK2yLyVScJdVq2",
+    "slug": "como-ajustar-alquileres-2026",
+    "title": "Cómo ajustar alquileres en 2026",
+    "excerpt": "El índice ICL cambió otra vez. Te contamos cómo impacta en tus contratos.",
+    "category": "Mercado Inmobiliario",
+    "tags": [
+      "Alquileres",
+      "ICL"
+    ],
+    "url": "https://zetaprop.com.ar/blog/como-ajustar-alquileres-2026",
+    "coverUrl": "https://storage.googleapis.com/prop-ia.firebasestorage.app/blog/como-ajustar-alquileres-2026/cover.jpg"
+  },
+  "images": {
+    "instagram": "https://zetaprop.com.ar/api/social/blog/fyEEArgK2yLyVScJdVq2/image?format=instagram&type=jpeg",
+    "instagramSquare": "https://zetaprop.com.ar/api/social/blog/fyEEArgK2yLyVScJdVq2/image?format=square&type=jpeg",
+    "linkedin": "https://zetaprop.com.ar/api/social/blog/fyEEArgK2yLyVScJdVq2/image?format=linkedin&type=jpeg"
+  },
+  "captions": {
+    "instagram": "Cómo ajustar alquileres en 2026\n\nEl índice ICL cambió otra vez. Te contamos cómo impacta en tus contratos.\n\nLeé la nota completa: link en la bio.\n\n#ZetaProp #MercadoInmobiliario #Alquileres #ICL",
+    "linkedin": "Cómo ajustar alquileres en 2026\n\nEl índice ICL cambió otra vez. Te contamos cómo impacta en tus contratos.\n\nLeé la nota completa: https://zetaprop.com.ar/blog/como-ajustar-alquileres-2026\n\n#ZetaProp #MercadoInmobiliario #Alquileres"
+  },
+  "publishedAt": "2026-10-01T12:00:00.000Z",
+  "secret": "TU-CLAVE"
+}

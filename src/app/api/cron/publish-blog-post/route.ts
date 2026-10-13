@@ -3,6 +3,7 @@ import { adminDb } from "@/infrastructure/firebase/admin";
 import { getStorage } from "firebase-admin/storage";
 import { Timestamp } from "firebase-admin/firestore";
 import { sendNewsletter } from "@/lib/newsletter/sendNewsletter";
+import { announceBlogPost } from "@/lib/social/announceBlogPost";
 import os from "os";
 import path from "path";
 import fs from "fs/promises";
@@ -140,11 +141,22 @@ export async function POST(request: NextRequest) {
             newsletter = { status: "error", error: message };
         }
 
+        // Hand the post to the Make.com social scenario (Instagram/LinkedIn).
+        // announceBlogPost never throws; the catch is a last-resort guard.
+        let social: { status: string };
+        try {
+            social = await announceBlogPost(docRef.id);
+        } catch (err: unknown) {
+            console.error("[publish-blog-post] Social announce failed:", err instanceof Error ? err.message : String(err));
+            social = { status: "failed" };
+        }
+
         return NextResponse.json({
             success: true,
             id: docRef.id,
             url: `https://zetaprop.com.ar/blog/${slug}`,
             newsletter,
+            social: { status: social.status },
         });
     } catch (err: any) {
         console.error("[publish-blog-post] Firestore write failed:", err.message);

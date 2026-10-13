@@ -1,41 +1,54 @@
 "use client";
 
-import { useEffect, useState, useRef } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
-import { doc, getDoc } from "firebase/firestore";
+import { doc, getDoc, Timestamp } from "firebase/firestore";
 import { db } from "@/infrastructure/firebase/client";
 import { BlogPost } from "@/infrastructure/services/blogService";
-import { Loader2, ArrowLeft, Download, Instagram, Linkedin, Type, Save, Link as LinkIcon } from "lucide-react";
-import html2canvas from "html2canvas";
-import InstagramCanvas from "@/ui/components/social/InstagramCanvas";
-import LinkedInCanvas from "@/ui/components/social/LinkedInCanvas";
+import { Loader2, ArrowLeft, Download, Copy, Link as LinkIcon, ImageIcon, Send } from "lucide-react";
 import { toast } from "sonner";
+import { useAuth } from "@/ui/context/AuthContext";
+import { buildInstagramCaption, buildLinkedInCaption } from "@/lib/social/blogCaptions";
+import { announceMessage, requestAnnounce } from "@/lib/social/requestAnnounce";
+
+type Format = "instagram" | "square" | "linkedin";
+
+const FORMATS: { id: Format; label: string; hint: string; ratio: string }[] = [
+    { id: "instagram", label: "Instagram", hint: "4:5 · 1080×1350", ratio: "1080 / 1350" },
+    { id: "square", label: "Instagram", hint: "Cuadrado · 1080×1080", ratio: "1 / 1" },
+    { id: "linkedin", label: "LinkedIn", hint: "1200×627", ratio: "1200 / 627" },
+];
+
+const TITLE_MAX = 120;
+
+type SocialPost = BlogPost & { socialAnnouncedAt?: Timestamp };
 
 export default function SocialGeneratorPage() {
-    const { id } = useParams();
+    const { id } = useParams<{ id: string }>();
     const router = useRouter();
-    const [post, setPost] = useState<BlogPost | null>(null);
+    const { user } = useAuth();
+    const [post, setPost] = useState<SocialPost | null>(null);
+    const [announcedAt, setAnnouncedAt] = useState<Date | null>(null);
+    const [sending, setSending] = useState(false);
     const [loading, setLoading] = useState(true);
-    const [platform, setPlatform] = useState<"instagram" | "linkedin">("instagram");
-
-    // Customization State
-    const [customTitle, setCustomTitle] = useState("");
-
-
-    // Canvas Ref
-    const canvasRef = useRef<HTMLDivElement>(null);
+    const [format, setFormat] = useState<Format>("instagram");
+    const [titleInput, setTitleInput] = useState("");
+    const [title, setTitle] = useState("");
+    const [imageLoading, setImageLoading] = useState(true);
+    const [origin, setOrigin] = useState("");
 
     useEffect(() => {
+        setOrigin(window.location.origin);
         const fetchPost = async () => {
             if (!id || !db) return;
             try {
-                const docRef = doc(db, "blog_posts", id as string);
-                const docSnap = await getDoc(docRef);
-
-                if (docSnap.exists()) {
-                    const data = { id: docSnap.id, ...docSnap.data() } as BlogPost;
+                const snap = await getDoc(doc(db, "blog_posts", id));
+                if (snap.exists()) {
+                    const data = { id: snap.id, ...snap.data() } as SocialPost;
                     setPost(data);
-                    setCustomTitle(data.title);
+                    setAnnouncedAt(data.socialAnnouncedAt?.toDate?.() ?? null);
+                    setTitleInput(data.title);
+                    setTitle(data.title);
                 }
             } catch (error) {
                 console.error("Error fetching post:", error);
@@ -43,273 +56,227 @@ export default function SocialGeneratorPage() {
                 setLoading(false);
             }
         };
-
         fetchPost();
     }, [id]);
 
-    const handleDownload = async () => {
-        if (!canvasRef.current) return;
+    // Debounce the title override so the image is not re-rendered on every keystroke.
+    useEffect(() => {
+        const timer = setTimeout(() => setTitle(titleInput.trim()), 600);
+        return () => clearTimeout(timer);
+    }, [titleInput]);
 
+    const imagePath = useMemo(() => {
+        const params = new URLSearchParams({ format });
+        if (post && title && title !== post.title) params.set("title", title.slice(0, TITLE_MAX));
+        return `/api/social/blog/${id}/image?${params.toString()}`;
+    }, [format, title, post, id]);
+
+    useEffect(() => setImageLoading(true), [imagePath]);
+
+    const suggestedCopy = useMemo(() => {
+        if (!post) return "";
+        return format === "linkedin"
+            ? buildLinkedInCaption(post, `https://zetaprop.com.ar/blog/${post.slug}`)
+            : buildInstagramCaption(post);
+    }, [post, format]);
+    const current = FORMATS.find((f) => f.id === format)!;
+
+    const copy = async (text: string, message: string) => {
         try {
-            toast.loading("Generando imagen...", { id: "generating" });
-
-            // Wait a bit for images to be fully ready
-            await new Promise(resolve => setTimeout(resolve, 1000));
-
-            const canvas = await html2canvas(canvasRef.current, {
-                useCORS: true,
-                scale: 2,
-                backgroundColor: null,
-            });
-
-            const image = canvas.toDataURL("image/png");
-
-            const link = document.createElement("a");
-            link.href = image;
-            link.download = `ZetaProp_${platform}_${post?.slug || "social"}.png`;
-            link.click();
-
-            toast.success("Imagen descargada con éxito", { id: "generating" });
-        } catch (error) {
-            console.error("Error generating image:", error);
-            toast.error("Error al generar la imagen. Intentá de nuevo.", { id: "generating" });
+            await navigator.clipboard.writeText(text);
+            toast.success(message);
+        } catch {
+            toast.error("No se pudo copiar. Probá de nuevo.");
         }
     };
 
+    // Re-sends the post to the Make.com scenario (Instagram + LinkedIn).
+    const handleAnnounce = async () => {
+        if (!user || !post?.id || sending) return;
+        const ask = announcedAt
+            ? "Esta nota ya se envió a redes. ¿Querés volver a publicarla en Instagram y LinkedIn?"
+            : "¿Querés publicar esta nota en Instagram y LinkedIn ahora?";
+        if (!window.confirm(ask)) return;
+        setSending(true);
+        try {
+            const result = await requestAnnounce(post.id, await user.getIdToken(), true);
+            const { kind, text } = announceMessage(result);
+            toast[kind](text);
+            if (result.status === "sent") setAnnouncedAt(new Date());
+        } catch {
+            toast.error(announceMessage({ status: "failed" }).text);
+        } finally {
+            setSending(false);
+        }
+    };
 
+    const handleDownload = async () => {
+        toast.loading("Generando imagen...", { id: "download" });
+        try {
+            const res = await fetch(imagePath);
+            if (!res.ok) throw new Error(`HTTP ${res.status}`);
+            const blob = await res.blob();
+            const href = URL.createObjectURL(blob);
+            const link = document.createElement("a");
+            link.href = href;
+            link.download = `ZetaProp_${format}_${post?.slug || id}.png`;
+            link.click();
+            URL.revokeObjectURL(href);
+            toast.success("Imagen descargada", { id: "download" });
+        } catch (error) {
+            console.error("Error downloading image:", error);
+            toast.error("No se pudo descargar la imagen. Probá de nuevo.", { id: "download" });
+        }
+    };
 
     if (loading) {
         return (
-            <div className="h-screen w-full flex items-center justify-center bg-gray-50">
-                <Loader2 className="w-10 h-10 animate-spin text-gray-400" />
+            <div className="h-screen w-full flex items-center justify-center bg-[#110f0d]">
+                <Loader2 className="w-10 h-10 animate-spin text-[#a8a198]" />
             </div>
         );
     }
 
-    if (!post) return null;
+    if (!post) {
+        return (
+            <div className="h-screen w-full flex items-center justify-center bg-[#110f0d] text-[#a8a198]">
+                No encontramos la nota.
+            </div>
+        );
+    }
+
+    const label = "text-xs font-semibold text-[#a8a198] uppercase tracking-[0.14em]";
+    const panel = "rounded-xl border border-white/10 bg-white/[0.03] p-4";
 
     return (
-        <div className="min-h-screen bg-gray-100 flex overflow-hidden">
-            {/* Sidebar Controls */}
-            <div className="w-80 bg-white border-r border-gray-200 flex-shrink-0 flex flex-col z-10 shadow-xl">
-                <div className="p-6 border-b border-gray-100 flex items-center gap-4">
-                    <button onClick={() => router.back()} className="text-gray-500 hover:text-gray-900 transition">
+        <div className="min-h-screen bg-[#110f0d] text-[#f3efe9] flex flex-col lg:flex-row">
+            {/* Controls */}
+            <aside className="lg:w-96 lg:h-screen lg:sticky lg:top-0 flex-shrink-0 flex flex-col border-b lg:border-b-0 lg:border-r border-white/10 bg-[#161310]">
+                <div className="px-6 py-5 border-b border-white/10 flex items-center gap-4">
+                    <button onClick={() => router.back()} className="text-[#a8a198] hover:text-[#f3efe9] transition" aria-label="Volver">
                         <ArrowLeft size={20} />
                     </button>
-                    <h1 className="font-bold text-lg text-gray-900">Generador RRSS</h1>
+                    <h1 className="font-semibold text-lg">
+                        Generador <span className="text-[#d4a76a]">RRSS</span>
+                    </h1>
                 </div>
 
-                <div className="p-6 flex-1 space-y-8 overflow-y-auto">
+                <div className="p-6 flex-1 space-y-7 lg:overflow-y-auto">
+                    <section className="space-y-3">
+                        <h2 className={label}>Formato</h2>
+                        <div className="grid grid-cols-3 gap-2">
+                            {FORMATS.map((f) => (
+                                <button
+                                    key={f.id}
+                                    onClick={() => setFormat(f.id)}
+                                    className={`flex flex-col items-start gap-1 rounded-lg border px-3 py-2.5 text-left transition ${format === f.id
+                                        ? "border-[#d4a76a] bg-[#d4a76a]/10 text-[#f3efe9]"
+                                        : "border-white/10 text-[#a8a198] hover:border-white/25"
+                                        }`}
+                                >
+                                    <span className="text-sm font-medium">{f.label}</span>
+                                    <span className="text-[10px] leading-tight">{f.hint}</span>
+                                </button>
+                            ))}
+                        </div>
+                    </section>
 
-                    {/* Platform Selector */}
-                    <div className="space-y-3">
-                        <label className="text-sm font-semibold text-gray-900 uppercase tracking-wide">Plataforma</label>
-                        <div className="grid grid-cols-2 gap-3">
+                    <section className="space-y-3">
+                        <h2 className={label}>Título</h2>
+                        <textarea
+                            value={titleInput}
+                            maxLength={TITLE_MAX}
+                            onChange={(e) => setTitleInput(e.target.value)}
+                            className="w-full h-24 resize-none rounded-lg border border-white/10 bg-[#110f0d] p-3 text-sm text-[#f3efe9] outline-none focus:border-[#d4a76a]"
+                        />
+                        <div className="flex justify-between text-[11px] text-[#a8a198]">
+                            <span>{titleInput.length}/{TITLE_MAX}</span>
+                            {titleInput.length > 70 && <span className="text-[#d4a76a]">Más corto se lee mejor</span>}
+                        </div>
+                    </section>
+
+                    <section className={panel}>
+                        <div className="flex items-center justify-between mb-2">
+                            <h2 className={label}>Copy sugerido · {format === "linkedin" ? "LinkedIn" : "Instagram"}</h2>
                             <button
-                                onClick={() => setPlatform("instagram")}
-                                className={`flex flex-col items-center justify-center gap-2 p-4 rounded-xl border-2 transition-all ${platform === "instagram"
-                                    ? "border-pink-500 bg-pink-50 text-pink-700"
-                                    : "border-gray-100 hover:border-gray-200 text-gray-500"
-                                    }`}
+                                onClick={() => copy(suggestedCopy, "Copy copiado al portapapeles")}
+                                className="flex items-center gap-1 text-xs font-medium text-[#d4a76a] hover:text-[#f3efe9] transition"
                             >
-                                <Instagram size={24} />
-                                <span className="text-sm font-medium">Instagram</span>
-                            </button>
-                            <button
-                                onClick={() => setPlatform("linkedin")}
-                                className={`flex flex-col items-center justify-center gap-2 p-4 rounded-xl border-2 transition-all ${platform === "linkedin"
-                                    ? "border-blue-600 bg-blue-50 text-blue-700"
-                                    : "border-gray-100 hover:border-gray-200 text-gray-500"
-                                    }`}
-                            >
-                                <Linkedin size={24} />
-                                <span className="text-sm font-medium">LinkedIn</span>
+                                <Copy size={12} /> Copiar texto
                             </button>
                         </div>
-                    </div>
+                        <p className="text-sm leading-relaxed text-[#f3efe9]/90 whitespace-pre-wrap">{suggestedCopy}</p>
+                    </section>
 
-                    {/* Text Editor */}
-                    <div className="space-y-3">
-                        <div className="flex justify-between items-center">
-                            <label className="text-sm font-semibold text-gray-900 uppercase tracking-wide">Personalización</label>
-
-                        </div>
-
-                        <div className="bg-gray-50 rounded-xl p-4 border border-gray-200 space-y-3">
-                            <div>
-                                <label className="text-xs text-gray-500 mb-1 block">Título</label>
-                                <textarea
-                                    value={customTitle}
-                                    onChange={(e) => setCustomTitle(e.target.value)}
-                                    className="w-full bg-white border border-gray-200 rounded-lg p-2 text-sm text-gray-900 focus:ring-2 focus:ring-black outline-none resize-none h-24"
-                                />
-                                <div className="flex justify-between mt-1">
-                                    <span className="text-[10px] text-gray-400">{customTitle.length} caracteres</span>
-                                    {platform === "instagram" && customTitle.length > 50 && (
-                                        <span className="text-[10px] text-amber-500 font-medium">Recomendado: 50 máx</span>
-                                    )}
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    {/* Copy Helper */}
-                    <div className="bg-indigo-50 border border-indigo-100 rounded-xl p-4">
-                        <div className="flex justify-between items-center mb-2">
-                            <h4 className="text-xs font-bold text-indigo-800 uppercase">Copy Sugerido ({platform === 'instagram' ? 'IG' : 'LI'})</h4>
-                        </div>
-
-                        <p className="text-sm text-indigo-900 leading-relaxed font-mono bg-white/50 p-2 rounded border border-indigo-100/50 whitespace-pre-wrap min-h-[100px]">
-                            {(() => {
-                                const hashtags = "#zetaprop #crmInmobiliario #gestiondealquileres #gestiondeemprendimientos #desarrollosinmobiliarios";
-
-                                // Robust Text Splitting Logic
-                                const cleanContent = post.content.replace(/<[^>]*>?/gm, '').trim();
-
-                                // Strategy 1: Split by double newlines (paragraphs)
-                                let paragraphs = cleanContent.split(/\n\n+/).map(p => p.trim()).filter(p => p.length > 50);
-
-                                // Strategy 2: If few paragraphs, split by single newlines
-                                if (paragraphs.length < 2) {
-                                    paragraphs = cleanContent.split(/\n/).map(p => p.trim()).filter(p => p.length > 50);
-                                }
-
-                                let p1 = post.excerpt && post.excerpt.length > 50 ? post.excerpt : paragraphs[0];
-
-                                // Fallback if p1 is still undefined or too short
-                                if (!p1 || p1.length < 20) {
-                                    p1 = cleanContent.substring(0, 160) + "...";
-                                }
-
-                                let p2 = "";
-                                if (paragraphs.length > 1) {
-                                    // Find the first paragraph that is NOT substantially similar to p1
-                                    const distinctP = paragraphs.find(p => !p.includes(p1.substring(0, 20)) && !p1.includes(p.substring(0, 20)));
-                                    if (distinctP) {
-                                        p2 = distinctP;
-                                    }
-                                }
-
-                                // Fallback: If still no p2, slice the content after p1
-                                if (!p2) {
-                                    const remainder = cleanContent.replace(p1.replace("...", ""), "").trim();
-                                    if (remainder.length > 50) {
-                                        p2 = remainder.substring(0, 160) + "...";
-                                    } else {
-                                        p2 = "Leé la nota completa en nuestro blog para enterarte de todos los detalles.";
-                                    }
-                                }
-
-                                // Truncate final strings
-                                const summary1 = p1.length > 200 ? p1.substring(0, 200) + "..." : p1;
-                                const summary2 = p2.length > 200 ? p2.substring(0, 200) + "..." : p2;
-
-                                const cta = "Más info en nuestro blog zetaprop.com.ar/blog";
-
-                                return `🔥 ${post.title}\n\n${summary1}\n\n${summary2}\n\n${cta}\n\n${hashtags}`;
-                            })()}
-                        </p>
-                        <button
-                            className="mt-2 text-xs text-indigo-600 font-bold hover:text-indigo-800 flex items-center gap-1"
-                            onClick={() => {
-                                const hashtags = "#zetaprop #crmInmobiliario #gestiondealquileres #gestiondeemprendimientos #desarrollosinmobiliarios";
-
-                                const cleanContent = post.content.replace(/<[^>]*>?/gm, '').trim();
-                                let paragraphs = cleanContent.split(/\n\n+/).map(p => p.trim()).filter(p => p.length > 50);
-                                if (paragraphs.length < 2) {
-                                    paragraphs = cleanContent.split(/\n/).map(p => p.trim()).filter(p => p.length > 50);
-                                }
-
-                                let p1 = post.excerpt && post.excerpt.length > 50 ? post.excerpt : paragraphs[0];
-                                if (!p1 || p1.length < 20) {
-                                    p1 = cleanContent.substring(0, 160) + "...";
-                                }
-
-                                let p2 = "";
-                                if (paragraphs.length > 1) {
-                                    const distinctP = paragraphs.find(p => !p.includes(p1.substring(0, 20)) && !p1.includes(p.substring(0, 20)));
-                                    if (distinctP) p2 = distinctP;
-                                }
-                                if (!p2) {
-                                    const remainder = cleanContent.replace(p1.replace("...", ""), "").trim();
-                                    if (remainder.length > 50) {
-                                        p2 = remainder.substring(0, 160) + "...";
-                                    } else {
-                                        p2 = "Leé la nota completa en nuestro blog para enterarte de todos los detalles.";
-                                    }
-                                }
-
-                                const summary1 = p1.length > 200 ? p1.substring(0, 200) + "..." : p1;
-                                const summary2 = p2.length > 200 ? p2.substring(0, 200) + "..." : p2;
-
-                                const cta = "Más info en nuestro blog zetaprop.com.ar/blog";
-                                const text = `🔥 ${post.title}\n\n${summary1}\n\n${summary2}\n\n${cta}\n\n${hashtags}`;
-
-                                navigator.clipboard.writeText(text);
-                                toast.success("Copy copiado al portapapeles");
-                            }}
-                        >
-                            <CopyIcon /> Copiar Texto
-                        </button>
-                    </div>
-
-                    {/* Link Helper */}
-                    <div className="bg-gray-50 border border-gray-200 rounded-xl p-4 flex items-center justify-between">
-                        <div className="overflow-hidden">
-                            <h4 className="text-xs font-bold text-gray-500 uppercase mb-1">Link del Post</h4>
-                            <p className="text-sm text-gray-900 truncate font-mono">
-                                zetaprop.com.ar/blog/{post.slug}
-                            </p>
+                    <section className={`${panel} flex items-center justify-between gap-3`}>
+                        <div className="min-w-0">
+                            <h2 className={`${label} mb-1`}>Link de la nota</h2>
+                            <p className="text-sm truncate font-mono">zetaprop.com.ar/blog/{post.slug}</p>
                         </div>
                         <button
-                            onClick={() => {
-                                const url = `https://zetaprop.com.ar/blog/${post.slug}`;
-                                navigator.clipboard.writeText(url);
-                                toast.success("Link copiado al portapapeles");
-                            }}
-                            className="p-2 text-gray-500 hover:text-indigo-600 hover:bg-indigo-50 rounded-lg transition"
-                            title="Copiar Link"
+                            onClick={() => copy(`https://zetaprop.com.ar/blog/${post.slug}`, "Link copiado al portapapeles")}
+                            className="p-2 rounded-lg text-[#a8a198] hover:text-[#d4a76a] hover:bg-white/5 transition"
+                            title="Copiar link de la nota"
                         >
                             <LinkIcon size={18} />
                         </button>
-                    </div>
-
+                    </section>
                 </div>
 
-                <div className="p-6 border-t border-gray-100 bg-gray-50">
+                <div className="p-6 border-t border-white/10 space-y-2">
+                    {user && (
+                        <div className="pb-2">
+                            <button
+                                onClick={handleAnnounce}
+                                disabled={sending}
+                                className="w-full flex items-center justify-center gap-2 rounded-xl border border-[#d4a76a] py-3 text-sm font-semibold text-[#d4a76a] hover:bg-[#d4a76a]/10 transition disabled:opacity-60"
+                            >
+                                {sending ? <Loader2 size={16} className="animate-spin" /> : <Send size={16} />}
+                                {sending ? "Enviando..." : "Enviar a redes ahora"}
+                            </button>
+                            {announcedAt && (
+                                <p className="mt-2 text-center text-[11px] text-[#a8a198]">
+                                    Ya enviado el {announcedAt.toLocaleString("es-AR", { dateStyle: "short", timeStyle: "short" })}
+                                </p>
+                            )}
+                        </div>
+                    )}
                     <button
                         onClick={handleDownload}
-                        className="w-full bg-black text-white py-4 rounded-xl font-bold flex items-center justify-center gap-2 hover:bg-gray-800 transition shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 active:translate-y-0"
+                        className="w-full flex items-center justify-center gap-2 rounded-xl bg-[#d4a76a] py-3.5 font-semibold text-[#110f0d] hover:bg-[#e0b97f] transition"
                     >
-                        <Download size={20} />
-                        Descargar {platform === "instagram" ? "Post IG" : "Banner LI"}
+                        <Download size={18} /> Descargar
+                    </button>
+                    <button
+                        onClick={() => copy(`${origin}${imagePath}`, "Link de la imagen copiado")}
+                        className="w-full flex items-center justify-center gap-2 rounded-xl border border-white/15 py-3 text-sm font-medium text-[#f3efe9] hover:border-[#d4a76a] transition"
+                    >
+                        <ImageIcon size={16} /> Copiar link de la imagen
                     </button>
                 </div>
-            </div>
+            </aside>
 
-            {/* Preview Area */}
-            <div className="flex-1 overflow-auto bg-gray-200 flex items-center justify-center p-8">
-                <div className="transform scale-[0.6] md:scale-[0.8] lg:scale-[0.9] origin-center transition-all duration-300 shadow-2xl rounded-sm"> // Scale down to fit screen
-                    {platform === "instagram" ? (
-                        <InstagramCanvas ref={canvasRef} post={post} customTitle={customTitle} />
-                    ) : (
-                        <LinkedInCanvas ref={canvasRef} post={post} customTitle={customTitle} />
+            {/* Preview */}
+            <main className="flex-1 flex items-center justify-center p-6 lg:p-10">
+                <div
+                    className="relative w-full max-h-[calc(100vh-5rem)] rounded-md overflow-hidden border border-white/10 shadow-2xl bg-[#161310]"
+                    style={{ aspectRatio: current.ratio, maxWidth: `min(100%, calc((100vh - 5rem) * ${current.ratio}))` }}
+                >
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img
+                        src={imagePath}
+                        alt={`Vista previa ${current.label} ${current.hint}`}
+                        className="w-full h-full object-contain"
+                        onLoad={() => setImageLoading(false)}
+                        onError={() => setImageLoading(false)}
+                    />
+                    {imageLoading && (
+                        <div className="absolute inset-0 flex items-center justify-center bg-[#110f0d]/60">
+                            <Loader2 className="w-8 h-8 animate-spin text-[#d4a76a]" />
+                        </div>
                     )}
                 </div>
-            </div>
+            </main>
         </div>
     );
-}
-
-// Icons helper
-function SparklesIcon() {
-    return (
-        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12l5.813 1.912a2 2 0 0 1 1.275 1.275L12 21l1.912-5.813a2 2 0 0 1 1.275-1.275L21 12l-5.813-1.912a2 2 0 0 1-1.275-1.275L12 3Z" /><path d="M5 3v4" /><path d="M9 3v4" /><path d="M3 9h4" /><path d="M3 5h4" /></svg>
-    )
-}
-
-function CopyIcon() {
-    return (
-        <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect width="14" height="14" x="8" y="8" rx="2" ry="2" /><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2" /></svg>
-    )
 }

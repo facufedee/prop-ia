@@ -8,16 +8,9 @@ import { LANDING_PHOTOS, photoThumb } from "../landingPhotos";
 // Leads, visits, valuation, sales reports, team and branches are Pro-plan features.
 // Product compositions use illustrative sample data, not real customers.
 
-const PIPELINE = [
-    { stage: "Nuevo", count: 6, cards: [{ name: "Carla Ruiz", detail: "Casa en Castelar · Web" }, { name: "Pablo Díaz", detail: "Depto en Morón · WhatsApp" }] },
-    { stage: "Contactado", count: 4, cards: [{ name: "Ana Torres", detail: "PH en Haedo · Instagram" }, { name: "Diego Sosa", detail: "Local en Morón · Teléfono" }] },
-    { stage: "Visita", count: 3, cards: [{ name: "Jorge Paz", detail: "Casa en Ituzaingó · Referido" }, { name: "Sofía Vera", detail: "Depto en Haedo · Web" }] },
-    { stage: "Negociación", count: 2, cards: [{ name: "Laura Gil", detail: "Depto en Palermo · Portal" }, { name: "Hugo Rey", detail: "Casa en Castelar · Email" }] },
-];
-
 export function PropertiesHero() {
     return (
-        <PhotoHero photo={LANDING_PHOTOS.properties} labelledBy="properties-title" aside={<PropertiesHeroVisual />}>
+        <PhotoHero photo={LANDING_PHOTOS.properties} labelledBy="properties-title" motion="zoom">
             <h1 id="properties-title">
                 <span className="l-hero__eyebrow l-h1-kicker">CRM inmobiliario y gestión de propiedades</span>{" "}
                 Tu cartera ordenada, <em>de la captación al cierre.</em>
@@ -35,40 +28,6 @@ export function PropertiesHero() {
             </div>
             <p className="l-hero__fineprint">Sin tarjeta de crédito ni pagos anticipados.</p>
         </PhotoHero>
-    );
-}
-
-function PropertiesHeroVisual() {
-    return (
-        <div aria-hidden="true">
-            <div className="l-sheet">
-                <div className="l-sheet__head">
-                    <p className="l-sheet__title">Interesados</p>
-                    <p className="l-sheet__meta">15 en curso · 3 cerrados este mes</p>
-                </div>
-                <div className="l-board">
-                    {PIPELINE.map((col) => (
-                        <div key={col.stage} className="l-board__col">
-                            <p className="l-board__head">
-                                {col.stage} <span>{col.count}</span>
-                            </p>
-                            {col.cards.map((card) => (
-                                <div key={card.name} className="l-board__card">
-                                    <p>{card.name}</p>
-                                    <p>{card.detail}</p>
-                                </div>
-                            ))}
-                        </div>
-                    ))}
-                </div>
-            </div>
-            <div className="l-hero__note">
-                <p>Visita agendada · sábado 11:00</p>
-                <p>
-                    <strong>Carla Ruiz</strong> visita la casa de Castelar con Martín.
-                </p>
-            </div>
-        </div>
     );
 }
 
