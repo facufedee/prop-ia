@@ -9,49 +9,9 @@ import { LANDING_PHOTOS, photoThumb } from "../landingPhotos";
 
 const THUMBS = [photoThumb(LANDING_PHOTOS.properties), photoThumb(LANDING_PHOTOS.interior2), photoThumb(LANDING_PHOTOS.dusk)];
 
-function SitePreview({ compact = false }: { compact?: boolean }) {
-    const cards = [
-        { title: "Casa 4 ambientes", place: "Castelar", price: "USD 189.000" },
-        { title: "Depto 2 ambientes", place: "Morón", price: "USD 98.500" },
-        { title: "PH con patio", place: "Haedo", price: "$780.000/mes" },
-    ];
-    return (
-        <div className="l-sheet l-browser">
-            <div className="l-browser__bar">
-                <span className="l-browser__dots">
-                    <span />
-                    <span />
-                    <span />
-                </span>
-                <span className="l-browser__url">garciapropiedades.zetaprop.com.ar</span>
-            </div>
-            <div className="l-site">
-                <div className="l-site__nav">
-                    <span className="l-site__brand">García Propiedades</span>
-                    <span>Comprar · Alquilar · Contacto</span>
-                </div>
-                {!compact && <p className="l-site__hero">Encontrá tu próxima casa en el oeste.</p>}
-                <div className="l-site__search">
-                    <span>Venta · Casa · 3+ ambientes</span>
-                    <span>Buscar</span>
-                </div>
-                <div className="l-site__cards">
-                    {cards.map((card, i) => (
-                        <div key={card.title}>
-                            <span style={{ ["--thumb" as string]: THUMBS[i] }} />
-                            <strong className="l-site__price">{card.price}</strong>
-                            {card.title} · {card.place}
-                        </div>
-                    ))}
-                </div>
-            </div>
-        </div>
-    );
-}
-
 export function WebsiteHero() {
     return (
-        <PhotoHero photo={LANDING_PHOTOS.website} labelledBy="website-title" aside={<WebsiteHeroVisual />}>
+        <PhotoHero photo={LANDING_PHOTOS.website} labelledBy="website-title" motion="zoom">
             <h1 id="website-title">
                 <span className="l-hero__eyebrow l-h1-kicker">Página web para inmobiliarias</span>{" "}
                 Una web con tu marca que se <em>actualiza sola.</em>
@@ -69,20 +29,6 @@ export function WebsiteHero() {
             </div>
             <p className="l-hero__fineprint">Incluida en todos los planes. 14 días gratis, sin tarjeta.</p>
         </PhotoHero>
-    );
-}
-
-function WebsiteHeroVisual() {
-    return (
-        <div aria-hidden="true">
-            <SitePreview />
-            <div className="l-hero__note">
-                <p>Nueva consulta desde tu web</p>
-                <p>
-                    <strong>Carla Ruiz</strong> pregunta por la casa de Castelar. Ya está en tus consultas.
-                </p>
-            </div>
-        </div>
     );
 }
 
