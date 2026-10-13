@@ -10,14 +10,21 @@ Cuando se publica una nota del blog, la app le avisa a un escenario de Make.com 
 
 Las notas con fecha de publicación futura no se envían (el link todavía daría 404).
 
-## 1. Variables de entorno en Vercel
+## 1. Secretos en Firebase App Hosting
 
 | Variable | Valor |
 | --- | --- |
 | `MAKE_SOCIAL_WEBHOOK_URL` | La URL del webhook de Make (paso 2). Sin esta variable no se envía nada. |
 | `MAKE_SOCIAL_WEBHOOK_SECRET` | Opcional. Un texto largo al azar. Se manda en el header `x-zetaprop-secret`. |
 
-Después de cargarlas, hacé un redeploy.
+Las dos están declaradas en `apphosting.yaml` como secretos. Cargalos con la CLI de Firebase (te pide el valor y te ofrece darle acceso al backend: respondé que sí):
+
+```bash
+firebase apphosting:secrets:set MAKE_SOCIAL_WEBHOOK_URL
+firebase apphosting:secrets:set MAKE_SOCIAL_WEBHOOK_SECRET
+```
+
+Los secretos tienen que existir antes del próximo deploy: si `apphosting.yaml` referencia un secreto que no existe, el build falla. Después de cargarlos, hacé un nuevo rollout.
 
 ## 2. Escenario en Make, paso a paso
 
