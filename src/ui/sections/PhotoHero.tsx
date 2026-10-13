@@ -12,11 +12,13 @@ interface PhotoHeroProps {
     backdrop?: ReactNode;
     children: ReactNode;
     aside?: ReactNode;
+    /** "zoom": slow Ken Burns push-in on the photo (off by default; disabled under reduced motion). */
+    motion?: "none" | "zoom";
 }
 
-export function PhotoHero({ photo, labelledBy, variant = "default", backdrop, children, aside }: PhotoHeroProps) {
+export function PhotoHero({ photo, labelledBy, variant = "default", backdrop, children, aside, motion = "none" }: PhotoHeroProps) {
     return (
-        <section className={`l-hero l-hero--${variant}`} aria-labelledby={labelledBy}>
+        <section className={`l-hero l-hero--${variant}${motion === "zoom" ? " l-hero--zoom" : ""}`} aria-labelledby={labelledBy}>
             <div className="l-hero__frame">
                 {backdrop ?? <Image src={photoSrc(photo)} alt="" fill priority sizes="100vw" className="l-hero__photo" />}
                 <div className="l-hero__scrim" aria-hidden="true" />
@@ -37,7 +39,7 @@ export function PhotoHero({ photo, labelledBy, variant = "default", backdrop, ch
 
 export function PrimaryCta({ href, children }: { href: string; children: ReactNode }) {
     return (
-        <Link href={href} className="l-btn l-btn--primary">
+        <Link href={href} className="l-btn l-btn--primary l-btn--cta">
             {children}
             <span className="l-btn__icon" aria-hidden="true">
                 <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">

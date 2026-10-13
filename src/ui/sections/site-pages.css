@@ -4243,3 +4243,133 @@ a.s-auth-submit {
   color: var(--color-ink-2);
   margin: 0 0 0.5rem;
 }
+
+/* ============================================================
+   Floating WhatsApp button + delayed speech-bubble nudge
+   (WhatsappButton.tsx, rendered inside .landing-page on public pages).
+   ============================================================ */
+
+.s-wa {
+  position: fixed;
+  right: 1.5rem;
+  bottom: 1.5rem;
+  z-index: 9999;
+  display: flex;
+  align-items: center;
+  gap: 0.625rem;
+}
+
+.s-wa__nudge {
+  position: relative;
+  display: flex;
+  align-items: center;
+  max-width: calc(100vw - 6.5rem);
+  padding-left: 1rem;
+  background: var(--color-paper-2);
+  border: 1px solid var(--color-rule);
+  border-radius: 999px;
+  color: var(--color-ink);
+  font-size: var(--text-sm);
+  font-weight: 500;
+  box-shadow: 0 16px 32px -18px oklch(8% 0.004 70 / 0.7);
+  animation: s-wa-nudge-in 420ms var(--ease-out) both;
+}
+
+/* Tail pointing at the button. */
+.s-wa__nudge::after {
+  content: "";
+  position: absolute;
+  top: 50%;
+  right: -5px;
+  width: 9px;
+  height: 9px;
+  background: var(--color-paper-2);
+  border-top: 1px solid var(--color-rule);
+  border-right: 1px solid var(--color-rule);
+  transform: translateY(-50%) rotate(45deg);
+}
+
+.s-wa__nudge-link {
+  color: inherit;
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+.s-wa__nudge-link:hover {
+  color: var(--color-accent);
+}
+
+.s-wa__nudge-long {
+  display: none;
+}
+
+.s-wa__close {
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  color: var(--color-ink-2);
+  background: transparent;
+  cursor: pointer;
+}
+
+.s-wa__close:hover {
+  color: var(--color-ink);
+}
+
+@media (min-width: 48rem) {
+  .s-wa__nudge-long {
+    display: inline;
+  }
+
+  .s-wa__nudge-short {
+    display: none;
+  }
+}
+
+@media (max-width: 47.99rem) {
+  .s-wa__nudge--desktop-only {
+    display: none;
+  }
+}
+
+/* One-time pulse ring when the nudge appears (two beats, then stops). */
+.s-wa__fab--pulse::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  box-shadow: 0 0 0 0 rgb(37 211 102 / 0.55);
+  animation: s-wa-pulse 1.6s ease-out 2;
+  pointer-events: none;
+}
+
+@keyframes s-wa-nudge-in {
+  from {
+    opacity: 0;
+    transform: translateX(8px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes s-wa-pulse {
+  to {
+    box-shadow: 0 0 0 14px rgb(37 211 102 / 0);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .s-wa__nudge {
+    animation: none;
+  }
+
+  .s-wa__fab--pulse::after {
+    animation: none;
+  }
+}
