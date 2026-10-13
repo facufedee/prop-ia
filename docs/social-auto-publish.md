@@ -15,7 +15,7 @@ Las notas con fecha de publicación futura no se envían (el link todavía darí
 | Variable | Valor |
 | --- | --- |
 | `MAKE_SOCIAL_WEBHOOK_URL` | La URL del webhook de Make (paso 2). Sin esta variable no se envía nada. |
-| `MAKE_SOCIAL_WEBHOOK_SECRET` | Opcional. Un texto largo al azar. Se manda en el header `x-zetaprop-secret`. |
+| `MAKE_SOCIAL_WEBHOOK_SECRET` | Un texto largo al azar (tiene que existir: `apphosting.yaml` lo pide). Se manda en el campo `secret` de los datos y en el header `x-zetaprop-secret`. |
 
 Las dos están declaradas en `apphosting.yaml` como secretos. Cargalos con la CLI de Firebase (te pide el valor y te ofrece darle acceso al backend: respondé que sí):
 
@@ -33,7 +33,7 @@ Los nombres de los módulos pueden variar un poco según la versión de Make; bu
 1. **Webhooks → Custom webhook**. Creá uno nuevo y copiá la URL a `MAKE_SOCIAL_WEBHOOK_URL`.
    - En "Advanced settings" activá **Get request headers** si vas a validar el secreto.
    - Para definir la estructura, usá "Redetermine data structure" y mandá el ejemplo de abajo (por ejemplo con el botón del generador una vez deployado, o con Postman/curl).
-2. **Filtro (opcional)** entre el webhook y el router: header `x-zetaprop-secret` **igual a** tu `MAKE_SOCIAL_WEBHOOK_SECRET`.
+2. **Filtro (opcional)** entre el webhook y el router: campo `secret` del webhook **igual a** tu `MAKE_SOCIAL_WEBHOOK_SECRET` (Text operators: Equal to).
 3. **Router** con dos rutas:
    - **Instagram for Business → Create a Photo Post**
      - Photo URL: `images.instagram`

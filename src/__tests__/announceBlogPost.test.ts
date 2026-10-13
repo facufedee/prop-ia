@@ -94,6 +94,8 @@ describe('announceBlogPost', () => {
 
         const body = JSON.parse(init.body);
         expect(body.event).toBe('blog.published');
+        // Sent in the body too so a Make filter can match it without parsing headers.
+        expect(body.secret).toBe('make-secret');
         expect(body.post).toMatchObject({
             id: 'post_1',
             slug: 'como-ajustar-alquileres',

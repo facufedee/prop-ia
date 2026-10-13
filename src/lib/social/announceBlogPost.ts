@@ -108,7 +108,8 @@ export async function announceBlogPost(postId: string, options: { force?: boolea
         const res = await fetch(webhookUrl, {
             method: "POST",
             headers,
-            body: JSON.stringify(buildPayload(postId, data)),
+            // The secret also travels in the body so a Make filter can compare it directly.
+            body: JSON.stringify({ ...buildPayload(postId, data), ...(secret ? { secret } : {}) }),
             signal: AbortSignal.timeout(TIMEOUT_MS),
         });
         if (!res.ok) error = `Webhook responded ${res.status}`;
