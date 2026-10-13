@@ -4,8 +4,10 @@ import { NextRequest } from 'next/server';
 
 const sendNewsletterMock = vi.fn();
 const addMock = vi.fn();
+const announceMock = vi.fn();
 
 vi.mock('@/lib/newsletter/sendNewsletter', () => ({ sendNewsletter: sendNewsletterMock }));
+vi.mock('@/lib/social/announceBlogPost', () => ({ announceBlogPost: announceMock }));
 
 vi.mock('@/infrastructure/firebase/admin', () => ({
     adminDb: {
@@ -47,6 +49,7 @@ describe('POST /api/cron/publish-blog-post', () => {
         process.env.BLOG_AUTOPUBLISH_SECRET = 'blog-secret';
         sendNewsletterMock.mockReset();
         addMock.mockReset().mockResolvedValue({ id: 'post_1' });
+        announceMock.mockReset().mockResolvedValue({ status: 'sent' });
         vi.stubGlobal(
             'fetch',
             vi.fn().mockResolvedValue({
@@ -80,5 +83,28 @@ describe('POST /api/cron/publish-blog-post', () => {
         expect(res.status).toBe(200);
         expect(body.success).toBe(true);
         expect(body.newsletter).toEqual({ status: 'error', error: 'Resend down' });
+    });
+
+    it('announces the published post to social and reports the status', async () => {
+        sendNewsletterMock.mockResolvedValue({ status: 'skipped' });
+        const { POST } = await import('../app/api/cron/publish-blog-post/route');
+
+        const body = await (await POST(publishRequest())).json();
+
+        expect(announceMock).toHaveBeenCalledWith('post_1');
+        expect(body.social).toEqual({ status: 'sent' });
+    });
+
+    it('still reports the publish as successful when the social announce throws', async () => {
+        sendNewsletterMock.mockResolvedValue({ status: 'skipped' });
+        announceMock.mockRejectedValue(new Error('boom'));
+        const { POST } = await import('../app/api/cron/publish-blog-post/route');
+
+        const res = await POST(publishRequest());
+        const body = await res.json();
+
+        expect(res.status).toBe(200);
+        expect(body.success).toBe(true);
+        expect(body.social).toEqual({ status: 'failed' });
     });
 });

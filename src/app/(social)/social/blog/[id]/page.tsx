@@ -2,11 +2,14 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
-import { doc, getDoc } from "firebase/firestore";
+import { doc, getDoc, Timestamp } from "firebase/firestore";
 import { db } from "@/infrastructure/firebase/client";
 import { BlogPost } from "@/infrastructure/services/blogService";
-import { Loader2, ArrowLeft, Download, Copy, Link as LinkIcon, ImageIcon } from "lucide-react";
+import { Loader2, ArrowLeft, Download, Copy, Link as LinkIcon, ImageIcon, Send } from "lucide-react";
 import { toast } from "sonner";
+import { useAuth } from "@/ui/context/AuthContext";
+import { buildInstagramCaption, buildLinkedInCaption } from "@/lib/social/blogCaptions";
+import { announceMessage, requestAnnounce } from "@/lib/social/requestAnnounce";
 
 type Format = "instagram" | "square" | "linkedin";
 
@@ -17,37 +20,16 @@ const FORMATS: { id: Format; label: string; hint: string; ratio: string }[] = [
 ];
 
 const TITLE_MAX = 120;
-const HASHTAGS = "#ZetaProp #inmobiliarias #softwareinmobiliario #gestiondealquileres #desarrollosinmobiliarios";
 
-function truncate(text: string, max: number): string {
-    return text.length > max ? `${text.slice(0, max).trimEnd()}...` : text;
-}
-
-// Builds the suggested caption: title, two short paragraphs, CTA and hashtags.
-function buildCopy(post: BlogPost): string {
-    const plain = post.content.replace(/<[^>]*>?/gm, "").trim();
-    let paragraphs = plain.split(/\n\n+/).map((p) => p.trim()).filter((p) => p.length > 50);
-    if (paragraphs.length < 2) {
-        paragraphs = plain.split(/\n/).map((p) => p.trim()).filter((p) => p.length > 50);
-    }
-
-    let first = post.excerpt && post.excerpt.length > 50 ? post.excerpt : paragraphs[0];
-    if (!first || first.length < 20) first = `${plain.substring(0, 160)}...`;
-
-    let second = paragraphs.find((p) => !p.includes(first.substring(0, 20)) && !first.includes(p.substring(0, 20))) ?? "";
-    if (!second) {
-        const remainder = plain.replace(first.replace("...", ""), "").trim();
-        second = remainder.length > 50 ? `${remainder.substring(0, 160)}...` : "";
-    }
-
-    const cta = `Leé la nota completa en zetaprop.com.ar/blog/${post.slug}`;
-    return [post.title, truncate(first, 200), second && truncate(second, 200), cta, HASHTAGS].filter(Boolean).join("\n\n");
-}
+type SocialPost = BlogPost & { socialAnnouncedAt?: Timestamp };
 
 export default function SocialGeneratorPage() {
     const { id } = useParams<{ id: string }>();
     const router = useRouter();
-    const [post, setPost] = useState<BlogPost | null>(null);
+    const { user } = useAuth();
+    const [post, setPost] = useState<SocialPost | null>(null);
+    const [announcedAt, setAnnouncedAt] = useState<Date | null>(null);
+    const [sending, setSending] = useState(false);
     const [loading, setLoading] = useState(true);
     const [format, setFormat] = useState<Format>("instagram");
     const [titleInput, setTitleInput] = useState("");
@@ -62,8 +44,9 @@ export default function SocialGeneratorPage() {
             try {
                 const snap = await getDoc(doc(db, "blog_posts", id));
                 if (snap.exists()) {
-                    const data = { id: snap.id, ...snap.data() } as BlogPost;
+                    const data = { id: snap.id, ...snap.data() } as SocialPost;
                     setPost(data);
+                    setAnnouncedAt(data.socialAnnouncedAt?.toDate?.() ?? null);
                     setTitleInput(data.title);
                     setTitle(data.title);
                 }
@@ -90,7 +73,12 @@ export default function SocialGeneratorPage() {
 
     useEffect(() => setImageLoading(true), [imagePath]);
 
-    const suggestedCopy = useMemo(() => (post ? buildCopy(post) : ""), [post]);
+    const suggestedCopy = useMemo(() => {
+        if (!post) return "";
+        return format === "linkedin"
+            ? buildLinkedInCaption(post, `https://zetaprop.com.ar/blog/${post.slug}`)
+            : buildInstagramCaption(post);
+    }, [post, format]);
     const current = FORMATS.find((f) => f.id === format)!;
 
     const copy = async (text: string, message: string) => {
@@ -99,6 +87,26 @@ export default function SocialGeneratorPage() {
             toast.success(message);
         } catch {
             toast.error("No se pudo copiar. Probá de nuevo.");
+        }
+    };
+
+    // Re-sends the post to the Make.com scenario (Instagram + LinkedIn).
+    const handleAnnounce = async () => {
+        if (!user || !post?.id || sending) return;
+        const ask = announcedAt
+            ? "Esta nota ya se envió a redes. ¿Querés volver a publicarla en Instagram y LinkedIn?"
+            : "¿Querés publicar esta nota en Instagram y LinkedIn ahora?";
+        if (!window.confirm(ask)) return;
+        setSending(true);
+        try {
+            const result = await requestAnnounce(post.id, await user.getIdToken(), true);
+            const { kind, text } = announceMessage(result);
+            toast[kind](text);
+            if (result.status === "sent") setAnnouncedAt(new Date());
+        } catch {
+            toast.error(announceMessage({ status: "failed" }).text);
+        } finally {
+            setSending(false);
         }
     };
 
@@ -189,7 +197,7 @@ export default function SocialGeneratorPage() {
 
                     <section className={panel}>
                         <div className="flex items-center justify-between mb-2">
-                            <h2 className={label}>Copy sugerido</h2>
+                            <h2 className={label}>Copy sugerido · {format === "linkedin" ? "LinkedIn" : "Instagram"}</h2>
                             <button
                                 onClick={() => copy(suggestedCopy, "Copy copiado al portapapeles")}
                                 className="flex items-center gap-1 text-xs font-medium text-[#d4a76a] hover:text-[#f3efe9] transition"
@@ -216,6 +224,23 @@ export default function SocialGeneratorPage() {
                 </div>
 
                 <div className="p-6 border-t border-white/10 space-y-2">
+                    {user && (
+                        <div className="pb-2">
+                            <button
+                                onClick={handleAnnounce}
+                                disabled={sending}
+                                className="w-full flex items-center justify-center gap-2 rounded-xl border border-[#d4a76a] py-3 text-sm font-semibold text-[#d4a76a] hover:bg-[#d4a76a]/10 transition disabled:opacity-60"
+                            >
+                                {sending ? <Loader2 size={16} className="animate-spin" /> : <Send size={16} />}
+                                {sending ? "Enviando..." : "Enviar a redes ahora"}
+                            </button>
+                            {announcedAt && (
+                                <p className="mt-2 text-center text-[11px] text-[#a8a198]">
+                                    Ya enviado el {announcedAt.toLocaleString("es-AR", { dateStyle: "short", timeStyle: "short" })}
+                                </p>
+                            )}
+                        </div>
+                    )}
                     <button
                         onClick={handleDownload}
                         className="w-full flex items-center justify-center gap-2 rounded-xl bg-[#d4a76a] py-3.5 font-semibold text-[#110f0d] hover:bg-[#e0b97f] transition"

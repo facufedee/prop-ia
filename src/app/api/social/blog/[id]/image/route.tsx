@@ -3,7 +3,8 @@ import { adminDb } from "@/infrastructure/firebase/admin";
 
 // Server-rendered social images for blog posts. Stable public URL so a future
 // auto-publisher (Instagram Graph API / LinkedIn API) can reference it:
-//   /api/social/blog/{id}/image?format=instagram|square|linkedin[&title=...]
+//   /api/social/blog/{id}/image?format=instagram|square|linkedin[&title=...][&type=jpeg]
+// PNG by default; `type=jpeg` returns a JPEG (required by Instagram).
 export const runtime = "nodejs";
 
 const PAPER = "#110f0d";
@@ -230,8 +231,23 @@ export async function GET(request: Request, { params }: { params: Promise<{ id: 
     };
 
     const { width, height } = FORMATS[format];
-    return new ImageResponse(
+    const image = new ImageResponse(
         format === "linkedin" ? <Landscape c={content} /> : <Portrait format={format} c={content} />,
         { width, height, headers: { "Cache-Control": CACHE_CONTROL } }
     );
+    if (search.get("type") !== "jpeg") return image;
+
+    // Instagram's Graph API only accepts JPEG. sharp ships with Next.js (its
+    // image optimizer dependency), so it is loaded lazily only for this path.
+    try {
+        const { default: sharp } = await import("sharp");
+        const png = Buffer.from(await image.arrayBuffer());
+        const jpeg = await sharp(png).flatten({ background: PAPER }).jpeg({ quality: 88, mozjpeg: true }).toBuffer();
+        return new Response(new Uint8Array(jpeg), {
+            headers: { "Content-Type": "image/jpeg", "Cache-Control": CACHE_CONTROL },
+        });
+    } catch (error) {
+        console.error("social image: JPEG conversion failed", error);
+        return new Response("Error", { status: 500 });
+    }
 }
