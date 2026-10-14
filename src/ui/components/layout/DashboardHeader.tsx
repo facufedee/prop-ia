@@ -14,10 +14,7 @@ import {
     X,
     ExternalLink,
     Building2,
-    Sun,
-    Moon,
 } from "lucide-react";
-import { useTheme } from "@/ui/context/ThemeContext";
 import { auth, db } from "@/infrastructure/firebase/client";
 import { onAuthStateChanged, signOut, User as FirebaseUser } from "firebase/auth";
 import { doc, onSnapshot, collection, query, where } from "firebase/firestore";
@@ -136,10 +133,9 @@ export default function DashboardHeader({ onMobileMenuClick }: DashboardHeaderPr
     };
 
     const unreadCount = notifications.filter(n => !n.readBy.includes(user?.uid || '')).length;
-    const { theme, toggleTheme } = useTheme();
 
     return (
-        <header className="bg-white/80 dark:bg-gray-900/80 backdrop-blur-md border-b border-gray-200 dark:border-white/10 h-16 px-4 md:px-8 flex items-center justify-between sticky top-0 z-40 shadow-sm dark:shadow-black/20">
+        <header className="bg-[var(--color-paper)]/90 backdrop-blur-md border-b border-[var(--color-rule)] h-16 px-4 md:px-8 flex items-center justify-between sticky top-0 z-40">
             {/* Left Section */}
             <div className="flex items-center gap-4">
                 <button
@@ -294,18 +290,6 @@ export default function DashboardHeader({ onMobileMenuClick }: DashboardHeaderPr
                     )}
                 </div>
 
-                {/* Theme Toggle */}
-                <button
-                    onClick={toggleTheme}
-                    className="p-2 rounded-full text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-white/10 transition-colors"
-                    title={theme === "dark" ? "Cambiar a modo claro" : "Cambiar a modo oscuro"}
-                >
-                    {theme === "dark"
-                        ? <Sun className="w-5 h-5 text-amber-400" />
-                        : <Moon className="w-5 h-5" />
-                    }
-                </button>
-
                 <div className="h-8 w-px bg-gray-200 dark:bg-white/10 hidden md:block"></div>
 
                 {/* User Menu */}
@@ -346,7 +330,7 @@ export default function DashboardHeader({ onMobileMenuClick }: DashboardHeaderPr
                                     <UserIcon size={16} />
                                     Mi Perfil / Inmobiliaria
                                 </Link>
-                                <div className="border-t border-gray-50 my-1"></div>
+                                <div className="border-t border-gray-100 dark:border-white/10 my-1"></div>
                                 <button
                                     onClick={async () => {
                                         if (auth) {
@@ -354,7 +338,7 @@ export default function DashboardHeader({ onMobileMenuClick }: DashboardHeaderPr
                                             router.push('/login');
                                         }
                                     }}
-                                    className="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-red-600 hover:bg-red-50 transition-colors"
+                                    className="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-950/30 transition-colors"
                                 >
                                     <LogOut size={16} />
                                     Cerrar Sesión

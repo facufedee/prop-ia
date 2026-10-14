@@ -62,9 +62,9 @@ export function MiniCalendar({ eventDates }: MiniCalendarProps) {
     const getFeriado = (day: Date) => FERIADOS_2026.find((f) => isSameDay(f.date, day));
 
     return (
-        <div className="bg-white rounded-2xl border border-gray-200 shadow-sm p-4">
+        <div className="bg-white dark:bg-[var(--color-paper-2)] rounded-2xl border border-gray-200 dark:border-[var(--color-rule)] shadow-sm p-4">
             <div className="flex items-center justify-between mb-3">
-                <h3 className="text-[13px] font-bold text-gray-900 capitalize">
+                <h3 className="text-[13px] font-bold text-gray-900 dark:text-[var(--color-ink)] capitalize">
                     {format(viewDate, "MMMM yyyy", { locale: es })}
                 </h3>
                 <div className="flex items-center gap-1">
@@ -72,7 +72,7 @@ export function MiniCalendar({ eventDates }: MiniCalendarProps) {
                         type="button"
                         onClick={() => setViewDate((d) => subMonths(d, 1))}
                         aria-label="Mes anterior"
-                        className="p-1 rounded-lg hover:bg-gray-100 text-gray-400 hover:text-gray-700 transition-colors"
+                        className="p-1 rounded-lg hover:bg-gray-100 dark:hover:bg-[var(--color-paper-4)] text-gray-400 dark:text-[var(--color-muted)] hover:text-gray-700 dark:hover:text-[var(--color-ink)] transition-colors"
                     >
                         <ChevronLeft size={14} />
                     </button>
@@ -80,7 +80,7 @@ export function MiniCalendar({ eventDates }: MiniCalendarProps) {
                         type="button"
                         onClick={() => setViewDate((d) => addMonths(d, 1))}
                         aria-label="Mes siguiente"
-                        className="p-1 rounded-lg hover:bg-gray-100 text-gray-400 hover:text-gray-700 transition-colors"
+                        className="p-1 rounded-lg hover:bg-gray-100 dark:hover:bg-[var(--color-paper-4)] text-gray-400 dark:text-[var(--color-muted)] hover:text-gray-700 dark:hover:text-[var(--color-ink)] transition-colors"
                     >
                         <ChevronRight size={14} />
                     </button>
@@ -89,7 +89,7 @@ export function MiniCalendar({ eventDates }: MiniCalendarProps) {
 
             <div className="grid grid-cols-7 gap-y-1">
                 {WEEKDAY_LABELS.map((label) => (
-                    <div key={label} className="text-center text-[9px] font-bold text-gray-400 pb-1">
+                    <div key={label} className="text-center text-[9px] font-bold text-gray-400 dark:text-[var(--color-neutral)] pb-1">
                         {label}
                     </div>
                 ))}
@@ -108,14 +108,14 @@ export function MiniCalendar({ eventDates }: MiniCalendarProps) {
                             <div
                                 title={titleParts.join(" · ") || undefined}
                                 className={`w-6 h-6 flex items-center justify-center rounded-full text-[11px] font-semibold relative
-                                    ${today ? "bg-indigo-900 text-white" : feriado && inMonth ? "text-rose-600" : inMonth ? "text-gray-700" : "text-gray-300"}
+                                    ${today ? "bg-[var(--color-accent)] text-[var(--color-paper)] font-bold shadow-sm" : feriado && inMonth ? "text-rose-500" : inMonth ? "text-gray-700 dark:text-[var(--color-ink-2)]" : "text-gray-300 dark:text-[var(--color-rule)]"}
                                 `}
                             >
                                 {format(day, "d")}
                                 <span className="absolute -bottom-0.5 flex items-center gap-0.5">
-                                    {event && !today && <span className="w-1 h-1 rounded-full bg-orange-500" />}
+                                    {event && !today && <span className="w-1 h-1 rounded-full bg-[var(--color-accent)]" />}
                                     {feriado && !today && <span className="w-1 h-1 rounded-full bg-rose-500" />}
-                                    {corredor && !today && <span className="w-1 h-1 rounded-full bg-violet-500" />}
+                                    {corredor && !today && <span className="w-1 h-1 rounded-full bg-amber-400" />}
                                 </span>
                             </div>
                         </div>
@@ -123,15 +123,15 @@ export function MiniCalendar({ eventDates }: MiniCalendarProps) {
                 })}
             </div>
 
-            <div className="flex items-center gap-3 mt-3 pt-3 border-t border-gray-100 flex-wrap">
-                <span className="flex items-center gap-1 text-[9px] font-bold text-gray-400 uppercase tracking-wide">
-                    <span className="w-1.5 h-1.5 rounded-full bg-orange-500" /> Visita
+            <div className="flex items-center gap-3 mt-3 pt-3 border-t border-gray-100 dark:border-[var(--color-rule)] flex-wrap">
+                <span className="flex items-center gap-1 text-[9px] font-bold text-gray-400 dark:text-[var(--color-muted)] uppercase tracking-wide">
+                    <span className="w-1.5 h-1.5 rounded-full bg-[var(--color-accent)]" /> Visita
                 </span>
-                <span className="flex items-center gap-1 text-[9px] font-bold text-gray-400 uppercase tracking-wide">
+                <span className="flex items-center gap-1 text-[9px] font-bold text-gray-400 dark:text-[var(--color-muted)] uppercase tracking-wide">
                     <span className="w-1.5 h-1.5 rounded-full bg-rose-500" /> Feriado
                 </span>
-                <span className="flex items-center gap-1 text-[9px] font-bold text-gray-400 uppercase tracking-wide">
-                    <span className="w-1.5 h-1.5 rounded-full bg-violet-500" /> Día del Corredor
+                <span className="flex items-center gap-1 text-[9px] font-bold text-gray-400 dark:text-[var(--color-muted)] uppercase tracking-wide">
+                    <span className="w-1.5 h-1.5 rounded-full bg-amber-400" /> Día del Corredor
                 </span>
             </div>
         </div>

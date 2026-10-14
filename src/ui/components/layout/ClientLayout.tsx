@@ -14,11 +14,16 @@ export default function ClientLayout({ children }: { children: React.ReactNode }
     const isDashboard = pathname?.startsWith("/dashboard");
     const isAuthPage = pathname === "/login" || pathname === "/register" || pathname === "/forgot-password";
 
-    // The app keeps its own design system; every public page shares the site theme.
+    // The dashboard reuses the site palette through `.app-theme` (dark-only); public pages use `.landing-page`.
     if (isDashboard) {
         return (
             <ThemeProvider>
-                <AuthProvider>{children}</AuthProvider>
+                <AuthProvider>
+                    {/* `dark` lives here (not on <html>) so `dark:` variants only apply inside the dashboard. */}
+                    <div className={`app-theme dark ${landingSans.variable} ${landingHeading.variable} font-sans min-h-screen bg-[var(--color-paper)] text-[var(--color-ink)]`}>
+                        {children}
+                    </div>
+                </AuthProvider>
             </ThemeProvider>
         );
     }

@@ -13,6 +13,8 @@
   --color-foreground: var(--foreground);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
+  /* Landing heading face; the variable is only defined inside the dashboard and public wrappers. */
+  --font-heading: var(--font-landing-heading), ui-sans-serif, system-ui, sans-serif;
 }
 
 @media (prefers-color-scheme: dark) {
@@ -77,202 +79,418 @@ body {
   animation: gradient-xy 6s ease infinite;
 }
 
-/* ─── Dashboard Dark Mode Overrides ────────────────────────────────────────────
-   Scoped to [data-dashboard] so la landing y otras páginas no se ven afectadas.
+/* ─── Dashboard theme (.app-theme) ─────────────────────────────────────────────
+   The dashboard wrapper (ClientLayout) carries `app-theme dark`. Color tokens come
+   from landing-theme.css (`.landing-page, .app-theme`), so the dashboard and the
+   public site share one palette. Body copy uses Inter Tight, headings Montserrat.
+─────────────────────────────────────────────────────────────────────────────── */
+
+.app-theme,
+.app-theme .font-sans {
+  font-family: var(--font-landing-sans), ui-sans-serif, system-ui, sans-serif;
+}
+
+.app-theme ::selection {
+  background: var(--color-accent-soft);
+  color: var(--color-ink);
+}
+
+/* ─── Dark override layer ──────────────────────────────────────────────────────
+   Most dashboard pages were written with light Tailwind classes. Inside
+   `.app-theme` these rules map them to the landing's dark warm surfaces.
    Selectores directos (sin nesting) para máxima compatibilidad con Tailwind v4.
 ─────────────────────────────────────────────────────────────────────────────── */
 
-/* Fondos */
-.dark [data-dashboard] .bg-white                    { background-color: #1e2433 !important; }
-.dark [data-dashboard] .bg-gray-50                  { background-color: #161b27 !important; }
-.dark [data-dashboard] .bg-gray-50\/70              { background-color: #161b27 !important; }
-.dark [data-dashboard] .bg-gray-50\/60              { background-color: #161b27 !important; }
-.dark [data-dashboard] .bg-gray-50\/50              { background-color: #161b27 !important; }
-.dark [data-dashboard] .bg-gray-100                 { background-color: #252d3d !important; }
-.dark [data-dashboard] .bg-gray-100\/60             { background-color: #252d3d !important; }
-.dark [data-dashboard] .bg-gray-100\/70             { background-color: #252d3d !important; }
-.dark [data-dashboard] .bg-gray-100\/80             { background-color: #252d3d !important; }
-.dark [data-dashboard] .bg-gray-200                 { background-color: #2e384d !important; }
-.dark [data-dashboard] .bg-gray-200\/50             { background-color: rgba(46,56,77,0.5) !important; }
-.dark [data-dashboard] .bg-white\/90                { background-color: rgba(30,36,51,0.9) !important; }
-.dark [data-dashboard] .bg-white\/80                { background-color: rgba(30,36,51,0.8) !important; }
+/* Surfaces */
+.app-theme .bg-white                    { background-color: var(--color-paper-2) !important; }
+.app-theme .bg-white\/90                { background-color: color-mix(in oklab, var(--color-paper-2) 90%, transparent) !important; }
+.app-theme .bg-white\/80                { background-color: color-mix(in oklab, var(--color-paper-2) 80%, transparent) !important; }
+.app-theme .bg-gray-50,
+.app-theme .bg-gray-50\/70,
+.app-theme .bg-gray-50\/60,
+.app-theme .bg-gray-50\/50,
+.app-theme .bg-\[\#F8F9FC\]             { background-color: var(--color-paper) !important; }
+.app-theme .bg-gray-100,
+.app-theme .bg-gray-100\/60,
+.app-theme .bg-gray-100\/70,
+.app-theme .bg-gray-100\/80             { background-color: var(--color-paper-3) !important; }
+.app-theme .bg-gray-200                 { background-color: var(--color-paper-4) !important; }
+.app-theme .bg-gray-200\/50             { background-color: color-mix(in oklab, var(--color-paper-4) 50%, transparent) !important; }
 
-/* Fondos de estado / badges claros */
-.dark [data-dashboard] .bg-green-50                 { background-color: #0d2318 !important; }
-.dark [data-dashboard] .bg-green-100                { background-color: #0d2318 !important; }
-.dark [data-dashboard] .bg-blue-50                  { background-color: #0d1626 !important; }
-.dark [data-dashboard] .bg-blue-100                 { background-color: #0d1626 !important; }
-.dark [data-dashboard] .bg-indigo-50                { background-color: #0d1626 !important; }
-.dark [data-dashboard] .bg-indigo-50\/40            { background-color: rgba(13,22,38,0.4) !important; }
-.dark [data-dashboard] .bg-indigo-50\/60            { background-color: rgba(13,22,38,0.6) !important; }
-.dark [data-dashboard] .bg-indigo-100               { background-color: #0d1626 !important; }
-.dark [data-dashboard] .bg-yellow-50                { background-color: #1f1a07 !important; }
-.dark [data-dashboard] .bg-yellow-100               { background-color: #1f1a07 !important; }
-.dark [data-dashboard] .bg-amber-50                 { background-color: #1f1a07 !important; }
-.dark [data-dashboard] .bg-amber-50\/60             { background-color: rgba(31,26,7,0.6) !important; }
-.dark [data-dashboard] .bg-amber-100                { background-color: #1f1a07 !important; }
-.dark [data-dashboard] .bg-blue-50\/60              { background-color: rgba(13,22,38,0.6) !important; }
-.dark [data-dashboard] .bg-teal-50\/60              { background-color: rgba(10,31,30,0.6) !important; }
-.dark [data-dashboard] .bg-emerald-50\/60           { background-color: rgba(13,35,24,0.6) !important; }
-.dark [data-dashboard] .bg-purple-50\/60            { background-color: rgba(22,13,38,0.6) !important; }
-.dark [data-dashboard] .bg-red-50                   { background-color: #280d0d !important; }
-.dark [data-dashboard] .bg-red-100                  { background-color: #280d0d !important; }
-.dark [data-dashboard] .bg-orange-50                { background-color: #200e06 !important; }
-.dark [data-dashboard] .bg-orange-100               { background-color: #200e06 !important; }
-.dark [data-dashboard] .bg-purple-50                { background-color: #160d26 !important; }
-.dark [data-dashboard] .bg-purple-100               { background-color: #160d26 !important; }
-.dark [data-dashboard] .bg-violet-50                { background-color: #160d26 !important; }
-.dark [data-dashboard] .bg-violet-100               { background-color: #160d26 !important; }
-.dark [data-dashboard] .bg-teal-50                  { background-color: #0a1f1e !important; }
-.dark [data-dashboard] .bg-teal-100                 { background-color: #0a1f1e !important; }
-.dark [data-dashboard] .bg-emerald-50               { background-color: #0d2318 !important; }
-.dark [data-dashboard] .bg-emerald-100              { background-color: #0d2318 !important; }
-/* Fondo principal de página */
-.dark [data-dashboard] .bg-\[\#F8F9FC\]             { background-color: #0f1623 !important; }
+/* Status surfaces */
+.app-theme .bg-green-50,
+.app-theme .bg-green-100,
+.app-theme .bg-emerald-50,
+.app-theme .bg-emerald-100,
+.app-theme .bg-emerald-50\/60           { background-color: var(--color-positive-soft) !important; }
+.app-theme .bg-yellow-50,
+.app-theme .bg-yellow-100,
+.app-theme .bg-amber-50,
+.app-theme .bg-amber-50\/60,
+.app-theme .bg-amber-100,
+.app-theme .bg-orange-50,
+.app-theme .bg-orange-100               { background-color: var(--color-warning-soft) !important; }
+.app-theme .bg-red-50,
+.app-theme .bg-red-100                  { background-color: var(--color-danger-soft) !important; }
 
-/* Texto principal (escala de grises) */
-.dark [data-dashboard] .text-gray-900               { color: #f1f5f9 !important; }
-.dark [data-dashboard] .text-gray-800               { color: #e2e8f0 !important; }
-.dark [data-dashboard] .text-gray-700               { color: #cbd5e1 !important; }
-.dark [data-dashboard] .text-gray-600               { color: #94a3b8 !important; }
-.dark [data-dashboard] .text-gray-500               { color: #64748b !important; }
-.dark [data-dashboard] .text-gray-400               { color: #475569 !important; }
+/* Text: neutral scale */
+.app-theme .text-gray-900,
+.app-theme .text-gray-800,
+.app-theme .text-black                  { color: var(--color-ink) !important; }
+.app-theme .text-gray-700,
+.app-theme .text-gray-600               { color: var(--color-ink-2) !important; }
+.app-theme .text-gray-500               { color: var(--color-muted) !important; }
+.app-theme .text-gray-400               { color: var(--color-neutral) !important; }
 
-/* Texto de estado con colores */
-.dark [data-dashboard] .text-green-700              { color: #4ade80 !important; }
-.dark [data-dashboard] .text-green-600              { color: #22c55e !important; }
-.dark [data-dashboard] .text-green-500              { color: #4ade80 !important; }
-.dark [data-dashboard] .text-green-800              { color: #86efac !important; }
-.dark [data-dashboard] .text-blue-700               { color: #818cf8 !important; }
-.dark [data-dashboard] .text-indigo-700             { color: #818cf8 !important; }
-.dark [data-dashboard] .text-blue-600               { color: #6366f1 !important; }
-.dark [data-dashboard] .text-indigo-600             { color: #6366f1 !important; }
-.dark [data-dashboard] .text-indigo-400             { color: #a5b4fc !important; }
-.dark [data-dashboard] .text-indigo-900             { color: #c7d2fe !important; }
-.dark [data-dashboard] .text-yellow-700             { color: #fbbf24 !important; }
-.dark [data-dashboard] .text-amber-700              { color: #fbbf24 !important; }
-.dark [data-dashboard] .text-amber-600              { color: #f59e0b !important; }
-.dark [data-dashboard] .text-red-700                { color: #f87171 !important; }
-.dark [data-dashboard] .text-orange-700             { color: #fb923c !important; }
-.dark [data-dashboard] .text-red-600                { color: #ef4444 !important; }
-.dark [data-dashboard] .text-purple-700             { color: #a78bfa !important; }
-.dark [data-dashboard] .text-violet-700             { color: #a78bfa !important; }
-.dark [data-dashboard] .text-violet-600             { color: #8b5cf6 !important; }
-.dark [data-dashboard] .text-violet-500             { color: #a78bfa !important; }
-.dark [data-dashboard] .text-black                  { color: #e2e8f0 !important; }
-.dark [data-dashboard] .text-indigo-800             { color: #a5b4fc !important; }
-.dark [data-dashboard] .text-yellow-800             { color: #fbbf24 !important; }
-.dark [data-dashboard] .text-yellow-900             { color: #fde68a !important; }
-.dark [data-dashboard] .text-red-500                { color: #f87171 !important; }
-.dark [data-dashboard] .text-teal-600               { color: #2dd4bf !important; }
-.dark [data-dashboard] .text-teal-700               { color: #2dd4bf !important; }
-.dark [data-dashboard] .text-purple-600             { color: #c084fc !important; }
-.dark [data-dashboard] .text-emerald-700            { color: #34d399 !important; }
-.dark [data-dashboard] .text-emerald-700\/80        { color: rgba(52,211,153,0.8) !important; }
-.dark [data-dashboard] .text-emerald-600            { color: #34d399 !important; }
-.dark [data-dashboard] .text-emerald-500            { color: #6ee7b7 !important; }
-.dark [data-dashboard] .text-orange-600             { color: #fb923c !important; }
+/* Text: status */
+.app-theme .text-green-500,
+.app-theme .text-green-600,
+.app-theme .text-green-700,
+.app-theme .text-green-800,
+.app-theme .text-emerald-500,
+.app-theme .text-emerald-600,
+.app-theme .text-emerald-700            { color: var(--color-positive) !important; }
+.app-theme .text-emerald-700\/80        { color: color-mix(in oklab, var(--color-positive) 80%, transparent) !important; }
+.app-theme .text-amber-600,
+.app-theme .text-amber-700,
+.app-theme .text-yellow-700,
+.app-theme .text-yellow-800,
+.app-theme .text-yellow-900,
+.app-theme .text-orange-600,
+.app-theme .text-orange-700             { color: var(--color-warning) !important; }
+.app-theme .text-red-500,
+.app-theme .text-red-600,
+.app-theme .text-red-700                { color: var(--color-danger) !important; }
 
-/* Bordes */
-.dark [data-dashboard] .border-gray-100             { border-color: rgba(255,255,255,0.07) !important; }
-.dark [data-dashboard] .border-gray-100\/50         { border-color: rgba(255,255,255,0.05) !important; }
-.dark [data-dashboard] .border-gray-200             { border-color: rgba(255,255,255,0.10) !important; }
-.dark [data-dashboard] .border-gray-200\/80         { border-color: rgba(255,255,255,0.08) !important; }
-.dark [data-dashboard] .border-gray-200\/60         { border-color: rgba(255,255,255,0.06) !important; }
-.dark [data-dashboard] .border-gray-300             { border-color: rgba(255,255,255,0.15) !important; }
-.dark [data-dashboard] .border-green-200            { border-color: rgba(74,222,128,0.25)  !important; }
-.dark [data-dashboard] .border-green-300            { border-color: rgba(74,222,128,0.30)  !important; }
-.dark [data-dashboard] .border-indigo-200           { border-color: rgba(129,140,248,0.25) !important; }
-.dark [data-dashboard] .border-indigo-300           { border-color: rgba(129,140,248,0.30) !important; }
-.dark [data-dashboard] .border-blue-200             { border-color: rgba(129,140,248,0.25) !important; }
-.dark [data-dashboard] .border-blue-300             { border-color: rgba(129,140,248,0.30) !important; }
-.dark [data-dashboard] .border-amber-300            { border-color: rgba(251,191,36,0.30)  !important; }
-.dark [data-dashboard] .border-red-200              { border-color: rgba(248,113,113,0.25) !important; }
-.dark [data-dashboard] .border-red-300              { border-color: rgba(248,113,113,0.30) !important; }
-.dark [data-dashboard] .border-violet-300           { border-color: rgba(167,139,250,0.30) !important; }
-.dark [data-dashboard] .border-teal-300             { border-color: rgba(45,212,191,0.30)  !important; }
-.dark [data-dashboard] .border-indigo-100           { border-color: rgba(129,140,248,0.15) !important; }
-.dark [data-dashboard] .border-violet-100           { border-color: rgba(167,139,250,0.15) !important; }
-.dark [data-dashboard] .border-yellow-200           { border-color: rgba(251,191,36,0.25)  !important; }
-.dark [data-dashboard] .border-purple-200           { border-color: rgba(192,132,252,0.25) !important; }
-.dark [data-dashboard] .border-emerald-200          { border-color: rgba(52,211,153,0.25)  !important; }
-.dark [data-dashboard] .border-orange-200           { border-color: rgba(251,146,60,0.25)  !important; }
-.dark [data-dashboard] .border-amber-100\/50        { border-color: rgba(251,191,36,0.10)  !important; }
-.dark [data-dashboard] .border-gray-50              { border-color: rgba(255,255,255,0.04) !important; }
+/* Borders */
+.app-theme .border-gray-50,
+.app-theme .border-gray-100,
+.app-theme .border-gray-100\/50         { border-color: var(--color-rule-2) !important; }
+.app-theme .border-gray-200,
+.app-theme .border-gray-200\/80,
+.app-theme .border-gray-200\/60         { border-color: var(--color-rule) !important; }
+.app-theme .border-gray-300             { border-color: color-mix(in oklab, var(--color-neutral) 55%, transparent) !important; }
+.app-theme .border-green-200,
+.app-theme .border-green-300,
+.app-theme .border-emerald-200          { border-color: color-mix(in oklab, var(--color-positive) 30%, transparent) !important; }
+.app-theme .border-amber-100\/50        { border-color: color-mix(in oklab, var(--color-warning) 12%, transparent) !important; }
+.app-theme .border-amber-200,
+.app-theme .border-amber-300,
+.app-theme .border-yellow-200,
+.app-theme .border-orange-200           { border-color: color-mix(in oklab, var(--color-warning) 30%, transparent) !important; }
+.app-theme .border-red-200,
+.app-theme .border-red-300              { border-color: color-mix(in oklab, var(--color-danger) 30%, transparent) !important; }
 
-/* Inputs, selects y textareas */
-.dark [data-dashboard] input:not([type="range"]):not([type="checkbox"]):not([type="radio"]),
-.dark [data-dashboard] select,
-.dark [data-dashboard] textarea {
-  background-color: #252d3d !important;
-  color: #e2e8f0 !important;
-  border-color: rgba(255,255,255,0.12) !important;
+/* Inputs, selects and textareas */
+.app-theme input:not([type="range"]):not([type="checkbox"]):not([type="radio"]),
+.app-theme select,
+.app-theme textarea {
+  background-color: var(--color-paper-3) !important;
+  color: var(--color-ink) !important;
+  border-color: var(--color-rule) !important;
 }
-.dark [data-dashboard] input::placeholder,
-.dark [data-dashboard] textarea::placeholder { color: #475569 !important; }
+.app-theme input:focus,
+.app-theme select:focus,
+.app-theme textarea:focus {
+  border-color: var(--color-accent) !important;
+  outline: none !important;
+  box-shadow: 0 0 0 1px var(--color-accent) !important;
+}
+.app-theme input::placeholder,
+.app-theme textarea::placeholder        { color: var(--color-neutral) !important; }
 
-/* Tablas */
-.dark [data-dashboard] thead                        { background-color: #1a2236 !important; }
-.dark [data-dashboard] th                           { color: #94a3b8 !important; border-color: rgba(255,255,255,0.08) !important; }
-.dark [data-dashboard] td                           { border-color: rgba(255,255,255,0.06) !important; }
-.dark [data-dashboard] tr:hover td                  { background-color: rgba(255,255,255,0.03) !important; }
+/* Tables */
+.app-theme thead                        { background-color: var(--color-paper) !important; }
+.app-theme th                           { color: var(--color-muted) !important; border-color: var(--color-rule) !important; }
+.app-theme td                           { border-color: var(--color-rule-2) !important; }
+.app-theme tr:hover td                  { background-color: color-mix(in oklab, var(--color-ink) 3%, transparent) !important; }
 
-/* Divisores */
-.dark [data-dashboard] hr                           { border-color: rgba(255,255,255,0.08) !important; }
-.dark [data-dashboard] .divide-gray-50 > * + *      { border-color: rgba(255,255,255,0.05) !important; }
-.dark [data-dashboard] .divide-gray-100 > * + *     { border-color: rgba(255,255,255,0.08) !important; }
-.dark [data-dashboard] .divide-gray-200 > * + *     { border-color: rgba(255,255,255,0.08) !important; }
+/* Dividers */
+.app-theme hr                           { border-color: var(--color-rule) !important; }
+.app-theme .divide-gray-50 > * + *,
+.app-theme .divide-gray-100 > * + *     { border-color: var(--color-rule-2) !important; }
+.app-theme .divide-gray-200 > * + *     { border-color: var(--color-rule) !important; }
 
 /* Hover states */
-.dark [data-dashboard] .hover\:bg-gray-50:hover          { background-color: rgba(255,255,255,0.04) !important; }
-.dark [data-dashboard] .hover\:bg-gray-100:hover         { background-color: rgba(255,255,255,0.06) !important; }
-.dark [data-dashboard] .hover\:bg-gray-200\/50:hover     { background-color: rgba(255,255,255,0.06) !important; }
-.dark [data-dashboard] .hover\:bg-white:hover            { background-color: rgba(255,255,255,0.05) !important; }
-.dark [data-dashboard] .hover\:bg-gray-900:hover         { background-color: rgba(255,255,255,0.08) !important; }
-.dark [data-dashboard] .hover\:text-gray-900:hover       { color: #f1f5f9 !important; }
-.dark [data-dashboard] .hover\:text-gray-700:hover       { color: #e2e8f0 !important; }
-.dark [data-dashboard] .hover\:text-indigo-700:hover     { color: #818cf8 !important; }
-.dark [data-dashboard] .hover\:border-indigo-100:hover   { border-color: rgba(129,140,248,0.20) !important; }
-.dark [data-dashboard] .hover\:border-emerald-200:hover  { border-color: rgba(52,211,153,0.30)  !important; }
-.dark [data-dashboard] .hover\:border-violet-200:hover   { border-color: rgba(167,139,250,0.30) !important; }
-.dark [data-dashboard] .hover\:bg-orange-50\/30:hover    { background-color: rgba(255,237,213,0.04) !important; }
-.dark [data-dashboard] .hover\:bg-blue-50\/30:hover      { background-color: rgba(219,234,254,0.04) !important; }
-.dark [data-dashboard] .hover\:bg-indigo-50\/50:hover    { background-color: rgba(13,22,38,0.5)  !important; }
-.dark [data-dashboard] .hover\:bg-indigo-100:hover       { background-color: rgba(13,22,38,0.6)  !important; }
-.dark [data-dashboard] .hover\:bg-green-100:hover        { background-color: rgba(13,35,24,0.6)  !important; }
-.dark [data-dashboard] .hover\:bg-gray-200:hover         { background-color: rgba(255,255,255,0.08) !important; }
-.dark [data-dashboard] .hover\:text-black:hover          { color: #e2e8f0 !important; }
-.dark [data-dashboard] .hover\:text-indigo-600:hover     { color: #818cf8 !important; }
-.dark [data-dashboard] .hover\:text-red-500:hover        { color: #f87171 !important; }
+.app-theme .hover\:bg-gray-50:hover     { background-color: color-mix(in oklab, var(--color-ink) 4%, transparent) !important; }
+.app-theme .hover\:bg-white:hover       { background-color: color-mix(in oklab, var(--color-ink) 5%, transparent) !important; }
+.app-theme .hover\:bg-gray-100:hover,
+.app-theme .hover\:bg-gray-200\/50:hover { background-color: color-mix(in oklab, var(--color-ink) 6%, transparent) !important; }
+.app-theme .hover\:bg-gray-200:hover,
+.app-theme .hover\:bg-gray-900:hover    { background-color: color-mix(in oklab, var(--color-ink) 8%, transparent) !important; }
+.app-theme .hover\:bg-green-100:hover   { background-color: var(--color-positive-soft) !important; }
+.app-theme .hover\:bg-orange-50\/30:hover { background-color: color-mix(in oklab, var(--color-warning) 6%, transparent) !important; }
+.app-theme .hover\:text-gray-900:hover,
+.app-theme .hover\:text-gray-700:hover,
+.app-theme .hover\:text-black:hover     { color: var(--color-ink) !important; }
+.app-theme .hover\:text-red-500:hover   { color: var(--color-danger) !important; }
+.app-theme .hover\:border-emerald-200:hover { border-color: color-mix(in oklab, var(--color-positive) 30%, transparent) !important; }
 
-/* Sombras */
-.dark [data-dashboard] .shadow-sm                   { box-shadow: 0 1px 3px rgba(0,0,0,0.5)  !important; }
-.dark [data-dashboard] .shadow-md                   { box-shadow: 0 4px 12px rgba(0,0,0,0.6) !important; }
-.dark [data-dashboard] .shadow-lg                   { box-shadow: 0 8px 24px rgba(0,0,0,0.7) !important; }
-.dark [data-dashboard] .shadow-xl                   { box-shadow: 0 12px 32px rgba(0,0,0,0.8) !important; }
+/* Shadows */
+.app-theme .shadow-sm                   { box-shadow: 0 1px 3px color-mix(in oklab, var(--shadow-color) 60%, transparent) !important; }
+.app-theme .shadow-md                   { box-shadow: 0 4px 14px color-mix(in oklab, var(--shadow-color) 70%, transparent) !important; }
+.app-theme .shadow-lg                   { box-shadow: 0 8px 24px color-mix(in oklab, var(--shadow-color) 80%, transparent) !important; }
+.app-theme .shadow-xl                   { box-shadow: 0 12px 32px color-mix(in oklab, var(--shadow-color) 85%, transparent) !important; }
 
-/* Gradientes — sobreescribir CSS vars de Tailwind */
-.dark [data-dashboard] .from-gray-50   { --tw-gradient-from: #161b27 !important; }
-.dark [data-dashboard] .to-white       { --tw-gradient-to:   #1e2433 !important; }
-.dark [data-dashboard] .to-gray-50     { --tw-gradient-to:   #161b27 !important; }
-.dark [data-dashboard] .from-amber-50  { --tw-gradient-from: #1f1a07 !important; }
-.dark [data-dashboard] .to-orange-50   { --tw-gradient-to:   #200e06 !important; }
+/* Gradients (neutral and status stops) */
+.app-theme .from-gray-50                { --tw-gradient-from: var(--color-paper) !important; }
+.app-theme .from-white                 { --tw-gradient-from: var(--color-paper-2) !important; }
+.app-theme .via-white                  { --tw-gradient-via: var(--color-paper-2) !important; }
+.app-theme .to-white                    { --tw-gradient-to: var(--color-paper-2) !important; }
+.app-theme .to-gray-50                  { --tw-gradient-to: var(--color-paper) !important; }
+.app-theme .from-amber-50               { --tw-gradient-from: var(--color-warning-soft) !important; }
+.app-theme .to-orange-50                { --tw-gradient-to: var(--color-warning-soft) !important; }
 
-/* Bordes izquierdos (prioridad en kanban cards) */
-.dark [data-dashboard] .border-l-red-400    { border-left-color: rgba(248,113,113,0.7) !important; }
-.dark [data-dashboard] .border-l-amber-400  { border-left-color: rgba(251,191,36,0.7)  !important; }
-.dark [data-dashboard] .border-l-emerald-400 { border-left-color: rgba(52,211,153,0.7) !important; }
+/* Left borders (kanban card priority) */
+.app-theme .border-l-red-400            { border-left-color: color-mix(in oklab, var(--color-danger) 70%, transparent) !important; }
+.app-theme .border-l-amber-400          { border-left-color: color-mix(in oklab, var(--color-warning) 70%, transparent) !important; }
+.app-theme .border-l-emerald-400        { border-left-color: color-mix(in oklab, var(--color-positive) 70%, transparent) !important; }
 
-/* Ring colors (urgencia en kanban cards) */
-.dark [data-dashboard] .ring-red-200    { --tw-ring-color: rgba(248,113,113,0.3) !important; }
-.dark [data-dashboard] .ring-orange-200 { --tw-ring-color: rgba(251,146,60,0.3)  !important; }
-.dark [data-dashboard] .ring-indigo-200 { --tw-ring-color: rgba(129,140,248,0.3) !important; }
+/* Ring colors (kanban urgency) */
+.app-theme .ring-red-200                { --tw-ring-color: color-mix(in oklab, var(--color-danger) 30%, transparent) !important; }
+.app-theme .ring-orange-200             { --tw-ring-color: color-mix(in oklab, var(--color-warning) 30%, transparent) !important; }
 
 /* SVG fills */
-.dark [data-dashboard] .fill-amber-600 { fill: #f59e0b !important; }
+.app-theme .fill-amber-600              { fill: var(--color-warning) !important; }
 
 /* Scrollbars */
-.dark [data-dashboard] * { scrollbar-color: #334155 transparent; }
+.app-theme * { scrollbar-color: var(--color-paper-4) transparent; }
+
+/* ─── Off-brand remap ──────────────────────────────────────────────────────────
+   Every indigo/violet/purple/cyan/sky/blue/teal/fuchsia class used under the
+   dashboard maps to the bronze accent (solid shades) or to neutral/soft surfaces
+   (light shades); gradient stops collapse to a flat accent or paper surface.
+   Generated from `rg` over src/app/(main)/dashboard and src/ui/components.
+─────────────────────────────────────────────────────────────────────────────── */
+.app-theme .bg-blue-100 { background-color: var(--color-accent-soft) !important; }
+.app-theme .bg-blue-400 { background-color: color-mix(in oklab, var(--color-accent) 30%, transparent) !important; }
+.app-theme .bg-blue-50 { background-color: var(--color-accent-soft) !important; }
+.app-theme .bg-blue-50\/30 { background-color: color-mix(in oklab, var(--color-accent) 8%, transparent) !important; }
+.app-theme .bg-blue-50\/50 { background-color: var(--color-accent-soft) !important; }
+.app-theme .bg-blue-50\/60 { background-color: var(--color-accent-soft) !important; }
+.app-theme .bg-blue-50\/80 { background-color: var(--color-accent-soft) !important; }
+.app-theme .bg-blue-50\/90 { background-color: var(--color-accent-soft) !important; }
+.app-theme .bg-blue-500 { background-color: var(--color-accent) !important; color: var(--color-accent-ink) !important; }
+.app-theme .bg-blue-600 { background-color: var(--color-accent) !important; color: var(--color-accent-ink) !important; }
+.app-theme .bg-blue-600\/90 { background-color: color-mix(in oklab, var(--color-accent) 90%, transparent) !important; }
+.app-theme .bg-cyan-200 { background-color: var(--color-accent-soft) !important; }
+.app-theme .bg-indigo-100 { background-color: var(--color-accent-soft) !important; }
+.app-theme .bg-indigo-200 { background-color: var(--color-accent-soft) !important; }
+.app-theme .bg-indigo-400 { background-color: color-mix(in oklab, var(--color-accent) 30%, transparent) !important; }
+.app-theme .bg-indigo-50 { background-color: var(--color-accent-soft) !important; }
+.app-theme .bg-indigo-50\/30 { background-color: color-mix(in oklab, var(--color-accent) 8%, transparent) !important; }
+.app-theme .bg-indigo-50\/40 { background-color: color-mix(in oklab, var(--color-accent) 8%, transparent) !important; }
+.app-theme .bg-indigo-50\/50 { background-color: var(--color-accent-soft) !important; }
+.app-theme .bg-indigo-50\/60 { background-color: var(--color-accent-soft) !important; }
+.app-theme .bg-indigo-500 { background-color: var(--color-accent) !important; color: var(--color-accent-ink) !important; }
+.app-theme .bg-indigo-500\/10 { background-color: color-mix(in oklab, var(--color-accent) 10%, transparent) !important; }
+.app-theme .bg-indigo-500\/80 { background-color: color-mix(in oklab, var(--color-accent) 80%, transparent) !important; }
+.app-theme .bg-indigo-600 { background-color: var(--color-accent) !important; color: var(--color-accent-ink) !important; }
+.app-theme .bg-indigo-900 { background-color: var(--color-paper-3) !important; }
+.app-theme .bg-purple-100 { background-color: var(--color-accent-soft) !important; }
+.app-theme .bg-purple-50 { background-color: var(--color-accent-soft) !important; }
+.app-theme .bg-purple-50\/50 { background-color: var(--color-accent-soft) !important; }
+.app-theme .bg-purple-50\/60 { background-color: var(--color-accent-soft) !important; }
+.app-theme .bg-purple-500 { background-color: var(--color-accent) !important; color: var(--color-accent-ink) !important; }
+.app-theme .bg-purple-600 { background-color: var(--color-accent) !important; color: var(--color-accent-ink) !important; }
+.app-theme .bg-purple-600\/90 { background-color: color-mix(in oklab, var(--color-accent) 90%, transparent) !important; }
+.app-theme .bg-sky-100 { background-color: var(--color-accent-soft) !important; }
+.app-theme .bg-sky-200\/50 { background-color: var(--color-accent-soft) !important; }
+.app-theme .bg-sky-400 { background-color: color-mix(in oklab, var(--color-accent) 30%, transparent) !important; }
+.app-theme .bg-teal-100 { background-color: var(--color-accent-soft) !important; }
+.app-theme .bg-teal-200\/20 { background-color: color-mix(in oklab, var(--color-accent) 8%, transparent) !important; }
+.app-theme .bg-teal-50 { background-color: var(--color-accent-soft) !important; }
+.app-theme .bg-teal-50\/60 { background-color: var(--color-accent-soft) !important; }
+.app-theme .bg-violet-100 { background-color: var(--color-accent-soft) !important; }
+.app-theme .bg-violet-50 { background-color: var(--color-accent-soft) !important; }
+.app-theme .bg-violet-500 { background-color: var(--color-accent) !important; color: var(--color-accent-ink) !important; }
+.app-theme .bg-violet-600 { background-color: var(--color-accent) !important; color: var(--color-accent-ink) !important; }
+.app-theme .border-blue-100 { border-color: color-mix(in oklab, var(--color-accent) 18%, transparent) !important; }
+.app-theme .border-blue-200 { border-color: color-mix(in oklab, var(--color-accent) 25%, transparent) !important; }
+.app-theme .border-blue-200\/60 { border-color: color-mix(in oklab, var(--color-accent) 60%, transparent) !important; }
+.app-theme .border-blue-300 { border-color: color-mix(in oklab, var(--color-accent) 35%, transparent) !important; }
+.app-theme .border-blue-400 { border-color: color-mix(in oklab, var(--color-accent) 55%, transparent) !important; }
+.app-theme .border-indigo-100 { border-color: color-mix(in oklab, var(--color-accent) 18%, transparent) !important; }
+.app-theme .border-indigo-100\/50 { border-color: color-mix(in oklab, var(--color-accent) 50%, transparent) !important; }
+.app-theme .border-indigo-200 { border-color: color-mix(in oklab, var(--color-accent) 25%, transparent) !important; }
+.app-theme .border-indigo-300 { border-color: color-mix(in oklab, var(--color-accent) 35%, transparent) !important; }
+.app-theme .border-indigo-400 { border-color: color-mix(in oklab, var(--color-accent) 55%, transparent) !important; }
+.app-theme .border-indigo-500 { border-color: var(--color-accent) !important; }
+.app-theme .border-indigo-600 { border-color: var(--color-accent) !important; }
+.app-theme .border-indigo-800 { border-color: color-mix(in oklab, var(--color-accent) 30%, transparent) !important; }
+.app-theme .border-l-indigo-500 { border-left-color: var(--color-accent) !important; }
+.app-theme .border-l-violet-500 { border-left-color: var(--color-accent) !important; }
+.app-theme .border-purple-100 { border-color: color-mix(in oklab, var(--color-accent) 18%, transparent) !important; }
+.app-theme .border-purple-200 { border-color: color-mix(in oklab, var(--color-accent) 25%, transparent) !important; }
+.app-theme .border-r-purple-500 { border-right-color: var(--color-accent) !important; }
+.app-theme .border-sky-200 { border-color: color-mix(in oklab, var(--color-accent) 25%, transparent) !important; }
+.app-theme .border-t-indigo-500 { border-top-color: var(--color-accent) !important; }
+.app-theme .border-teal-300 { border-color: color-mix(in oklab, var(--color-accent) 35%, transparent) !important; }
+.app-theme .border-violet-100 { border-color: color-mix(in oklab, var(--color-accent) 18%, transparent) !important; }
+.app-theme .border-violet-200 { border-color: color-mix(in oklab, var(--color-accent) 25%, transparent) !important; }
+.app-theme .border-violet-300 { border-color: color-mix(in oklab, var(--color-accent) 35%, transparent) !important; }
+.app-theme .border-violet-400 { border-color: color-mix(in oklab, var(--color-accent) 55%, transparent) !important; }
+.app-theme .dark\:bg-blue-900\/20 { background-color: var(--color-accent-soft) !important; }
+.app-theme .dark\:bg-indigo-900 { background-color: var(--color-paper-3) !important; }
+.app-theme .dark\:bg-indigo-900\/20 { background-color: var(--color-accent-soft) !important; }
+.app-theme .dark\:bg-indigo-900\/30 { background-color: var(--color-accent-soft) !important; }
+.app-theme .dark\:border-blue-700 { border-color: color-mix(in oklab, var(--color-accent) 30%, transparent) !important; }
+.app-theme .dark\:border-indigo-700 { border-color: color-mix(in oklab, var(--color-accent) 30%, transparent) !important; }
+.app-theme .dark\:border-indigo-800 { border-color: color-mix(in oklab, var(--color-accent) 30%, transparent) !important; }
+.app-theme .dark\:hover\:bg-indigo-900\/10:hover { background-color: var(--color-accent-soft) !important; }
+.app-theme .dark\:hover\:bg-indigo-900\/20:hover { background-color: var(--color-accent-soft) !important; }
+.app-theme .dark\:hover\:bg-indigo-900\/30:hover { background-color: var(--color-accent-soft) !important; }
+.app-theme .dark\:hover\:bg-indigo-900\/50:hover { background-color: var(--color-accent-soft) !important; }
+.app-theme .dark\:text-blue-400 { color: var(--color-accent-2) !important; }
+.app-theme .dark\:text-indigo-300 { color: var(--color-accent-2) !important; }
+.app-theme .dark\:text-indigo-400 { color: var(--color-accent-2) !important; }
+.app-theme .focus-within\:border-indigo-400:focus-within { border-color: color-mix(in oklab, var(--color-accent) 55%, transparent) !important; }
+.app-theme .focus-within\:ring-indigo-400:focus-within { --tw-ring-color: color-mix(in oklab, var(--color-accent) 55%, transparent) !important; }
+.app-theme .focus-within\:ring-indigo-500:focus-within { --tw-ring-color: var(--color-accent) !important; }
+.app-theme .focus\:border-blue-500:focus { border-color: var(--color-accent) !important; }
+.app-theme .focus\:border-indigo-400:focus { border-color: color-mix(in oklab, var(--color-accent) 55%, transparent) !important; }
+.app-theme .focus\:border-indigo-500:focus { border-color: var(--color-accent) !important; }
+.app-theme .focus\:border-violet-500:focus { border-color: var(--color-accent) !important; }
+.app-theme .focus\:ring-blue-500:focus { --tw-ring-color: var(--color-accent) !important; }
+.app-theme .focus\:ring-indigo-200:focus { --tw-ring-color: color-mix(in oklab, var(--color-accent) 25%, transparent) !important; }
+.app-theme .focus\:ring-indigo-400:focus { --tw-ring-color: color-mix(in oklab, var(--color-accent) 55%, transparent) !important; }
+.app-theme .focus\:ring-indigo-500:focus { --tw-ring-color: var(--color-accent) !important; }
+.app-theme .focus\:ring-indigo-500\/10:focus { --tw-ring-color: color-mix(in oklab, var(--color-accent) 10%, transparent) !important; }
+.app-theme .focus\:ring-indigo-500\/20:focus { --tw-ring-color: color-mix(in oklab, var(--color-accent) 20%, transparent) !important; }
+.app-theme .focus\:ring-indigo-500\/50:focus { --tw-ring-color: color-mix(in oklab, var(--color-accent) 50%, transparent) !important; }
+.app-theme .focus\:ring-purple-500:focus { --tw-ring-color: var(--color-accent) !important; }
+.app-theme .focus\:ring-violet-500:focus { --tw-ring-color: var(--color-accent) !important; }
+.app-theme .from-blue-50 { --tw-gradient-from: var(--color-paper-2) !important; }
+.app-theme .from-blue-500 { --tw-gradient-from: var(--color-accent) !important; }
+.app-theme .from-cyan-400 { --tw-gradient-from: var(--color-accent) !important; }
+.app-theme .from-indigo-100 { --tw-gradient-from: var(--color-paper-2) !important; }
+.app-theme .from-indigo-400 { --tw-gradient-from: var(--color-accent) !important; }
+.app-theme .from-indigo-50 { --tw-gradient-from: var(--color-paper-2) !important; }
+.app-theme .from-indigo-50\/50 { --tw-gradient-from: var(--color-paper-2) !important; }
+.app-theme .from-indigo-500 { --tw-gradient-from: var(--color-accent) !important; }
+.app-theme .from-indigo-600 { --tw-gradient-from: var(--color-accent) !important; }
+.app-theme .from-purple-50 { --tw-gradient-from: var(--color-paper-2) !important; }
+.app-theme .from-teal-500 { --tw-gradient-from: var(--color-accent) !important; }
+.app-theme .from-violet-400 { --tw-gradient-from: var(--color-accent) !important; }
+.app-theme .from-violet-500 { --tw-gradient-from: var(--color-accent) !important; }
+.app-theme .group:hover .group-hover\:bg-blue-100 { background-color: var(--color-accent-soft) !important; }
+.app-theme .group:hover .group-hover\:bg-indigo-100 { background-color: var(--color-accent-soft) !important; }
+.app-theme .group:hover .group-hover\:bg-indigo-50 { background-color: var(--color-accent-soft) !important; }
+.app-theme .group:hover .group-hover\:border-indigo-300 { border-color: color-mix(in oklab, var(--color-accent) 35%, transparent) !important; }
+.app-theme .group:hover .group-hover\:text-indigo-500 { color: var(--color-accent-2) !important; }
+.app-theme .group:hover .group-hover\:text-indigo-600 { color: var(--color-accent-2) !important; }
+.app-theme .group:hover .group-hover\:text-indigo-700 { color: var(--color-accent-2) !important; }
+.app-theme .hover\:bg-blue-100:hover { background-color: var(--color-accent-soft) !important; }
+.app-theme .hover\:bg-blue-50:hover { background-color: var(--color-accent-soft) !important; }
+.app-theme .hover\:bg-blue-50\/30:hover { background-color: color-mix(in oklab, var(--color-accent) 8%, transparent) !important; }
+.app-theme .hover\:bg-blue-50\/50:hover { background-color: var(--color-accent-soft) !important; }
+.app-theme .hover\:bg-blue-700:hover { background-color: var(--color-accent-2) !important; color: var(--color-accent-ink) !important; }
+.app-theme .hover\:bg-indigo-100:hover { background-color: var(--color-accent-soft) !important; }
+.app-theme .hover\:bg-indigo-50:hover { background-color: var(--color-accent-soft) !important; }
+.app-theme .hover\:bg-indigo-50\/30:hover { background-color: color-mix(in oklab, var(--color-accent) 8%, transparent) !important; }
+.app-theme .hover\:bg-indigo-50\/40:hover { background-color: color-mix(in oklab, var(--color-accent) 8%, transparent) !important; }
+.app-theme .hover\:bg-indigo-50\/50:hover { background-color: var(--color-accent-soft) !important; }
+.app-theme .hover\:bg-indigo-50\/60:hover { background-color: var(--color-accent-soft) !important; }
+.app-theme .hover\:bg-indigo-500:hover { background-color: var(--color-accent-2) !important; color: var(--color-accent-ink) !important; }
+.app-theme .hover\:bg-indigo-600:hover { background-color: var(--color-accent-2) !important; color: var(--color-accent-ink) !important; }
+.app-theme .hover\:bg-indigo-700:hover { background-color: var(--color-accent-2) !important; color: var(--color-accent-ink) !important; }
+.app-theme .hover\:bg-purple-200:hover { background-color: var(--color-accent-soft) !important; }
+.app-theme .hover\:bg-sky-200\/50:hover { background-color: var(--color-accent-soft) !important; }
+.app-theme .hover\:bg-violet-700:hover { background-color: var(--color-accent-2) !important; color: var(--color-accent-ink) !important; }
+.app-theme .hover\:border-blue-200:hover { border-color: color-mix(in oklab, var(--color-accent) 25%, transparent) !important; }
+.app-theme .hover\:border-blue-300:hover { border-color: color-mix(in oklab, var(--color-accent) 35%, transparent) !important; }
+.app-theme .hover\:border-indigo-100:hover { border-color: color-mix(in oklab, var(--color-accent) 18%, transparent) !important; }
+.app-theme .hover\:border-indigo-200:hover { border-color: color-mix(in oklab, var(--color-accent) 25%, transparent) !important; }
+.app-theme .hover\:border-indigo-300:hover { border-color: color-mix(in oklab, var(--color-accent) 35%, transparent) !important; }
+.app-theme .hover\:border-indigo-400:hover { border-color: color-mix(in oklab, var(--color-accent) 55%, transparent) !important; }
+.app-theme .hover\:border-indigo-500:hover { border-color: var(--color-accent) !important; }
+.app-theme .hover\:border-purple-200:hover { border-color: color-mix(in oklab, var(--color-accent) 25%, transparent) !important; }
+.app-theme .hover\:border-purple-300:hover { border-color: color-mix(in oklab, var(--color-accent) 35%, transparent) !important; }
+.app-theme .hover\:border-violet-200:hover { border-color: color-mix(in oklab, var(--color-accent) 25%, transparent) !important; }
+.app-theme .hover\:from-indigo-700:hover { --tw-gradient-from: var(--color-accent) !important; }
+.app-theme .hover\:shadow-indigo-500\/20:hover { --tw-shadow-color: color-mix(in oklab, var(--shadow-color) 50%, transparent) !important; }
+.app-theme .hover\:shadow-indigo-500\/30:hover { --tw-shadow-color: color-mix(in oklab, var(--shadow-color) 50%, transparent) !important; }
+.app-theme .hover\:shadow-indigo-500\/5:hover { --tw-shadow-color: color-mix(in oklab, var(--shadow-color) 50%, transparent) !important; }
+.app-theme .hover\:shadow-indigo-500\/50:hover { --tw-shadow-color: color-mix(in oklab, var(--shadow-color) 50%, transparent) !important; }
+.app-theme .hover\:text-blue-600:hover { color: var(--color-accent-2) !important; }
+.app-theme .hover\:text-indigo-500:hover { color: var(--color-accent-2) !important; }
+.app-theme .hover\:text-indigo-600:hover { color: var(--color-accent-2) !important; }
+.app-theme .hover\:text-indigo-700:hover { color: var(--color-accent-2) !important; }
+.app-theme .hover\:text-indigo-800:hover { color: var(--color-accent-2) !important; }
+.app-theme .hover\:text-indigo-900:hover { color: var(--color-ink) !important; }
+.app-theme .hover\:text-sky-600:hover { color: var(--color-accent-2) !important; }
+.app-theme .hover\:text-sky-900:hover { color: var(--color-ink) !important; }
+.app-theme .hover\:to-violet-700:hover { --tw-gradient-to: var(--color-accent) !important; }
+.app-theme .peer:checked ~ .peer-checked\:bg-indigo-600 { background-color: var(--color-accent) !important; color: var(--color-accent-ink) !important; }
+.app-theme .peer:focus ~ .peer-focus\:ring-indigo-300 { --tw-ring-color: color-mix(in oklab, var(--color-accent) 35%, transparent) !important; }
+.app-theme .prose-a\:text-indigo-600 a { color: var(--color-accent) !important; }
+.app-theme .ring-indigo-100 { --tw-ring-color: color-mix(in oklab, var(--color-accent) 18%, transparent) !important; }
+.app-theme .ring-indigo-200 { --tw-ring-color: color-mix(in oklab, var(--color-accent) 25%, transparent) !important; }
+.app-theme .ring-indigo-50 { --tw-ring-color: color-mix(in oklab, var(--color-accent) 18%, transparent) !important; }
+.app-theme .ring-indigo-500 { --tw-ring-color: var(--color-accent) !important; }
+.app-theme .ring-indigo-600 { --tw-ring-color: var(--color-accent) !important; }
+.app-theme .shadow-blue-500\/10 { --tw-shadow-color: color-mix(in oklab, var(--shadow-color) 50%, transparent) !important; }
+.app-theme .shadow-indigo-100 { --tw-shadow-color: color-mix(in oklab, var(--shadow-color) 50%, transparent) !important; }
+.app-theme .shadow-indigo-100\/50 { --tw-shadow-color: color-mix(in oklab, var(--shadow-color) 50%, transparent) !important; }
+.app-theme .shadow-indigo-200 { --tw-shadow-color: color-mix(in oklab, var(--shadow-color) 50%, transparent) !important; }
+.app-theme .shadow-indigo-300 { --tw-shadow-color: color-mix(in oklab, var(--shadow-color) 50%, transparent) !important; }
+.app-theme .shadow-indigo-500\/30 { --tw-shadow-color: color-mix(in oklab, var(--shadow-color) 50%, transparent) !important; }
+.app-theme .shadow-indigo-500\/5 { --tw-shadow-color: color-mix(in oklab, var(--shadow-color) 50%, transparent) !important; }
+.app-theme .shadow-indigo-600\/20 { --tw-shadow-color: color-mix(in oklab, var(--shadow-color) 50%, transparent) !important; }
+.app-theme .shadow-indigo-600\/30 { --tw-shadow-color: color-mix(in oklab, var(--shadow-color) 50%, transparent) !important; }
+.app-theme .shadow-indigo-900\/10 { --tw-shadow-color: color-mix(in oklab, var(--shadow-color) 50%, transparent) !important; }
+.app-theme .shadow-indigo-900\/20 { --tw-shadow-color: color-mix(in oklab, var(--shadow-color) 50%, transparent) !important; }
+.app-theme .text-blue-400 { color: var(--color-accent-2) !important; }
+.app-theme .text-blue-500 { color: var(--color-accent) !important; }
+.app-theme .text-blue-600 { color: var(--color-accent) !important; }
+.app-theme .text-blue-700 { color: var(--color-accent) !important; }
+.app-theme .text-blue-800 { color: var(--color-accent-2) !important; }
+.app-theme .text-blue-900 { color: var(--color-ink) !important; }
+.app-theme .text-cyan-500 { color: var(--color-accent) !important; }
+.app-theme .text-indigo-100 { color: var(--color-ink) !important; }
+.app-theme .text-indigo-200 { color: var(--color-ink) !important; }
+.app-theme .text-indigo-300 { color: var(--color-accent-2) !important; }
+.app-theme .text-indigo-400 { color: var(--color-accent-2) !important; }
+.app-theme .text-indigo-50 { color: var(--color-ink) !important; }
+.app-theme .text-indigo-500 { color: var(--color-accent) !important; }
+.app-theme .text-indigo-600 { color: var(--color-accent) !important; }
+.app-theme .text-indigo-700 { color: var(--color-accent) !important; }
+.app-theme .text-indigo-700\/90 { color: color-mix(in oklab, var(--color-accent) 90%, transparent) !important; }
+.app-theme .text-indigo-800 { color: var(--color-accent-2) !important; }
+.app-theme .text-indigo-900 { color: var(--color-ink) !important; }
+.app-theme .text-indigo-900\/70 { color: color-mix(in oklab, var(--color-ink) 70%, transparent) !important; }
+.app-theme .text-purple-400 { color: var(--color-accent-2) !important; }
+.app-theme .text-purple-500 { color: var(--color-accent) !important; }
+.app-theme .text-purple-600 { color: var(--color-accent) !important; }
+.app-theme .text-purple-700 { color: var(--color-accent) !important; }
+.app-theme .text-purple-900 { color: var(--color-ink) !important; }
+.app-theme .text-sky-400 { color: var(--color-accent-2) !important; }
+.app-theme .text-sky-600 { color: var(--color-accent) !important; }
+.app-theme .text-sky-800 { color: var(--color-accent-2) !important; }
+.app-theme .text-teal-600 { color: var(--color-accent) !important; }
+.app-theme .text-teal-700 { color: var(--color-accent) !important; }
+.app-theme .text-violet-500 { color: var(--color-accent) !important; }
+.app-theme .text-violet-600 { color: var(--color-accent) !important; }
+.app-theme .text-violet-700 { color: var(--color-accent) !important; }
+.app-theme .to-blue-100 { --tw-gradient-to: var(--color-paper-2) !important; }
+.app-theme .to-blue-50 { --tw-gradient-to: var(--color-paper-2) !important; }
+.app-theme .to-blue-500 { --tw-gradient-to: var(--color-accent) !important; }
+.app-theme .to-cyan-500 { --tw-gradient-to: var(--color-accent) !important; }
+.app-theme .to-cyan-600 { --tw-gradient-to: var(--color-accent) !important; }
+.app-theme .to-indigo-500 { --tw-gradient-to: var(--color-accent) !important; }
+.app-theme .to-indigo-600 { --tw-gradient-to: var(--color-accent) !important; }
+.app-theme .to-purple-100 { --tw-gradient-to: var(--color-paper-2) !important; }
+.app-theme .to-purple-50 { --tw-gradient-to: var(--color-paper-2) !important; }
+.app-theme .to-purple-500 { --tw-gradient-to: var(--color-accent) !important; }
+.app-theme .to-purple-600 { --tw-gradient-to: var(--color-accent) !important; }
+.app-theme .to-sky-500 { --tw-gradient-to: var(--color-accent) !important; }
+.app-theme .to-teal-50 { --tw-gradient-to: var(--color-paper-2) !important; }
+.app-theme .to-teal-500 { --tw-gradient-to: var(--color-accent) !important; }
+.app-theme .to-violet-500 { --tw-gradient-to: var(--color-accent) !important; }
+.app-theme .to-violet-600 { --tw-gradient-to: var(--color-accent) !important; }
+.app-theme .to-violet-700 { --tw-gradient-to: var(--color-accent) !important; }
+.app-theme .via-purple-500 { --tw-gradient-via: var(--color-accent) !important; }
+.app-theme .via-purple-600 { --tw-gradient-via: var(--color-accent) !important; }
 
 .scrollbar-hide { scrollbar-width: none; }
 .scrollbar-hide::-webkit-scrollbar { display: none; }
