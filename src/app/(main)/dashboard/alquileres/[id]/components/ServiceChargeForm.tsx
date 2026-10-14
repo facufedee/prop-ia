@@ -83,11 +83,11 @@ export default function ServiceChargeForm({
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 {Object.entries(SERVICE_TYPES).map(([type, config]) => (
                     <div key={type} className="space-y-2">
-                        <label className="block text-sm font-medium text-gray-700">
+                        <label className="block text-sm font-medium text-[var(--color-ink-2)]">
                             {config.icon} {config.label}
                         </label>
                         <div className="relative">
-                            <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500">$</span>
+                            <span className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--color-muted)]">$</span>
                             <input
                                 type="number"
                                 min="0"
@@ -95,7 +95,7 @@ export default function ServiceChargeForm({
                                 placeholder="0"
                                 value={charges[type]?.amount || ''}
                                 onChange={(e) => handleAmountChange(type, e.target.value)}
-                                className="w-full pl-8 pr-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                                className="w-full pl-8 pr-3 py-2 border border-[var(--color-rule)] rounded-lg focus:ring-2 focus:ring-[var(--color-accent)]/40 focus:border-[var(--color-accent)]"
                             />
                         </div>
                         {type === 'otros' && charges[type]?.amount && parseFloat(charges[type].amount) > 0 && (
@@ -104,7 +104,7 @@ export default function ServiceChargeForm({
                                 placeholder="Descripción (opcional)"
                                 value={charges[type]?.description || ''}
                                 onChange={(e) => handleDescriptionChange(type, e.target.value)}
-                                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-sm"
+                                className="w-full px-3 py-2 border border-[var(--color-rule)] rounded-lg focus:ring-2 focus:ring-[var(--color-accent)]/40 focus:border-[var(--color-accent)] text-sm"
                             />
                         )}
                     </div>
@@ -112,10 +112,10 @@ export default function ServiceChargeForm({
             </div>
 
             {/* Total */}
-            <div className="bg-indigo-50 border border-indigo-200 rounded-xl p-4">
+            <div className="bg-[var(--color-accent-soft)] border border-[var(--color-accent)]/30 rounded-xl p-4">
                 <div className="flex justify-between items-center">
-                    <span className="text-lg font-semibold text-indigo-900">Total</span>
-                    <span className="text-2xl font-bold text-indigo-600">
+                    <span className="text-lg font-semibold text-[var(--color-accent)]">Total</span>
+                    <span className="text-2xl font-bold text-[var(--color-accent)]">
                         ${total.toLocaleString('es-AR', { minimumFractionDigits: 0, maximumFractionDigits: 2 })}
                     </span>
                 </div>
@@ -125,11 +125,11 @@ export default function ServiceChargeForm({
             <button
                 type="submit"
                 disabled={loading || total === 0}
-                className="w-full bg-indigo-600 text-white px-6 py-3 rounded-xl font-semibold hover:bg-indigo-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                className="w-full bg-[var(--color-ink)] text-[var(--color-paper)] px-6 py-3 rounded-xl font-semibold hover:bg-[var(--color-ink-2)] transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
             >
                 {loading ? (
                     <>
-                        <Loader2 className="w-5 h-5 animate-spin" />
+                        <Loader2 strokeWidth={1.5} className="w-5 h-5 animate-spin" />
                         Guardando...
                     </>
                 ) : (

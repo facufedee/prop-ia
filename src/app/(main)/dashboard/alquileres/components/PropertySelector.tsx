@@ -77,7 +77,7 @@ export default function PropertySelector({ onSelect, selectedId }: PropertySelec
 
     if (loading) {
         return (
-            <div className="w-full p-3 border border-gray-300 rounded-lg bg-gray-50 text-gray-500">
+            <div className="w-full p-3 border border-[var(--color-rule)] rounded-lg bg-[var(--color-paper)] text-[var(--color-muted)]">
                 Cargando propiedades...
             </div>
         );
@@ -86,12 +86,12 @@ export default function PropertySelector({ onSelect, selectedId }: PropertySelec
     return (
         <div>
             <div className="flex justify-between items-center mb-2">
-                <label className="block text-sm font-medium text-gray-700">
+                <label className="block text-sm font-medium text-[var(--color-ink-2)]">
                     Seleccionar Propiedad *
                 </label>
                 <a
                     href="/dashboard/propiedades/nueva?returnTo=/dashboard/alquileres/nuevo"
-                    className="text-sm font-medium text-indigo-600 hover:text-indigo-700 hover:underline"
+                    className="text-sm font-medium text-[var(--color-accent)] hover:text-[var(--color-accent-2)] hover:underline"
                 >
                     + Nueva propiedad
                 </a>
@@ -99,7 +99,7 @@ export default function PropertySelector({ onSelect, selectedId }: PropertySelec
 
             <select
                 required
-                className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-gray-900"
+                className="w-full p-3 border border-[var(--color-rule)] rounded-lg focus:ring-2 focus:ring-[var(--color-accent)]/40 focus:border-[var(--color-accent)] text-[var(--color-ink)]"
                 value={selectedId || ""}
                 onChange={handleChange}
             >
@@ -112,7 +112,7 @@ export default function PropertySelector({ onSelect, selectedId }: PropertySelec
             </select>
 
             {properties.length === 0 && (
-                <p className="mt-2 text-sm text-gray-500">
+                <p className="mt-2 text-sm text-[var(--color-muted)]">
                     No tenés propiedades. Creá una nueva para continuar.
                 </p>
             )}

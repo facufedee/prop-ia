@@ -13,64 +13,53 @@ interface Props {
 const getInitials = (name: string) =>
     name.trim().split(" ").slice(0, 2).map((n) => n[0]).join("").toUpperCase();
 
-const AVATAR_COLORS = [
-    "from-emerald-400 to-teal-500",
-    "from-indigo-400 to-blue-500",
-    "from-violet-400 to-purple-500",
-    "from-rose-400 to-pink-500",
-    "from-amber-400 to-orange-500",
-    "from-cyan-400 to-sky-500",
-];
-const avatarColor = (name: string) =>
-    AVATAR_COLORS[(name?.charCodeAt(0) || 0) % AVATAR_COLORS.length];
-
 export default function InquilinosTable({ inquilinos, onDelete, onEdit, onViewDetail }: Props) {
     if (inquilinos.length === 0) {
         return (
-            <div className="bg-white rounded-2xl border border-gray-100 shadow-sm flex flex-col items-center justify-center py-16 text-center px-4">
-                <div className="w-16 h-16 bg-emerald-50 rounded-full flex items-center justify-center mb-4 border border-emerald-100">
-                    <Home size={28} className="text-emerald-400" />
+            <div className="bg-[var(--color-paper-2)] rounded-2xl border border-[var(--color-rule-2)] shadow-sm flex flex-col items-center justify-center py-16 text-center px-4">
+                <div className="w-16 h-16 bg-[var(--color-paper-3)] rounded-full flex items-center justify-center mb-4">
+                    <Home strokeWidth={1.5} size={28} className="text-[var(--color-muted)]" />
                 </div>
-                <p className="text-[16px] font-bold text-gray-700">Sin inquilinos registrados</p>
-                <p className="text-sm text-gray-400 mt-1">Agregá un inquilino para verlo aquí</p>
+                <p className="text-[16px] font-bold text-[var(--color-ink-2)]">Sin inquilinos registrados</p>
+                <p className="text-sm text-[var(--color-neutral)] mt-1">Agregá un inquilino para verlo aquí</p>
             </div>
         );
     }
 
     return (
-        <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
+        <div className="bg-[var(--color-paper-2)] rounded-2xl border border-[var(--color-rule-2)] shadow-sm overflow-hidden">
             <div className="overflow-x-auto">
                 <table className="w-full">
                     <thead>
-                        <tr className="bg-gray-50 border-b border-gray-100">
-                            <th className="px-5 py-3.5 text-left text-[11px] font-bold text-gray-400 uppercase tracking-widest">Inquilino</th>
-                            <th className="px-5 py-3.5 text-left text-[11px] font-bold text-gray-400 uppercase tracking-widest hidden md:table-cell">DNI</th>
-                            <th className="px-5 py-3.5 text-left text-[11px] font-bold text-gray-400 uppercase tracking-widest hidden lg:table-cell">Domicilio</th>
-                            <th className="px-5 py-3.5 text-left text-[11px] font-bold text-gray-400 uppercase tracking-widest hidden sm:table-cell">Contacto</th>
-                            <th className="px-5 py-3.5 text-right text-[11px] font-bold text-gray-400 uppercase tracking-widest">Acciones</th>
+                        <tr className="bg-[var(--color-paper)] border-b border-[var(--color-rule-2)]">
+                            <th className="px-5 py-3.5 text-left text-[11px] font-bold text-[var(--color-neutral)] uppercase tracking-widest">Inquilino</th>
+                            <th className="px-5 py-3.5 text-left text-[11px] font-bold text-[var(--color-neutral)] uppercase tracking-widest hidden md:table-cell">DNI</th>
+                            <th className="px-5 py-3.5 text-left text-[11px] font-bold text-[var(--color-neutral)] uppercase tracking-widest hidden lg:table-cell">Domicilio</th>
+                            <th className="px-5 py-3.5 text-left text-[11px] font-bold text-[var(--color-neutral)] uppercase tracking-widest hidden sm:table-cell">Contacto</th>
+                            <th className="px-5 py-3.5 text-right text-[11px] font-bold text-[var(--color-neutral)] uppercase tracking-widest">Acciones</th>
                         </tr>
                     </thead>
-                    <tbody className="divide-y divide-gray-50">
+                    <tbody className="divide-y divide-[var(--color-rule-2)]">
                         {inquilinos.map((i) => (
                             <tr
                                 key={i.id}
                                 onClick={() => onViewDetail(i)}
-                                className="hover:bg-gray-50/70 transition-colors cursor-pointer group"
+                                className="hover:bg-[var(--color-paper-3)] transition-colors cursor-pointer group"
                             >
                                 {/* Avatar + name */}
                                 <td className="px-5 py-4">
                                     <div className="flex items-center gap-3">
-                                        <div className={`w-9 h-9 rounded-full bg-gradient-to-br ${avatarColor(i.nombre)} text-white flex items-center justify-center font-bold text-sm flex-shrink-0 shadow-sm`}>
+                                        <div className={`w-9 h-9 rounded-full bg-[var(--color-paper-3)] text-[var(--color-ink-2)] flex items-center justify-center font-bold text-sm flex-shrink-0`}>
                                             {getInitials(i.nombre)}
                                         </div>
                                         <div>
-                                            <p className="text-sm font-semibold text-gray-900 group-hover:text-indigo-600 transition-colors">{i.nombre}</p>
-                                            <p className="text-xs text-gray-400 sm:hidden">{i.email}</p>
+                                            <p className="text-sm font-semibold text-[var(--color-ink)] group-hover:text-[var(--color-accent-2)] transition-colors">{i.nombre}</p>
+                                            <p className="text-xs text-[var(--color-neutral)] sm:hidden">{i.email}</p>
                                         </div>
                                     </div>
                                 </td>
-                                <td className="px-5 py-4 text-sm text-gray-500 hidden md:table-cell font-mono">{i.dni || "—"}</td>
-                                <td className="px-5 py-4 text-sm text-gray-500 hidden lg:table-cell max-w-[200px] truncate">{i.domicilio || "—"}</td>
+                                <td className="px-5 py-4 text-sm text-[var(--color-muted)] hidden md:table-cell font-mono">{i.dni || "—"}</td>
+                                <td className="px-5 py-4 text-sm text-[var(--color-muted)] hidden lg:table-cell max-w-[200px] truncate">{i.domicilio || "—"}</td>
                                 {/* Contact shortcuts */}
                                 <td className="px-5 py-4 hidden sm:table-cell" onClick={(e) => e.stopPropagation()}>
                                     <div className="flex items-center gap-2">
@@ -78,18 +67,18 @@ export default function InquilinosTable({ inquilinos, onDelete, onEdit, onViewDe
                                             <a
                                                 href={`tel:${i.telefono}`}
                                                 title={i.telefono}
-                                                className="w-7 h-7 flex items-center justify-center rounded-lg bg-emerald-50 text-emerald-600 hover:bg-emerald-100 transition-colors"
+                                                className="w-7 h-7 flex items-center justify-center rounded-lg bg-[var(--color-positive-soft)] text-[var(--color-positive)] hover:bg-[var(--color-positive-soft)] transition-colors"
                                             >
-                                                <Phone size={13} />
+                                                <Phone strokeWidth={1.5} size={13} />
                                             </a>
                                         )}
                                         {i.email && (
                                             <a
                                                 href={`mailto:${i.email}`}
                                                 title={i.email}
-                                                className="w-7 h-7 flex items-center justify-center rounded-lg bg-indigo-50 text-indigo-600 hover:bg-indigo-100 transition-colors"
+                                                className="w-7 h-7 flex items-center justify-center rounded-lg border border-[var(--color-rule)] text-[var(--color-ink)] hover:bg-[var(--color-paper-3)] transition-colors"
                                             >
-                                                <Mail size={13} />
+                                                <Mail strokeWidth={1.5} size={13} />
                                             </a>
                                         )}
                                     </div>
@@ -99,24 +88,24 @@ export default function InquilinosTable({ inquilinos, onDelete, onEdit, onViewDe
                                     <div className="flex items-center justify-end gap-1">
                                         <button
                                             onClick={() => onViewDetail(i)}
-                                            className="p-2 text-gray-400 hover:text-indigo-600 hover:bg-indigo-50 rounded-lg transition-colors"
+                                            className="p-2 text-[var(--color-neutral)] hover:text-[var(--color-ink)] hover:bg-[var(--color-paper-3)] rounded-lg transition-colors"
                                             title="Ver detalle"
                                         >
-                                            <Eye size={15} />
+                                            <Eye strokeWidth={1.5} size={15} />
                                         </button>
                                         <button
                                             onClick={() => onEdit(i)}
-                                            className="p-2 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
+                                            className="p-2 text-[var(--color-neutral)] hover:text-[var(--color-ink)] hover:bg-[var(--color-paper-3)] rounded-lg transition-colors"
                                             title="Editar"
                                         >
-                                            <Edit size={15} />
+                                            <Edit strokeWidth={1.5} size={15} />
                                         </button>
                                         <button
                                             onClick={() => onDelete(i.id)}
-                                            className="p-2 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+                                            className="p-2 text-[var(--color-neutral)] hover:text-[var(--color-danger)] hover:bg-[var(--color-danger-soft)] rounded-lg transition-colors"
                                             title="Eliminar"
                                         >
-                                            <Trash2 size={15} />
+                                            <Trash2 strokeWidth={1.5} size={15} />
                                         </button>
                                     </div>
                                 </td>
@@ -125,7 +114,7 @@ export default function InquilinosTable({ inquilinos, onDelete, onEdit, onViewDe
                     </tbody>
                 </table>
             </div>
-            <div className="px-5 py-3 border-t border-gray-50 bg-gray-50/50 text-xs text-gray-400 font-medium">
+            <div className="px-5 py-3 border-t border-[var(--color-rule-2)] bg-[var(--color-paper)]/50 text-xs text-[var(--color-neutral)] font-medium">
                 {inquilinos.length} inquilino{inquilinos.length !== 1 ? "s" : ""}
             </div>
         </div>

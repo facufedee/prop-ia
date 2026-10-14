@@ -249,44 +249,44 @@ export default function ClientFormModal({ isOpen, onClose, onSuccess, initialTyp
             />
 
             <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4 animate-in fade-in duration-200 overflow-y-auto">
-                <div className="bg-white rounded-2xl shadow-xl w-full max-w-2xl my-8 overflow-hidden animate-in zoom-in-95 duration-200 flex flex-col max-h-[90vh]">
+                <div className="bg-[var(--color-paper-2)] rounded-2xl shadow-xl w-full max-w-2xl my-8 overflow-hidden animate-in zoom-in-95 duration-200 flex flex-col max-h-[90vh]">
 
                     {/* Header */}
-                    <div className="flex items-center justify-between p-6 border-b border-gray-100 flex-shrink-0">
-                        <h2 className="text-xl font-bold text-gray-900">
+                    <div className="flex items-center justify-between p-6 border-b border-[var(--color-rule-2)] flex-shrink-0">
+                        <h2 className="text-xl font-bold text-[var(--color-ink)]">
                             {isEditing ? 'Editar' : 'Nuevo'} {
                                 clientType === 'inquilinos' ? 'Inquilino' :
                                     clientType === 'propietarios' ? 'Propietario' : 'Lead'
                             }
                         </h2>
-                        <button onClick={onClose} className="p-2 hover:bg-gray-100 rounded-full transition-colors">
-                            <X className="w-5 h-5 text-gray-500" />
+                        <button onClick={onClose} className="p-2 hover:bg-[var(--color-paper-3)] rounded-full transition-colors">
+                            <X strokeWidth={1.5} className="w-5 h-5 text-[var(--color-muted)]" />
                         </button>
                     </div>
 
                     {/* Type Selector (Only if NOT editing) */}
                     {!isEditing && (
-                        <div className="p-2 grid grid-cols-3 gap-1 bg-gray-50 m-6 mb-0 rounded-xl border border-gray-100 flex-shrink-0">
+                        <div className="p-2 grid grid-cols-3 gap-1 bg-[var(--color-paper)] m-6 mb-0 rounded-xl border border-[var(--color-rule-2)] flex-shrink-0">
                             <button
                                 type="button"
                                 onClick={() => setClientType('inquilinos')}
-                                className={`flex flex-col items-center gap-2 p-3 rounded-lg text-sm font-medium transition-all ${clientType === 'inquilinos' ? 'bg-white text-indigo-600 shadow-sm' : 'text-gray-500 hover:text-gray-700'}`}
+                                className={`flex flex-col items-center gap-2 p-3 rounded-lg text-sm font-medium transition-all ${clientType === 'inquilinos' ? 'bg-[var(--color-paper-2)] text-[var(--color-accent)] shadow-sm' : 'text-[var(--color-muted)] hover:text-[var(--color-ink-2)]'}`}
                             >
-                                <Users className="w-5 h-5" /> Inquilino
+                                <Users strokeWidth={1.5} className="w-5 h-5" /> Inquilino
                             </button>
                             <button
                                 type="button"
                                 onClick={() => setClientType('propietarios')}
-                                className={`flex flex-col items-center gap-2 p-3 rounded-lg text-sm font-medium transition-all ${clientType === 'propietarios' ? 'bg-white text-indigo-600 shadow-sm' : 'text-gray-500 hover:text-gray-700'}`}
+                                className={`flex flex-col items-center gap-2 p-3 rounded-lg text-sm font-medium transition-all ${clientType === 'propietarios' ? 'bg-[var(--color-paper-2)] text-[var(--color-accent)] shadow-sm' : 'text-[var(--color-muted)] hover:text-[var(--color-ink-2)]'}`}
                             >
-                                <Building2 className="w-5 h-5" /> Propietario
+                                <Building2 strokeWidth={1.5} className="w-5 h-5" /> Propietario
                             </button>
                             <button
                                 type="button"
                                 onClick={() => setClientType('leads')}
-                                className={`flex flex-col items-center gap-2 p-3 rounded-lg text-sm font-medium transition-all ${clientType === 'leads' ? 'bg-white text-indigo-600 shadow-sm' : 'text-gray-500 hover:text-gray-700'}`}
+                                className={`flex flex-col items-center gap-2 p-3 rounded-lg text-sm font-medium transition-all ${clientType === 'leads' ? 'bg-[var(--color-paper-2)] text-[var(--color-accent)] shadow-sm' : 'text-[var(--color-muted)] hover:text-[var(--color-ink-2)]'}`}
                             >
-                                <UserPlus className="w-5 h-5" /> Lead
+                                <UserPlus strokeWidth={1.5} className="w-5 h-5" /> Lead
                             </button>
                         </div>
                     )}
@@ -295,45 +295,45 @@ export default function ClientFormModal({ isOpen, onClose, onSuccess, initialTyp
                     <div className="overflow-y-auto p-6 flex-1">
                         <form id="client-form" onSubmit={handleSubmit} className="space-y-6">
                             {error && (
-                                <div className="p-3 bg-red-50 text-red-600 text-sm rounded-lg flex items-center gap-2">
-                                    <X className="w-4 h-4" /> {error}
+                                <div className="p-3 bg-[var(--color-danger-soft)] text-[var(--color-danger)] text-sm rounded-lg flex items-center gap-2">
+                                    <X strokeWidth={1.5} className="w-4 h-4" /> {error}
                                 </div>
                             )}
 
                             {/* --- Sección: Datos Personales --- */}
                             <section className="space-y-4">
-                                <h3 className="text-sm font-semibold text-gray-900 flex items-center gap-2 uppercase tracking-wide">
-                                    <User className="w-4 h-4" /> Datos Personales
+                                <h3 className="text-sm font-semibold text-[var(--color-ink)] flex items-center gap-2 uppercase tracking-wide">
+                                    <User strokeWidth={1.5} className="w-4 h-4" /> Datos Personales
                                 </h3>
 
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                     <div className="md:col-span-2">
-                                        <label className="block text-sm font-medium text-gray-700 mb-1">Nombre Completo</label>
-                                        <input type="text" required value={nombre} onChange={(e) => handleNameChange(e.target.value)} maxLength={50} className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none text-gray-900" placeholder="Ej: Facundo Flores" />
+                                        <label className="block text-sm font-medium text-[var(--color-ink-2)] mb-1">Nombre Completo</label>
+                                        <input type="text" required value={nombre} onChange={(e) => handleNameChange(e.target.value)} maxLength={50} className="w-full px-3 py-2 border border-[var(--color-rule)] rounded-lg focus:ring-2 focus:ring-[var(--color-accent)]/40 outline-none text-[var(--color-ink)]" placeholder="Ej: Facundo Flores" />
                                     </div>
 
                                     <div>
-                                        <label className="block text-sm font-medium text-gray-700 mb-1">Email</label>
-                                        <input type="email" required value={email} onChange={(e) => setEmail(e.target.value)} maxLength={50} className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none text-gray-900" placeholder="facundo@zetaprop.com.ar" />
+                                        <label className="block text-sm font-medium text-[var(--color-ink-2)] mb-1">Email</label>
+                                        <input type="email" required value={email} onChange={(e) => setEmail(e.target.value)} maxLength={50} className="w-full px-3 py-2 border border-[var(--color-rule)] rounded-lg focus:ring-2 focus:ring-[var(--color-accent)]/40 outline-none text-[var(--color-ink)]" placeholder="facundo@zetaprop.com.ar" />
                                     </div>
                                     <div>
-                                        <label className="block text-sm font-medium text-gray-700 mb-1">Teléfono (Solo números)</label>
-                                        <input type="tel" required value={telefono} onChange={(e) => handlePhoneChange(e.target.value)} maxLength={20} className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none text-gray-900" placeholder="1112345678" />
+                                        <label className="block text-sm font-medium text-[var(--color-ink-2)] mb-1">Teléfono (Solo números)</label>
+                                        <input type="tel" required value={telefono} onChange={(e) => handlePhoneChange(e.target.value)} maxLength={20} className="w-full px-3 py-2 border border-[var(--color-rule)] rounded-lg focus:ring-2 focus:ring-[var(--color-accent)]/40 outline-none text-[var(--color-ink)]" placeholder="1112345678" />
                                     </div>
 
                                     {clientType !== 'leads' && (
                                         <>
                                             <div>
-                                                <label className="block text-sm font-medium text-gray-700 mb-1">DNI (Solo números)</label>
-                                                <input type="text" value={dni} onChange={(e) => handleDniChange(e.target.value)} maxLength={10} className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none text-gray-900" placeholder="12345678" />
+                                                <label className="block text-sm font-medium text-[var(--color-ink-2)] mb-1">DNI (Solo números)</label>
+                                                <input type="text" value={dni} onChange={(e) => handleDniChange(e.target.value)} maxLength={10} className="w-full px-3 py-2 border border-[var(--color-rule)] rounded-lg focus:ring-2 focus:ring-[var(--color-accent)]/40 outline-none text-[var(--color-ink)]" placeholder="12345678" />
                                             </div>
                                             <div>
-                                                <label className="block text-sm font-medium text-gray-700 mb-1">CUIT / CUIL</label>
-                                                <input type="text" value={cuit} onChange={(e) => setCuit(e.target.value)} className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none text-gray-900" placeholder="20-12345678-9" />
+                                                <label className="block text-sm font-medium text-[var(--color-ink-2)] mb-1">CUIT / CUIL</label>
+                                                <input type="text" value={cuit} onChange={(e) => setCuit(e.target.value)} className="w-full px-3 py-2 border border-[var(--color-rule)] rounded-lg focus:ring-2 focus:ring-[var(--color-accent)]/40 outline-none text-[var(--color-ink)]" placeholder="20-12345678-9" />
                                             </div>
                                             <div className="md:col-span-2">
-                                                <label className="block text-sm font-medium text-gray-700 mb-1">Domicilio Real / Legal</label>
-                                                <input type="text" value={domicilio} onChange={(e) => setDomicilio(e.target.value)} className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none text-gray-900" placeholder="Dr Monte 800 - Moron" />
+                                                <label className="block text-sm font-medium text-[var(--color-ink-2)] mb-1">Domicilio Real / Legal</label>
+                                                <input type="text" value={domicilio} onChange={(e) => setDomicilio(e.target.value)} className="w-full px-3 py-2 border border-[var(--color-rule)] rounded-lg focus:ring-2 focus:ring-[var(--color-accent)]/40 outline-none text-[var(--color-ink)]" placeholder="Dr Monte 800 - Moron" />
                                             </div>
                                         </>
                                     )}
@@ -346,21 +346,21 @@ export default function ClientFormModal({ isOpen, onClose, onSuccess, initialTyp
                             {clientType === 'leads' && (
                                 <section className="space-y-4">
                                     {isEditing && (initialData as Lead)?.propertyTitle && (
-                                        <div className="bg-indigo-50 p-4 rounded-xl border border-indigo-100 flex flex-col gap-1">
-                                            <label className="text-xs font-bold text-indigo-500 uppercase tracking-wide">Propiedad Consultada</label>
+                                        <div className="bg-[var(--color-accent-soft)] p-4 rounded-xl border border-[var(--color-accent)]/30 flex flex-col gap-1">
+                                            <label className="text-xs font-bold text-[var(--color-accent)] uppercase tracking-wide">Propiedad Consultada</label>
                                             {(initialData as Lead)?.propertyId ? (
-                                                <a href={`/propiedades/p/${(initialData as Lead).propertyId}`} target="_blank" rel="noopener noreferrer" className="text-sm font-semibold text-indigo-700 hover:text-indigo-900 hover:underline inline-flex items-center gap-1">
+                                                <a href={`/propiedades/p/${(initialData as Lead).propertyId}`} target="_blank" rel="noopener noreferrer" className="text-sm font-semibold text-[var(--color-accent)] hover:text-[var(--color-accent-2)] hover:underline inline-flex items-center gap-1">
                                                     {(initialData as Lead).propertyTitle}
                                                 </a>
                                             ) : (
-                                                <p className="text-sm font-semibold text-indigo-900">{(initialData as Lead).propertyTitle}</p>
+                                                <p className="text-sm font-semibold text-[var(--color-accent)]">{(initialData as Lead).propertyTitle}</p>
                                             )}
                                         </div>
                                     )}
                                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                         <div>
-                                            <label className="block text-sm font-medium text-gray-700 mb-1">Estado</label>
-                                            <select value={leadData.estado} onChange={(e) => setLeadData(prev => ({ ...prev, estado: e.target.value }))} className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none bg-white text-gray-900">
+                                            <label className="block text-sm font-medium text-[var(--color-ink-2)] mb-1">Estado</label>
+                                            <select value={leadData.estado} onChange={(e) => setLeadData(prev => ({ ...prev, estado: e.target.value }))} className="w-full px-3 py-2 border border-[var(--color-rule)] rounded-lg focus:ring-2 focus:ring-[var(--color-accent)]/40 outline-none bg-[var(--color-paper-2)] text-[var(--color-ink)]">
                                                 <option value="nuevo">Nuevo</option>
                                                 <option value="contactado">Contactado</option>
                                                 <option value="interesado">Interesado</option>
@@ -370,12 +370,12 @@ export default function ClientFormModal({ isOpen, onClose, onSuccess, initialTyp
                                             </select>
                                         </div>
                                         <div>
-                                            <label className="block text-sm font-medium text-gray-700 mb-1">Origen</label>
-                                            <input type="text" value={leadData.origen} onChange={(e) => setLeadData(prev => ({ ...prev, origen: e.target.value }))} className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none text-gray-900" />
+                                            <label className="block text-sm font-medium text-[var(--color-ink-2)] mb-1">Origen</label>
+                                            <input type="text" value={leadData.origen} onChange={(e) => setLeadData(prev => ({ ...prev, origen: e.target.value }))} className="w-full px-3 py-2 border border-[var(--color-rule)] rounded-lg focus:ring-2 focus:ring-[var(--color-accent)]/40 outline-none text-[var(--color-ink)]" />
                                         </div>
                                         <div className="md:col-span-2">
-                                            <label className="block text-sm font-medium text-gray-700 mb-1">Mensaje / Consulta</label>
-                                            <textarea rows={3} value={leadData.mensaje} onChange={(e) => setLeadData(prev => ({ ...prev, mensaje: e.target.value }))} className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none text-gray-900" />
+                                            <label className="block text-sm font-medium text-[var(--color-ink-2)] mb-1">Mensaje / Consulta</label>
+                                            <textarea rows={3} value={leadData.mensaje} onChange={(e) => setLeadData(prev => ({ ...prev, mensaje: e.target.value }))} className="w-full px-3 py-2 border border-[var(--color-rule)] rounded-lg focus:ring-2 focus:ring-[var(--color-accent)]/40 outline-none text-[var(--color-ink)]" />
                                         </div>
                                     </div>
                                 </section>
@@ -385,12 +385,12 @@ export default function ClientFormModal({ isOpen, onClose, onSuccess, initialTyp
                     </div>
 
                     {/* Footer - Actions */}
-                    <div className="p-6 border-t border-gray-100 flex gap-3 flex-shrink-0 bg-white">
+                    <div className="p-6 border-t border-[var(--color-rule-2)] flex gap-3 flex-shrink-0 bg-[var(--color-paper-2)]">
                         <button
                             type="button"
                             onClick={onClose}
                             disabled={loading}
-                            className="flex-1 px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors font-medium disabled:opacity-50"
+                            className="flex-1 px-4 py-2 border border-[var(--color-rule)] text-[var(--color-ink-2)] rounded-lg hover:bg-[var(--color-paper-3)] transition-colors font-medium disabled:opacity-50"
                         >
                             Cancelar
                         </button>
@@ -398,9 +398,9 @@ export default function ClientFormModal({ isOpen, onClose, onSuccess, initialTyp
                             type="submit"
                             form="client-form"
                             disabled={loading}
-                            className="flex-1 flex items-center justify-center gap-2 px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors font-medium disabled:opacity-50 shadow-sm shadow-indigo-200"
+                            className="flex-1 flex items-center justify-center gap-2 px-4 py-2 bg-[var(--color-ink)] text-[var(--color-paper)] rounded-lg hover:bg-[var(--color-ink-2)] transition-colors font-medium disabled:opacity-50 shadow-sm"
                         >
-                            {loading ? <Loader2 className="w-5 h-5 animate-spin" /> : <Save className="w-5 h-5" />}
+                            {loading ? <Loader2 strokeWidth={1.5} className="w-5 h-5 animate-spin" /> : <Save strokeWidth={1.5} className="w-5 h-5" />}
                             {isEditing ? 'Guardar Cambios' : 'Crear Cliente'}
                         </button>
                     </div>

@@ -35,23 +35,23 @@ function clasificarPago(pago: PagoConContexto): Filtro {
 function badgePago(dias: number) {
     if (dias < 0) return {
         label: `Vencido hace ${Math.abs(dias)} día${Math.abs(dias) !== 1 ? "s" : ""}`,
-        className: "bg-red-100 text-red-700 border border-red-200",
-        dot: "bg-red-500",
+        className: "bg-[var(--color-danger-soft)] text-[var(--color-danger)] border border-[var(--color-danger)]/30",
+        dot: "bg-[var(--color-danger)]",
     };
     if (dias === 0) return {
         label: "Vence hoy",
-        className: "bg-orange-100 text-orange-700 border border-orange-200",
-        dot: "bg-orange-500",
+        className: "bg-[var(--color-warning-soft)] text-[var(--color-warning)] border border-[var(--color-warning)]/30",
+        dot: "bg-[var(--color-warning)]",
     };
     if (dias <= 3) return {
         label: `Vence en ${dias} día${dias !== 1 ? "s" : ""}`,
-        className: "bg-amber-100 text-amber-700 border border-amber-200",
-        dot: "bg-amber-400",
+        className: "bg-[var(--color-warning-soft)] text-[var(--color-warning)] border border-[var(--color-warning)]/30",
+        dot: "bg-[var(--color-warning)]/30",
     };
     return {
         label: `Vence en ${dias} días`,
-        className: "bg-blue-50 text-blue-700 border border-blue-200",
-        dot: "bg-blue-400",
+        className: "bg-[var(--color-accent-soft)] text-[var(--color-accent)] border border-[var(--color-accent)]/30",
+        dot: "bg-[var(--color-accent)]/30",
     };
 }
 
@@ -166,63 +166,63 @@ export default function AgendaCobrosPage() {
             {/* Header */}
             <div className="flex items-center justify-between">
                 <div>
-                    <h1 className="text-2xl font-bold text-gray-900 flex items-center gap-2">
-                        <span className="w-9 h-9 bg-gradient-to-br from-rose-500 to-orange-500 rounded-xl flex items-center justify-center">
-                            <CalendarDays size={18} className="text-white" />
+                    <h1 className="font-heading text-2xl font-bold text-[var(--color-ink)] flex items-center gap-2">
+                        <span className="w-9 h-9 rounded-full bg-[var(--color-paper-3)] flex items-center justify-center">
+                            <CalendarDays size={18} strokeWidth={1.5} className="text-[var(--color-muted)]" />
                         </span>
                         Agenda de Cobros
                     </h1>
-                    <p className="text-gray-500 mt-1 text-sm">Pagos pendientes de todos los contratos activos</p>
+                    <p className="text-[var(--color-muted)] mt-1 text-sm">Pagos pendientes de todos los contratos activos</p>
                 </div>
                 <button
                     onClick={cargarPagos}
-                    className="flex items-center gap-2 px-3 py-2 text-sm text-gray-600 hover:bg-gray-100 rounded-xl transition"
+                    className="flex items-center gap-2 px-3 py-2 text-sm text-[var(--color-ink-2)] hover:bg-[var(--color-paper-3)] rounded-xl transition"
                 >
-                    <RefreshCw size={14} className={loading ? "animate-spin" : ""} />
+                    <RefreshCw strokeWidth={1.5} size={14} className={loading ? "animate-spin" : ""} />
                     Actualizar
                 </button>
             </div>
 
             {/* Summary cards */}
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-                <button onClick={() => setFiltro("vencidos")} className={`text-left p-4 rounded-2xl border-2 transition-all ${filtro === "vencidos" ? "border-red-400 bg-red-50" : "border-transparent bg-white hover:border-red-200"} shadow-sm`}>
+                <button onClick={() => setFiltro("vencidos")} className={`text-left p-4 rounded-2xl border-2 transition-all ${filtro === "vencidos" ? "border-[var(--color-danger)] bg-[var(--color-danger-soft)]" : "border-transparent bg-[var(--color-paper-2)] hover:border-[var(--color-danger)]/30"} shadow-sm`}>
                     <div className="flex items-center gap-2 mb-2">
-                        <AlertTriangle size={16} className="text-red-500" />
-                        <span className="text-xs font-medium text-gray-500 uppercase tracking-wide">Vencidos</span>
+                        <AlertTriangle strokeWidth={1.5} size={16} className="text-[var(--color-danger)]" />
+                        <span className="text-xs font-medium text-[var(--color-muted)] uppercase tracking-wide">Vencidos</span>
                     </div>
-                    <p className="text-3xl font-bold text-red-600">{loading ? "—" : counts.vencidos}</p>
+                    <p className="text-3xl font-bold text-[var(--color-danger)]">{loading ? "—" : counts.vencidos}</p>
                 </button>
 
-                <button onClick={() => setFiltro("hoy")} className={`text-left p-4 rounded-2xl border-2 transition-all ${filtro === "hoy" ? "border-orange-400 bg-orange-50" : "border-transparent bg-white hover:border-orange-200"} shadow-sm`}>
+                <button onClick={() => setFiltro("hoy")} className={`text-left p-4 rounded-2xl border-2 transition-all ${filtro === "hoy" ? "border-[var(--color-warning)] bg-[var(--color-warning-soft)]" : "border-transparent bg-[var(--color-paper-2)] hover:border-[var(--color-warning)]/30"} shadow-sm`}>
                     <div className="flex items-center gap-2 mb-2">
-                        <Clock size={16} className="text-orange-500" />
-                        <span className="text-xs font-medium text-gray-500 uppercase tracking-wide">Hoy</span>
+                        <Clock strokeWidth={1.5} size={16} className="text-[var(--color-warning)]" />
+                        <span className="text-xs font-medium text-[var(--color-muted)] uppercase tracking-wide">Hoy</span>
                     </div>
-                    <p className="text-3xl font-bold text-orange-600">{loading ? "—" : counts.hoy}</p>
+                    <p className="text-3xl font-bold text-[var(--color-warning)]">{loading ? "—" : counts.hoy}</p>
                 </button>
 
-                <button onClick={() => setFiltro("semana")} className={`text-left p-4 rounded-2xl border-2 transition-all ${filtro === "semana" ? "border-amber-400 bg-amber-50" : "border-transparent bg-white hover:border-amber-200"} shadow-sm`}>
+                <button onClick={() => setFiltro("semana")} className={`text-left p-4 rounded-2xl border-2 transition-all ${filtro === "semana" ? "border-[var(--color-warning)] bg-[var(--color-warning-soft)]" : "border-transparent bg-[var(--color-paper-2)] hover:border-[var(--color-warning)]/30"} shadow-sm`}>
                     <div className="flex items-center gap-2 mb-2">
-                        <CalendarDays size={16} className="text-amber-500" />
-                        <span className="text-xs font-medium text-gray-500 uppercase tracking-wide">Esta semana</span>
+                        <CalendarDays strokeWidth={1.5} size={16} className="text-[var(--color-warning)]" />
+                        <span className="text-xs font-medium text-[var(--color-muted)] uppercase tracking-wide">Esta semana</span>
                     </div>
-                    <p className="text-3xl font-bold text-amber-600">{loading ? "—" : counts.semana}</p>
+                    <p className="text-3xl font-bold text-[var(--color-warning)]">{loading ? "—" : counts.semana}</p>
                 </button>
 
-                <button onClick={() => setFiltro("mes")} className={`text-left p-4 rounded-2xl border-2 transition-all ${filtro === "mes" ? "border-blue-400 bg-blue-50" : "border-transparent bg-white hover:border-blue-200"} shadow-sm`}>
+                <button onClick={() => setFiltro("mes")} className={`text-left p-4 rounded-2xl border-2 transition-all ${filtro === "mes" ? "border-[var(--color-accent)] bg-[var(--color-accent-soft)]" : "border-transparent bg-[var(--color-paper-2)] hover:border-[var(--color-accent)]/30"} shadow-sm`}>
                     <div className="flex items-center gap-2 mb-2">
-                        <TrendingDown size={16} className="text-blue-500" />
-                        <span className="text-xs font-medium text-gray-500 uppercase tracking-wide">Este mes</span>
+                        <TrendingDown strokeWidth={1.5} size={16} className="text-[var(--color-accent)]" />
+                        <span className="text-xs font-medium text-[var(--color-muted)] uppercase tracking-wide">Este mes</span>
                     </div>
-                    <p className="text-3xl font-bold text-blue-600">{loading ? "—" : counts.mes}</p>
+                    <p className="text-3xl font-bold text-[var(--color-accent)]">{loading ? "—" : counts.mes}</p>
                 </button>
             </div>
 
             {/* Table */}
-            <div className="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden">
+            <div className="bg-[var(--color-paper-2)] rounded-2xl border border-[var(--color-rule)] shadow-sm overflow-hidden">
                 {/* Table header with filter tabs + total */}
-                <div className="px-6 py-4 border-b border-gray-100 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-                    <div className="flex gap-1 bg-gray-100 p-1 rounded-xl w-fit">
+                <div className="px-6 py-4 border-b border-[var(--color-rule-2)] flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                    <div className="flex gap-1 bg-[var(--color-paper-3)] p-1 rounded-xl w-fit">
                         {([
                             { key: "vencidos", label: "Vencidos" },
                             { key: "hoy", label: "Hoy" },
@@ -233,11 +233,11 @@ export default function AgendaCobrosPage() {
                             <button
                                 key={f.key}
                                 onClick={() => setFiltro(f.key)}
-                                className={`px-3 py-1.5 text-sm font-medium rounded-lg transition-all ${filtro === f.key ? "bg-white text-gray-900 shadow-sm" : "text-gray-500 hover:text-gray-700"}`}
+                                className={`px-3 py-1.5 text-sm font-medium rounded-lg transition-all ${filtro === f.key ? "bg-[var(--color-paper-2)] text-[var(--color-ink)] shadow-sm" : "text-[var(--color-muted)] hover:text-[var(--color-ink-2)]"}`}
                             >
                                 {f.label}
                                 {counts[f.key] > 0 && (
-                                    <span className={`ml-1.5 text-xs px-1.5 py-0.5 rounded-full font-semibold ${f.key === "vencidos" ? "bg-red-100 text-red-600" : "bg-gray-200 text-gray-600"}`}>
+                                    <span className={`ml-1.5 text-xs px-1.5 py-0.5 rounded-full font-semibold ${f.key === "vencidos" ? "bg-[var(--color-danger-soft)] text-[var(--color-danger)]" : "bg-[var(--color-paper-4)] text-[var(--color-ink-2)]"}`}>
                                         {counts[f.key]}
                                     </span>
                                 )}
@@ -245,45 +245,45 @@ export default function AgendaCobrosPage() {
                         ))}
                     </div>
                     {pagosFiltrados.length > 0 && (
-                        <p className="text-sm text-gray-500">
-                            Total: <span className="font-semibold text-gray-900">$ {totalFiltrado.toLocaleString("es-AR")}</span>
+                        <p className="text-sm text-[var(--color-muted)]">
+                            Total: <span className="font-semibold text-[var(--color-ink)]">$ {totalFiltrado.toLocaleString("es-AR")}</span>
                         </p>
                     )}
                 </div>
 
                 {/* Content */}
                 {loading ? (
-                    <div className="py-16 flex flex-col items-center gap-3 text-gray-400">
-                        <Loader2 size={28} className="animate-spin" />
+                    <div className="py-16 flex flex-col items-center gap-3 text-[var(--color-neutral)]">
+                        <Loader2 strokeWidth={1.5} size={28} className="animate-spin" />
                         <p className="text-sm">Cargando agenda...</p>
                     </div>
                 ) : pagosFiltrados.length === 0 ? (
                     <div className="py-16 text-center">
-                        <CheckCircle2 size={40} className="text-green-400 mx-auto mb-3" />
-                        <p className="text-gray-600 font-medium">Todo al día</p>
-                        <p className="text-gray-400 text-sm mt-1">No hay cobros pendientes en este período</p>
+                        <CheckCircle2 strokeWidth={1.5} size={40} className="text-[var(--color-positive)] mx-auto mb-3" />
+                        <p className="text-[var(--color-ink-2)] font-medium">Todo al día</p>
+                        <p className="text-[var(--color-neutral)] text-sm mt-1">No hay cobros pendientes en este período</p>
                     </div>
                 ) : (
                     <div className="overflow-x-auto">
                         <table className="w-full text-sm">
                             <thead>
-                                <tr className="bg-gray-50 border-b border-gray-100">
-                                    <th className="px-6 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wide">Estado</th>
-                                    <th className="px-6 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wide">Inquilino / Propiedad</th>
-                                    <th className="px-6 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wide">Período</th>
-                                    <th className="px-6 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wide">Vencimiento</th>
-                                    <th className="px-6 py-3 text-right text-xs font-semibold text-gray-500 uppercase tracking-wide">Monto</th>
-                                    <th className="px-6 py-3 text-right text-xs font-semibold text-gray-500 uppercase tracking-wide">Acción</th>
+                                <tr className="bg-[var(--color-paper)] border-b border-[var(--color-rule-2)]">
+                                    <th className="px-6 py-3 text-left text-xs font-semibold text-[var(--color-muted)] uppercase tracking-wide">Estado</th>
+                                    <th className="px-6 py-3 text-left text-xs font-semibold text-[var(--color-muted)] uppercase tracking-wide">Inquilino / Propiedad</th>
+                                    <th className="px-6 py-3 text-left text-xs font-semibold text-[var(--color-muted)] uppercase tracking-wide">Período</th>
+                                    <th className="px-6 py-3 text-left text-xs font-semibold text-[var(--color-muted)] uppercase tracking-wide">Vencimiento</th>
+                                    <th className="px-6 py-3 text-right text-xs font-semibold text-[var(--color-muted)] uppercase tracking-wide">Monto</th>
+                                    <th className="px-6 py-3 text-right text-xs font-semibold text-[var(--color-muted)] uppercase tracking-wide">Acción</th>
                                 </tr>
                             </thead>
-                            <tbody className="divide-y divide-gray-50">
+                            <tbody className="divide-y divide-[var(--color-rule-2)]">
                                 {pagosFiltrados.map(pago => {
                                     const badge = badgePago(pago.diasRestantes);
                                     const [year, month] = pago.mes.split("-");
                                     const periodoLabel = format(new Date(Number(year), Number(month) - 1, 1), "MMMM yyyy", { locale: es });
 
                                     return (
-                                        <tr key={`${pago.alquilerId}-${pago.id}`} className="hover:bg-gray-50/60 transition-colors">
+                                        <tr key={`${pago.alquilerId}-${pago.id}`} className="hover:bg-[var(--color-paper-3)] transition-colors">
                                             {/* Estado */}
                                             <td className="px-6 py-4">
                                                 <span className={`inline-flex items-center gap-1.5 text-xs font-medium px-2.5 py-1 rounded-full ${badge.className}`}>
@@ -294,22 +294,22 @@ export default function AgendaCobrosPage() {
 
                                             {/* Inquilino / Propiedad */}
                                             <td className="px-6 py-4">
-                                                <p className="font-medium text-gray-900">{pago.nombreInquilino}</p>
-                                                <p className="text-xs text-gray-400 mt-0.5 max-w-[200px] truncate">{pago.direccion}</p>
+                                                <p className="font-medium text-[var(--color-ink)]">{pago.nombreInquilino}</p>
+                                                <p className="text-xs text-[var(--color-neutral)] mt-0.5 max-w-[200px] truncate">{pago.direccion}</p>
                                             </td>
 
                                             {/* Período */}
-                                            <td className="px-6 py-4 text-gray-700 capitalize">{periodoLabel}</td>
+                                            <td className="px-6 py-4 text-[var(--color-ink-2)] capitalize">{periodoLabel}</td>
 
                                             {/* Vencimiento */}
-                                            <td className="px-6 py-4 text-gray-500">
+                                            <td className="px-6 py-4 text-[var(--color-muted)]">
                                                 {pago.fechaVencimiento
                                                     ? format(new Date(pago.fechaVencimiento), "dd/MM/yyyy")
                                                     : "—"}
                                             </td>
 
                                             {/* Monto */}
-                                            <td className="px-6 py-4 text-right font-semibold text-gray-900">
+                                            <td className="px-6 py-4 text-right font-semibold text-[var(--color-ink)]">
                                                 $ {(pago.monto || 0).toLocaleString("es-AR")}
                                             </td>
 
@@ -318,16 +318,16 @@ export default function AgendaCobrosPage() {
                                                 <div className="flex items-center justify-end gap-2">
                                                     <button
                                                         onClick={() => abrirModal(pago)}
-                                                        className="px-3 py-1.5 bg-gray-900 text-white text-xs font-medium rounded-lg hover:bg-gray-700 transition"
+                                                        className="px-3 py-1.5 bg-[var(--color-ink)] text-[var(--color-paper)] text-xs font-medium rounded-lg hover:bg-[var(--color-ink-2)] transition"
                                                     >
                                                         Cobrar
                                                     </button>
                                                     <Link
                                                         href={`/dashboard/alquileres/${pago.alquilerId}`}
-                                                        className="p-1.5 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-lg transition"
+                                                        className="p-1.5 text-[var(--color-neutral)] hover:text-[var(--color-ink-2)] hover:bg-[var(--color-paper-3)] rounded-lg transition"
                                                         title="Ver contrato"
                                                     >
-                                                        <ExternalLink size={14} />
+                                                        <ExternalLink strokeWidth={1.5} size={14} />
                                                     </Link>
                                                 </div>
                                             </td>
@@ -343,45 +343,45 @@ export default function AgendaCobrosPage() {
             {/* Modal cobrar */}
             {modalPago && (
                 <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40 backdrop-blur-sm">
-                    <div className="bg-white rounded-2xl shadow-xl w-full max-w-sm">
-                        <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100">
-                            <h3 className="font-semibold text-gray-900">Registrar cobro</h3>
-                            <button onClick={() => setModalPago(null)} className="p-1 rounded-lg hover:bg-gray-100 transition">
-                                <X size={18} className="text-gray-500" />
+                    <div className="bg-[var(--color-paper-2)] rounded-2xl shadow-xl w-full max-w-sm">
+                        <div className="flex items-center justify-between px-6 py-4 border-b border-[var(--color-rule-2)]">
+                            <h3 className="font-semibold text-[var(--color-ink)]">Registrar cobro</h3>
+                            <button onClick={() => setModalPago(null)} className="p-1 rounded-lg hover:bg-[var(--color-paper-3)] transition">
+                                <X strokeWidth={1.5} size={18} className="text-[var(--color-muted)]" />
                             </button>
                         </div>
 
                         <div className="px-6 py-5 space-y-4">
                             {/* Resumen */}
-                            <div className="bg-gray-50 rounded-xl p-4 space-y-1.5">
-                                <p className="font-medium text-gray-900">{modalPago.nombreInquilino}</p>
-                                <p className="text-sm text-gray-500">{modalPago.direccion}</p>
-                                <p className="text-xs text-gray-400 capitalize">
+                            <div className="bg-[var(--color-paper)] rounded-xl p-4 space-y-1.5">
+                                <p className="font-medium text-[var(--color-ink)]">{modalPago.nombreInquilino}</p>
+                                <p className="text-sm text-[var(--color-muted)]">{modalPago.direccion}</p>
+                                <p className="text-xs text-[var(--color-neutral)] capitalize">
                                     {format(new Date(Number(modalPago.mes.split("-")[0]), Number(modalPago.mes.split("-")[1]) - 1, 1), "MMMM yyyy", { locale: es })}
                                 </p>
-                                <p className="text-2xl font-bold text-gray-900 pt-1">
+                                <p className="text-2xl font-bold text-[var(--color-ink)] pt-1">
                                     $ {(modalPago.monto || 0).toLocaleString("es-AR")}
                                 </p>
                             </div>
 
                             {/* Fecha */}
                             <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-1.5">Fecha de pago</label>
+                                <label className="block text-sm font-medium text-[var(--color-ink-2)] mb-1.5">Fecha de pago</label>
                                 <input
                                     type="date"
                                     value={fechaPago}
                                     onChange={e => setFechaPago(e.target.value)}
-                                    className="w-full px-4 py-2.5 border border-gray-300 rounded-xl text-sm focus:ring-2 focus:ring-gray-900 focus:border-gray-900 outline-none"
+                                    className="w-full px-4 py-2.5 border border-[var(--color-rule)] rounded-xl text-sm focus:ring-2 focus:ring-[var(--color-neutral)] focus:border-[var(--color-neutral)] outline-none"
                                 />
                             </div>
 
                             {/* Método */}
                             <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-1.5">Método de pago</label>
+                                <label className="block text-sm font-medium text-[var(--color-ink-2)] mb-1.5">Método de pago</label>
                                 <select
                                     value={metodoPago}
                                     onChange={e => setMetodoPago(e.target.value)}
-                                    className="w-full px-4 py-2.5 border border-gray-300 rounded-xl text-sm focus:ring-2 focus:ring-gray-900 focus:border-gray-900 outline-none bg-white"
+                                    className="w-full px-4 py-2.5 border border-[var(--color-rule)] rounded-xl text-sm focus:ring-2 focus:ring-[var(--color-neutral)] focus:border-[var(--color-neutral)] outline-none bg-[var(--color-paper-2)]"
                                 >
                                     <option value="transferencia">Transferencia</option>
                                     <option value="efectivo">Efectivo</option>
@@ -395,16 +395,16 @@ export default function AgendaCobrosPage() {
                         <div className="px-6 pb-5 flex gap-3">
                             <button
                                 onClick={() => setModalPago(null)}
-                                className="flex-1 px-4 py-2.5 border border-gray-200 text-gray-700 rounded-xl text-sm font-medium hover:bg-gray-50 transition"
+                                className="flex-1 px-4 py-2.5 border border-[var(--color-rule)] text-[var(--color-ink-2)] rounded-xl text-sm font-medium hover:bg-[var(--color-paper-3)] transition"
                             >
                                 Cancelar
                             </button>
                             <button
                                 onClick={confirmarCobro}
                                 disabled={guardando}
-                                className="flex-1 px-4 py-2.5 bg-gray-900 text-white rounded-xl text-sm font-medium hover:bg-gray-700 transition disabled:opacity-60 flex items-center justify-center gap-2"
+                                className="flex-1 px-4 py-2.5 bg-[var(--color-ink)] text-[var(--color-paper)] rounded-xl text-sm font-medium hover:bg-[var(--color-ink-2)] transition disabled:opacity-60 flex items-center justify-center gap-2"
                             >
-                                {guardando ? <Loader2 size={14} className="animate-spin" /> : <CheckCircle2 size={14} />}
+                                {guardando ? <Loader2 strokeWidth={1.5} size={14} className="animate-spin" /> : <CheckCircle2 strokeWidth={1.5} size={14} />}
                                 Confirmar cobro
                             </button>
                         </div>

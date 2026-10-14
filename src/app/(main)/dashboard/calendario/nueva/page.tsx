@@ -153,24 +153,24 @@ export default function NuevaVisitaPage() {
             <div className="mb-6">
                 <Link
                     href="/dashboard/calendario"
-                    className="flex items-center gap-2 text-gray-600 hover:text-gray-900 mb-4"
+                    className="flex items-center gap-2 text-[var(--color-ink-2)] hover:text-[var(--color-ink)] mb-4"
                 >
-                    <ArrowLeft className="w-5 h-5" />
+                    <ArrowLeft strokeWidth={1.5} className="w-5 h-5" />
                     Volver al calendario
                 </Link>
-                <h1 className="text-2xl font-bold text-gray-900">Nueva Visita</h1>
-                <p className="text-gray-500">Agendar una visita a una propiedad</p>
+                <h1 className="font-heading text-2xl font-bold text-[var(--color-ink)]">Nueva Visita</h1>
+                <p className="text-[var(--color-muted)]">Agendar una visita a una propiedad</p>
             </div>
 
-            <form onSubmit={handleSubmit} className="bg-white rounded-xl border border-gray-200 p-6 space-y-6">
+            <form onSubmit={handleSubmit} className="bg-[var(--color-paper-2)] rounded-xl border border-[var(--color-rule)] p-6 space-y-6">
                 {/* Propiedad */}
                 <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                    <label className="block text-sm font-medium text-[var(--color-ink-2)] mb-2">
                         Propiedad *
                     </label>
                     <select
                         required
-                        className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-black bg-white"
+                        className="w-full p-3 border border-[var(--color-rule)] rounded-lg focus:ring-2 focus:ring-[var(--color-accent)]/40 focus:border-[var(--color-accent)] text-[var(--color-ink)] bg-[var(--color-paper-2)]"
                         value={formData.propiedadId}
                         onChange={(e) => handleChange("propiedadId", e.target.value)}
                     >
@@ -184,55 +184,55 @@ export default function NuevaVisitaPage() {
                 </div>
 
                 {/* Datos del Cliente */}
-                <div className="border-t border-gray-200 pt-6">
-                    <h3 className="text-lg font-semibold text-gray-900 mb-4">Datos del Cliente</h3>
+                <div className="border-t border-[var(--color-rule)] pt-6">
+                    <h3 className="text-lg font-semibold text-[var(--color-ink)] mb-4">Datos del Cliente</h3>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-2">
+                            <label className="block text-sm font-medium text-[var(--color-ink-2)] mb-2">
                                 Nombre Completo *
                             </label>
                             <input
                                 type="text"
                                 required
-                                className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-black bg-white"
+                                className="w-full p-3 border border-[var(--color-rule)] rounded-lg focus:ring-2 focus:ring-[var(--color-accent)]/40 focus:border-[var(--color-accent)] text-[var(--color-ink)] bg-[var(--color-paper-2)]"
                                 value={formData.clienteNombre}
                                 onChange={(e) => handleChange("clienteNombre", e.target.value)}
                             />
                         </div>
 
                         <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-2">
+                            <label className="block text-sm font-medium text-[var(--color-ink-2)] mb-2">
                                 Email *
                             </label>
                             <input
                                 type="email"
                                 required
-                                className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-black bg-white"
+                                className="w-full p-3 border border-[var(--color-rule)] rounded-lg focus:ring-2 focus:ring-[var(--color-accent)]/40 focus:border-[var(--color-accent)] text-[var(--color-ink)] bg-[var(--color-paper-2)]"
                                 value={formData.clienteEmail}
                                 onChange={(e) => handleChange("clienteEmail", e.target.value)}
                             />
                         </div>
 
                         <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-2">
+                            <label className="block text-sm font-medium text-[var(--color-ink-2)] mb-2">
                                 Teléfono *
                             </label>
                             <input
                                 type="tel"
                                 required
-                                className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-black bg-white"
+                                className="w-full p-3 border border-[var(--color-rule)] rounded-lg focus:ring-2 focus:ring-[var(--color-accent)]/40 focus:border-[var(--color-accent)] text-[var(--color-ink)] bg-[var(--color-paper-2)]"
                                 value={formData.clienteTelefono}
                                 onChange={(e) => handleChange("clienteTelefono", e.target.value)}
                             />
                         </div>
 
                         <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-2">
+                            <label className="block text-sm font-medium text-[var(--color-ink-2)] mb-2">
                                 Agente Asignado *
                             </label>
                             <select
                                 required
-                                className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-black bg-white"
+                                className="w-full p-3 border border-[var(--color-rule)] rounded-lg focus:ring-2 focus:ring-[var(--color-accent)]/40 focus:border-[var(--color-accent)] text-[var(--color-ink)] bg-[var(--color-paper-2)]"
                                 value={formData.agenteId}
                                 onChange={(e) => handleChange("agenteId", e.target.value)}
                             >
@@ -250,42 +250,42 @@ export default function NuevaVisitaPage() {
                 </div>
 
                 {/* Fecha y Hora */}
-                <div className="border-t border-gray-200 pt-6">
-                    <h3 className="text-lg font-semibold text-gray-900 mb-4">Fecha y Hora</h3>
+                <div className="border-t border-[var(--color-rule)] pt-6">
+                    <h3 className="text-lg font-semibold text-[var(--color-ink)] mb-4">Fecha y Hora</h3>
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                         <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-2">
+                            <label className="block text-sm font-medium text-[var(--color-ink-2)] mb-2">
                                 Fecha *
                             </label>
                             <input
                                 type="date"
                                 required
-                                className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-black bg-white"
+                                className="w-full p-3 border border-[var(--color-rule)] rounded-lg focus:ring-2 focus:ring-[var(--color-accent)]/40 focus:border-[var(--color-accent)] text-[var(--color-ink)] bg-[var(--color-paper-2)]"
                                 value={formData.fecha}
                                 onChange={(e) => handleChange("fecha", e.target.value)}
                             />
                         </div>
 
                         <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-2">
+                            <label className="block text-sm font-medium text-[var(--color-ink-2)] mb-2">
                                 Hora *
                             </label>
                             <input
                                 type="time"
                                 required
-                                className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-black bg-white"
+                                className="w-full p-3 border border-[var(--color-rule)] rounded-lg focus:ring-2 focus:ring-[var(--color-accent)]/40 focus:border-[var(--color-accent)] text-[var(--color-ink)] bg-[var(--color-paper-2)]"
                                 value={formData.hora}
                                 onChange={(e) => handleChange("hora", e.target.value)}
                             />
                         </div>
 
                         <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-2">
+                            <label className="block text-sm font-medium text-[var(--color-ink-2)] mb-2">
                                 Duración (minutos) *
                             </label>
                             <select
                                 required
-                                className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-black bg-white"
+                                className="w-full p-3 border border-[var(--color-rule)] rounded-lg focus:ring-2 focus:ring-[var(--color-accent)]/40 focus:border-[var(--color-accent)] text-[var(--color-ink)] bg-[var(--color-paper-2)]"
                                 value={formData.duracion}
                                 onChange={(e) => handleChange("duracion", e.target.value)}
                             >
@@ -299,13 +299,13 @@ export default function NuevaVisitaPage() {
                 </div>
 
                 {/* Notas */}
-                <div className="border-t border-gray-200 pt-6">
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                <div className="border-t border-[var(--color-rule)] pt-6">
+                    <label className="block text-sm font-medium text-[var(--color-ink-2)] mb-2">
                         Notas Previas
                     </label>
                     <textarea
                         rows={4}
-                        className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-gray-900 bg-white"
+                        className="w-full p-3 border border-[var(--color-rule)] rounded-lg focus:ring-2 focus:ring-[var(--color-accent)]/40 focus:border-[var(--color-accent)] text-[var(--color-ink)] bg-[var(--color-paper-2)]"
                         placeholder="Información adicional sobre la visita..."
                         value={formData.notasPrevias}
                         onChange={(e) => handleChange("notasPrevias", e.target.value)}
@@ -313,17 +313,17 @@ export default function NuevaVisitaPage() {
                 </div>
 
                 {/* Buttons */}
-                <div className="flex justify-end gap-3 pt-6 border-t border-gray-200">
+                <div className="flex justify-end gap-3 pt-6 border-t border-[var(--color-rule)]">
                     <Link
                         href="/dashboard/calendario"
-                        className="px-6 py-3 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors"
+                        className="px-6 py-3 border border-[var(--color-rule)] text-[var(--color-ink-2)] rounded-lg hover:bg-[var(--color-paper-3)] transition-colors"
                     >
                         Cancelar
                     </Link>
                     <button
                         type="submit"
                         disabled={loading}
-                        className="px-6 py-3 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors disabled:opacity-50"
+                        className="px-6 py-3 bg-[var(--color-ink)] text-[var(--color-paper)] rounded-lg hover:bg-[var(--color-ink-2)] transition-colors disabled:opacity-50"
                     >
                         {loading ? "Creando..." : "Agendar Visita"}
                     </button>

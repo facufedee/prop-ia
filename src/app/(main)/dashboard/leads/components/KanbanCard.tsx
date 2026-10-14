@@ -35,25 +35,10 @@ const getInitials = (name: string) => {
     return (parts.length > 1 ? parts[0][0] + parts[1][0] : parts[0][0]).toUpperCase();
 };
 
-const AVATAR_COLORS = [
-    "from-indigo-400 to-blue-500",
-    "from-violet-400 to-purple-500",
-    "from-emerald-400 to-teal-500",
-    "from-rose-400 to-pink-500",
-    "from-amber-400 to-orange-500",
-    "from-cyan-400 to-sky-500",
-];
-const getAvatarColor = (name: string) => AVATAR_COLORS[(name?.charCodeAt(0) || 0) % AVATAR_COLORS.length];
-
-const ORIGEN_EMOJI: Record<string, string> = {
-    web: '🌐', whatsapp: '💬', instagram: '📷', facebook: '📘',
-    portal: '🏠', referido: '🤝', telefono: '📞', email: '✉️', otro: '❓'
-};
-
-const PRIORIDAD_CONFIG: Record<LeadPrioridad, { emoji: string; border: string }> = {
-    alta: { emoji: '🔴', border: 'border-l-4 border-l-red-400' },
-    media: { emoji: '🟡', border: 'border-l-4 border-l-amber-400' },
-    baja: { emoji: '🟢', border: 'border-l-4 border-l-emerald-400' },
+const PRIORIDAD_CONFIG: Record<LeadPrioridad, { label: string; dot: string; border: string }> = {
+    alta: { label: 'Alta', dot: 'bg-[var(--color-danger)]', border: 'border-l-4 border-l-[var(--color-danger)]' },
+    media: { label: 'Media', dot: 'bg-[var(--color-warning)]', border: 'border-l-4 border-l-[var(--color-warning)]' },
+    baja: { label: 'Baja', dot: 'bg-[var(--color-positive)]', border: 'border-l-4 border-l-[var(--color-positive)]' },
 };
 
 // ── Component ─────────────────────────────────────────────────────────────────
@@ -82,13 +67,13 @@ export default function KanbanCard({ lead, index, onDelete, onStatusChange }: Ka
                     ref={provided.innerRef}
                     {...provided.draggableProps}
                     {...provided.dragHandleProps}
-                    className={`bg-white rounded-2xl border border-gray-100 shadow-sm transition-all duration-200 select-none mb-3 group relative overflow-hidden cursor-pointer
+                    className={`bg-[var(--color-paper-2)] rounded-2xl border border-[var(--color-rule-2)] shadow-sm transition-all duration-200 select-none mb-3 group relative overflow-hidden cursor-pointer
                         ${prioridadConfig?.border ?? ''}
                         ${snapshot.isDragging
-                            ? "shadow-2xl rotate-[1.5deg] scale-[1.02] border-indigo-200 ring-2 ring-indigo-200 z-50"
-                            : "hover:shadow-md hover:border-indigo-100"
+                            ? "shadow-2xl rotate-[1.5deg] scale-[1.02] border-[var(--color-accent)]/30 ring-2 ring-[var(--color-accent)]/30 z-50"
+                            : "hover:shadow-md hover:border-[var(--color-accent)]/30"
                         }
-                        ${isUrgent48 ? 'ring-1 ring-red-200' : isUrgent24 ? 'ring-1 ring-orange-200' : ''}
+                        ${isUrgent48 ? 'ring-1 ring-[var(--color-danger)]/30' : isUrgent24 ? 'ring-1 ring-[var(--color-warning)]/30' : ''}
                     `}
                     onMouseEnter={() => setShowActions(true)}
                     onMouseLeave={() => setShowActions(false)}
@@ -96,43 +81,45 @@ export default function KanbanCard({ lead, index, onDelete, onStatusChange }: Ka
                 >
                     {/* Urgency top bar */}
                     {(isUrgent24 || isUrgent48) && (
-                        <div className={`h-0.5 w-full ${isUrgent48 ? 'bg-red-400' : 'bg-orange-400'}`} />
+                        <div className={`h-0.5 w-full ${isUrgent48 ? 'bg-[var(--color-danger)]' : 'bg-[var(--color-warning)]'}`} />
                     )}
 
                     {/* Delete button */}
                     {onDelete && showActions && (
                         <button
                             onClick={(e) => { e.stopPropagation(); if (confirm("¿Eliminar esta consulta?")) onDelete(lead.id); }}
-                            className="absolute top-2.5 right-2.5 p-1.5 text-gray-300 hover:text-red-500 hover:bg-red-50 rounded-lg transition-all z-20"
+                            className="absolute top-2.5 right-2.5 p-1.5 text-[var(--color-neutral)] hover:text-[var(--color-danger)] hover:bg-[var(--color-danger-soft)] rounded-lg transition-all z-20"
                         >
-                            <Trash2 size={13} />
+                            <Trash2 strokeWidth={1.5} size={13} />
                         </button>
                     )}
 
                     <div className="p-4">
                         {/* Header: Avatar + Name + Time */}
                         <div className="flex items-center gap-3 mb-2.5">
-                            <div className={`w-9 h-9 rounded-full bg-gradient-to-br ${getAvatarColor(lead.nombre)} text-white flex items-center justify-center font-bold text-sm flex-shrink-0 shadow-sm`}>
+                            <div className={`w-9 h-9 rounded-full bg-[var(--color-paper-3)] text-[var(--color-ink-2)] flex items-center justify-center font-bold text-sm flex-shrink-0`}>
                                 {getInitials(lead.nombre)}
                             </div>
                             <div className="flex-1 min-w-0">
-                                <span className="font-bold text-gray-900 text-sm flex items-center gap-1 group/link">
+                                <span className="font-bold text-[var(--color-ink)] text-sm flex items-center gap-1 group/link">
                                     <span className="truncate">{lead.nombre || "Sin nombre"}</span>
-                                    <ArrowRight size={12} className="opacity-0 group-hover/link:opacity-100 transition-opacity flex-shrink-0 text-indigo-400" />
+                                    <ArrowRight strokeWidth={1.5} size={12} className="opacity-0 group-hover/link:opacity-100 transition-opacity flex-shrink-0 text-[var(--color-accent)]" />
                                 </span>
                                 <div className="flex items-center gap-1.5 mt-0.5">
-                                    <span className="text-[10px] text-gray-400 flex items-center gap-0.5">
-                                        <Clock size={9} /> {timeAgo(lead.createdAt)}
+                                    <span className="text-[10px] text-[var(--color-neutral)] flex items-center gap-0.5">
+                                        <Clock strokeWidth={1.5} size={9} /> {timeAgo(lead.createdAt)}
                                     </span>
                                     {/* Source */}
-                                    <span className="text-[10px] text-gray-400">
-                                        {ORIGEN_EMOJI[lead.origen] ?? '❓'} {lead.origen ?? 'web'}
+                                    <span className="text-[10px] text-[var(--color-neutral)]">
+                                        {lead.origen ?? 'web'}
                                     </span>
                                     {/* Priority */}
                                     {lead.prioridad && (
-                                        <span className="text-[10px]">
-                                            {PRIORIDAD_CONFIG[lead.prioridad].emoji}
-                                        </span>
+                                        <span
+                                            title={PRIORIDAD_CONFIG[lead.prioridad].label}
+                                            aria-label={PRIORIDAD_CONFIG[lead.prioridad].label}
+                                            className={`w-1.5 h-1.5 rounded-full ${PRIORIDAD_CONFIG[lead.prioridad].dot}`}
+                                        />
                                     )}
                                 </div>
                             </div>
@@ -140,27 +127,27 @@ export default function KanbanCard({ lead, index, onDelete, onStatusChange }: Ka
 
                         {/* Urgency indicator */}
                         {(isUrgent24 || isUrgent48) && (
-                            <div className={`flex items-center gap-1 text-[10px] font-bold mb-2 ${isUrgent48 ? 'text-red-600' : 'text-orange-600'}`}>
+                            <div className={`flex items-center gap-1 text-[10px] font-bold mb-2 ${isUrgent48 ? 'text-[var(--color-danger)]' : 'text-[var(--color-warning)]'}`}>
                                 {isUrgent48
-                                    ? <><AlertCircle size={10} className="animate-pulse" /> 🚨 {timeAgo(refDate)} sin respuesta</>
-                                    : <><AlertTriangle size={10} /> ⚠ {timeAgo(refDate)} sin respuesta</>
+                                    ? <><AlertCircle strokeWidth={1.5} size={10} className="animate-pulse" /> {timeAgo(refDate)} sin respuesta</>
+                                    : <><AlertTriangle strokeWidth={1.5} size={10} /> {timeAgo(refDate)} sin respuesta</>
                                 }
                             </div>
                         )}
 
                         {/* Property tag */}
                         {lead.propertyTitle && (
-                            <div className="mb-2.5 flex items-center gap-1.5 text-[11px] text-indigo-600 bg-indigo-50 border border-indigo-100 rounded-lg px-2.5 py-1.5 truncate">
-                                <Building2 size={11} className="flex-shrink-0" />
+                            <div className="mb-2.5 flex items-center gap-1.5 text-[11px] text-[var(--color-ink-2)] bg-[var(--color-paper-3)] border border-[var(--color-rule)] rounded-lg px-2.5 py-1.5 truncate">
+                                <Building2 size={11} strokeWidth={1.5} className="flex-shrink-0 text-[var(--color-muted)]" />
                                 <span className="truncate font-medium">{lead.propertyTitle}</span>
                             </div>
                         )}
 
                         {/* Message preview */}
                         {latestMsg && (
-                            <div className="bg-gray-50 rounded-xl px-3 py-2.5 mb-3 relative">
-                                <span className="absolute top-1 left-1.5 text-gray-300 text-lg leading-none">"</span>
-                                <p className="text-[12px] text-gray-500 italic line-clamp-2 pt-1 px-1.5 relative z-10">
+                            <div className="bg-[var(--color-paper)] rounded-xl px-3 py-2.5 mb-3 relative">
+                                <span className="absolute top-1 left-1.5 text-[var(--color-neutral)] text-lg leading-none">"</span>
+                                <p className="text-[12px] text-[var(--color-muted)] italic line-clamp-2 pt-1 px-1.5 relative z-10">
                                     {latestMsg}
                                 </p>
                             </div>
@@ -176,17 +163,17 @@ export default function KanbanCard({ lead, index, onDelete, onStatusChange }: Ka
                                             target="_blank" rel="noopener noreferrer"
                                             onClick={(e) => { e.stopPropagation(); onStatusChange && lead.estado === 'nuevo' && onStatusChange(lead.id, 'contactado'); }}
                                             title="WhatsApp"
-                                            className="w-7 h-7 flex items-center justify-center rounded-lg bg-green-50 hover:bg-green-100 text-green-600 transition-colors"
+                                            className="w-7 h-7 flex items-center justify-center rounded-lg bg-[var(--color-paper-3)] hover:bg-[var(--color-positive-soft)] text-[var(--color-positive)] transition-colors"
                                         >
-                                            <MessageSquare size={12} />
+                                            <MessageSquare strokeWidth={1.5} size={12} />
                                         </a>
                                         <a
                                             href={`tel:${lead.telefono.replace(/\D/g, "")}`}
                                             onClick={(e) => { e.stopPropagation(); onStatusChange && onStatusChange(lead.id, 'contactado'); }}
                                             title="Llamar"
-                                            className="w-7 h-7 flex items-center justify-center rounded-lg bg-indigo-50 hover:bg-indigo-100 text-indigo-600 transition-colors"
+                                            className="w-7 h-7 flex items-center justify-center rounded-lg bg-[var(--color-paper-3)] hover:bg-[var(--color-paper-4)] text-[var(--color-ink-2)] transition-colors"
                                         >
-                                            <Phone size={12} />
+                                            <Phone strokeWidth={1.5} size={12} />
                                         </a>
                                     </>
                                 )}
@@ -195,17 +182,17 @@ export default function KanbanCard({ lead, index, onDelete, onStatusChange }: Ka
                                         href={`mailto:${lead.email}`}
                                         onClick={(e) => e.stopPropagation()}
                                         title="Email"
-                                        className="w-7 h-7 flex items-center justify-center rounded-lg bg-gray-100 hover:bg-gray-200 text-gray-600 transition-colors"
+                                        className="w-7 h-7 flex items-center justify-center rounded-lg bg-[var(--color-paper-3)] hover:bg-[var(--color-paper-4)] text-[var(--color-ink-2)] transition-colors"
                                     >
-                                        <Mail size={12} />
+                                        <Mail strokeWidth={1.5} size={12} />
                                     </a>
                                 )}
                             </div>
 
                             {/* Consultas badge */}
                             {consultaCount > 1 && (
-                                <div title={`${consultaCount} consultas`} className="flex items-center gap-1 text-[10px] font-bold text-violet-600 bg-violet-50 border border-violet-100 rounded-full px-2 py-0.5">
-                                    <Copy size={9} /> {consultaCount}
+                                <div title={`${consultaCount} consultas`} className="flex items-center gap-1 text-[10px] font-bold text-[var(--color-accent)] bg-[var(--color-accent-soft)] border border-[var(--color-accent)]/30 rounded-full px-2 py-0.5">
+                                    <Copy strokeWidth={1.5} size={9} /> {consultaCount}
                                 </div>
                             )}
                         </div>

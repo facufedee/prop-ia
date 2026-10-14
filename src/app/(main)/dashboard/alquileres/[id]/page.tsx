@@ -12,7 +12,7 @@ import LiquidacionesTab from "./components/LiquidacionesTab";
 
 import { contractDocxService } from "@/infrastructure/services/contractDocxService";
 import ContractGeneratorPreviewModal from "@/ui/components/modals/ContractGeneratorPreviewModal";
-import { ArrowLeft, FileText, DollarSign, Wrench, Edit, Save, X, Download, Pause, Check, MoreVertical, Trash2, AlertCircle, Printer, Calendar, User, Shield, Zap, Percent, Clock, ExternalLink, TrendingUp } from "lucide-react";
+import { ArrowLeft, FileText, DollarSign, Wrench, Edit, Save, X, Download, Pause, Check, MoreVertical, Trash2, AlertCircle, Printer, Calendar, User, Shield, Percent, Clock, ExternalLink, TrendingUp } from "lucide-react";
 import Link from "next/link";
 import { TextInput, MoneyInput, TextAreaInput } from "@/ui/components/forms";
 
@@ -363,7 +363,7 @@ export default function AlquilerDetailPage() {
     if (loading) {
         return (
             <div className="p-6 flex items-center justify-center min-h-[400px]">
-                <div className="text-gray-500">Cargando contrato...</div>
+                <div className="text-[var(--color-muted)]">Cargando contrato...</div>
             </div>
         );
     }
@@ -372,8 +372,8 @@ export default function AlquilerDetailPage() {
         return (
             <div className="p-6">
                 <div className="text-center py-12">
-                    <p className="text-gray-500">Contrato no encontrado</p>
-                    <Link href="/dashboard/alquileres" className="text-indigo-600 hover:underline mt-4 inline-block">
+                    <p className="text-[var(--color-muted)]">Contrato no encontrado</p>
+                    <Link href="/dashboard/alquileres" className="text-[var(--color-accent)] hover:underline mt-4 inline-block">
                         Volver a Alquileres
                     </Link>
                 </div>
@@ -395,19 +395,19 @@ export default function AlquilerDetailPage() {
                 <div className="flex items-start gap-4">
                     <Link
                         href="/dashboard/alquileres"
-                        className="p-2 -ml-2 hover:bg-gray-100 rounded-xl transition-colors text-gray-400 hover:text-gray-600"
+                        className="p-2 -ml-2 hover:bg-[var(--color-paper-3)] rounded-xl transition-colors text-[var(--color-neutral)] hover:text-[var(--color-ink-2)]"
                     >
-                        <ArrowLeft className="w-6 h-6" />
+                        <ArrowLeft strokeWidth={1.5} className="w-6 h-6" />
                     </Link>
                     <div>
                         <div className="flex items-center gap-3 flex-wrap">
-                            <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 tracking-tight leading-tight">
+                            <h1 className="font-heading text-2xl sm:text-3xl font-bold text-[var(--color-ink)] tracking-tight leading-tight">
                                 {alquiler.direccion}
                             </h1>
-                            <span className={`px-2.5 py-1 text-[11px] font-bold rounded-lg uppercase tracking-wider border ${alquiler.estado === 'activo' ? 'bg-emerald-50 text-emerald-700 border-emerald-100' :
-                                alquiler.estado === 'pendiente' ? 'bg-amber-50 text-amber-700 border-amber-100' :
-                                    alquiler.estado === 'suspendido' ? 'bg-orange-50 text-orange-700 border-orange-100' :
-                                        'bg-gray-50 text-gray-600 border-gray-200'
+                            <span className={`px-2.5 py-1 text-[11px] font-bold rounded-lg uppercase tracking-wider border ${alquiler.estado === 'activo' ? 'bg-[var(--color-positive-soft)] text-[var(--color-positive)] border-[var(--color-positive)]/30' :
+                                alquiler.estado === 'pendiente' ? 'bg-[var(--color-warning-soft)] text-[var(--color-warning)] border-[var(--color-warning)]/30' :
+                                    alquiler.estado === 'suspendido' ? 'bg-[var(--color-warning-soft)] text-[var(--color-warning)] border-[var(--color-warning)]/30' :
+                                        'bg-[var(--color-paper)] text-[var(--color-ink-2)] border-[var(--color-rule)]'
                                 }`}>
                                 {alquiler.estado}
                             </span>
@@ -415,7 +415,7 @@ export default function AlquilerDetailPage() {
                         {/* Rental Code Display */}
                         {alquiler.codigoAlquiler ? (
                             <div className="mt-1.5 flex flex-wrap items-center gap-2">
-                                <p className="text-gray-500 font-mono text-sm tracking-wide uppercase select-all bg-gray-50 px-2 py-0.5 rounded border border-gray-100">
+                                <p className="text-[var(--color-muted)] font-mono text-sm tracking-wide uppercase select-all bg-[var(--color-paper)] px-2 py-0.5 rounded border border-[var(--color-rule-2)]">
                                     {alquiler.codigoAlquiler}
                                 </p>
                                 <button
@@ -425,7 +425,7 @@ export default function AlquilerDetailPage() {
                                         const url = `https://wa.me/?text=${encodeURIComponent(text)}`;
                                         window.open(url, '_blank');
                                     }}
-                                    className="flex items-center gap-1 pl-2 pr-3 py-1 bg-green-50 text-green-700 text-[10px] font-bold uppercase tracking-wider rounded-full hover:bg-green-100 transition-colors border border-green-200/50"
+                                    className="flex items-center gap-1 pl-2 pr-3 py-1 bg-[var(--color-positive-soft)] text-[var(--color-positive)] text-[10px] font-bold uppercase tracking-wider rounded-full hover:bg-[var(--color-positive-soft)] transition-colors border border-[var(--color-positive)]/30"
                                     title="Enviar por WhatsApp"
                                 >
                                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="w-3 h-3"><path d="M3 21l1.65-3.8a9 9 0 1 1 3.4 2.9L3 21" /><path d="M9 10a.5.5 0 0 0 1 0V9a.5.5 0 0 0 1 0v1a5 5 0 0 0 5 5h1a.5.5 0 0 0 0-1h-1a.5.5 0 0 0 0 1" /></svg>
@@ -444,13 +444,13 @@ export default function AlquilerDetailPage() {
                                         } catch (e) { console.error(e); alert('Error al generar'); }
                                     }
                                 }}
-                                className="mt-1 text-xs bg-indigo-50 text-indigo-600 px-2 py-1 rounded border border-indigo-200 hover:bg-indigo-100 transition-colors"
+                                className="mt-1 text-xs border border-[var(--color-rule)] text-[var(--color-ink)] px-2 py-1 rounded border border-[var(--color-accent)]/30 hover:bg-[var(--color-paper-3)] transition-colors"
                             >
                                 Generar Código Inquilino
                             </button>
                         )}
-                        <p className="text-gray-500 font-medium mt-1 flex items-center gap-2 text-sm">
-                            <span className="w-1.5 h-1.5 rounded-full bg-gray-300"></span>
+                        <p className="text-[var(--color-muted)] font-medium mt-1 flex items-center gap-2 text-sm">
+                            <span className="w-1.5 h-1.5 rounded-full bg-[var(--color-paper-4)]"></span>
                             {alquiler.propiedadTipo}
                         </p>
                     </div>
@@ -459,39 +459,39 @@ export default function AlquilerDetailPage() {
                 <div className="relative">
                     <button
                         onClick={() => setShowMenu(!showMenu)}
-                        className="p-2 hover:bg-gray-100 rounded-xl transition-colors text-gray-500 hover:text-gray-900"
+                        className="p-2 hover:bg-[var(--color-paper-3)] rounded-xl transition-colors text-[var(--color-muted)] hover:text-[var(--color-ink)]"
                         title="Opciones"
                     >
-                        <MoreVertical className="w-5 h-5" />
+                        <MoreVertical strokeWidth={1.5} className="w-5 h-5" />
                     </button>
 
                     {showMenu && (
-                        <div className="absolute right-0 mt-2 w-56 bg-white rounded-xl shadow-xl border border-gray-100 py-1.5 z-50 animate-in fade-in zoom-in-95 duration-200 origin-top-right">
-                            <div className="px-3 py-2 border-b border-gray-50 mb-1">
-                                <span className="text-xs font-semibold text-gray-400 uppercase tracking-wider">Acciones</span>
+                        <div className="absolute right-0 mt-2 w-56 bg-[var(--color-paper-2)] rounded-xl shadow-xl border border-[var(--color-rule-2)] py-1.5 z-50 animate-in fade-in zoom-in-95 duration-200 origin-top-right">
+                            <div className="px-3 py-2 border-b border-[var(--color-rule-2)] mb-1">
+                                <span className="text-xs font-semibold text-[var(--color-neutral)] uppercase tracking-wider">Acciones</span>
                             </div>
                             <button
                                 onClick={() => { setShowMenu(false); handleDownloadContract(); }}
-                                className="w-full text-left px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 flex items-center gap-3 transition-colors"
+                                className="w-full text-left px-4 py-2.5 text-sm text-[var(--color-ink-2)] hover:bg-[var(--color-paper-3)] flex items-center gap-3 transition-colors"
                             >
-                                <Download className="w-4 h-4 text-gray-400" />
+                                <Download strokeWidth={1.5} className="w-4 h-4 text-[var(--color-neutral)]" />
                                 Descargar Docx
                             </button>
 
                             <button
                                 onClick={() => { setShowMenu(false); setShowContractPreview(true); }}
-                                className="w-full text-left px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 flex items-center gap-3 transition-colors"
+                                className="w-full text-left px-4 py-2.5 text-sm text-[var(--color-ink-2)] hover:bg-[var(--color-paper-3)] flex items-center gap-3 transition-colors"
                             >
-                                <Printer className="w-4 h-4 text-gray-400" />
+                                <Printer strokeWidth={1.5} className="w-4 h-4 text-[var(--color-neutral)]" />
                                 Vista Previa
                             </button>
 
                             {alquiler.estado === 'activo' && (
                                 <button
                                     onClick={() => { setShowMenu(false); handleSuspender(); }}
-                                    className="w-full text-left px-4 py-2.5 text-sm text-orange-700 hover:bg-orange-50 flex items-center gap-3 transition-colors"
+                                    className="w-full text-left px-4 py-2.5 text-sm text-[var(--color-warning)] hover:bg-[var(--color-warning-soft)] flex items-center gap-3 transition-colors"
                                 >
-                                    <Pause className="w-4 h-4" />
+                                    <Pause strokeWidth={1.5} className="w-4 h-4" />
                                     Suspender Contrato
                                 </button>
                             )}
@@ -499,20 +499,20 @@ export default function AlquilerDetailPage() {
                             {alquiler.estado === 'suspendido' && (
                                 <button
                                     onClick={() => { setShowMenu(false); handleActivar(); }}
-                                    className="w-full text-left px-4 py-2.5 text-sm text-emerald-700 hover:bg-emerald-50 flex items-center gap-3 transition-colors"
+                                    className="w-full text-left px-4 py-2.5 text-sm text-[var(--color-positive)] hover:bg-[var(--color-positive-soft)] flex items-center gap-3 transition-colors"
                                 >
-                                    <Check className="w-4 h-4" />
+                                    <Check strokeWidth={1.5} className="w-4 h-4" />
                                     Reactivar Contrato
                                 </button>
                             )}
 
-                            <div className="border-t border-gray-100 my-1"></div>
+                            <div className="border-t border-[var(--color-rule-2)] my-1"></div>
 
                             <button
                                 onClick={() => { setShowMenu(false); handleFinalizarContrato(); }}
-                                className="w-full text-left px-4 py-2.5 text-sm text-red-600 hover:bg-red-50 flex items-center gap-3 transition-colors"
+                                className="w-full text-left px-4 py-2.5 text-sm text-[var(--color-danger)] hover:bg-[var(--color-danger-soft)] flex items-center gap-3 transition-colors"
                             >
-                                <Trash2 className="w-4 h-4" />
+                                <Trash2 strokeWidth={1.5} className="w-4 h-4" />
                                 Finalizar Contrato
                             </button>
                         </div>
@@ -521,7 +521,7 @@ export default function AlquilerDetailPage() {
             </div>
 
             {/* Tabs */}
-            <div className="border-b border-gray-200">
+            <div className="border-b border-[var(--color-rule)]">
                 <div className="flex gap-4 overflow-x-auto">
                     {tabs.map(tab => {
                         const Icon = tab.icon;
@@ -530,8 +530,8 @@ export default function AlquilerDetailPage() {
                                 key={tab.id}
                                 onClick={() => setActiveTab(tab.id)}
                                 className={`flex items-center gap-2 px-4 py-3 border-b-2 transition-colors whitespace-nowrap ${activeTab === tab.id
-                                    ? 'border-indigo-600 text-indigo-600 font-medium'
-                                    : 'border-transparent text-gray-600 hover:text-gray-900'
+                                    ? 'border-[var(--color-accent)] text-[var(--color-accent)] font-medium'
+                                    : 'border-transparent text-[var(--color-ink-2)] hover:text-[var(--color-ink)]'
                                     }`}
                             >
                                 <Icon className="w-5 h-5" />
@@ -546,23 +546,23 @@ export default function AlquilerDetailPage() {
             <div>
                 {activeTab === 'info' && (
                     <div className="space-y-6">
-                        <div className="bg-white rounded-xl border border-gray-200 p-6">
+                        <div className="bg-[var(--color-paper-2)] rounded-xl border border-[var(--color-rule)] p-6">
                             <div className="mb-6 flex justify-between items-center">
-                                <h2 className="text-lg font-semibold text-gray-900">Información del Contrato</h2>
+                                <h2 className="text-lg font-semibold text-[var(--color-ink)]">Información del Contrato</h2>
                                 <div>
                                     {isEditing ? (
                                         <div className="flex gap-2">
-                                            <button onClick={handleCancelEdit} className="px-3 py-1.5 text-sm border rounded hover:bg-gray-50 text-gray-700">Cancelar</button>
-                                            <button onClick={handleSaveEdit} className="px-3 py-1.5 text-sm bg-green-600 text-white rounded hover:bg-green-700 flex items-center gap-1">
-                                                <Save size={14} /> Guardar
+                                            <button onClick={handleCancelEdit} className="px-3 py-1.5 text-sm border rounded hover:bg-[var(--color-paper-3)] text-[var(--color-ink-2)]">Cancelar</button>
+                                            <button onClick={handleSaveEdit} className="px-3 py-1.5 text-sm bg-[var(--color-positive)] text-[var(--color-accent-ink)] rounded hover:bg-[var(--color-positive)] flex items-center gap-1">
+                                                <Save strokeWidth={1.5} size={14} /> Guardar
                                             </button>
                                         </div>
                                     ) : (
                                         <button
                                             onClick={() => { setIsEditing(true); setEditData({ ...alquiler }); }}
-                                            className="px-3 py-1.5 text-sm border border-indigo-200 text-indigo-700 bg-indigo-50 rounded hover:bg-indigo-100 flex items-center gap-2"
+                                            className="px-3 py-1.5 text-sm border border-[var(--color-accent)]/30 text-[var(--color-accent)] bg-[var(--color-accent-soft)] rounded hover:bg-[var(--color-accent-soft)] flex items-center gap-2"
                                         >
-                                            <Edit size={14} /> Editar Contrato
+                                            <Edit strokeWidth={1.5} size={14} /> Editar Contrato
                                         </button>
                                     )}
                                 </div>
@@ -573,26 +573,26 @@ export default function AlquilerDetailPage() {
                                     {/* General */}
                                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                         <div>
-                                            <label className="block text-sm font-medium text-gray-700 mb-2">
+                                            <label className="block text-sm font-medium text-[var(--color-ink-2)] mb-2">
                                                 Fecha de Inicio *
                                             </label>
                                             <input
                                                 type="date"
                                                 required
-                                                className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-gray-900"
+                                                className="w-full p-3 border border-[var(--color-rule)] rounded-lg focus:ring-2 focus:ring-[var(--color-accent)]/40 focus:border-[var(--color-accent)] text-[var(--color-ink)]"
                                                 value={editData.fechaInicio ? new Date(editData.fechaInicio).toISOString().split('T')[0] : ''}
                                                 onChange={(e) => handleEditChange("fechaInicio", new Date(e.target.value))}
                                             />
                                         </div>
 
                                         <div>
-                                            <label className="block text-sm font-medium text-gray-700 mb-2">
+                                            <label className="block text-sm font-medium text-[var(--color-ink-2)] mb-2">
                                                 Fecha de Fin *
                                             </label>
                                             <input
                                                 type="date"
                                                 required
-                                                className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-gray-900"
+                                                className="w-full p-3 border border-[var(--color-rule)] rounded-lg focus:ring-2 focus:ring-[var(--color-accent)]/40 focus:border-[var(--color-accent)] text-[var(--color-ink)]"
                                                 value={editData.fechaFin ? new Date(editData.fechaFin).toISOString().split('T')[0] : ''}
                                                 onChange={(e) => handleEditChange("fechaFin", new Date(e.target.value))}
                                             />
@@ -610,9 +610,9 @@ export default function AlquilerDetailPage() {
                                                     />
                                                 </div>
                                                 <div className="w-24">
-                                                    <label className="block text-sm font-medium text-gray-700 mb-2">Moneda</label>
+                                                    <label className="block text-sm font-medium text-[var(--color-ink-2)] mb-2">Moneda</label>
                                                     <select
-                                                        className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-gray-900"
+                                                        className="w-full p-3 border border-[var(--color-rule)] rounded-lg focus:ring-2 focus:ring-[var(--color-accent)]/40 focus:border-[var(--color-accent)] text-[var(--color-ink)]"
                                                         value={editData.monedaAlquiler}
                                                         onChange={(e) => handleEditChange("monedaAlquiler", e.target.value)}
                                                     >
@@ -634,9 +634,9 @@ export default function AlquilerDetailPage() {
                                                     />
                                                 </div>
                                                 <div className="w-24">
-                                                    <label className="block text-sm font-medium text-gray-700 mb-2">Moneda</label>
+                                                    <label className="block text-sm font-medium text-[var(--color-ink-2)] mb-2">Moneda</label>
                                                     <select
-                                                        className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-gray-900"
+                                                        className="w-full p-3 border border-[var(--color-rule)] rounded-lg focus:ring-2 focus:ring-[var(--color-accent)]/40 focus:border-[var(--color-accent)] text-[var(--color-ink)]"
                                                         value={editData.monedaDeposito}
                                                         onChange={(e) => handleEditChange("monedaDeposito", e.target.value)}
                                                     >
@@ -648,7 +648,7 @@ export default function AlquilerDetailPage() {
                                         </div>
 
                                         <div>
-                                            <label className="block text-sm font-medium text-gray-700 mb-2">
+                                            <label className="block text-sm font-medium text-[var(--color-ink-2)] mb-2">
                                                 Día de Vencimiento *
                                             </label>
                                             <input
@@ -656,18 +656,18 @@ export default function AlquilerDetailPage() {
                                                 required
                                                 min="1"
                                                 max="31"
-                                                className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-gray-900"
+                                                className="w-full p-3 border border-[var(--color-rule)] rounded-lg focus:ring-2 focus:ring-[var(--color-accent)]/40 focus:border-[var(--color-accent)] text-[var(--color-ink)]"
                                                 value={editData.diaVencimiento}
                                                 onChange={(e) => handleEditChange("diaVencimiento", parseInt(e.target.value))}
                                             />
                                         </div>
 
                                         <div>
-                                            <label className="block text-sm font-medium text-gray-700 mb-2">
+                                            <label className="block text-sm font-medium text-[var(--color-ink-2)] mb-2">
                                                 Método de Pago Preferido
                                             </label>
                                             <select
-                                                className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-gray-900"
+                                                className="w-full p-3 border border-[var(--color-rule)] rounded-lg focus:ring-2 focus:ring-[var(--color-accent)]/40 focus:border-[var(--color-accent)] text-[var(--color-ink)]"
                                                 value={editData.metodoPago || ''}
                                                 onChange={(e) => handleEditChange("metodoPago", e.target.value)}
                                             >
@@ -694,15 +694,15 @@ export default function AlquilerDetailPage() {
                                     </div>
 
                                     {/* Honorarios */}
-                                    <div className="bg-gray-50 p-4 rounded-lg">
-                                        <h3 className="text-sm font-medium text-gray-900 mb-4">Honorarios de Inmobiliaria</h3>
+                                    <div className="bg-[var(--color-paper)] p-4 rounded-lg">
+                                        <h3 className="text-sm font-medium text-[var(--color-ink)] mb-4">Honorarios de Inmobiliaria</h3>
                                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                             <div>
-                                                <label className="block text-sm font-medium text-gray-700 mb-2">
+                                                <label className="block text-sm font-medium text-[var(--color-ink-2)] mb-2">
                                                     Tipo de Honorarios
                                                 </label>
                                                 <select
-                                                    className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-gray-900"
+                                                    className="w-full p-3 border border-[var(--color-rule)] rounded-lg focus:ring-2 focus:ring-[var(--color-accent)]/40 focus:border-[var(--color-accent)] text-[var(--color-ink)]"
                                                     value={editData.honorariosTipo || 'fijo'}
                                                     onChange={(e) => handleEditChange("honorariosTipo", e.target.value)}
                                                 >
@@ -720,13 +720,13 @@ export default function AlquilerDetailPage() {
                                                     />
                                                 ) : (
                                                     <div>
-                                                        <label className="block text-sm font-medium text-gray-700 mb-2">
+                                                        <label className="block text-sm font-medium text-[var(--color-ink-2)] mb-2">
                                                             % Mensual
                                                         </label>
                                                         <input
                                                             type="number"
                                                             step="0.1"
-                                                            className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-gray-900"
+                                                            className="w-full p-3 border border-[var(--color-rule)] rounded-lg focus:ring-2 focus:ring-[var(--color-accent)]/40 focus:border-[var(--color-accent)] text-[var(--color-ink)]"
                                                             value={editData.honorariosValor || ''}
                                                             onChange={(e) => handleEditChange("honorariosValor", parseFloat(e.target.value))}
                                                             placeholder="Ej: 4"
@@ -738,15 +738,15 @@ export default function AlquilerDetailPage() {
                                     </div>
 
                                     {/* Punitorios */}
-                                    <div className="bg-gray-50 p-4 rounded-lg">
-                                        <h3 className="text-sm font-medium text-gray-900 mb-4">Intereses Punitorios</h3>
+                                    <div className="bg-[var(--color-paper)] p-4 rounded-lg">
+                                        <h3 className="text-sm font-medium text-[var(--color-ink)] mb-4">Intereses Punitorios</h3>
                                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                             <div>
-                                                <label className="block text-sm font-medium text-gray-700 mb-2">
+                                                <label className="block text-sm font-medium text-[var(--color-ink-2)] mb-2">
                                                     Tipo de Interés
                                                 </label>
                                                 <select
-                                                    className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-gray-900"
+                                                    className="w-full p-3 border border-[var(--color-rule)] rounded-lg focus:ring-2 focus:ring-[var(--color-accent)]/40 focus:border-[var(--color-accent)] text-[var(--color-ink)]"
                                                     value={editData.punitoriosTipo || 'porcentaje'}
                                                     onChange={(e) => handleEditChange("punitoriosTipo", e.target.value)}
                                                 >
@@ -764,13 +764,13 @@ export default function AlquilerDetailPage() {
                                                     />
                                                 ) : (
                                                     <div>
-                                                        <label className="block text-sm font-medium text-gray-700 mb-2">
+                                                        <label className="block text-sm font-medium text-[var(--color-ink-2)] mb-2">
                                                             Porcentaje Diario (%)
                                                         </label>
                                                         <input
                                                             type="number"
                                                             step="0.01"
-                                                            className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-gray-900"
+                                                            className="w-full p-3 border border-[var(--color-rule)] rounded-lg focus:ring-2 focus:ring-[var(--color-accent)]/40 focus:border-[var(--color-accent)] text-[var(--color-ink)]"
                                                             value={editData.punitoriosValor || ''}
                                                             onChange={(e) => handleEditChange("punitoriosValor", parseFloat(e.target.value))}
                                                             placeholder="Ej: 0.5"
@@ -782,16 +782,16 @@ export default function AlquilerDetailPage() {
                                     </div>
 
                                     {/* Ajustes */}
-                                    <div className="bg-gray-50 p-4 rounded-lg">
-                                        <h3 className="text-sm font-medium text-gray-900 mb-4">Actualización / Ajuste</h3>
+                                    <div className="bg-[var(--color-paper)] p-4 rounded-lg">
+                                        <h3 className="text-sm font-medium text-[var(--color-ink)] mb-4">Actualización / Ajuste</h3>
                                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                             <div>
-                                                <label className="block text-sm font-medium text-gray-700 mb-2">
+                                                <label className="block text-sm font-medium text-[var(--color-ink-2)] mb-2">
                                                     Tipo de Ajuste *
                                                 </label>
                                                 <select
                                                     required
-                                                    className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-gray-900"
+                                                    className="w-full p-3 border border-[var(--color-rule)] rounded-lg focus:ring-2 focus:ring-[var(--color-accent)]/40 focus:border-[var(--color-accent)] text-[var(--color-ink)]"
                                                     value={editData.ajusteTipo}
                                                     onChange={(e) => handleEditChange("ajusteTipo", e.target.value)}
                                                 >
@@ -814,13 +814,13 @@ export default function AlquilerDetailPage() {
                                                         />
                                                     ) : (
                                                         <>
-                                                            <label className="block text-sm font-medium text-gray-700 mb-2">
+                                                            <label className="block text-sm font-medium text-[var(--color-ink-2)] mb-2">
                                                                 Valor de Ajuste (%)
                                                             </label>
                                                             <input
                                                                 type="number"
                                                                 step="0.01"
-                                                                className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-gray-900"
+                                                                className="w-full p-3 border border-[var(--color-rule)] rounded-lg focus:ring-2 focus:ring-[var(--color-accent)]/40 focus:border-[var(--color-accent)] text-[var(--color-ink)]"
                                                                 value={editData.ajusteValor || ''}
                                                                 onChange={(e) => handleEditChange("ajusteValor", parseFloat(e.target.value))}
                                                                 placeholder="0"
@@ -831,11 +831,11 @@ export default function AlquilerDetailPage() {
                                             )}
 
                                             <div>
-                                                <label className="block text-sm font-medium text-gray-700 mb-2">
+                                                <label className="block text-sm font-medium text-[var(--color-ink-2)] mb-2">
                                                     Frecuencia de Actualización
                                                 </label>
                                                 <select
-                                                    className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-gray-900"
+                                                    className="w-full p-3 border border-[var(--color-rule)] rounded-lg focus:ring-2 focus:ring-[var(--color-accent)]/40 focus:border-[var(--color-accent)] text-[var(--color-ink)]"
                                                     value={isCustomFrequency ? "0" : editData.ajusteFrecuencia?.toString() || "3"}
                                                     onChange={(e) => {
                                                         const val = e.target.value;
@@ -859,27 +859,27 @@ export default function AlquilerDetailPage() {
                                             {isCustomFrequency && (
                                                 <>
                                                     <div>
-                                                        <label className="block text-sm font-medium text-gray-700 mb-2">
+                                                        <label className="block text-sm font-medium text-[var(--color-ink-2)] mb-2">
                                                             Primer Ajuste (Meses)
                                                         </label>
                                                         <input
                                                             type="number"
                                                             min="1"
-                                                            className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-gray-900"
+                                                            className="w-full p-3 border border-[var(--color-rule)] rounded-lg focus:ring-2 focus:ring-[var(--color-accent)]/40 focus:border-[var(--color-accent)] text-[var(--color-ink)]"
                                                             value={editData.ajusteMesesPrimer || ''}
                                                             onChange={(e) => handleEditChange("ajusteMesesPrimer", parseInt(e.target.value) || null)}
                                                             placeholder="Ej: 4"
                                                         />
-                                                        <p className="text-xs text-gray-500 mt-1">Si difiere del resto.</p>
+                                                        <p className="text-xs text-[var(--color-muted)] mt-1">Si difiere del resto.</p>
                                                     </div>
                                                     <div>
-                                                        <label className="block text-sm font-medium text-gray-700 mb-2">
+                                                        <label className="block text-sm font-medium text-[var(--color-ink-2)] mb-2">
                                                             Ajustes Siguientes (Meses)
                                                         </label>
                                                         <input
                                                             type="number"
                                                             min="1"
-                                                            className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-gray-900"
+                                                            className="w-full p-3 border border-[var(--color-rule)] rounded-lg focus:ring-2 focus:ring-[var(--color-accent)]/40 focus:border-[var(--color-accent)] text-[var(--color-ink)]"
                                                             value={editData.ajusteFrecuencia || ''}
                                                             onChange={(e) => handleEditChange("ajusteFrecuencia", parseInt(e.target.value))}
                                                         />
@@ -890,15 +890,15 @@ export default function AlquilerDetailPage() {
                                     </div>
 
                                     {/* Garantía */}
-                                    <div className="bg-gray-50 p-4 rounded-lg">
-                                        <h3 className="text-sm font-medium text-gray-900 mb-4">Garantía / Aval</h3>
+                                    <div className="bg-[var(--color-paper)] p-4 rounded-lg">
+                                        <h3 className="text-sm font-medium text-[var(--color-ink)] mb-4">Garantía / Aval</h3>
                                         <div className="grid grid-cols-1 gap-4 mb-4">
                                             <div>
-                                                <label className="block text-sm font-medium text-gray-700 mb-2">
+                                                <label className="block text-sm font-medium text-[var(--color-ink-2)] mb-2">
                                                     Tipo de Garantía
                                                 </label>
                                                 <select
-                                                    className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-gray-900"
+                                                    className="w-full p-3 border border-[var(--color-rule)] rounded-lg focus:ring-2 focus:ring-[var(--color-accent)]/40 focus:border-[var(--color-accent)] text-[var(--color-ink)]"
                                                     value={editData.tipoGarantia || 'garante'}
                                                     onChange={(e) => handleEditChange("tipoGarantia", e.target.value)}
                                                 >
@@ -960,8 +960,8 @@ export default function AlquilerDetailPage() {
                                     </div>
 
                                     {/* Servicios */}
-                                    <div className="bg-gray-50 p-4 rounded-lg">
-                                        <h3 className="text-sm font-medium text-gray-900 mb-4">Servicios y Expensas a Cargo del Inquilino</h3>
+                                    <div className="bg-[var(--color-paper)] p-4 rounded-lg">
+                                        <h3 className="text-sm font-medium text-[var(--color-ink)] mb-4">Servicios y Expensas a Cargo del Inquilino</h3>
                                         <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
                                             {[
                                                 { key: 'luz', label: 'Luz' },
@@ -971,24 +971,24 @@ export default function AlquilerDetailPage() {
                                                 { key: 'cochera', label: 'Cochera' },
                                                 { key: 'expensas', label: 'Expensas' },
                                             ].map((sc) => (
-                                                <label key={sc.key} className="flex items-center gap-3 p-3 bg-white border border-gray-200 rounded-lg cursor-pointer hover:border-indigo-300">
+                                                <label key={sc.key} className="flex items-center gap-3 p-3 bg-[var(--color-paper-2)] border border-[var(--color-rule)] rounded-lg cursor-pointer hover:border-[var(--color-accent)]/30">
                                                     <input
                                                         type="checkbox"
-                                                        className="w-5 h-5 text-indigo-600 rounded focus:ring-indigo-500"
+                                                        className="w-5 h-5 text-[var(--color-accent)] rounded focus:ring-[var(--color-accent)]/40"
                                                         checked={servicios[sc.key]}
                                                         onChange={(e) => handleServiceChange(sc.key, e.target.checked)}
                                                     />
-                                                    <span className="text-gray-700 font-medium">{sc.label}</span>
+                                                    <span className="text-[var(--color-ink-2)] font-medium">{sc.label}</span>
                                                 </label>
                                             ))}
                                         </div>
                                         <div className="mt-4">
-                                            <label className="block text-sm font-medium text-gray-700 mb-2">
+                                            <label className="block text-sm font-medium text-[var(--color-ink-2)] mb-2">
                                                 Otros Servicios / Observaciones
                                             </label>
                                             <input
                                                 type="text"
-                                                className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-gray-900"
+                                                className="w-full p-3 border border-[var(--color-rule)] rounded-lg focus:ring-2 focus:ring-[var(--color-accent)]/40 focus:border-[var(--color-accent)] text-[var(--color-ink)]"
                                                 placeholder="Ej: Jardinero, Seguridad Privada, Piletero..."
                                                 value={otroServicio}
                                                 onChange={(e) => handleOtroServicioChange(e.target.value)}
@@ -1012,57 +1012,57 @@ export default function AlquilerDetailPage() {
                                 <div className="animate-in fade-in duration-300 space-y-8">
                                     {/* Key Metrics */}
                                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-                                        <div className="bg-indigo-50/50 p-4 rounded-xl border border-indigo-100 flex flex-col justify-between group hover:border-indigo-200 transition-colors">
+                                        <div className="bg-[var(--color-accent-soft)] p-4 rounded-xl border border-[var(--color-accent)]/30 flex flex-col justify-between group hover:border-[var(--color-accent)]/30 transition-colors">
                                             <div className="flex items-center gap-3 mb-2">
-                                                <div className="p-2 bg-white rounded-lg shadow-sm text-indigo-600 group-hover:scale-110 transition-transform">
-                                                    <DollarSign size={18} />
+                                                <div className="p-2 bg-[var(--color-paper-2)] rounded-lg shadow-sm text-[var(--color-accent)] group-hover:scale-110 transition-transform">
+                                                    <DollarSign strokeWidth={1.5} size={18} />
                                                 </div>
-                                                <span className="text-xs font-bold uppercase text-indigo-400 tracking-wider">Monto Mensual</span>
+                                                <span className="text-xs font-bold uppercase text-[var(--color-accent)] tracking-wider">Monto Mensual</span>
                                             </div>
                                             <div>
-                                                <p className="text-2xl font-bold text-gray-900 tracking-tight">${alquiler.montoMensual?.toLocaleString()}</p>
-                                                <p className="text-xs text-gray-500 font-medium mt-1">{alquiler.monedaAlquiler}</p>
+                                                <p className="text-2xl font-bold text-[var(--color-ink)] tracking-tight">${alquiler.montoMensual?.toLocaleString()}</p>
+                                                <p className="text-xs text-[var(--color-muted)] font-medium mt-1">{alquiler.monedaAlquiler}</p>
                                             </div>
                                         </div>
 
-                                        <div className="bg-blue-50/50 p-4 rounded-xl border border-blue-100 flex flex-col justify-between group hover:border-blue-200 transition-colors">
+                                        <div className="bg-[var(--color-accent-soft)] p-4 rounded-xl border border-[var(--color-accent)]/30 flex flex-col justify-between group hover:border-[var(--color-accent)]/30 transition-colors">
                                             <div className="flex items-center gap-3 mb-2">
-                                                <div className="p-2 bg-white rounded-lg shadow-sm text-blue-600 group-hover:scale-110 transition-transform">
-                                                    <Calendar size={18} />
+                                                <div className="p-2 bg-[var(--color-paper-2)] rounded-lg shadow-sm text-[var(--color-accent)] group-hover:scale-110 transition-transform">
+                                                    <Calendar strokeWidth={1.5} size={18} />
                                                 </div>
-                                                <span className="text-xs font-bold uppercase text-blue-400 tracking-wider">Vencimiento</span>
+                                                <span className="text-xs font-bold uppercase text-[var(--color-accent)] tracking-wider">Vencimiento</span>
                                             </div>
                                             <div>
-                                                <p className="text-2xl font-bold text-gray-900 tracking-tight">Día {alquiler.diaVencimiento}</p>
-                                                <p className="text-xs text-gray-500 font-medium mt-1">de cada mes</p>
+                                                <p className="text-2xl font-bold text-[var(--color-ink)] tracking-tight">Día {alquiler.diaVencimiento}</p>
+                                                <p className="text-xs text-[var(--color-muted)] font-medium mt-1">de cada mes</p>
                                             </div>
                                         </div>
 
-                                        <div className="bg-emerald-50/50 p-4 rounded-xl border border-emerald-100 flex flex-col justify-between group hover:border-emerald-200 transition-colors">
+                                        <div className="bg-[var(--color-positive-soft)] p-4 rounded-xl border border-[var(--color-positive)]/30 flex flex-col justify-between group hover:border-[var(--color-positive)]/30 transition-colors">
                                             <div className="flex items-center gap-3 mb-2">
-                                                <div className="p-2 bg-white rounded-lg shadow-sm text-emerald-600 group-hover:scale-110 transition-transform">
-                                                    <TrendingUp size={18} />
+                                                <div className="p-2 bg-[var(--color-paper-2)] rounded-lg shadow-sm text-[var(--color-positive)] group-hover:scale-110 transition-transform">
+                                                    <TrendingUp strokeWidth={1.5} size={18} />
                                                 </div>
-                                                <span className="text-xs font-bold uppercase text-emerald-400 tracking-wider">Ajuste</span>
+                                                <span className="text-xs font-bold uppercase text-[var(--color-positive)] tracking-wider">Ajuste</span>
                                             </div>
                                             <div>
-                                                <p className="text-lg font-bold text-gray-900 tracking-tight leading-tight">
+                                                <p className="text-lg font-bold text-[var(--color-ink)] tracking-tight leading-tight">
                                                     {alquiler.ajusteTipo === 'ICL' ? 'ICL' : alquiler.ajusteTipo === 'IPC' ? 'IPC' : alquiler.ajusteValor ? `${alquiler.ajusteValor}%` : alquiler.ajusteTipo}
                                                 </p>
-                                                <p className="text-xs text-gray-500 font-medium mt-1">Cada {alquiler.ajusteFrecuencia} meses</p>
+                                                <p className="text-xs text-[var(--color-muted)] font-medium mt-1">Cada {alquiler.ajusteFrecuencia} meses</p>
                                             </div>
                                         </div>
 
-                                        <div className="bg-purple-50/50 p-4 rounded-xl border border-purple-100 flex flex-col justify-between group hover:border-purple-200 transition-colors">
+                                        <div className="bg-[var(--color-accent-soft)] p-4 rounded-xl border border-[var(--color-accent)]/30 flex flex-col justify-between group hover:border-[var(--color-accent)]/30 transition-colors">
                                             <div className="flex items-center gap-3 mb-2">
-                                                <div className="p-2 bg-white rounded-lg shadow-sm text-purple-600 group-hover:scale-110 transition-transform">
-                                                    <Clock size={18} />
+                                                <div className="p-2 bg-[var(--color-paper-2)] rounded-lg shadow-sm text-[var(--color-accent)] group-hover:scale-110 transition-transform">
+                                                    <Clock strokeWidth={1.5} size={18} />
                                                 </div>
-                                                <span className="text-xs font-bold uppercase text-purple-400 tracking-wider">Vigencia</span>
+                                                <span className="text-xs font-bold uppercase text-[var(--color-accent)] tracking-wider">Vigencia</span>
                                             </div>
                                             <div>
-                                                <p className="text-sm font-semibold text-gray-900">{new Date(alquiler.fechaFin).toLocaleDateString()}</p>
-                                                <p className="text-xs text-gray-500 font-medium mt-1">Finaliza contrato</p>
+                                                <p className="text-sm font-semibold text-[var(--color-ink)]">{new Date(alquiler.fechaFin).toLocaleDateString()}</p>
+                                                <p className="text-xs text-[var(--color-muted)] font-medium mt-1">Finaliza contrato</p>
                                             </div>
                                         </div>
                                     </div>
@@ -1070,44 +1070,44 @@ export default function AlquilerDetailPage() {
                                     <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
                                         {/* Involucrados */}
                                         <div className="space-y-4">
-                                            <h3 className="flex items-center gap-2 text-sm font-bold text-gray-900 uppercase tracking-widest pl-1">
-                                                <User size={16} className="text-gray-400" />
+                                            <h3 className="flex items-center gap-2 text-sm font-bold text-[var(--color-ink)] uppercase tracking-widest pl-1">
+                                                <User strokeWidth={1.5} size={16} className="text-[var(--color-neutral)]" />
                                                 Involucrados
                                             </h3>
 
                                             {/* Inquilino Card */}
-                                            <div className="bg-white border border-gray-100 shadow-sm rounded-xl p-4 flex items-center gap-4 hover:shadow-md transition-shadow">
-                                                <div className="w-12 h-12 rounded-full bg-gray-100 flex items-center justify-center text-gray-500 font-bold text-lg border-2 border-white shadow-sm ring-1 ring-gray-100">
+                                            <div className="bg-[var(--color-paper-2)] border border-[var(--color-rule-2)] shadow-sm rounded-xl p-4 flex items-center gap-4 hover:shadow-md transition-shadow">
+                                                <div className="w-12 h-12 rounded-full bg-[var(--color-paper-3)] flex items-center justify-center text-[var(--color-muted)] font-bold text-lg border-2 border-[var(--color-paper-2)] shadow-sm ring-1 ring-[var(--color-rule)]">
                                                     {inquilino?.nombre.charAt(0) || alquiler.nombreInquilino?.charAt(0) || "I"}
                                                 </div>
                                                 <div className="flex-1 min-w-0">
-                                                    <p className="text-[10px] text-indigo-500 font-bold uppercase tracking-wider mb-0.5">Inquilino</p>
-                                                    <p className="font-semibold text-gray-900 truncate">{inquilino?.nombre || alquiler.nombreInquilino}</p>
-                                                    <p className="text-sm text-gray-500 font-mono">{inquilino?.dni || alquiler.dniInquilino || '-'}</p>
+                                                    <p className="text-[10px] text-[var(--color-accent)] font-bold uppercase tracking-wider mb-0.5">Inquilino</p>
+                                                    <p className="font-semibold text-[var(--color-ink)] truncate">{inquilino?.nombre || alquiler.nombreInquilino}</p>
+                                                    <p className="text-sm text-[var(--color-muted)] font-mono">{inquilino?.dni || alquiler.dniInquilino || '-'}</p>
                                                 </div>
-                                                <Link href="/dashboard/clientes" className="p-2 text-gray-400 hover:text-indigo-600 hover:bg-gray-50 rounded-lg transition-colors" title="Ver perfil">
-                                                    <ExternalLink size={18} />
+                                                <Link href="/dashboard/clientes" className="p-2 text-[var(--color-neutral)] hover:text-[var(--color-accent-2)] hover:bg-[var(--color-paper-3)] rounded-lg transition-colors" title="Ver perfil">
+                                                    <ExternalLink strokeWidth={1.5} size={18} />
                                                 </Link>
                                             </div>
 
                                             {/* Garantía Card */}
-                                            <div className="bg-white border border-gray-100 shadow-sm rounded-xl p-4 flex items-center gap-4 hover:shadow-md transition-shadow">
-                                                <div className="w-12 h-12 rounded-full bg-orange-50 flex items-center justify-center text-orange-500 font-bold border-2 border-white shadow-sm ring-1 ring-orange-50">
-                                                    <Shield size={20} />
+                                            <div className="bg-[var(--color-paper-2)] border border-[var(--color-rule-2)] shadow-sm rounded-xl p-4 flex items-center gap-4 hover:shadow-md transition-shadow">
+                                                <div className="w-12 h-12 rounded-full bg-[var(--color-paper-3)] flex items-center justify-center text-[var(--color-muted)] font-bold border-2 border-[var(--color-paper-2)] ring-1 ring-[var(--color-warning)]/15">
+                                                    <Shield strokeWidth={1.5} size={20} />
                                                 </div>
                                                 <div className="flex-1 min-w-0">
-                                                    <p className="text-[10px] text-orange-500 font-bold uppercase tracking-wider mb-0.5">
+                                                    <p className="text-[10px] text-[var(--color-warning)] font-bold uppercase tracking-wider mb-0.5">
                                                         {alquiler.tipoGarantia === 'seguro_caucion' ? 'Seguro de Caución' : 'Garante'}
                                                     </p>
                                                     {alquiler.tipoGarantia === 'garante' ? (
                                                         <>
-                                                            <p className="font-semibold text-gray-900 truncate">{alquiler.garante?.nombre || 'Sin nombre'}</p>
-                                                            <p className="text-sm text-gray-500 font-mono">{alquiler.garante?.dni || '-'}</p>
+                                                            <p className="font-semibold text-[var(--color-ink)] truncate">{alquiler.garante?.nombre || 'Sin nombre'}</p>
+                                                            <p className="text-sm text-[var(--color-muted)] font-mono">{alquiler.garante?.dni || '-'}</p>
                                                         </>
                                                     ) : (
                                                         <>
-                                                            <p className="font-semibold text-gray-900 truncate">{alquiler.seguroCaucion?.compania || 'Sin compañía'}</p>
-                                                            <p className="text-sm text-gray-500">Póliza: {alquiler.seguroCaucion?.numeroPoliza || '-'}</p>
+                                                            <p className="font-semibold text-[var(--color-ink)] truncate">{alquiler.seguroCaucion?.compania || 'Sin compañía'}</p>
+                                                            <p className="text-sm text-[var(--color-muted)]">Póliza: {alquiler.seguroCaucion?.numeroPoliza || '-'}</p>
                                                         </>
                                                     )}
                                                 </div>
@@ -1116,37 +1116,37 @@ export default function AlquilerDetailPage() {
 
                                         {/* Financial & Services */}
                                         <div className="space-y-4">
-                                            <h3 className="flex items-center gap-2 text-sm font-bold text-gray-900 uppercase tracking-widest pl-1">
-                                                <FileText size={16} className="text-gray-400" />
+                                            <h3 className="flex items-center gap-2 text-sm font-bold text-[var(--color-ink)] uppercase tracking-widest pl-1">
+                                                <FileText strokeWidth={1.5} size={16} className="text-[var(--color-neutral)]" />
                                                 Condiciones y Servicios
                                             </h3>
 
-                                            <div className="bg-gray-50/50 rounded-xl p-5 border border-gray-100 space-y-4">
+                                            <div className="bg-[var(--color-paper)]/50 rounded-xl p-5 border border-[var(--color-rule-2)] space-y-4">
                                                 {/* Honorarios */}
-                                                <div className="flex justify-between items-center pb-3 border-b border-gray-200/60 last:border-0 last:pb-0">
+                                                <div className="flex justify-between items-center pb-3 border-b border-[var(--color-rule)]/60 last:border-0 last:pb-0">
                                                     <div className="flex items-center gap-3">
-                                                        <div className="p-1.5 bg-white rounded text-gray-500 shadow-sm">
-                                                            <Percent size={14} />
+                                                        <div className="p-1.5 bg-[var(--color-paper-2)] rounded text-[var(--color-muted)] shadow-sm">
+                                                            <Percent strokeWidth={1.5} size={14} />
                                                         </div>
-                                                        <span className="text-sm text-gray-600 font-medium">Honorarios</span>
+                                                        <span className="text-sm text-[var(--color-ink-2)] font-medium">Honorarios</span>
                                                     </div>
-                                                    <span className="text-sm font-semibold text-gray-900">
+                                                    <span className="text-sm font-semibold text-[var(--color-ink)]">
                                                         {alquiler.honorariosTipo === 'fijo'
                                                             ? `$${alquiler.honorariosValor?.toLocaleString()}`
                                                             : `${alquiler.honorariosValor}%`}
-                                                        <span className="text-xs text-gray-400 font-normal ml-1">/ mes</span>
+                                                        <span className="text-xs text-[var(--color-neutral)] font-normal ml-1">/ mes</span>
                                                     </span>
                                                 </div>
 
                                                 {/* Punitorios */}
-                                                <div className="flex justify-between items-center pb-3 border-b border-gray-200/60 last:border-0 last:pb-0">
+                                                <div className="flex justify-between items-center pb-3 border-b border-[var(--color-rule)]/60 last:border-0 last:pb-0">
                                                     <div className="flex items-center gap-3">
-                                                        <div className="p-1.5 bg-white rounded text-gray-500 shadow-sm">
-                                                            <AlertCircle size={14} />
+                                                        <div className="p-1.5 bg-[var(--color-paper-2)] rounded text-[var(--color-muted)] shadow-sm">
+                                                            <AlertCircle strokeWidth={1.5} size={14} />
                                                         </div>
-                                                        <span className="text-sm text-gray-600 font-medium">Punitorios (Diario)</span>
+                                                        <span className="text-sm text-[var(--color-ink-2)] font-medium">Punitorios (Diario)</span>
                                                     </div>
-                                                    <span className="text-sm font-semibold text-gray-900">
+                                                    <span className="text-sm font-semibold text-[var(--color-ink)]">
                                                         {alquiler.punitoriosTipo === 'fijo'
                                                             ? `$${alquiler.punitoriosValor?.toLocaleString()}`
                                                             : `${alquiler.punitoriosValor}%`}
@@ -1155,17 +1155,17 @@ export default function AlquilerDetailPage() {
 
                                                 {/* Servicios */}
                                                 <div className="pt-2">
-                                                    <span className="text-xs font-semibold text-gray-400 uppercase tracking-wider block mb-3">Servicios Incluidos</span>
+                                                    <span className="text-xs font-semibold text-[var(--color-neutral)] uppercase tracking-wider block mb-3">Servicios Incluidos</span>
                                                     <div className="flex flex-wrap gap-2">
                                                         {alquiler.serviciosAdicionales && alquiler.serviciosAdicionales.length > 0 ? (
                                                             alquiler.serviciosAdicionales.map((s, i) => (
-                                                                <span key={i} className="inline-flex items-center gap-1.5 px-3 py-1 bg-white text-gray-700 text-xs font-medium rounded-full border border-gray-200 shadow-sm">
-                                                                    <Zap size={10} className="text-yellow-500 fill-yellow-500" />
+                                                                <span key={i} className="inline-flex items-center gap-1.5 px-3 py-1 bg-[var(--color-paper-2)] text-[var(--color-ink-2)] text-xs font-medium rounded-full border border-[var(--color-rule)] shadow-sm">
+                                                                    <Check strokeWidth={1.5} size={10} className="text-[var(--color-muted)]" />
                                                                     {s}
                                                                 </span>
                                                             ))
                                                         ) : (
-                                                            <span className="text-xs text-gray-400 italic">No hay servicios adicionales especificados.</span>
+                                                            <span className="text-xs text-[var(--color-neutral)] italic">No hay servicios adicionales especificados.</span>
                                                         )}
                                                     </div>
                                                 </div>

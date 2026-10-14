@@ -11,10 +11,10 @@ interface RentalCardProps {
 export default function RentalCard({ contract, onDelete }: RentalCardProps) {
     const getStatusColor = (status: string) => {
         switch (status) {
-            case 'activo': return 'bg-green-100 text-green-800 border-green-200';
-            case 'pendiente': return 'bg-yellow-100 text-yellow-800 border-yellow-200';
-            case 'finalizado': return 'bg-gray-100 text-gray-800 border-gray-200';
-            default: return 'bg-gray-100 text-gray-800 border-gray-200';
+            case 'activo': return 'bg-[var(--color-positive-soft)] text-[var(--color-positive)] border-[var(--color-positive)]/30';
+            case 'pendiente': return 'bg-[var(--color-warning-soft)] text-[var(--color-warning)] border-[var(--color-warning)]/30';
+            case 'finalizado': return 'bg-[var(--color-paper-3)] text-[var(--color-ink)] border-[var(--color-rule)]';
+            default: return 'bg-[var(--color-paper-3)] text-[var(--color-ink)] border-[var(--color-rule)]';
         }
     };
 
@@ -24,16 +24,16 @@ export default function RentalCard({ contract, onDelete }: RentalCardProps) {
 
     return (
         <Link href={`/dashboard/alquileres/${contract.id}`} className="block">
-            <div className="bg-white rounded-xl border border-gray-200 p-5 hover:shadow-md transition-shadow cursor-pointer h-full flex flex-col justify-between">
+            <div className="bg-[var(--color-paper-2)] rounded-xl border border-[var(--color-rule)] p-5 hover:shadow-md transition-shadow cursor-pointer h-full flex flex-col justify-between">
                 <div>
                     <div className="flex justify-between items-start mb-3">
                         <div className="flex items-start gap-2">
-                            <div className="p-2 bg-indigo-50 rounded-lg shrink-0">
-                                <MapPin className="w-5 h-5 text-indigo-600" />
+                            <div className="p-2 bg-[var(--color-paper-3)] rounded-full shrink-0">
+                                <MapPin strokeWidth={1.5} className="w-5 h-5 text-[var(--color-muted)]" />
                             </div>
                             <div>
-                                <h3 className="font-semibold text-gray-900 line-clamp-1">{contract.direccion}</h3>
-                                <p className="text-sm text-gray-500">{contract.propiedadTipo}</p>
+                                <h3 className="font-semibold text-[var(--color-ink)] line-clamp-1">{contract.direccion}</h3>
+                                <p className="text-sm text-[var(--color-muted)]">{contract.propiedadTipo}</p>
                             </div>
                         </div>
                         <span className={`px-2.5 py-0.5 rounded-full text-xs font-medium border ${getStatusColor(contract.estado)}`}>
@@ -42,30 +42,30 @@ export default function RentalCard({ contract, onDelete }: RentalCardProps) {
                     </div>
 
                     <div className="space-y-2 mb-4">
-                        <div className="flex items-center text-sm text-gray-600">
-                            <User className="w-4 h-4 mr-2 text-gray-400" />
+                        <div className="flex items-center text-sm text-[var(--color-ink-2)]">
+                            <User strokeWidth={1.5} className="w-4 h-4 mr-2 text-[var(--color-neutral)]" />
                             <span className="truncate">{contract.nombreInquilino}</span>
                         </div>
-                        <div className="flex items-center text-sm text-gray-600">
-                            <Calendar className="w-4 h-4 mr-2 text-gray-400" />
+                        <div className="flex items-center text-sm text-[var(--color-ink-2)]">
+                            <Calendar strokeWidth={1.5} className="w-4 h-4 mr-2 text-[var(--color-neutral)]" />
                             <span>Vence: {new Date(contract.fechaFin as any).toLocaleDateString()}</span>
                         </div>
-                        <div className="flex items-center text-sm font-medium text-gray-900">
-                            <DollarSign className="w-4 h-4 mr-2 text-gray-400" />
+                        <div className="flex items-center text-sm font-medium text-[var(--color-ink)]">
+                            <DollarSign strokeWidth={1.5} className="w-4 h-4 mr-2 text-[var(--color-neutral)]" />
                             <span>{formatCurrency(contract.montoMensual)}</span>
-                            {contract.ajusteTipo === 'ICL' && <span className="text-xs text-gray-500 ml-1">(ajustable ICL)</span>}
+                            {contract.ajusteTipo === 'ICL' && <span className="text-xs text-[var(--color-muted)] ml-1">(ajustable ICL)</span>}
                         </div>
                     </div>
                 </div>
 
                 {/* Optional: Add footer actions if needed, for now just the card is clickable */}
-                {/* <div className="pt-4 border-t border-gray-100 flex justify-end">
+                {/* <div className="pt-4 border-t border-[var(--color-rule-2)] flex justify-end">
                     <button 
                         onClick={(e) => {
                             e.preventDefault(); // Prevent navigation
                             onDelete(contract.id);
                         }}
-                        className="text-sm text-red-600 hover:text-red-700 font-medium"
+                        className="text-sm text-[var(--color-danger)] hover:text-[var(--color-danger)] font-medium"
                     >
                         Eliminar
                     </button>

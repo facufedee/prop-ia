@@ -257,26 +257,26 @@ export default function LiquidacionesTab({ alquiler, onUpdateAlquiler }: Liquida
     return (
         <div className="space-y-8">
             {/* Header */}
-            <div className="flex justify-between items-center pb-4 border-b border-gray-100">
+            <div className="flex justify-between items-center pb-4 border-b border-[var(--color-rule-2)]">
                 <div>
-                    <h3 className="text-xl font-bold text-gray-900 tracking-tight">Liquidaciones al Propietario</h3>
-                    <p className="text-gray-500 text-sm mt-1">Saldos pendientes y emitidos para el dueño del inmueble.</p>
+                    <h3 className="text-xl font-bold text-[var(--color-ink)] tracking-tight">Liquidaciones al Propietario</h3>
+                    <p className="text-[var(--color-muted)] text-sm mt-1">Saldos pendientes y emitidos para el dueño del inmueble.</p>
                 </div>
                 <div className="flex items-center gap-3">
                     {sortedLiquidaciones.length > 0 && (
                         <button
                             onClick={() => reportService.generateLiquidacionesReport(alquiler, sortedLiquidaciones)}
-                            className="flex items-center gap-2 px-4 py-2 bg-white text-gray-700 border border-gray-300 rounded-xl hover:bg-gray-50 transition-colors shadow-sm font-medium text-sm"
+                            className="flex items-center gap-2 px-4 py-2 bg-[var(--color-paper-2)] text-[var(--color-ink-2)] border border-[var(--color-rule)] rounded-xl hover:bg-[var(--color-paper-3)] transition-colors shadow-sm font-medium text-sm"
                         >
-                            <History size={16} />
+                            <History strokeWidth={1.5} size={16} />
                             Historial PDF
                         </button>
                     )}
                     <button
                         onClick={() => { setSelectedMonth(""); setShowModal(true); }}
-                        className="flex items-center gap-2 px-4 py-2 bg-indigo-600 text-white rounded-xl hover:bg-indigo-700 transition-colors shadow-sm font-medium text-sm"
+                        className="flex items-center gap-2 px-4 py-2 bg-[var(--color-ink)] text-[var(--color-paper)] rounded-xl hover:bg-[var(--color-ink-2)] transition-colors shadow-sm font-medium text-sm"
                     >
-                        <Plus size={16} />
+                        <Plus strokeWidth={1.5} size={16} />
                         Personalizada
                     </button>
                 </div>
@@ -286,19 +286,19 @@ export default function LiquidacionesTab({ alquiler, onUpdateAlquiler }: Liquida
             {availablePagos.length > 0 && (
                 <div className="space-y-4">
                     <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-                        <h4 className="text-lg font-bold text-gray-900 flex items-center gap-2">
-                            <span className="w-2 h-2 rounded-full bg-amber-500"></span>
+                        <h4 className="text-lg font-bold text-[var(--color-ink)] flex items-center gap-2">
+                            <span className="w-2 h-2 rounded-full bg-[var(--color-warning)]"></span>
                             Pendientes de Liquidar
                         </h4>
                         <div className="flex items-center gap-3 w-full sm:w-auto">
                             <button
                                 onClick={toggleAllPending}
-                                className="flex items-center gap-2 text-sm text-gray-600 hover:text-amber-600 font-medium"
+                                className="flex items-center gap-2 text-sm text-[var(--color-ink-2)] hover:text-[var(--color-warning)] font-medium"
                             >
                                 {selectedPendingIds.size === availablePagos.length ? (
-                                    <><CheckSquare size={18} /> Deseleccionar todo</>
+                                    <><CheckSquare strokeWidth={1.5} size={18} /> Deseleccionar todo</>
                                 ) : (
-                                    <><Square size={18} /> Seleccionar todo</>
+                                    <><Square strokeWidth={1.5} size={18} /> Seleccionar todo</>
                                 )}
                             </button>
                         </div>
@@ -307,29 +307,29 @@ export default function LiquidacionesTab({ alquiler, onUpdateAlquiler }: Liquida
                     <div className="flex flex-col gap-3">
                         {availablePagos.map((pago) => (
                             <div key={pago.id}
-                                className={`flex flex-col sm:flex-row justify-between items-start sm:items-center p-4 bg-amber-50/50 border rounded-xl shadow-sm gap-4 transition-all ${selectedPendingIds.has(pago.id) ? 'border-amber-400 ring-1 ring-amber-400 bg-amber-100/30' : 'border-amber-200 hover:border-amber-300'}`}
+                                className={`flex flex-col sm:flex-row justify-between items-start sm:items-center p-4 bg-[var(--color-warning-soft)] border rounded-xl shadow-sm gap-4 transition-all ${selectedPendingIds.has(pago.id) ? 'border-[var(--color-warning)] ring-1 ring-[var(--color-warning)] bg-[var(--color-warning)]/7' : 'border-[var(--color-warning)]/30 hover:border-[var(--color-warning)]/30'}`}
                             >
                                 <div className="flex items-start gap-3 w-full sm:w-auto">
-                                    <div onClick={() => togglePendingSelection(pago.id)} className="mt-1 text-gray-400 cursor-pointer">
-                                        {selectedPendingIds.has(pago.id) ? <CheckSquare size={20} className="text-amber-600" /> : <Square size={20} />}
+                                    <div onClick={() => togglePendingSelection(pago.id)} className="mt-1 text-[var(--color-neutral)] cursor-pointer">
+                                        {selectedPendingIds.has(pago.id) ? <CheckSquare strokeWidth={1.5} size={20} className="text-[var(--color-warning)]" /> : <Square strokeWidth={1.5} size={20} />}
                                     </div>
                                     <div>
                                         <div className="flex items-center gap-2">
-                                            <h4 className="font-bold text-gray-900 text-base capitalize">
+                                            <h4 className="font-bold text-[var(--color-ink)] text-base capitalize">
                                                 {format(parseISO(pago.mes + "-01"), "MMMM yyyy", { locale: es })}
                                             </h4>
-                                            <span className="px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider rounded border bg-emerald-50 text-emerald-700 border-emerald-100">
+                                            <span className="px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider rounded border bg-[var(--color-positive-soft)] text-[var(--color-positive)] border-[var(--color-positive)]/30">
                                                 Pagado Inquilino
                                             </span>
                                         </div>
-                                        <p className="text-sm text-gray-600 mt-1">
-                                            Total cobrado: <span className="font-medium text-gray-900">${pago.monto?.toLocaleString()}</span>
+                                        <p className="text-sm text-[var(--color-ink-2)] mt-1">
+                                            Total cobrado: <span className="font-medium text-[var(--color-ink)]">${pago.monto?.toLocaleString()}</span>
                                         </p>
                                     </div>
                                 </div>
                                 <button
                                     onClick={(e) => { e.stopPropagation(); openModalForMonth(pago.mes); }}
-                                    className="w-full sm:w-auto px-5 py-2.5 bg-white border border-amber-300 text-amber-700 rounded-lg text-sm font-bold hover:bg-amber-100 transition-colors shadow-sm whitespace-nowrap uppercase tracking-wide"
+                                    className="w-full sm:w-auto px-5 py-2.5 bg-[var(--color-paper-2)] border border-[var(--color-warning)]/30 text-[var(--color-warning)] rounded-lg text-sm font-bold hover:bg-[var(--color-warning-soft)] transition-colors shadow-sm whitespace-nowrap uppercase tracking-wide"
                                 >
                                     Liquidar {format(parseISO(pago.mes + "-01"), "MMMM", { locale: es })}
                                 </button>
@@ -339,28 +339,28 @@ export default function LiquidacionesTab({ alquiler, onUpdateAlquiler }: Liquida
 
                     {/* Batch Actions for Pending Liquidations */}
                     {selectedPendingIds.size > 0 && (
-                        <div className="fixed bottom-6 left-1/2 -translate-x-1/2 bg-white rounded-2xl shadow-xl border border-gray-200 p-4 flex items-center gap-6 z-50 animate-in slide-in-from-bottom-10 fade-in duration-200">
+                        <div className="fixed bottom-6 left-1/2 -translate-x-1/2 bg-[var(--color-paper-2)] rounded-2xl shadow-xl border border-[var(--color-rule)] p-4 flex items-center gap-6 z-50 animate-in slide-in-from-bottom-10 fade-in duration-200">
                             <div className="flex flex-col">
-                                <span className="text-sm font-bold text-gray-900">{selectedPendingIds.size} seleccionados</span>
-                                <span className="text-xs text-gray-500">Pendientes de liquidar</span>
+                                <span className="text-sm font-bold text-[var(--color-ink)]">{selectedPendingIds.size} seleccionados</span>
+                                <span className="text-xs text-[var(--color-muted)]">Pendientes de liquidar</span>
                             </div>
-                            <div className="h-8 w-px bg-gray-200"></div>
+                            <div className="h-8 w-px bg-[var(--color-paper-4)]"></div>
                             <div className="flex gap-2">
                                 <button
                                     onClick={handleBatchLiquidate}
                                     disabled={isSubmitting}
-                                    className="flex items-center gap-2 px-4 py-2 bg-amber-600 text-white rounded-xl hover:bg-amber-700 transition-colors font-medium text-sm disabled:opacity-50"
+                                    className="flex items-center gap-2 px-4 py-2 bg-[var(--color-warning)] text-[var(--color-accent-ink)] rounded-xl hover:bg-[var(--color-warning)] transition-colors font-medium text-sm disabled:opacity-50"
                                 >
                                     {isSubmitting ? (
-                                        <span className="w-4 h-4 rounded-full border-2 border-white/20 border-t-white animate-spin"></span>
+                                        <span className="w-4 h-4 rounded-full border-2 border-[var(--color-paper-2)]/20 border-t-[var(--color-paper-2)] animate-spin"></span>
                                     ) : (
-                                        <CheckCircle2 size={16} />
+                                        <CheckCircle2 strokeWidth={1.5} size={16} />
                                     )}
                                     Generar {selectedPendingIds.size} Liquidaciones Rápidas
                                 </button>
                                 <button
                                     onClick={() => setSelectedPendingIds(new Set())}
-                                    className="px-4 py-2 text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded-xl transition-colors text-sm font-medium"
+                                    className="px-4 py-2 text-[var(--color-muted)] hover:text-[var(--color-ink-2)] hover:bg-[var(--color-paper-3)] rounded-xl transition-colors text-sm font-medium"
                                 >
                                     Cancelar
                                 </button>
@@ -373,8 +373,8 @@ export default function LiquidacionesTab({ alquiler, onUpdateAlquiler }: Liquida
             {/* Historial Section */}
             <div className="space-y-4">
                 <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-                    <h4 className="text-lg font-bold text-gray-900 flex items-center gap-2">
-                        <span className="w-2 h-2 rounded-full bg-indigo-500"></span>
+                    <h4 className="text-lg font-bold text-[var(--color-ink)] flex items-center gap-2">
+                        <span className="w-2 h-2 rounded-full bg-[var(--color-accent)]"></span>
                         Liquidaciones Generadas
                     </h4>
 
@@ -382,12 +382,12 @@ export default function LiquidacionesTab({ alquiler, onUpdateAlquiler }: Liquida
                         <div className="flex items-center gap-3 w-full sm:w-auto">
                             <button
                                 onClick={toggleAll}
-                                className="flex items-center gap-2 text-sm text-gray-600 hover:text-indigo-600 font-medium"
+                                className="flex items-center gap-2 text-sm text-[var(--color-ink-2)] hover:text-[var(--color-accent-2)] font-medium"
                             >
                                 {selectedIds.size === sortedLiquidaciones.length ? (
-                                    <><CheckSquare size={18} /> Deseleccionar todo</>
+                                    <><CheckSquare strokeWidth={1.5} size={18} /> Deseleccionar todo</>
                                 ) : (
-                                    <><Square size={18} /> Seleccionar todo</>
+                                    <><Square strokeWidth={1.5} size={18} /> Seleccionar todo</>
                                 )}
                             </button>
                         </div>
@@ -396,23 +396,23 @@ export default function LiquidacionesTab({ alquiler, onUpdateAlquiler }: Liquida
 
                 {/* Floating Action Bar */}
                 {selectedIds.size > 0 && (
-                    <div className="bg-indigo-50 border border-indigo-200 rounded-xl p-3 flex flex-wrap justify-between items-center gap-4 animate-in fade-in slide-in-from-top-2">
-                        <span className="text-sm font-semibold text-indigo-900 ml-2">
+                    <div className="bg-[var(--color-accent-soft)] border border-[var(--color-accent)]/30 rounded-xl p-3 flex flex-wrap justify-between items-center gap-4 animate-in fade-in slide-in-from-top-2">
+                        <span className="text-sm font-semibold text-[var(--color-accent)] ml-2">
                             {selectedIds.size} liquidaciones seleccionadas
                         </span>
                         <div className="flex gap-2">
                             <button
                                 onClick={handleDownloadSelected}
-                                className="flex items-center gap-2 px-3 py-1.5 bg-white text-gray-700 border border-gray-300 rounded-lg hover:bg-gray-50 text-sm font-medium transition-colors shadow-sm"
+                                className="flex items-center gap-2 px-3 py-1.5 bg-[var(--color-paper-2)] text-[var(--color-ink-2)] border border-[var(--color-rule)] rounded-lg hover:bg-[var(--color-paper-3)] text-sm font-medium transition-colors shadow-sm"
                             >
-                                <Download size={16} />
+                                <Download strokeWidth={1.5} size={16} />
                                 Descargar {selectedIds.size > 1 ? 'PDFs' : 'PDF'}
                             </button>
                             <button
                                 onClick={handleSendWhatsApp}
-                                className="flex items-center gap-2 px-3 py-1.5 bg-green-600 text-white rounded-lg hover:bg-green-700 text-sm font-medium transition-colors shadow-sm"
+                                className="flex items-center gap-2 px-3 py-1.5 bg-[var(--color-positive)] text-[var(--color-accent-ink)] rounded-lg hover:bg-[var(--color-positive)] text-sm font-medium transition-colors shadow-sm"
                             >
-                                <MessageCircle size={16} />
+                                <MessageCircle strokeWidth={1.5} size={16} />
                                 Enviar por WhatsApp
                             </button>
                         </div>
@@ -424,79 +424,79 @@ export default function LiquidacionesTab({ alquiler, onUpdateAlquiler }: Liquida
                         {sortedLiquidaciones.map(liq => (
                             <div
                                 key={liq.id}
-                                className={`bg-white border-2 rounded-xl p-5 shadow-sm transition-all cursor-pointer ${selectedIds.has(liq.id) ? 'border-indigo-500 ring-2 ring-indigo-100' : 'border-gray-200 hover:border-indigo-300'
+                                className={`bg-[var(--color-paper-2)] border-2 rounded-xl p-5 shadow-sm transition-all cursor-pointer ${selectedIds.has(liq.id) ? 'border-[var(--color-accent)] ring-2 ring-[var(--color-accent)]/30' : 'border-[var(--color-rule)] hover:border-[var(--color-accent)]/30'
                                     }`}
                                 onClick={() => toggleSelection(liq.id)}
                             >
                                 <div className="flex justify-between items-start mb-4">
                                     <div>
                                         <div className="flex items-center gap-2">
-                                            <div onClick={(e) => { e.stopPropagation(); toggleSelection(liq.id); }} className="mr-1 text-gray-400">
-                                                {selectedIds.has(liq.id) ? <CheckSquare size={20} className="text-indigo-600" /> : <Square size={20} />}
+                                            <div onClick={(e) => { e.stopPropagation(); toggleSelection(liq.id); }} className="mr-1 text-[var(--color-neutral)]">
+                                                {selectedIds.has(liq.id) ? <CheckSquare strokeWidth={1.5} size={20} className="text-[var(--color-accent)]" /> : <Square strokeWidth={1.5} size={20} />}
                                             </div>
-                                            <h4 className="font-bold text-gray-900 text-lg capitalize">
+                                            <h4 className="font-bold text-[var(--color-ink)] text-lg capitalize">
                                                 {format(parseISO(liq.mes + "-01"), "MMMM yyyy", { locale: es })}
                                             </h4>
                                         </div>
-                                        <p className="text-xs text-gray-500 mt-1 ml-8">
+                                        <p className="text-xs text-[var(--color-muted)] mt-1 ml-8">
                                             Emitida el {format(parseSafeDate(liq.fechaEmision), "dd MMM yyyy", { locale: es })}
                                         </p>
                                     </div>
                                     <div className="flex items-start gap-2">
                                         <span className={`px-2 py-0.5 mt-0.5 text-[10px] font-bold uppercase tracking-wider rounded border ${liq.estado === 'pagado'
-                                            ? 'bg-emerald-50 text-emerald-700 border-emerald-100'
-                                            : 'bg-amber-50 text-amber-700 border-amber-100'
+                                            ? 'bg-[var(--color-positive-soft)] text-[var(--color-positive)] border-[var(--color-positive)]/30'
+                                            : 'bg-[var(--color-warning-soft)] text-[var(--color-warning)] border-[var(--color-warning)]/30'
                                             }`}>
                                             {liq.estado}
                                         </span>
                                         <button
                                             onClick={(e) => { e.stopPropagation(); handleDeleteLiquidacion(liq.id, liq.mes); }}
-                                            className="p-1.5 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+                                            className="p-1.5 text-[var(--color-neutral)] hover:text-[var(--color-danger)] hover:bg-[var(--color-danger-soft)] rounded-lg transition-colors"
                                             title="Eliminar liquidación (Volver a pendiente)"
                                         >
-                                            <Trash2 size={18} />
+                                            <Trash2 strokeWidth={1.5} size={18} />
                                         </button>
                                     </div>
                                 </div>
 
                                 <div className="space-y-3 mb-5 pl-8">
                                     <div className="flex justify-between text-sm">
-                                        <span className="text-gray-500">Total Ingresos:</span>
-                                        <span className="font-medium text-gray-900">
+                                        <span className="text-[var(--color-muted)]">Total Ingresos:</span>
+                                        <span className="font-medium text-[var(--color-ink)]">
                                             ${liq.detalles.filter(d => d.tipo === 'ingreso').reduce((acc, d) => acc + d.monto, 0).toLocaleString()}
                                         </span>
                                     </div>
                                     <div className="flex justify-between text-sm">
-                                        <span className="text-gray-500">Monto Inquilino:</span>
-                                        <span className="font-medium text-gray-900">${liq.TotalCobradoInquilino.toLocaleString()}</span>
+                                        <span className="text-[var(--color-muted)]">Monto Inquilino:</span>
+                                        <span className="font-medium text-[var(--color-ink)]">${liq.TotalCobradoInquilino.toLocaleString()}</span>
                                     </div>
                                     <div className="flex justify-between text-sm">
-                                        <span className="text-gray-500">Deducciones:</span>
-                                        <span className="font-medium text-red-600">
+                                        <span className="text-[var(--color-muted)]">Deducciones:</span>
+                                        <span className="font-medium text-[var(--color-danger)]">
                                             -${liq.detalles.filter(d => d.tipo === 'egreso').reduce((acc, d) => acc + d.monto, 0).toLocaleString()}
                                         </span>
                                     </div>
-                                    <div className="pt-3 border-t border-gray-100 flex justify-between items-center">
-                                        <span className="font-semibold text-gray-900">Neto a Pagar:</span>
-                                        <span className="text-lg font-bold text-indigo-700">${liq.netoAPagar.toLocaleString()}</span>
+                                    <div className="pt-3 border-t border-[var(--color-rule-2)] flex justify-between items-center">
+                                        <span className="font-semibold text-[var(--color-ink)]">Neto a Pagar:</span>
+                                        <span className="text-lg font-bold text-[var(--color-accent)]">${liq.netoAPagar.toLocaleString()}</span>
                                     </div>
                                 </div>
 
-                                <div className="flex gap-2 pt-2 border-t border-gray-50 pl-8" onClick={e => e.stopPropagation()}>
+                                <div className="flex gap-2 pt-2 border-t border-[var(--color-rule-2)] pl-8" onClick={e => e.stopPropagation()}>
                                     {liq.estado === 'pendiente' && (
                                         <button
                                             onClick={() => handleMarkAsPaid(liq.id)}
-                                            className="flex-1 flex justify-center items-center gap-1 py-2 bg-emerald-50 text-emerald-700 rounded-lg text-sm font-medium hover:bg-emerald-100 transition-colors"
+                                            className="flex-1 flex justify-center items-center gap-1 py-2 bg-[var(--color-positive-soft)] text-[var(--color-positive)] rounded-lg text-sm font-medium hover:bg-[var(--color-positive-soft)] transition-colors"
                                         >
-                                            <CheckCircle2 size={16} />
+                                            <CheckCircle2 strokeWidth={1.5} size={16} />
                                             Marcar Pagado
                                         </button>
                                     )}
                                     <button
                                         onClick={() => receiptService.generateLiquidacionReceipt(liq, alquiler)}
-                                        className="flex-1 flex justify-center items-center gap-1 py-2 border border-gray-200 text-gray-700 rounded-lg text-sm font-medium hover:bg-gray-50 transition-colors"
+                                        className="flex-1 flex justify-center items-center gap-1 py-2 border border-[var(--color-rule)] text-[var(--color-ink-2)] rounded-lg text-sm font-medium hover:bg-[var(--color-paper-3)] transition-colors"
                                     >
-                                        <FileText size={16} />
+                                        <FileText strokeWidth={1.5} size={16} />
                                         PDF
                                     </button>
                                 </div>
@@ -504,10 +504,10 @@ export default function LiquidacionesTab({ alquiler, onUpdateAlquiler }: Liquida
                         ))}
                     </div>
                 ) : (
-                    <div className="p-12 text-center bg-gray-50 rounded-2xl border border-dashed border-gray-300">
-                        <User className="w-12 h-12 text-gray-300 mx-auto mb-3" />
-                        <h4 className="text-lg font-medium text-gray-900 mb-1">No hay historial</h4>
-                        <p className="text-gray-500 text-sm">Las liquidaciones generadas aparecerán aquí.</p>
+                    <div className="p-12 text-center bg-[var(--color-paper)] rounded-2xl border border-dashed border-[var(--color-rule)]">
+                        <User strokeWidth={1.5} className="w-12 h-12 text-[var(--color-neutral)] mx-auto mb-3" />
+                        <h4 className="text-lg font-medium text-[var(--color-ink)] mb-1">No hay historial</h4>
+                        <p className="text-[var(--color-muted)] text-sm">Las liquidaciones generadas aparecerán aquí.</p>
                     </div>
                 )}
             </div>
@@ -515,17 +515,17 @@ export default function LiquidacionesTab({ alquiler, onUpdateAlquiler }: Liquida
             {/* Modal de Nueva Liquidación */}
             {showModal && (
                 <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
-                    <div className="bg-white rounded-2xl shadow-xl w-full max-w-md overflow-hidden animate-in fade-in zoom-in-95 duration-200">
-                        <div className="px-6 py-4 border-b border-gray-100 flex justify-between items-center">
-                            <h3 className="text-lg font-bold text-gray-900">Nueva Liquidación</h3>
-                            <button onClick={() => setShowModal(false)} className="text-gray-400 hover:text-gray-600">×</button>
+                    <div className="bg-[var(--color-paper-2)] rounded-2xl shadow-xl w-full max-w-md overflow-hidden animate-in fade-in zoom-in-95 duration-200">
+                        <div className="px-6 py-4 border-b border-[var(--color-rule-2)] flex justify-between items-center">
+                            <h3 className="text-lg font-bold text-[var(--color-ink)]">Nueva Liquidación</h3>
+                            <button onClick={() => setShowModal(false)} className="text-[var(--color-neutral)] hover:text-[var(--color-ink-2)]">×</button>
                         </div>
 
                         <div className="p-6 space-y-4">
                             <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-2">Mes a Liquidar</label>
+                                <label className="block text-sm font-medium text-[var(--color-ink-2)] mb-2">Mes a Liquidar</label>
                                 <select
-                                    className="w-full p-2.5 bg-gray-50 border border-gray-200 rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none"
+                                    className="w-full p-2.5 bg-[var(--color-paper)] border border-[var(--color-rule)] rounded-lg focus:ring-2 focus:ring-[var(--color-accent)]/40 outline-none"
                                     value={selectedMonth}
                                     onChange={(e) => setSelectedMonth(e.target.value)}
                                 >
@@ -537,38 +537,38 @@ export default function LiquidacionesTab({ alquiler, onUpdateAlquiler }: Liquida
                                     ))}
                                 </select>
                                 {availablePagos.length === 0 && (
-                                    <p className="text-amber-600 text-xs mt-2">No hay pagos cobrados pendientes de liquidación.</p>
+                                    <p className="text-[var(--color-warning)] text-xs mt-2">No hay pagos cobrados pendientes de liquidación.</p>
                                 )}
                             </div>
 
                             {selectedMonth && (
                                 <div className="space-y-4 animate-in fade-in slide-in-from-top-4">
-                                    <div className="bg-gray-50 p-4 rounded-xl space-y-3">
-                                        <h4 className="text-sm font-semibold text-gray-900 border-b border-gray-200 pb-2">Resumen Base</h4>
+                                    <div className="bg-[var(--color-paper)] p-4 rounded-xl space-y-3">
+                                        <h4 className="text-sm font-semibold text-[var(--color-ink)] border-b border-[var(--color-rule)] pb-2">Resumen Base</h4>
 
                                         <div className="flex justify-between text-sm">
-                                            <span className="text-gray-600">Alquiler Puro:</span>
+                                            <span className="text-[var(--color-ink-2)]">Alquiler Puro:</span>
                                             <span className="font-medium">
                                                 ${availablePagos.find(p => p.mes === selectedMonth)?.desglose?.alquilerPuro?.toLocaleString()}
                                             </span>
                                         </div>
                                         {availablePagos.find(p => p.mes === selectedMonth)?.montoPunitorios ? (
                                             <div className="flex justify-between text-sm">
-                                                <span className="text-gray-600">Punitorios:</span>
+                                                <span className="text-[var(--color-ink-2)]">Punitorios:</span>
                                                 <span className="font-medium">
                                                     ${availablePagos.find(p => p.mes === selectedMonth)?.montoPunitorios?.toLocaleString()}
                                                 </span>
                                             </div>
                                         ) : null}
                                         {availablePagos.find(p => p.mes === selectedMonth)?.detalleServicios?.length ? (
-                                            <div className="pt-2 border-t border-gray-100 flex flex-col gap-2">
-                                                <span className="text-gray-600 text-xs font-semibold mb-1">Servicios a liquidar:</span>
+                                            <div className="pt-2 border-t border-[var(--color-rule-2)] flex flex-col gap-2">
+                                                <span className="text-[var(--color-ink-2)] text-xs font-semibold mb-1">Servicios a liquidar:</span>
                                                 {availablePagos.find(p => p.mes === selectedMonth)?.detalleServicios?.map((s, idx) => (
-                                                    <label key={idx} className="flex items-center justify-between text-sm cursor-pointer hover:bg-white p-1 rounded transition-colors -mx-1 px-1">
+                                                    <label key={idx} className="flex items-center justify-between text-sm cursor-pointer hover:bg-[var(--color-paper-3)] p-1 rounded transition-colors -mx-1 px-1">
                                                         <div className="flex items-center gap-2">
                                                             <input
                                                                 type="checkbox"
-                                                                className="rounded border-gray-300 text-indigo-600 focus:ring-indigo-500 w-4 h-4"
+                                                                className="rounded border-[var(--color-rule)] text-[var(--color-accent)] focus:ring-[var(--color-accent)]/40 w-4 h-4"
                                                                 checked={checkedServicesIndices.has(idx)}
                                                                 onChange={() => {
                                                                     const newSet = new Set(checkedServicesIndices);
@@ -577,31 +577,31 @@ export default function LiquidacionesTab({ alquiler, onUpdateAlquiler }: Liquida
                                                                     setCheckedServicesIndices(newSet);
                                                                 }}
                                                             />
-                                                            <span className="text-gray-700">{s.concepto}</span>
+                                                            <span className="text-[var(--color-ink-2)]">{s.concepto}</span>
                                                         </div>
-                                                        <span className="font-medium text-gray-900">${s.monto.toLocaleString()}</span>
+                                                        <span className="font-medium text-[var(--color-ink)]">${s.monto.toLocaleString()}</span>
                                                     </label>
                                                 ))}
                                             </div>
                                         ) : null}
-                                        <div className="flex justify-between text-sm pt-2 border-t border-gray-100">
-                                            <span className="text-gray-600">Honorarios Inmo:</span>
-                                            <span className="font-medium text-red-600">
+                                        <div className="flex justify-between text-sm pt-2 border-t border-[var(--color-rule-2)]">
+                                            <span className="text-[var(--color-ink-2)]">Honorarios Inmo:</span>
+                                            <span className="font-medium text-[var(--color-danger)]">
                                                 -${availablePagos.find(p => p.mes === selectedMonth)?.desglose?.honorarios?.toLocaleString()}
                                             </span>
                                         </div>
                                     </div>
 
                                     <div>
-                                        <h4 className="text-sm font-semibold text-gray-900 mb-3">Otras Deducciones</h4>
+                                        <h4 className="text-sm font-semibold text-[var(--color-ink)] mb-3">Otras Deducciones</h4>
                                         <div className="flex gap-2 items-end">
                                             <div className="flex-1">
-                                                <label className="block text-xs text-gray-500 mb-1">Monto ($)</label>
+                                                <label className="block text-xs text-[var(--color-muted)] mb-1">Monto ($)</label>
                                                 <input
                                                     type="number"
                                                     min="0"
                                                     step="any"
-                                                    className="w-full p-2.5 border border-gray-200 rounded-lg"
+                                                    className="w-full p-2.5 border border-[var(--color-rule)] rounded-lg"
                                                     value={otrosDescuentos || ''}
                                                     onChange={(e) => setOtrosDescuentos(Number(e.target.value.replace(/[^0-9.]/g, '')))}
                                                     onKeyDown={(e) => {
@@ -613,10 +613,10 @@ export default function LiquidacionesTab({ alquiler, onUpdateAlquiler }: Liquida
                                                 />
                                             </div>
                                             <div className="flex-[2]">
-                                                <label className="block text-xs text-gray-500 mb-1">Motivo (ej. Arreglo cañería)</label>
+                                                <label className="block text-xs text-[var(--color-muted)] mb-1">Motivo (ej. Arreglo cañería)</label>
                                                 <input
                                                     type="text"
-                                                    className="w-full p-2.5 border border-gray-200 rounded-lg"
+                                                    className="w-full p-2.5 border border-[var(--color-rule)] rounded-lg"
                                                     value={motivoDescuento}
                                                     onChange={(e) => setMotivoDescuento(e.target.value)}
                                                     placeholder="Motivo del descuento"
@@ -625,9 +625,9 @@ export default function LiquidacionesTab({ alquiler, onUpdateAlquiler }: Liquida
                                         </div>
                                     </div>
 
-                                    <div className="bg-indigo-50 p-4 rounded-xl flex justify-between items-center border border-indigo-100">
-                                        <span className="font-bold text-indigo-900">Total a Pagar Propietario</span>
-                                        <span className="text-xl font-bold text-indigo-700">
+                                    <div className="bg-[var(--color-accent-soft)] p-4 rounded-xl flex justify-between items-center border border-[var(--color-accent)]/30">
+                                        <span className="font-bold text-[var(--color-accent)]">Total a Pagar Propietario</span>
+                                        <span className="text-xl font-bold text-[var(--color-accent)]">
                                             ${(
                                                 (availablePagos.find(p => p.mes === selectedMonth)?.desglose?.alquilerPuro || 0) +
                                                 (availablePagos.find(p => p.mes === selectedMonth)?.montoPunitorios || 0) +
@@ -641,17 +641,17 @@ export default function LiquidacionesTab({ alquiler, onUpdateAlquiler }: Liquida
                             )}
                         </div>
 
-                        <div className="px-6 py-4 border-t border-gray-100 flex justify-end gap-2 bg-gray-50">
+                        <div className="px-6 py-4 border-t border-[var(--color-rule-2)] flex justify-end gap-2 bg-[var(--color-paper)]">
                             <button
                                 onClick={() => setShowModal(false)}
-                                className="px-4 py-2 text-gray-700 hover:bg-gray-200 rounded-lg transition-colors font-medium text-sm"
+                                className="px-4 py-2 text-[var(--color-ink-2)] hover:bg-[var(--color-paper-4)] rounded-lg transition-colors font-medium text-sm"
                             >
                                 Cancelar
                             </button>
                             <button
                                 onClick={handleCreateLiquidacion}
                                 disabled={!selectedMonth || isSubmitting}
-                                className="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 disabled:opacity-50 transition-colors font-medium text-sm"
+                                className="px-4 py-2 bg-[var(--color-ink)] text-[var(--color-paper)] rounded-lg hover:bg-[var(--color-ink-2)] disabled:opacity-50 transition-colors font-medium text-sm"
                             >
                                 {isSubmitting ? 'Generando...' : 'Generar Liquidación'}
                             </button>

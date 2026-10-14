@@ -1,6 +1,6 @@
 import { FichaTemplateConfig } from "@/app/(print)/print/propiedades/components/ficha/fichaTemplates";
 
-// Small abstract wireframe preview of a ficha layout — gray blocks stand in
+// Small abstract wireframe preview of a ficha layout — muted blocks stand in
 // for photos/map, thin bars stand in for text. Purely illustrative, not a
 // pixel-accurate render (that would need the real property data at hover time).
 export default function FichaThumbnail({ config }: { config: FichaTemplateConfig }) {
@@ -10,10 +10,10 @@ export default function FichaThumbnail({ config }: { config: FichaTemplateConfig
 
     return (
         <svg viewBox={`0 0 ${w} ${h}`} className="w-full h-full" aria-hidden="true">
-            <rect x={0.5} y={0.5} width={w - 1} height={h - 1} rx={3} fill="#fff" stroke="#e5e7eb" />
+            <rect x={0.5} y={0.5} width={w - 1} height={h - 1} rx={3} style={{ fill: "var(--color-paper-3)", stroke: "var(--color-rule)" }} />
             {/* header bar */}
-            <rect x={6} y={7} width={w * 0.35} height={4} rx={1} fill="#c7d2fe" />
-            <rect x={6} y={13} width={w - 12} height={1.4} fill="#eef2ff" />
+            <rect x={6} y={7} width={w * 0.35} height={4} rx={1} style={{ fill: "var(--color-accent)" }} />
+            <rect x={6} y={13} width={w - 12} height={1.4} style={{ fill: "var(--color-rule)" }} />
 
             {config.qrHero ? (
                 <QrPattern w={w} />
@@ -27,7 +27,7 @@ export default function FichaThumbnail({ config }: { config: FichaTemplateConfig
             )}
 
             {/* footer */}
-            <rect x={6} y={h - 8} width={w - 12} height={2} fill="#f3f4f6" />
+            <rect x={6} y={h - 8} width={w - 12} height={2} style={{ fill: "var(--color-paper-4)" }} />
         </svg>
     );
 }
@@ -37,30 +37,30 @@ function PhotoBlock({ config, w }: { config: FichaTemplateConfig; w: number }) {
     if (config.showMap && config.photoLayout === "hero") {
         return (
             <>
-                <rect x={6} y={top} width={w * 0.44} height={22} rx={1.5} fill="#dbeafe" />
-                <rect x={6 + w * 0.44 + 4} y={top} width={w * 0.44} height={22} rx={1.5} fill="#e5e7eb" />
+                <rect x={6} y={top} width={w * 0.44} height={22} rx={1.5} style={{ fill: "var(--color-accent-soft)" }} />
+                <rect x={6 + w * 0.44 + 4} y={top} width={w * 0.44} height={22} rx={1.5} style={{ fill: "var(--color-paper-4)" }} />
             </>
         );
     }
     if (config.showMap) {
-        return <rect x={6} y={top} width={w - 12} height={22} rx={1.5} fill="#dbeafe" />;
+        return <rect x={6} y={top} width={w - 12} height={22} rx={1.5} style={{ fill: "var(--color-accent-soft)" }} />;
     }
     switch (config.photoLayout) {
         case "hero":
-            return <rect x={6} y={top} width={w - 12} height={26} rx={1.5} fill="#e5e7eb" />;
+            return <rect x={6} y={top} width={w - 12} height={26} rx={1.5} style={{ fill: "var(--color-paper-4)" }} />;
         case "hero+1":
             return (
                 <>
-                    <rect x={6} y={top} width={(w - 14) * 0.65} height={26} rx={1.5} fill="#e5e7eb" />
-                    <rect x={6 + (w - 14) * 0.65 + 4} y={top} width={(w - 14) * 0.35} height={26} rx={1.5} fill="#d1d5db" />
+                    <rect x={6} y={top} width={(w - 14) * 0.65} height={26} rx={1.5} style={{ fill: "var(--color-paper-4)" }} />
+                    <rect x={6 + (w - 14) * 0.65 + 4} y={top} width={(w - 14) * 0.35} height={26} rx={1.5} style={{ fill: "var(--color-rule)" }} />
                 </>
             );
         case "hero+3":
             return (
                 <>
-                    <rect x={6} y={top} width={w - 12} height={18} rx={1.5} fill="#e5e7eb" />
+                    <rect x={6} y={top} width={w - 12} height={18} rx={1.5} style={{ fill: "var(--color-paper-4)" }} />
                     {[0, 1, 2].map((i) => (
-                        <rect key={i} x={6 + i * ((w - 12) / 3 + 1)} y={top + 20} width={(w - 12) / 3 - 2} height={9} rx={1} fill="#d1d5db" />
+                        <rect key={i} x={6 + i * ((w - 12) / 3 + 1)} y={top + 20} width={(w - 12) / 3 - 2} height={9} rx={1} style={{ fill: "var(--color-rule)" }} />
                     ))}
                 </>
             );
@@ -76,7 +76,7 @@ function PhotoBlock({ config, w }: { config: FichaTemplateConfig; w: number }) {
                                 width={(w - 12) / 2 - 2}
                                 height={13}
                                 rx={1}
-                                fill="#e5e7eb"
+                                style={{ fill: "var(--color-paper-4)" }}
                             />
                         ))
                     )}
@@ -91,19 +91,19 @@ function TextLines({ config, w }: { config: FichaTemplateConfig; w: number }) {
     const startY = 50;
     return (
         <>
-            <rect x={6} y={startY} width={w * 0.55} height={3} rx={1} fill="#9ca3af" />
+            <rect x={6} y={startY} width={w * 0.55} height={3} rx={1} style={{ fill: "var(--color-muted)" }} />
             {config.showBadges && (
                 <>
-                    <rect x={6} y={startY + 7} width={(w - 16) / 3} height={8} rx={1} fill="#f3f4f6" stroke="#e5e7eb" strokeWidth={0.3} />
-                    <rect x={6 + (w - 16) / 3 + 3} y={startY + 7} width={(w - 16) / 3} height={8} rx={1} fill="#f3f4f6" stroke="#e5e7eb" strokeWidth={0.3} />
-                    <rect x={6 + 2 * ((w - 16) / 3 + 3)} y={startY + 7} width={(w - 16) / 3} height={8} rx={1} fill="#f3f4f6" stroke="#e5e7eb" strokeWidth={0.3} />
+                    <rect x={6} y={startY + 7} width={(w - 16) / 3} height={8} rx={1} style={{ fill: "var(--color-paper-4)", stroke: "var(--color-rule)" }} strokeWidth={0.3} />
+                    <rect x={6 + (w - 16) / 3 + 3} y={startY + 7} width={(w - 16) / 3} height={8} rx={1} style={{ fill: "var(--color-paper-4)", stroke: "var(--color-rule)" }} strokeWidth={0.3} />
+                    <rect x={6 + 2 * ((w - 16) / 3 + 3)} y={startY + 7} width={(w - 16) / 3} height={8} rx={1} style={{ fill: "var(--color-paper-4)", stroke: "var(--color-rule)" }} strokeWidth={0.3} />
                 </>
             )}
             {config.showDescription && (
                 <>
-                    <rect x={6} y={startY + 19} width={w - 12} height={1.6} fill="#e5e7eb" />
-                    <rect x={6} y={startY + 23} width={w - 12} height={1.6} fill="#e5e7eb" />
-                    <rect x={6} y={startY + 27} width={w * 0.6} height={1.6} fill="#e5e7eb" />
+                    <rect x={6} y={startY + 19} width={w - 12} height={1.6} style={{ fill: "var(--color-paper-4)" }} />
+                    <rect x={6} y={startY + 23} width={w - 12} height={1.6} style={{ fill: "var(--color-paper-4)" }} />
+                    <rect x={6} y={startY + 27} width={w * 0.6} height={1.6} style={{ fill: "var(--color-paper-4)" }} />
                 </>
             )}
         </>
@@ -124,7 +124,7 @@ function GridPattern({ w, cols, rows }: { w: number; cols: number; rows: number 
                         width={size}
                         height={size}
                         rx={0.8}
-                        fill="#e5e7eb"
+                        style={{ fill: "var(--color-paper-4)" }}
                     />
                 ))
             )}
@@ -137,9 +137,9 @@ function QrPattern({ w }: { w: number }) {
     const s = w * 0.32;
     return (
         <g>
-            <rect x={cx - s / 2} y={26} width={s} height={s} fill="#111827" />
-            <rect x={cx - s / 2 + s * 0.18} y={26 + s * 0.18} width={s * 0.64} height={s * 0.64} fill="#fff" />
-            <rect x={cx - s / 2 + s * 0.32} y={26 + s * 0.32} width={s * 0.36} height={s * 0.36} fill="#111827" />
+            <rect x={cx - s / 2} y={26} width={s} height={s} style={{ fill: "var(--color-ink)" }} />
+            <rect x={cx - s / 2 + s * 0.18} y={26 + s * 0.18} width={s * 0.64} height={s * 0.64} style={{ fill: "var(--color-paper-3)" }} />
+            <rect x={cx - s / 2 + s * 0.32} y={26 + s * 0.32} width={s * 0.36} height={s * 0.36} style={{ fill: "var(--color-ink)" }} />
         </g>
     );
 }

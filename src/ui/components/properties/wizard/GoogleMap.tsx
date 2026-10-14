@@ -50,8 +50,8 @@ export default function GoogleMapComponent({ lat, lng, onLocationSelect }: MapPr
 
     if (!isLoaded) {
         return (
-            <div className="w-full h-full flex items-center justify-center bg-gray-50">
-                <Loader2 className="w-8 h-8 text-indigo-600 animate-spin" />
+            <div className="w-full h-full flex items-center justify-center bg-[var(--color-paper)]">
+                <Loader2 strokeWidth={1.5} className="w-8 h-8 text-[var(--color-accent)] animate-spin" />
             </div>
         );
     }

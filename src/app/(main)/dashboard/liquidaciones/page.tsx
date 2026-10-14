@@ -135,19 +135,19 @@ export default function LiquidacionesPage() {
             {/* Header */}
             <div className="flex items-center justify-between">
                 <div>
-                    <h1 className="text-2xl font-bold text-gray-900 flex items-center gap-2">
-                        <span className="w-9 h-9 bg-gradient-to-br from-violet-500 to-indigo-600 rounded-xl flex items-center justify-center">
-                            <Wallet size={18} className="text-white" />
+                    <h1 className="font-heading text-2xl font-bold text-[var(--color-ink)] flex items-center gap-2">
+                        <span className="w-9 h-9 rounded-full bg-[var(--color-paper-3)] flex items-center justify-center">
+                            <Wallet size={18} strokeWidth={1.5} className="text-[var(--color-muted)]" />
                         </span>
                         Liquidaciones
                     </h1>
-                    <p className="text-gray-500 mt-1 text-sm">Pagos pendientes a propietarios de todos los contratos</p>
+                    <p className="text-[var(--color-muted)] mt-1 text-sm">Pagos pendientes a propietarios de todos los contratos</p>
                 </div>
                 <button
                     onClick={cargarLiquidaciones}
-                    className="flex items-center gap-2 px-3 py-2 text-sm text-gray-600 hover:bg-gray-100 rounded-xl transition"
+                    className="flex items-center gap-2 px-3 py-2 text-sm text-[var(--color-ink-2)] hover:bg-[var(--color-paper-3)] rounded-xl transition"
                 >
-                    <RefreshCw size={14} className={loading ? "animate-spin" : ""} />
+                    <RefreshCw strokeWidth={1.5} size={14} className={loading ? "animate-spin" : ""} />
                     Actualizar
                 </button>
             </div>
@@ -156,56 +156,56 @@ export default function LiquidacionesPage() {
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <button
                     onClick={() => setFiltro("pendientes")}
-                    className={`text-left p-5 rounded-2xl border-2 transition-all shadow-sm ${filtro === "pendientes" ? "border-violet-400 bg-violet-50" : "border-transparent bg-white hover:border-violet-200"}`}
+                    className={`text-left p-5 rounded-2xl border-2 transition-all shadow-sm ${filtro === "pendientes" ? "border-[var(--color-accent)] bg-[var(--color-accent-soft)]" : "border-transparent bg-[var(--color-paper-2)] hover:border-[var(--color-accent)]/30"}`}
                 >
                     <div className="flex items-center justify-between mb-3">
                         <div className="flex items-center gap-2">
-                            <Clock size={16} className="text-violet-500" />
-                            <span className="text-xs font-medium text-gray-500 uppercase tracking-wide">Pendientes de pago</span>
+                            <Clock strokeWidth={1.5} size={16} className="text-[var(--color-accent)]" />
+                            <span className="text-xs font-medium text-[var(--color-muted)] uppercase tracking-wide">Pendientes de pago</span>
                         </div>
-                        <span className="text-xs font-semibold bg-violet-100 text-violet-700 px-2 py-0.5 rounded-full">
+                        <span className="text-xs font-semibold bg-[var(--color-accent-soft)] text-[var(--color-accent)] px-2 py-0.5 rounded-full">
                             {loading ? "—" : pendientes.length}
                         </span>
                     </div>
-                    <p className="text-3xl font-bold text-violet-700">
+                    <p className="text-3xl font-bold text-[var(--color-accent)]">
                         {loading ? "—" : `$ ${totalPendiente.toLocaleString("es-AR")}`}
                     </p>
-                    <p className="text-xs text-gray-400 mt-1">Neto a transferir a propietarios</p>
+                    <p className="text-xs text-[var(--color-neutral)] mt-1">Neto a transferir a propietarios</p>
                 </button>
 
                 <button
                     onClick={() => setFiltro("pagadas")}
-                    className={`text-left p-5 rounded-2xl border-2 transition-all shadow-sm ${filtro === "pagadas" ? "border-green-400 bg-green-50" : "border-transparent bg-white hover:border-green-200"}`}
+                    className={`text-left p-5 rounded-2xl border-2 transition-all shadow-sm ${filtro === "pagadas" ? "border-[var(--color-positive)] bg-[var(--color-positive-soft)]" : "border-transparent bg-[var(--color-paper-2)] hover:border-[var(--color-positive)]/30"}`}
                 >
                     <div className="flex items-center justify-between mb-3">
                         <div className="flex items-center gap-2">
-                            <CheckCircle2 size={16} className="text-green-500" />
-                            <span className="text-xs font-medium text-gray-500 uppercase tracking-wide">Pagadas</span>
+                            <CheckCircle2 strokeWidth={1.5} size={16} className="text-[var(--color-positive)]" />
+                            <span className="text-xs font-medium text-[var(--color-muted)] uppercase tracking-wide">Pagadas</span>
                         </div>
-                        <span className="text-xs font-semibold bg-green-100 text-green-700 px-2 py-0.5 rounded-full">
+                        <span className="text-xs font-semibold bg-[var(--color-positive-soft)] text-[var(--color-positive)] px-2 py-0.5 rounded-full">
                             {loading ? "—" : pagadas.length}
                         </span>
                     </div>
-                    <p className="text-3xl font-bold text-green-700">
+                    <p className="text-3xl font-bold text-[var(--color-positive)]">
                         {loading ? "—" : `$ ${totalPagado.toLocaleString("es-AR")}`}
                     </p>
-                    <p className="text-xs text-gray-400 mt-1">Total liquidado históricamente</p>
+                    <p className="text-xs text-[var(--color-neutral)] mt-1">Total liquidado históricamente</p>
                 </button>
             </div>
 
             {/* Table */}
-            <div className="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden">
-                <div className="px-6 py-4 border-b border-gray-100 flex items-center justify-between">
-                    <div className="flex gap-1 bg-gray-100 p-1 rounded-xl w-fit">
+            <div className="bg-[var(--color-paper-2)] rounded-2xl border border-[var(--color-rule)] shadow-sm overflow-hidden">
+                <div className="px-6 py-4 border-b border-[var(--color-rule-2)] flex items-center justify-between">
+                    <div className="flex gap-1 bg-[var(--color-paper-3)] p-1 rounded-xl w-fit">
                         {(["pendientes", "pagadas"] as Filtro[]).map(f => (
                             <button
                                 key={f}
                                 onClick={() => setFiltro(f)}
-                                className={`px-4 py-1.5 text-sm font-medium rounded-lg transition-all capitalize ${filtro === f ? "bg-white text-gray-900 shadow-sm" : "text-gray-500 hover:text-gray-700"}`}
+                                className={`px-4 py-1.5 text-sm font-medium rounded-lg transition-all capitalize ${filtro === f ? "bg-[var(--color-paper-2)] text-[var(--color-ink)] shadow-sm" : "text-[var(--color-muted)] hover:text-[var(--color-ink-2)]"}`}
                             >
                                 {f === "pendientes" ? "Pendientes" : "Pagadas"}
                                 {f === "pendientes" && pendientes.length > 0 && (
-                                    <span className="ml-1.5 text-xs px-1.5 py-0.5 rounded-full font-semibold bg-violet-100 text-violet-700">
+                                    <span className="ml-1.5 text-xs px-1.5 py-0.5 rounded-full font-semibold bg-[var(--color-accent-soft)] text-[var(--color-accent)]">
                                         {pendientes.length}
                                     </span>
                                 )}
@@ -213,8 +213,8 @@ export default function LiquidacionesPage() {
                         ))}
                     </div>
                     {listado.length > 0 && (
-                        <p className="text-sm text-gray-500">
-                            Total: <span className="font-semibold text-gray-900">
+                        <p className="text-sm text-[var(--color-muted)]">
+                            Total: <span className="font-semibold text-[var(--color-ink)]">
                                 $ {listado.reduce((s, l) => s + (l.netoAPagar || 0), 0).toLocaleString("es-AR")}
                             </span>
                         </p>
@@ -222,17 +222,17 @@ export default function LiquidacionesPage() {
                 </div>
 
                 {loading ? (
-                    <div className="py-16 flex flex-col items-center gap-3 text-gray-400">
-                        <Loader2 size={28} className="animate-spin" />
+                    <div className="py-16 flex flex-col items-center gap-3 text-[var(--color-neutral)]">
+                        <Loader2 strokeWidth={1.5} size={28} className="animate-spin" />
                         <p className="text-sm">Cargando liquidaciones...</p>
                     </div>
                 ) : listado.length === 0 ? (
                     <div className="py-16 text-center">
-                        <CheckCircle2 size={40} className="text-green-400 mx-auto mb-3" />
-                        <p className="text-gray-600 font-medium">
+                        <CheckCircle2 strokeWidth={1.5} size={40} className="text-[var(--color-positive)] mx-auto mb-3" />
+                        <p className="text-[var(--color-ink-2)] font-medium">
                             {filtro === "pendientes" ? "No hay liquidaciones pendientes" : "No hay liquidaciones pagadas"}
                         </p>
-                        <p className="text-gray-400 text-sm mt-1">
+                        <p className="text-[var(--color-neutral)] text-sm mt-1">
                             {filtro === "pendientes" ? "Todos los propietarios están al día" : "Aún no se registraron pagos"}
                         </p>
                     </div>
@@ -240,17 +240,17 @@ export default function LiquidacionesPage() {
                     <div className="overflow-x-auto">
                         <table className="w-full text-sm">
                             <thead>
-                                <tr className="bg-gray-50 border-b border-gray-100">
-                                    <th className="px-6 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wide">Propietario</th>
-                                    <th className="px-6 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wide">Propiedad</th>
-                                    <th className="px-6 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wide">Período</th>
-                                    <th className="px-6 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wide">Emitida</th>
-                                    <th className="px-6 py-3 text-right text-xs font-semibold text-gray-500 uppercase tracking-wide">Cobrado al inquilino</th>
-                                    <th className="px-6 py-3 text-right text-xs font-semibold text-gray-500 uppercase tracking-wide">Neto propietario</th>
-                                    <th className="px-6 py-3 text-right text-xs font-semibold text-gray-500 uppercase tracking-wide">Acción</th>
+                                <tr className="bg-[var(--color-paper)] border-b border-[var(--color-rule-2)]">
+                                    <th className="px-6 py-3 text-left text-xs font-semibold text-[var(--color-muted)] uppercase tracking-wide">Propietario</th>
+                                    <th className="px-6 py-3 text-left text-xs font-semibold text-[var(--color-muted)] uppercase tracking-wide">Propiedad</th>
+                                    <th className="px-6 py-3 text-left text-xs font-semibold text-[var(--color-muted)] uppercase tracking-wide">Período</th>
+                                    <th className="px-6 py-3 text-left text-xs font-semibold text-[var(--color-muted)] uppercase tracking-wide">Emitida</th>
+                                    <th className="px-6 py-3 text-right text-xs font-semibold text-[var(--color-muted)] uppercase tracking-wide">Cobrado al inquilino</th>
+                                    <th className="px-6 py-3 text-right text-xs font-semibold text-[var(--color-muted)] uppercase tracking-wide">Neto propietario</th>
+                                    <th className="px-6 py-3 text-right text-xs font-semibold text-[var(--color-muted)] uppercase tracking-wide">Acción</th>
                                 </tr>
                             </thead>
-                            <tbody className="divide-y divide-gray-50">
+                            <tbody className="divide-y divide-[var(--color-rule-2)]">
                                 {listado.map(liq => {
                                     const [year, month] = liq.mes.split("-");
                                     const periodoLabel = format(
@@ -260,37 +260,37 @@ export default function LiquidacionesPage() {
                                     );
 
                                     return (
-                                        <tr key={`${liq.alquilerId}-${liq.id}`} className="hover:bg-gray-50/60 transition-colors">
+                                        <tr key={`${liq.alquilerId}-${liq.id}`} className="hover:bg-[var(--color-paper-3)] transition-colors">
                                             {/* Propietario */}
                                             <td className="px-6 py-4">
                                                 <div className="flex items-center gap-2">
-                                                    <div className="w-7 h-7 rounded-full bg-violet-100 flex items-center justify-center flex-shrink-0">
-                                                        <Building2 size={13} className="text-violet-600" />
+                                                    <div className="w-7 h-7 rounded-full bg-[var(--color-paper-3)] flex items-center justify-center flex-shrink-0">
+                                                        <Building2 strokeWidth={1.5} size={13} className="text-[var(--color-muted)]" />
                                                     </div>
-                                                    <span className="font-medium text-gray-900">{liq.nombrePropietario}</span>
+                                                    <span className="font-medium text-[var(--color-ink)]">{liq.nombrePropietario}</span>
                                                 </div>
                                             </td>
 
                                             {/* Propiedad */}
-                                            <td className="px-6 py-4 text-gray-500 max-w-[180px] truncate">{liq.direccion}</td>
+                                            <td className="px-6 py-4 text-[var(--color-muted)] max-w-[180px] truncate">{liq.direccion}</td>
 
                                             {/* Período */}
-                                            <td className="px-6 py-4 text-gray-700 capitalize">{periodoLabel}</td>
+                                            <td className="px-6 py-4 text-[var(--color-ink-2)] capitalize">{periodoLabel}</td>
 
                                             {/* Emitida */}
-                                            <td className="px-6 py-4 text-gray-400 text-xs">
+                                            <td className="px-6 py-4 text-[var(--color-neutral)] text-xs">
                                                 {toDate(liq.fechaEmision)
                                                     ? format(toDate(liq.fechaEmision)!, "dd/MM/yyyy")
                                                     : "—"}
                                             </td>
 
                                             {/* Cobrado al inquilino */}
-                                            <td className="px-6 py-4 text-right text-gray-500">
+                                            <td className="px-6 py-4 text-right text-[var(--color-muted)]">
                                                 $ {(liq.TotalCobradoInquilino || 0).toLocaleString("es-AR")}
                                             </td>
 
                                             {/* Neto propietario */}
-                                            <td className="px-6 py-4 text-right font-bold text-gray-900">
+                                            <td className="px-6 py-4 text-right font-bold text-[var(--color-ink)]">
                                                 $ {(liq.netoAPagar || 0).toLocaleString("es-AR")}
                                             </td>
 
@@ -300,13 +300,13 @@ export default function LiquidacionesPage() {
                                                     {liq.estado === "pendiente" ? (
                                                         <button
                                                             onClick={() => abrirModal(liq)}
-                                                            className="px-3 py-1.5 bg-violet-600 text-white text-xs font-medium rounded-lg hover:bg-violet-700 transition"
+                                                            className="px-3 py-1.5 bg-[var(--color-ink)] text-[var(--color-paper)] text-xs font-medium rounded-lg hover:bg-[var(--color-ink-2)] transition"
                                                         >
                                                             Pagar
                                                         </button>
                                                     ) : (
-                                                        <span className="inline-flex items-center gap-1 text-green-600 text-xs font-medium">
-                                                            <CheckCircle2 size={13} />
+                                                        <span className="inline-flex items-center gap-1 text-[var(--color-positive)] text-xs font-medium">
+                                                            <CheckCircle2 strokeWidth={1.5} size={13} />
                                                             {liq.fechaPago
                                                                 ? format(toDate(liq.fechaPago)!, "dd/MM/yy")
                                                                 : "Pagada"}
@@ -314,10 +314,10 @@ export default function LiquidacionesPage() {
                                                     )}
                                                     <Link
                                                         href={`/dashboard/alquileres/${liq.alquilerId}`}
-                                                        className="p-1.5 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-lg transition"
+                                                        className="p-1.5 text-[var(--color-neutral)] hover:text-[var(--color-ink-2)] hover:bg-[var(--color-paper-3)] rounded-lg transition"
                                                         title="Ver contrato"
                                                     >
-                                                        <ExternalLink size={14} />
+                                                        <ExternalLink strokeWidth={1.5} size={14} />
                                                     </Link>
                                                 </div>
                                             </td>
@@ -333,34 +333,34 @@ export default function LiquidacionesPage() {
             {/* Modal pagar */}
             {modalLiq && (
                 <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40 backdrop-blur-sm">
-                    <div className="bg-white rounded-2xl shadow-xl w-full max-w-sm">
-                        <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100">
-                            <h3 className="font-semibold text-gray-900">Registrar pago al propietario</h3>
-                            <button onClick={() => setModalLiq(null)} className="p-1 rounded-lg hover:bg-gray-100 transition">
-                                <X size={18} className="text-gray-500" />
+                    <div className="bg-[var(--color-paper-2)] rounded-2xl shadow-xl w-full max-w-sm">
+                        <div className="flex items-center justify-between px-6 py-4 border-b border-[var(--color-rule-2)]">
+                            <h3 className="font-semibold text-[var(--color-ink)]">Registrar pago al propietario</h3>
+                            <button onClick={() => setModalLiq(null)} className="p-1 rounded-lg hover:bg-[var(--color-paper-3)] transition">
+                                <X strokeWidth={1.5} size={18} className="text-[var(--color-muted)]" />
                             </button>
                         </div>
 
                         <div className="px-6 py-5 space-y-4">
                             {/* Resumen */}
-                            <div className="bg-violet-50 rounded-xl p-4 space-y-1.5">
-                                <p className="font-medium text-gray-900">{modalLiq.nombrePropietario}</p>
-                                <p className="text-sm text-gray-500">{modalLiq.direccion}</p>
-                                <p className="text-xs text-gray-400 capitalize">
+                            <div className="bg-[var(--color-accent-soft)] rounded-xl p-4 space-y-1.5">
+                                <p className="font-medium text-[var(--color-ink)]">{modalLiq.nombrePropietario}</p>
+                                <p className="text-sm text-[var(--color-muted)]">{modalLiq.direccion}</p>
+                                <p className="text-xs text-[var(--color-neutral)] capitalize">
                                     {format(
                                         new Date(Number(modalLiq.mes.split("-")[0]), Number(modalLiq.mes.split("-")[1]) - 1, 1),
                                         "MMMM yyyy",
                                         { locale: es }
                                     )}
                                 </p>
-                                <div className="pt-2 border-t border-violet-100 flex justify-between items-center">
-                                    <span className="text-xs text-gray-500">Neto a pagar</span>
-                                    <span className="text-2xl font-bold text-violet-700">
+                                <div className="pt-2 border-t border-[var(--color-accent)]/30 flex justify-between items-center">
+                                    <span className="text-xs text-[var(--color-muted)]">Neto a pagar</span>
+                                    <span className="text-2xl font-bold text-[var(--color-accent)]">
                                         $ {(modalLiq.netoAPagar || 0).toLocaleString("es-AR")}
                                     </span>
                                 </div>
                                 {modalLiq.honorariosA > 0 && (
-                                    <p className="text-xs text-gray-400">
+                                    <p className="text-xs text-[var(--color-neutral)]">
                                         (Cobrado al inquilino: $ {(modalLiq.TotalCobradoInquilino || 0).toLocaleString("es-AR")} — Honorarios: $ {modalLiq.honorariosA.toLocaleString("es-AR")})
                                     </p>
                                 )}
@@ -368,22 +368,22 @@ export default function LiquidacionesPage() {
 
                             {/* Fecha */}
                             <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-1.5">Fecha de pago</label>
+                                <label className="block text-sm font-medium text-[var(--color-ink-2)] mb-1.5">Fecha de pago</label>
                                 <input
                                     type="date"
                                     value={fechaPago}
                                     onChange={e => setFechaPago(e.target.value)}
-                                    className="w-full px-4 py-2.5 border border-gray-300 rounded-xl text-sm focus:ring-2 focus:ring-violet-500 focus:border-violet-500 outline-none"
+                                    className="w-full px-4 py-2.5 border border-[var(--color-rule)] rounded-xl text-sm focus:ring-2 focus:ring-[var(--color-accent)]/40 focus:border-[var(--color-accent)] outline-none"
                                 />
                             </div>
 
                             {/* Método */}
                             <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-1.5">Método de pago</label>
+                                <label className="block text-sm font-medium text-[var(--color-ink-2)] mb-1.5">Método de pago</label>
                                 <select
                                     value={metodoPago}
                                     onChange={e => setMetodoPago(e.target.value)}
-                                    className="w-full px-4 py-2.5 border border-gray-300 rounded-xl text-sm focus:ring-2 focus:ring-violet-500 focus:border-violet-500 outline-none bg-white"
+                                    className="w-full px-4 py-2.5 border border-[var(--color-rule)] rounded-xl text-sm focus:ring-2 focus:ring-[var(--color-accent)]/40 focus:border-[var(--color-accent)] outline-none bg-[var(--color-paper-2)]"
                                 >
                                     <option value="transferencia">Transferencia</option>
                                     <option value="efectivo">Efectivo</option>
@@ -395,16 +395,16 @@ export default function LiquidacionesPage() {
                         <div className="px-6 pb-5 flex gap-3">
                             <button
                                 onClick={() => setModalLiq(null)}
-                                className="flex-1 px-4 py-2.5 border border-gray-200 text-gray-700 rounded-xl text-sm font-medium hover:bg-gray-50 transition"
+                                className="flex-1 px-4 py-2.5 border border-[var(--color-rule)] text-[var(--color-ink-2)] rounded-xl text-sm font-medium hover:bg-[var(--color-paper-3)] transition"
                             >
                                 Cancelar
                             </button>
                             <button
                                 onClick={confirmarPago}
                                 disabled={guardando}
-                                className="flex-1 px-4 py-2.5 bg-violet-600 text-white rounded-xl text-sm font-medium hover:bg-violet-700 transition disabled:opacity-60 flex items-center justify-center gap-2"
+                                className="flex-1 px-4 py-2.5 bg-[var(--color-ink)] text-[var(--color-paper)] rounded-xl text-sm font-medium hover:bg-[var(--color-ink-2)] transition disabled:opacity-60 flex items-center justify-center gap-2"
                             >
-                                {guardando ? <Loader2 size={14} className="animate-spin" /> : <CheckCircle2 size={14} />}
+                                {guardando ? <Loader2 strokeWidth={1.5} size={14} className="animate-spin" /> : <CheckCircle2 strokeWidth={1.5} size={14} />}
                                 Confirmar pago
                             </button>
                         </div>

@@ -11,9 +11,9 @@ interface MaintenanceListProps {
 export default function MaintenanceList({ incidencias, onUpdateStatus }: MaintenanceListProps) {
     const getEstadoBadge = (estado: string) => {
         const styles = {
-            abierto: "bg-red-100 text-red-700",
-            en_proceso: "bg-yellow-100 text-yellow-700",
-            resuelto: "bg-green-100 text-green-700",
+            abierto: "bg-[var(--color-danger-soft)] text-[var(--color-danger)]",
+            en_proceso: "bg-[var(--color-warning-soft)] text-[var(--color-warning)]",
+            resuelto: "bg-[var(--color-positive-soft)] text-[var(--color-positive)]",
         };
         return styles[estado as keyof typeof styles] || styles.abierto;
     };
@@ -21,29 +21,29 @@ export default function MaintenanceList({ incidencias, onUpdateStatus }: Mainten
     const getEstadoIcon = (estado: string) => {
         switch (estado) {
             case 'resuelto':
-                return <CheckCircle className="w-5 h-5 text-green-600" />;
+                return <CheckCircle strokeWidth={1.5} className="w-5 h-5 text-[var(--color-positive)]" />;
             case 'en_proceso':
-                return <Clock className="w-5 h-5 text-yellow-600" />;
+                return <Clock strokeWidth={1.5} className="w-5 h-5 text-[var(--color-warning)]" />;
             default:
-                return <AlertCircle className="w-5 h-5 text-red-600" />;
+                return <AlertCircle strokeWidth={1.5} className="w-5 h-5 text-[var(--color-danger)]" />;
         }
     };
 
     return (
         <div className="space-y-4">
             {incidencias.length === 0 ? (
-                <div className="bg-white rounded-xl border border-gray-200 p-12 text-center text-gray-500">
+                <div className="bg-[var(--color-paper-2)] rounded-xl border border-[var(--color-rule)] p-12 text-center text-[var(--color-muted)]">
                     No hay incidencias registradas
                 </div>
             ) : (
                 incidencias.map((incidencia) => (
-                    <div key={incidencia.id} className="bg-white rounded-xl border border-gray-200 p-6">
+                    <div key={incidencia.id} className="bg-[var(--color-paper-2)] rounded-xl border border-[var(--color-rule)] p-6">
                         <div className="flex items-start justify-between mb-3">
                             <div className="flex items-start gap-3">
                                 {getEstadoIcon(incidencia.estado)}
                                 <div>
-                                    <h4 className="font-semibold text-gray-900">{incidencia.titulo}</h4>
-                                    <p className="text-sm text-gray-600 mt-1">{incidencia.descripcion}</p>
+                                    <h4 className="font-semibold text-[var(--color-ink)]">{incidencia.titulo}</h4>
+                                    <p className="text-sm text-[var(--color-ink-2)] mt-1">{incidencia.descripcion}</p>
                                 </div>
                             </div>
                             <span className={`px-3 py-1 text-xs font-medium rounded-full ${getEstadoBadge(incidencia.estado)}`}>
@@ -51,8 +51,8 @@ export default function MaintenanceList({ incidencias, onUpdateStatus }: Mainten
                             </span>
                         </div>
 
-                        <div className="flex items-center justify-between mt-4 pt-4 border-t border-gray-100">
-                            <div className="text-sm text-gray-500">
+                        <div className="flex items-center justify-between mt-4 pt-4 border-t border-[var(--color-rule-2)]">
+                            <div className="text-sm text-[var(--color-muted)]">
                                 Creado: {new Date(incidencia.fechaCreacion).toLocaleDateString()}
                                 {incidencia.fechaResolucion && (
                                     <span className="ml-4">
@@ -66,14 +66,14 @@ export default function MaintenanceList({ incidencias, onUpdateStatus }: Mainten
                                     {incidencia.estado === 'abierto' && (
                                         <button
                                             onClick={() => onUpdateStatus(incidencia.id, 'en_proceso')}
-                                            className="px-3 py-1 text-sm bg-yellow-600 text-white rounded-lg hover:bg-yellow-700 transition-colors"
+                                            className="px-3 py-1 text-sm bg-[var(--color-warning)] text-[var(--color-accent-ink)] rounded-lg hover:bg-[var(--color-warning)] transition-colors"
                                         >
                                             En Proceso
                                         </button>
                                     )}
                                     <button
                                         onClick={() => onUpdateStatus(incidencia.id, 'resuelto')}
-                                        className="px-3 py-1 text-sm bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors"
+                                        className="px-3 py-1 text-sm bg-[var(--color-positive)] text-[var(--color-accent-ink)] rounded-lg hover:bg-[var(--color-positive)] transition-colors"
                                     >
                                         Marcar Resuelto
                                     </button>
@@ -82,11 +82,11 @@ export default function MaintenanceList({ incidencias, onUpdateStatus }: Mainten
                         </div>
 
                         {incidencia.comentarios && incidencia.comentarios.length > 0 && (
-                            <div className="mt-4 pt-4 border-t border-gray-100">
-                                <p className="text-sm font-medium text-gray-700 mb-2">Comentarios:</p>
+                            <div className="mt-4 pt-4 border-t border-[var(--color-rule-2)]">
+                                <p className="text-sm font-medium text-[var(--color-ink-2)] mb-2">Comentarios:</p>
                                 <div className="space-y-2">
                                     {incidencia.comentarios.map((comentario, idx) => (
-                                        <p key={idx} className="text-sm text-gray-600 pl-4 border-l-2 border-gray-200">
+                                        <p key={idx} className="text-sm text-[var(--color-ink-2)] pl-4 border-l-2 border-[var(--color-rule)]">
                                             {comentario}
                                         </p>
                                     ))}
