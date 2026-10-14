@@ -6,40 +6,49 @@ import {
   Home,
   Settings,
   LogOut,
-  CreditCard,
   Ticket,
   MessageSquare,
   Key,
-  Building2,
   ChevronLeft,
   ChevronRight,
   Database,
   Calculator,
-  Menu,
   X,
-  Bot,
   Megaphone,
   FileText,
   DollarSign,
   Calendar,
   Headphones,
-  Sparkles,
   BookOpen,
   Mail,
   Shield,
   UserCog,
   Package,
-  Crown,
   GraduationCap,
   PieChart,
   ChevronDown,
   UserPlus,
   ClipboardList,
   Handshake,
-  TrendingUp,
   Globe,
   Palette,
   Signpost,
+  LayoutTemplate,
+  Newspaper,
+  MessagesSquare,
+  BadgeCheck,
+  Building,
+  Store,
+  UserRound,
+  KeyRound,
+  Contact,
+  Inbox,
+  AtSign,
+  Link2,
+  Search,
+  ScrollText,
+  Kanban,
+  ChartLine,
 } from "lucide-react";
 import Link from "next/link";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
@@ -49,7 +58,6 @@ import { auth } from "@/infrastructure/firebase/client";
 import { signOut } from "firebase/auth";
 import { useState, useEffect } from "react";
 import { useAuth } from "@/ui/context/AuthContext";
-import { addDays, format } from "date-fns";
 
 
 // Types
@@ -75,7 +83,7 @@ const MENU_ITEMS: MenuItem[] = [
     icon: Key,
     description: "Administra contratos, cuotas y renovaciones",
     subItems: [
-      { href: "/dashboard/alquileres", label: "Panel de Contratos", icon: Key, description: "Todos los contratos activos" },
+      { href: "/dashboard/alquileres", label: "Panel de Contratos", icon: ScrollText, description: "Todos los contratos activos" },
       { href: "/dashboard/agenda-cobros", label: "Agenda de Cobros", icon: ClipboardList, description: "Cobros pendientes de todos los contratos" },
       { href: "/dashboard/liquidaciones", label: "Liquidaciones", icon: DollarSign, description: "Pagos pendientes a propietarios" },
       { href: "/dashboard/finanzas", label: "Reportes", icon: PieChart, description: "Ingresos, honorarios y movimientos" },
@@ -87,8 +95,8 @@ const MENU_ITEMS: MenuItem[] = [
     icon: Handshake,
     description: "Operaciones de compraventa",
     subItems: [
-      { href: "/dashboard/ventas", label: "Pipeline de Operaciones", icon: Handshake, description: "Todas las operaciones en curso" },
-      { href: "/dashboard/ventas/reportes", label: "Reportes de Ventas", icon: TrendingUp, description: "Volumen, comisiones y cierres" },
+      { href: "/dashboard/ventas", label: "Pipeline de Operaciones", icon: Kanban, description: "Todas las operaciones en curso" },
+      { href: "/dashboard/ventas/reportes", label: "Reportes de Ventas", icon: ChartLine, description: "Volumen, comisiones y cierres" },
     ]
   },
   {
@@ -97,8 +105,8 @@ const MENU_ITEMS: MenuItem[] = [
     icon: Users,
     description: "Directorio de tus contactos",
     subItems: [
-      { href: "/dashboard/clientes?tab=inquilinos", label: "Inquilinos", icon: Users, description: "Lista de Inquilinos" },
-      { href: "/dashboard/clientes?tab=propietarios", label: "Propietarios", icon: Building2, description: "Lista de Propietarios" },
+      { href: "/dashboard/clientes?tab=inquilinos", label: "Inquilinos", icon: KeyRound, description: "Lista de Inquilinos" },
+      { href: "/dashboard/clientes?tab=propietarios", label: "Propietarios", icon: UserRound, description: "Lista de Propietarios" },
       { href: "/dashboard/clientes?tab=leads", label: "Leads", icon: UserPlus, description: "Lista de Leads" }
     ]
   },
@@ -115,31 +123,31 @@ const MENU_ITEMS: MenuItem[] = [
     icon: Globe,
     description: "Tu portal inmobiliario público",
     subItems: [
-      { href: "/dashboard/mi-sitio?tab=plantilla", label: "Plantilla", icon: Sparkles, description: "Elegí el diseño de tu sitio" },
-      { href: "/dashboard/mi-sitio?tab=identidad", label: "Identidad y Logo", icon: Building2, description: "Nombre, logo e imagen de portada" },
+      { href: "/dashboard/mi-sitio?tab=plantilla", label: "Plantilla", icon: LayoutTemplate, description: "Elegí el diseño de tu sitio" },
+      { href: "/dashboard/mi-sitio?tab=identidad", label: "Identidad y Logo", icon: BadgeCheck, description: "Nombre, logo e imagen de portada" },
       { href: "/dashboard/mi-sitio?tab=colores", label: "Colores", icon: Palette, description: "Personalizá los colores" },
-      { href: "/dashboard/mi-sitio?tab=contacto", label: "Contacto y Redes", icon: MessageSquare, description: "WhatsApp, email y redes sociales" },
-      { href: "/dashboard/mi-sitio?tab=dominio", label: "Dominio", icon: Globe, description: "Subdominio y dominio propio" },
-      { href: "/dashboard/mi-sitio?tab=seo", label: "SEO", icon: TrendingUp, description: "Título, descripción y metadatos" },
+      { href: "/dashboard/mi-sitio?tab=contacto", label: "Contacto y Redes", icon: AtSign, description: "WhatsApp, email y redes sociales" },
+      { href: "/dashboard/mi-sitio?tab=dominio", label: "Dominio", icon: Link2, description: "Subdominio y dominio propio" },
+      { href: "/dashboard/mi-sitio?tab=seo", label: "SEO", icon: Search, description: "Título, descripción y metadatos" },
     ],
   },
-  { href: "/dashboard/novedades", label: "Noticias", icon: Sparkles, description: "Novedades y actualizaciones del rubro" },
+  { href: "/dashboard/novedades", label: "Noticias", icon: Newspaper, description: "Novedades y actualizaciones del rubro" },
   { href: "/dashboard/tutoriales", label: "Tutoriales", icon: GraduationCap, description: "Aprende a usar la plataforma al máximo" },
   { href: "/dashboard/soporte", label: "Soporte", icon: Headphones, description: "Mesa de ayuda y contacto directo" },
 
   // Other Tools (Hidden in standard flow or kept for Pro admins, but grouped below)
   { href: "divider-2", label: "", icon: LayoutDashboard, isDivider: true, adminOnly: true },
   { href: "/dashboard/tasacion", label: "Tasación IA", icon: Calculator, description: "Herramienta de tasación inteligente" },
-  { href: "/dashboard/emprendimientos", label: "Emprendimientos", icon: Building2, description: "Proyectos en pozo o desarrollo" },
-  { href: "/dashboard/chat", label: "Chat Zeta Prop", icon: Bot, description: "Asistente virtual inmobiliario" },
+  { href: "/dashboard/emprendimientos", label: "Emprendimientos", icon: Building, description: "Proyectos en pozo o desarrollo" },
+  { href: "/dashboard/chat", label: "Chat Zeta Prop", icon: MessagesSquare, description: "Asistente virtual inmobiliario" },
   { href: "/dashboard/publicaciones", label: "Publicaciones", icon: Megaphone, description: "Distribución en portales" },
   { href: "/dashboard/marketing", label: "Marketing", icon: Mail, permission: "/dashboard/marketing", description: "Emails automáticos y campañas" },
   { href: "/dashboard/blog", label: "Blog / Novedades", icon: FileText, description: "Artículos y notas" },
-  { href: "/dashboard/mensajes", label: "Mensajes", icon: Mail, description: "Mensajería interna" },
+  { href: "/dashboard/mensajes", label: "Mensajes", icon: Inbox, description: "Mensajería interna" },
 
   // Pro Tools
-  { href: "/dashboard/agentes", label: "Agentes", icon: Users, description: "Gestión de equipo de ventas", adminOnly: true },
-  { href: "/dashboard/sucursales", label: "Multi Sucursal", icon: Building2, permission: "/dashboard/sucursales", description: "Manejo de múltiples oficinas" },
+  { href: "/dashboard/agentes", label: "Agentes", icon: Contact, description: "Gestión de equipo de ventas", adminOnly: true },
+  { href: "/dashboard/sucursales", label: "Multi Sucursal", icon: Store, permission: "/dashboard/sucursales", description: "Manejo de múltiples oficinas" },
   { href: "/dashboard/gestion-plataforma", label: "Gestión Plataforma", icon: Shield, permission: "/dashboard/gestion-plataforma", description: "Control total (SuperAdmin)" },
 
   // Admin & Config
@@ -298,7 +306,7 @@ export default function DashboardSidebar({ isOpen = false, onClose }: DashboardS
                   onClick={() => setCollapsed(!collapsed)}
                   className="hidden lg:flex p-1.5 hover:bg-[var(--color-paper-2)] rounded-lg text-[var(--color-muted)] hover:text-[var(--color-ink)] transition-colors"
                 >
-                  <ChevronLeft size={18} />
+                  <ChevronLeft size={18} strokeWidth={1.5} />
                 </button>
 
                 {/* Mobile Close Button */}
@@ -306,7 +314,7 @@ export default function DashboardSidebar({ isOpen = false, onClose }: DashboardS
                   onClick={onClose}
                   className="lg:hidden p-1 hover:bg-[var(--color-paper-2)] rounded-lg text-[var(--color-muted)] hover:text-[var(--color-ink)]"
                 >
-                  <X size={20} />
+                  <X size={20} strokeWidth={1.5} />
                 </button>
               </div>
 
@@ -356,7 +364,7 @@ export default function DashboardSidebar({ isOpen = false, onClose }: DashboardS
             onClick={() => setCollapsed(false)}
             className="hidden lg:flex mx-auto mt-3 p-1.5 hover:bg-[var(--color-paper-2)] rounded-lg text-[var(--color-muted)] hover:text-[var(--color-ink)] transition-colors"
           >
-            <ChevronRight size={18} />
+            <ChevronRight size={18} strokeWidth={1.5} />
           </button>
         )}
 
@@ -378,16 +386,17 @@ export default function DashboardSidebar({ isOpen = false, onClose }: DashboardS
                   className={cn(
                     "flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all duration-150 w-full group",
                     isActive
-                      ? "bg-[var(--color-paper-3)] text-[var(--color-accent)] font-semibold border-l-2 border-[var(--color-accent)]"
+                      ? "bg-[var(--color-paper-2)] text-[var(--color-ink)] font-semibold border-l-2 border-[var(--color-accent)]"
                       : "text-[var(--color-muted)] hover:bg-[var(--color-paper-2)] hover:text-[var(--color-ink)]",
                     collapsed ? "justify-center px-0" : ""
                   )}
                 >
                   <item.icon
                     size={18}
+                    strokeWidth={1.5}
                     className={cn(
                       "flex-shrink-0 transition-colors",
-                      isActive ? "text-[var(--color-accent)]" : "text-[var(--color-muted)] group-hover:text-[var(--color-ink-2)]"
+                      isActive ? "text-[var(--color-ink)]" : "text-[var(--color-muted)] group-hover:text-[var(--color-ink-2)]"
                     )}
                   />
                   {!collapsed && (
@@ -395,7 +404,7 @@ export default function DashboardSidebar({ isOpen = false, onClose }: DashboardS
                       <span className="truncate text-sm font-medium">{item.label}</span>
 
                       {item.subItems && (
-                        <ChevronDown size={14} className={cn("transition-transform text-[var(--color-neutral)] flex-shrink-0", isExpanded && "rotate-180")} />
+                        <ChevronDown size={14} strokeWidth={1.5} className={cn("transition-transform text-[var(--color-neutral)] flex-shrink-0", isExpanded && "rotate-180")} />
                       )}
 
                       {item.href === '/dashboard/leads' && unreadCount > 0 && (
@@ -426,11 +435,11 @@ export default function DashboardSidebar({ isOpen = false, onClose }: DashboardS
                           className={cn(
                             "flex items-center gap-2 py-2 px-3 rounded-lg text-sm transition-all w-full",
                             isSubActive
-                              ? "text-[var(--color-accent)] font-semibold bg-[var(--color-paper-3)]"
+                              ? "text-[var(--color-ink)] font-semibold bg-[var(--color-paper-2)] border-l-2 border-[var(--color-accent)]"
                               : "text-[var(--color-muted)] hover:text-[var(--color-ink)] hover:bg-[var(--color-paper-2)]"
                           )}
                         >
-                          <sub.icon size={15} className={cn(isSubActive ? "text-[var(--color-accent)]" : "text-[var(--color-neutral)]")} />
+                          <sub.icon size={16} strokeWidth={1.5} className={cn("flex-shrink-0", isSubActive ? "text-[var(--color-ink)]" : "text-[var(--color-muted)]")} />
                           <span className="truncate">{sub.label}</span>
                         </Link>
                       );
@@ -452,7 +461,7 @@ export default function DashboardSidebar({ isOpen = false, onClose }: DashboardS
             )}
             title={collapsed ? "Cerrar Sesión" : undefined}
           >
-            <LogOut size={18} className="flex-shrink-0" />
+            <LogOut size={18} strokeWidth={1.5} className="flex-shrink-0" />
             {!collapsed && <span className="text-sm font-medium truncate">Cerrar Sesión</span>}
           </button>
         </div>

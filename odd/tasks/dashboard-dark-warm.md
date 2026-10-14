@@ -16,7 +16,7 @@ Antigravity left 17 uncommitted files (carried onto this branch): coherent sideb
 ## Tasks
 - [x] D1 — Contain globals + tokens: revert root `html/body` navy + `:root` changes; dashboard-scoped theme reusing landing tokens and fonts (Montserrat/Inter Tight); restore and extend the dark override layer (incl. violet/purple/sky/cyan/teal); remove theme toggle; ThemeProvider no longer affects public pages — delegated
 - [x] D2 — Brand: wordmark component for sidebar (expanded/collapsed) + loaders (AuthGuard, dashboard/loading, LoadingSpinner); new bronze favicon/apple/manifest icons; retire gradient PNGs — delegated
-- [ ] D3 — Shell + icons: header, sidebar menu icons, footer, AnnouncementBanner, dashboard home cleanup — delegated
+- [x] D3 — Shell + icons: header, sidebar menu icons, footer, AnnouncementBanner, dashboard home cleanup — delegated
 - [ ] D4 — High-traffic pages: propiedades (PropertyWizard), alquileres (list/[id]/nuevo, LiquidacionesTab, PaymentCard), clientes, leads, calendario, agenda-cobros, liquidaciones, finanzas — delegated
 - [ ] D5 — Remaining modules + admin + emails — delegated
 
@@ -35,3 +35,13 @@ Antigravity left 17 uncommitted files (carried onto this branch): coherent sideb
   - Icons regenerated (sharp): icon.png 64, apple-icon.png 180, icon-192/512, favincon.png 64, favicon.ico (PNG-in-ICO 16/32/48). loading.png restored to HEAD (unreferenced).
 - Evidence: `tsc` exit 0; vitest 21/21 files pass (first run 4 cold-import timeouts, rerun green); eslint no new errors (ThemeContext 1→0); `/`, `/alquileres`, `/login` 200 with 0 `0b0f17`/`class="dark"`.
 - Pending: browser visual check (owner login); D3 header indigo classes (9) remain by design.
+- D3 implemented by delegated writer (uncommitted, awaiting parent verification):
+  - Icon style: lucide `strokeWidth={1.5}`, 18px sidebar / 16px submenus, muted by default; active item = ink text/icon on paper-2 with the bronze left border (submenus too). No icon tiles.
+  - Sidebar icon remap (no duplicate top-level icons; submenus no longer reuse parent icons): Plantilla LayoutTemplate, Identidad BadgeCheck, Contacto y Redes AtSign, Dominio Link2, SEO Search, Noticias Newspaper, Chat MessagesSquare, Emprendimientos Building, Mensajes Inbox, Agentes Contact, Multi Sucursal Store, Inquilinos KeyRound, Propietarios UserRound, Panel de Contratos ScrollText, Pipeline Kanban, Reportes de Ventas ChartLine. Tasación keeps Calculator. Unused imports (Crown, Menu, CreditCard, Bot, Sparkles, Building2, TrendingUp, date-fns) removed.
+  - Header fully tokenized (branch dropdown paper-2/rule, accent unread badge, paper-3 avatar with ink initial, notifications as tone-colored icons without pastel circles, danger logout).
+  - Footer: emoji removed, muted xs text. AnnouncementBanner: paper-2 + rule border + 2px tone bar, no tinted icon tile.
+  - Home: 16 unused imports, unused `userRole/userPermissions` and `TUTORIALS` removed; Quick Add accent tile removed; emerald/rose to positive/danger tokens; all icons 1.5 stroke.
+  - Shared: `ui/` only holds InfoAlert (tokenized; currently unused), LoadingSpinner (already tokenized in D2) and WhatsappButton (public site, WhatsApp brand green, untouched). No Button/Badge/Card/Modal primitives exist. OnboardingModal (dashboard layout) tokenized: ink pill primary, outline secondary, accent focus ring. MiniCalendar light variants dropped.
+  - Portals: FichasPdfModal (PropertyCard) wraps the portal in `app-theme dark` and is tokenized. OnboardingTour also portals but is not imported anywhere, left untouched. Unused dashboard components EstimationChart/LastEstimations/QuickActions left as-is.
+- D3 evidence: `tsc` exit 0; vitest 21/21 files, 153 tests pass; eslint on 9 touched files: 0 unused-vars (home dropped 18 unused-var warnings; remaining no-explicit-any/react-hooks/no-img-element are pre-existing); off-brand rg = 0 except `slide-in-from-top-2` (animation class, false positive); Sparkles/Bot/Wand rg = 0; `/login` 200.
+- Pending: browser visual check (owner login).

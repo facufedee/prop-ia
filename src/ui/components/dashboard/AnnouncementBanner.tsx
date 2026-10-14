@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Info, AlertTriangle, CheckCircle2, XCircle, X, Megaphone } from "lucide-react";
+import { Info, AlertTriangle, CheckCircle2, XCircle, X, type LucideIcon } from "lucide-react";
 
 type AnnouncementType = "info" | "warning" | "success" | "error";
 
@@ -13,35 +13,12 @@ interface Announcement {
     expiresAt?: string;
 }
 
-const ANNOUNCEMENT_STYLES: Record<AnnouncementType, { bg: string; border: string; icon: any; text: string; shadow: string }> = {
-    info: {
-        bg: "bg-[var(--color-paper-2)]",
-        border: "border-[color:var(--color-accent)]/30",
-        icon: Info,
-        text: "text-[var(--color-ink)]",
-        shadow: "shadow-black/20"
-    },
-    warning: {
-        bg: "bg-[var(--color-paper-2)]",
-        border: "border-[color:var(--color-warning)]/30",
-        icon: AlertTriangle,
-        text: "text-[var(--color-warning)]",
-        shadow: "shadow-black/20"
-    },
-    success: {
-        bg: "bg-[var(--color-paper-2)]",
-        border: "border-[color:var(--color-positive)]/30",
-        icon: CheckCircle2,
-        text: "text-[var(--color-positive)]",
-        shadow: "shadow-black/20"
-    },
-    error: {
-        bg: "bg-[var(--color-paper-2)]",
-        border: "border-[color:var(--color-danger)]/30",
-        icon: XCircle,
-        text: "text-[var(--color-danger)]",
-        shadow: "shadow-black/20"
-    },
+// Quiet banner: same paper-2 surface for every type; only the left bar and icon carry the tone.
+const ANNOUNCEMENT_STYLES: Record<AnnouncementType, { bar: string; icon: LucideIcon; tone: string }> = {
+    info: { bar: "bg-[var(--color-accent)]", icon: Info, tone: "text-[var(--color-accent)]" },
+    warning: { bar: "bg-[var(--color-warning)]", icon: AlertTriangle, tone: "text-[var(--color-warning)]" },
+    success: { bar: "bg-[var(--color-positive)]", icon: CheckCircle2, tone: "text-[var(--color-positive)]" },
+    error: { bar: "bg-[var(--color-danger)]", icon: XCircle, tone: "text-[var(--color-danger)]" },
 };
 
 export function AnnouncementBanner() {
@@ -104,28 +81,28 @@ export function AnnouncementBanner() {
                 const Icon = style.icon;
 
                 return (
-                    <div 
+                    <div
                         key={ann.id}
-                        className={`relative overflow-hidden rounded-2xl border ${style.bg} ${style.border} ${style.shadow} p-4 md:p-5 transition-all animate-in fade-in slide-in-from-top-2 duration-500 shadow-lg`}
+                        className="relative overflow-hidden rounded-xl border border-[var(--color-rule)] bg-[var(--color-paper-2)] p-4 md:p-5 animate-in fade-in slide-in-from-top-2 duration-500"
                     >
-                        <div className="flex items-start gap-4">
-                            <div className={`p-2 rounded-xl bg-white/50 dark:bg-white/5 backdrop-blur-sm border border-black/5 dark:border-white/5 shadow-sm ${style.text}`}>
-                                <Icon className="w-5 h-5" />
-                            </div>
+                        <span aria-hidden className={`absolute left-0 top-0 bottom-0 w-0.5 ${style.bar}`} />
+                        <div className="flex items-start gap-3">
+                            <Icon size={18} strokeWidth={1.5} className={`mt-0.5 shrink-0 ${style.tone}`} />
                             <div className="flex-1 pr-8">
-                                <h3 className={`text-sm md:text-base font-bold ${style.text} flex items-center gap-2 mb-1`}>
+                                <h3 className="font-heading text-sm md:text-base font-semibold text-[var(--color-ink)] mb-1">
                                     {ann.title}
                                 </h3>
-                                <p className={`text-xs md:text-sm ${style.text} opacity-90 leading-relaxed`}>
+                                <p className="text-xs md:text-sm text-[var(--color-ink-2)] leading-relaxed">
                                     {ann.message}
                                 </p>
                             </div>
-                            <button 
+                            <button
                                 onClick={() => handleDismiss(ann.id)}
-                                className={`p-1.5 rounded-lg hover:bg-black/5 dark:hover:bg-white/10 transition-colors absolute top-3 right-3 ${style.text} opacity-50 hover:opacity-100`}
+                                className="p-1.5 rounded-lg text-[var(--color-muted)] hover:text-[var(--color-ink)] hover:bg-[var(--color-paper-3)] transition-colors absolute top-3 right-3"
                                 title="Cerrar"
+                                aria-label="Cerrar anuncio"
                             >
-                                <X className="w-4 h-4" />
+                                <X size={16} strokeWidth={1.5} />
                             </button>
                         </div>
                     </div>

@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import Image from "next/image";
 import { db, auth } from "@/infrastructure/firebase/client";
-import { collection, query, where, getDocs, getDoc, doc, orderBy, limit } from "firebase/firestore";
+import { collection, query, where, getDocs, getDoc, doc, orderBy } from "firebase/firestore";
 import { onAuthStateChanged } from "firebase/auth";
 import { leadsService } from "@/infrastructure/services/leadsService";
 import { alquileresService } from "@/infrastructure/services/alquileresService";
@@ -15,33 +15,16 @@ import { MiniCalendar } from "@/ui/components/dashboard/MiniCalendar";
 import { isSameMonth, addDays, format, differenceInDays } from "date-fns";
 import { es } from "date-fns/locale";
 import {
-    Home,
-    Users,
-    DollarSign,
-    ArrowUpRight,
-    Building2,
-    Calendar,
-    MessageSquare,
     Plus,
-    GraduationCap,
-    Key,
     ArrowRight,
-    Clock,
-    AlertTriangle,
     CheckCircle2,
-    PlayCircle,
     ChevronRight,
-    UserCheck,
-    Camera,
-    CreditCard,
-    Globe,
     Newspaper,
     Instagram,
     Linkedin,
 } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useAuth } from "@/ui/context/AuthContext";
 import { useBranchContext } from "@/infrastructure/context/BranchContext";
 import { AnnouncementBanner } from "@/ui/components/dashboard/AnnouncementBanner";
 
@@ -66,7 +49,6 @@ interface BlogPostSummary {
 
 export default function DashboardPage() {
     const router = useRouter();
-    const { userRole, userPermissions } = useAuth();
     const [user, setUser] = useState<any>(null);
     const { selectedBranchId } = useBranchContext();
     const [stats, setStats] = useState({
@@ -317,13 +299,6 @@ export default function DashboardPage() {
         );
     }
 
-    const TUTORIALS = [
-        { title: "Cómo cargar tu primera propiedad", duration: "3 min", href: "/dashboard/tutoriales", icon: Home },
-        { title: "Registrar un alquiler paso a paso", duration: "5 min", href: "/dashboard/tutoriales", icon: Key },
-        { title: "Gestión de cobros y honorarios", duration: "4 min", href: "/dashboard/tutoriales", icon: DollarSign },
-        { title: "Cómo usar el CRM de Leads", duration: "3 min", href: "/dashboard/tutoriales", icon: MessageSquare },
-    ];
-
     // Limits logic
     let fallbackPropertiesLimit: number | null = null;
     let fallbackClientsLimit: number | null = null;
@@ -378,7 +353,7 @@ export default function DashboardPage() {
                                     href="/dashboard/propiedades"
                                     className="text-xs font-semibold text-[var(--color-accent)] hover:text-[var(--color-accent-2)] flex items-center gap-1 transition-colors"
                                 >
-                                    Ver catálogo <ChevronRight size={14} />
+                                    Ver catálogo <ChevronRight size={14} strokeWidth={1.5} />
                                 </Link>
                             </div>
 
@@ -390,8 +365,8 @@ export default function DashboardPage() {
                                             <p className="text-[11px] font-bold text-[var(--color-muted)] uppercase tracking-widest mb-1.5">Inventario Activo</p>
                                             <p className="text-4xl font-extrabold font-heading text-[var(--color-ink)] tracking-tight">{stats.totalProperties}</p>
                                         </div>
-                                        <span className="bg-emerald-950/40 text-emerald-300 border border-emerald-800/30 text-xs font-semibold px-3 py-1 rounded-full flex items-center gap-1.5">
-                                            <CheckCircle2 size={13} /> Al día
+                                        <span className="bg-[var(--color-positive-soft)] text-[var(--color-positive)] border border-[var(--color-positive)]/30 text-xs font-semibold px-3 py-1 rounded-full flex items-center gap-1.5">
+                                            <CheckCircle2 size={13} strokeWidth={1.5} /> Al día
                                         </span>
                                     </div>
 
@@ -415,9 +390,7 @@ export default function DashboardPage() {
                                         href="/dashboard/propiedades/nueva"
                                         className="flex-1 flex flex-col items-center justify-center p-6 bg-[var(--color-paper-3)] hover:bg-[var(--color-paper-4)] rounded-xl border border-dashed border-[var(--color-neutral)] hover:border-[var(--color-accent)]/50 transition-all group text-center"
                                     >
-                                        <div className="w-10 h-10 rounded-full bg-[var(--color-accent)]/15 text-[var(--color-accent)] flex items-center justify-center mb-3 group-hover:scale-110 transition-transform">
-                                            <Plus size={20} strokeWidth={2.5} />
-                                        </div>
+                                        <Plus size={20} strokeWidth={1.5} className="mb-3 text-[var(--color-muted)] group-hover:text-[var(--color-accent)] transition-colors" />
                                         <span className="text-xs font-bold text-[var(--color-ink)] group-hover:text-[var(--color-accent)] transition-colors">
                                             Cargar propiedad
                                         </span>
@@ -436,7 +409,7 @@ export default function DashboardPage() {
                                     href="/dashboard/alquileres"
                                     className="text-xs font-semibold text-[var(--color-accent)] hover:text-[var(--color-accent-2)] flex items-center gap-1 transition-colors"
                                 >
-                                    Ver todos <ChevronRight size={14} />
+                                    Ver todos <ChevronRight size={14} strokeWidth={1.5} />
                                 </Link>
                             </div>
 
@@ -452,7 +425,7 @@ export default function DashboardPage() {
                                     </div>
                                     <div className="pt-4 border-t border-[var(--color-rule)] flex items-center justify-between">
                                         <span className="text-xs font-semibold text-[var(--color-accent)] group-hover:text-[var(--color-accent-2)]">Panel de alquileres</span>
-                                        <ChevronRight size={14} className="text-[var(--color-muted)] group-hover:text-[var(--color-accent)] group-hover:translate-x-1 transition-all" />
+                                        <ChevronRight size={14} strokeWidth={1.5} className="text-[var(--color-muted)] group-hover:text-[var(--color-accent)] group-hover:translate-x-1 transition-all" />
                                     </div>
                                 </Link>
 
@@ -488,7 +461,7 @@ export default function DashboardPage() {
                                                     </div>
                                                     <div className="text-right flex-shrink-0">
                                                         <p className="text-xs font-bold font-heading text-[var(--color-ink)]">{formatCurrency(v.monto)}</p>
-                                                        <p className={`text-[10px] font-semibold mt-0.5 ${v.estado === 'vencido' ? 'text-rose-400' : v.diasRestantes <= 3 ? 'text-[var(--color-accent)]' : 'text-[var(--color-muted)]'}`}>
+                                                        <p className={`text-[10px] font-semibold mt-0.5 ${v.estado === 'vencido' ? 'text-[var(--color-danger)]' : v.diasRestantes <= 3 ? 'text-[var(--color-accent)]' : 'text-[var(--color-muted)]'}`}>
                                                             {v.estado === 'vencido' ? `Venció hace ${Math.abs(v.diasRestantes)}d` : v.diasRestantes === 0 ? 'Hoy' : `En ${v.diasRestantes}d`}
                                                         </p>
                                                     </div>
@@ -510,7 +483,7 @@ export default function DashboardPage() {
                             <div className="px-5 py-3.5 border-b border-[var(--color-rule)] flex items-center justify-between bg-[var(--color-paper)]">
                                 <h3 className="font-bold font-heading text-[var(--color-ink)] text-xs uppercase tracking-wider">Próximas Visitas</h3>
                                 <Link href="/dashboard/calendario" className="text-xs font-semibold text-[var(--color-accent)] hover:text-[var(--color-accent-2)] flex items-center gap-1">
-                                    Ver <ChevronRight size={13} />
+                                    Ver <ChevronRight size={13} strokeWidth={1.5} />
                                 </Link>
                             </div>
 
@@ -522,7 +495,7 @@ export default function DashboardPage() {
                                             href="/dashboard/calendario/nueva"
                                             className="inline-flex items-center gap-2 text-xs font-bold text-[var(--color-paper)] bg-[var(--color-accent)] hover:bg-[var(--color-accent-2)] px-4 py-2 rounded-full transition-all active:scale-95"
                                         >
-                                            <Plus size={14} /> Agendar visita
+                                            <Plus size={14} strokeWidth={1.5} /> Agendar visita
                                         </Link>
                                     </div>
                                 ) : (
@@ -558,7 +531,7 @@ export default function DashboardPage() {
                             href="/dashboard/leads"
                             className="text-xs font-semibold text-[var(--color-accent)] hover:text-[var(--color-accent-2)] flex items-center gap-1 transition-colors"
                         >
-                            Ver CRM <ChevronRight size={14} />
+                            Ver CRM <ChevronRight size={14} strokeWidth={1.5} />
                         </Link>
                     </div>
 
@@ -574,7 +547,7 @@ export default function DashboardPage() {
                             </div>
                             <div className="pt-4 border-t border-[var(--color-rule)] flex items-center justify-between">
                                 <span className="text-xs font-semibold text-[var(--color-accent)] group-hover:text-[var(--color-accent-2)]">Directorio de contactos</span>
-                                <ChevronRight size={14} className="text-[var(--color-muted)] group-hover:text-[var(--color-accent)] group-hover:translate-x-1 transition-all" />
+                                <ChevronRight size={14} strokeWidth={1.5} className="text-[var(--color-muted)] group-hover:text-[var(--color-accent)] group-hover:translate-x-1 transition-all" />
                             </div>
                         </Link>
 
@@ -609,7 +582,7 @@ export default function DashboardPage() {
                                                 <div className="flex items-center gap-2 mb-0.5">
                                                     <p className="text-xs font-bold text-[var(--color-ink)] truncate group-hover:text-[var(--color-accent)] transition-colors">{lead.nombre}</p>
                                                     <span className={`text-[9px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full flex-shrink-0 border ${
-                                                        lead.estado === 'nuevo' ? 'bg-emerald-950/40 text-emerald-300 border-emerald-800/30' :
+                                                        lead.estado === 'nuevo' ? 'bg-[var(--color-positive-soft)] text-[var(--color-positive)] border-[var(--color-positive)]/30' :
                                                         lead.estado === 'contactado' ? 'bg-[var(--color-accent)]/15 text-[var(--color-accent)] border-[var(--color-accent)]/30' :
                                                         'bg-[var(--color-paper-3)] text-[var(--color-muted)] border-[var(--color-rule)]'
                                                     }`}>
@@ -619,7 +592,7 @@ export default function DashboardPage() {
                                                 <p className="text-[11px] text-[var(--color-muted)] truncate">{lead.propertyTitle || 'Consulta general'}</p>
                                             </div>
                                             <div className="text-right">
-                                                <ChevronRight size={14} className="text-[var(--color-neutral)] group-hover:text-[var(--color-accent)] group-hover:translate-x-1 transition-all" />
+                                                <ChevronRight size={14} strokeWidth={1.5} className="text-[var(--color-neutral)] group-hover:text-[var(--color-accent)] group-hover:translate-x-1 transition-all" />
                                             </div>
                                         </Link>
                                     ))
@@ -636,7 +609,7 @@ export default function DashboardPage() {
                             Últimas Novedades
                         </h2>
                         <Link href="/blog" target="_blank" className="text-xs font-semibold text-[var(--color-accent)] hover:text-[var(--color-accent-2)] flex items-center gap-1 transition-colors">
-                            Ver blog <ChevronRight size={14} />
+                            Ver blog <ChevronRight size={14} strokeWidth={1.5} />
                         </Link>
                     </div>
 
@@ -658,7 +631,7 @@ export default function DashboardPage() {
                                             <Image src={post.imageUrl} alt={post.title} fill className="object-cover group-hover:scale-105 transition-transform duration-500" sizes="256px" />
                                         ) : (
                                             <div className="w-full h-full flex items-center justify-center text-[var(--color-neutral)]">
-                                                <Newspaper size={24} />
+                                                <Newspaper size={24} strokeWidth={1.5} />
                                             </div>
                                         )}
                                         {post.category && (
@@ -670,7 +643,7 @@ export default function DashboardPage() {
                                     <div className="p-4">
                                         <p className="text-xs font-bold font-heading text-[var(--color-ink)] leading-snug line-clamp-2 group-hover:text-[var(--color-accent)] transition-colors">{post.title}</p>
                                         <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-[var(--color-accent)] mt-2 group-hover:gap-1.5 transition-all">
-                                            Leer nota <ArrowRight size={12} />
+                                            Leer nota <ArrowRight size={12} strokeWidth={1.5} />
                                         </span>
                                     </div>
                                 </Link>
@@ -695,7 +668,7 @@ export default function DashboardPage() {
                             rel="noopener noreferrer"
                             className="flex items-center gap-2 bg-[var(--color-accent)] hover:bg-[var(--color-accent-2)] text-[var(--color-paper)] font-bold px-4 py-2.5 rounded-full transition-all text-xs"
                         >
-                            <Instagram size={16} /> Instagram
+                            <Instagram size={16} strokeWidth={1.5} /> Instagram
                         </a>
                         <a
                             href="https://www.linkedin.com/company/zetaprop"
@@ -703,7 +676,7 @@ export default function DashboardPage() {
                             rel="noopener noreferrer"
                             className="flex items-center gap-2 bg-[var(--color-paper-3)] hover:bg-[var(--color-paper-4)] text-[var(--color-ink)] font-bold px-4 py-2.5 rounded-full border border-[var(--color-rule)] transition-all text-xs"
                         >
-                            <Linkedin size={16} /> LinkedIn
+                            <Linkedin size={16} strokeWidth={1.5} /> LinkedIn
                         </a>
                     </div>
                 </div>
@@ -715,7 +688,7 @@ export default function DashboardPage() {
                             <div>
                                 <div className="flex items-center gap-2">
                                     <p className="font-bold font-heading text-[var(--color-ink)] text-sm">{stats.plan?.name || `Plan ${stats.subscription.planTier}`}</p>
-                                    <span className="bg-emerald-950/40 text-emerald-300 text-[9px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full border border-emerald-800/30">Activo</span>
+                                    <span className="bg-[var(--color-positive-soft)] text-[var(--color-positive)] text-[9px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full border border-[var(--color-positive)]/30">Activo</span>
                                 </div>
                                 <p className="text-xs text-[var(--color-muted)] mt-0.5">
                                     {stats.subscription.billingPeriod === 'monthly' ? 'Mensual' :
@@ -734,7 +707,7 @@ export default function DashboardPage() {
                                 </p>
                             </div>
                             <Link href="/precios" className="text-xs font-bold text-[var(--color-accent)] hover:text-[var(--color-accent-2)] flex items-center gap-1 whitespace-nowrap">
-                                Cambiar plan <ChevronRight size={13} />
+                                Cambiar plan <ChevronRight size={13} strokeWidth={1.5} />
                             </Link>
                         </div>
                     </div>
