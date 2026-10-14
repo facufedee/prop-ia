@@ -1,10 +1,12 @@
 // Pre-written templates ready to load with one click from the Marketing UI.
 // Content matches the copy validated in scripts/seed_marketing_templates.js.
 
+import { EMAIL_COLORS, emailHeaderBarHtml } from '@/lib/email/brandColors';
+
 const saasWrapper = (content: string) => `
 <div style="font-family: 'Segoe UI', Arial, sans-serif; color: #333; line-height: 1.6; max-width: 600px; margin: 0 auto; background-color: #ffffff; padding: 30px; border-radius: 12px; border: 1px solid #e2e8f0; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);">
-    <div style="text-align: center; margin-bottom: 25px;">
-        <img src="https://zetaprop.com.ar/assets/img/logo_zeta_prop_transparent.png" alt="Zeta Prop" width="174" height="45" style="height: 45px; width: 174px; margin-bottom: 10px;" />
+    <div style="margin-bottom: 25px;">
+        ${emailHeaderBarHtml('https://zetaprop.com.ar')}
     </div>
     <div style="font-size: 16px;">
         ${content}
@@ -12,10 +14,10 @@ const saasWrapper = (content: string) => `
     <p style="margin-top: 30px;">
         Éxitos en tu gestión,<br>
         <strong>Facundo</strong><br>
-        <span style="color: #2563eb; font-weight: bold;">Zeta Prop</span>
+        <span style="color: ${EMAIL_COLORS.link}; font-weight: bold;">Zeta Prop</span>
     </p>
     <div style="font-size: 0.85em; color: #64748b; margin-top: 35px; border-top: 1px solid #e2e8f0; padding-top: 20px; text-align: center;">
-        Ingresá al portal: <a href="https://zetaprop.com.ar/login" style="color: #2563eb; text-decoration: none; font-weight: bold;">zetaprop.com.ar/login</a>
+        Ingresá al portal: <a href="https://zetaprop.com.ar/login" style="color: ${EMAIL_COLORS.link}; text-decoration: none; font-weight: bold;">zetaprop.com.ar/login</a>
     </div>
     <div style="font-size: 0.75em; color: #94a3b8; margin-top: 15px; text-align: center;">
         ¿No querés recibir más estos correos? <a href="{{unsubscribeUrl}}" style="color: #94a3b8; text-decoration: underline;">Darse de baja de la lista</a>
@@ -41,7 +43,7 @@ const RAW_TEMPLATES: { type: string; name: string; subject: string; content: str
         </ul>
         <p>Con solo un contrato ya podés comenzar a gestionar todo desde el sistema y olvidarte del Excel para siempre.</p>
         <div style="text-align: center; margin: 30px 0;">
-            <a href="https://zetaprop.com.ar/login" style="background-color: #2563eb; color: white; padding: 12px 25px; text-decoration: none; border-radius: 6px; font-weight: bold; display: inline-block;">Ingresar a mi panel</a>
+            <a href="https://zetaprop.com.ar/login" style="background-color: ${EMAIL_COLORS.buttonBg}; color: ${EMAIL_COLORS.buttonText}; padding: 12px 25px; text-decoration: none; border-radius: 6px; font-weight: bold; display: inline-block;">Ingresar a mi panel</a>
         </div>
         <p>Si necesitás ayuda para empezar, podés responder directamente a este mensaje.</p>
         `
@@ -60,8 +62,8 @@ const RAW_TEMPLATES: { type: string; name: string; subject: string; content: str
             <li>Un inquilino</li>
             <li>El contrato</li>
         </ul>
-        <div style="background-color: #f8fafc; border-left: 4px solid #2563eb; padding: 15px; margin: 25px 0; border-radius: 0 8px 8px 0;">
-            <p style="margin-top: 0; font-weight: bold; color: #2563eb;">A partir de ahí el sistema ya te permite:</p>
+        <div style="background-color: #f8fafc; border-left: 4px solid ${EMAIL_COLORS.buttonBg}; padding: 15px; margin: 25px 0; border-radius: 0 8px 8px 0;">
+            <p style="margin-top: 0; font-weight: bold; color: ${EMAIL_COLORS.link};">A partir de ahí el sistema ya te permite:</p>
             <ul style="margin-bottom: 0;">
                 <li>registrar pagos automáticamente</li>
                 <li>controlar vencimientos sin depender de tu memoria</li>
@@ -81,7 +83,7 @@ const RAW_TEMPLATES: { type: string; name: string; subject: string; content: str
         <p>Una de las funciones que más valoran las inmobiliarias que usan Zeta Prop es la <strong>generación automática de liquidaciones</strong>.</p>
         <p>Una vez cargado el contrato y los pagos del mes, apretando solo un botón el sistema puede generar:</p>
 
-        <p style="color: #2563eb; font-weight: bold; margin-top: 20px;">Liquidación para el propietario</p>
+        <p style="color: ${EMAIL_COLORS.link}; font-weight: bold; margin-top: 20px;">Liquidación para el propietario</p>
         <ul>
             <li>alquiler cobrado</li>
             <li>comisión inmobiliaria (honorarios calculados solos)</li>
@@ -89,7 +91,7 @@ const RAW_TEMPLATES: { type: string; name: string; subject: string; content: str
             <li>monto exacto a transferir</li>
         </ul>
 
-        <p style="color: #2563eb; font-weight: bold; margin-top: 20px;">Liquidación para el inquilino (Recibo)</p>
+        <p style="color: ${EMAIL_COLORS.link}; font-weight: bold; margin-top: 20px;">Liquidación para el inquilino (Recibo)</p>
         <ul>
             <li>alquiler del período</li>
             <li>aumentos indexados aplicados</li>
@@ -114,7 +116,7 @@ const RAW_TEMPLATES: { type: string; name: string; subject: string; content: str
         </ul>
         <p>La idea de nuestro sistema es ahorrar el tiempo administrativo que consume tu energía, para que puedas enfocarte en lo que de verdad importa: concretar ventas y captar más clientes.</p>
         <div style="text-align: center; margin: 30px 0;">
-            <a href="https://zetaprop.com.ar/" style="background-color: #0f172a; color: white; padding: 12px 25px; text-decoration: none; border-radius: 6px; font-weight: bold; display: inline-block;">Ver Funciones Premium</a>
+            <a href="https://zetaprop.com.ar/" style="background-color: ${EMAIL_COLORS.text}; color: #ffffff; padding: 12px 25px; text-decoration: none; border-radius: 6px; font-weight: bold; display: inline-block;">Ver Funciones Premium</a>
         </div>
         `
     },
@@ -196,7 +198,7 @@ const RAW_TEMPLATES: { type: string; name: string; subject: string; content: str
         name: 'Nueva Consulta CRM',
         subject: '📥 Tienes una nueva consulta en Zeta Prop',
         content: `
-        <h2 style="color: #2563eb; border-bottom: 2px solid #e2e8f0; padding-bottom: 10px; margin-top: 0;">¡Llegó un Interesado!</h2>
+        <h2 style="color: ${EMAIL_COLORS.link}; border-bottom: 2px solid #e2e8f0; padding-bottom: 10px; margin-top: 0;">¡Llegó un Interesado!</h2>
         <p>Hola {{userName}},</p>
         <p>Estás recibiendo este alerta del sistema porque un usuario solicitó información de una de tus oportunidades vigentes:</p>
         <ul style="background-color: #f8fafc; padding: 20px 40px; border-radius: 8px;">

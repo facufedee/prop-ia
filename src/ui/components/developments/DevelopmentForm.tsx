@@ -13,11 +13,11 @@ interface DevelopmentFormProps {
 }
 
 const steps = [
-    { id: 'general', label: 'Información General', icon: <Building2 size={18} /> },
-    { id: 'location', label: 'Ubicación', icon: <MapPin size={18} /> },
-    { id: 'units', label: 'Tipologías y Unidades', icon: <LayoutGrid size={18} /> },
-    { id: 'media', label: 'Imágenes y Branding', icon: <ImageIcon size={18} /> },
-    { id: 'amenities', label: 'Servicios', icon: <CheckCircle size={18} /> }
+    { id: 'general', label: 'Información General', icon: <Building2 strokeWidth={1.5} size={18} /> },
+    { id: 'location', label: 'Ubicación', icon: <MapPin strokeWidth={1.5} size={18} /> },
+    { id: 'units', label: 'Tipologías y Unidades', icon: <LayoutGrid strokeWidth={1.5} size={18} /> },
+    { id: 'media', label: 'Imágenes y Branding', icon: <ImageIcon strokeWidth={1.5} size={18} /> },
+    { id: 'amenities', label: 'Servicios', icon: <CheckCircle strokeWidth={1.5} size={18} /> }
 ];
 
 const emptyUnit: DevelopmentUnit = {
@@ -161,21 +161,21 @@ export default function DevelopmentForm({ initialData, isEditing = false }: Deve
                     <div className="space-y-6 animate-in fade-in">
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                             <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-1">Nombre del Proyecto</label>
+                                <label className="block text-sm font-medium text-[var(--color-ink-2)] mb-1">Nombre del Proyecto</label>
                                 <input
                                     type="text"
                                     value={formData.name}
                                     onChange={e => handleChange('name', e.target.value)}
-                                    className="w-full p-3 border border-gray-300 rounded-xl text-gray-900"
+                                    className="w-full p-3 border border-[var(--color-rule)] rounded-xl text-[var(--color-ink)]"
                                     placeholder="Ej: Grand Tower Palermo"
                                 />
                             </div>
                             <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-1">Estado de Obra</label>
+                                <label className="block text-sm font-medium text-[var(--color-ink-2)] mb-1">Estado de Obra</label>
                                 <select
                                     value={formData.status}
                                     onChange={e => handleChange('status', e.target.value)}
-                                    className="w-full p-3 border border-gray-300 rounded-xl text-gray-900 bg-white"
+                                    className="w-full p-3 border border-[var(--color-rule)] rounded-xl text-[var(--color-ink)] bg-[var(--color-paper-2)]"
                                 >
                                     <option value="en-pozo">En Pozo</option>
                                     <option value="en-construccion">En Construcción</option>
@@ -183,30 +183,30 @@ export default function DevelopmentForm({ initialData, isEditing = false }: Deve
                                 </select>
                             </div>
                             <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-1">Fecha de Entrega (Estimada)</label>
+                                <label className="block text-sm font-medium text-[var(--color-ink-2)] mb-1">Fecha de Entrega (Estimada)</label>
                                 <input
                                     type="date"
                                     value={formData.delivery_date ? new Date(formData.delivery_date).toISOString().split('T')[0] : ''}
                                     onChange={e => handleChange('delivery_date', e.target.value)}
-                                    className="w-full p-3 border border-gray-300 rounded-xl text-gray-900"
+                                    className="w-full p-3 border border-[var(--color-rule)] rounded-xl text-[var(--color-ink)]"
                                 />
                             </div>
                             <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-1">Desarrolladora (Firma)</label>
+                                <label className="block text-sm font-medium text-[var(--color-ink-2)] mb-1">Desarrolladora (Firma)</label>
                                 <input
                                     type="text"
                                     value={formData.developer || ''}
                                     onChange={e => handleChange('developer', e.target.value)}
-                                    className="w-full p-3 border border-gray-300 rounded-xl text-gray-900"
+                                    className="w-full p-3 border border-[var(--color-rule)] rounded-xl text-[var(--color-ink)]"
                                     placeholder="Ej: Grupo Construir S.A."
                                 />
                             </div>
                             <div className="md:col-span-2">
-                                <label className="block text-sm font-medium text-gray-700 mb-1">Descripción Comercial</label>
+                                <label className="block text-sm font-medium text-[var(--color-ink-2)] mb-1">Descripción Comercial</label>
                                 <textarea
                                     value={formData.description}
                                     onChange={e => handleChange('description', e.target.value)}
-                                    className="w-full p-3 border border-gray-300 rounded-xl text-gray-900 h-32"
+                                    className="w-full p-3 border border-[var(--color-rule)] rounded-xl text-[var(--color-ink)] h-32"
                                     placeholder="Descripción atractiva del proyecto..."
                                 />
                             </div>
@@ -218,42 +218,42 @@ export default function DevelopmentForm({ initialData, isEditing = false }: Deve
                     <div className="space-y-6 animate-in fade-in">
                         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                             <div className="md:col-span-2">
-                                <label className="block text-sm font-medium text-gray-700 mb-1">Dirección Exacta</label>
+                                <label className="block text-sm font-medium text-[var(--color-ink-2)] mb-1">Dirección Exacta</label>
                                 <input
                                     type="text"
                                     value={formData.address || ''}
                                     onChange={e => handleChange('address', e.target.value)}
-                                    className="w-full p-3 border border-gray-300 rounded-xl text-gray-900"
+                                    className="w-full p-3 border border-[var(--color-rule)] rounded-xl text-[var(--color-ink)]"
                                     placeholder="Calle y Altura"
                                 />
                             </div>
                             <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-1">Localidad</label>
+                                <label className="block text-sm font-medium text-[var(--color-ink-2)] mb-1">Localidad</label>
                                 <input
                                     type="text"
                                     value={formData.city || ''}
                                     onChange={e => handleChange('city', e.target.value)}
-                                    className="w-full p-3 border border-gray-300 rounded-xl text-gray-900"
+                                    className="w-full p-3 border border-[var(--color-rule)] rounded-xl text-[var(--color-ink)]"
                                 />
                             </div>
                             <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-1">Provincia</label>
+                                <label className="block text-sm font-medium text-[var(--color-ink-2)] mb-1">Provincia</label>
                                 <input
                                     type="text"
                                     value={formData.province || ''}
                                     onChange={e => handleChange('province', e.target.value)}
-                                    className="w-full p-3 border border-gray-300 rounded-xl text-gray-900"
+                                    className="w-full p-3 border border-[var(--color-rule)] rounded-xl text-[var(--color-ink)]"
                                 />
                             </div>
                         </div>
                         {/* Map Integration */}
-                        <div className="bg-gray-100 rounded-xl h-96 overflow-hidden border border-gray-300 relative">
+                        <div className="bg-[var(--color-paper-3)] rounded-xl h-96 overflow-hidden border border-[var(--color-rule)] relative">
                             <GoogleMapComponent
                                 lat={formData.lat || -34.6037}
                                 lng={formData.lng || -58.3816}
                                 onLocationSelect={handleLocationSelect}
                             />
-                            <div className="absolute top-4 left-4 bg-white/90 backdrop-blur px-3 py-1.5 rounded-lg shadow-sm text-xs font-medium text-gray-700 pointer-events-none">
+                            <div className="absolute top-4 left-4 bg-[var(--color-paper-2)]/90 backdrop-blur px-3 py-1.5 rounded-lg shadow-sm text-xs font-medium text-[var(--color-ink-2)] pointer-events-none">
                                 Hacé click en el mapa para ajustar la ubicación
                             </div>
                         </div>
@@ -264,24 +264,24 @@ export default function DevelopmentForm({ initialData, isEditing = false }: Deve
                     <div className="space-y-6 animate-in fade-in">
                         <div className="flex justify-between items-center mb-4">
                             <h3 className="font-semibold text-lg">Tipologías Disponibles</h3>
-                            <button onClick={handleUnitAdd} className="bg-black text-white px-3 py-2 rounded-lg text-sm flex items-center gap-2">
-                                <Plus size={16} /> Agregar Tipología
+                            <button onClick={handleUnitAdd} className="bg-[var(--color-ink)] text-[var(--color-paper)] px-3 py-2 rounded-lg text-sm flex items-center gap-2">
+                                <Plus strokeWidth={1.5} size={16} /> Agregar Tipología
                             </button>
                         </div>
 
                         <div className="space-y-4">
                             {formData.units?.map((unit, index) => (
-                                <div key={index} className="bg-gray-50 border border-gray-200 p-4 rounded-xl relative group">
+                                <div key={index} className="bg-[var(--color-paper)] border border-[var(--color-rule)] p-4 rounded-xl relative group">
                                     <button
                                         onClick={() => handleUnitRemove(index)}
-                                        className="absolute top-2 right-2 text-gray-400 hover:text-red-600 p-1"
+                                        className="absolute top-2 right-2 text-[var(--color-neutral)] hover:text-[var(--color-danger)] p-1"
                                     >
-                                        <Trash2 size={16} />
+                                        <Trash2 strokeWidth={1.5} size={16} />
                                     </button>
 
                                     <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-4">
                                         <div className="md:col-span-2">
-                                            <label className="text-xs font-bold text-gray-500 uppercase">Nombre</label>
+                                            <label className="text-xs font-bold text-[var(--color-muted)] uppercase">Nombre</label>
                                             <input
                                                 type="text"
                                                 value={unit.name}
@@ -291,7 +291,7 @@ export default function DevelopmentForm({ initialData, isEditing = false }: Deve
                                             />
                                         </div>
                                         <div>
-                                            <label className="text-xs font-bold text-gray-500 uppercase">Tipo</label>
+                                            <label className="text-xs font-bold text-[var(--color-muted)] uppercase">Tipo</label>
                                             <select
                                                 value={unit.type}
                                                 onChange={e => handleUnitChange(index, 'type', e.target.value)}
@@ -307,7 +307,7 @@ export default function DevelopmentForm({ initialData, isEditing = false }: Deve
                                             </select>
                                         </div>
                                         <div>
-                                            <label className="text-xs font-bold text-gray-500 uppercase">Estado</label>
+                                            <label className="text-xs font-bold text-[var(--color-muted)] uppercase">Estado</label>
                                             <select
                                                 value={unit.status}
                                                 onChange={e => handleUnitChange(index, 'status', e.target.value)}
@@ -321,7 +321,7 @@ export default function DevelopmentForm({ initialData, isEditing = false }: Deve
                                     </div>
                                     <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                                         <div>
-                                            <label className="text-xs font-bold text-gray-500 uppercase">Precio Min ({unit.price_currency})</label>
+                                            <label className="text-xs font-bold text-[var(--color-muted)] uppercase">Precio Min ({unit.price_currency})</label>
                                             <input
                                                 type="number"
                                                 value={unit.price_min}
@@ -330,7 +330,7 @@ export default function DevelopmentForm({ initialData, isEditing = false }: Deve
                                             />
                                         </div>
                                         <div>
-                                            <label className="text-xs font-bold text-gray-500 uppercase">Sup. Cubierta (m²)</label>
+                                            <label className="text-xs font-bold text-[var(--color-muted)] uppercase">Sup. Cubierta (m²)</label>
                                             <input
                                                 type="number"
                                                 value={unit.area_covered}
@@ -339,7 +339,7 @@ export default function DevelopmentForm({ initialData, isEditing = false }: Deve
                                             />
                                         </div>
                                         <div>
-                                            <label className="text-xs font-bold text-gray-500 uppercase">Baños</label>
+                                            <label className="text-xs font-bold text-[var(--color-muted)] uppercase">Baños</label>
                                             <input
                                                 type="number"
                                                 value={unit.bathrooms}
@@ -351,7 +351,7 @@ export default function DevelopmentForm({ initialData, isEditing = false }: Deve
                                 </div>
                             ))}
                             {(!formData.units || formData.units.length === 0) && (
-                                <p className="text-center text-gray-500 py-4 italic">No has cargado tipologías aún. Agregá al menos una.</p>
+                                <p className="text-center text-[var(--color-muted)] py-4 italic">No has cargado tipologías aún. Agregá al menos una.</p>
                             )}
                         </div>
                     </div>
@@ -359,12 +359,12 @@ export default function DevelopmentForm({ initialData, isEditing = false }: Deve
             case 3: // Media
                 return (
                     <div className="space-y-6 animate-in fade-in">
-                        <div className="border-2 border-dashed border-gray-300 rounded-xl p-8 text-center hover:bg-gray-50 transition">
+                        <div className="border-2 border-dashed border-[var(--color-rule)] rounded-xl p-8 text-center hover:bg-[var(--color-paper-3)] transition">
                             <input type="file" multiple accept="image/*" onChange={handleImageSelect} className="hidden" id="imgs" />
                             <label htmlFor="imgs" className="cursor-pointer flex flex-col items-center gap-2">
-                                <Upload className="w-10 h-10 text-gray-400" />
+                                <Upload strokeWidth={1.5} className="w-10 h-10 text-[var(--color-neutral)]" />
                                 <span className="font-medium">Hacé click para subir imágenes</span>
-                                <span className="text-xs text-gray-500">Renders, planos y fotos de obra</span>
+                                <span className="text-xs text-[var(--color-muted)]">Renders, planos y fotos de obra</span>
                             </label>
                         </div>
                         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
@@ -382,7 +382,7 @@ export default function DevelopmentForm({ initialData, isEditing = false }: Deve
                         <h3 className="font-semibold text-lg">Servicios y Amenities</h3>
                         <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
                             {['Piscina', 'SUM', 'Gimnasio', 'Seguridad 24hs', 'Parrilla', 'Solarium', 'Cocheras', 'Laundry', 'Coworking'].map(amenity => (
-                                <label key={amenity} className="flex items-center gap-2 p-3 border rounded-lg cursor-pointer hover:bg-gray-50">
+                                <label key={amenity} className="flex items-center gap-2 p-3 border rounded-lg cursor-pointer hover:bg-[var(--color-paper-3)]">
                                     <input
                                         type="checkbox"
                                         checked={formData.amenities?.includes(amenity) || false}
@@ -390,7 +390,7 @@ export default function DevelopmentForm({ initialData, isEditing = false }: Deve
                                             if (e.target.checked) setFormData(prev => ({ ...prev, amenities: [...(prev.amenities || []), amenity] }));
                                             else setFormData(prev => ({ ...prev, amenities: prev.amenities?.filter(a => a !== amenity) }));
                                         }}
-                                        className="rounded text-black focus:ring-black"
+                                        className="rounded text-[var(--color-ink)] focus:ring-[var(--color-rule)]"
                                     />
                                     <span className="text-sm">{amenity}</span>
                                 </label>
@@ -398,7 +398,7 @@ export default function DevelopmentForm({ initialData, isEditing = false }: Deve
                         </div>
 
                         <div className="mt-8">
-                            <label className="block text-sm font-medium text-gray-700 mb-2">Detalle de Financiación (Opcional)</label>
+                            <label className="block text-sm font-medium text-[var(--color-ink-2)] mb-2">Detalle de Financiación (Opcional)</label>
                             <textarea
                                 value={formData.financing_details || ''}
                                 onChange={e => handleChange('financing_details', e.target.value)}
@@ -413,14 +413,14 @@ export default function DevelopmentForm({ initialData, isEditing = false }: Deve
     };
 
     return (
-        <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden flex flex-col md:flex-row min-h-[600px]">
+        <div className="bg-[var(--color-paper-2)] rounded-2xl shadow-sm border border-[var(--color-rule-2)] overflow-hidden flex flex-col md:flex-row min-h-[600px]">
             {/* Sidebar Steps */}
-            <div className="w-full md:w-64 bg-gray-50 border-r border-gray-100 p-4 md:flex flex-col gap-2 hidden">
+            <div className="w-full md:w-64 bg-[var(--color-paper)] border-r border-[var(--color-rule-2)] p-4 md:flex flex-col gap-2 hidden">
                 {steps.map((step, idx) => (
                     <button
                         key={step.id}
                         onClick={() => setCurrentStep(idx)}
-                        className={`text-left px-4 py-3 rounded-xl flex items-center gap-3 transition ${currentStep === idx ? 'bg-black text-white shadow-md' : 'text-gray-600 hover:bg-gray-200'}`}
+                        className={`text-left px-4 py-3 rounded-xl flex items-center gap-3 transition ${currentStep === idx ? 'bg-[var(--color-ink)] text-[var(--color-paper)] shadow-md' : 'text-[var(--color-ink-2)] hover:bg-[var(--color-paper-4)]'}`}
                     >
                         {step.icon}
                         <span className="text-sm font-medium">{step.label}</span>
@@ -429,12 +429,12 @@ export default function DevelopmentForm({ initialData, isEditing = false }: Deve
             </div>
 
             {/* Mobile Tabs */}
-            <div className="md:hidden flex overflow-x-auto gap-2 p-4 bg-gray-50 border-b border-gray-100">
+            <div className="md:hidden flex overflow-x-auto gap-2 p-4 bg-[var(--color-paper)] border-b border-[var(--color-rule-2)]">
                 {steps.map((step, idx) => (
                     <button
                         key={step.id}
                         onClick={() => setCurrentStep(idx)}
-                        className={`flex-shrink-0 px-4 py-2 rounded-full text-xs font-bold whitespace-nowrap transition ${currentStep === idx ? 'bg-black text-white' : 'bg-white border text-gray-600'}`}
+                        className={`flex-shrink-0 px-4 py-2 rounded-full text-xs font-bold whitespace-nowrap transition ${currentStep === idx ? 'bg-[var(--color-ink)] text-[var(--color-paper)]' : 'bg-[var(--color-paper-2)] border text-[var(--color-ink-2)]'}`}
                     >
                         {step.label}
                     </button>
@@ -444,16 +444,16 @@ export default function DevelopmentForm({ initialData, isEditing = false }: Deve
             {/* Content Area */}
             <div className="flex-1 p-6 md:p-8 flex flex-col">
                 <div className="flex-1">
-                    <h2 className="text-2xl font-bold text-gray-900 mb-6">{steps[currentStep].label}</h2>
+                    <h2 className="text-2xl font-bold text-[var(--color-ink)] mb-6">{steps[currentStep].label}</h2>
                     {renderStepContent()}
                 </div>
 
                 {/* Footer Controls */}
-                <div className="mt-8 pt-6 border-t border-gray-100 flex justify-between">
+                <div className="mt-8 pt-6 border-t border-[var(--color-rule-2)] flex justify-between">
                     <button
                         onClick={() => setCurrentStep(prev => Math.max(0, prev - 1))}
                         disabled={currentStep === 0}
-                        className="px-6 py-2 rounded-xl text-gray-600 hover:bg-gray-100 disabled:opacity-50"
+                        className="px-6 py-2 rounded-xl text-[var(--color-ink-2)] hover:bg-[var(--color-paper-3)] disabled:opacity-50"
                     >
                         Anterior
                     </button>
@@ -461,7 +461,7 @@ export default function DevelopmentForm({ initialData, isEditing = false }: Deve
                     {currentStep < steps.length - 1 ? (
                         <button
                             onClick={() => setCurrentStep(prev => Math.min(steps.length - 1, prev + 1))}
-                            className="px-6 py-2 bg-black text-white rounded-xl hover:bg-gray-800"
+                            className="px-6 py-2 bg-[var(--color-ink)] text-[var(--color-paper)] rounded-xl hover:bg-[var(--color-ink-2)]"
                         >
                             Siguiente
                         </button>
@@ -469,9 +469,9 @@ export default function DevelopmentForm({ initialData, isEditing = false }: Deve
                         <button
                             onClick={handleSubmit}
                             disabled={loading}
-                            className="px-8 py-2 bg-indigo-600 text-white rounded-xl hover:bg-indigo-700 font-bold flex items-center gap-2"
+                            className="px-8 py-2 bg-[var(--color-ink)] text-[var(--color-paper)] rounded-xl hover:bg-[var(--color-ink-2)] font-bold flex items-center gap-2"
                         >
-                            {loading && <Loader2 className="animate-spin" size={18} />}
+                            {loading && <Loader2 strokeWidth={1.5} className="animate-spin" size={18} />}
                             {isEditing ? 'Guardar Cambios' : 'Crear Emprendimiento'}
                         </button>
                     )}

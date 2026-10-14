@@ -70,7 +70,7 @@ export default function ComisionesConfigPage() {
     if (loading) {
         return (
             <div className="p-6 flex items-center justify-center min-h-[400px]">
-                <div className="text-gray-500">Cargando configuración...</div>
+                <div className="text-[var(--color-muted)]">Cargando configuración...</div>
             </div>
         );
     }
@@ -79,54 +79,54 @@ export default function ComisionesConfigPage() {
         <div className="p-6 max-w-4xl mx-auto space-y-6">
             {/* Header */}
             <div>
-                <h1 className="text-2xl font-bold text-gray-900">Configuración de Comisiones</h1>
-                <p className="text-gray-500">Configura los porcentajes de comisión por defecto para nuevos agentes</p>
+                <h1 className="font-heading text-2xl font-bold text-[var(--color-ink)]">Configuración de Comisiones</h1>
+                <p className="text-[var(--color-muted)]">Configura los porcentajes de comisión por defecto para nuevos agentes</p>
             </div>
 
             {/* Info Cards */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <div className="bg-gradient-to-br from-blue-50 to-blue-100 rounded-xl p-6 border border-blue-200">
+                <div className="bg-[var(--color-paper-2)] rounded-xl p-6 border border-[var(--color-rule)]">
                     <div className="flex items-center gap-3 mb-2">
-                        <div className="p-2 bg-blue-600 rounded-lg">
-                            <DollarSign className="w-5 h-5 text-white" />
+                        <div className="p-2 bg-[var(--color-paper-3)] rounded-full">
+                            <DollarSign strokeWidth={1.5} className="w-5 h-5 text-[var(--color-muted)]" />
                         </div>
-                        <h3 className="font-semibold text-blue-900">Ventas</h3>
+                        <h3 className="font-semibold text-[var(--color-ink)]">Ventas</h3>
                     </div>
-                    <p className="text-sm text-blue-700">Comisión por venta de propiedades de la inmobiliaria</p>
+                    <p className="text-sm text-[var(--color-muted)]">Comisión por venta de propiedades de la inmobiliaria</p>
                 </div>
 
-                <div className="bg-gradient-to-br from-green-50 to-green-100 rounded-xl p-6 border border-green-200">
+                <div className="bg-[var(--color-paper-2)] rounded-xl p-6 border border-[var(--color-rule)]">
                     <div className="flex items-center gap-3 mb-2">
-                        <div className="p-2 bg-green-600 rounded-lg">
-                            <TrendingUp className="w-5 h-5 text-white" />
+                        <div className="p-2 bg-[var(--color-paper-3)] rounded-full">
+                            <TrendingUp strokeWidth={1.5} className="w-5 h-5 text-[var(--color-muted)]" />
                         </div>
-                        <h3 className="font-semibold text-green-900">Alquileres</h3>
+                        <h3 className="font-semibold text-[var(--color-ink)]">Alquileres</h3>
                     </div>
-                    <p className="text-sm text-green-700">Comisión por cierre de contratos de alquiler</p>
+                    <p className="text-sm text-[var(--color-muted)]">Comisión por cierre de contratos de alquiler</p>
                 </div>
 
-                <div className="bg-gradient-to-br from-purple-50 to-purple-100 rounded-xl p-6 border border-purple-200">
+                <div className="bg-[var(--color-paper-2)] rounded-xl p-6 border border-[var(--color-rule)]">
                     <div className="flex items-center gap-3 mb-2">
-                        <div className="p-2 bg-purple-600 rounded-lg">
-                            <Award className="w-5 h-5 text-white" />
+                        <div className="p-2 bg-[var(--color-paper-3)] rounded-full">
+                            <Award strokeWidth={1.5} className="w-5 h-5 text-[var(--color-muted)]" />
                         </div>
-                        <h3 className="font-semibold text-purple-900">Prop. Propia</h3>
+                        <h3 className="font-semibold text-[var(--color-ink)]">Prop. Propia</h3>
                     </div>
-                    <p className="text-sm text-purple-700">Comisión extra si el agente trajo la propiedad</p>
+                    <p className="text-sm text-[var(--color-muted)]">Comisión extra si el agente trajo la propiedad</p>
                 </div>
             </div>
 
             {/* Form */}
-            <form onSubmit={handleSubmit} className="bg-white rounded-xl border border-gray-200 p-6 space-y-6">
+            <form onSubmit={handleSubmit} className="bg-[var(--color-paper-2)] rounded-xl border border-[var(--color-rule)] p-6 space-y-6">
                 <div>
-                    <h3 className="text-lg font-semibold text-gray-900 mb-4">Comisiones por Defecto</h3>
-                    <p className="text-sm text-gray-600 mb-6">
+                    <h3 className="text-lg font-semibold text-[var(--color-ink)] mb-4">Comisiones por Defecto</h3>
+                    <p className="text-sm text-[var(--color-ink-2)] mb-6">
                         Estos valores se aplicarán automáticamente al crear nuevos agentes. Puedes personalizarlos individualmente después.
                     </p>
 
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                         <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-2">
+                            <label className="block text-sm font-medium text-[var(--color-ink-2)] mb-2">
                                 Comisión Venta (%)
                             </label>
                             <div className="relative">
@@ -136,17 +136,17 @@ export default function ComisionesConfigPage() {
                                     min="0"
                                     max="100"
                                     step="0.1"
-                                    className="w-full p-3 pr-10 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                                    className="w-full p-3 pr-10 border border-[var(--color-rule)] rounded-lg focus:ring-2 focus:ring-[var(--color-accent)]/40 focus:border-[var(--color-accent)]"
                                     value={formData.comisionVentaDefault}
                                     onChange={(e) => handleChange("comisionVentaDefault", e.target.value)}
                                 />
-                                <span className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500">%</span>
+                                <span className="absolute right-3 top-1/2 -translate-y-1/2 text-[var(--color-muted)]">%</span>
                             </div>
-                            <p className="text-xs text-gray-500 mt-1">Típicamente 2-5%</p>
+                            <p className="text-xs text-[var(--color-muted)] mt-1">Típicamente 2-5%</p>
                         </div>
 
                         <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-2">
+                            <label className="block text-sm font-medium text-[var(--color-ink-2)] mb-2">
                                 Comisión Alquiler (%)
                             </label>
                             <div className="relative">
@@ -156,17 +156,17 @@ export default function ComisionesConfigPage() {
                                     min="0"
                                     max="100"
                                     step="0.1"
-                                    className="w-full p-3 pr-10 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                                    className="w-full p-3 pr-10 border border-[var(--color-rule)] rounded-lg focus:ring-2 focus:ring-[var(--color-accent)]/40 focus:border-[var(--color-accent)]"
                                     value={formData.comisionAlquilerDefault}
                                     onChange={(e) => handleChange("comisionAlquilerDefault", e.target.value)}
                                 />
-                                <span className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500">%</span>
+                                <span className="absolute right-3 top-1/2 -translate-y-1/2 text-[var(--color-muted)]">%</span>
                             </div>
-                            <p className="text-xs text-gray-500 mt-1">% del primer mes (típicamente 50%)</p>
+                            <p className="text-xs text-[var(--color-muted)] mt-1">% del primer mes (típicamente 50%)</p>
                         </div>
 
                         <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-2">
+                            <label className="block text-sm font-medium text-[var(--color-ink-2)] mb-2">
                                 Comisión Propiedad Propia (%)
                             </label>
                             <div className="relative">
@@ -176,51 +176,51 @@ export default function ComisionesConfigPage() {
                                     min="0"
                                     max="100"
                                     step="0.1"
-                                    className="w-full p-3 pr-10 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                                    className="w-full p-3 pr-10 border border-[var(--color-rule)] rounded-lg focus:ring-2 focus:ring-[var(--color-accent)]/40 focus:border-[var(--color-accent)]"
                                     value={formData.comisionPropiedadPropiaDefault}
                                     onChange={(e) => handleChange("comisionPropiedadPropiaDefault", e.target.value)}
                                 />
-                                <span className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500">%</span>
+                                <span className="absolute right-3 top-1/2 -translate-y-1/2 text-[var(--color-muted)]">%</span>
                             </div>
-                            <p className="text-xs text-gray-500 mt-1">Incentivo por traer propiedades</p>
+                            <p className="text-xs text-[var(--color-muted)] mt-1">Incentivo por traer propiedades</p>
                         </div>
                     </div>
                 </div>
 
                 {/* Ejemplos */}
-                <div className="border-t border-gray-200 pt-6">
-                    <h4 className="text-sm font-semibold text-gray-900 mb-4">Ejemplos de Cálculo</h4>
+                <div className="border-t border-[var(--color-rule)] pt-6">
+                    <h4 className="text-sm font-semibold text-[var(--color-ink)] mb-4">Ejemplos de Cálculo</h4>
 
                     <div className="space-y-4">
                         {/* Ejemplo 1 */}
-                        <div className="p-4 bg-gray-50 rounded-lg">
-                            <p className="text-sm font-medium text-gray-900 mb-2">Venta de $100,000 (Propiedad de la Inmobiliaria)</p>
-                            <div className="text-sm text-gray-700 space-y-1">
+                        <div className="p-4 bg-[var(--color-paper)] rounded-lg">
+                            <p className="text-sm font-medium text-[var(--color-ink)] mb-2">Venta de $100,000 (Propiedad de la Inmobiliaria)</p>
+                            <div className="text-sm text-[var(--color-ink-2)] space-y-1">
                                 <p>• Comisión = $100,000 × {formData.comisionVentaDefault}%</p>
-                                <p className="font-semibold text-indigo-600">
+                                <p className="font-semibold text-[var(--color-accent)]">
                                     = ${(100000 * parseFloat(formData.comisionVentaDefault) / 100).toLocaleString()}
                                 </p>
                             </div>
                         </div>
 
                         {/* Ejemplo 2 */}
-                        <div className="p-4 bg-gray-50 rounded-lg">
-                            <p className="text-sm font-medium text-gray-900 mb-2">Venta de $100,000 (Propiedad del Agente)</p>
-                            <div className="text-sm text-gray-700 space-y-1">
+                        <div className="p-4 bg-[var(--color-paper)] rounded-lg">
+                            <p className="text-sm font-medium text-[var(--color-ink)] mb-2">Venta de $100,000 (Propiedad del Agente)</p>
+                            <div className="text-sm text-[var(--color-ink-2)] space-y-1">
                                 <p>• Comisión Base = $100,000 × {formData.comisionVentaDefault}% = ${(100000 * parseFloat(formData.comisionVentaDefault) / 100).toLocaleString()}</p>
                                 <p>• Comisión Extra = $100,000 × {formData.comisionPropiedadPropiaDefault}% = ${(100000 * parseFloat(formData.comisionPropiedadPropiaDefault) / 100).toLocaleString()}</p>
-                                <p className="font-semibold text-indigo-600">
+                                <p className="font-semibold text-[var(--color-accent)]">
                                     Total = ${(100000 * (parseFloat(formData.comisionVentaDefault) + parseFloat(formData.comisionPropiedadPropiaDefault)) / 100).toLocaleString()}
                                 </p>
                             </div>
                         </div>
 
                         {/* Ejemplo 3 */}
-                        <div className="p-4 bg-gray-50 rounded-lg">
-                            <p className="text-sm font-medium text-gray-900 mb-2">Alquiler de $50,000/mes</p>
-                            <div className="text-sm text-gray-700 space-y-1">
+                        <div className="p-4 bg-[var(--color-paper)] rounded-lg">
+                            <p className="text-sm font-medium text-[var(--color-ink)] mb-2">Alquiler de $50,000/mes</p>
+                            <div className="text-sm text-[var(--color-ink-2)] space-y-1">
                                 <p>• Comisión = $50,000 × {formData.comisionAlquilerDefault}%</p>
-                                <p className="font-semibold text-indigo-600">
+                                <p className="font-semibold text-[var(--color-accent)]">
                                     = ${(50000 * parseFloat(formData.comisionAlquilerDefault) / 100).toLocaleString()}
                                 </p>
                             </div>
@@ -229,22 +229,22 @@ export default function ComisionesConfigPage() {
                 </div>
 
                 {/* Save Button */}
-                <div className="flex justify-end pt-6 border-t border-gray-200">
+                <div className="flex justify-end pt-6 border-t border-[var(--color-rule)]">
                     <button
                         type="submit"
                         disabled={saving}
-                        className="flex items-center gap-2 px-6 py-3 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors disabled:opacity-50"
+                        className="flex items-center gap-2 px-6 py-3 bg-[var(--color-ink)] text-[var(--color-paper)] rounded-lg hover:bg-[var(--color-ink-2)] transition-colors disabled:opacity-50"
                     >
-                        <Save className="w-5 h-5" />
+                        <Save strokeWidth={1.5} className="w-5 h-5" />
                         {saving ? "Guardando..." : "Guardar Configuración"}
                     </button>
                 </div>
             </form>
 
             {/* Info */}
-            <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-                <h4 className="text-sm font-semibold text-blue-900 mb-2">💡 Nota Importante</h4>
-                <ul className="text-sm text-blue-800 space-y-1 list-disc list-inside">
+            <div className="bg-[var(--color-paper-3)] border border-[var(--color-rule)] rounded-lg p-4">
+                <h4 className="text-sm font-semibold text-[var(--color-ink)] mb-2">Nota Importante</h4>
+                <ul className="text-sm text-[var(--color-ink-2)] space-y-1 list-disc list-inside">
                     <li>Estos valores son solo por defecto para nuevos agentes</li>
                     <li>Puedes personalizar las comisiones de cada agente individualmente</li>
                     <li>Los cambios aquí NO afectan a agentes ya creados</li>

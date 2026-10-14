@@ -14,13 +14,13 @@ export default function VentaKanbanColumn({ etapa, ventas }: Props) {
     const cfg = ETAPA_CONFIG[etapa];
 
     return (
-        <div className={`flex flex-col rounded-2xl bg-gray-50/70 border border-gray-200/80 min-w-[280px] max-w-[300px] flex-shrink-0 h-full shadow-sm`}>
+        <div className={`flex flex-col rounded-2xl bg-[var(--color-paper)]/70 border border-[var(--color-rule)]/80 min-w-[280px] max-w-[300px] flex-shrink-0 h-full shadow-sm`}>
             {/* Header */}
-            <div className="px-4 py-3 bg-gray-100/60 rounded-t-2xl border-b border-gray-200/60 sticky top-0 z-10">
+            <div className="px-4 py-3 bg-[var(--color-paper-3)]/60 rounded-t-2xl border-b border-[var(--color-rule)]/60 sticky top-0 z-10">
                 <div className="flex items-center justify-between">
                     <div className="flex items-center gap-2">
                         <div className={`w-7 h-7 rounded-lg ${cfg.bg} ${cfg.color} flex items-center justify-center`}>
-                            <Handshake size={13} />
+                            <Handshake strokeWidth={1.5} size={13} />
                         </div>
                         <span className={`text-sm font-bold ${cfg.color}`}>{cfg.label}</span>
                     </div>
@@ -36,13 +36,13 @@ export default function VentaKanbanColumn({ etapa, ventas }: Props) {
                     <div
                         ref={provided.innerRef}
                         {...provided.droppableProps}
-                        className={`flex-1 p-3 overflow-y-auto transition-colors duration-200 ${snapshot.isDraggingOver ? "bg-indigo-50/40 rounded-b-2xl" : ""}`}
+                        className={`flex-1 p-3 overflow-y-auto transition-colors duration-200 ${snapshot.isDraggingOver ? "bg-[var(--color-accent)]/10 rounded-b-2xl" : ""}`}
                         style={{ minHeight: 120 }}
                     >
                         {ventas.length === 0 && !snapshot.isDraggingOver && (
-                            <div className="flex flex-col items-center justify-center py-8 text-gray-400">
-                                <div className="w-9 h-9 rounded-full bg-gray-100 flex items-center justify-center mb-2">
-                                    <Handshake size={16} className="opacity-30" />
+                            <div className="flex flex-col items-center justify-center py-8 text-[var(--color-neutral)]">
+                                <div className="w-9 h-9 rounded-full bg-[var(--color-paper-3)] flex items-center justify-center mb-2">
+                                    <Handshake strokeWidth={1.5} size={16} className="opacity-30" />
                                 </div>
                                 <p className="text-xs opacity-60">Sin operaciones</p>
                             </div>

@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { useAuth } from "@/ui/context/AuthContext";
 import { differenceInDays } from "date-fns";
 import { useRouter } from "next/navigation";
-import { Sparkles } from "lucide-react";
+import { Clock } from "lucide-react";
 
 const FREE_ROLES = ["Cliente Free", "Cliente Básico"];
 
@@ -44,9 +44,9 @@ export default function TrialBanner() {
     if (daysRemaining < 0) return null;
 
     return (
-        <div className="bg-indigo-600 text-white px-4 py-2 flex flex-col sm:flex-row items-center justify-between gap-2 text-sm relative z-30 shadow-md">
+        <div className="bg-[var(--color-paper-2)] text-[var(--color-ink)] border-b border-[var(--color-rule)] px-4 py-2 flex flex-col sm:flex-row items-center justify-between gap-2 text-sm relative z-30">
             <div className="flex items-center gap-2">
-                <Sparkles className="w-4 h-4 text-yellow-300 animate-pulse" />
+                <Clock strokeWidth={1.5} className="w-4 h-4 text-[var(--color-accent)]" />
                 <p className="font-medium">
                     {daysRemaining === 0
                         ? "¡Último día de tu prueba gratuita!"
@@ -57,7 +57,7 @@ export default function TrialBanner() {
 
             <button
                 onClick={() => router.push('/precios')}
-                className="bg-white text-indigo-700 px-3 py-1 rounded-full text-xs font-bold hover:bg-gray-100 transition-colors shadow-sm whitespace-nowrap"
+                className="bg-[var(--color-ink)] text-[var(--color-paper)] px-3 py-1 rounded-full text-xs font-bold hover:bg-[var(--color-ink-2)] transition-colors whitespace-nowrap"
             >
                 Mejorar Plan
             </button>

@@ -176,46 +176,46 @@ export default function CartelModal({ userId, editingCartel, onClose, onSaved }:
 
     return (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
-            <div className="bg-white rounded-xl shadow-xl w-full max-w-2xl max-h-[90vh] overflow-y-auto">
-                <div className="px-6 py-4 border-b border-gray-100 flex justify-between items-center bg-gray-50 sticky top-0">
-                    <h2 className="text-lg font-bold text-gray-800">
+            <div className="bg-[var(--color-paper-2)] rounded-xl shadow-xl w-full max-w-2xl max-h-[90vh] overflow-y-auto">
+                <div className="px-6 py-4 border-b border-[var(--color-rule-2)] flex justify-between items-center bg-[var(--color-paper)] sticky top-0">
+                    <h2 className="text-lg font-bold text-[var(--color-ink)]">
                         {editingCartel ? `Editar ${editingCartel.codigo}` : "Nuevo Cartel"}
                     </h2>
-                    <button onClick={onClose} className="text-gray-400 hover:text-gray-600">
-                        <X className="w-5 h-5" />
+                    <button onClick={onClose} className="text-[var(--color-neutral)] hover:text-[var(--color-ink-2)]">
+                        <X strokeWidth={1.5} className="w-5 h-5" />
                     </button>
                 </div>
 
                 <form onSubmit={handleSubmit} className="p-6 space-y-4">
                     {/* Photo */}
                     <div className="flex items-center gap-4">
-                        <label className="relative w-24 h-24 rounded-xl border-2 border-dashed border-gray-300 flex items-center justify-center cursor-pointer hover:border-indigo-400 overflow-hidden bg-gray-50 flex-shrink-0">
+                        <label className="relative w-24 h-24 rounded-xl border-2 border-dashed border-[var(--color-rule)] flex items-center justify-center cursor-pointer hover:border-[var(--color-accent)] overflow-hidden bg-[var(--color-paper)] flex-shrink-0">
                             {photoPreview ? (
                                 <img src={photoPreview} alt="Preview" className="w-full h-full object-cover" />
                             ) : (
-                                <Camera className="w-6 h-6 text-gray-400" />
+                                <Camera strokeWidth={1.5} className="w-6 h-6 text-[var(--color-neutral)]" />
                             )}
                             <input type="file" accept="image/*" className="hidden" onChange={handlePhotoChange} />
                         </label>
-                        <p className="text-xs text-gray-500">Foto del cartel o de dónde está ubicado (opcional)</p>
+                        <p className="text-xs text-[var(--color-muted)]">Foto del cartel o de dónde está ubicado (opcional)</p>
                     </div>
 
                     <div className="grid grid-cols-2 gap-4">
                         <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-1">Código interno</label>
+                            <label className="block text-sm font-medium text-[var(--color-ink-2)] mb-1">Código interno</label>
                             <input
                                 type="text"
                                 required
-                                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 text-gray-900"
+                                className="w-full px-3 py-2 border border-[var(--color-rule)] rounded-lg focus:ring-2 focus:ring-[var(--color-accent)]/40 text-[var(--color-ink)]"
                                 value={form.codigo}
                                 onChange={(e) => setForm({ ...form, codigo: e.target.value })}
                             />
                         </div>
                         {branches.length > 0 && (
                             <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-1">Sucursal</label>
+                                <label className="block text-sm font-medium text-[var(--color-ink-2)] mb-1">Sucursal</label>
                                 <select
-                                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 text-gray-900"
+                                    className="w-full px-3 py-2 border border-[var(--color-rule)] rounded-lg focus:ring-2 focus:ring-[var(--color-accent)]/40 text-[var(--color-ink)]"
                                     value={form.branchId}
                                     onChange={(e) => setForm({ ...form, branchId: e.target.value })}
                                 >
@@ -230,9 +230,9 @@ export default function CartelModal({ userId, editingCartel, onClose, onSaved }:
 
                     <div className="grid grid-cols-2 gap-4">
                         <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-1">Tipo</label>
+                            <label className="block text-sm font-medium text-[var(--color-ink-2)] mb-1">Tipo</label>
                             <select
-                                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 text-gray-900"
+                                className="w-full px-3 py-2 border border-[var(--color-rule)] rounded-lg focus:ring-2 focus:ring-[var(--color-accent)]/40 text-[var(--color-ink)]"
                                 value={form.tipo}
                                 onChange={(e) => setForm({ ...form, tipo: e.target.value as CartelTipo })}
                             >
@@ -242,9 +242,9 @@ export default function CartelModal({ userId, editingCartel, onClose, onSaved }:
                             </select>
                         </div>
                         <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-1">Estado</label>
+                            <label className="block text-sm font-medium text-[var(--color-ink-2)] mb-1">Estado</label>
                             <select
-                                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 text-gray-900"
+                                className="w-full px-3 py-2 border border-[var(--color-rule)] rounded-lg focus:ring-2 focus:ring-[var(--color-accent)]/40 text-[var(--color-ink)]"
                                 value={form.estado}
                                 onChange={(e) => setForm({ ...form, estado: e.target.value as CartelEstado })}
                             >
@@ -257,9 +257,9 @@ export default function CartelModal({ userId, editingCartel, onClose, onSaved }:
 
                     <div className="grid grid-cols-2 gap-4">
                         <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-1">Material</label>
+                            <label className="block text-sm font-medium text-[var(--color-ink-2)] mb-1">Material</label>
                             <select
-                                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 text-gray-900"
+                                className="w-full px-3 py-2 border border-[var(--color-rule)] rounded-lg focus:ring-2 focus:ring-[var(--color-accent)]/40 text-[var(--color-ink)]"
                                 value={form.material}
                                 onChange={(e) => setForm({ ...form, material: e.target.value as CartelMaterial })}
                             >
@@ -271,16 +271,16 @@ export default function CartelModal({ userId, editingCartel, onClose, onSaved }:
                                 <input
                                     type="text"
                                     placeholder="Especificar material"
-                                    className="w-full mt-2 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 text-gray-900"
+                                    className="w-full mt-2 px-3 py-2 border border-[var(--color-rule)] rounded-lg focus:ring-2 focus:ring-[var(--color-accent)]/40 text-[var(--color-ink)]"
                                     value={form.materialPersonalizado}
                                     onChange={(e) => setForm({ ...form, materialPersonalizado: e.target.value })}
                                 />
                             )}
                         </div>
                         <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-1">Medida</label>
+                            <label className="block text-sm font-medium text-[var(--color-ink-2)] mb-1">Medida</label>
                             <select
-                                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 text-gray-900"
+                                className="w-full px-3 py-2 border border-[var(--color-rule)] rounded-lg focus:ring-2 focus:ring-[var(--color-accent)]/40 text-[var(--color-ink)]"
                                 value={form.medida}
                                 onChange={(e) => setForm({ ...form, medida: e.target.value as CartelMedida })}
                             >
@@ -292,7 +292,7 @@ export default function CartelModal({ userId, editingCartel, onClose, onSaved }:
                                 <input
                                     type="text"
                                     placeholder="Ej: 60x90 cm"
-                                    className="w-full mt-2 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 text-gray-900"
+                                    className="w-full mt-2 px-3 py-2 border border-[var(--color-rule)] rounded-lg focus:ring-2 focus:ring-[var(--color-accent)]/40 text-[var(--color-ink)]"
                                     value={form.medidaPersonalizada}
                                     onChange={(e) => setForm({ ...form, medidaPersonalizada: e.target.value })}
                                 />
@@ -302,7 +302,7 @@ export default function CartelModal({ userId, editingCartel, onClose, onSaved }:
 
                     {form.estado === "instalado" && (
                         <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-1">Propiedad asociada</label>
+                            <label className="block text-sm font-medium text-[var(--color-ink-2)] mb-1">Propiedad asociada</label>
                             <CartelPropertySelector
                                 userId={userId}
                                 value={form.propiedadId}
@@ -313,48 +313,48 @@ export default function CartelModal({ userId, editingCartel, onClose, onSaved }:
 
                     {form.estado === "almacen" && (
                         <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-1">Ubicación en el almacén</label>
+                            <label className="block text-sm font-medium text-[var(--color-ink-2)] mb-1">Ubicación en el almacén</label>
                             <input
                                 type="text"
                                 placeholder="Ej: Depósito Oeste, estante 3"
-                                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 text-gray-900"
+                                className="w-full px-3 py-2 border border-[var(--color-rule)] rounded-lg focus:ring-2 focus:ring-[var(--color-accent)]/40 text-[var(--color-ink)]"
                                 value={form.ubicacionAlmacen}
                                 onChange={(e) => setForm({ ...form, ubicacionAlmacen: e.target.value })}
                             />
                         </div>
                     )}
 
-                    <div className="border-t border-gray-100 pt-4">
-                        <p className="text-xs font-semibold text-gray-400 uppercase tracking-wide mb-3">Inversión (opcional)</p>
+                    <div className="border-t border-[var(--color-rule-2)] pt-4">
+                        <p className="text-xs font-semibold text-[var(--color-neutral)] uppercase tracking-wide mb-3">Inversión (opcional)</p>
                         <div className="grid grid-cols-3 gap-4">
                             <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-1">Costo adquisición</label>
+                                <label className="block text-sm font-medium text-[var(--color-ink-2)] mb-1">Costo adquisición</label>
                                 <input
                                     type="number"
                                     min={0}
                                     placeholder="$"
-                                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 text-gray-900"
+                                    className="w-full px-3 py-2 border border-[var(--color-rule)] rounded-lg focus:ring-2 focus:ring-[var(--color-accent)]/40 text-[var(--color-ink)]"
                                     value={form.costoAdquisicion}
                                     onChange={(e) => setForm({ ...form, costoAdquisicion: e.target.value })}
                                 />
                             </div>
                             <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-1">Costo instalación</label>
+                                <label className="block text-sm font-medium text-[var(--color-ink-2)] mb-1">Costo instalación</label>
                                 <input
                                     type="number"
                                     min={0}
                                     placeholder="$"
-                                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 text-gray-900"
+                                    className="w-full px-3 py-2 border border-[var(--color-rule)] rounded-lg focus:ring-2 focus:ring-[var(--color-accent)]/40 text-[var(--color-ink)]"
                                     value={form.costoInstalacion}
                                     onChange={(e) => setForm({ ...form, costoInstalacion: e.target.value })}
                                 />
                             </div>
                             <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-1">Proveedor</label>
+                                <label className="block text-sm font-medium text-[var(--color-ink-2)] mb-1">Proveedor</label>
                                 <input
                                     type="text"
                                     placeholder="Ej: Imprenta Lugones"
-                                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 text-gray-900"
+                                    className="w-full px-3 py-2 border border-[var(--color-rule)] rounded-lg focus:ring-2 focus:ring-[var(--color-accent)]/40 text-[var(--color-ink)]"
                                     value={form.proveedor}
                                     onChange={(e) => setForm({ ...form, proveedor: e.target.value })}
                                 />
@@ -363,25 +363,25 @@ export default function CartelModal({ userId, editingCartel, onClose, onSaved }:
                     </div>
 
                     <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">Notas</label>
+                        <label className="block text-sm font-medium text-[var(--color-ink-2)] mb-1">Notas</label>
                         <textarea
                             rows={2}
-                            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 text-gray-900"
+                            className="w-full px-3 py-2 border border-[var(--color-rule)] rounded-lg focus:ring-2 focus:ring-[var(--color-accent)]/40 text-[var(--color-ink)]"
                             value={form.notas}
                             onChange={(e) => setForm({ ...form, notas: e.target.value })}
                         />
                     </div>
 
                     <div className="pt-2 flex justify-end gap-3">
-                        <button type="button" onClick={onClose} className="px-4 py-2 text-gray-700 hover:bg-gray-100 rounded-lg">
+                        <button type="button" onClick={onClose} className="px-4 py-2 text-[var(--color-ink-2)] hover:bg-[var(--color-paper-3)] rounded-lg">
                             Cancelar
                         </button>
                         <button
                             type="submit"
                             disabled={saving}
-                            className="bg-indigo-600 hover:bg-indigo-700 text-white px-6 py-2 rounded-lg font-medium shadow-sm shadow-indigo-200 disabled:opacity-60 flex items-center gap-2"
+                            className="bg-[var(--color-ink)] hover:bg-[var(--color-ink-2)] text-[var(--color-paper)] px-6 py-2 rounded-lg font-medium shadow-sm disabled:opacity-60 flex items-center gap-2"
                         >
-                            {saving && <Loader2 className="w-4 h-4 animate-spin" />}
+                            {saving && <Loader2 strokeWidth={1.5} className="w-4 h-4 animate-spin" />}
                             {editingCartel ? "Guardar Cambios" : "Crear Cartel"}
                         </button>
                     </div>

@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { adminDb } from "@/infrastructure/firebase/admin";
 import { Timestamp } from "firebase-admin/firestore";
 import { sendEmailWithResend } from "@/lib/resend";
+import { EMAIL_COLORS, emailWordmarkHtml } from "@/lib/email/brandColors";
 import { verifyCronSecret } from "@/lib/apiAuth";
 
 /**
@@ -77,9 +78,10 @@ export async function GET(request: NextRequest) {
                     subject: `📅 Visita mañana: ${v.propiedadDireccion} con ${v.clienteNombre}`,
                     html: `
                         <div style="font-family:system-ui,sans-serif;max-width:520px;margin:0 auto;color:#111827">
-                            <div style="background:linear-gradient(135deg,#4f46e5,#7c3aed);padding:28px 32px;border-radius:16px 16px 0 0">
-                                <h1 style="color:white;margin:0;font-size:20px">📅 Visita programada para mañana</h1>
-                                <p style="color:rgba(255,255,255,0.8);margin:6px 0 0;font-size:14px">Recordatorio automático — ZetaProp</p>
+                            <div style="background:${EMAIL_COLORS.headerBg};border-bottom:3px solid ${EMAIL_COLORS.buttonBg};padding:28px 32px;border-radius:16px 16px 0 0">
+                                <div style="margin:0 0 12px">${emailWordmarkHtml(18)}</div>
+                                <h1 style="color:${EMAIL_COLORS.headerText};margin:0;font-size:20px">📅 Visita programada para mañana</h1>
+                                <p style="color:${EMAIL_COLORS.headerText};opacity:0.8;margin:6px 0 0;font-size:14px">Recordatorio automático — ZetaProp</p>
                             </div>
                             <div style="background:#fff;padding:28px 32px;border:1px solid #e5e7eb;border-top:none;border-radius:0 0 16px 16px">
                                 <table style="width:100%;border-collapse:collapse;margin-bottom:24px">
@@ -91,7 +93,7 @@ export async function GET(request: NextRequest) {
                                     ${v.notasPrevias ? `<tr><td style="padding:8px 0;color:#6b7280;font-size:14px">📝 Notas</td><td style="padding:8px 0;color:#4b5563;font-style:italic">${v.notasPrevias}</td></tr>` : ""}
                                 </table>
                                 <a href="https://zetaprop.com.ar/dashboard/calendario/${doc.id}"
-                                   style="display:inline-block;padding:12px 24px;background:#4f46e5;color:white;border-radius:10px;text-decoration:none;font-weight:600;font-size:14px">
+                                   style="display:inline-block;padding:12px 24px;background:${EMAIL_COLORS.buttonBg};color:${EMAIL_COLORS.buttonText};border-radius:10px;text-decoration:none;font-weight:600;font-size:14px">
                                     Ver detalle de la visita →
                                 </a>
                             </div>

@@ -263,30 +263,30 @@ export default function NuevaVentaPage() {
         <div className="max-w-2xl mx-auto">
             <Link
                 href="/dashboard/ventas"
-                className="inline-flex items-center gap-2 text-sm text-gray-500 hover:text-gray-700 mb-6 transition-colors"
+                className="inline-flex items-center gap-2 text-sm text-[var(--color-muted)] hover:text-[var(--color-ink-2)] mb-6 transition-colors"
             >
-                <ArrowLeft size={16} /> Volver a Ventas
+                <ArrowLeft strokeWidth={1.5} size={16} /> Volver a Ventas
             </Link>
 
-            <div className="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden">
+            <div className="bg-[var(--color-paper-2)] rounded-2xl border border-[var(--color-rule)] shadow-sm overflow-hidden">
                 {/* Step indicator */}
-                <div className="px-6 pt-6 pb-4 border-b border-gray-100">
-                    <h1 className="text-xl font-bold text-gray-900 mb-4">Nueva Operación de Venta</h1>
+                <div className="px-6 pt-6 pb-4 border-b border-[var(--color-rule-2)]">
+                    <h1 className="font-heading text-xl font-bold text-[var(--color-ink)] mb-4">Nueva Operación de Venta</h1>
                     <div className="flex items-center gap-2">
                         {STEPS.map((s, i) => (
                             <div key={i} className="flex items-center gap-2 flex-1">
                                 <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold transition-all ${
-                                    i < step  ? "bg-indigo-600 text-white" :
-                                    i === step ? "bg-indigo-600 text-white ring-4 ring-indigo-100" :
-                                    "bg-gray-100 text-gray-400"
+                                    i < step  ? "bg-[var(--color-ink)] text-[var(--color-paper)]" :
+                                    i === step ? "bg-[var(--color-ink)] text-[var(--color-paper)] ring-4 ring-[var(--color-accent)]/30" :
+                                    "bg-[var(--color-paper-3)] text-[var(--color-neutral)]"
                                 }`}>
-                                    {i < step ? <Check size={14} /> : i + 1}
+                                    {i < step ? <Check strokeWidth={1.5} size={14} /> : i + 1}
                                 </div>
-                                <span className={`text-xs font-medium hidden sm:block ${i === step ? "text-indigo-600" : "text-gray-400"}`}>
+                                <span className={`text-xs font-medium hidden sm:block ${i === step ? "text-[var(--color-accent)]" : "text-[var(--color-neutral)]"}`}>
                                     {s.label}
                                 </span>
                                 {i < STEPS.length - 1 && (
-                                    <div className={`flex-1 h-0.5 ${i < step ? "bg-indigo-600" : "bg-gray-200"}`} />
+                                    <div className={`flex-1 h-0.5 ${i < step ? "bg-[var(--color-accent)]" : "bg-[var(--color-paper-4)]"}`} />
                                 )}
                             </div>
                         ))}
@@ -301,60 +301,60 @@ export default function NuevaVentaPage() {
                         <div className="space-y-4">
                             {loadingData ? (
                                 <div className="flex justify-center py-10">
-                                    <Loader2 size={24} className="animate-spin text-indigo-500" />
+                                    <Loader2 strokeWidth={1.5} size={24} className="animate-spin text-[var(--color-accent)]" />
                                 </div>
                             ) : (
                                 <>
                                     {/* Selector de propiedad del sistema */}
                                     {!manualEntry && (
                                         <div>
-                                            <label className="block text-sm font-medium text-gray-700 mb-2">
+                                            <label className="block text-sm font-medium text-[var(--color-ink-2)] mb-2">
                                                 Seleccioná una propiedad del sistema
-                                                <span className="text-gray-400 font-normal ml-1">({propiedades.length} disponibles)</span>
+                                                <span className="text-[var(--color-neutral)] font-normal ml-1">({propiedades.length} disponibles)</span>
                                             </label>
                                             <div className="relative mb-2">
-                                                <Search size={15} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" />
+                                                <Search strokeWidth={1.5} size={15} className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--color-neutral)] pointer-events-none" />
                                                 <input
                                                     type="text"
                                                     placeholder="Buscar por dirección o tipo…"
                                                     value={propSearch}
                                                     onChange={e => setPropSearch(e.target.value)}
-                                                    className="w-full pl-9 pr-4 py-2.5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none text-sm"
+                                                    className="w-full pl-9 pr-4 py-2.5 border border-[var(--color-rule)] rounded-xl focus:ring-2 focus:ring-[var(--color-accent)]/40 outline-none text-sm"
                                                     maxLength={100}
                                                 />
                                             </div>
 
                                             {propFiltradas.length === 0 ? (
-                                                <p className="text-sm text-gray-400 text-center py-6 bg-gray-50 rounded-xl">
+                                                <p className="text-sm text-[var(--color-neutral)] text-center py-6 bg-[var(--color-paper)] rounded-xl">
                                                     No hay propiedades cargadas
                                                 </p>
                                             ) : (
-                                                <div className="border border-gray-200 rounded-xl overflow-hidden max-h-60 overflow-y-auto">
+                                                <div className="border border-[var(--color-rule)] rounded-xl overflow-hidden max-h-60 overflow-y-auto">
                                                     {propFiltradas.map(p => (
                                                         <button
                                                             key={p.id}
                                                             type="button"
                                                             onClick={() => seleccionarPropiedad(p)}
-                                                            className={`w-full text-left px-4 py-3 flex items-center justify-between gap-3 hover:bg-indigo-50 transition-colors border-b border-gray-100 last:border-b-0 ${
+                                                            className={`w-full text-left px-4 py-3 flex items-center justify-between gap-3 hover:bg-[var(--color-accent-soft)] transition-colors border-b border-[var(--color-rule-2)] last:border-b-0 ${
                                                                 selectedProp?.id === p.id
-                                                                    ? "bg-indigo-50 border-l-4 border-l-indigo-500"
+                                                                    ? "bg-[var(--color-accent-soft)] border-l-4 border-l-[var(--color-accent)]"
                                                                     : ""
                                                             }`}
                                                         >
                                                             <div className="flex items-center gap-2 min-w-0">
-                                                                <Home size={14} className="text-indigo-400 flex-shrink-0" />
+                                                                <Home strokeWidth={1.5} size={14} className="text-[var(--color-accent)] flex-shrink-0" />
                                                                 <div className="min-w-0">
-                                                                    <p className="text-sm font-medium text-gray-900 truncate">{getAddress(p)}</p>
-                                                                    <p className="text-xs text-gray-400">{p.property_type || "—"} · {p.status || "active"}</p>
+                                                                    <p className="text-sm font-medium text-[var(--color-ink)] truncate">{getAddress(p)}</p>
+                                                                    <p className="text-xs text-[var(--color-neutral)]">{p.property_type || "—"} · {p.status || "active"}</p>
                                                                 </div>
                                                             </div>
                                                             <div className="flex items-center gap-2 flex-shrink-0">
                                                                 {p.price ? (
-                                                                    <span className="text-xs font-semibold text-gray-600 whitespace-nowrap">
+                                                                    <span className="text-xs font-semibold text-[var(--color-ink-2)] whitespace-nowrap">
                                                                         {p.currency} {Number(p.price).toLocaleString("es-AR")}
                                                                     </span>
                                                                 ) : null}
-                                                                {selectedProp?.id === p.id && <Check size={14} className="text-indigo-600" />}
+                                                                {selectedProp?.id === p.id && <Check strokeWidth={1.5} size={14} className="text-[var(--color-accent)]" />}
                                                             </div>
                                                         </button>
                                                     ))}
@@ -365,16 +365,16 @@ export default function NuevaVentaPage() {
                                                 <Link
                                                     href="/dashboard/propiedades/nueva"
                                                     target="_blank"
-                                                    className="flex items-center gap-1.5 text-xs text-indigo-600 hover:text-indigo-700 font-medium"
+                                                    className="flex items-center gap-1.5 text-xs text-[var(--color-accent)] hover:text-[var(--color-accent-2)] font-medium"
                                                 >
-                                                    <Plus size={13} /> Nueva propiedad
-                                                    <ExternalLink size={11} />
+                                                    <Plus strokeWidth={1.5} size={13} /> Nueva propiedad
+                                                    <ExternalLink strokeWidth={1.5} size={11} />
                                                 </Link>
-                                                <span className="text-gray-300 text-xs">|</span>
+                                                <span className="text-[var(--color-neutral)] text-xs">|</span>
                                                 <button
                                                     type="button"
                                                     onClick={() => { setManualEntry(true); setSelectedProp(null); setDireccion(""); }}
-                                                    className="text-xs text-gray-400 hover:text-gray-600 underline underline-offset-2"
+                                                    className="text-xs text-[var(--color-neutral)] hover:text-[var(--color-ink-2)] underline underline-offset-2"
                                                 >
                                                     Cargar sin propiedad del sistema
                                                 </button>
@@ -384,32 +384,32 @@ export default function NuevaVentaPage() {
 
                                     {/* Campos de la propiedad (seleccionada o manual) */}
                                     {(selectedProp || manualEntry) && (
-                                        <div className={`space-y-4 ${selectedProp ? "p-4 bg-gray-50 rounded-xl border border-gray-200" : ""}`}>
+                                        <div className={`space-y-4 ${selectedProp ? "p-4 bg-[var(--color-paper)] rounded-xl border border-[var(--color-rule)]" : ""}`}>
                                             <div className="flex items-center justify-between">
-                                                <p className="text-xs font-semibold uppercase tracking-wider text-gray-400">
+                                                <p className="text-xs font-semibold uppercase tracking-wider text-[var(--color-neutral)]">
                                                     {selectedProp ? "Propiedad seleccionada" : "Datos de la propiedad"}
                                                 </p>
                                                 {selectedProp ? (
                                                     <button
                                                         type="button"
                                                         onClick={deseleccionarPropiedad}
-                                                        className="flex items-center gap-1 text-xs text-gray-400 hover:text-gray-600"
+                                                        className="flex items-center gap-1 text-xs text-[var(--color-neutral)] hover:text-[var(--color-ink-2)]"
                                                     >
-                                                        <X size={12} /> Cambiar
+                                                        <X strokeWidth={1.5} size={12} /> Cambiar
                                                     </button>
                                                 ) : (
                                                     <button
                                                         type="button"
                                                         onClick={() => setManualEntry(false)}
-                                                        className="flex items-center gap-1 text-xs text-gray-400 hover:text-gray-600"
+                                                        className="flex items-center gap-1 text-xs text-[var(--color-neutral)] hover:text-[var(--color-ink-2)]"
                                                     >
-                                                        <ArrowLeft size={12} /> Ver listado
+                                                        <ArrowLeft strokeWidth={1.5} size={12} /> Ver listado
                                                     </button>
                                                 )}
                                             </div>
 
                                             <div>
-                                                <label className="block text-sm font-medium text-gray-700 mb-1.5">
+                                                <label className="block text-sm font-medium text-[var(--color-ink-2)] mb-1.5">
                                                     Dirección *
                                                 </label>
                                                 <input
@@ -417,34 +417,34 @@ export default function NuevaVentaPage() {
                                                     value={direccion}
                                                     onChange={e => setDireccion(e.target.value)}
                                                     placeholder="Ej: Av. Corrientes 1234, CABA"
-                                                    className="w-full px-4 py-2.5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none text-sm"
+                                                    className="w-full px-4 py-2.5 border border-[var(--color-rule)] rounded-xl focus:ring-2 focus:ring-[var(--color-accent)]/40 outline-none text-sm"
                                                     maxLength={200}
                                                     required
                                                 />
                                                 {direccion.length > 0 && direccion.trim().length < 5 && (
-                                                    <p className="text-xs text-red-500 mt-1">Ingresá una dirección válida (mínimo 5 caracteres)</p>
+                                                    <p className="text-xs text-[var(--color-danger)] mt-1">Ingresá una dirección válida (mínimo 5 caracteres)</p>
                                                 )}
                                             </div>
 
                                             <div className="grid grid-cols-2 gap-4">
                                                 <div>
-                                                    <label className="block text-sm font-medium text-gray-700 mb-1.5">Tipo</label>
+                                                    <label className="block text-sm font-medium text-[var(--color-ink-2)] mb-1.5">Tipo</label>
                                                     <select
                                                         value={propiedadTipo}
                                                         onChange={e => setPropiedadTipo(e.target.value)}
-                                                        className="w-full px-4 py-2.5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none text-sm"
+                                                        className="w-full px-4 py-2.5 border border-[var(--color-rule)] rounded-xl focus:ring-2 focus:ring-[var(--color-accent)]/40 outline-none text-sm"
                                                     >
                                                         {TIPOS_PROPIEDAD.map(t => <option key={t}>{t}</option>)}
                                                     </select>
                                                 </div>
                                                 <div>
-                                                    <label className="block text-sm font-medium text-gray-700 mb-1.5">Superficie (m²)</label>
+                                                    <label className="block text-sm font-medium text-[var(--color-ink-2)] mb-1.5">Superficie (m²)</label>
                                                     <input
                                                         type="number"
                                                         value={superficie}
                                                         onChange={e => setSuperficie(e.target.value)}
                                                         placeholder="Ej: 75"
-                                                        className="w-full px-4 py-2.5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none text-sm"
+                                                        className="w-full px-4 py-2.5 border border-[var(--color-rule)] rounded-xl focus:ring-2 focus:ring-[var(--color-accent)]/40 outline-none text-sm"
                                                         min="1"
                                                         max="99999"
                                                         step="0.01"
@@ -454,16 +454,16 @@ export default function NuevaVentaPage() {
                                             </div>
 
                                             <div>
-                                                <label className="block text-sm font-medium text-gray-700 mb-1.5">
+                                                <label className="block text-sm font-medium text-[var(--color-ink-2)] mb-1.5">
                                                     Nº Partida Inmobiliaria
-                                                    <span className="text-gray-400 font-normal ml-1">(opcional)</span>
+                                                    <span className="text-[var(--color-neutral)] font-normal ml-1">(opcional)</span>
                                                 </label>
                                                 <input
                                                     type="text"
                                                     value={nroPartida}
                                                     onChange={e => setNroPartida(e.target.value.replace(/[^a-zA-Z0-9\-\/]/g, ""))}
                                                     placeholder="Ej: 022-12345-6"
-                                                    className="w-full px-4 py-2.5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none text-sm"
+                                                    className="w-full px-4 py-2.5 border border-[var(--color-rule)] rounded-xl focus:ring-2 focus:ring-[var(--color-accent)]/40 outline-none text-sm"
                                                     maxLength={50}
                                                 />
                                             </div>
@@ -480,57 +480,57 @@ export default function NuevaVentaPage() {
                             {/* VENDEDORES */}
                             <section>
                                 <div className="flex items-center justify-between mb-3">
-                                    <h3 className="text-sm font-semibold text-gray-700">Vendedores</h3>
+                                    <h3 className="text-sm font-semibold text-[var(--color-ink-2)]">Vendedores</h3>
                                     <div className="flex items-center gap-3">
                                         <button
                                             type="button"
                                             onClick={() => { setShowPropietarioList(v => !v); setPropietarioSearch(""); }}
-                                            className="flex items-center gap-1.5 text-xs text-indigo-600 hover:text-indigo-700 font-medium"
+                                            className="flex items-center gap-1.5 text-xs text-[var(--color-accent)] hover:text-[var(--color-accent-2)] font-medium"
                                         >
-                                            <UserCheck size={13} />
+                                            <UserCheck strokeWidth={1.5} size={13} />
                                             {showPropietarioList ? "Cerrar lista" : "Desde propietario"}
                                         </button>
                                         <button
                                             type="button"
                                             onClick={() => setVendedores(p => [...p, emptyParte()])}
-                                            className="flex items-center gap-1 text-xs text-gray-500 hover:text-gray-700"
+                                            className="flex items-center gap-1 text-xs text-[var(--color-muted)] hover:text-[var(--color-ink-2)]"
                                         >
-                                            <Plus size={13} /> Agregar
+                                            <Plus strokeWidth={1.5} size={13} /> Agregar
                                         </button>
                                     </div>
                                 </div>
 
                                 {showPropietarioList && (
-                                    <div className="mb-4 border border-indigo-200 rounded-xl overflow-hidden">
-                                        <div className="p-3 bg-indigo-50/40 border-b border-indigo-100">
+                                    <div className="mb-4 border border-[var(--color-accent)]/30 rounded-xl overflow-hidden">
+                                        <div className="p-3 bg-[var(--color-accent)]/10 border-b border-[var(--color-accent)]/30">
                                             <div className="relative">
-                                                <Search size={13} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+                                                <Search strokeWidth={1.5} size={13} className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--color-neutral)]" />
                                                 <input
                                                     autoFocus
                                                     type="text"
                                                     placeholder="Buscar propietario por nombre o DNI…"
                                                     value={propietarioSearch}
                                                     onChange={e => setPropietarioSearch(e.target.value)}
-                                                    className="w-full pl-8 pr-3 py-2 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-indigo-500 outline-none"
+                                                    className="w-full pl-8 pr-3 py-2 border border-[var(--color-rule)] rounded-lg text-sm focus:ring-2 focus:ring-[var(--color-accent)]/40 outline-none"
                                                     maxLength={100}
                                                 />
                                             </div>
                                         </div>
-                                        <div className="max-h-48 overflow-y-auto bg-white">
+                                        <div className="max-h-48 overflow-y-auto bg-[var(--color-paper-2)]">
                                             {propietariosFiltrados.length === 0 ? (
-                                                <p className="text-xs text-gray-400 text-center py-5">Sin propietarios cargados</p>
+                                                <p className="text-xs text-[var(--color-neutral)] text-center py-5">Sin propietarios cargados</p>
                                             ) : propietariosFiltrados.map(p => (
                                                 <button
                                                     key={p.id}
                                                     type="button"
                                                     onClick={() => seleccionarPropietario(p)}
-                                                    className="w-full text-left px-4 py-2.5 hover:bg-indigo-50 transition-colors border-b border-gray-100 last:border-b-0 flex items-center justify-between"
+                                                    className="w-full text-left px-4 py-2.5 hover:bg-[var(--color-accent-soft)] transition-colors border-b border-[var(--color-rule-2)] last:border-b-0 flex items-center justify-between"
                                                 >
                                                     <div>
-                                                        <p className="text-sm font-medium text-gray-900">{p.nombre}</p>
-                                                        <p className="text-xs text-gray-400">DNI {p.dni} · {p.telefono}</p>
+                                                        <p className="text-sm font-medium text-[var(--color-ink)]">{p.nombre}</p>
+                                                        <p className="text-xs text-[var(--color-neutral)]">DNI {p.dni} · {p.telefono}</p>
                                                     </div>
-                                                    <ArrowRight size={13} className="text-indigo-400 flex-shrink-0" />
+                                                    <ArrowRight strokeWidth={1.5} size={13} className="text-[var(--color-accent)] flex-shrink-0" />
                                                 </button>
                                             ))}
                                         </div>
@@ -548,23 +548,23 @@ export default function NuevaVentaPage() {
                                 ))}
                             </section>
 
-                            <hr className="border-gray-100" />
+                            <hr className="border-[var(--color-rule-2)]" />
 
                             {/* COMPRADORES */}
                             <section>
                                 <div className="flex items-center justify-between mb-3">
-                                    <h3 className="text-sm font-semibold text-gray-700">Compradores</h3>
+                                    <h3 className="text-sm font-semibold text-[var(--color-ink-2)]">Compradores</h3>
                                     <button
                                         type="button"
                                         onClick={() => setCompradores(p => [...p, emptyParte()])}
-                                        className="flex items-center gap-1 text-xs text-gray-500 hover:text-gray-700"
+                                        className="flex items-center gap-1 text-xs text-[var(--color-muted)] hover:text-[var(--color-ink-2)]"
                                     >
-                                        <Plus size={13} /> Agregar
+                                        <Plus strokeWidth={1.5} size={13} /> Agregar
                                     </button>
                                 </div>
 
                                 {/* Tabs */}
-                                <div className="flex items-center gap-1 bg-gray-100 p-1 rounded-xl w-fit mb-3">
+                                <div className="flex items-center gap-1 bg-[var(--color-paper-3)] p-1 rounded-xl w-fit mb-3">
                                     {(["lead", "inquilino", "manual"] as const).map(t => (
                                         <button
                                             key={t}
@@ -576,8 +576,8 @@ export default function NuevaVentaPage() {
                                             }}
                                             className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all capitalize ${
                                                 compradorTab === t
-                                                    ? "bg-white shadow text-indigo-600"
-                                                    : "text-gray-500 hover:text-gray-700"
+                                                    ? "bg-[var(--color-paper-2)] shadow text-[var(--color-accent)]"
+                                                    : "text-[var(--color-muted)] hover:text-[var(--color-ink-2)]"
                                             }`}
                                         >
                                             {t === "lead" ? "Lead" : t === "inquilino" ? "Inquilino" : "Manual"}
@@ -586,54 +586,54 @@ export default function NuevaVentaPage() {
                                 </div>
 
                                 {showCompradorList && compradorTab !== "manual" && (
-                                    <div className="mb-4 border border-green-200 rounded-xl overflow-hidden">
-                                        <div className="p-3 bg-green-50/30 border-b border-green-100">
+                                    <div className="mb-4 border border-[var(--color-positive)]/30 rounded-xl overflow-hidden">
+                                        <div className="p-3 bg-[var(--color-positive)]/7 border-b border-[var(--color-positive)]/30">
                                             <div className="relative">
-                                                <Search size={13} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+                                                <Search strokeWidth={1.5} size={13} className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--color-neutral)]" />
                                                 <input
                                                     autoFocus
                                                     type="text"
                                                     placeholder={`Buscar ${compradorTab === "lead" ? "lead" : "inquilino"}…`}
                                                     value={compradorSearch}
                                                     onChange={e => setCompradorSearch(e.target.value)}
-                                                    className="w-full pl-8 pr-3 py-2 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-indigo-500 outline-none"
+                                                    className="w-full pl-8 pr-3 py-2 border border-[var(--color-rule)] rounded-lg text-sm focus:ring-2 focus:ring-[var(--color-accent)]/40 outline-none"
                                                     maxLength={100}
                                                 />
                                             </div>
                                         </div>
-                                        <div className="max-h-48 overflow-y-auto bg-white">
+                                        <div className="max-h-48 overflow-y-auto bg-[var(--color-paper-2)]">
                                             {compradorTab === "lead" ? (
                                                 leadsFiltrados.length === 0 ? (
-                                                    <p className="text-xs text-gray-400 text-center py-5">Sin leads cargados</p>
+                                                    <p className="text-xs text-[var(--color-neutral)] text-center py-5">Sin leads cargados</p>
                                                 ) : leadsFiltrados.map(l => (
                                                     <button
                                                         key={l.id}
                                                         type="button"
                                                         onClick={() => seleccionarLead(l)}
-                                                        className="w-full text-left px-4 py-2.5 hover:bg-green-50 transition-colors border-b border-gray-100 last:border-b-0 flex items-center justify-between"
+                                                        className="w-full text-left px-4 py-2.5 hover:bg-[var(--color-positive-soft)] transition-colors border-b border-[var(--color-rule-2)] last:border-b-0 flex items-center justify-between"
                                                     >
                                                         <div>
-                                                            <p className="text-sm font-medium text-gray-900">{l.nombre}</p>
-                                                            <p className="text-xs text-gray-400">{l.email} · {l.telefono}</p>
+                                                            <p className="text-sm font-medium text-[var(--color-ink)]">{l.nombre}</p>
+                                                            <p className="text-xs text-[var(--color-neutral)]">{l.email} · {l.telefono}</p>
                                                         </div>
-                                                        <ArrowRight size={13} className="text-green-500 flex-shrink-0" />
+                                                        <ArrowRight strokeWidth={1.5} size={13} className="text-[var(--color-positive)] flex-shrink-0" />
                                                     </button>
                                                 ))
                                             ) : (
                                                 inquilinosFiltrados.length === 0 ? (
-                                                    <p className="text-xs text-gray-400 text-center py-5">Sin inquilinos cargados</p>
+                                                    <p className="text-xs text-[var(--color-neutral)] text-center py-5">Sin inquilinos cargados</p>
                                                 ) : inquilinosFiltrados.map(i => (
                                                     <button
                                                         key={i.id}
                                                         type="button"
                                                         onClick={() => seleccionarInquilino(i)}
-                                                        className="w-full text-left px-4 py-2.5 hover:bg-green-50 transition-colors border-b border-gray-100 last:border-b-0 flex items-center justify-between"
+                                                        className="w-full text-left px-4 py-2.5 hover:bg-[var(--color-positive-soft)] transition-colors border-b border-[var(--color-rule-2)] last:border-b-0 flex items-center justify-between"
                                                     >
                                                         <div>
-                                                            <p className="text-sm font-medium text-gray-900">{i.nombre}</p>
-                                                            <p className="text-xs text-gray-400">DNI {i.dni} · {i.telefono}</p>
+                                                            <p className="text-sm font-medium text-[var(--color-ink)]">{i.nombre}</p>
+                                                            <p className="text-xs text-[var(--color-neutral)]">DNI {i.dni} · {i.telefono}</p>
                                                         </div>
-                                                        <ArrowRight size={13} className="text-green-500 flex-shrink-0" />
+                                                        <ArrowRight strokeWidth={1.5} size={13} className="text-[var(--color-positive)] flex-shrink-0" />
                                                     </button>
                                                 ))
                                             )}
@@ -659,10 +659,10 @@ export default function NuevaVentaPage() {
                         <>
                             <div className="grid grid-cols-2 gap-4">
                                 <div>
-                                    <label className="block text-sm font-medium text-gray-700 mb-1.5">
+                                    <label className="block text-sm font-medium text-[var(--color-ink-2)] mb-1.5">
                                         Precio de lista *
                                         {selectedProp?.price && (
-                                            <span className="text-xs text-indigo-500 font-normal ml-1">(desde propiedad)</span>
+                                            <span className="text-xs text-[var(--color-accent)] font-normal ml-1">(desde propiedad)</span>
                                         )}
                                     </label>
                                     <input
@@ -670,7 +670,7 @@ export default function NuevaVentaPage() {
                                         value={precioListado}
                                         onChange={e => setPrecioListado(e.target.value)}
                                         placeholder="Ej: 120000"
-                                        className="w-full px-4 py-2.5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none text-sm"
+                                        className="w-full px-4 py-2.5 border border-[var(--color-rule)] rounded-xl focus:ring-2 focus:ring-[var(--color-accent)]/40 outline-none text-sm"
                                         min="1"
                                         max="999999999"
                                         step="1"
@@ -678,15 +678,15 @@ export default function NuevaVentaPage() {
                                         onKeyDown={e => ["-","e","E","+"].includes(e.key) && e.preventDefault()}
                                     />
                                     {precioListado && parseFloat(precioListado) < 1 && (
-                                        <p className="text-xs text-red-500 mt-1">El precio debe ser mayor a 0</p>
+                                        <p className="text-xs text-[var(--color-danger)] mt-1">El precio debe ser mayor a 0</p>
                                     )}
                                 </div>
                                 <div>
-                                    <label className="block text-sm font-medium text-gray-700 mb-1.5">Moneda</label>
+                                    <label className="block text-sm font-medium text-[var(--color-ink-2)] mb-1.5">Moneda</label>
                                     <select
                                         value={moneda}
                                         onChange={e => setMoneda(e.target.value as "ARS" | "USD")}
-                                        className="w-full px-4 py-2.5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none text-sm"
+                                        className="w-full px-4 py-2.5 border border-[var(--color-rule)] rounded-xl focus:ring-2 focus:ring-[var(--color-accent)]/40 outline-none text-sm"
                                     >
                                         <option value="USD">USD – Dólares</option>
                                         <option value="ARS">ARS – Pesos</option>
@@ -696,8 +696,8 @@ export default function NuevaVentaPage() {
 
                             <div className="grid grid-cols-2 gap-4">
                                 <div>
-                                    <label className="block text-sm font-medium text-gray-700 mb-1.5">
-                                        Comisión (%) <span className="text-gray-400 font-normal text-xs">0.5 – 20</span>
+                                    <label className="block text-sm font-medium text-[var(--color-ink-2)] mb-1.5">
+                                        Comisión (%) <span className="text-[var(--color-neutral)] font-normal text-xs">0.5 – 20</span>
                                     </label>
                                     <input
                                         type="number"
@@ -709,22 +709,22 @@ export default function NuevaVentaPage() {
                                         step="0.5"
                                         min="0.5"
                                         max="20"
-                                        className="w-full px-4 py-2.5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none text-sm"
+                                        className="w-full px-4 py-2.5 border border-[var(--color-rule)] rounded-xl focus:ring-2 focus:ring-[var(--color-accent)]/40 outline-none text-sm"
                                         onKeyDown={e => ["-","e","E","+"].includes(e.key) && e.preventDefault()}
                                     />
                                     {comisionMonto > 0 && (
-                                        <p className="text-xs text-indigo-600 mt-1 font-medium">
+                                        <p className="text-xs text-[var(--color-accent)] mt-1 font-medium">
                                             = {moneda === "USD" ? "USD" : "$"}{" "}
                                             {comisionMonto.toLocaleString("es-AR", { maximumFractionDigits: 0 })}
                                         </p>
                                     )}
                                 </div>
                                 <div>
-                                    <label className="block text-sm font-medium text-gray-700 mb-1.5">Modalidad comisión</label>
+                                    <label className="block text-sm font-medium text-[var(--color-ink-2)] mb-1.5">Modalidad comisión</label>
                                     <select
                                         value={modalidad}
                                         onChange={e => setModalidad(e.target.value as ModalidadComision)}
-                                        className="w-full px-4 py-2.5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none text-sm"
+                                        className="w-full px-4 py-2.5 border border-[var(--color-rule)] rounded-xl focus:ring-2 focus:ring-[var(--color-accent)]/40 outline-none text-sm"
                                     >
                                         <option value="ambas_partes">Ambas partes</option>
                                         <option value="comprador">Solo comprador</option>
@@ -734,9 +734,9 @@ export default function NuevaVentaPage() {
                             </div>
 
                             <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-1.5">
+                                <label className="block text-sm font-medium text-[var(--color-ink-2)] mb-1.5">
                                     Observaciones
-                                    <span className="text-xs text-gray-400 font-normal ml-1">
+                                    <span className="text-xs text-[var(--color-neutral)] font-normal ml-1">
                                         {observaciones.length}/500
                                     </span>
                                 </label>
@@ -745,7 +745,7 @@ export default function NuevaVentaPage() {
                                     onChange={e => setObservaciones(e.target.value)}
                                     rows={3}
                                     placeholder="Notas internas sobre la operación…"
-                                    className="w-full px-4 py-2.5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none text-sm resize-none"
+                                    className="w-full px-4 py-2.5 border border-[var(--color-rule)] rounded-xl focus:ring-2 focus:ring-[var(--color-accent)]/40 outline-none text-sm resize-none"
                                     maxLength={500}
                                 />
                             </div>
@@ -755,25 +755,25 @@ export default function NuevaVentaPage() {
                     {/* ── STEP 3 — CONFIRMACIÓN ── */}
                     {step === 3 && (
                         <div className="space-y-4">
-                            <div className="bg-indigo-50 border border-indigo-100 rounded-xl p-4 space-y-3">
-                                <h3 className="font-semibold text-indigo-900">Resumen de la operación</h3>
+                            <div className="bg-[var(--color-accent-soft)] border border-[var(--color-accent)]/30 rounded-xl p-4 space-y-3">
+                                <h3 className="font-semibold text-[var(--color-accent)]">Resumen de la operación</h3>
                                 <dl className="grid grid-cols-2 gap-x-6 gap-y-2 text-sm">
-                                    <div><dt className="text-gray-500 inline">Dirección: </dt><dd className="font-medium text-gray-800 inline">{direccion}</dd></div>
-                                    <div><dt className="text-gray-500 inline">Tipo: </dt><dd className="font-medium text-gray-800 inline">{propiedadTipo}</dd></div>
-                                    {superficie && <div><dt className="text-gray-500 inline">Superficie: </dt><dd className="font-medium text-gray-800 inline">{superficie} m²</dd></div>}
-                                    <div><dt className="text-gray-500 inline">Vendedor: </dt><dd className="font-medium text-gray-800 inline">{vendedores[0]?.nombre}</dd></div>
-                                    <div><dt className="text-gray-500 inline">Comprador: </dt><dd className="font-medium text-gray-800 inline">{compradores[0]?.nombre}</dd></div>
-                                    <div><dt className="text-gray-500 inline">Precio: </dt><dd className="font-bold text-indigo-700 inline">{moneda} {parseFloat(precioListado).toLocaleString("es-AR")}</dd></div>
-                                    <div><dt className="text-gray-500 inline">Comisión: </dt><dd className="font-medium text-gray-800 inline">{comisionPct}% — {modalidad.replace(/_/g, " ")}</dd></div>
+                                    <div><dt className="text-[var(--color-muted)] inline">Dirección: </dt><dd className="font-medium text-[var(--color-ink)] inline">{direccion}</dd></div>
+                                    <div><dt className="text-[var(--color-muted)] inline">Tipo: </dt><dd className="font-medium text-[var(--color-ink)] inline">{propiedadTipo}</dd></div>
+                                    {superficie && <div><dt className="text-[var(--color-muted)] inline">Superficie: </dt><dd className="font-medium text-[var(--color-ink)] inline">{superficie} m²</dd></div>}
+                                    <div><dt className="text-[var(--color-muted)] inline">Vendedor: </dt><dd className="font-medium text-[var(--color-ink)] inline">{vendedores[0]?.nombre}</dd></div>
+                                    <div><dt className="text-[var(--color-muted)] inline">Comprador: </dt><dd className="font-medium text-[var(--color-ink)] inline">{compradores[0]?.nombre}</dd></div>
+                                    <div><dt className="text-[var(--color-muted)] inline">Precio: </dt><dd className="font-bold text-[var(--color-accent)] inline">{moneda} {parseFloat(precioListado).toLocaleString("es-AR")}</dd></div>
+                                    <div><dt className="text-[var(--color-muted)] inline">Comisión: </dt><dd className="font-medium text-[var(--color-ink)] inline">{comisionPct}% — {modalidad.replace(/_/g, " ")}</dd></div>
                                     {selectedProp && (
                                         <div className="col-span-2">
-                                            <dt className="text-gray-500 inline">Propiedad vinculada: </dt>
-                                            <dd className="inline text-xs text-indigo-600 font-medium">✓ {getAddress(selectedProp)}</dd>
+                                            <dt className="text-[var(--color-muted)] inline">Propiedad vinculada: </dt>
+                                            <dd className="inline text-xs text-[var(--color-accent)] font-medium">{getAddress(selectedProp)}</dd>
                                         </div>
                                     )}
                                 </dl>
                             </div>
-                            <p className="text-sm text-gray-500">
+                            <p className="text-sm text-[var(--color-muted)]">
                                 La operación se creará en etapa <strong>Prospecto</strong>. Podés completar todos los datos desde el detalle.
                             </p>
                         </div>
@@ -781,14 +781,14 @@ export default function NuevaVentaPage() {
                 </div>
 
                 {/* Footer nav */}
-                <div className="px-6 pb-6 flex justify-between border-t border-gray-100 pt-4">
+                <div className="px-6 pb-6 flex justify-between border-t border-[var(--color-rule-2)] pt-4">
                     <button
                         type="button"
                         onClick={() => setStep(s => s - 1)}
                         disabled={step === 0}
-                        className="flex items-center gap-2 px-4 py-2 text-sm text-gray-600 hover:text-gray-900 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+                        className="flex items-center gap-2 px-4 py-2 text-sm text-[var(--color-ink-2)] hover:text-[var(--color-ink)] disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
                     >
-                        <ArrowLeft size={15} /> Anterior
+                        <ArrowLeft strokeWidth={1.5} size={15} /> Anterior
                     </button>
 
                     {step < STEPS.length - 1 ? (
@@ -796,18 +796,18 @@ export default function NuevaVentaPage() {
                             type="button"
                             onClick={() => setStep(s => s + 1)}
                             disabled={!canNext()}
-                            className="flex items-center gap-2 px-5 py-2.5 bg-indigo-600 text-white rounded-xl text-sm font-semibold hover:bg-indigo-700 disabled:opacity-40 disabled:cursor-not-allowed transition"
+                            className="flex items-center gap-2 px-5 py-2.5 bg-[var(--color-ink)] text-[var(--color-paper)] rounded-xl text-sm font-semibold hover:bg-[var(--color-ink-2)] disabled:opacity-40 disabled:cursor-not-allowed transition"
                         >
-                            Siguiente <ArrowRight size={15} />
+                            Siguiente <ArrowRight strokeWidth={1.5} size={15} />
                         </button>
                     ) : (
                         <button
                             type="button"
                             onClick={handleSubmit}
                             disabled={saving}
-                            className="flex items-center gap-2 px-5 py-2.5 bg-green-600 text-white rounded-xl text-sm font-semibold hover:bg-green-700 disabled:opacity-60 transition"
+                            className="flex items-center gap-2 px-5 py-2.5 bg-[var(--color-positive)] text-[var(--color-accent-ink)] rounded-xl text-sm font-semibold hover:bg-[var(--color-positive)] disabled:opacity-60 transition"
                         >
-                            {saving ? <Loader2 size={15} className="animate-spin" /> : <Check size={15} />}
+                            {saving ? <Loader2 strokeWidth={1.5} size={15} className="animate-spin" /> : <Check strokeWidth={1.5} size={15} />}
                             Crear Operación
                         </button>
                     )}
@@ -828,23 +828,23 @@ interface ParteFormProps {
 
 function ParteForm({ parte, label, onUpdate, onRemove }: ParteFormProps) {
     return (
-        <div className="relative grid grid-cols-2 gap-3 mb-3 p-4 bg-gray-50 rounded-xl border border-gray-200">
+        <div className="relative grid grid-cols-2 gap-3 mb-3 p-4 bg-[var(--color-paper)] rounded-xl border border-[var(--color-rule)]">
             {onRemove && (
                 <button
                     type="button"
                     onClick={onRemove}
-                    className="absolute top-2 right-2 p-1 text-red-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+                    className="absolute top-2 right-2 p-1 text-[var(--color-danger)] hover:text-[var(--color-danger)] hover:bg-[var(--color-danger-soft)] rounded-lg transition-colors"
                 >
-                    <Trash2 size={13} />
+                    <Trash2 strokeWidth={1.5} size={13} />
                 </button>
             )}
-            <p className="col-span-2 text-xs font-semibold text-gray-500 uppercase tracking-wider">{label}</p>
+            <p className="col-span-2 text-xs font-semibold text-[var(--color-muted)] uppercase tracking-wider">{label}</p>
 
             <input
                 placeholder="Nombre completo *"
                 value={parte.nombre}
                 onChange={e => onUpdate("nombre", e.target.value)}
-                className="px-3 py-2 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-indigo-500 outline-none"
+                className="px-3 py-2 border border-[var(--color-rule)] rounded-lg text-sm focus:ring-2 focus:ring-[var(--color-accent)]/40 outline-none"
                 maxLength={100}
                 required
             />
@@ -853,7 +853,7 @@ function ParteForm({ parte, label, onUpdate, onRemove }: ParteFormProps) {
                 inputMode="numeric"
                 value={parte.dni}
                 onChange={e => onUpdate("dni", e.target.value.replace(/\D/g, "").slice(0, 8))}
-                className="px-3 py-2 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-indigo-500 outline-none"
+                className="px-3 py-2 border border-[var(--color-rule)] rounded-lg text-sm focus:ring-2 focus:ring-[var(--color-accent)]/40 outline-none"
                 maxLength={8}
                 pattern="[0-9]*"
             />
@@ -862,7 +862,7 @@ function ParteForm({ parte, label, onUpdate, onRemove }: ParteFormProps) {
                 type="email"
                 value={parte.email ?? ""}
                 onChange={e => onUpdate("email", e.target.value)}
-                className="px-3 py-2 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-indigo-500 outline-none"
+                className="px-3 py-2 border border-[var(--color-rule)] rounded-lg text-sm focus:ring-2 focus:ring-[var(--color-accent)]/40 outline-none"
                 maxLength={100}
             />
             <input
@@ -870,7 +870,7 @@ function ParteForm({ parte, label, onUpdate, onRemove }: ParteFormProps) {
                 type="tel"
                 value={parte.telefono ?? ""}
                 onChange={e => onUpdate("telefono", phoneChars(e.target.value).slice(0, 20))}
-                className="px-3 py-2 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-indigo-500 outline-none"
+                className="px-3 py-2 border border-[var(--color-rule)] rounded-lg text-sm focus:ring-2 focus:ring-[var(--color-accent)]/40 outline-none"
                 maxLength={20}
             />
             <input
@@ -878,14 +878,14 @@ function ParteForm({ parte, label, onUpdate, onRemove }: ParteFormProps) {
                 inputMode="numeric"
                 value={parte.cuit ?? ""}
                 onChange={e => onUpdate("cuit", e.target.value.replace(/\D/g, "").slice(0, 11))}
-                className="px-3 py-2 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-indigo-500 outline-none"
+                className="px-3 py-2 border border-[var(--color-rule)] rounded-lg text-sm focus:ring-2 focus:ring-[var(--color-accent)]/40 outline-none"
                 maxLength={11}
             />
             <input
                 placeholder="Domicilio"
                 value={parte.domicilio ?? ""}
                 onChange={e => onUpdate("domicilio", e.target.value)}
-                className="px-3 py-2 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-indigo-500 outline-none"
+                className="px-3 py-2 border border-[var(--color-rule)] rounded-lg text-sm focus:ring-2 focus:ring-[var(--color-accent)]/40 outline-none"
                 maxLength={150}
             />
         </div>

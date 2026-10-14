@@ -80,12 +80,12 @@ export default function PlansTab({ onEditingChange }: PlansTabProps) {
         return (
             <div className="space-y-6">
                 <div className="flex items-center justify-between">
-                    <h2 className="text-xl font-bold text-gray-900">
+                    <h2 className="text-xl font-bold text-[var(--color-ink)]">
                         {selectedPlan ? "Editar Plan" : "Nuevo Plan"}
                     </h2>
                     <button
                         onClick={handleClose}
-                        className="px-4 py-2 text-gray-600 hover:bg-gray-100 rounded-lg transition-colors"
+                        className="px-4 py-2 text-[var(--color-ink-2)] hover:bg-[var(--color-paper-3)] rounded-lg transition-colors"
                     >
                         Cancelar
                     </button>
@@ -104,34 +104,34 @@ export default function PlansTab({ onEditingChange }: PlansTabProps) {
             <div className="flex justify-end">
                 <button
                     onClick={handleCreate}
-                    className="flex items-center gap-2 px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors"
+                    className="flex items-center gap-2 px-4 py-2 bg-[var(--color-ink)] text-[var(--color-paper)] rounded-lg hover:bg-[var(--color-ink-2)] transition-colors"
                 >
-                    <Plus size={20} />
+                    <Plus strokeWidth={1.5} size={20} />
                     Crear Plan
                 </button>
             </div>
 
             {loading ? (
                 <div className="flex justify-center py-12">
-                    <Loader2 className="w-8 h-8 animate-spin text-indigo-600" />
+                    <Loader2 strokeWidth={1.5} className="w-8 h-8 animate-spin text-[var(--color-accent)]" />
                 </div>
             ) : (
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                     {plans.map((plan) => (
                         <div
                             key={plan.id}
-                            className={`bg-white rounded-xl shadow-sm border p-6 hover:shadow-md transition-shadow relative ${plan.popular ? 'ring-2 ring-indigo-500 border-transparent' : 'border-gray-200'}`}
+                            className={`bg-[var(--color-paper-2)] rounded-xl shadow-sm border p-6 hover:shadow-md transition-shadow relative ${plan.popular ? 'ring-2 ring-[var(--color-accent)] border-transparent' : 'border-[var(--color-rule)]'}`}
                         >
                             {plan.popular && (
-                                <div className="absolute top-0 right-0 bg-indigo-600 text-white text-xs font-bold px-3 py-1 rounded-bl-lg rounded-tr-lg mr-[40px]">
+                                <div className="absolute top-0 right-0 bg-[var(--color-accent)] text-[var(--color-accent-ink)] text-xs font-bold px-3 py-1 rounded-bl-lg rounded-tr-lg mr-[40px]">
                                     POPULAR
                                 </div>
                             )}
 
                             <div className="flex justify-between items-start mb-4">
                                 <div>
-                                    <h3 className="text-lg font-bold text-gray-900">{plan.name}</h3>
-                                    <p className="text-sm text-gray-500 capitalize">{plan.tier}</p>
+                                    <h3 className="text-lg font-bold text-[var(--color-ink)]">{plan.name}</h3>
+                                    <p className="text-sm text-[var(--color-muted)] capitalize">{plan.tier}</p>
                                 </div>
 
                                 <div className="relative">
@@ -141,9 +141,9 @@ export default function PlansTab({ onEditingChange }: PlansTabProps) {
                                             e.stopPropagation();
                                             setOpenMenuId(openMenuId === plan.id ? null : plan.id);
                                         }}
-                                        className={`p-2 rounded-lg transition-colors ${openMenuId === plan.id ? 'bg-indigo-50 text-indigo-600' : 'text-gray-400 hover:text-gray-600 hover:bg-gray-100'}`}
+                                        className={`p-2 rounded-lg transition-colors ${openMenuId === plan.id ? 'bg-[var(--color-accent-soft)] text-[var(--color-accent)]' : 'text-[var(--color-neutral)] hover:text-[var(--color-ink-2)] hover:bg-[var(--color-paper-3)]'}`}
                                     >
-                                        <MoreVertical size={20} />
+                                        <MoreVertical strokeWidth={1.5} size={20} />
                                     </button>
 
                                     {openMenuId === plan.id && (
@@ -152,22 +152,22 @@ export default function PlansTab({ onEditingChange }: PlansTabProps) {
                                                 className="fixed inset-0 z-30"
                                                 onClick={() => setOpenMenuId(null)}
                                             />
-                                            <div className="absolute right-0 top-full mt-1 w-40 bg-white rounded-lg shadow-xl border border-gray-100 py-1 z-40">
+                                            <div className="absolute right-0 top-full mt-1 w-40 bg-[var(--color-paper-2)] rounded-lg shadow-xl border border-[var(--color-rule-2)] py-1 z-40">
                                                 <button
                                                     type="button"
                                                     onClick={() => handleEdit(plan)}
-                                                    className="w-full flex items-center gap-2 px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50"
+                                                    className="w-full flex items-center gap-2 px-4 py-2.5 text-sm text-[var(--color-ink-2)] hover:bg-[var(--color-paper-3)]"
                                                 >
-                                                    <Edit size={16} />
+                                                    <Edit strokeWidth={1.5} size={16} />
                                                     Editar
                                                 </button>
-                                                <div className="h-px bg-gray-100" />
+                                                <div className="h-px bg-[var(--color-paper-3)]" />
                                                 <button
                                                     type="button"
                                                     onClick={() => handleDelete(plan.id)}
-                                                    className="w-full flex items-center gap-2 px-4 py-2.5 text-sm text-red-600 hover:bg-red-50"
+                                                    className="w-full flex items-center gap-2 px-4 py-2.5 text-sm text-[var(--color-danger)] hover:bg-[var(--color-danger-soft)]"
                                                 >
-                                                    <Trash2 size={16} />
+                                                    <Trash2 strokeWidth={1.5} size={16} />
                                                     Eliminar
                                                 </button>
                                             </div>
@@ -176,25 +176,25 @@ export default function PlansTab({ onEditingChange }: PlansTabProps) {
                                 </div>
                             </div>
 
-                            <p className="text-gray-600 text-sm mb-6 h-10 line-clamp-2">
+                            <p className="text-[var(--color-ink-2)] text-sm mb-6 h-10 line-clamp-2">
                                 {plan.description}
                             </p>
 
                             <div className="mb-6">
                                 <div className="flex items-baseline gap-1">
-                                    <span className="text-2xl font-bold text-gray-900">
+                                    <span className="text-2xl font-bold text-[var(--color-ink)]">
                                         ${plan.price.monthly.toLocaleString('es-AR')}
                                     </span>
-                                    <span className="text-gray-500 text-sm">/mes</span>
+                                    <span className="text-[var(--color-muted)] text-sm">/mes</span>
                                 </div>
-                                <div className="text-xs text-gray-400 mt-1">
+                                <div className="text-xs text-[var(--color-neutral)] mt-1">
                                     ${plan.price.yearly.toLocaleString('es-AR')} al año
                                 </div>
                             </div>
 
                             <div className="space-y-2">
-                                <p className="text-xs font-semibold text-gray-500 uppercase tracking-wider">Límites</p>
-                                <div className="grid grid-cols-2 gap-y-1 text-sm text-gray-700">
+                                <p className="text-xs font-semibold text-[var(--color-muted)] uppercase tracking-wider">Límites</p>
+                                <div className="grid grid-cols-2 gap-y-1 text-sm text-[var(--color-ink-2)]">
                                     <div>Propiedades:</div>
                                     <div className="font-medium text-right">{plan.limits.properties === 'unlimited' ? 'Ilimitadas' : plan.limits.properties}</div>
                                     <div>Usuarios:</div>
@@ -207,11 +207,11 @@ export default function PlansTab({ onEditingChange }: PlansTabProps) {
                     ))}
 
                     {plans.length === 0 && (
-                        <div className="col-span-full text-center py-12 bg-gray-50 rounded-xl border border-dashed border-gray-300">
-                            <p className="text-gray-500">No hay planes configurados aún.</p>
+                        <div className="col-span-full text-center py-12 bg-[var(--color-paper)] rounded-xl border border-dashed border-[var(--color-rule)]">
+                            <p className="text-[var(--color-muted)]">No hay planes configurados aún.</p>
                             <button
                                 onClick={handleCreate}
-                                className="mt-2 text-indigo-600 hover:text-indigo-700 font-medium"
+                                className="mt-2 text-[var(--color-accent)] hover:text-[var(--color-accent-2)] font-medium"
                             >
                                 Crear el primero
                             </button>

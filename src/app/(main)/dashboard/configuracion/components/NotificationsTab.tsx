@@ -103,24 +103,24 @@ export default function NotificationsTab() {
         }));
     };
 
-    if (loading) return <div className="p-8 text-center text-gray-500">Cargando configuración...</div>;
+    if (loading) return <div className="p-8 text-center text-[var(--color-muted)]">Cargando configuración...</div>;
 
     return (
-        <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
-            <div className="p-6 border-b border-gray-100 flex justify-between items-center bg-gray-50">
+        <div className="bg-[var(--color-paper-2)] rounded-xl shadow-sm border border-[var(--color-rule)] overflow-hidden">
+            <div className="p-6 border-b border-[var(--color-rule-2)] flex justify-between items-center bg-[var(--color-paper)]">
                 <div>
-                    <h2 className="text-lg font-bold text-gray-900 flex items-center gap-2">
-                        <Bell className="w-5 h-5 text-indigo-600" />
+                    <h2 className="text-lg font-bold text-[var(--color-ink)] flex items-center gap-2">
+                        <Bell strokeWidth={1.5} className="w-5 h-5 text-[var(--color-accent)]" />
                         Notificaciones por Email
                     </h2>
-                    <p className="text-sm text-gray-500">Configura las alertas que deseas recibir de la plataforma.</p>
+                    <p className="text-sm text-[var(--color-muted)]">Configura las alertas que deseas recibir de la plataforma.</p>
                 </div>
                 <button
                     onClick={handleSave}
                     disabled={saving}
-                    className="flex items-center gap-2 px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 disabled:opacity-50 transition-colors font-medium shadow-sm"
+                    className="flex items-center gap-2 px-4 py-2 bg-[var(--color-ink)] text-[var(--color-paper)] rounded-lg hover:bg-[var(--color-ink-2)] disabled:opacity-50 transition-colors font-medium shadow-sm"
                 >
-                    {saving ? <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" /> : <Save className="w-4 h-4" />}
+                    {saving ? <div className="w-4 h-4 border-2 border-[var(--color-paper-2)]/30 border-t-[var(--color-paper-2)] rounded-full animate-spin" /> : <Save strokeWidth={1.5} className="w-4 h-4" />}
                     {saving ? "Guardando..." : "Guardar Cambios"}
                 </button>
             </div>
@@ -128,9 +128,9 @@ export default function NotificationsTab() {
             <div className="p-6 grid grid-cols-1 md:grid-cols-2 gap-8">
                 {/* General Toggle & Events */}
                 <div className="space-y-6">
-                    <div className="bg-indigo-50 rounded-xl p-4 border border-indigo-100">
+                    <div className="bg-[var(--color-accent-soft)] rounded-xl p-4 border border-[var(--color-accent)]/30">
                         <label className="flex items-center justify-between cursor-pointer">
-                            <span className="font-medium text-indigo-900">Activar Notificaciones</span>
+                            <span className="font-medium text-[var(--color-accent)]">Activar Notificaciones</span>
                             <div className="relative inline-flex items-center cursor-pointer">
                                 <input
                                     type="checkbox"
@@ -138,65 +138,65 @@ export default function NotificationsTab() {
                                     checked={settings.enabled}
                                     onChange={(e) => setSettings(prev => ({ ...prev, enabled: e.target.checked }))}
                                 />
-                                <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-indigo-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-indigo-600"></div>
+                                <div className="w-11 h-6 bg-[var(--color-paper-4)] peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-[var(--color-accent)]/30 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-[var(--color-paper-2)] after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-[var(--color-paper-2)] after:border-[var(--color-rule)] after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-[var(--color-accent)]"></div>
                             </div>
                         </label>
-                        <p className="text-xs text-indigo-600 mt-2">
+                        <p className="text-xs text-[var(--color-accent)] mt-2">
                             Si desactivas esta opción, no se enviarán correos aunque los eventos estén habilitados.
                         </p>
                     </div>
 
                     <div>
-                        <h3 className="text-sm font-semibold text-gray-900 mb-4 uppercase tracking-wider">Eventos a Notificar</h3>
+                        <h3 className="text-sm font-semibold text-[var(--color-ink)] mb-4 uppercase tracking-wider">Eventos a Notificar</h3>
                         <div className="space-y-3">
-                            <label className={`flex items-center p-3 border rounded-lg cursor-pointer hover:bg-gray-50 transition-colors ${settings.events.newUser ? 'border-indigo-200 bg-indigo-50/50' : 'border-gray-200'}`}>
+                            <label className={`flex items-center p-3 border rounded-lg cursor-pointer hover:bg-[var(--color-paper-3)] transition-colors ${settings.events.newUser ? 'border-[var(--color-accent)]/30 bg-[var(--color-accent-soft)]' : 'border-[var(--color-rule)]'}`}>
                                 <input
                                     type="checkbox"
-                                    className="w-4 h-4 text-indigo-600 rounded border-gray-300 focus:ring-indigo-500"
+                                    className="w-4 h-4 text-[var(--color-accent)] rounded border-[var(--color-rule)] focus:ring-[var(--color-accent)]/40"
                                     checked={settings.events.newUser}
                                     onChange={() => toggleEvent('newUser')}
                                 />
-                                <span className="ml-3 text-sm font-medium text-gray-700">Nuevo Usuario Registrado</span>
+                                <span className="ml-3 text-sm font-medium text-[var(--color-ink-2)]">Nuevo Usuario Registrado</span>
                             </label>
 
-                            <label className={`flex items-center p-3 border rounded-lg cursor-pointer hover:bg-gray-50 transition-colors ${settings.events.newPayment ? 'border-indigo-200 bg-indigo-50/50' : 'border-gray-200'}`}>
+                            <label className={`flex items-center p-3 border rounded-lg cursor-pointer hover:bg-[var(--color-paper-3)] transition-colors ${settings.events.newPayment ? 'border-[var(--color-accent)]/30 bg-[var(--color-accent-soft)]' : 'border-[var(--color-rule)]'}`}>
                                 <input
                                     type="checkbox"
-                                    className="w-4 h-4 text-indigo-600 rounded border-gray-300 focus:ring-indigo-500"
+                                    className="w-4 h-4 text-[var(--color-accent)] rounded border-[var(--color-rule)] focus:ring-[var(--color-accent)]/40"
                                     checked={settings.events.newPayment}
                                     onChange={() => toggleEvent('newPayment')}
                                 />
-                                <span className="ml-3 text-sm font-medium text-gray-700">Nuevo Pago Recibido</span>
+                                <span className="ml-3 text-sm font-medium text-[var(--color-ink-2)]">Nuevo Pago Recibido</span>
                             </label>
 
-                            <label className={`flex items-center p-3 border rounded-lg cursor-pointer hover:bg-gray-50 transition-colors ${settings.events.newLead ? 'border-indigo-200 bg-indigo-50/50' : 'border-gray-200'}`}>
+                            <label className={`flex items-center p-3 border rounded-lg cursor-pointer hover:bg-[var(--color-paper-3)] transition-colors ${settings.events.newLead ? 'border-[var(--color-accent)]/30 bg-[var(--color-accent-soft)]' : 'border-[var(--color-rule)]'}`}>
                                 <input
                                     type="checkbox"
-                                    className="w-4 h-4 text-indigo-600 rounded border-gray-300 focus:ring-indigo-500"
+                                    className="w-4 h-4 text-[var(--color-accent)] rounded border-[var(--color-rule)] focus:ring-[var(--color-accent)]/40"
                                     checked={settings.events.newLead}
                                     onChange={() => toggleEvent('newLead')}
                                 />
-                                <span className="ml-3 text-sm font-medium text-gray-700">Nueva Consulta (Lead)</span>
+                                <span className="ml-3 text-sm font-medium text-[var(--color-ink-2)]">Nueva Consulta (Lead)</span>
                             </label>
 
-                            <label className={`flex items-center p-3 border rounded-lg cursor-pointer hover:bg-gray-50 transition-colors ${settings.events.newTicket ? 'border-indigo-200 bg-indigo-50/50' : 'border-gray-200'}`}>
+                            <label className={`flex items-center p-3 border rounded-lg cursor-pointer hover:bg-[var(--color-paper-3)] transition-colors ${settings.events.newTicket ? 'border-[var(--color-accent)]/30 bg-[var(--color-accent-soft)]' : 'border-[var(--color-rule)]'}`}>
                                 <input
                                     type="checkbox"
-                                    className="w-4 h-4 text-indigo-600 rounded border-gray-300 focus:ring-indigo-500"
+                                    className="w-4 h-4 text-[var(--color-accent)] rounded border-[var(--color-rule)] focus:ring-[var(--color-accent)]/40"
                                     checked={settings.events.newTicket || false}
                                     onChange={() => toggleEvent('newTicket')}
                                 />
-                                <span className="ml-3 text-sm font-medium text-gray-700">Nuevo Ticket de Soporte</span>
+                                <span className="ml-3 text-sm font-medium text-[var(--color-ink-2)]">Nuevo Ticket de Soporte</span>
                             </label>
 
-                            <label className={`flex items-center p-3 border rounded-lg cursor-pointer hover:bg-gray-50 transition-colors ${settings.events.subscriptionCancelled ? 'border-red-200 bg-red-50/50' : 'border-gray-200'}`}>
+                            <label className={`flex items-center p-3 border rounded-lg cursor-pointer hover:bg-[var(--color-paper-3)] transition-colors ${settings.events.subscriptionCancelled ? 'border-[var(--color-danger)]/30 bg-[var(--color-danger-soft)]' : 'border-[var(--color-rule)]'}`}>
                                 <input
                                     type="checkbox"
-                                    className="w-4 h-4 text-red-600 rounded border-gray-300 focus:ring-red-500"
+                                    className="w-4 h-4 text-[var(--color-danger)] rounded border-[var(--color-rule)] focus:ring-[var(--color-danger)]"
                                     checked={settings.events.subscriptionCancelled || false}
                                     onChange={() => toggleEvent('subscriptionCancelled')}
                                 />
-                                <span className="ml-3 text-sm font-medium text-gray-700">Suscripción Cancelada</span>
+                                <span className="ml-3 text-sm font-medium text-[var(--color-ink-2)]">Suscripción Cancelada</span>
                             </label>
                         </div>
                     </div>
@@ -204,13 +204,13 @@ export default function NotificationsTab() {
 
                 {/* Recipients */}
                 <div>
-                    <h3 className="text-sm font-semibold text-gray-900 mb-4 uppercase tracking-wider">Destinatarios</h3>
-                    <div className="bg-gray-50 rounded-xl p-4 border border-gray-200 mb-4">
+                    <h3 className="text-sm font-semibold text-[var(--color-ink)] mb-4 uppercase tracking-wider">Destinatarios</h3>
+                    <div className="bg-[var(--color-paper)] rounded-xl p-4 border border-[var(--color-rule)] mb-4">
                         <div className="flex gap-2">
                             <input
                                 type="email"
                                 placeholder="ejemplo@empresa.com"
-                                className="flex-1 rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm p-2 border"
+                                className="flex-1 rounded-md border-[var(--color-rule)] shadow-sm focus:border-[var(--color-accent)] focus:ring-[var(--color-accent)]/40 sm:text-sm p-2 border"
                                 value={newEmail}
                                 onChange={(e) => setNewEmail(e.target.value)}
                                 onKeyDown={(e) => e.key === 'Enter' && addEmail()}
@@ -219,9 +219,9 @@ export default function NotificationsTab() {
                                 type="button"
                                 onClick={addEmail}
                                 disabled={!newEmail}
-                                className="px-4 py-2 bg-gray-100 text-gray-700 rounded-md hover:bg-gray-200 transition-colors"
+                                className="px-4 py-2 bg-[var(--color-paper-3)] text-[var(--color-ink-2)] rounded-md hover:bg-[var(--color-paper-4)] transition-colors"
                             >
-                                <Plus className="w-4 h-4" />
+                                <Plus strokeWidth={1.5} className="w-4 h-4" />
                             </button>
                         </div>
                         {settings.recipients.length > 0 && (
@@ -249,32 +249,32 @@ export default function NotificationsTab() {
                                             toast.error("Error de conexión", { id: loadingToast });
                                         }
                                     }}
-                                    className="text-xs text-indigo-600 hover:text-indigo-800 underline mt-1"
+                                    className="text-xs text-[var(--color-accent)] hover:text-[var(--color-accent-2)] underline mt-1"
                                 >
                                     Enviar correo de prueba a estos destinatarios
                                 </button>
                             </div>
                         )}
-                        <p className="mt-1 text-xs text-gray-500">
+                        <p className="mt-1 text-xs text-[var(--color-muted)]">
                             Ingresa los emails que recibirán las alertas.
                         </p>
                     </div>
 
                     <div className="space-y-2 max-h-[300px] overflow-y-auto">
                         {settings.recipients.length === 0 ? (
-                            <div className="text-center py-8 text-gray-500 text-sm border-2 border-dashed border-gray-200 rounded-xl">
+                            <div className="text-center py-8 text-[var(--color-muted)] text-sm border-2 border-dashed border-[var(--color-rule)] rounded-xl">
                                 No hay destinatarios configurados.
                             </div>
                         ) : (
                             settings.recipients.map((email) => (
-                                <div key={email} className="flex justify-between items-center p-3 bg-white border border-gray-200 rounded-lg shadow-sm group">
-                                    <span className="text-sm text-gray-700 font-medium">{email}</span>
+                                <div key={email} className="flex justify-between items-center p-3 bg-[var(--color-paper-2)] border border-[var(--color-rule)] rounded-lg shadow-sm group">
+                                    <span className="text-sm text-[var(--color-ink-2)] font-medium">{email}</span>
                                     <button
                                         onClick={() => removeEmail(email)}
-                                        className="text-gray-400 hover:text-red-500 transition-colors opacity-0 group-hover:opacity-100"
+                                        className="text-[var(--color-neutral)] hover:text-[var(--color-danger)] transition-colors opacity-0 group-hover:opacity-100"
                                         title="Eliminar"
                                     >
-                                        <Trash2 className="w-4 h-4" />
+                                        <Trash2 strokeWidth={1.5} className="w-4 h-4" />
                                     </button>
                                 </div>
                             ))
@@ -282,8 +282,8 @@ export default function NotificationsTab() {
                     </div>
 
                     {/* Sender Warning */}
-                    <div className="mt-6 flex items-start gap-3 p-4 bg-amber-50 rounded-xl border border-amber-100 text-amber-800 text-xs">
-                        <AlertCircle className="w-5 h-5 shrink-0" />
+                    <div className="mt-6 flex items-start gap-3 p-4 bg-[var(--color-warning-soft)] rounded-xl border border-[var(--color-warning)]/30 text-[var(--color-warning)] text-xs">
+                        <AlertCircle strokeWidth={1.5} className="w-5 h-5 shrink-0" />
                         <p>
                             Asegúrate de que la dirección de envío configurada en el sistema (Postmark) esté verificada. De lo contrario, los correos podrían rebotar.
                         </p>

@@ -96,27 +96,27 @@ export default function SitePagesEditor({ pages, onChange }: Props) {
             <div className="space-y-4">
                 <div className="flex items-center justify-between">
                     <div>
-                        <h3 className="font-semibold text-gray-900 dark:text-white">Páginas del sitio</h3>
-                        <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
+                        <h3 className="font-semibold text-[var(--color-ink)]">Páginas del sitio</h3>
+                        <p className="text-xs text-[var(--color-muted)] mt-0.5">
                             Las páginas habilitadas aparecen automáticamente en el menú de tu sitio.
                         </p>
                     </div>
                     <button
                         onClick={openNew}
-                        className="flex items-center gap-1.5 px-3 py-2 bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-semibold rounded-lg transition-colors"
+                        className="flex items-center gap-1.5 px-3 py-2 bg-[var(--color-ink)] hover:bg-[var(--color-ink-2)] text-[var(--color-paper)] text-xs font-semibold rounded-lg transition-colors"
                     >
-                        <Plus className="w-3.5 h-3.5" /> Nueva página
+                        <Plus strokeWidth={1.5} className="w-3.5 h-3.5" /> Nueva página
                     </button>
                 </div>
 
                 {pages.length === 0 ? (
-                    <div className="text-center py-12 border-2 border-dashed border-gray-200 dark:border-gray-700 rounded-2xl">
-                        <FileText className="w-10 h-10 text-gray-300 mx-auto mb-3" />
-                        <p className="text-sm font-medium text-gray-500 dark:text-gray-400">Todavía no tenés páginas</p>
-                        <p className="text-xs text-gray-400 mt-1">Agregá "Quiénes Somos", "Emprendimientos" y más.</p>
+                    <div className="text-center py-12 border-2 border-dashed border-[var(--color-rule)] rounded-2xl">
+                        <FileText strokeWidth={1.5} className="w-10 h-10 text-[var(--color-neutral)] mx-auto mb-3" />
+                        <p className="text-sm font-medium text-[var(--color-muted)]">Todavía no tenés páginas</p>
+                        <p className="text-xs text-[var(--color-neutral)] mt-1">Agregá "Quiénes Somos", "Emprendimientos" y más.</p>
                         <button
                             onClick={openNew}
-                            className="mt-4 px-4 py-2 bg-indigo-50 dark:bg-indigo-900/30 text-indigo-600 text-xs font-semibold rounded-lg hover:bg-indigo-100 transition-colors"
+                            className="mt-4 px-4 py-2 border border-[var(--color-rule)] text-[var(--color-ink)] text-xs font-semibold rounded-lg hover:bg-[var(--color-paper-3)] transition-colors"
                         >
                             + Crear primera página
                         </button>
@@ -126,41 +126,41 @@ export default function SitePagesEditor({ pages, onChange }: Props) {
                         {pages.map(page => (
                             <div
                                 key={page.id}
-                                className="flex items-center gap-3 p-3 bg-gray-50 dark:bg-gray-800 rounded-xl border border-gray-100 dark:border-gray-700"
+                                className="flex items-center gap-3 p-3 bg-[var(--color-paper)] rounded-xl border border-[var(--color-rule-2)]"
                             >
-                                <div className="flex-shrink-0 w-8 h-8 rounded-lg bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600 flex items-center justify-center">
+                                <div className="flex-shrink-0 w-8 h-8 rounded-lg bg-[var(--color-paper-2)] border border-[var(--color-rule)] flex items-center justify-center">
                                     {page.type === "content"
-                                        ? <FileText className="w-4 h-4 text-indigo-500" />
-                                        : <Building2 className="w-4 h-4 text-emerald-500" />
+                                        ? <FileText strokeWidth={1.5} className="w-4 h-4 text-[var(--color-accent)]" />
+                                        : <Building2 strokeWidth={1.5} className="w-4 h-4 text-[var(--color-positive)]" />
                                     }
                                 </div>
                                 <div className="flex-1 min-w-0">
-                                    <p className="text-sm font-semibold text-gray-900 dark:text-white truncate">{page.label}</p>
-                                    <p className="text-xs text-gray-400 font-mono">/p/{page.id}</p>
+                                    <p className="text-sm font-semibold text-[var(--color-ink)] truncate">{page.label}</p>
+                                    <p className="text-xs text-[var(--color-neutral)] font-mono">/p/{page.id}</p>
                                 </div>
-                                <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${page.type === "content" ? "bg-indigo-100 text-indigo-700" : "bg-emerald-100 text-emerald-700"}`}>
+                                <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${page.type === "content" ? "bg-[var(--color-accent-soft)] text-[var(--color-accent)]" : "bg-[var(--color-positive-soft)] text-[var(--color-positive)]"}`}>
                                     {page.type === "content" ? "Contenido" : "Propiedades"}
                                 </span>
                                 <button
                                     onClick={() => toggle(page.id)}
-                                    className={`text-xs font-semibold px-2 py-1 rounded-lg transition-colors ${page.enabled ? "bg-green-100 text-green-700 hover:bg-green-200" : "bg-gray-100 text-gray-500 hover:bg-gray-200"}`}
+                                    className={`text-xs font-semibold px-2 py-1 rounded-lg transition-colors ${page.enabled ? "bg-[var(--color-positive-soft)] text-[var(--color-positive)] hover:bg-[var(--color-positive-soft)]" : "bg-[var(--color-paper-3)] text-[var(--color-muted)] hover:bg-[var(--color-paper-4)]"}`}
                                     title={page.enabled ? "Deshabilitar" : "Habilitar"}
                                 >
-                                    {page.enabled ? <Eye className="w-3.5 h-3.5" /> : <EyeOff className="w-3.5 h-3.5" />}
+                                    {page.enabled ? <Eye strokeWidth={1.5} className="w-3.5 h-3.5" /> : <EyeOff strokeWidth={1.5} className="w-3.5 h-3.5" />}
                                 </button>
                                 <button
                                     onClick={() => openEdit(page)}
-                                    className="p-1.5 rounded-lg text-gray-400 hover:text-indigo-600 hover:bg-indigo-50 transition-colors"
+                                    className="p-1.5 rounded-lg text-[var(--color-neutral)] hover:text-[var(--color-ink)] hover:bg-[var(--color-paper-3)] transition-colors"
                                     title="Editar"
                                 >
-                                    <Edit3 className="w-4 h-4" />
+                                    <Edit3 strokeWidth={1.5} className="w-4 h-4" />
                                 </button>
                                 <button
                                     onClick={() => remove(page.id)}
-                                    className="p-1.5 rounded-lg text-gray-400 hover:text-red-600 hover:bg-red-50 transition-colors"
+                                    className="p-1.5 rounded-lg text-[var(--color-neutral)] hover:text-[var(--color-danger)] hover:bg-[var(--color-danger-soft)] transition-colors"
                                     title="Eliminar"
                                 >
-                                    <Trash2 className="w-4 h-4" />
+                                    <Trash2 strokeWidth={1.5} className="w-4 h-4" />
                                 </button>
                             </div>
                         ))}
@@ -174,10 +174,10 @@ export default function SitePagesEditor({ pages, onChange }: Props) {
     return (
         <div className="space-y-5">
             <div className="flex items-center justify-between">
-                <h3 className="font-semibold text-gray-900 dark:text-white">
+                <h3 className="font-semibold text-[var(--color-ink)]">
                     {editingId === "new" ? "Nueva página" : "Editar página"}
                 </h3>
-                <button onClick={cancel} className="text-xs text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 font-medium">
+                <button onClick={cancel} className="text-xs text-[var(--color-neutral)] hover:text-[var(--color-ink-2)] font-medium">
                     ← Volver
                 </button>
             </div>
@@ -185,29 +185,29 @@ export default function SitePagesEditor({ pages, onChange }: Props) {
             {/* Label + Type */}
             <div className="grid sm:grid-cols-2 gap-4">
                 <div>
-                    <label className="block text-xs font-semibold text-gray-700 dark:text-gray-300 mb-1.5">
+                    <label className="block text-xs font-semibold text-[var(--color-ink-2)] mb-1.5">
                         Nombre de la página *
                     </label>
                     <input
                         value={draft.label}
                         onChange={e => set("label", e.target.value)}
                         placeholder="ej: Quiénes Somos"
-                        className="w-full px-3 py-2.5 text-sm border border-gray-200 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-indigo-400 outline-none"
+                        className="w-full px-3 py-2.5 text-sm border border-[var(--color-rule)] rounded-xl bg-[var(--color-paper-2)] text-[var(--color-ink)] focus:ring-2 focus:ring-[var(--color-accent)]/40 outline-none"
                     />
                     {draft.label && (
-                        <p className="text-[10px] text-gray-400 mt-1 font-mono">URL: /p/{slugify(draft.label) || "…"}</p>
+                        <p className="text-[10px] text-[var(--color-neutral)] mt-1 font-mono">URL: /p/{slugify(draft.label) || "…"}</p>
                     )}
                 </div>
                 <div>
-                    <label className="block text-xs font-semibold text-gray-700 dark:text-gray-300 mb-1.5">Tipo de página</label>
+                    <label className="block text-xs font-semibold text-[var(--color-ink-2)] mb-1.5">Tipo de página</label>
                     <div className="flex gap-2">
                         {(["content", "properties"] as const).map(t => (
                             <button
                                 key={t}
                                 onClick={() => set("type", t)}
-                                className={`flex-1 flex items-center justify-center gap-2 py-2.5 rounded-xl border-2 text-xs font-semibold transition-all ${draft.type === t ? "border-indigo-500 bg-indigo-50 dark:bg-indigo-900/30 text-indigo-700 dark:text-indigo-300" : "border-gray-200 dark:border-gray-600 text-gray-500 hover:border-gray-300"}`}
+                                className={`flex-1 flex items-center justify-center gap-2 py-2.5 rounded-xl border-2 text-xs font-semibold transition-all ${draft.type === t ? "border-[var(--color-accent)] bg-[var(--color-accent-soft)] text-[var(--color-accent)]" : "border-[var(--color-rule)] text-[var(--color-muted)] hover:border-[var(--color-neutral)]"}`}
                             >
-                                {t === "content" ? <FileText className="w-3.5 h-3.5" /> : <Building2 className="w-3.5 h-3.5" />}
+                                {t === "content" ? <FileText strokeWidth={1.5} className="w-3.5 h-3.5" /> : <Building2 strokeWidth={1.5} className="w-3.5 h-3.5" />}
                                 {t === "content" ? "Contenido" : "Propiedades"}
                             </button>
                         ))}
@@ -219,86 +219,86 @@ export default function SitePagesEditor({ pages, onChange }: Props) {
             <label className="flex items-center gap-3 cursor-pointer select-none">
                 <div
                     onClick={() => set("enabled", !draft.enabled)}
-                    className={`relative w-10 h-6 rounded-full transition-colors ${draft.enabled ? "bg-indigo-500" : "bg-gray-300"}`}
+                    className={`relative w-10 h-6 rounded-full transition-colors ${draft.enabled ? "bg-[var(--color-accent)]" : "bg-[var(--color-paper-4)]"}`}
                 >
-                    <div className={`absolute top-1 w-4 h-4 bg-white rounded-full shadow transition-all ${draft.enabled ? "left-5" : "left-1"}`} />
+                    <div className={`absolute top-1 w-4 h-4 bg-[var(--color-paper-2)] rounded-full shadow transition-all ${draft.enabled ? "left-5" : "left-1"}`} />
                 </div>
-                <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                <span className="text-sm font-medium text-[var(--color-ink-2)]">
                     {draft.enabled ? "Habilitada (aparece en el menú)" : "Deshabilitada (oculta)"}
                 </span>
             </label>
 
-            <div className="border-t border-gray-100 dark:border-gray-700 pt-4 space-y-5">
+            <div className="border-t border-[var(--color-rule-2)] pt-4 space-y-5">
 
                 {/* ── CONTENT fields ── */}
                 {draft.type === "content" && (
                     <>
                         {/* Hero */}
                         <div className="space-y-3">
-                            <h4 className="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-widest">Encabezado</h4>
+                            <h4 className="text-xs font-bold text-[var(--color-muted)] uppercase tracking-widest">Encabezado</h4>
                             <input
                                 value={draft.heroTitle || ""}
                                 onChange={e => set("heroTitle", e.target.value)}
                                 placeholder="Título principal (ej: Conocé nuestro equipo)"
-                                className="w-full px-3 py-2.5 text-sm border border-gray-200 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-indigo-400 outline-none"
+                                className="w-full px-3 py-2.5 text-sm border border-[var(--color-rule)] rounded-xl bg-[var(--color-paper-2)] text-[var(--color-ink)] focus:ring-2 focus:ring-[var(--color-accent)]/40 outline-none"
                             />
                             <input
                                 value={draft.heroSubtitle || ""}
                                 onChange={e => set("heroSubtitle", e.target.value)}
                                 placeholder="Subtítulo o descripción breve"
-                                className="w-full px-3 py-2.5 text-sm border border-gray-200 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-indigo-400 outline-none"
+                                className="w-full px-3 py-2.5 text-sm border border-[var(--color-rule)] rounded-xl bg-[var(--color-paper-2)] text-[var(--color-ink)] focus:ring-2 focus:ring-[var(--color-accent)]/40 outline-none"
                             />
                         </div>
 
                         {/* Body text */}
                         <div>
-                            <h4 className="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-widest mb-2">Texto principal</h4>
+                            <h4 className="text-xs font-bold text-[var(--color-muted)] uppercase tracking-widest mb-2">Texto principal</h4>
                             <textarea
                                 value={draft.body || ""}
                                 onChange={e => set("body", e.target.value)}
                                 placeholder="Escribí el contenido de la página..."
                                 rows={5}
-                                className="w-full px-3 py-2.5 text-sm border border-gray-200 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-indigo-400 outline-none resize-y"
+                                className="w-full px-3 py-2.5 text-sm border border-[var(--color-rule)] rounded-xl bg-[var(--color-paper-2)] text-[var(--color-ink)] focus:ring-2 focus:ring-[var(--color-accent)]/40 outline-none resize-y"
                             />
                         </div>
 
                         {/* FAQ section */}
                         <div className="space-y-3">
                             <div className="flex items-center justify-between">
-                                <h4 className="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-widest flex items-center gap-1.5">
-                                    <HelpCircle className="w-3.5 h-3.5" /> Preguntas frecuentes
+                                <h4 className="text-xs font-bold text-[var(--color-muted)] uppercase tracking-widest flex items-center gap-1.5">
+                                    <HelpCircle strokeWidth={1.5} className="w-3.5 h-3.5" /> Preguntas frecuentes
                                 </h4>
                                 <button
                                     onClick={addFaq}
-                                    className="text-xs text-indigo-600 hover:text-indigo-800 font-semibold flex items-center gap-1"
+                                    className="text-xs text-[var(--color-accent)] hover:text-[var(--color-accent-2)] font-semibold flex items-center gap-1"
                                 >
-                                    <Plus className="w-3 h-3" /> Agregar
+                                    <Plus strokeWidth={1.5} className="w-3 h-3" /> Agregar
                                 </button>
                             </div>
                             {(draft.faqItems || []).length === 0 && (
-                                <p className="text-xs text-gray-400 italic">Sin preguntas todavía.</p>
+                                <p className="text-xs text-[var(--color-neutral)] italic">Sin preguntas todavía.</p>
                             )}
                             {(draft.faqItems || []).map((faq, i) => (
-                                <div key={i} className="space-y-2 p-3 bg-gray-50 dark:bg-gray-800 rounded-xl border border-gray-100 dark:border-gray-700">
+                                <div key={i} className="space-y-2 p-3 bg-[var(--color-paper)] rounded-xl border border-[var(--color-rule-2)]">
                                     <div className="flex items-start gap-2">
-                                        <span className="text-[10px] font-bold text-gray-400 mt-2.5 min-w-[12px]">{i + 1}</span>
+                                        <span className="text-[10px] font-bold text-[var(--color-neutral)] mt-2.5 min-w-[12px]">{i + 1}</span>
                                         <div className="flex-1 space-y-2">
                                             <input
                                                 value={faq.question}
                                                 onChange={e => updateFaq(i, "question", e.target.value)}
                                                 placeholder="Pregunta"
-                                                className="w-full px-3 py-2 text-xs border border-gray-200 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-indigo-400 outline-none font-semibold"
+                                                className="w-full px-3 py-2 text-xs border border-[var(--color-rule)] rounded-lg bg-[var(--color-paper-2)] text-[var(--color-ink)] focus:ring-2 focus:ring-[var(--color-accent)]/40 outline-none font-semibold"
                                             />
                                             <textarea
                                                 value={faq.answer}
                                                 onChange={e => updateFaq(i, "answer", e.target.value)}
                                                 placeholder="Respuesta"
                                                 rows={2}
-                                                className="w-full px-3 py-2 text-xs border border-gray-200 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-indigo-400 outline-none resize-none"
+                                                className="w-full px-3 py-2 text-xs border border-[var(--color-rule)] rounded-lg bg-[var(--color-paper-2)] text-[var(--color-ink)] focus:ring-2 focus:ring-[var(--color-accent)]/40 outline-none resize-none"
                                             />
                                         </div>
-                                        <button onClick={() => removeFaq(i)} className="mt-1.5 p-1 text-gray-400 hover:text-red-500 transition-colors flex-shrink-0">
-                                            <Trash2 className="w-3.5 h-3.5" />
+                                        <button onClick={() => removeFaq(i)} className="mt-1.5 p-1 text-[var(--color-neutral)] hover:text-[var(--color-danger)] transition-colors flex-shrink-0">
+                                            <Trash2 strokeWidth={1.5} className="w-3.5 h-3.5" />
                                         </button>
                                     </div>
                                 </div>
@@ -308,50 +308,50 @@ export default function SitePagesEditor({ pages, onChange }: Props) {
                         {/* Team section */}
                         <div className="space-y-3">
                             <div className="flex items-center justify-between">
-                                <h4 className="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-widest flex items-center gap-1.5">
-                                    <Users className="w-3.5 h-3.5" /> Equipo
+                                <h4 className="text-xs font-bold text-[var(--color-muted)] uppercase tracking-widest flex items-center gap-1.5">
+                                    <Users strokeWidth={1.5} className="w-3.5 h-3.5" /> Equipo
                                 </h4>
                                 <button
                                     onClick={addMember}
-                                    className="text-xs text-indigo-600 hover:text-indigo-800 font-semibold flex items-center gap-1"
+                                    className="text-xs text-[var(--color-accent)] hover:text-[var(--color-accent-2)] font-semibold flex items-center gap-1"
                                 >
-                                    <Plus className="w-3 h-3" /> Agregar persona
+                                    <Plus strokeWidth={1.5} className="w-3 h-3" /> Agregar persona
                                 </button>
                             </div>
                             {(draft.teamMembers || []).length === 0 && (
-                                <p className="text-xs text-gray-400 italic">Sin miembros del equipo todavía.</p>
+                                <p className="text-xs text-[var(--color-neutral)] italic">Sin miembros del equipo todavía.</p>
                             )}
                             {(draft.teamMembers || []).map((m, i) => (
-                                <div key={i} className="p-3 bg-gray-50 dark:bg-gray-800 rounded-xl border border-gray-100 dark:border-gray-700">
+                                <div key={i} className="p-3 bg-[var(--color-paper)] rounded-xl border border-[var(--color-rule-2)]">
                                     <div className="flex items-start gap-2">
                                         <div className="flex-1 grid sm:grid-cols-2 gap-2">
                                             <input
                                                 value={m.name}
                                                 onChange={e => updateMember(i, "name", e.target.value)}
                                                 placeholder="Nombre *"
-                                                className="px-3 py-2 text-xs border border-gray-200 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-indigo-400 outline-none font-semibold"
+                                                className="px-3 py-2 text-xs border border-[var(--color-rule)] rounded-lg bg-[var(--color-paper-2)] text-[var(--color-ink)] focus:ring-2 focus:ring-[var(--color-accent)]/40 outline-none font-semibold"
                                             />
                                             <input
                                                 value={m.role}
                                                 onChange={e => updateMember(i, "role", e.target.value)}
                                                 placeholder="Rol / Cargo *"
-                                                className="px-3 py-2 text-xs border border-gray-200 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-indigo-400 outline-none"
+                                                className="px-3 py-2 text-xs border border-[var(--color-rule)] rounded-lg bg-[var(--color-paper-2)] text-[var(--color-ink)] focus:ring-2 focus:ring-[var(--color-accent)]/40 outline-none"
                                             />
                                             <input
                                                 value={m.whatsapp || ""}
                                                 onChange={e => updateMember(i, "whatsapp", e.target.value)}
                                                 placeholder="WhatsApp (ej: 5491112345678)"
-                                                className="px-3 py-2 text-xs border border-gray-200 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-indigo-400 outline-none"
+                                                className="px-3 py-2 text-xs border border-[var(--color-rule)] rounded-lg bg-[var(--color-paper-2)] text-[var(--color-ink)] focus:ring-2 focus:ring-[var(--color-accent)]/40 outline-none"
                                             />
                                             <input
                                                 value={m.email || ""}
                                                 onChange={e => updateMember(i, "email", e.target.value)}
                                                 placeholder="Email"
-                                                className="px-3 py-2 text-xs border border-gray-200 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-indigo-400 outline-none"
+                                                className="px-3 py-2 text-xs border border-[var(--color-rule)] rounded-lg bg-[var(--color-paper-2)] text-[var(--color-ink)] focus:ring-2 focus:ring-[var(--color-accent)]/40 outline-none"
                                             />
                                         </div>
-                                        <button onClick={() => removeMember(i)} className="mt-1.5 p-1 text-gray-400 hover:text-red-500 transition-colors flex-shrink-0">
-                                            <Trash2 className="w-3.5 h-3.5" />
+                                        <button onClick={() => removeMember(i)} className="mt-1.5 p-1 text-[var(--color-neutral)] hover:text-[var(--color-danger)] transition-colors flex-shrink-0">
+                                            <Trash2 strokeWidth={1.5} className="w-3.5 h-3.5" />
                                         </button>
                                     </div>
                                 </div>
@@ -363,32 +363,32 @@ export default function SitePagesEditor({ pages, onChange }: Props) {
                 {/* ── PROPERTIES fields ── */}
                 {draft.type === "properties" && (
                     <div className="space-y-4">
-                        <h4 className="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-widest">Configuración</h4>
+                        <h4 className="text-xs font-bold text-[var(--color-muted)] uppercase tracking-widest">Configuración</h4>
                         <div className="grid sm:grid-cols-2 gap-4">
                             <input
                                 value={draft.pageTitle || ""}
                                 onChange={e => set("pageTitle", e.target.value)}
                                 placeholder="Título (ej: Emprendimientos)"
-                                className="px-3 py-2.5 text-sm border border-gray-200 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-indigo-400 outline-none"
+                                className="px-3 py-2.5 text-sm border border-[var(--color-rule)] rounded-xl bg-[var(--color-paper-2)] text-[var(--color-ink)] focus:ring-2 focus:ring-[var(--color-accent)]/40 outline-none"
                             />
                             <input
                                 value={draft.pageSubtitle || ""}
                                 onChange={e => set("pageSubtitle", e.target.value)}
                                 placeholder="Subtítulo opcional"
-                                className="px-3 py-2.5 text-sm border border-gray-200 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-indigo-400 outline-none"
+                                className="px-3 py-2.5 text-sm border border-[var(--color-rule)] rounded-xl bg-[var(--color-paper-2)] text-[var(--color-ink)] focus:ring-2 focus:ring-[var(--color-accent)]/40 outline-none"
                             />
                         </div>
                         <div>
-                            <label className="block text-xs font-semibold text-gray-700 dark:text-gray-300 mb-1.5">
+                            <label className="block text-xs font-semibold text-[var(--color-ink-2)] mb-1.5">
                                 Etiqueta de filtro *
                             </label>
                             <input
                                 value={draft.filterTag || ""}
                                 onChange={e => set("filterTag", e.target.value.toLowerCase().trim())}
                                 placeholder="ej: emprendimiento"
-                                className="w-full px-3 py-2.5 text-sm border border-gray-200 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-indigo-400 outline-none"
+                                className="w-full px-3 py-2.5 text-sm border border-[var(--color-rule)] rounded-xl bg-[var(--color-paper-2)] text-[var(--color-ink)] focus:ring-2 focus:ring-[var(--color-accent)]/40 outline-none"
                             />
-                            <p className="text-xs text-gray-400 mt-1.5">
+                            <p className="text-xs text-[var(--color-neutral)] mt-1.5">
                                 Solo se mostrarán las propiedades que tengan esta etiqueta en el campo <strong>"Etiqueta de página"</strong> del formulario de propiedad.
                             </p>
                         </div>
@@ -397,17 +397,17 @@ export default function SitePagesEditor({ pages, onChange }: Props) {
             </div>
 
             {/* Save / Cancel */}
-            <div className="flex gap-3 pt-2 border-t border-gray-100 dark:border-gray-700">
+            <div className="flex gap-3 pt-2 border-t border-[var(--color-rule-2)]">
                 <button
                     onClick={save}
                     disabled={!draft.label.trim() || (draft.type === "properties" && !draft.filterTag?.trim())}
-                    className="flex-1 py-2.5 bg-indigo-600 hover:bg-indigo-700 disabled:opacity-40 disabled:cursor-not-allowed text-white text-sm font-semibold rounded-xl transition-colors"
+                    className="flex-1 py-2.5 bg-[var(--color-ink)] hover:bg-[var(--color-ink-2)] disabled:opacity-40 disabled:cursor-not-allowed text-[var(--color-paper)] text-sm font-semibold rounded-xl transition-colors"
                 >
                     {editingId === "new" ? "Crear página" : "Guardar cambios"}
                 </button>
                 <button
                     onClick={cancel}
-                    className="px-5 py-2.5 border border-gray-200 dark:border-gray-600 text-gray-700 dark:text-gray-300 text-sm font-semibold rounded-xl hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
+                    className="px-5 py-2.5 border border-[var(--color-rule)] text-[var(--color-ink-2)] text-sm font-semibold rounded-xl hover:bg-[var(--color-paper-3)] transition-colors"
                 >
                     Cancelar
                 </button>

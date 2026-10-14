@@ -77,14 +77,14 @@ describe('repository email templates', () => {
         }
     });
 
-    it('premium templates use the {{unsubscribeUrl}} placeholder and the working logo', async () => {
+    it('premium templates use the {{unsubscribeUrl}} placeholder and the text wordmark header', async () => {
         const { PREMIUM_TEMPLATES } = await import('../app/(main)/dashboard/marketing/premiumTemplates');
 
         for (const template of PREMIUM_TEMPLATES) {
             expect(template.html, template.type).toContain('href="{{unsubscribeUrl}}"');
-            expect(template.html, template.type).toContain(
-                'https://zetaprop.com.ar/assets/img/logo_zeta_prop_transparent.png'
-            );
+            expect(template.html, template.type).toContain('>Zeta<span style="color:');
+            expect(template.html, template.type).not.toContain('logo_zeta_prop');
+            expect(template.html, template.type).not.toMatch(/#2563eb|#4f46e5|#7c3aed/i);
         }
     });
 });

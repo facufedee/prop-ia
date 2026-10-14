@@ -153,7 +153,7 @@ export default function CuentaPage() {
     if (loading) {
         return (
             <div className="min-h-screen flex items-center justify-center">
-                <Loader2 className="w-8 h-8 animate-spin text-indigo-600" />
+                <Loader2 strokeWidth={1.5} className="w-8 h-8 animate-spin text-[var(--color-accent)]" />
             </div>
         );
     }
@@ -164,98 +164,98 @@ export default function CuentaPage() {
 
     return (
         <div className="space-y-6 max-w-4xl mx-auto p-4 md:p-8">
-            <h1 className="text-2xl font-bold text-gray-900">Mi Cuenta</h1>
+            <h1 className="font-heading text-2xl font-bold text-[var(--color-ink)]">Mi Cuenta</h1>
 
             {/* Status Message */}
             {message && (
-                <div className={`p-4 rounded-xl flex items-center gap-3 ${message.type === 'success' ? 'bg-green-50 text-green-800 border border-green-200' : 'bg-red-50 text-red-800 border border-red-200'
+                <div className={`p-4 rounded-xl flex items-center gap-3 ${message.type === 'success' ? 'bg-[var(--color-positive-soft)] text-[var(--color-positive)] border border-[var(--color-positive)]/30' : 'bg-[var(--color-danger-soft)] text-[var(--color-danger)] border border-[var(--color-danger)]/30'
                     }`}>
-                    <Info className="w-5 h-5 flex-shrink-0" />
+                    <Info strokeWidth={1.5} className="w-5 h-5 flex-shrink-0" />
                     <p className="font-medium">{message.text}</p>
                 </div>
             )}
 
-            <div className="bg-white border rounded-2xl overflow-hidden shadow-sm">
+            <div className="bg-[var(--color-paper-2)] border rounded-2xl overflow-hidden shadow-sm">
 
                 {/* Header Profile */}
-                <div className="p-6 border-b bg-gray-50 flex flex-col md:flex-row items-center gap-6">
-                    <div className="w-24 h-24 bg-indigo-600 text-white rounded-full flex items-center justify-center text-3xl font-bold border-4 border-white shadow-md">
+                <div className="p-6 border-b bg-[var(--color-paper)] flex flex-col md:flex-row items-center gap-6">
+                    <div className="w-24 h-24 bg-[var(--color-paper-3)] text-[var(--color-ink-2)] rounded-full flex items-center justify-center text-3xl font-bold border-4 border-[var(--color-paper-2)] shadow-md">
                         {displayName ? displayName.charAt(0).toUpperCase() : user.email?.charAt(0).toUpperCase()}
                     </div>
                     <div className="text-center md:text-left space-y-1">
-                        <h2 className="text-2xl font-bold text-gray-900">{displayName || user.email}</h2>
+                        <h2 className="text-2xl font-bold text-[var(--color-ink)]">{displayName || user.email}</h2>
                         <div className="flex flex-wrap gap-2 justify-center md:justify-start">
-                            <span className="px-3 py-1 rounded-full bg-blue-100 text-blue-700 text-sm font-medium">
+                            <span className="px-3 py-1 rounded-full bg-[var(--color-paper-3)] text-[var(--color-ink-2)] text-sm font-medium">
                                 {role?.name || "Usuario"}
                             </span>
                             {plan && (
-                                <span className="px-3 py-1 rounded-full bg-indigo-100 text-indigo-700 text-sm font-medium">
+                                <span className="px-3 py-1 rounded-full bg-[var(--color-paper-3)] text-[var(--color-ink-2)] text-sm font-medium">
                                     Plan {plan.name}
                                 </span>
                             )}
                         </div>
-                        <p className="text-gray-500 text-sm">{user.email}</p>
+                        <p className="text-[var(--color-muted)] text-sm">{user.email}</p>
                     </div>
                 </div>
 
                 <div className="p-6 space-y-8">
                     {/* Personal Information */}
                     <section className="space-y-4">
-                        <h3 className="text-lg font-bold text-gray-900 flex items-center gap-2">
-                            <User className="w-5 h-5 text-gray-400" />
+                        <h3 className="text-lg font-bold text-[var(--color-ink)] flex items-center gap-2">
+                            <User strokeWidth={1.5} className="w-5 h-5 text-[var(--color-neutral)]" />
                             Información Personal
                         </h3>
                         <div className="grid md:grid-cols-2 gap-6">
                             <div className="space-y-2">
-                                <label className="text-sm font-medium text-gray-700">Nombre Completo</label>
+                                <label className="text-sm font-medium text-[var(--color-ink-2)]">Nombre Completo</label>
                                 <div className="relative">
                                     <input
                                         type="text"
                                         value={displayName}
                                         onChange={(e) => setDisplayName(e.target.value)}
-                                        className="w-full pl-4 p-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all"
+                                        className="w-full pl-4 p-3 border border-[var(--color-rule)] rounded-xl focus:ring-2 focus:ring-[var(--color-accent)]/40 focus:border-[var(--color-accent)] transition-all"
                                         placeholder="Tu nombre"
                                     />
                                 </div>
                             </div>
                             <div className="space-y-2">
-                                <label className="text-sm font-medium text-gray-700">Email</label>
+                                <label className="text-sm font-medium text-[var(--color-ink-2)]">Email</label>
                                 <div className="relative">
-                                    <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
+                                    <Mail strokeWidth={1.5} className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-[var(--color-neutral)]" />
                                     <input
                                         type="email"
                                         value={user.email || ""}
                                         disabled
-                                        className="w-full pl-10 p-3 border border-gray-200 rounded-xl bg-gray-50 text-gray-500 cursor-not-allowed"
+                                        className="w-full pl-10 p-3 border border-[var(--color-rule)] rounded-xl bg-[var(--color-paper)] text-[var(--color-muted)] cursor-not-allowed"
                                     />
                                 </div>
-                                <p className="text-xs text-gray-400">El email no se puede cambiar.</p>
+                                <p className="text-xs text-[var(--color-neutral)]">El email no se puede cambiar.</p>
                             </div>
                         </div>
                     </section>
 
-                    <div className="border-t border-gray-100 my-6"></div>
+                    <div className="border-t border-[var(--color-rule-2)] my-6"></div>
 
                     {/* Agency Information - NEW SECTION */}
                     <section className="space-y-4">
-                        <h3 className="text-lg font-bold text-gray-900 flex items-center gap-2">
-                            <Building2 className="w-5 h-5 text-gray-400" />
+                        <h3 className="text-lg font-bold text-[var(--color-ink)] flex items-center gap-2">
+                            <Building2 strokeWidth={1.5} className="w-5 h-5 text-[var(--color-neutral)]" />
                             Datos de la Inmobiliaria
                         </h3>
                         <div className="grid md:grid-cols-2 gap-6">
                             <div className="md:col-span-2 space-y-4">
-                                <label className="text-sm font-medium text-gray-700">Logo de la Inmobiliaria</label>
+                                <label className="text-sm font-medium text-[var(--color-ink-2)]">Logo de la Inmobiliaria</label>
                                 <div className="flex items-center gap-6">
-                                    <div className="w-24 h-24 border-2 border-dashed border-gray-300 rounded-xl flex items-center justify-center bg-gray-50 overflow-hidden relative">
+                                    <div className="w-24 h-24 border-2 border-dashed border-[var(--color-rule)] rounded-xl flex items-center justify-center bg-[var(--color-paper)] overflow-hidden relative">
                                         {agencyData.agencyLogoUrl ? (
                                             <img src={agencyData.agencyLogoUrl} alt="Logo" className="w-full h-full object-cover" />
                                         ) : (
-                                            <Building2 className="w-8 h-8 text-gray-400" />
+                                            <Building2 strokeWidth={1.5} className="w-8 h-8 text-[var(--color-neutral)]" />
                                         )}
-                                        {saving && <div className="absolute inset-0 bg-white/50 flex items-center justify-center"><Loader2 className="w-6 h-6 animate-spin text-indigo-600" /></div>}
+                                        {saving && <div className="absolute inset-0 bg-[var(--color-paper-2)]/50 flex items-center justify-center"><Loader2 strokeWidth={1.5} className="w-6 h-6 animate-spin text-[var(--color-accent)]" /></div>}
                                     </div>
                                     <div className="space-y-2">
-                                        <p className="text-sm text-gray-500">
+                                        <p className="text-sm text-[var(--color-muted)]">
                                             Sube tu logo para personalizar la plataforma.
                                             <br />Recomendado: 500x500px, PNG o JPG.
                                         </p>
@@ -295,7 +295,7 @@ export default function CuentaPage() {
                                             />
                                             <label
                                                 htmlFor="logo-upload"
-                                                className="px-4 py-2 bg-white border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 font-medium text-sm transition-colors shadow-sm cursor-pointer inline-block"
+                                                className="px-4 py-2 bg-[var(--color-paper-2)] border border-[var(--color-rule)] text-[var(--color-ink-2)] rounded-lg hover:bg-[var(--color-paper-3)] font-medium text-sm transition-colors shadow-sm cursor-pointer inline-block"
                                             >
                                                 Subir Nuevo Logo
                                             </label>
@@ -305,153 +305,153 @@ export default function CuentaPage() {
                             </div>
 
                             <div className="space-y-2">
-                                <label className="text-sm font-medium text-gray-700">Nombre de Inmobiliaria / Fantasía</label>
+                                <label className="text-sm font-medium text-[var(--color-ink-2)]">Nombre de Inmobiliaria / Fantasía</label>
                                 <input
                                     type="text"
                                     value={agencyData.agencyName}
                                     onChange={(e) => handleAgencyChange('agencyName', e.target.value)}
-                                    className="w-full p-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all"
+                                    className="w-full p-3 border border-[var(--color-rule)] rounded-xl focus:ring-2 focus:ring-[var(--color-accent)]/40 focus:border-[var(--color-accent)] transition-all"
                                     placeholder="Ej. Inmobiliaria Zeta Prop"
                                 />
                             </div>
 
                             <div className="space-y-2">
-                                <label className="text-sm font-medium text-gray-700">Matrícula / Legajo</label>
+                                <label className="text-sm font-medium text-[var(--color-ink-2)]">Matrícula / Legajo</label>
                                 <input
                                     type="text"
                                     value={agencyData.agencyLicense}
                                     onChange={(e) => handleAgencyChange('agencyLicense', e.target.value)}
-                                    className="w-full p-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all"
+                                    className="w-full p-3 border border-[var(--color-rule)] rounded-xl focus:ring-2 focus:ring-[var(--color-accent)]/40 focus:border-[var(--color-accent)] transition-all"
                                     placeholder="Ej. CUCICBA 1234"
                                 />
                             </div>
 
                             <div className="space-y-2">
-                                <label className="text-sm font-medium text-gray-700">Responsable / Corredor</label>
+                                <label className="text-sm font-medium text-[var(--color-ink-2)]">Responsable / Corredor</label>
                                 <input
                                     type="text"
                                     value={agencyData.agencyManager}
                                     onChange={(e) => handleAgencyChange('agencyManager', e.target.value)}
-                                    className="w-full p-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all"
+                                    className="w-full p-3 border border-[var(--color-rule)] rounded-xl focus:ring-2 focus:ring-[var(--color-accent)]/40 focus:border-[var(--color-accent)] transition-all"
                                     placeholder="Ej. Juan Pérez"
                                 />
                             </div>
 
                             <div className="space-y-2">
-                                <label className="text-sm font-medium text-gray-700">CUIT</label>
+                                <label className="text-sm font-medium text-[var(--color-ink-2)]">CUIT</label>
                                 <input
                                     type="text"
                                     value={agencyData.agencyCuit}
                                     onChange={(e) => handleAgencyChange('agencyCuit', e.target.value)}
-                                    className="w-full p-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all"
+                                    className="w-full p-3 border border-[var(--color-rule)] rounded-xl focus:ring-2 focus:ring-[var(--color-accent)]/40 focus:border-[var(--color-accent)] transition-all"
                                     placeholder="Ej. 20-12345678-9"
                                 />
                             </div>
 
                             <div className="md:col-span-2 space-y-2">
-                                <label className="text-sm font-medium text-gray-700">Dirección Comercial</label>
+                                <label className="text-sm font-medium text-[var(--color-ink-2)]">Dirección Comercial</label>
                                 <input
                                     type="text"
                                     value={agencyData.agencyAddress}
                                     onChange={(e) => handleAgencyChange('agencyAddress', e.target.value)}
-                                    className="w-full p-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all"
+                                    className="w-full p-3 border border-[var(--color-rule)] rounded-xl focus:ring-2 focus:ring-[var(--color-accent)]/40 focus:border-[var(--color-accent)] transition-all"
                                     placeholder="Ej. Av. Libertador 1000, CABA"
                                 />
                             </div>
 
                             <div className="space-y-2">
-                                <label className="text-sm font-medium text-gray-700">WhatsApp Comercial</label>
+                                <label className="text-sm font-medium text-[var(--color-ink-2)]">WhatsApp Comercial</label>
                                 <input
                                     type="text"
                                     value={agencyData.agencyWhatsapp}
                                     onChange={(e) => handleAgencyChange('agencyWhatsapp', e.target.value)}
-                                    className="w-full p-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all"
+                                    className="w-full p-3 border border-[var(--color-rule)] rounded-xl focus:ring-2 focus:ring-[var(--color-accent)]/40 focus:border-[var(--color-accent)] transition-all"
                                     placeholder="Ej. 5491112345678"
                                 />
                             </div>
 
                             <div className="space-y-2">
-                                <label className="text-sm font-medium text-gray-700">Sitio Web</label>
+                                <label className="text-sm font-medium text-[var(--color-ink-2)]">Sitio Web</label>
                                 <input
                                     type="text"
                                     value={agencyData.agencyWebsite}
                                     onChange={(e) => handleAgencyChange('agencyWebsite', e.target.value)}
-                                    className="w-full p-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all"
+                                    className="w-full p-3 border border-[var(--color-rule)] rounded-xl focus:ring-2 focus:ring-[var(--color-accent)]/40 focus:border-[var(--color-accent)] transition-all"
                                     placeholder="Ej. www.tuinmobiliaria.com"
                                 />
                             </div>
                         </div>
                     </section>
 
-                    <div className="border-t border-gray-100 my-6"></div>
+                    <div className="border-t border-[var(--color-rule-2)] my-6"></div>
 
                     {/* Security */}
                     <section className="space-y-4">
-                        <h3 className="text-lg font-bold text-gray-900 flex items-center gap-2">
-                            <Lock className="w-5 h-5 text-gray-400" />
+                        <h3 className="text-lg font-bold text-[var(--color-ink)] flex items-center gap-2">
+                            <Lock strokeWidth={1.5} className="w-5 h-5 text-[var(--color-neutral)]" />
                             Seguridad e Identidad
                         </h3>
 
                         {/* Password Reset */}
-                        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between p-4 border border-gray-200 rounded-xl bg-gray-50 mb-4">
+                        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between p-4 border border-[var(--color-rule)] rounded-xl bg-[var(--color-paper)] mb-4">
                             <div>
-                                <p className="font-medium text-gray-900">Contraseña</p>
-                                <p className="text-sm text-gray-500">Te enviaremos un email para restablecerla.</p>
+                                <p className="font-medium text-[var(--color-ink)]">Contraseña</p>
+                                <p className="text-sm text-[var(--color-muted)]">Te enviaremos un email para restablecerla.</p>
                             </div>
                             <button
                                 onClick={handlePasswordReset}
-                                className="mt-3 sm:mt-0 px-4 py-2 bg-white border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 font-medium text-sm transition-colors shadow-sm"
+                                className="mt-3 sm:mt-0 px-4 py-2 bg-[var(--color-paper-2)] border border-[var(--color-rule)] text-[var(--color-ink-2)] rounded-lg hover:bg-[var(--color-paper-3)] font-medium text-sm transition-colors shadow-sm"
                             >
                                 Cambiar Contraseña
                             </button>
                         </div>
 
                         {/* Identity Verification */}
-                        <div className="p-4 border border-gray-200 rounded-xl bg-white space-y-4">
+                        <div className="p-4 border border-[var(--color-rule)] rounded-xl bg-[var(--color-paper-2)] space-y-4">
                             <div className="flex justify-between items-start">
                                 <div>
-                                    <h4 className="font-medium text-gray-900">Validación de Identidad</h4>
-                                    <p className="text-sm text-gray-500">Para mayor seguridad y confianza, valida tu identidad como inmobiliaria.</p>
+                                    <h4 className="font-medium text-[var(--color-ink)]">Validación de Identidad</h4>
+                                    <p className="text-sm text-[var(--color-muted)]">Para mayor seguridad y confianza, valida tu identidad como inmobiliaria.</p>
                                 </div>
                                 {/* Status Badge */}
                                 {user.photoURL === 'verified' ? ( // Using photoURL/App state for demo, ideally user.isVerified
-                                    <span className="px-3 py-1 bg-green-100 text-green-700 text-xs font-bold rounded-full border border-green-200">
+                                    <span className="px-3 py-1 bg-[var(--color-positive-soft)] text-[var(--color-positive)] text-xs font-bold rounded-full border border-[var(--color-positive)]/30">
                                         VERIFICADO
                                     </span>
                                 ) : (
-                                    <span className="px-3 py-1 bg-gray-100 text-gray-600 text-xs font-bold rounded-full border border-gray-200">
+                                    <span className="px-3 py-1 bg-[var(--color-paper-3)] text-[var(--color-ink-2)] text-xs font-bold rounded-full border border-[var(--color-rule)]">
                                         NO VERIFICADO
                                     </span>
                                 )}
                             </div>
 
                             <div className="grid md:grid-cols-2 gap-4">
-                                <div className="p-4 border border-dashed border-gray-300 rounded-lg text-center hover:bg-gray-50 transition-colors cursor-pointer group">
-                                    <Building2 className="w-8 h-8 text-indigo-300 mx-auto mb-2 group-hover:text-indigo-500" />
-                                    <p className="text-sm font-medium text-gray-700">Validar Dominio Web</p>
-                                    <p className="text-xs text-gray-400">DNS o archivo HTML</p>
+                                <div className="p-4 border border-dashed border-[var(--color-rule)] rounded-lg text-center hover:bg-[var(--color-paper-3)] transition-colors cursor-pointer group">
+                                    <Building2 strokeWidth={1.5} className="w-8 h-8 text-[var(--color-accent-2)] mx-auto mb-2 group-hover:text-[var(--color-accent-2)]" />
+                                    <p className="text-sm font-medium text-[var(--color-ink-2)]">Validar Dominio Web</p>
+                                    <p className="text-xs text-[var(--color-neutral)]">DNS o archivo HTML</p>
                                 </div>
-                                <div className="p-4 border border-dashed border-gray-300 rounded-lg text-center hover:bg-gray-50 transition-colors cursor-pointer group">
-                                    <Shield className="w-8 h-8 text-indigo-300 mx-auto mb-2 group-hover:text-indigo-500" />
-                                    <p className="text-sm font-medium text-gray-700">Cargar Documentación</p>
-                                    <p className="text-xs text-gray-400">Matrícula o Constancia</p>
+                                <div className="p-4 border border-dashed border-[var(--color-rule)] rounded-lg text-center hover:bg-[var(--color-paper-3)] transition-colors cursor-pointer group">
+                                    <Shield strokeWidth={1.5} className="w-8 h-8 text-[var(--color-accent-2)] mx-auto mb-2 group-hover:text-[var(--color-accent-2)]" />
+                                    <p className="text-sm font-medium text-[var(--color-ink-2)]">Cargar Documentación</p>
+                                    <p className="text-xs text-[var(--color-neutral)]">Matrícula o Constancia</p>
                                 </div>
                             </div>
                         </div>
                     </section>
 
-                    <div className="border-t border-gray-100 my-6"></div>
+                    <div className="border-t border-[var(--color-rule-2)] my-6"></div>
 
                     {/* Danger Zone - Right to be Forgotten */}
                     <section className="space-y-4">
-                        <h3 className="text-lg font-bold text-red-600 flex items-center gap-2">
-                            <Info className="w-5 h-5 text-red-400" />
+                        <h3 className="text-lg font-bold text-[var(--color-danger)] flex items-center gap-2">
+                            <Info strokeWidth={1.5} className="w-5 h-5 text-[var(--color-danger)]" />
                             Zona de Peligro
                         </h3>
-                        <div className="p-4 border border-red-200 rounded-xl bg-red-50 space-y-4">
+                        <div className="p-4 border border-[var(--color-danger)]/30 rounded-xl bg-[var(--color-danger-soft)] space-y-4">
                             <div>
-                                <h4 className="font-medium text-red-900">Eliminar Cuenta</h4>
-                                <p className="text-sm text-red-700 mt-1">
+                                <h4 className="font-medium text-[var(--color-danger)]">Eliminar Cuenta</h4>
+                                <p className="text-sm text-[var(--color-danger)] mt-1">
                                     Al eliminar tu cuenta, se borrarán todos tus datos personales, propiedades y configuraciones de forma permanente.
                                     Esta acción es irreversible (Derecho al Olvido).
                                 </p>
@@ -467,49 +467,49 @@ export default function CuentaPage() {
                                         // Actually call adminService.deleteUser(user.uid) if allowed or auth.currentUser.delete()
                                     }
                                 }}
-                                className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 font-medium text-sm transition-colors shadow-sm"
+                                className="px-4 py-2 bg-[var(--color-danger)] text-[var(--color-accent-ink)] rounded-lg hover:bg-[var(--color-danger)] font-medium text-sm transition-colors shadow-sm"
                             >
                                 Eliminar mi cuenta permanentemente
                             </button>
                         </div>
                     </section>
 
-                    <div className="border-t border-gray-100 my-6"></div>
+                    <div className="border-t border-[var(--color-rule-2)] my-6"></div>
 
                     {/* Notifications */}
                     <section className="space-y-4">
-                        <h3 className="text-lg font-bold text-gray-900 flex items-center gap-2">
-                            <Bell className="w-5 h-5 text-gray-400" />
+                        <h3 className="text-lg font-bold text-[var(--color-ink)] flex items-center gap-2">
+                            <Bell strokeWidth={1.5} className="w-5 h-5 text-[var(--color-neutral)]" />
                             Notificaciones
                         </h3>
                         <div className="space-y-3">
-                            <label className="flex items-start gap-4 p-4 border border-gray-200 rounded-xl cursor-pointer hover:bg-gray-50 transition-colors group">
+                            <label className="flex items-start gap-4 p-4 border border-[var(--color-rule)] rounded-xl cursor-pointer hover:bg-[var(--color-paper-3)] transition-colors group">
                                 <div className="relative flex items-center">
                                     <input
                                         type="checkbox"
                                         checked={preferences.emailNotifications}
                                         onChange={() => handlePreferenceChange('emailNotifications')}
-                                        className="w-5 h-5 text-indigo-600 border-gray-300 rounded focus:ring-indigo-500 transition-all"
+                                        className="w-5 h-5 text-[var(--color-accent)] border-[var(--color-rule)] rounded focus:ring-[var(--color-accent)]/40 transition-all"
                                     />
                                 </div>
                                 <div className="flex-1">
-                                    <p className="font-medium text-gray-900 group-hover:text-indigo-700 transition-colors">Nuevos Leads</p>
-                                    <p className="text-sm text-gray-500">Recibir un email inmediatamente cuando ingresa una nueva consulta.</p>
+                                    <p className="font-medium text-[var(--color-ink)] group-hover:text-[var(--color-accent-2)] transition-colors">Nuevos Leads</p>
+                                    <p className="text-sm text-[var(--color-muted)]">Recibir un email inmediatamente cuando ingresa una nueva consulta.</p>
                                 </div>
                             </label>
 
-                            <label className="flex items-start gap-4 p-4 border border-gray-200 rounded-xl cursor-pointer hover:bg-gray-50 transition-colors group">
+                            <label className="flex items-start gap-4 p-4 border border-[var(--color-rule)] rounded-xl cursor-pointer hover:bg-[var(--color-paper-3)] transition-colors group">
                                 <div className="relative flex items-center">
                                     <input
                                         type="checkbox"
                                         checked={preferences.weeklyReport}
                                         onChange={() => handlePreferenceChange('weeklyReport')}
-                                        className="w-5 h-5 text-indigo-600 border-gray-300 rounded focus:ring-indigo-500 transition-all"
+                                        className="w-5 h-5 text-[var(--color-accent)] border-[var(--color-rule)] rounded focus:ring-[var(--color-accent)]/40 transition-all"
                                     />
                                 </div>
                                 <div className="flex-1">
-                                    <p className="font-medium text-gray-900 group-hover:text-indigo-700 transition-colors">Resumen Semanal</p>
-                                    <p className="text-sm text-gray-500">Recibir estadísticas de rendimiento y métricas clave cada lunes.</p>
+                                    <p className="font-medium text-[var(--color-ink)] group-hover:text-[var(--color-accent-2)] transition-colors">Resumen Semanal</p>
+                                    <p className="text-sm text-[var(--color-muted)]">Recibir estadísticas de rendimiento y métricas clave cada lunes.</p>
                                 </div>
                             </label>
                         </div>
@@ -517,13 +517,13 @@ export default function CuentaPage() {
                 </div>
 
                 {/* Footer Actions */}
-                <div className="p-6 bg-gray-50 border-t flex justify-end gap-3 sticky bottom-0">
+                <div className="p-6 bg-[var(--color-paper)] border-t flex justify-end gap-3 sticky bottom-0">
                     <button
                         onClick={handleSaveProfile}
                         disabled={saving}
-                        className="px-6 py-2.5 bg-indigo-600 text-white rounded-xl font-medium hover:bg-indigo-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2 shadow-sm shadow-indigo-200"
+                        className="px-6 py-2.5 bg-[var(--color-ink)] text-[var(--color-paper)] rounded-xl font-medium hover:bg-[var(--color-ink-2)] transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2 shadow-sm"
                     >
-                        {saving && <Loader2 className="w-4 h-4 animate-spin" />}
+                        {saving && <Loader2 strokeWidth={1.5} className="w-4 h-4 animate-spin" />}
                         {saving ? "Guardando..." : "Guardar Cambios"}
                     </button>
                 </div>

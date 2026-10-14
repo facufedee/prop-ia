@@ -61,7 +61,7 @@ export default function BackupPage() {
                 }
 
                 // Confirm restore
-                if (!confirm('⚠️ ADVERTENCIA: Esto sobrescribirá todos los datos actuales. ¿Continuar?')) {
+                if (!confirm('ADVERTENCIA: Esto sobrescribirá todos los datos actuales. ¿Continuar?')) {
                     return;
                 }
 
@@ -71,9 +71,9 @@ export default function BackupPage() {
                     setRestoreResult(result);
 
                     if (result.success) {
-                        alert(`✅ Backup restaurado exitosamente!\n${result.restored} documentos restaurados.`);
+                        alert(`Backup restaurado exitosamente!\n${result.restored} documentos restaurados.`);
                     } else {
-                        alert(`⚠️ Backup restaurado con errores:\n${result.errors.join('\n')}`);
+                        alert(`Backup restaurado con errores:\n${result.errors.join('\n')}`);
                     }
                 }
             } catch (error) {
@@ -91,17 +91,17 @@ export default function BackupPage() {
         <div className="p-6 max-w-4xl mx-auto space-y-6">
             {/* Header */}
             <div>
-                <h1 className="text-2xl font-bold text-gray-900">Backup y Restauración</h1>
-                <p className="text-gray-500">Gestión de copias de seguridad de la base de datos</p>
+                <h1 className="font-heading text-2xl font-bold text-[var(--color-ink)]">Backup y Restauración</h1>
+                <p className="text-[var(--color-muted)]">Gestión de copias de seguridad de la base de datos</p>
             </div>
 
             {/* Warning */}
-            <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
+            <div className="bg-[var(--color-warning-soft)] border border-[var(--color-warning)]/30 rounded-lg p-4">
                 <div className="flex items-start gap-3">
-                    <AlertTriangle className="w-5 h-5 text-yellow-600 mt-0.5" />
+                    <AlertTriangle strokeWidth={1.5} className="w-5 h-5 text-[var(--color-warning)] mt-0.5" />
                     <div>
-                        <h3 className="text-sm font-semibold text-yellow-900">Importante</h3>
-                        <p className="text-sm text-yellow-800 mt-1">
+                        <h3 className="text-sm font-semibold text-[var(--color-warning)]">Importante</h3>
+                        <p className="text-sm text-[var(--color-warning)] mt-1">
                             Esta funcionalidad es solo para administradores. Restaurar un backup sobrescribirá TODOS los datos actuales.
                             Asegúrate de crear un backup antes de restaurar.
                         </p>
@@ -110,14 +110,14 @@ export default function BackupPage() {
             </div>
 
             {/* Backup Section */}
-            <div className="bg-white rounded-xl border border-gray-200 p-6">
+            <div className="bg-[var(--color-paper-2)] rounded-xl border border-[var(--color-rule)] p-6">
                 <div className="flex items-center gap-3 mb-4">
-                    <div className="p-3 bg-indigo-100 rounded-lg">
-                        <Database className="w-6 h-6 text-indigo-600" />
+                    <div className="p-3 bg-[var(--color-paper-3)] rounded-full">
+                        <Database strokeWidth={1.5} className="w-6 h-6 text-[var(--color-muted)]" />
                     </div>
                     <div>
-                        <h2 className="text-lg font-semibold text-gray-900">Crear Backup</h2>
-                        <p className="text-sm text-gray-500">Exportar todos los datos a un archivo JSON</p>
+                        <h2 className="text-lg font-semibold text-[var(--color-ink)]">Crear Backup</h2>
+                        <p className="text-sm text-[var(--color-muted)]">Exportar todos los datos a un archivo JSON</p>
                     </div>
                 </div>
 
@@ -126,43 +126,43 @@ export default function BackupPage() {
                         <button
                             onClick={handlePreviewBackup}
                             disabled={loading}
-                            className="flex items-center gap-2 px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors disabled:opacity-50"
+                            className="flex items-center gap-2 px-4 py-2 border border-[var(--color-rule)] text-[var(--color-ink-2)] rounded-lg hover:bg-[var(--color-paper-3)] transition-colors disabled:opacity-50"
                         >
-                            <FileJson className="w-5 h-5" />
+                            <FileJson strokeWidth={1.5} className="w-5 h-5" />
                             {loading ? "Cargando..." : "Previsualizar"}
                         </button>
 
                         <button
                             onClick={handleCreateBackup}
                             disabled={loading}
-                            className="flex items-center gap-2 px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors disabled:opacity-50"
+                            className="flex items-center gap-2 px-4 py-2 bg-[var(--color-ink)] text-[var(--color-paper)] rounded-lg hover:bg-[var(--color-ink-2)] transition-colors disabled:opacity-50"
                         >
-                            <Download className="w-5 h-5" />
+                            <Download strokeWidth={1.5} className="w-5 h-5" />
                             {loading ? "Creando..." : "Descargar Backup"}
                         </button>
                     </div>
 
                     {backupStats && (
-                        <div className="mt-4 p-4 bg-gray-50 rounded-lg">
-                            <h4 className="text-sm font-semibold text-gray-900 mb-3">Estadísticas del Backup</h4>
+                        <div className="mt-4 p-4 bg-[var(--color-paper)] rounded-lg">
+                            <h4 className="text-sm font-semibold text-[var(--color-ink)] mb-3">Estadísticas del Backup</h4>
                             <div className="grid grid-cols-2 gap-4 mb-4">
                                 <div>
-                                    <p className="text-xs text-gray-500">Total Documentos</p>
-                                    <p className="text-lg font-bold text-gray-900">{backupStats.totalDocuments}</p>
+                                    <p className="text-xs text-[var(--color-muted)]">Total Documentos</p>
+                                    <p className="text-lg font-bold text-[var(--color-ink)]">{backupStats.totalDocuments}</p>
                                 </div>
                                 <div>
-                                    <p className="text-xs text-gray-500">Tamaño Estimado</p>
-                                    <p className="text-lg font-bold text-gray-900">{backupStats.size}</p>
+                                    <p className="text-xs text-[var(--color-muted)]">Tamaño Estimado</p>
+                                    <p className="text-lg font-bold text-[var(--color-ink)]">{backupStats.size}</p>
                                 </div>
                             </div>
 
                             <div>
-                                <p className="text-xs text-gray-500 mb-2">Colecciones:</p>
+                                <p className="text-xs text-[var(--color-muted)] mb-2">Colecciones:</p>
                                 <div className="space-y-1">
                                     {backupStats.collections.map((col: any) => (
                                         <div key={col.name} className="flex justify-between text-sm">
-                                            <span className="text-gray-700">{col.name}</span>
-                                            <span className="text-gray-900 font-medium">{col.count} docs</span>
+                                            <span className="text-[var(--color-ink-2)]">{col.name}</span>
+                                            <span className="text-[var(--color-ink)] font-medium">{col.count} docs</span>
                                         </div>
                                     ))}
                                 </div>
@@ -173,19 +173,19 @@ export default function BackupPage() {
             </div>
 
             {/* Restore Section */}
-            <div className="bg-white rounded-xl border border-gray-200 p-6">
+            <div className="bg-[var(--color-paper-2)] rounded-xl border border-[var(--color-rule)] p-6">
                 <div className="flex items-center gap-3 mb-4">
-                    <div className="p-3 bg-green-100 rounded-lg">
-                        <Upload className="w-6 h-6 text-green-600" />
+                    <div className="p-3 bg-[var(--color-paper-3)] rounded-full">
+                        <Upload strokeWidth={1.5} className="w-6 h-6 text-[var(--color-muted)]" />
                     </div>
                     <div>
-                        <h2 className="text-lg font-semibold text-gray-900">Restaurar Backup</h2>
-                        <p className="text-sm text-gray-500">Importar datos desde un archivo JSON</p>
+                        <h2 className="text-lg font-semibold text-[var(--color-ink)]">Restaurar Backup</h2>
+                        <p className="text-sm text-[var(--color-muted)]">Importar datos desde un archivo JSON</p>
                     </div>
                 </div>
 
                 <div className="space-y-4">
-                    <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center">
+                    <div className="border-2 border-dashed border-[var(--color-rule)] rounded-lg p-6 text-center">
                         <input
                             type="file"
                             accept=".json"
@@ -198,34 +198,34 @@ export default function BackupPage() {
                             htmlFor="restore-file"
                             className="cursor-pointer flex flex-col items-center gap-2"
                         >
-                            <Upload className="w-8 h-8 text-gray-400" />
-                            <p className="text-sm text-gray-600">
+                            <Upload strokeWidth={1.5} className="w-8 h-8 text-[var(--color-neutral)]" />
+                            <p className="text-sm text-[var(--color-ink-2)]">
                                 {restoring ? "Restaurando..." : "Click para seleccionar archivo JSON"}
                             </p>
-                            <p className="text-xs text-gray-500">Solo archivos .json</p>
+                            <p className="text-xs text-[var(--color-muted)]">Solo archivos .json</p>
                         </label>
                     </div>
 
                     {restoreResult && (
-                        <div className={`p-4 rounded-lg ${restoreResult.success ? 'bg-green-50 border border-green-200' : 'bg-red-50 border border-red-200'
+                        <div className={`p-4 rounded-lg ${restoreResult.success ? 'bg-[var(--color-positive-soft)] border border-[var(--color-positive)]/30' : 'bg-[var(--color-danger-soft)] border border-[var(--color-danger)]/30'
                             }`}>
                             <div className="flex items-start gap-3">
                                 {restoreResult.success ? (
-                                    <CheckCircle className="w-5 h-5 text-green-600 mt-0.5" />
+                                    <CheckCircle strokeWidth={1.5} className="w-5 h-5 text-[var(--color-positive)] mt-0.5" />
                                 ) : (
-                                    <AlertTriangle className="w-5 h-5 text-red-600 mt-0.5" />
+                                    <AlertTriangle strokeWidth={1.5} className="w-5 h-5 text-[var(--color-danger)] mt-0.5" />
                                 )}
                                 <div>
-                                    <h4 className={`text-sm font-semibold ${restoreResult.success ? 'text-green-900' : 'text-red-900'
+                                    <h4 className={`text-sm font-semibold ${restoreResult.success ? 'text-[var(--color-positive)]' : 'text-[var(--color-danger)]'
                                         }`}>
                                         {restoreResult.success ? 'Restauración Exitosa' : 'Restauración con Errores'}
                                     </h4>
-                                    <p className={`text-sm mt-1 ${restoreResult.success ? 'text-green-800' : 'text-red-800'
+                                    <p className={`text-sm mt-1 ${restoreResult.success ? 'text-[var(--color-positive)]' : 'text-[var(--color-danger)]'
                                         }`}>
                                         {restoreResult.restored} documentos restaurados
                                     </p>
                                     {restoreResult.errors.length > 0 && (
-                                        <div className="mt-2 text-xs text-red-700">
+                                        <div className="mt-2 text-xs text-[var(--color-danger)]">
                                             {restoreResult.errors.map((error: string, idx: number) => (
                                                 <p key={idx}>• {error}</p>
                                             ))}
@@ -239,9 +239,9 @@ export default function BackupPage() {
             </div>
 
             {/* Info */}
-            <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-                <h4 className="text-sm font-semibold text-blue-900 mb-2">💡 Recomendaciones</h4>
-                <ul className="text-sm text-blue-800 space-y-1 list-disc list-inside">
+            <div className="bg-[var(--color-paper-3)] border border-[var(--color-rule)] rounded-lg p-4">
+                <h4 className="text-sm font-semibold text-[var(--color-ink)] mb-2">Recomendaciones</h4>
+                <ul className="text-sm text-[var(--color-ink-2)] space-y-1 list-disc list-inside">
                     <li>Crea backups regularmente (semanal o mensual)</li>
                     <li>Guarda los backups en un lugar seguro (Google Drive, Dropbox, etc.)</li>
                     <li>Prueba la restauración en un ambiente de desarrollo primero</li>

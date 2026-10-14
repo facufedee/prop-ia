@@ -160,7 +160,7 @@ export default function AdminUserProfilePage() {
     };
 
     const handleDeleteAccount = async () => {
-        if (!confirm("🚨 ATENCIÓN: ¿Estás seguro de ELIMINAR PERMANENTEMENTE toda la cuenta y los datos de este usuario? Esta acción es irreversible.")) return;
+        if (!confirm("ATENCIÓN: ¿Estás seguro de ELIMINAR PERMANENTEMENTE toda la cuenta y los datos de este usuario? Esta acción es irreversible.")) return;
 
         try {
             setLoading(true);
@@ -209,13 +209,13 @@ export default function AdminUserProfilePage() {
     if (loading) {
         return (
             <div className="flex justify-center items-center py-20">
-                <Loader2 className="w-8 h-8 text-indigo-500 animate-spin" />
+                <Loader2 strokeWidth={1.5} className="w-8 h-8 text-[var(--color-accent)] animate-spin" />
             </div>
         );
     }
 
     if (!profileData) {
-        return <div className="p-8 text-center text-red-500">Usuario no encontrado</div>;
+        return <div className="p-8 text-center text-[var(--color-danger)]">Usuario no encontrado</div>;
     }
 
     const { user, subscription, usage, payments, sentEmails } = profileData;
@@ -238,48 +238,48 @@ export default function AdminUserProfilePage() {
                 <div className="flex items-center gap-4">
                     <button
                         onClick={() => router.back()}
-                        className="p-2 bg-white rounded-full border border-gray-200 hover:bg-gray-50 text-gray-600 transition-colors"
+                        className="p-2 bg-[var(--color-paper-2)] rounded-full border border-[var(--color-rule)] hover:bg-[var(--color-paper-3)] text-[var(--color-ink-2)] transition-colors"
                     >
-                        <ArrowLeft className="w-5 h-5" />
+                        <ArrowLeft strokeWidth={1.5} className="w-5 h-5" />
                     </button>
                     <div>
-                        <h1 className="text-2xl font-bold text-gray-900">Perfil de Usuario</h1>
-                        <p className="text-sm text-gray-500 break-all">{user.email}</p>
+                        <h1 className="font-heading text-2xl font-bold text-[var(--color-ink)]">Perfil de Usuario</h1>
+                        <p className="text-sm text-[var(--color-muted)] break-all">{user.email}</p>
                     </div>
                 </div>
                 <div className="flex flex-wrap gap-3 items-center sm:justify-end">
                     {user.disabled ? (
                         <>
-                            <span className="inline-flex items-center px-3 py-1 bg-red-100 text-red-800 rounded-full text-sm font-medium gap-1">
-                                <XCircle className="w-4 h-4" /> Suspendido
+                            <span className="inline-flex items-center px-3 py-1 bg-[var(--color-danger-soft)] text-[var(--color-danger)] rounded-full text-sm font-medium gap-1">
+                                <XCircle strokeWidth={1.5} className="w-4 h-4" /> Suspendido
                             </span>
                             <button
                                 onClick={() => handleToggleStatus(user.disabled)}
-                                className="text-sm font-medium text-green-600 hover:underline hover:text-green-700"
+                                className="text-sm font-medium text-[var(--color-positive)] hover:underline hover:text-[var(--color-positive)]"
                             >
                                 Restaurar Acceso
                             </button>
                         </>
                     ) : isExpired ? (
                         <>
-                            <span className="inline-flex items-center px-3 py-1 bg-orange-100 text-orange-800 rounded-full text-sm font-medium gap-1">
-                                <AlertCircle className="w-4 h-4" /> Prueba Vencida
+                            <span className="inline-flex items-center px-3 py-1 bg-[var(--color-warning-soft)] text-[var(--color-warning)] rounded-full text-sm font-medium gap-1">
+                                <AlertCircle strokeWidth={1.5} className="w-4 h-4" /> Prueba Vencida
                             </span>
                             <button
                                 onClick={() => handleToggleStatus(user.disabled)}
-                                className="text-sm font-medium text-amber-600 hover:underline hover:text-amber-700"
+                                className="text-sm font-medium text-[var(--color-warning)] hover:underline hover:text-[var(--color-warning)]"
                             >
                                 Suspender Manualmente
                             </button>
                         </>
                     ) : (
                         <>
-                            <span className="inline-flex items-center px-3 py-1 bg-green-100 text-green-800 rounded-full text-sm font-medium gap-1">
-                                <CheckCircle className="w-4 h-4" /> Activo
+                            <span className="inline-flex items-center px-3 py-1 bg-[var(--color-positive-soft)] text-[var(--color-positive)] rounded-full text-sm font-medium gap-1">
+                                <CheckCircle strokeWidth={1.5} className="w-4 h-4" /> Activo
                             </span>
                             <button
                                 onClick={() => handleToggleStatus(user.disabled)}
-                                className="text-sm font-medium text-amber-600 hover:underline hover:text-amber-700"
+                                className="text-sm font-medium text-[var(--color-warning)] hover:underline hover:text-[var(--color-warning)]"
                             >
                                 Suspender Manualmente
                             </button>
@@ -287,25 +287,25 @@ export default function AdminUserProfilePage() {
                     )}
 
                     {user.unsubscribedMarketing && (
-                        <span className="inline-flex items-center px-3 py-1 bg-gray-100 text-gray-800 rounded-full text-sm font-medium gap-1">
-                            <Mail className="w-4 h-4 opacity-70" /> Baja de Marketing
+                        <span className="inline-flex items-center px-3 py-1 bg-[var(--color-paper-3)] text-[var(--color-ink)] rounded-full text-sm font-medium gap-1">
+                            <Mail strokeWidth={1.5} className="w-4 h-4 opacity-70" /> Baja de Marketing
                         </span>
                     )}
 
-                    <span className="text-gray-200">|</span>
+                    <span className="text-[var(--color-ink-2)]">|</span>
 
                     <button
                         id="btn-delete-account"
                         onClick={handleDeleteAccount}
-                        className="text-sm font-medium text-red-500 hover:text-red-700 hover:underline flex items-center gap-1 transition-colors"
+                        className="text-sm font-medium text-[var(--color-danger)] hover:text-[var(--color-danger)] hover:underline flex items-center gap-1 transition-colors"
                     >
-                        <Trash2 className="w-4 h-4" /> Eliminar Cuenta
+                        <Trash2 strokeWidth={1.5} className="w-4 h-4" /> Eliminar Cuenta
                     </button>
                 </div>
             </div>
 
             {/* Tabs Navigation */}
-            <div className="border-b border-gray-200 overflow-x-auto scrollbar-hide">
+            <div className="border-b border-[var(--color-rule)] overflow-x-auto scrollbar-hide">
                 <nav className="flex space-x-8 min-w-max px-2">
                     {[
                         { id: 'resumen', label: 'Resumen General', icon: UserIcon },
@@ -318,11 +318,11 @@ export default function AdminUserProfilePage() {
                             id={`tab-${tab.id}`}
                             onClick={() => setActiveTab(tab.id as 'resumen' | 'suscripcion' | 'pagos' | 'correos')}
                             className={`flex items-center whitespace-nowrap gap-2 py-4 px-1 border-b-2 font-medium text-sm transition-colors ${activeTab === tab.id
-                                ? 'border-indigo-500 text-indigo-600'
-                                : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                                ? 'border-[var(--color-accent)] text-[var(--color-accent)]'
+                                : 'border-transparent text-[var(--color-muted)] hover:text-[var(--color-ink-2)] hover:border-[var(--color-neutral)]'
                                 }`}
                         >
-                            <tab.icon className="w-4 h-4" />
+                            <tab.icon strokeWidth={1.5} className="w-4 h-4" />
                             {tab.label}
                         </button>
                     ))}
@@ -332,32 +332,32 @@ export default function AdminUserProfilePage() {
             {/* Tab: Resumen */}
             {activeTab === 'resumen' && (
                 <div className="grid md:grid-cols-2 gap-6">
-                    <div className="bg-white rounded-2xl border border-gray-200 p-6 shadow-sm">
-                        <h3 className="text-lg font-semibold text-gray-900 mb-4 border-b pb-2">Datos Personales</h3>
+                    <div className="bg-[var(--color-paper-2)] rounded-2xl border border-[var(--color-rule)] p-6 shadow-sm">
+                        <h3 className="text-lg font-semibold text-[var(--color-ink)] mb-4 border-b pb-2">Datos Personales</h3>
                         <div className="space-y-4">
                             <div>
-                                <p className="text-sm text-gray-500">ID Usuario</p>
+                                <p className="text-sm text-[var(--color-muted)]">ID Usuario</p>
                                 <p className="font-mono text-sm break-all">{user.uid}</p>
                             </div>
                             <div>
-                                <p className="text-sm text-gray-500">Nombre</p>
-                                <p className="font-medium text-gray-900">{user.displayName || "No especificado"}</p>
+                                <p className="text-sm text-[var(--color-muted)]">Nombre</p>
+                                <p className="font-medium text-[var(--color-ink)]">{user.displayName || "No especificado"}</p>
                             </div>
                             <div>
-                                <p className="text-sm text-gray-500">Email</p>
-                                <p className="font-medium text-gray-900">{user.email}</p>
+                                <p className="text-sm text-[var(--color-muted)]">Email</p>
+                                <p className="font-medium text-[var(--color-ink)]">{user.email}</p>
                             </div>
                             <div>
-                                <p className="text-sm text-gray-500">Fecha de Registro</p>
-                                <p className="text-gray-900">
+                                <p className="text-sm text-[var(--color-muted)]">Fecha de Registro</p>
+                                <p className="text-[var(--color-ink)]">
                                     {user.createdAt
                                         ? format(user.createdAt, "dd 'de' MMMM, yyyy", { locale: es })
                                         : "Desconocida"}
                                 </p>
                             </div>
                             <div>
-                                <p className="text-sm text-gray-500">Último Acceso</p>
-                                <p className="text-gray-900">
+                                <p className="text-sm text-[var(--color-muted)]">Último Acceso</p>
+                                <p className="text-[var(--color-ink)]">
                                     {user.lastLogin
                                         ? format(user.lastLogin, "dd/MM/yyyy HH:mm", { locale: es })
                                         : "Nunca"}
@@ -367,43 +367,43 @@ export default function AdminUserProfilePage() {
                     </div>
 
                     <div className="space-y-6">
-                        <div className="bg-white rounded-2xl border border-gray-200 p-6 shadow-sm">
-                            <h3 className="text-lg font-semibold text-gray-900 mb-4 border-b pb-2">Uso Actual</h3>
+                        <div className="bg-[var(--color-paper-2)] rounded-2xl border border-[var(--color-rule)] p-6 shadow-sm">
+                            <h3 className="text-lg font-semibold text-[var(--color-ink)] mb-4 border-b pb-2">Uso Actual</h3>
                             <div className="grid grid-cols-2 gap-4">
-                                <div className="bg-gray-50 p-4 rounded-xl border border-gray-100 flex items-center gap-3">
-                                    <div className="p-2 bg-blue-100 text-blue-600 rounded-lg">
-                                        <Home className="w-5 h-5" />
+                                <div className="bg-[var(--color-paper)] p-4 rounded-xl border border-[var(--color-rule-2)] flex items-center gap-3">
+                                    <div className="p-2 bg-[var(--color-paper-3)] text-[var(--color-muted)] rounded-full">
+                                        <Home strokeWidth={1.5} className="w-5 h-5" />
                                     </div>
                                     <div>
-                                        <p className="text-sm text-gray-500">Propiedades</p>
-                                        <p className="font-bold text-xl text-gray-900">{usage.properties}</p>
+                                        <p className="text-sm text-[var(--color-muted)]">Propiedades</p>
+                                        <p className="font-bold text-xl text-[var(--color-ink)]">{usage.properties}</p>
                                     </div>
                                 </div>
-                                <div className="bg-gray-50 p-4 rounded-xl border border-gray-100 flex items-center gap-3">
-                                    <div className="p-2 bg-purple-100 text-purple-600 rounded-lg">
-                                        <Users className="w-5 h-5" />
+                                <div className="bg-[var(--color-paper)] p-4 rounded-xl border border-[var(--color-rule-2)] flex items-center gap-3">
+                                    <div className="p-2 bg-[var(--color-paper-3)] text-[var(--color-muted)] rounded-full">
+                                        <Users strokeWidth={1.5} className="w-5 h-5" />
                                     </div>
                                     <div>
-                                        <p className="text-sm text-gray-500">Clientes</p>
-                                        <p className="font-bold text-xl text-gray-900">{usage.clients}</p>
+                                        <p className="text-sm text-[var(--color-muted)]">Clientes</p>
+                                        <p className="font-bold text-xl text-[var(--color-ink)]">{usage.clients}</p>
                                     </div>
                                 </div>
                             </div>
                         </div>
 
-                        <div className="bg-white rounded-2xl border border-gray-200 p-6 shadow-sm">
-                            <h3 className="text-lg font-semibold text-gray-900 mb-4 border-b pb-2">Plan Actual</h3>
+                        <div className="bg-[var(--color-paper-2)] rounded-2xl border border-[var(--color-rule)] p-6 shadow-sm">
+                            <h3 className="text-lg font-semibold text-[var(--color-ink)] mb-4 border-b pb-2">Plan Actual</h3>
                             {subscription ? (
                                 <div className="space-y-3">
                                     <div className="flex justify-between items-center">
-                                        <span className="text-gray-600">Nivel de Plan:</span>
-                                        <span className="px-3 py-1 bg-indigo-100 text-indigo-700 rounded-full font-medium capitalize">
+                                        <span className="text-[var(--color-ink-2)]">Nivel de Plan:</span>
+                                        <span className="px-3 py-1 bg-[var(--color-accent-soft)] text-[var(--color-accent)] rounded-full font-medium capitalize">
                                             {subscription.planTier}
                                         </span>
                                     </div>
                                     <div className="flex justify-between items-center">
-                                        <span className="text-gray-600">Vence:</span>
-                                        <span className="font-medium text-gray-900">
+                                        <span className="text-[var(--color-ink-2)]">Vence:</span>
+                                        <span className="font-medium text-[var(--color-ink)]">
                                             {subscription.endDate
                                                 ? format(subscription.endDate, "dd/MM/yyyy")
                                                 : user.createdAt
@@ -412,15 +412,15 @@ export default function AdminUserProfilePage() {
                                         </span>
                                     </div>
                                     <div className="flex justify-between items-center">
-                                        <span className="text-gray-600">Estado:</span>
-                                        <span className={`capitalize font-medium ${subscription.status === 'active' ? 'text-green-600' : 'text-red-500'}`}>
+                                        <span className="text-[var(--color-ink-2)]">Estado:</span>
+                                        <span className={`capitalize font-medium ${subscription.status === 'active' ? 'text-[var(--color-positive)]' : 'text-[var(--color-danger)]'}`}>
                                             {subscription.status}
                                         </span>
                                     </div>
                                 </div>
                             ) : (
-                                <div className="p-4 bg-yellow-50 text-yellow-800 rounded-xl border border-yellow-200 flex items-center gap-2">
-                                    <AlertCircle className="w-5 h-5" />
+                                <div className="p-4 bg-[var(--color-warning-soft)] text-[var(--color-warning)] rounded-xl border border-[var(--color-warning)]/30 flex items-center gap-2">
+                                    <AlertCircle strokeWidth={1.5} className="w-5 h-5" />
                                     <span>Este usuario no tiene una suscripción registrada. El sistema aplica límites gratuitos por defecto.</span>
                                 </div>
                             )}
@@ -432,18 +432,18 @@ export default function AdminUserProfilePage() {
             {/* Tab: Suscripcion */}
             {activeTab === 'suscripcion' && (
                 <div className="space-y-6 max-w-2xl">
-                    <div className="bg-white rounded-2xl border border-gray-200 p-6 shadow-sm">
-                        <h3 className="text-lg font-semibold text-gray-900 mb-4 border-b pb-2">Estado Actual</h3>
+                    <div className="bg-[var(--color-paper-2)] rounded-2xl border border-[var(--color-rule)] p-6 shadow-sm">
+                        <h3 className="text-lg font-semibold text-[var(--color-ink)] mb-4 border-b pb-2">Estado Actual</h3>
                         <div className="flex flex-col sm:flex-row gap-8">
                             <div>
-                                <p className="text-sm text-gray-500 mb-1">Plan de Suscripción</p>
-                                <span className="px-3 py-1 bg-indigo-100 text-indigo-700 rounded-full font-bold capitalize">
+                                <p className="text-sm text-[var(--color-muted)] mb-1">Plan de Suscripción</p>
+                                <span className="px-3 py-1 bg-[var(--color-accent-soft)] text-[var(--color-accent)] rounded-full font-bold capitalize">
                                     {subscription?.planTier || "Básico"}
                                 </span>
                             </div>
                             <div>
-                                <p className="text-sm text-gray-500 mb-1">Fecha Límite / Vencimiento</p>
-                                <p className="font-bold text-gray-900 text-lg">
+                                <p className="text-sm text-[var(--color-muted)] mb-1">Fecha Límite / Vencimiento</p>
+                                <p className="font-bold text-[var(--color-ink)] text-lg">
                                     {subscription?.endDate
                                         ? format(subscription.endDate, "dd/MM/yyyy")
                                         : user.createdAt
@@ -454,41 +454,41 @@ export default function AdminUserProfilePage() {
                         </div>
                     </div>
 
-                    <div className="bg-white rounded-2xl border border-gray-200 p-6 shadow-sm">
-                        <h3 className="text-lg font-semibold text-gray-900 mb-6 border-b pb-2">Modificar Plan y Vencimiento</h3>
+                    <div className="bg-[var(--color-paper-2)] rounded-2xl border border-[var(--color-rule)] p-6 shadow-sm">
+                        <h3 className="text-lg font-semibold text-[var(--color-ink)] mb-6 border-b pb-2">Modificar Plan y Vencimiento</h3>
 
                         <div className="space-y-6">
                             <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-1">Plan de Suscripción</label>
+                                <label className="block text-sm font-medium text-[var(--color-ink-2)] mb-1">Plan de Suscripción</label>
                                 <select
                                     value={planTier}
                                     onChange={(e) => setPlanTier(e.target.value as PlanTier)}
-                                    className="w-full px-4 py-2 border border-gray-300 rounded-xl focus:ring-2 focus:ring-indigo-500 transition-shadow outline-none"
+                                    className="w-full px-4 py-2 border border-[var(--color-rule)] rounded-xl focus:ring-2 focus:ring-[var(--color-accent)]/40 transition-shadow outline-none"
                                 >
                                     <option value="basic">Plan Básico (Lite/Free)</option>
                                     <option value="professional">Plan Profesional</option>
                                     <option value="enterprise">Plan Enterprise</option>
                                 </select>
-                                <p className="mt-1 text-xs text-gray-500">Esto determinará a qué funciones tiene acceso y sus límites (ej. cantidad de propiedades).</p>
+                                <p className="mt-1 text-xs text-[var(--color-muted)]">Esto determinará a qué funciones tiene acceso y sus límites (ej. cantidad de propiedades).</p>
                             </div>
 
                             <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-1">Fecha de Vencimiento de este Plan</label>
+                                <label className="block text-sm font-medium text-[var(--color-ink-2)] mb-1">Fecha de Vencimiento de este Plan</label>
                                 <input
                                     type="date"
                                     value={endDate}
                                     onChange={(e) => setEndDate(e.target.value)}
-                                    className="w-full px-4 py-2 border border-gray-300 rounded-xl focus:ring-2 focus:ring-indigo-500 transition-shadow outline-none"
+                                    className="w-full px-4 py-2 border border-[var(--color-rule)] rounded-xl focus:ring-2 focus:ring-[var(--color-accent)]/40 transition-shadow outline-none"
                                 />
-                                <p className="mt-1 text-xs text-gray-500">Superada esta fecha, las acciones de su cuenta se verán limitadas automáticamente hasta que vuelva a pagar.</p>
+                                <p className="mt-1 text-xs text-[var(--color-muted)]">Superada esta fecha, las acciones de su cuenta se verán limitadas automáticamente hasta que vuelva a pagar.</p>
                             </div>
 
-                            <div className="pt-4 border-t border-gray-100 flex justify-end">
+                            <div className="pt-4 border-t border-[var(--color-rule-2)] flex justify-end">
                                 <button
                                     id="btn-save-sub"
                                     onClick={handleUpdateSubscription}
                                     disabled={updatingSub}
-                                    className="px-6 py-2 bg-indigo-600 text-white rounded-xl hover:bg-indigo-700 transition-colors disabled:opacity-50"
+                                    className="px-6 py-2 bg-[var(--color-ink)] text-[var(--color-paper)] rounded-xl hover:bg-[var(--color-ink-2)] transition-colors disabled:opacity-50"
                                 >
                                     {updatingSub ? "Guardando..." : "Guardar Cambios"}
                                 </button>
@@ -502,27 +502,27 @@ export default function AdminUserProfilePage() {
             {activeTab === 'pagos' && (
                 <div className="grid lg:grid-cols-3 gap-6">
                     {/* Form to add payment */}
-                    <div className="lg:col-span-1 bg-white rounded-2xl border border-gray-200 p-6 shadow-sm h-fit">
-                        <h3 className="text-lg font-semibold text-gray-900 mb-4 border-b pb-2">Registrar Pago</h3>
+                    <div className="lg:col-span-1 bg-[var(--color-paper-2)] rounded-2xl border border-[var(--color-rule)] p-6 shadow-sm h-fit">
+                        <h3 className="text-lg font-semibold text-[var(--color-ink)] mb-4 border-b pb-2">Registrar Pago</h3>
 
                         <div className="space-y-4">
                             <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-1">Monto ($)</label>
+                                <label className="block text-sm font-medium text-[var(--color-ink-2)] mb-1">Monto ($)</label>
                                 <input
                                     type="number"
                                     value={paymentAmount}
                                     onChange={(e) => setPaymentAmount(e.target.value)}
                                     placeholder="Ej: 15000"
-                                    className="w-full px-4 py-2 border border-gray-300 rounded-xl focus:ring-2 focus:ring-indigo-500 transition-shadow outline-none"
+                                    className="w-full px-4 py-2 border border-[var(--color-rule)] rounded-xl focus:ring-2 focus:ring-[var(--color-accent)]/40 transition-shadow outline-none"
                                 />
                             </div>
 
                             <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-1">Método</label>
+                                <label className="block text-sm font-medium text-[var(--color-ink-2)] mb-1">Método</label>
                                 <select
                                     value={paymentMethod}
                                     onChange={(e) => setPaymentMethod(e.target.value)}
-                                    className="w-full px-4 py-2 border border-gray-300 rounded-xl"
+                                    className="w-full px-4 py-2 border border-[var(--color-rule)] rounded-xl"
                                 >
                                     <option value="transfer">Transferencia</option>
                                     <option value="cash">Efectivo</option>
@@ -532,23 +532,23 @@ export default function AdminUserProfilePage() {
                             </div>
 
                             <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-1">Fecha del Pago</label>
+                                <label className="block text-sm font-medium text-[var(--color-ink-2)] mb-1">Fecha del Pago</label>
                                 <input
                                     type="date"
                                     value={paymentDate}
                                     onChange={(e) => setPaymentDate(e.target.value)}
-                                    className="w-full px-4 py-2 border border-gray-300 rounded-xl"
+                                    className="w-full px-4 py-2 border border-[var(--color-rule)] rounded-xl"
                                 />
                             </div>
 
                             <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-1">Descripción / Referencia</label>
+                                <label className="block text-sm font-medium text-[var(--color-ink-2)] mb-1">Descripción / Referencia</label>
                                 <input
                                     type="text"
                                     value={paymentDesc}
                                     onChange={(e) => setPaymentDesc(e.target.value)}
                                     placeholder="Ej: Pago Octubre Transferencia BBVA"
-                                    className="w-full px-4 py-2 border border-gray-300 rounded-xl"
+                                    className="w-full px-4 py-2 border border-[var(--color-rule)] rounded-xl"
                                 />
                             </div>
 
@@ -556,31 +556,31 @@ export default function AdminUserProfilePage() {
                                 id="btn-add-payment"
                                 onClick={handleAddPayment}
                                 disabled={addingPayment}
-                                className="w-full px-4 py-2 bg-green-600 text-white font-medium rounded-xl hover:bg-green-700 transition-colors disabled:opacity-50 mt-2"
+                                className="w-full px-4 py-2 bg-[var(--color-positive)] text-[var(--color-accent-ink)] font-medium rounded-xl hover:bg-[var(--color-positive)] transition-colors disabled:opacity-50 mt-2"
                             >
                                 {addingPayment ? "Registrando..." : "Registrar Pago"}
                             </button>
 
-                            <p className="text-xs text-gray-500 text-center mt-2">
+                            <p className="text-xs text-[var(--color-muted)] text-center mt-2">
                                 Nota: Registrar el pago aquí <span className="font-semibold underline">no extiende</span> automáticamente el plan. Recordá ir a la pestaña "Suscripción" para estirar la fecha de vencimiento si corresponde.
                             </p>
                         </div>
                     </div>
 
                     {/* Payments List */}
-                    <div className="lg:col-span-2 bg-white rounded-2xl border border-gray-200 overflow-hidden shadow-sm">
-                        <div className="p-6 border-b border-gray-200">
-                            <h3 className="text-lg font-semibold text-gray-900">Historial de Pagos</h3>
+                    <div className="lg:col-span-2 bg-[var(--color-paper-2)] rounded-2xl border border-[var(--color-rule)] overflow-hidden shadow-sm">
+                        <div className="p-6 border-b border-[var(--color-rule)]">
+                            <h3 className="text-lg font-semibold text-[var(--color-ink)]">Historial de Pagos</h3>
                         </div>
 
                         {payments.length === 0 ? (
-                            <div className="p-8 text-center text-gray-500">
+                            <div className="p-8 text-center text-[var(--color-muted)]">
                                 No hay pagos registrados para este usuario.
                             </div>
                         ) : (
                             <div className="overflow-x-auto">
-                                <table className="w-full text-left text-sm text-gray-600">
-                                    <thead className="bg-gray-50 text-xs uppercase text-gray-700 border-b border-gray-200">
+                                <table className="w-full text-left text-sm text-[var(--color-ink-2)]">
+                                    <thead className="bg-[var(--color-paper)] text-xs uppercase text-[var(--color-ink-2)] border-b border-[var(--color-rule)]">
                                         <tr>
                                             <th className="px-6 py-4 font-semibold">Fecha</th>
                                             <th className="px-6 py-4 font-semibold">Monto</th>
@@ -589,27 +589,27 @@ export default function AdminUserProfilePage() {
                                             <th className="px-6 py-4 font-semibold">Referencia</th>
                                         </tr>
                                     </thead>
-                                    <tbody className="divide-y divide-gray-100">
+                                    <tbody className="divide-y divide-[var(--color-rule-2)]">
                                         {payments.map((payment) => (
-                                            <tr key={payment.id} className="hover:bg-gray-50/50 transition-colors">
+                                            <tr key={payment.id} className="hover:bg-[var(--color-paper-3)] transition-colors">
                                                 <td className="px-6 py-4 whitespace-nowrap">
                                                     {format(new Date(payment.createdAt.seconds * 1000), "dd/MM/yy")}
                                                 </td>
-                                                <td className="px-6 py-4 font-medium text-gray-900">
+                                                <td className="px-6 py-4 font-medium text-[var(--color-ink)]">
                                                     ${Number(payment.amount).toLocaleString('es-AR')}
                                                 </td>
                                                 <td className="px-6 py-4 capitalize">
                                                     {payment.paymentMethod}
                                                 </td>
                                                 <td className="px-6 py-4">
-                                                    <span className={`px-2 py-1 text-xs rounded-full font-medium ${payment.status === 'completed' ? 'bg-green-100 text-green-700' :
-                                                        payment.status === 'pending' ? 'bg-yellow-100 text-yellow-700' :
-                                                            'bg-red-100 text-red-700'
+                                                    <span className={`px-2 py-1 text-xs rounded-full font-medium ${payment.status === 'completed' ? 'bg-[var(--color-positive-soft)] text-[var(--color-positive)]' :
+                                                        payment.status === 'pending' ? 'bg-[var(--color-warning-soft)] text-[var(--color-warning)]' :
+                                                            'bg-[var(--color-danger-soft)] text-[var(--color-danger)]'
                                                         }`}>
                                                         {payment.status}
                                                     </span>
                                                 </td>
-                                                <td className="px-6 py-4 text-xs text-gray-500 max-w-[200px] truncate">
+                                                <td className="px-6 py-4 text-xs text-[var(--color-muted)] max-w-[200px] truncate">
                                                     {payment.description || payment.providerPaymentId || "-"}
                                                 </td>
                                             </tr>
@@ -624,14 +624,14 @@ export default function AdminUserProfilePage() {
 
             {/* Tab: Correos */}
             {activeTab === 'correos' && (
-                <div className="bg-white rounded-2xl border border-gray-200 overflow-hidden shadow-sm">
-                    <div className="p-6 border-b border-gray-200 flex flex-col md:flex-row justify-between items-center gap-4">
-                        <h3 className="text-lg font-semibold text-gray-900">Correos Enviados a {user.email}</h3>
+                <div className="bg-[var(--color-paper-2)] rounded-2xl border border-[var(--color-rule)] overflow-hidden shadow-sm">
+                    <div className="p-6 border-b border-[var(--color-rule)] flex flex-col md:flex-row justify-between items-center gap-4">
+                        <h3 className="text-lg font-semibold text-[var(--color-ink)]">Correos Enviados a {user.email}</h3>
 
                         <div className="flex items-center gap-2">
-                            <span className="text-xs font-medium text-gray-500 uppercase">Enviar Nuevo:</span>
+                            <span className="text-xs font-medium text-[var(--color-muted)] uppercase">Enviar Nuevo:</span>
                             <select
-                                className={`px-3 py-2 border border-gray-200 rounded-xl text-sm font-medium focus:outline-none transition-all outline-none ${user.unsubscribedMarketing ? 'bg-gray-50 text-gray-400 cursor-not-allowed border-gray-200' : 'bg-white text-gray-700 cursor-pointer hover:border-indigo-300 shadow-sm focus:ring-2 focus:ring-indigo-500'}`}
+                                className={`px-3 py-2 border border-[var(--color-rule)] rounded-xl text-sm font-medium focus:outline-none transition-all outline-none ${user.unsubscribedMarketing ? 'bg-[var(--color-paper)] text-[var(--color-neutral)] cursor-not-allowed border-[var(--color-rule)]' : 'bg-[var(--color-paper-2)] text-[var(--color-ink-2)] cursor-pointer hover:border-[var(--color-accent)]/30 shadow-sm focus:ring-2 focus:ring-[var(--color-accent)]/40'}`}
                                 onChange={(e) => {
                                     const val = e.target.value;
                                     if (val) {
@@ -648,21 +648,21 @@ export default function AdminUserProfilePage() {
                                     <option key={key} value={key}>{name}</option>
                                 ))}
                                 {customTemplates.filter(t => !DEFAULT_TEMPLATES_MINIMAL[t.type]).map(t => (
-                                    <option key={t.type} value={t.type}>✨ {t.name}</option>
+                                    <option key={t.type} value={t.type}>{t.name}</option>
                                 ))}
                             </select>
                         </div>
                     </div>
 
                     {sentEmails.length === 0 ? (
-                        <div className="p-8 text-center text-gray-500">
+                        <div className="p-8 text-center text-[var(--color-muted)]">
                             No se han guardado registros de correos para este usuario.
                         </div>
                     ) : (
                         <>
                         <div className="overflow-x-auto">
                             <table className="w-full text-left font-sans">
-                                <thead className="bg-gray-50 text-xs text-gray-500 uppercase font-semibold border-b">
+                                <thead className="bg-[var(--color-paper)] text-xs text-[var(--color-muted)] uppercase font-semibold border-b">
                                     <tr>
                                         <th className="px-6 py-4">Fecha Evento</th>
                                         <th className="px-6 py-4">Status</th>
@@ -670,28 +670,28 @@ export default function AdminUserProfilePage() {
                                         <th className="px-6 py-4">Error (Si aplica)</th>
                                     </tr>
                                 </thead>
-                                <tbody className="divide-y divide-gray-100 text-sm">
+                                <tbody className="divide-y divide-[var(--color-rule-2)] text-sm">
                                     {sentEmails.slice(emailPage * EMAIL_PAGE_SIZE, (emailPage + 1) * EMAIL_PAGE_SIZE).map((email) => (
-                                        <tr key={email.id} className="hover:bg-gray-50 transition-colors">
-                                            <td className="px-6 py-4 whitespace-nowrap text-gray-500">
+                                        <tr key={email.id} className="hover:bg-[var(--color-paper-3)] transition-colors">
+                                            <td className="px-6 py-4 whitespace-nowrap text-[var(--color-muted)]">
                                                 {format(new Date(email.sentAt), "dd/MM/yyyy HH:mm")}
                                             </td>
-                                            <td className="px-6 py-4 text-gray-900">
+                                            <td className="px-6 py-4 text-[var(--color-ink)]">
                                                 {email.status === 'sent' ? (
-                                                    <span className="inline-flex items-center gap-1 text-green-600 bg-green-50 px-2 py-1 rounded-md text-xs font-medium border border-green-200">
-                                                        <CheckCircle className="w-3 h-3" /> Exitoso
+                                                    <span className="inline-flex items-center gap-1 text-[var(--color-positive)] bg-[var(--color-positive-soft)] px-2 py-1 rounded-md text-xs font-medium border border-[var(--color-positive)]/30">
+                                                        <CheckCircle strokeWidth={1.5} className="w-3 h-3" /> Exitoso
                                                     </span>
                                                 ) : (
-                                                    <span className="inline-flex items-center gap-1 text-red-600 bg-red-50 px-2 py-1 rounded-md text-xs font-medium border border-red-200">
-                                                        <XCircle className="w-3 h-3" /> Fallo
+                                                    <span className="inline-flex items-center gap-1 text-[var(--color-danger)] bg-[var(--color-danger-soft)] px-2 py-1 rounded-md text-xs font-medium border border-[var(--color-danger)]/30">
+                                                        <XCircle strokeWidth={1.5} className="w-3 h-3" /> Fallo
                                                     </span>
                                                 )}
                                             </td>
                                             <td className="px-6 py-4">
-                                                <p className="font-medium text-gray-900 text-sm">{email.subject}</p>
-                                                <p className="text-xs text-indigo-500 mt-1 uppercase font-mono">{email.type}</p>
+                                                <p className="font-medium text-[var(--color-ink)] text-sm">{email.subject}</p>
+                                                <p className="text-xs text-[var(--color-accent)] mt-1 uppercase font-mono">{email.type}</p>
                                             </td>
-                                            <td className="px-6 py-4 text-xs text-red-500 max-w-[250px] truncate">
+                                            <td className="px-6 py-4 text-xs text-[var(--color-danger)] max-w-[250px] truncate">
                                                 {email.error || "-"}
                                             </td>
                                         </tr>
@@ -700,20 +700,20 @@ export default function AdminUserProfilePage() {
                             </table>
                         </div>
                         {sentEmails.length > EMAIL_PAGE_SIZE && (
-                            <div className="px-6 py-4 border-t border-gray-100 flex items-center justify-between text-sm text-gray-500">
+                            <div className="px-6 py-4 border-t border-[var(--color-rule-2)] flex items-center justify-between text-sm text-[var(--color-muted)]">
                                 <span>{emailPage * EMAIL_PAGE_SIZE + 1}–{Math.min((emailPage + 1) * EMAIL_PAGE_SIZE, sentEmails.length)} de {sentEmails.length}</span>
                                 <div className="flex gap-2">
                                     <button
                                         onClick={() => setEmailPage(p => p - 1)}
                                         disabled={emailPage === 0}
-                                        className="px-3 py-1 rounded-lg border border-gray-200 hover:bg-gray-50 disabled:opacity-40 disabled:cursor-not-allowed transition"
+                                        className="px-3 py-1 rounded-lg border border-[var(--color-rule)] hover:bg-[var(--color-paper-3)] disabled:opacity-40 disabled:cursor-not-allowed transition"
                                     >
                                         ← Anterior
                                     </button>
                                     <button
                                         onClick={() => setEmailPage(p => p + 1)}
                                         disabled={(emailPage + 1) * EMAIL_PAGE_SIZE >= sentEmails.length}
-                                        className="px-3 py-1 rounded-lg border border-gray-200 hover:bg-gray-50 disabled:opacity-40 disabled:cursor-not-allowed transition"
+                                        className="px-3 py-1 rounded-lg border border-[var(--color-rule)] hover:bg-[var(--color-paper-3)] disabled:opacity-40 disabled:cursor-not-allowed transition"
                                     >
                                         Siguiente →
                                     </button>

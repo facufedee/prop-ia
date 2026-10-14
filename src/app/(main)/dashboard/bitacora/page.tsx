@@ -134,10 +134,10 @@ export default function BitacoraPage() {
 
     const getLevelColor = (level: LogLevel) => {
         const colors = {
-            info: 'bg-blue-100 text-blue-700',
-            success: 'bg-green-100 text-green-700',
-            warning: 'bg-yellow-100 text-yellow-700',
-            error: 'bg-red-100 text-red-700',
+            info: 'bg-[var(--color-accent-soft)] text-[var(--color-accent)]',
+            success: 'bg-[var(--color-positive-soft)] text-[var(--color-positive)]',
+            warning: 'bg-[var(--color-warning-soft)] text-[var(--color-warning)]',
+            error: 'bg-[var(--color-danger-soft)] text-[var(--color-danger)]',
         };
         return colors[level];
     };
@@ -169,7 +169,7 @@ export default function BitacoraPage() {
     if (loading) {
         return (
             <div className="p-6 flex items-center justify-center min-h-[400px]">
-                <div className="text-gray-500">Cargando bitácora...</div>
+                <div className="text-[var(--color-muted)]">Cargando bitácora...</div>
             </div>
         );
     }
@@ -179,22 +179,22 @@ export default function BitacoraPage() {
             {/* Header */}
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
                 <div>
-                    <h1 className="text-2xl font-bold text-gray-900">Bitácora de Auditoría</h1>
-                    <p className="text-gray-500">Registro completo de todas las acciones del sistema</p>
+                    <h1 className="font-heading text-2xl font-bold text-[var(--color-ink)]">Bitácora de Auditoría</h1>
+                    <p className="text-[var(--color-muted)]">Registro completo de todas las acciones del sistema</p>
                 </div>
                 <div className="flex gap-2">
                     <button
                         onClick={() => setShowFilters(!showFilters)}
-                        className="flex items-center gap-2 px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors"
+                        className="flex items-center gap-2 px-4 py-2 border border-[var(--color-rule)] text-[var(--color-ink-2)] rounded-lg hover:bg-[var(--color-paper-3)] transition-colors"
                     >
-                        <Filter className="w-5 h-5" />
+                        <Filter strokeWidth={1.5} className="w-5 h-5" />
                         Filtros
                     </button>
                     <button
                         onClick={exportToCSV}
-                        className="flex items-center gap-2 px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors"
+                        className="flex items-center gap-2 px-4 py-2 bg-[var(--color-ink)] text-[var(--color-paper)] rounded-lg hover:bg-[var(--color-ink-2)] transition-colors"
                     >
-                        <Download className="w-5 h-5" />
+                        <Download strokeWidth={1.5} className="w-5 h-5" />
                         Exportar
                     </button>
                 </div>
@@ -202,56 +202,56 @@ export default function BitacoraPage() {
 
             {/* Stats */}
             <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-                <div className="bg-white rounded-xl border border-gray-200 p-6">
+                <div className="bg-[var(--color-paper-2)] rounded-xl border border-[var(--color-rule)] p-6">
                     <div className="flex items-center justify-between">
                         <div>
-                            <p className="text-sm text-gray-500">Total Registros</p>
-                            <p className="text-2xl font-bold text-gray-900 mt-1">{logs.length}</p>
+                            <p className="text-sm text-[var(--color-muted)]">Total Registros</p>
+                            <p className="text-2xl font-bold text-[var(--color-ink)] mt-1">{logs.length}</p>
                         </div>
-                        <div className="p-3 bg-indigo-100 rounded-lg">
-                            <FileText className="w-6 h-6 text-indigo-600" />
+                        <div className="p-3 bg-[var(--color-paper-3)] rounded-full">
+                            <FileText strokeWidth={1.5} className="w-6 h-6 text-[var(--color-muted)]" />
                         </div>
                     </div>
                 </div>
 
-                <div className="bg-white rounded-xl border border-gray-200 p-6">
+                <div className="bg-[var(--color-paper-2)] rounded-xl border border-[var(--color-rule)] p-6">
                     <div className="flex items-center justify-between">
                         <div>
-                            <p className="text-sm text-gray-500">Hoy</p>
-                            <p className="text-2xl font-bold text-gray-900 mt-1">
+                            <p className="text-sm text-[var(--color-muted)]">Hoy</p>
+                            <p className="text-2xl font-bold text-[var(--color-ink)] mt-1">
                                 {logs.filter(l => new Date(l.timestamp).toDateString() === new Date().toDateString()).length}
                             </p>
                         </div>
-                        <div className="p-3 bg-green-100 rounded-lg">
-                            <Calendar className="w-6 h-6 text-green-600" />
+                        <div className="p-3 bg-[var(--color-paper-3)] rounded-full">
+                            <Calendar strokeWidth={1.5} className="w-6 h-6 text-[var(--color-muted)]" />
                         </div>
                     </div>
                 </div>
 
-                <div className="bg-white rounded-xl border border-gray-200 p-6">
+                <div className="bg-[var(--color-paper-2)] rounded-xl border border-[var(--color-rule)] p-6">
                     <div className="flex items-center justify-between">
                         <div>
-                            <p className="text-sm text-gray-500">Usuarios Activos</p>
-                            <p className="text-2xl font-bold text-gray-900 mt-1">
+                            <p className="text-sm text-[var(--color-muted)]">Usuarios Activos</p>
+                            <p className="text-2xl font-bold text-[var(--color-ink)] mt-1">
                                 {new Set(logs.map(l => l.userId)).size}
                             </p>
                         </div>
-                        <div className="p-3 bg-blue-100 rounded-lg">
-                            <User className="w-6 h-6 text-blue-600" />
+                        <div className="p-3 bg-[var(--color-paper-3)] rounded-full">
+                            <User strokeWidth={1.5} className="w-6 h-6 text-[var(--color-muted)]" />
                         </div>
                     </div>
                 </div>
 
-                <div className="bg-white rounded-xl border border-gray-200 p-6">
+                <div className="bg-[var(--color-paper-2)] rounded-xl border border-[var(--color-rule)] p-6">
                     <div className="flex items-center justify-between">
                         <div>
-                            <p className="text-sm text-gray-500">Errores</p>
-                            <p className="text-2xl font-bold text-gray-900 mt-1">
+                            <p className="text-sm text-[var(--color-muted)]">Errores</p>
+                            <p className="text-2xl font-bold text-[var(--color-ink)] mt-1">
                                 {logs.filter(l => l.level === 'error').length}
                             </p>
                         </div>
-                        <div className="p-3 bg-red-100 rounded-lg">
-                            <Activity className="w-6 h-6 text-red-600" />
+                        <div className="p-3 bg-[var(--color-paper-3)] rounded-full">
+                            <Activity strokeWidth={1.5} className="w-6 h-6 text-[var(--color-muted)]" />
                         </div>
                     </div>
                 </div>
@@ -259,13 +259,13 @@ export default function BitacoraPage() {
 
             {/* Filters */}
             {showFilters && (
-                <div className="bg-white rounded-xl border border-gray-200 p-6">
-                    <h3 className="text-lg font-semibold text-gray-900 mb-4">Filtros Avanzados</h3>
+                <div className="bg-[var(--color-paper-2)] rounded-xl border border-[var(--color-rule)] p-6">
+                    <h3 className="text-lg font-semibold text-[var(--color-ink)] mb-4">Filtros Avanzados</h3>
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
                         <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-2">Módulo</label>
+                            <label className="block text-sm font-medium text-[var(--color-ink-2)] mb-2">Módulo</label>
                             <select
-                                className="w-full p-2 border border-gray-300 rounded-lg"
+                                className="w-full p-2 border border-[var(--color-rule)] rounded-lg"
                                 value={filters.module}
                                 onChange={(e) => handleFilterChange("module", e.target.value)}
                             >
@@ -281,9 +281,9 @@ export default function BitacoraPage() {
                         </div>
 
                         <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-2">Nivel</label>
+                            <label className="block text-sm font-medium text-[var(--color-ink-2)] mb-2">Nivel</label>
                             <select
-                                className="w-full p-2 border border-gray-300 rounded-lg"
+                                className="w-full p-2 border border-[var(--color-rule)] rounded-lg"
                                 value={filters.level}
                                 onChange={(e) => handleFilterChange("level", e.target.value)}
                             >
@@ -296,13 +296,13 @@ export default function BitacoraPage() {
                         </div>
 
                         <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-2">Buscar</label>
+                            <label className="block text-sm font-medium text-[var(--color-ink-2)] mb-2">Buscar</label>
                             <div className="relative">
-                                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
+                                <Search strokeWidth={1.5} className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-[var(--color-neutral)]" />
                                 <input
                                     type="text"
                                     placeholder="Usuario, descripción..."
-                                    className="w-full pl-10 p-2 border border-gray-300 rounded-lg"
+                                    className="w-full pl-10 p-2 border border-[var(--color-rule)] rounded-lg"
                                     value={filters.searchTerm}
                                     onChange={(e) => handleFilterChange("searchTerm", e.target.value)}
                                 />
@@ -310,20 +310,20 @@ export default function BitacoraPage() {
                         </div>
 
                         <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-2">Fecha Desde</label>
+                            <label className="block text-sm font-medium text-[var(--color-ink-2)] mb-2">Fecha Desde</label>
                             <input
                                 type="date"
-                                className="w-full p-2 border border-gray-300 rounded-lg"
+                                className="w-full p-2 border border-[var(--color-rule)] rounded-lg"
                                 value={filters.startDate}
                                 onChange={(e) => handleFilterChange("startDate", e.target.value)}
                             />
                         </div>
 
                         <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-2">Fecha Hasta</label>
+                            <label className="block text-sm font-medium text-[var(--color-ink-2)] mb-2">Fecha Hasta</label>
                             <input
                                 type="date"
-                                className="w-full p-2 border border-gray-300 rounded-lg"
+                                className="w-full p-2 border border-[var(--color-rule)] rounded-lg"
                                 value={filters.endDate}
                                 onChange={(e) => handleFilterChange("endDate", e.target.value)}
                             />
@@ -333,13 +333,13 @@ export default function BitacoraPage() {
                     <div className="flex justify-end gap-2">
                         <button
                             onClick={handleClearFilters}
-                            className="px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50"
+                            className="px-4 py-2 border border-[var(--color-rule)] text-[var(--color-ink-2)] rounded-lg hover:bg-[var(--color-paper-3)]"
                         >
                             Limpiar
                         </button>
                         <button
                             onClick={handleApplyFilters}
-                            className="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700"
+                            className="px-4 py-2 bg-[var(--color-ink)] text-[var(--color-paper)] rounded-lg hover:bg-[var(--color-ink-2)]"
                         >
                             Aplicar Filtros
                         </button>
@@ -348,39 +348,39 @@ export default function BitacoraPage() {
             )}
 
             {/* Logs Table */}
-            <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
+            <div className="bg-[var(--color-paper-2)] rounded-xl border border-[var(--color-rule)] overflow-hidden">
                 <div className="overflow-x-auto">
                     <table className="w-full">
-                        <thead className="bg-gray-50 border-b border-gray-200">
+                        <thead className="bg-[var(--color-paper)] border-b border-[var(--color-rule)]">
                             <tr>
-                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Fecha/Hora</th>
-                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Usuario</th>
-                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Módulo</th>
-                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Acción</th>
-                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Descripción</th>
-                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Nivel</th>
+                                <th className="px-6 py-3 text-left text-xs font-medium text-[var(--color-muted)] uppercase">Fecha/Hora</th>
+                                <th className="px-6 py-3 text-left text-xs font-medium text-[var(--color-muted)] uppercase">Usuario</th>
+                                <th className="px-6 py-3 text-left text-xs font-medium text-[var(--color-muted)] uppercase">Módulo</th>
+                                <th className="px-6 py-3 text-left text-xs font-medium text-[var(--color-muted)] uppercase">Acción</th>
+                                <th className="px-6 py-3 text-left text-xs font-medium text-[var(--color-muted)] uppercase">Descripción</th>
+                                <th className="px-6 py-3 text-left text-xs font-medium text-[var(--color-muted)] uppercase">Nivel</th>
                             </tr>
                         </thead>
-                        <tbody className="divide-y divide-gray-200">
+                        <tbody className="divide-y divide-[var(--color-rule)]">
                             {logs.length === 0 ? (
                                 <tr>
-                                    <td colSpan={6} className="px-6 py-12 text-center text-gray-500">
+                                    <td colSpan={6} className="px-6 py-12 text-center text-[var(--color-muted)]">
                                         No hay registros en la bitácora
                                     </td>
                                 </tr>
                             ) : (
                                 logs.map((log) => (
-                                    <tr key={log.id} className="hover:bg-gray-50">
-                                        <td className="px-6 py-4 text-sm text-gray-900">
+                                    <tr key={log.id} className="hover:bg-[var(--color-paper-3)]">
+                                        <td className="px-6 py-4 text-sm text-[var(--color-ink)]">
                                             {new Date(log.timestamp).toLocaleString('es-AR')}
                                         </td>
                                         <td className="px-6 py-4">
-                                            <div className="text-sm font-medium text-gray-900">{log.userName}</div>
-                                            <div className="text-xs text-gray-500">{log.userEmail}</div>
+                                            <div className="text-sm font-medium text-[var(--color-ink)]">{log.userName}</div>
+                                            <div className="text-xs text-[var(--color-muted)]">{log.userEmail}</div>
                                         </td>
-                                        <td className="px-6 py-4 text-sm text-gray-600">{log.module}</td>
-                                        <td className="px-6 py-4 text-sm text-gray-600 font-mono">{log.action}</td>
-                                        <td className="px-6 py-4 text-sm text-gray-700">{log.description}</td>
+                                        <td className="px-6 py-4 text-sm text-[var(--color-ink-2)]">{log.module}</td>
+                                        <td className="px-6 py-4 text-sm text-[var(--color-ink-2)] font-mono">{log.action}</td>
+                                        <td className="px-6 py-4 text-sm text-[var(--color-ink-2)]">{log.description}</td>
                                         <td className="px-6 py-4">
                                             <span className={`px-2 py-1 text-xs font-medium rounded-full ${getLevelColor(log.level)}`}>
                                                 {getLevelIcon(log.level)}
@@ -395,22 +395,22 @@ export default function BitacoraPage() {
             </div>
 
             {/* Pagination Controls */}
-            <div className="flex items-center justify-between bg-white p-4 rounded-xl border border-gray-200">
-                <div className="text-sm text-gray-500">
+            <div className="flex items-center justify-between bg-[var(--color-paper-2)] p-4 rounded-xl border border-[var(--color-rule)]">
+                <div className="text-sm text-[var(--color-muted)]">
                     Página {pageNumber}
                 </div>
                 <div className="flex gap-2">
                     <button
                         onClick={handlePrevPage}
                         disabled={pageNumber === 1 || loading}
-                        className="px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                        className="px-4 py-2 border border-[var(--color-rule)] text-[var(--color-ink-2)] rounded-lg hover:bg-[var(--color-paper-3)] disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
                     >
                         Anterior
                     </button>
                     <button
                         onClick={handleNextPage}
                         disabled={logs.length < LIMIT || loading}
-                        className="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                        className="px-4 py-2 bg-[var(--color-ink)] text-[var(--color-paper)] rounded-lg hover:bg-[var(--color-ink-2)] disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
                     >
                         Siguiente
                     </button>

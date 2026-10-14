@@ -1,5 +1,6 @@
 import { db } from "@/infrastructure/firebase/client";
 import { doc, getDoc, setDoc, collection, addDoc } from "firebase/firestore";
+import { EMAIL_COLORS, emailWordmarkHtml } from "@/lib/email/brandColors";
 
 const logSentEmail = async (to: string, subject: string, templateKey: string, status: 'success' | 'error', errorMsg?: string) => {
     if (!db) return;
@@ -93,8 +94,9 @@ export const emailNotificationService = {
                 subject: `[ZetaProp Alerta] ${subject}`,
                 html: `
                     <div style="font-family: Arial, sans-serif; color: #333; line-height: 1.6; max-width: 600px; margin: 0 auto; border: 1px solid #eee; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 12px rgba(0,0,0,0.05);">
-                        <div style="background: linear-gradient(to r, #4f46e5, #7c3aed); padding: 24px; color: white;">
-                            <h2 style="margin: 0; font-size: 20px;">Nueva Notificación</h2>
+                        <div style="background-color: ${EMAIL_COLORS.headerBg}; border-bottom: 3px solid ${EMAIL_COLORS.buttonBg}; padding: 24px; color: ${EMAIL_COLORS.headerText};">
+                            <div style="margin: 0 0 12px 0;">${emailWordmarkHtml(18)}</div>
+                            <h2 style="margin: 0; font-size: 20px; color: ${EMAIL_COLORS.headerText};">Nueva Notificación</h2>
                             <p style="margin: 4px 0 0 0; opacity: 0.8; font-size: 14px;">${event === 'newLead' ? 'Nueva Consulta Recibida' : event}</p>
                         </div>
                         <div style="padding: 24px;">
@@ -128,7 +130,7 @@ export const emailNotificationService = {
                             ` : ''}
 
                             <div style="text-align: center; margin-top: 32px;">
-                                <a href="https://zetaprop.com.ar/dashboard/leads" style="display: inline-block; background-color: #4f46e5; color: white; padding: 12px 24px; text-decoration: none; border-radius: 8px; font-weight: 600; font-size: 14px;">Gestionar en el Panel</a>
+                                <a href="https://zetaprop.com.ar/dashboard/leads" style="display: inline-block; background-color: ${EMAIL_COLORS.buttonBg}; color: ${EMAIL_COLORS.buttonText}; padding: 12px 24px; text-decoration: none; border-radius: 8px; font-weight: 600; font-size: 14px;">Gestionar en el Panel</a>
                             </div>
                         </div>
                         <div style="background-color: #f9fafb; padding: 16px; text-align: center; border-top: 1px solid #eee;">
@@ -180,8 +182,8 @@ export const emailNotificationService = {
                         
                         <p>Sabemos que gestionar propiedades y alquileres puede ser un caos: contratos que vencen, cálculos de aumentos que quitan tiempo y la dificultad de no tener una web propia que se vea profesional.</p>
                         
-                        <div style="background-color: #f9f9f9; border-left: 4px solid #2563eb; padding: 15px; margin: 20px 0;">
-                            <p style="margin-top: 0; font-weight: bold; color: #2563eb;">En Zeta Prop no somos solo un portal; somos tu aliado para olvidarte de:</p>
+                        <div style="background-color: #f9f9f9; border-left: 4px solid ${EMAIL_COLORS.buttonBg}; padding: 15px; margin: 20px 0;">
+                            <p style="margin-top: 0; font-weight: bold; color: ${EMAIL_COLORS.link};">En Zeta Prop no somos solo un portal; somos tu aliado para olvidarte de:</p>
                             <ul style="padding-left: 20px;">
                                 <li><strong>El desorden del Excel:</strong> Centralizá contratos, inquilinos y propietarios en un solo lugar.</li>
                                 <li><strong>Los cálculos manuales:</strong> El sistema automatiza la indexación de tus contratos.</li>
@@ -193,14 +195,14 @@ export const emailNotificationService = {
                         <p>Solo te toma <strong>5 minutos</strong> cargar tu primer alquiler o propiedad para ver cómo el sistema empieza a trabajar por vos.</p>
                         
                         <div style="text-align: center; margin: 30px 0;">
-                            <a href="https://zetaprop.com.ar/login" style="background-color: #2563eb; color: white; padding: 12px 25px; text-decoration: none; border-radius: 5px; font-weight: bold;">Ingresar a mi panel</a>
+                            <a href="https://zetaprop.com.ar/login" style="background-color: ${EMAIL_COLORS.buttonBg}; color: ${EMAIL_COLORS.buttonText}; padding: 12px 25px; text-decoration: none; border-radius: 5px; font-weight: bold;">Ingresar a mi panel</a>
                         </div>
                         
                         <p>Estamos acá para simplificar tu día a día. Si tenés alguna sugerencia o algo que hoy te da mucho trabajo manual y querés que lo automaticemos, respondé directamente a este mail.</p>
                         
                         <p>Éxitos con tu gestión,<br>
                         <strong>Facundo</strong><br>
-                        Zeta Prop | <a href="https://zetaprop.com.ar" style="color: #2563eb;">zetaprop.com.ar</a></p>
+                        Zeta Prop | <a href="https://zetaprop.com.ar" style="color: ${EMAIL_COLORS.link};">zetaprop.com.ar</a></p>
                         
                         <hr style="border: 0; border-top: 1px solid #eee; margin: 20px 0;">
                         
@@ -393,7 +395,7 @@ export const emailNotificationService = {
                         <p>Ahora podés <strong>publicar tus propiedades y mostrarlas a tus clientes</strong>, obtener nuevos contactos y realizar un seguimiento inteligente de cada consulta.</p>
                         <p>Todo esto integrado en un <strong>CRM mucho más moderno, ágil y fácil de usar</strong> que las alternativas robustas del mercado actual, pero a un <strong>costo infinitamente más bajo</strong> en comparación a las grandes plataformas.</p>
                         <p>Animate a llevar tu gestión al próximo nivel:</p>
-                        <p><a href="https://zetaprop.com.ar" style="display:inline-block; padding:10px 20px; background-color:#4F46E5; color:white; text-decoration:none; border-radius:5px; margin-top:10px;">Descubrir Zeta Prop</a></p>
+                        <p><a href="https://zetaprop.com.ar" style="display:inline-block; padding:10px 20px; background-color:${EMAIL_COLORS.buttonBg}; color:${EMAIL_COLORS.buttonText}; text-decoration:none; border-radius:5px; margin-top:10px;">Descubrir Zeta Prop</a></p>
                         <p>Cualquier consulta o duda, podés escribirme directamente a este mail.</p>
                         <p>Saludos,<br><strong>Facundo</strong><br>Zeta Prop</p>
                         <p style="font-size: 0.85em; color: #666; margin-top: 20px; border-top: 1px solid #eee; pt-4;">

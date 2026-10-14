@@ -77,85 +77,85 @@ export default function AgentDetailPage() {
         }
     };
 
-    if (loading) return <div className="p-8 text-center text-gray-500">Cargando agente...</div>;
+    if (loading) return <div className="p-8 text-center text-[var(--color-muted)]">Cargando agente...</div>;
 
     if (!agente) return (
-        <div className="p-8 flex flex-col items-center justify-center text-gray-500">
-            <ShieldAlert size={48} className="mb-4 text-red-500" />
-            <h2 className="text-xl font-bold text-gray-900">Agente no encontrado</h2>
+        <div className="p-8 flex flex-col items-center justify-center text-[var(--color-muted)]">
+            <ShieldAlert strokeWidth={1.5} size={48} className="mb-4 text-[var(--color-danger)]" />
+            <h2 className="text-xl font-bold text-[var(--color-ink)]">Agente no encontrado</h2>
             <p className="mb-4">El agente que buscas no existe o no tienes permisos para verlo.</p>
-            <Link href="/dashboard/agentes" className="text-indigo-600 hover:underline">Volver a Agentes</Link>
+            <Link href="/dashboard/agentes" className="text-[var(--color-accent)] hover:underline">Volver a Agentes</Link>
         </div>
     );
 
     if (!canEdit) return (
-        <div className="p-8 flex flex-col items-center justify-center text-gray-500">
-            <ShieldAlert size={48} className="mb-4 text-red-500" />
-            <h2 className="text-xl font-bold text-gray-900">Acceso Denegado</h2>
+        <div className="p-8 flex flex-col items-center justify-center text-[var(--color-muted)]">
+            <ShieldAlert strokeWidth={1.5} size={48} className="mb-4 text-[var(--color-danger)]" />
+            <h2 className="text-xl font-bold text-[var(--color-ink)]">Acceso Denegado</h2>
             <p className="mb-4">No tienes permisos para editar agentes.</p>
-            <Link href="/dashboard/agentes" className="text-indigo-600 hover:underline">Volver a Agentes</Link>
+            <Link href="/dashboard/agentes" className="text-[var(--color-accent)] hover:underline">Volver a Agentes</Link>
         </div>
     );
 
     return (
         <div className="max-w-4xl mx-auto p-6 md:p-8">
             <div className="flex items-center gap-4 mb-8">
-                <Link href="/dashboard/agentes" className="p-2 hover:bg-gray-100 rounded-full transition">
-                    <ArrowLeft size={20} className="text-gray-600" />
+                <Link href="/dashboard/agentes" className="p-2 hover:bg-[var(--color-paper-3)] rounded-full transition">
+                    <ArrowLeft strokeWidth={1.5} size={20} className="text-[var(--color-ink-2)]" />
                 </Link>
                 <div>
-                    <h1 className="text-2xl font-bold text-gray-900">{agente.nombre}</h1>
-                    <p className="text-gray-500 text-sm">Editar información del agente</p>
+                    <h1 className="font-heading text-2xl font-bold text-[var(--color-ink)]">{agente.nombre}</h1>
+                    <p className="text-[var(--color-muted)] text-sm">Editar información del agente</p>
                 </div>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
                 {/* Main Info */}
                 <div className="md:col-span-2 space-y-6">
-                    <div className="bg-white p-6 rounded-2xl border border-gray-200 shadow-sm space-y-4">
-                        <h2 className="text-lg font-bold text-gray-900 mb-4 flex items-center gap-2">
-                            <UserIcon size={20} /> Información Personal
+                    <div className="bg-[var(--color-paper-2)] p-6 rounded-2xl border border-[var(--color-rule)] shadow-sm space-y-4">
+                        <h2 className="text-lg font-bold text-[var(--color-ink)] mb-4 flex items-center gap-2">
+                            <UserIcon strokeWidth={1.5} size={20} /> Información Personal
                         </h2>
 
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                             <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-1">Nombre Completo</label>
-                                <div className="p-2 bg-gray-50 rounded-lg text-gray-900">{agente.nombre}</div>
+                                <label className="block text-sm font-medium text-[var(--color-ink-2)] mb-1">Nombre Completo</label>
+                                <div className="p-2 bg-[var(--color-paper)] rounded-lg text-[var(--color-ink)]">{agente.nombre}</div>
                             </div>
                             <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-1">Email</label>
-                                <div className="p-2 bg-gray-50 rounded-lg text-gray-900 flex items-center gap-2">
-                                    <Mail size={14} className="text-gray-400" /> {agente.email}
+                                <label className="block text-sm font-medium text-[var(--color-ink-2)] mb-1">Email</label>
+                                <div className="p-2 bg-[var(--color-paper)] rounded-lg text-[var(--color-ink)] flex items-center gap-2">
+                                    <Mail strokeWidth={1.5} size={14} className="text-[var(--color-neutral)]" /> {agente.email}
                                 </div>
                             </div>
                             <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-1">Teléfono</label>
-                                <div className="p-2 bg-gray-50 rounded-lg text-gray-900 flex items-center gap-2">
-                                    <Phone size={14} className="text-gray-400" /> {agente.telefono || "No registrado"}
+                                <label className="block text-sm font-medium text-[var(--color-ink-2)] mb-1">Teléfono</label>
+                                <div className="p-2 bg-[var(--color-paper)] rounded-lg text-[var(--color-ink)] flex items-center gap-2">
+                                    <Phone strokeWidth={1.5} size={14} className="text-[var(--color-neutral)]" /> {agente.telefono || "No registrado"}
                                 </div>
                             </div>
                         </div>
                     </div>
 
-                    <div className="bg-white p-6 rounded-2xl border border-gray-200 shadow-sm">
-                        <h2 className="text-lg font-bold text-gray-900 mb-4 flex items-center gap-2">
-                            <Building2 size={20} /> Asignación de Sucursal
+                    <div className="bg-[var(--color-paper-2)] p-6 rounded-2xl border border-[var(--color-rule)] shadow-sm">
+                        <h2 className="text-lg font-bold text-[var(--color-ink)] mb-4 flex items-center gap-2">
+                            <Building2 strokeWidth={1.5} size={20} /> Asignación de Sucursal
                         </h2>
                         <div className="flex items-center justify-between mb-4">
-                            <p className="text-sm text-gray-500">
-                                Sucursal actual: <span className="font-bold text-indigo-600">{branches.find(b => b.id === agente.branchId)?.name || "Sin asignar"}</span>
+                            <p className="text-sm text-[var(--color-muted)]">
+                                Sucursal actual: <span className="font-bold text-[var(--color-accent)]">{branches.find(b => b.id === agente.branchId)?.name || "Sin asignar"}</span>
                             </p>
                         </div>
-                        <p className="text-sm text-gray-500 mb-4">
+                        <p className="text-sm text-[var(--color-muted)] mb-4">
                             Selecciona la nueva sucursal a la que pertenece este agente.
                         </p>
 
                         <div className="max-w-md">
-                            <label className="block text-sm font-medium text-gray-700 mb-1">Sucursal</label>
+                            <label className="block text-sm font-medium text-[var(--color-ink-2)] mb-1">Sucursal</label>
                             <select
                                 value={selectedBranch}
                                 onChange={(e) => setSelectedBranch(e.target.value)}
-                                className="w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none"
+                                className="w-full p-2 border border-[var(--color-rule)] rounded-lg focus:ring-2 focus:ring-[var(--color-accent)]/40 outline-none"
                             >
                                 <option value="">Sin Asignar</option>
                                 {branches.map(branch => (
@@ -168,20 +168,20 @@ export default function AgentDetailPage() {
 
                 {/* Sidebar Stats */}
                 <div className="space-y-6">
-                    <div className="bg-white p-6 rounded-2xl border border-gray-200 shadow-sm">
-                        <h3 className="font-bold text-gray-900 mb-4">Rendimiento</h3>
+                    <div className="bg-[var(--color-paper-2)] p-6 rounded-2xl border border-[var(--color-rule)] shadow-sm">
+                        <h3 className="font-bold text-[var(--color-ink)] mb-4">Rendimiento</h3>
                         <div className="space-y-4">
-                            <div className="flex justify-between items-center pb-2 border-b border-gray-100">
-                                <span className="text-sm text-gray-500">Ventas Totales</span>
-                                <span className="font-bold text-gray-900">{agente.totalVentas}</span>
+                            <div className="flex justify-between items-center pb-2 border-b border-[var(--color-rule-2)]">
+                                <span className="text-sm text-[var(--color-muted)]">Ventas Totales</span>
+                                <span className="font-bold text-[var(--color-ink)]">{agente.totalVentas}</span>
                             </div>
-                            <div className="flex justify-between items-center pb-2 border-b border-gray-100">
-                                <span className="text-sm text-gray-500">Alquileres</span>
-                                <span className="font-bold text-gray-900">{agente.totalAlquileres}</span>
+                            <div className="flex justify-between items-center pb-2 border-b border-[var(--color-rule-2)]">
+                                <span className="text-sm text-[var(--color-muted)]">Alquileres</span>
+                                <span className="font-bold text-[var(--color-ink)]">{agente.totalAlquileres}</span>
                             </div>
                             <div className="flex justify-between items-center pt-2">
-                                <span className="text-sm text-gray-500">Comisiones</span>
-                                <span className="font-bold text-green-600">${agente.totalComisiones.toLocaleString()}</span>
+                                <span className="text-sm text-[var(--color-muted)]">Comisiones</span>
+                                <span className="font-bold text-[var(--color-positive)]">${agente.totalComisiones.toLocaleString()}</span>
                             </div>
                         </div>
                     </div>
@@ -189,9 +189,9 @@ export default function AgentDetailPage() {
                     <button
                         onClick={handleSave}
                         disabled={saving}
-                        className="w-full py-3 px-4 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-xl transition flex items-center justify-center gap-2 shadow-lg shadow-indigo-200 disabled:opacity-70"
+                        className="w-full py-3 px-4 bg-[var(--color-ink)] hover:bg-[var(--color-ink-2)] text-[var(--color-paper)] font-bold rounded-xl transition flex items-center justify-center gap-2 shadow-lg disabled:opacity-70"
                     >
-                        {saving ? "Guardando..." : <><Save size={20} /> Guardar Cambios</>}
+                        {saving ? "Guardando..." : <><Save strokeWidth={1.5} size={20} /> Guardar Cambios</>}
                     </button>
                 </div>
             </div>

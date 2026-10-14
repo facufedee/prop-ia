@@ -3,12 +3,18 @@
  * Layout follows the brand wrapper used by the marketing templates.
  */
 
+import { EMAIL_COLORS, emailHeaderBarHtml } from '@/lib/email/brandColors';
+
 export const SITE_URL = 'https://zetaprop.com.ar';
+/** PNG logo (its "Prop" is still indigo). Kept for confirmationEmail; the newsletter uses the text wordmark. */
 export const LOGO_URL = `${SITE_URL}/assets/img/logo_zeta_prop_transparent.png`;
 // Covers are cropped to this height with an overflow:hidden wrapper, since Gmail
 // ignores object-fit and tall (portrait) covers would otherwise dominate the email.
 const COVER_HEIGHT_PX = 260;
-export const BRAND_BLUE = '#2563eb';
+/** Deep bronze for links and white-text buttons on a white body (see src/lib/email/brandColors.ts). */
+export const BRAND_ACCENT: string = EMAIL_COLORS.link;
+/** @deprecated Kept as an alias for confirmationEmail.ts; use BRAND_ACCENT. */
+export const BRAND_BLUE = BRAND_ACCENT;
 
 export interface NewsletterPost {
     title: string;
@@ -65,7 +71,7 @@ function renderPostHtml(post: NewsletterPost): string {
         ? `<div style="height: ${COVER_HEIGHT_PX}px; max-height: ${COVER_HEIGHT_PX}px; overflow: hidden; border-radius: 10px; margin-bottom: 16px;"><a href="${url}"><img src="${escapeHtml(post.imageUrl)}" alt="${escapeHtml(post.title)}" width="540" style="width: 100%; max-width: 540px; height: auto; display: block;" /></a></div>`
         : '';
     const category = post.category
-        ? `<div style="font-size: 12px; font-weight: bold; text-transform: uppercase; letter-spacing: 0.05em; color: ${BRAND_BLUE}; margin-bottom: 6px;">${escapeHtml(post.category)}</div>`
+        ? `<div style="font-size: 12px; font-weight: bold; text-transform: uppercase; letter-spacing: 0.05em; color: ${BRAND_ACCENT}; margin-bottom: 6px;">${escapeHtml(post.category)}</div>`
         : '';
     const excerpt = post.excerpt
         ? `<p style="margin: 0 0 18px; color: #475569;">${escapeHtml(post.excerpt)}</p>`
@@ -79,7 +85,7 @@ function renderPostHtml(post: NewsletterPost): string {
             <a href="${url}" style="color: #0f172a; text-decoration: none;">${escapeHtml(post.title)}</a>
         </h2>
         ${excerpt}
-        <a href="${url}" style="background-color: ${BRAND_BLUE}; color: #ffffff; padding: 11px 22px; text-decoration: none; border-radius: 6px; font-weight: bold; display: inline-block;">Leer nota</a>
+        <a href="${url}" style="background-color: ${EMAIL_COLORS.buttonBg}; color: ${EMAIL_COLORS.buttonText}; padding: 11px 22px; text-decoration: none; border-radius: 6px; font-weight: bold; display: inline-block;">Leer nota</a>
     </div>`;
 }
 
@@ -109,15 +115,15 @@ export function renderNewsletter({
 </head>
 <body style="margin: 0; padding: 20px 10px; background-color: #f1f5f9;">
 <div style="font-family: 'Segoe UI', Arial, sans-serif; color: #333; line-height: 1.6; max-width: 600px; margin: 0 auto; background-color: #ffffff; padding: 30px; border-radius: 12px; border: 1px solid #e2e8f0;">
-    <div style="text-align: center; margin-bottom: 25px;">
-        <a href="${SITE_URL}"><img src="${LOGO_URL}" alt="Zeta Prop" width="174" height="45" style="width: 174px; height: 45px; margin-bottom: 10px; border: 0;" /></a>
+    <div style="margin-bottom: 25px;">
+        ${emailHeaderBarHtml(SITE_URL)}
     </div>
     <div style="font-size: 16px;">
         <p style="margin: 0 0 8px;">${escapeHtml(greeting)}</p>
         <p style="margin: 0 0 28px;">${escapeHtml(intro)}</p>
         ${posts.map(renderPostHtml).join('\n')}
         <p style="margin: 0;">
-            Más notas en <a href="${SITE_URL}/blog" style="color: ${BRAND_BLUE}; font-weight: bold; text-decoration: none;">zetaprop.com.ar/blog</a>
+            Más notas en <a href="${SITE_URL}/blog" style="color: ${BRAND_ACCENT}; font-weight: bold; text-decoration: none;">zetaprop.com.ar/blog</a>
         </p>
     </div>
     <div style="font-size: 0.75em; color: #94a3b8; margin-top: 35px; border-top: 1px solid #e2e8f0; padding-top: 20px; text-align: center;">

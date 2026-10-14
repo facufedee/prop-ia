@@ -5,10 +5,10 @@ export default function NewDevelopmentPage() {
     return (
         <div className="space-y-6">
             <div>
-                <h1 className="text-2xl font-bold text-gray-900 flex items-center gap-2">
-                    <Building2 className="text-indigo-600" /> Nuevo Emprendimiento
+                <h1 className="font-heading text-2xl font-bold text-[var(--color-ink)] flex items-center gap-2">
+                    <Building2 strokeWidth={1.5} className="text-[var(--color-accent)]" /> Nuevo Emprendimiento
                 </h1>
-                <p className="text-gray-500 text-sm">Completá la información del proyecto paso a paso.</p>
+                <p className="text-[var(--color-muted)] text-sm">Completá la información del proyecto paso a paso.</p>
             </div>
 
             <DevelopmentForm />

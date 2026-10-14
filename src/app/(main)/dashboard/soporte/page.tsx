@@ -32,13 +32,13 @@ export default function SoportePage() {
 
     const getStatusColor = (status: string) => {
         const colors = {
-            abierto: 'bg-blue-100 text-blue-700',
-            en_progreso: 'bg-yellow-100 text-yellow-700',
-            esperando_respuesta: 'bg-purple-100 text-purple-700',
-            resuelto: 'bg-green-100 text-green-700',
-            cerrado: 'bg-gray-100 text-gray-700',
+            abierto: 'bg-[var(--color-accent-soft)] text-[var(--color-accent)]',
+            en_progreso: 'bg-[var(--color-warning-soft)] text-[var(--color-warning)]',
+            esperando_respuesta: 'bg-[var(--color-accent-soft)] text-[var(--color-accent)]',
+            resuelto: 'bg-[var(--color-positive-soft)] text-[var(--color-positive)]',
+            cerrado: 'bg-[var(--color-paper-3)] text-[var(--color-ink-2)]',
         };
-        return colors[status as keyof typeof colors] || 'bg-gray-100 text-gray-700';
+        return colors[status as keyof typeof colors] || 'bg-[var(--color-paper-3)] text-[var(--color-ink-2)]';
     };
 
     const getStatusLabel = (status: string) => {
@@ -54,12 +54,12 @@ export default function SoportePage() {
 
     const getPriorityColor = (priority: string) => {
         const colors = {
-            baja: 'text-gray-600',
-            media: 'text-blue-600',
-            alta: 'text-orange-600',
-            urgente: 'text-red-600',
+            baja: 'text-[var(--color-ink-2)]',
+            media: 'text-[var(--color-accent)]',
+            alta: 'text-[var(--color-warning)]',
+            urgente: 'text-[var(--color-danger)]',
         };
-        return colors[priority as keyof typeof colors] || 'text-gray-600';
+        return colors[priority as keyof typeof colors] || 'text-[var(--color-ink-2)]';
     };
 
     const getCategoryLabel = (category: string) => {
@@ -77,7 +77,7 @@ export default function SoportePage() {
     if (loading) {
         return (
             <div className="p-6 flex items-center justify-center min-h-[400px]">
-                <div className="text-gray-500">Cargando tickets...</div>
+                <div className="text-[var(--color-muted)]">Cargando tickets...</div>
             </div>
         );
     }
@@ -87,56 +87,56 @@ export default function SoportePage() {
             {/* Header */}
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
                 <div>
-                    <h1 className="text-2xl font-bold text-gray-900">Mesa de Ayuda</h1>
-                    <p className="text-gray-500">Soporte técnico y asistencia</p>
+                    <h1 className="font-heading text-2xl font-bold text-[var(--color-ink)]">Mesa de Ayuda</h1>
+                    <p className="text-[var(--color-muted)]">Soporte técnico y asistencia</p>
                 </div>
                 <Link
                     href="/dashboard/soporte/nuevo"
-                    className="flex items-center gap-2 px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors"
+                    className="flex items-center gap-2 px-4 py-2 bg-[var(--color-ink)] text-[var(--color-paper)] rounded-lg hover:bg-[var(--color-ink-2)] transition-colors"
                 >
-                    <Plus className="w-5 h-5" />
+                    <Plus strokeWidth={1.5} className="w-5 h-5" />
                     Nuevo Ticket
                 </Link>
             </div>
 
             {/* Stats */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <div className="bg-white rounded-xl border border-gray-200 p-6">
+                <div className="bg-[var(--color-paper-2)] rounded-xl border border-[var(--color-rule)] p-6">
                     <div className="flex items-center justify-between">
                         <div>
-                            <p className="text-sm text-gray-500">Tickets Abiertos</p>
-                            <p className="text-2xl font-bold text-gray-900 mt-1">
+                            <p className="text-sm text-[var(--color-muted)]">Tickets Abiertos</p>
+                            <p className="text-2xl font-bold text-[var(--color-ink)] mt-1">
                                 {tickets.filter(t => t.status === 'abierto' || t.status === 'en_progreso').length}
                             </p>
                         </div>
-                        <div className="p-3 bg-blue-100 rounded-lg">
-                            <Clock className="w-6 h-6 text-blue-600" />
+                        <div className="p-3 bg-[var(--color-paper-3)] rounded-full">
+                            <Clock strokeWidth={1.5} className="w-6 h-6 text-[var(--color-muted)]" />
                         </div>
                     </div>
                 </div>
 
-                <div className="bg-white rounded-xl border border-gray-200 p-6">
+                <div className="bg-[var(--color-paper-2)] rounded-xl border border-[var(--color-rule)] p-6">
                     <div className="flex items-center justify-between">
                         <div>
-                            <p className="text-sm text-gray-500">Resueltos</p>
-                            <p className="text-2xl font-bold text-gray-900 mt-1">
+                            <p className="text-sm text-[var(--color-muted)]">Resueltos</p>
+                            <p className="text-2xl font-bold text-[var(--color-ink)] mt-1">
                                 {tickets.filter(t => t.status === 'resuelto').length}
                             </p>
                         </div>
-                        <div className="p-3 bg-green-100 rounded-lg">
-                            <CheckCircle className="w-6 h-6 text-green-600" />
+                        <div className="p-3 bg-[var(--color-paper-3)] rounded-full">
+                            <CheckCircle strokeWidth={1.5} className="w-6 h-6 text-[var(--color-muted)]" />
                         </div>
                     </div>
                 </div>
 
-                <div className="bg-white rounded-xl border border-gray-200 p-6">
+                <div className="bg-[var(--color-paper-2)] rounded-xl border border-[var(--color-rule)] p-6">
                     <div className="flex items-center justify-between">
                         <div>
-                            <p className="text-sm text-gray-500">Total</p>
-                            <p className="text-2xl font-bold text-gray-900 mt-1">{tickets.length}</p>
+                            <p className="text-sm text-[var(--color-muted)]">Total</p>
+                            <p className="text-2xl font-bold text-[var(--color-ink)] mt-1">{tickets.length}</p>
                         </div>
-                        <div className="p-3 bg-indigo-100 rounded-lg">
-                            <MessageSquare className="w-6 h-6 text-indigo-600" />
+                        <div className="p-3 bg-[var(--color-paper-3)] rounded-full">
+                            <MessageSquare strokeWidth={1.5} className="w-6 h-6 text-[var(--color-muted)]" />
                         </div>
                     </div>
                 </div>
@@ -144,12 +144,12 @@ export default function SoportePage() {
 
             {/* Tickets Grid */}
             {tickets.length === 0 ? (
-                <div className="bg-white rounded-xl border border-gray-200 p-12 text-center text-gray-500">
+                <div className="bg-[var(--color-paper-2)] rounded-xl border border-[var(--color-rule)] p-12 text-center text-[var(--color-muted)]">
                     <div className="flex flex-col items-center">
-                        <div className="w-16 h-16 bg-gray-50 rounded-full flex items-center justify-center mb-4">
-                            <MessageSquare className="w-8 h-8 text-gray-300" />
+                        <div className="w-16 h-16 bg-[var(--color-paper)] rounded-full flex items-center justify-center mb-4">
+                            <MessageSquare strokeWidth={1.5} className="w-8 h-8 text-[var(--color-neutral)]" />
                         </div>
-                        <h3 className="text-lg font-medium text-gray-900">No tienes tickets</h3>
+                        <h3 className="text-lg font-medium text-[var(--color-ink)]">No tienes tickets</h3>
                         <p className="mt-1">Crea un nuevo ticket para obtener ayuda con la plataforma.</p>
                     </div>
                 </div>
@@ -158,7 +158,7 @@ export default function SoportePage() {
                     {tickets.map((ticket) => (
                         <div
                             key={ticket.id}
-                            className="bg-white rounded-xl border border-gray-200 p-5 shadow-sm hover:shadow-md transition-shadow relative group flex flex-col justify-between h-full cursor-pointer"
+                            className="bg-[var(--color-paper-2)] rounded-xl border border-[var(--color-rule)] p-5 shadow-sm hover:shadow-md transition-shadow relative group flex flex-col justify-between h-full cursor-pointer"
                             onClick={() => router.push(`/dashboard/soporte/${ticket.id}`)}
                         >
                             <div>
@@ -170,26 +170,26 @@ export default function SoportePage() {
                                         {getStatusLabel(ticket.status)}
                                     </span>
                                     <div className="flex items-center gap-2">
-                                        <div className="text-xs font-medium text-gray-500 bg-gray-50 px-2 py-1 rounded-md border border-gray-100">
+                                        <div className="text-xs font-medium text-[var(--color-muted)] bg-[var(--color-paper)] px-2 py-1 rounded-md border border-[var(--color-rule-2)]">
                                             {getCategoryLabel(ticket.category)}
                                         </div>
                                     </div>
                                 </div>
 
                                 <div className="mb-4">
-                                    <h3 className="font-semibold text-gray-900 mb-1 line-clamp-1" title={ticket.title}>{ticket.title}</h3>
-                                    <p className="text-sm text-gray-500 line-clamp-2 min-h-[40px]">{ticket.description}</p>
+                                    <h3 className="font-semibold text-[var(--color-ink)] mb-1 line-clamp-1" title={ticket.title}>{ticket.title}</h3>
+                                    <p className="text-sm text-[var(--color-muted)] line-clamp-2 min-h-[40px]">{ticket.description}</p>
                                 </div>
                             </div>
 
-                            <div className="pt-4 border-t border-gray-100 flex items-center justify-between">
-                                <div className="flex items-center gap-4 text-xs text-gray-500">
+                            <div className="pt-4 border-t border-[var(--color-rule-2)] flex items-center justify-between">
+                                <div className="flex items-center gap-4 text-xs text-[var(--color-muted)]">
                                     <div className="flex items-center gap-1">
-                                        <Clock className="w-3.5 h-3.5" />
+                                        <Clock strokeWidth={1.5} className="w-3.5 h-3.5" />
                                         <span>{new Date(ticket.createdAt).toLocaleDateString('es-AR')}</span>
                                     </div>
                                     <div className="flex items-center gap-1">
-                                        <MessageSquare className="w-3.5 h-3.5" />
+                                        <MessageSquare strokeWidth={1.5} className="w-3.5 h-3.5" />
                                         <span>{ticket.messagesCount}</span>
                                     </div>
                                 </div>
@@ -208,7 +208,7 @@ export default function SoportePage() {
                                                 }
                                             }
                                         }}
-                                        className="p-1.5 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+                                        className="p-1.5 text-[var(--color-neutral)] hover:text-[var(--color-danger)] hover:bg-[var(--color-danger-soft)] rounded-lg transition-colors"
                                         title="Eliminar"
                                     >
                                         <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-trash-2"><path d="M3 6h18" /><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6" /><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2" /><line x1="10" x2="10" y1="11" y2="17" /><line x1="14" x2="14" y1="11" y2="17" /></svg>

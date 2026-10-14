@@ -186,19 +186,20 @@ describe('renderNewsletter', () => {
         expect(result.html).not.toContain('tenés una cuenta');
     });
 
-    it('links a logo that exists in public/ and crops covers to a fixed height', async () => {
+    it('renders the text wordmark header (no indigo PNG logo) and crops covers to a fixed height', async () => {
         const { renderNewsletter } = await import('../lib/newsletter/template');
-        const { existsSync } = await import('node:fs');
-        const { join } = await import('node:path');
+        const { BRAND_COLORS } = await import('../lib/email/brandColors');
 
         const { html } = renderNewsletter({
             posts: [{ title: 'Uno', slug: 'uno', imageUrl: 'https://img/x.jpg' }],
             unsubscribeUrl: 'https://zetaprop.com.ar/unsubscribe?u=a&t=b',
         });
 
-        const logoPath = html.match(/https:\/\/zetaprop\.com\.ar(\/assets\/img\/[^"]+)/)?.[1];
-        expect(logoPath).toBeDefined();
-        expect(existsSync(join(process.cwd(), 'public', logoPath!))).toBe(true);
+        expect(html).not.toContain('logo_zeta_prop');
+        expect(html).toContain(`bgcolor="${BRAND_COLORS.paper}"`);
+        expect(html).toMatch(/>Zeta<span style="color:#[0-9a-f]{6};">Prop<\/span>/);
+        expect(html).toContain(`color:${BRAND_COLORS.accent};">Prop`);
+        expect(html).not.toMatch(/#2563eb|#4f46e5|#7c3aed/i);
         expect(html).toMatch(/height: \d+px; max-height: \d+px; overflow: hidden;[^>]*><a [^>]*><img src="https:\/\/img\/x\.jpg"/);
     });
 });

@@ -99,35 +99,35 @@ export default function VentasPage() {
             {/* Header */}
             <div className="flex items-center justify-between flex-wrap gap-3">
                 <div>
-                    <h1 className="text-2xl font-bold text-gray-900 flex items-center gap-2">
-                        <Handshake className="text-indigo-600" size={24} />
+                    <h1 className="font-heading text-2xl font-bold text-[var(--color-ink)] flex items-center gap-2">
+                        <Handshake strokeWidth={1.5} className="text-[var(--color-accent)]" size={24} />
                         Ventas
                     </h1>
-                    <p className="text-sm text-gray-500 mt-0.5">Pipeline de operaciones de compraventa</p>
+                    <p className="text-sm text-[var(--color-muted)] mt-0.5">Pipeline de operaciones de compraventa</p>
                 </div>
                 <Link
                     href="/dashboard/ventas/nuevo"
-                    className="flex items-center gap-2 px-4 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-sm font-semibold transition shadow-sm active:scale-95"
+                    className="flex items-center gap-2 px-4 py-2.5 bg-[var(--color-ink)] hover:bg-[var(--color-ink-2)] text-[var(--color-paper)] rounded-xl text-sm font-semibold transition shadow-sm active:scale-95"
                 >
-                    <Plus size={16} /> Nueva Operación
+                    <Plus strokeWidth={1.5} size={16} /> Nueva Operación
                 </Link>
             </div>
 
             {/* Stats */}
             <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
                 {[
-                    { label: "Operaciones activas",   value: activas.length,     icon: Handshake,  color: "text-indigo-600",  bg: "bg-indigo-50" },
-                    { label: "En escrituración",       value: enEscritura.length, icon: FileCheck,  color: "text-violet-600",  bg: "bg-violet-50" },
-                    { label: "Cerradas este mes",      value: cerradasMes.length, icon: TrendingUp, color: "text-green-600",   bg: "bg-green-50" },
-                    { label: "Volumen cerrado (año)",  value: `$${(volumenTotal / 1_000_000).toFixed(1)}M`, icon: DollarSign, color: "text-emerald-600", bg: "bg-emerald-50" },
+                    { label: "Operaciones activas",   value: activas.length,     icon: Handshake,  color: "text-[var(--color-muted)]",  bg: "bg-[var(--color-paper-3)]" },
+                    { label: "En escrituración",       value: enEscritura.length, icon: FileCheck,  color: "text-[var(--color-muted)]",  bg: "bg-[var(--color-paper-3)]" },
+                    { label: "Cerradas este mes",      value: cerradasMes.length, icon: TrendingUp, color: "text-[var(--color-positive)]",   bg: "bg-[var(--color-paper-3)]" },
+                    { label: "Volumen cerrado (año)",  value: `$${(volumenTotal / 1_000_000).toFixed(1)}M`, icon: DollarSign, color: "text-[var(--color-positive)]", bg: "bg-[var(--color-paper-3)]" },
                 ].map(s => (
-                    <div key={s.label} className="bg-white rounded-xl border border-gray-200 p-4 shadow-sm flex items-center gap-3">
-                        <div className={`w-10 h-10 rounded-xl ${s.bg} flex items-center justify-center flex-shrink-0`}>
-                            <s.icon size={18} className={s.color} />
+                    <div key={s.label} className="bg-[var(--color-paper-2)] rounded-xl border border-[var(--color-rule)] p-4 shadow-sm flex items-center gap-3">
+                        <div className={`w-10 h-10 rounded-full bg-[var(--color-paper-3)] flex items-center justify-center flex-shrink-0`}>
+                            <s.icon strokeWidth={1.5} size={18} className={s.color} />
                         </div>
                         <div>
-                            <div className="text-xl font-bold text-gray-900">{s.value}</div>
-                            <div className="text-xs text-gray-500">{s.label}</div>
+                            <div className="text-xl font-bold text-[var(--color-ink)]">{s.value}</div>
+                            <div className="text-xs text-[var(--color-muted)]">{s.label}</div>
                         </div>
                     </div>
                 ))}
@@ -140,37 +140,37 @@ export default function VentasPage() {
                     placeholder="Buscar por dirección, comprador o vendedor…"
                     value={busqueda}
                     onChange={e => setBusqueda(e.target.value)}
-                    className="flex-1 min-w-[220px] px-4 py-2 bg-white border border-gray-200 rounded-xl text-sm text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 shadow-sm"
+                    className="flex-1 min-w-[220px] px-4 py-2 bg-[var(--color-paper-2)] border border-[var(--color-rule)] rounded-xl text-sm text-[var(--color-ink)] placeholder-[var(--color-neutral)] focus:outline-none focus:ring-2 focus:ring-[var(--color-accent)]/40 shadow-sm"
                 />
-                <div className="flex items-center bg-gray-100 rounded-xl p-1 gap-1">
+                <div className="flex items-center bg-[var(--color-paper-3)] rounded-xl p-1 gap-1">
                     {(["activo", "cerrado", "caido", "todos"] as FiltroEstado[]).map(f => (
                         <button
                             key={f}
                             onClick={() => setFiltro(f)}
-                            className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-all capitalize ${filtro === f ? "bg-white shadow text-indigo-600" : "text-gray-500 hover:text-gray-700"}`}
+                            className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-all capitalize ${filtro === f ? "bg-[var(--color-paper-2)] shadow text-[var(--color-accent)]" : "text-[var(--color-muted)] hover:text-[var(--color-ink-2)]"}`}
                         >
                             {f === "activo" ? "Activas" : f === "cerrado" ? "Cerradas" : f === "caido" ? "Caídas" : "Todas"}
                         </button>
                     ))}
                 </div>
-                <button onClick={cargar} className="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-lg transition-colors">
-                    <RefreshCw size={16} className={loading ? "animate-spin" : ""} />
+                <button onClick={cargar} className="p-2 text-[var(--color-neutral)] hover:text-[var(--color-ink-2)] hover:bg-[var(--color-paper-3)] rounded-lg transition-colors">
+                    <RefreshCw strokeWidth={1.5} size={16} className={loading ? "animate-spin" : ""} />
                 </button>
             </div>
 
             {/* Board */}
             {loading ? (
                 <div className="flex-1 flex items-center justify-center">
-                    <Loader2 size={32} className="text-indigo-500 animate-spin" />
+                    <Loader2 strokeWidth={1.5} size={32} className="text-[var(--color-accent)] animate-spin" />
                 </div>
             ) : ventasFiltradas.length === 0 ? (
-                <div className="flex-1 flex flex-col items-center justify-center py-20 text-center bg-gray-50 rounded-xl border border-dashed border-gray-200">
-                    <Handshake size={48} className="text-gray-200 mb-4" />
-                    <p className="text-gray-500 font-medium">No hay operaciones todavía</p>
-                    <p className="text-sm text-gray-400 mt-1">Crea tu primera operación de venta</p>
+                <div className="flex-1 flex flex-col items-center justify-center py-20 text-center bg-[var(--color-paper)] rounded-xl border border-dashed border-[var(--color-rule)]">
+                    <Handshake strokeWidth={1.5} size={48} className="text-[var(--color-ink-2)] mb-4" />
+                    <p className="text-[var(--color-muted)] font-medium">No hay operaciones todavía</p>
+                    <p className="text-sm text-[var(--color-neutral)] mt-1">Crea tu primera operación de venta</p>
                     <Link
                         href="/dashboard/ventas/nuevo"
-                        className="mt-4 px-4 py-2 bg-indigo-600 text-white rounded-xl text-sm font-semibold hover:bg-indigo-700 transition"
+                        className="mt-4 px-4 py-2 bg-[var(--color-ink)] text-[var(--color-paper)] rounded-xl text-sm font-semibold hover:bg-[var(--color-ink-2)] transition"
                     >
                         Nueva Operación
                     </Link>

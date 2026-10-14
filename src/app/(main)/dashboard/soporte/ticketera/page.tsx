@@ -82,23 +82,23 @@ export default function TicketeraPage() {
 
     const getStatusColor = (status: string) => {
         const colors = {
-            abierto: 'bg-blue-100 text-blue-700 border-blue-200',
-            en_progreso: 'bg-yellow-100 text-yellow-700 border-yellow-200',
-            esperando_respuesta: 'bg-purple-100 text-purple-700 border-purple-200',
-            resuelto: 'bg-green-100 text-green-700 border-green-200',
-            cerrado: 'bg-gray-100 text-gray-700 border-gray-200',
+            abierto: 'bg-[var(--color-accent-soft)] text-[var(--color-accent)] border-[var(--color-accent)]/30',
+            en_progreso: 'bg-[var(--color-warning-soft)] text-[var(--color-warning)] border-[var(--color-warning)]/30',
+            esperando_respuesta: 'bg-[var(--color-accent-soft)] text-[var(--color-accent)] border-[var(--color-accent)]/30',
+            resuelto: 'bg-[var(--color-positive-soft)] text-[var(--color-positive)] border-[var(--color-positive)]/30',
+            cerrado: 'bg-[var(--color-paper-3)] text-[var(--color-ink-2)] border-[var(--color-rule)]',
         };
-        return colors[status as keyof typeof colors] || 'bg-gray-100 text-gray-700';
+        return colors[status as keyof typeof colors] || 'bg-[var(--color-paper-3)] text-[var(--color-ink-2)]';
     };
 
     const getPriorityColor = (priority: string) => {
         const colors = {
-            baja: 'text-gray-600',
-            media: 'text-blue-600',
-            alta: 'text-orange-600',
-            urgente: 'text-red-600 font-bold',
+            baja: 'text-[var(--color-ink-2)]',
+            media: 'text-[var(--color-accent)]',
+            alta: 'text-[var(--color-warning)]',
+            urgente: 'text-[var(--color-danger)] font-bold',
         };
-        return colors[priority as keyof typeof colors] || 'text-gray-600';
+        return colors[priority as keyof typeof colors] || 'text-[var(--color-ink-2)]';
     };
 
     const getCategoryLabel = (category: string) => {
@@ -120,7 +120,7 @@ export default function TicketeraPage() {
     if (loading) {
         return (
             <div className="p-6 flex items-center justify-center min-h-[400px]">
-                <div className="text-gray-500">Cargando ticketera...</div>
+                <div className="text-[var(--color-muted)]">Cargando ticketera...</div>
             </div>
         );
     }
@@ -129,70 +129,70 @@ export default function TicketeraPage() {
         <div className="p-6 max-w-7xl mx-auto space-y-6">
             {/* Header */}
             <div>
-                <h1 className="text-2xl font-bold text-gray-900">Ticketera - Gestión de Soporte</h1>
-                <p className="text-gray-500">Panel de administración de tickets</p>
+                <h1 className="font-heading text-2xl font-bold text-[var(--color-ink)]">Ticketera - Gestión de Soporte</h1>
+                <p className="text-[var(--color-muted)]">Panel de administración de tickets</p>
             </div>
 
             {/* Stats */}
             <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-                <div className="bg-white rounded-xl border border-gray-200 p-6">
+                <div className="bg-[var(--color-paper-2)] rounded-xl border border-[var(--color-rule)] p-6">
                     <div className="flex items-center justify-between">
                         <div>
-                            <p className="text-sm text-gray-500">Abiertos</p>
-                            <p className="text-2xl font-bold text-blue-600 mt-1">{abiertos}</p>
+                            <p className="text-sm text-[var(--color-muted)]">Abiertos</p>
+                            <p className="text-2xl font-bold text-[var(--color-accent)] mt-1">{abiertos}</p>
                         </div>
-                        <div className="p-3 bg-blue-100 rounded-lg">
-                            <AlertCircle className="w-6 h-6 text-blue-600" />
+                        <div className="p-3 bg-[var(--color-paper-3)] rounded-full">
+                            <AlertCircle strokeWidth={1.5} className="w-6 h-6 text-[var(--color-muted)]" />
                         </div>
                     </div>
                 </div>
 
-                <div className="bg-white rounded-xl border border-gray-200 p-6">
+                <div className="bg-[var(--color-paper-2)] rounded-xl border border-[var(--color-rule)] p-6">
                     <div className="flex items-center justify-between">
                         <div>
-                            <p className="text-sm text-gray-500">En Progreso</p>
-                            <p className="text-2xl font-bold text-yellow-600 mt-1">{enProgreso}</p>
+                            <p className="text-sm text-[var(--color-muted)]">En Progreso</p>
+                            <p className="text-2xl font-bold text-[var(--color-warning)] mt-1">{enProgreso}</p>
                         </div>
-                        <div className="p-3 bg-yellow-100 rounded-lg">
-                            <Clock className="w-6 h-6 text-yellow-600" />
+                        <div className="p-3 bg-[var(--color-paper-3)] rounded-full">
+                            <Clock strokeWidth={1.5} className="w-6 h-6 text-[var(--color-muted)]" />
                         </div>
                     </div>
                 </div>
 
-                <div className="bg-white rounded-xl border border-gray-200 p-6">
+                <div className="bg-[var(--color-paper-2)] rounded-xl border border-[var(--color-rule)] p-6">
                     <div className="flex items-center justify-between">
                         <div>
-                            <p className="text-sm text-gray-500">Resueltos</p>
-                            <p className="text-2xl font-bold text-green-600 mt-1">{resueltos}</p>
+                            <p className="text-sm text-[var(--color-muted)]">Resueltos</p>
+                            <p className="text-2xl font-bold text-[var(--color-positive)] mt-1">{resueltos}</p>
                         </div>
-                        <div className="p-3 bg-green-100 rounded-lg">
-                            <CheckCircle className="w-6 h-6 text-green-600" />
+                        <div className="p-3 bg-[var(--color-paper-3)] rounded-full">
+                            <CheckCircle strokeWidth={1.5} className="w-6 h-6 text-[var(--color-muted)]" />
                         </div>
                     </div>
                 </div>
 
-                <div className="bg-white rounded-xl border border-gray-200 p-6">
+                <div className="bg-[var(--color-paper-2)] rounded-xl border border-[var(--color-rule)] p-6">
                     <div className="flex items-center justify-between">
                         <div>
-                            <p className="text-sm text-gray-500">Total</p>
-                            <p className="text-2xl font-bold text-gray-900 mt-1">{tickets.length}</p>
+                            <p className="text-sm text-[var(--color-muted)]">Total</p>
+                            <p className="text-2xl font-bold text-[var(--color-ink)] mt-1">{tickets.length}</p>
                         </div>
-                        <div className="p-3 bg-indigo-100 rounded-lg">
-                            <XCircle className="w-6 h-6 text-indigo-600" />
+                        <div className="p-3 bg-[var(--color-paper-3)] rounded-full">
+                            <XCircle strokeWidth={1.5} className="w-6 h-6 text-[var(--color-muted)]" />
                         </div>
                     </div>
                 </div>
             </div>
 
             {/* Filters */}
-            <div className="bg-white rounded-xl border border-gray-200 p-4">
+            <div className="bg-[var(--color-paper-2)] rounded-xl border border-[var(--color-rule)] p-4">
                 <div className="flex items-center gap-2 mb-3">
-                    <Filter className="w-5 h-5 text-gray-600" />
-                    <h3 className="font-semibold text-gray-900">Filtros</h3>
+                    <Filter strokeWidth={1.5} className="w-5 h-5 text-[var(--color-ink-2)]" />
+                    <h3 className="font-semibold text-[var(--color-ink)]">Filtros</h3>
                 </div>
                 <div className="grid grid-cols-1 md:grid-cols-4 gap-3">
                     <select
-                        className="p-2 border border-gray-300 rounded-lg text-sm text-gray-900"
+                        className="p-2 border border-[var(--color-rule)] rounded-lg text-sm text-[var(--color-ink)]"
                         value={filters.status}
                         onChange={(e) => setFilters(prev => ({ ...prev, status: e.target.value }))}
                     >
@@ -205,7 +205,7 @@ export default function TicketeraPage() {
                     </select>
 
                     <select
-                        className="p-2 border border-gray-300 rounded-lg text-sm text-gray-900"
+                        className="p-2 border border-[var(--color-rule)] rounded-lg text-sm text-[var(--color-ink)]"
                         value={filters.category}
                         onChange={(e) => setFilters(prev => ({ ...prev, category: e.target.value }))}
                     >
@@ -219,7 +219,7 @@ export default function TicketeraPage() {
                     </select>
 
                     <select
-                        className="p-2 border border-gray-300 rounded-lg text-sm text-gray-900"
+                        className="p-2 border border-[var(--color-rule)] rounded-lg text-sm text-[var(--color-ink)]"
                         value={filters.priority}
                         onChange={(e) => setFilters(prev => ({ ...prev, priority: e.target.value }))}
                     >
@@ -232,7 +232,7 @@ export default function TicketeraPage() {
 
                     <button
                         onClick={applyFilters}
-                        className="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 text-sm"
+                        className="px-4 py-2 bg-[var(--color-ink)] text-[var(--color-paper)] rounded-lg hover:bg-[var(--color-ink-2)] text-sm"
                     >
                         Aplicar Filtros
                     </button>
@@ -241,7 +241,7 @@ export default function TicketeraPage() {
 
             {/* Tickets Grid */}
             {tickets.length === 0 ? (
-                <div className="bg-white rounded-xl border border-gray-200 p-12 text-center text-gray-500">
+                <div className="bg-[var(--color-paper-2)] rounded-xl border border-[var(--color-rule)] p-12 text-center text-[var(--color-muted)]">
                     <p>No hay tickets encontrados con los filtros actuales.</p>
                 </div>
             ) : (
@@ -249,7 +249,7 @@ export default function TicketeraPage() {
                     {tickets.map((ticket) => (
                         <div
                             key={ticket.id}
-                            className="bg-white rounded-xl border border-gray-200 p-5 shadow-sm hover:shadow-md transition-shadow flex flex-col justify-between h-full group"
+                            className="bg-[var(--color-paper-2)] rounded-xl border border-[var(--color-rule)] p-5 shadow-sm hover:shadow-md transition-shadow flex flex-col justify-between h-full group"
                         >
                             <div onClick={() => router.push(`/dashboard/soporte/${ticket.id}`)} className="cursor-pointer">
                                 {/* Header: Status and Priority */}
@@ -278,24 +278,24 @@ export default function TicketeraPage() {
                                 {/* Content */}
                                 <div className="mb-4">
                                     <div className="flex items-center gap-2 mb-1">
-                                        <h3 className="font-semibold text-gray-900 line-clamp-1" title={ticket.title}>{ticket.title}</h3>
+                                        <h3 className="font-semibold text-[var(--color-ink)] line-clamp-1" title={ticket.title}>{ticket.title}</h3>
                                     </div>
-                                    <div className="text-xs text-gray-500 mb-2 font-medium flex items-center gap-1">
+                                    <div className="text-xs text-[var(--color-muted)] mb-2 font-medium flex items-center gap-1">
                                         <span>{ticket.userName}</span>
-                                        <span className="text-gray-300">•</span>
+                                        <span className="text-[var(--color-neutral)]">•</span>
                                         <span>{ticket.organizationName || 'Sin Org'}</span>
                                     </div>
-                                    <p className="text-sm text-gray-600 line-clamp-2 min-h-[40px]">{ticket.description}</p>
+                                    <p className="text-sm text-[var(--color-ink-2)] line-clamp-2 min-h-[40px]">{ticket.description}</p>
                                 </div>
                             </div>
 
                             {/* Footer */}
-                            <div className="pt-4 border-t border-gray-100 flex items-center justify-between">
+                            <div className="pt-4 border-t border-[var(--color-rule-2)] flex items-center justify-between">
                                 <div className="flex flex-col gap-1">
-                                    <div className="text-xs text-gray-500 bg-gray-50 px-2 py-0.5 rounded border border-gray-100 w-fit">
+                                    <div className="text-xs text-[var(--color-muted)] bg-[var(--color-paper)] px-2 py-0.5 rounded border border-[var(--color-rule-2)] w-fit">
                                         {getCategoryLabel(ticket.category)}
                                     </div>
-                                    <div className="text-xs text-gray-400 mt-1">
+                                    <div className="text-xs text-[var(--color-neutral)] mt-1">
                                         {new Date(ticket.createdAt).toLocaleDateString('es-AR')}
                                     </div>
                                 </div>
@@ -306,10 +306,10 @@ export default function TicketeraPage() {
                                             e.stopPropagation();
                                             router.push(`/dashboard/soporte/${ticket.id}`);
                                         }}
-                                        className="p-1.5 text-indigo-600 hover:bg-indigo-50 rounded-lg transition-colors"
+                                        className="p-1.5 text-[var(--color-accent)] hover:bg-[var(--color-accent-soft)] rounded-lg transition-colors"
                                         title="Ver Detalles"
                                     >
-                                        <CheckCircle className="w-4 h-4" /> {/* Reuse existing import or generic icon */}
+                                        <CheckCircle strokeWidth={1.5} className="w-4 h-4" /> {/* Reuse existing import or generic icon */}
                                     </button>
                                     <button
                                         onClick={async (e) => {
@@ -324,7 +324,7 @@ export default function TicketeraPage() {
                                                 }
                                             }
                                         }}
-                                        className="p-1.5 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+                                        className="p-1.5 text-[var(--color-neutral)] hover:text-[var(--color-danger)] hover:bg-[var(--color-danger-soft)] rounded-lg transition-colors"
                                         title="Eliminar"
                                     >
                                         <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-trash-2"><path d="M3 6h18" /><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6" /><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2" /><line x1="10" x2="10" y1="11" y2="17" /><line x1="14" x2="14" y1="11" y2="17" /></svg>

@@ -125,38 +125,38 @@ export default function NuevoAgentePage() {
     if (successData) {
         return (
             <div className="p-6 max-w-2xl mx-auto flex flex-col items-center justify-center min-h-[60vh] text-center">
-                <div className="bg-green-100 p-4 rounded-full mb-6">
-                    <CheckCircle className="w-12 h-12 text-green-600" />
+                <div className="bg-[var(--color-paper-3)] p-4 rounded-full mb-6">
+                    <CheckCircle strokeWidth={1.5} className="w-12 h-12 text-[var(--color-muted)]" />
                 </div>
-                <h2 className="text-2xl font-bold text-gray-900 mb-2">¡Agente Creado Exitósamente!</h2>
-                <p className="text-gray-600 mb-8">
+                <h2 className="text-2xl font-bold text-[var(--color-ink)] mb-2">¡Agente Creado Exitósamente!</h2>
+                <p className="text-[var(--color-ink-2)] mb-8">
                     El agente <strong>{successData.agentName}</strong> ha sido registrado.
                     Comparte este enlace para que pueda configurar su acceso.
                 </p>
 
-                <div className="w-full bg-gray-50 p-4 rounded-lg border border-gray-200 flex items-center gap-3 mb-6">
-                    <code className="flex-1 text-sm text-gray-800 break-all">
+                <div className="w-full bg-[var(--color-paper)] p-4 rounded-lg border border-[var(--color-rule)] flex items-center gap-3 mb-6">
+                    <code className="flex-1 text-sm text-[var(--color-ink)] break-all">
                         {`${window.location.origin}/invitacion/${successData.token}`}
                     </code>
                     <button
                         onClick={() => navigator.clipboard.writeText(`${window.location.origin}/invitacion/${successData.token}`)}
-                        className="p-2 text-indigo-600 hover:bg-indigo-50 rounded-lg transition-colors"
+                        className="p-2 text-[var(--color-accent)] hover:bg-[var(--color-accent-soft)] rounded-lg transition-colors"
                         title="Copiar enlace"
                     >
-                        <Copy className="w-5 h-5" />
+                        <Copy strokeWidth={1.5} className="w-5 h-5" />
                     </button>
                 </div>
 
                 <div className="flex gap-4">
                     <Link
                         href="/dashboard/agentes"
-                        className="px-6 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50"
+                        className="px-6 py-2 border border-[var(--color-rule)] text-[var(--color-ink-2)] rounded-lg hover:bg-[var(--color-paper-3)]"
                     >
                         Volver a la lista
                     </Link>
                     <button
                         onClick={() => setSuccessData(null)}
-                        className="px-6 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700"
+                        className="px-6 py-2 bg-[var(--color-ink)] text-[var(--color-paper)] rounded-lg hover:bg-[var(--color-ink-2)]"
                     >
                         Crear otro
                     </button>
@@ -170,65 +170,65 @@ export default function NuevoAgentePage() {
             <div className="mb-6">
                 <Link
                     href="/dashboard/agentes"
-                    className="flex items-center gap-2 text-gray-600 hover:text-gray-900 mb-4"
+                    className="flex items-center gap-2 text-[var(--color-ink-2)] hover:text-[var(--color-ink)] mb-4"
                 >
-                    <ArrowLeft className="w-5 h-5" />
+                    <ArrowLeft strokeWidth={1.5} className="w-5 h-5" />
                     Volver a agentes
                 </Link>
-                <h1 className="text-2xl font-bold text-gray-900">Nuevo Agente</h1>
-                <p className="text-gray-500">Agregar un nuevo agente al equipo</p>
+                <h1 className="font-heading text-2xl font-bold text-[var(--color-ink)]">Nuevo Agente</h1>
+                <p className="text-[var(--color-muted)]">Agregar un nuevo agente al equipo</p>
             </div>
 
-            <form onSubmit={handleSubmit} className="bg-white rounded-xl border border-gray-200 p-6 space-y-6">
+            <form onSubmit={handleSubmit} className="bg-[var(--color-paper-2)] rounded-xl border border-[var(--color-rule)] p-6 space-y-6">
                 {/* Datos Personales */}
                 <div>
-                    <h3 className="text-lg font-semibold text-gray-900 mb-4">Datos Personales</h3>
+                    <h3 className="text-lg font-semibold text-[var(--color-ink)] mb-4">Datos Personales</h3>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-2">
+                            <label className="block text-sm font-medium text-[var(--color-ink-2)] mb-2">
                                 Nombre Completo *
                             </label>
                             <input
                                 type="text"
                                 required
-                                className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                                className="w-full p-3 border border-[var(--color-rule)] rounded-lg focus:ring-2 focus:ring-[var(--color-accent)]/40 focus:border-[var(--color-accent)]"
                                 value={formData.nombre}
                                 onChange={(e) => handleChange("nombre", e.target.value)}
                             />
                         </div>
 
                         <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-2">
+                            <label className="block text-sm font-medium text-[var(--color-ink-2)] mb-2">
                                 Email *
                             </label>
                             <input
                                 type="email"
                                 required
-                                className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                                className="w-full p-3 border border-[var(--color-rule)] rounded-lg focus:ring-2 focus:ring-[var(--color-accent)]/40 focus:border-[var(--color-accent)]"
                                 value={formData.email}
                                 onChange={(e) => handleChange("email", e.target.value)}
                             />
                         </div>
 
                         <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-2">
+                            <label className="block text-sm font-medium text-[var(--color-ink-2)] mb-2">
                                 Teléfono *
                             </label>
                             <input
                                 type="tel"
                                 required
-                                className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                                className="w-full p-3 border border-[var(--color-rule)] rounded-lg focus:ring-2 focus:ring-[var(--color-accent)]/40 focus:border-[var(--color-accent)]"
                                 value={formData.telefono}
                                 onChange={(e) => handleChange("telefono", e.target.value)}
                             />
                         </div>
 
                         <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-2">
+                            <label className="block text-sm font-medium text-[var(--color-ink-2)] mb-2">
                                 Estado
                             </label>
                             <select
-                                className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-gray-900"
+                                className="w-full p-3 border border-[var(--color-rule)] rounded-lg focus:ring-2 focus:ring-[var(--color-accent)]/40 focus:border-[var(--color-accent)] text-[var(--color-ink)]"
                                 value={formData.activo ? "true" : "false"}
                                 onChange={(e) => handleChange("activo", e.target.value === "true")}
                             >
@@ -239,11 +239,11 @@ export default function NuevoAgentePage() {
 
                         {/* Branch Selection */}
                         <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-2">
+                            <label className="block text-sm font-medium text-[var(--color-ink-2)] mb-2">
                                 Sucursal Asignada
                             </label>
                             <select
-                                className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-gray-900"
+                                className="w-full p-3 border border-[var(--color-rule)] rounded-lg focus:ring-2 focus:ring-[var(--color-accent)]/40 focus:border-[var(--color-accent)] text-[var(--color-ink)]"
                                 value={formData.branchId}
                                 onChange={(e) => handleChange("branchId", e.target.value)}
                             >
@@ -252,17 +252,17 @@ export default function NuevoAgentePage() {
                                     <option key={b.id} value={b.id}>{b.name}</option>
                                 ))}
                             </select>
-                            <p className="text-xs text-gray-400 mt-1">El agente solo verá datos de esta sucursal.</p>
+                            <p className="text-xs text-[var(--color-neutral)] mt-1">El agente solo verá datos de esta sucursal.</p>
                         </div>
                     </div>
                 </div>
 
                 {/* Comisiones */}
-                <div className="border-t border-gray-200 pt-6">
-                    <h3 className="text-lg font-semibold text-gray-900 mb-4">Configuración de Comisiones</h3>
+                <div className="border-t border-[var(--color-rule)] pt-6">
+                    <h3 className="text-lg font-semibold text-[var(--color-ink)] mb-4">Configuración de Comisiones</h3>
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                         <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-2">
+                            <label className="block text-sm font-medium text-[var(--color-ink-2)] mb-2">
                                 Comisión Venta (%) *
                             </label>
                             <input
@@ -271,15 +271,15 @@ export default function NuevoAgentePage() {
                                 min="0"
                                 max="100"
                                 step="0.1"
-                                className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                                className="w-full p-3 border border-[var(--color-rule)] rounded-lg focus:ring-2 focus:ring-[var(--color-accent)]/40 focus:border-[var(--color-accent)]"
                                 value={formData.comisionVenta}
                                 onChange={(e) => handleChange("comisionVenta", e.target.value)}
                             />
-                            <p className="text-xs text-gray-500 mt-1">Ej: 3% = 3</p>
+                            <p className="text-xs text-[var(--color-muted)] mt-1">Ej: 3% = 3</p>
                         </div>
 
                         <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-2">
+                            <label className="block text-sm font-medium text-[var(--color-ink-2)] mb-2">
                                 Comisión Alquiler (%) *
                             </label>
                             <input
@@ -288,15 +288,15 @@ export default function NuevoAgentePage() {
                                 min="0"
                                 max="100"
                                 step="0.1"
-                                className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                                className="w-full p-3 border border-[var(--color-rule)] rounded-lg focus:ring-2 focus:ring-[var(--color-accent)]/40 focus:border-[var(--color-accent)]"
                                 value={formData.comisionAlquiler}
                                 onChange={(e) => handleChange("comisionAlquiler", e.target.value)}
                             />
-                            <p className="text-xs text-gray-500 mt-1">Ej: 50% del primer mes</p>
+                            <p className="text-xs text-[var(--color-muted)] mt-1">Ej: 50% del primer mes</p>
                         </div>
 
                         <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-2">
+                            <label className="block text-sm font-medium text-[var(--color-ink-2)] mb-2">
                                 Comisión Propiedad Propia (%) *
                             </label>
                             <input
@@ -305,17 +305,17 @@ export default function NuevoAgentePage() {
                                 min="0"
                                 max="100"
                                 step="0.1"
-                                className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                                className="w-full p-3 border border-[var(--color-rule)] rounded-lg focus:ring-2 focus:ring-[var(--color-accent)]/40 focus:border-[var(--color-accent)]"
                                 value={formData.comisionPropiedadPropia}
                                 onChange={(e) => handleChange("comisionPropiedadPropia", e.target.value)}
                             />
-                            <p className="text-xs text-gray-500 mt-1">Extra si trae la propiedad</p>
+                            <p className="text-xs text-[var(--color-muted)] mt-1">Extra si trae la propiedad</p>
                         </div>
                     </div>
 
-                    <div className="mt-4 p-4 bg-blue-50 border border-blue-200 rounded-lg">
-                        <h4 className="text-sm font-semibold text-blue-900 mb-2">Ejemplo de Cálculo</h4>
-                        <div className="text-sm text-blue-800 space-y-1">
+                    <div className="mt-4 p-4 bg-[var(--color-accent-soft)] border border-[var(--color-accent)]/30 rounded-lg">
+                        <h4 className="text-sm font-semibold text-[var(--color-ink)] mb-2">Ejemplo de Cálculo</h4>
+                        <div className="text-sm text-[var(--color-accent)] space-y-1">
                             <p>• Venta de $100,000 (propiedad de la inmobiliaria):</p>
                             <p className="ml-4">Comisión = $100,000 × {formData.comisionVenta || 0}% = ${(100000 * parseFloat(formData.comisionVenta || "0") / 100).toLocaleString()}</p>
 
@@ -328,17 +328,17 @@ export default function NuevoAgentePage() {
                 </div>
 
                 {/* Buttons */}
-                <div className="flex justify-end gap-3 pt-6 border-t border-gray-200">
+                <div className="flex justify-end gap-3 pt-6 border-t border-[var(--color-rule)]">
                     <Link
                         href="/dashboard/agentes"
-                        className="px-6 py-3 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors"
+                        className="px-6 py-3 border border-[var(--color-rule)] text-[var(--color-ink-2)] rounded-lg hover:bg-[var(--color-paper-3)] transition-colors"
                     >
                         Cancelar
                     </Link>
                     <button
                         type="submit"
                         disabled={loading}
-                        className="px-6 py-3 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors disabled:opacity-50"
+                        className="px-6 py-3 bg-[var(--color-ink)] text-[var(--color-paper)] rounded-lg hover:bg-[var(--color-ink-2)] transition-colors disabled:opacity-50"
                     >
                         {loading ? "Creando..." : "Crear Agente"}
                     </button>

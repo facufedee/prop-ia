@@ -17,6 +17,7 @@ import { toast } from "sonner";
 import { PlanTier } from "@/domain/models/Subscription";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/ui/context/AuthContext";
+import { useChartColors, type ChartColors } from "@/lib/chartColors";
 import {
     BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer,
     PieChart, Pie, Cell, Legend,
@@ -49,17 +50,17 @@ interface Announcement {
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
 
-const PLAN_COLORS: Record<string, string> = {
-    basic: "#94a3b8",
-    professional: "#6366f1",
-    enterprise: "#8b5cf6",
-};
+const planColors = (c: ChartColors): Record<string, string> => ({
+    basic: c.neutral,
+    professional: c.accent,
+    enterprise: c.ink2,
+});
 
 const ANNOUNCEMENT_STYLES: Record<AnnouncementType, { bg: string; border: string; icon: any; label: string }> = {
-    info:    { bg: "bg-blue-50 dark:bg-blue-900/20",    border: "border-blue-200 dark:border-blue-700",    icon: Info,          label: "Información" },
-    warning: { bg: "bg-amber-50 dark:bg-amber-900/20",  border: "border-amber-200 dark:border-amber-700",  icon: AlertTriangle, label: "Advertencia" },
-    success: { bg: "bg-green-50 dark:bg-green-900/20",  border: "border-green-200 dark:border-green-700",  icon: CheckCircle2,  label: "Éxito" },
-    error:   { bg: "bg-red-50 dark:bg-red-900/20",      border: "border-red-200 dark:border-red-700",      icon: XCircle,       label: "Urgente" },
+    info:    { bg: "bg-[var(--color-accent-soft)]",    border: "border-[var(--color-accent)]/30",    icon: Info,          label: "Información" },
+    warning: { bg: "bg-[var(--color-warning-soft)]",  border: "border-[var(--color-warning)]/30",  icon: AlertTriangle, label: "Advertencia" },
+    success: { bg: "bg-[var(--color-positive-soft)]",  border: "border-[var(--color-positive)]/30",  icon: CheckCircle2,  label: "Éxito" },
+    error:   { bg: "bg-[var(--color-danger-soft)]",      border: "border-[var(--color-danger)]/30",      icon: XCircle,       label: "Urgente" },
 };
 
 function getExpirationDate(user: User): Date | null {
@@ -85,14 +86,14 @@ function KpiCard({ label, value, sub, icon: Icon, color }: {
     label: string; value: string | number; sub?: string; icon: any; color: string;
 }) {
     return (
-        <div className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-200 dark:border-gray-700 p-5 flex items-start gap-4">
-            <div className={`p-2.5 rounded-xl ${color}`}>
-                <Icon className="w-5 h-5 text-white" />
+        <div className="bg-[var(--color-paper-2)] rounded-2xl border border-[var(--color-rule)] p-5 flex items-start gap-4">
+            <div className={`p-2.5 rounded-full bg-[var(--color-paper-3)] ${color}`}>
+                <Icon strokeWidth={1.5} className="w-5 h-5" />
             </div>
             <div>
-                <p className="text-2xl font-bold text-gray-900 dark:text-white leading-none">{value}</p>
-                <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">{label}</p>
-                {sub && <p className="text-xs text-gray-400 dark:text-gray-500 mt-0.5">{sub}</p>}
+                <p className="text-2xl font-bold text-[var(--color-ink)] leading-none">{value}</p>
+                <p className="text-sm text-[var(--color-muted)] mt-1">{label}</p>
+                {sub && <p className="text-xs text-[var(--color-neutral)] mt-0.5">{sub}</p>}
             </div>
         </div>
     );
@@ -103,6 +104,7 @@ function KpiCard({ label, value, sub, icon: Icon, color }: {
 export default function PlatformManagementPage() {
     const router = useRouter();
     const { user } = useAuth();
+    const chartColors = useChartColors();
     const [activeTab, setActiveTab] = useState<Tab>("dashboard");
 
     // ── Shared user list ────────────────────────────────────────────────────
@@ -244,7 +246,7 @@ export default function PlatformManagementPage() {
         setBulkLoading(true);
         try {
             const { updated, created } = await adminService.bulkExtendSubscriptions(new Date(bulkDate + "T23:59:59"), bulkPlan);
-            toast.success(`✅ Acceso extendido: ${updated} actualizados, ${created} nuevos`);
+            toast.success(`Acceso extendido: ${updated} actualizados, ${created} nuevos`);
             await loadUsers();
         } catch (e: any) {
             toast.error("Error al extender: " + e.message);
@@ -281,8 +283,8 @@ export default function PlatformManagementPage() {
     }, [users, searchTerm, onlyNoMails, sortField, sortDirection]);
 
     const SortIcon = ({ field }: { field: SortField }) => {
-        if (sortField !== field) return <ChevronsUpDown size={14} className="text-gray-300 ml-1 inline" />;
-        return sortDirection === "asc" ? <ChevronUp size={14} className="text-indigo-500 ml-1 inline" /> : <ChevronDown size={14} className="text-indigo-500 ml-1 inline" />;
+        if (sortField !== field) return <ChevronsUpDown strokeWidth={1.5} size={14} className="text-[var(--color-neutral)] ml-1 inline" />;
+        return sortDirection === "asc" ? <ChevronUp strokeWidth={1.5} size={14} className="text-[var(--color-accent)] ml-1 inline" /> : <ChevronDown strokeWidth={1.5} size={14} className="text-[var(--color-accent)] ml-1 inline" />;
     };
 
     // ── Email tab handlers ──────────────────────────────────────────────────
@@ -390,29 +392,29 @@ export default function PlatformManagementPage() {
                 {/* ── Header ── */}
                 <div className="flex items-start justify-between gap-4 flex-wrap">
                     <div>
-                        <h1 className="text-2xl font-bold text-gray-900 dark:text-white flex items-center gap-2">
-                            <Shield className="text-indigo-600 w-6 h-6" /> Gestión de Plataforma
+                        <h1 className="font-heading text-2xl font-bold text-[var(--color-ink)] flex items-center gap-2">
+                            <Shield strokeWidth={1.5} className="text-[var(--color-accent)] w-6 h-6" /> Gestión de Plataforma
                         </h1>
-                        <p className="text-gray-500 dark:text-gray-400 text-sm mt-1">
+                        <p className="text-[var(--color-muted)] text-sm mt-1">
                             Panel de control para administrar Zeta Prop.
                         </p>
                     </div>
-                    <button onClick={() => { loadDashboard(); loadUsers(); }} className="flex items-center gap-2 px-4 py-2 text-sm text-gray-600 dark:text-gray-300 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
-                        <RefreshCw className="w-4 h-4" /> Actualizar
+                    <button onClick={() => { loadDashboard(); loadUsers(); }} className="flex items-center gap-2 px-4 py-2 text-sm text-[var(--color-ink-2)] bg-[var(--color-paper-2)] border border-[var(--color-rule)] rounded-xl hover:bg-[var(--color-paper-3)] transition-colors">
+                        <RefreshCw strokeWidth={1.5} className="w-4 h-4" /> Actualizar
                     </button>
                 </div>
 
                 {/* ── Tabs ── */}
-                <div className="flex bg-gray-100 dark:bg-gray-800 rounded-xl p-1 gap-1 w-fit">
+                <div className="flex bg-[var(--color-paper-3)] rounded-xl p-1 gap-1 w-fit">
                     {TABS.map(({ id, label, icon: Icon }) => (
                         <button key={id} onClick={() => { setActiveTab(id); if (id === "emails" && availableTemplates.length === 0) loadAvailableTemplates(); }}
                             className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-semibold transition-all ${
                                 activeTab === id
-                                    ? "bg-white dark:bg-gray-700 text-gray-900 dark:text-white shadow-sm"
-                                    : "text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200"
+                                    ? "bg-[var(--color-paper-2)] text-[var(--color-ink)] shadow-sm"
+                                    : "text-[var(--color-muted)] hover:text-[var(--color-ink-2)]"
                             }`}
                         >
-                            <Icon className="w-4 h-4" />
+                            <Icon strokeWidth={1.5} className="w-4 h-4" />
                             <span className="hidden sm:inline">{label}</span>
                         </button>
                     ))}
@@ -423,45 +425,45 @@ export default function PlatformManagementPage() {
                     <div className="space-y-6">
                         {dashLoading ? (
                             <div className="flex items-center justify-center py-20">
-                                <Loader2 className="w-8 h-8 animate-spin text-indigo-500" />
+                                <Loader2 strokeWidth={1.5} className="w-8 h-8 animate-spin text-[var(--color-accent)]" />
                             </div>
                         ) : dashData ? (
                             <>
                                 {/* KPI Cards */}
                                 <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-                                    <KpiCard label="Usuarios totales" value={dashData.kpis.totalUsers} icon={Users} color="bg-indigo-500" />
-                                    <KpiCard label="Activos" value={dashData.kpis.activeUsers} sub={`${dashData.kpis.trialUsers} en trial`} icon={CheckCircle} color="bg-green-500" />
-                                    <KpiCard label="MRR" value={`$${dashData.kpis.mrr.toLocaleString("es-AR")}`} sub="ARS / mes" icon={DollarSign} color="bg-violet-500" />
-                                    <KpiCard label="Por vencer" value={dashData.kpis.expiringSoon} sub={`${dashData.kpis.expiredUsers} vencidos`} icon={AlertCircle} color="bg-amber-500" />
+                                    <KpiCard label="Usuarios totales" value={dashData.kpis.totalUsers} icon={Users} color="text-[var(--color-muted)]" />
+                                    <KpiCard label="Activos" value={dashData.kpis.activeUsers} sub={`${dashData.kpis.trialUsers} en trial`} icon={CheckCircle} color="text-[var(--color-positive)]" />
+                                    <KpiCard label="MRR" value={`$${dashData.kpis.mrr.toLocaleString("es-AR")}`} sub="ARS / mes" icon={DollarSign} color="text-[var(--color-muted)]" />
+                                    <KpiCard label="Por vencer" value={dashData.kpis.expiringSoon} sub={`${dashData.kpis.expiredUsers} vencidos`} icon={AlertCircle} color="text-[var(--color-warning)]" />
                                 </div>
 
                                 {/* Charts row */}
                                 <div className="grid lg:grid-cols-3 gap-6">
 
                                     {/* Registros por mes */}
-                                    <div className="lg:col-span-2 bg-white dark:bg-gray-900 rounded-2xl border border-gray-200 dark:border-gray-700 p-5">
-                                        <p className="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-4">Nuevos registros por mes</p>
+                                    <div className="lg:col-span-2 bg-[var(--color-paper-2)] rounded-2xl border border-[var(--color-rule)] p-5">
+                                        <p className="text-sm font-semibold text-[var(--color-ink-2)] mb-4">Nuevos registros por mes</p>
                                         <ResponsiveContainer width="100%" height={200}>
                                             <BarChart data={dashData.registrationsByMonth}>
-                                                <XAxis dataKey="month" tick={{ fontSize: 12 }} />
-                                                <YAxis tick={{ fontSize: 12 }} />
-                                                <Tooltip />
-                                                <Bar dataKey="usuarios" fill="#6366f1" radius={[4, 4, 0, 0]} />
+                                                <XAxis dataKey="month" tick={{ fontSize: 12, fill: chartColors.muted }} stroke={chartColors.rule} />
+                                                <YAxis tick={{ fontSize: 12, fill: chartColors.muted }} stroke={chartColors.rule} />
+                                                <Tooltip contentStyle={{ borderRadius: "12px", border: `1px solid ${chartColors.rule}`, background: chartColors.paper3, color: chartColors.ink }} labelStyle={{ color: chartColors.ink }} itemStyle={{ color: chartColors.ink2 }} cursor={{ fill: chartColors.paper3 }} />
+                                                <Bar dataKey="usuarios" fill={chartColors.accent} radius={[4, 4, 0, 0]} />
                                             </BarChart>
                                         </ResponsiveContainer>
                                     </div>
 
                                     {/* Plan distribution */}
-                                    <div className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-200 dark:border-gray-700 p-5">
-                                        <p className="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-4">Distribución por plan</p>
+                                    <div className="bg-[var(--color-paper-2)] rounded-2xl border border-[var(--color-rule)] p-5">
+                                        <p className="text-sm font-semibold text-[var(--color-ink-2)] mb-4">Distribución por plan</p>
                                         <ResponsiveContainer width="100%" height={200}>
                                             <PieChart>
                                                 <Pie data={dashData.planDistribution} dataKey="value" nameKey="name" cx="50%" cy="50%" outerRadius={70} label={({ name, percent }) => `${name ?? ""} ${((percent ?? 0) * 100).toFixed(0)}%`} labelLine={false}>
                                                     {dashData.planDistribution.map((entry) => (
-                                                        <Cell key={entry.name} fill={PLAN_COLORS[entry.name] || "#94a3b8"} />
+                                                        <Cell key={entry.name} fill={planColors(chartColors)[entry.name] || chartColors.neutral} />
                                                     ))}
                                                 </Pie>
-                                                <Tooltip />
+                                                <Tooltip contentStyle={{ borderRadius: "12px", border: `1px solid ${chartColors.rule}`, background: chartColors.paper3, color: chartColors.ink }} labelStyle={{ color: chartColors.ink }} itemStyle={{ color: chartColors.ink2 }} cursor={{ fill: chartColors.paper3 }} />
                                             </PieChart>
                                         </ResponsiveContainer>
                                     </div>
@@ -470,41 +472,41 @@ export default function PlatformManagementPage() {
                                 {/* Module usage + At-risk users */}
                                 <div className="grid lg:grid-cols-3 gap-6">
                                     {/* Module usage */}
-                                    <div className="lg:col-span-2 bg-white dark:bg-gray-900 rounded-2xl border border-gray-200 dark:border-gray-700 p-5">
-                                        <p className="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-1">Módulos más usados</p>
-                                        <p className="text-xs text-gray-400 dark:text-gray-500 mb-4">Últimos 30 días · desde audit_logs</p>
+                                    <div className="lg:col-span-2 bg-[var(--color-paper-2)] rounded-2xl border border-[var(--color-rule)] p-5">
+                                        <p className="text-sm font-semibold text-[var(--color-ink-2)] mb-1">Módulos más usados</p>
+                                        <p className="text-xs text-[var(--color-neutral)] mb-4">Últimos 30 días · desde audit_logs</p>
                                         {dashData.moduleUsage.length === 0 ? (
-                                            <p className="text-sm text-gray-400 text-center py-8">Sin datos de audit_logs aún</p>
+                                            <p className="text-sm text-[var(--color-neutral)] text-center py-8">Sin datos de audit_logs aún</p>
                                         ) : (
                                             <ResponsiveContainer width="100%" height={220}>
                                                 <BarChart data={dashData.moduleUsage} layout="vertical">
-                                                    <XAxis type="number" tick={{ fontSize: 11 }} />
-                                                    <YAxis dataKey="module" type="category" tick={{ fontSize: 11 }} width={100} />
-                                                    <Tooltip />
-                                                    <Bar dataKey="acciones" fill="#8b5cf6" radius={[0, 4, 4, 0]} />
+                                                    <XAxis type="number" tick={{ fontSize: 11, fill: chartColors.muted }} stroke={chartColors.rule} />
+                                                    <YAxis dataKey="module" type="category" tick={{ fontSize: 11, fill: chartColors.muted }} stroke={chartColors.rule} width={100} />
+                                                    <Tooltip contentStyle={{ borderRadius: "12px", border: `1px solid ${chartColors.rule}`, background: chartColors.paper3, color: chartColors.ink }} labelStyle={{ color: chartColors.ink }} itemStyle={{ color: chartColors.ink2 }} cursor={{ fill: chartColors.paper3 }} />
+                                                    <Bar dataKey="acciones" fill={chartColors.ink2} radius={[0, 4, 4, 0]} />
                                                 </BarChart>
                                             </ResponsiveContainer>
                                         )}
                                     </div>
 
                                     {/* At-risk users */}
-                                    <div className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-200 dark:border-gray-700 p-5">
-                                        <p className="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-1">Usuarios en riesgo</p>
-                                        <p className="text-xs text-gray-400 dark:text-gray-500 mb-4">Sin login hace +14 días</p>
+                                    <div className="bg-[var(--color-paper-2)] rounded-2xl border border-[var(--color-rule)] p-5">
+                                        <p className="text-sm font-semibold text-[var(--color-ink-2)] mb-1">Usuarios en riesgo</p>
+                                        <p className="text-xs text-[var(--color-neutral)] mb-4">Sin login hace +14 días</p>
                                         {dashData.atRisk.length === 0 ? (
-                                            <p className="text-sm text-gray-400 text-center py-8">¡Ninguno! Todos activos.</p>
+                                            <p className="text-sm text-[var(--color-neutral)] text-center py-8">¡Ninguno! Todos activos.</p>
                                         ) : (
                                             <div className="space-y-2.5">
                                                 {dashData.atRisk.slice(0, 7).map(u => (
                                                     <div key={u.uid} className="flex items-center justify-between gap-2">
                                                         <div className="min-w-0">
-                                                            <p className="text-xs font-medium text-gray-800 dark:text-gray-200 truncate">{u.displayName}</p>
-                                                            <p className="text-[10px] text-gray-400 dark:text-gray-500">
+                                                            <p className="text-xs font-medium text-[var(--color-ink)] truncate">{u.displayName}</p>
+                                                            <p className="text-[10px] text-[var(--color-neutral)]">
                                                                 {u.lastLogin ? format(u.lastLogin, "dd MMM", { locale: es }) : "—"}
                                                             </p>
                                                         </div>
-                                                        <button onClick={() => router.push(`/dashboard/gestion-plataforma/${u.uid}`)} className="p-1 text-indigo-500 hover:bg-indigo-50 dark:hover:bg-indigo-900/30 rounded-lg flex-shrink-0">
-                                                            <Eye className="w-3.5 h-3.5" />
+                                                        <button onClick={() => router.push(`/dashboard/gestion-plataforma/${u.uid}`)} className="p-1 text-[var(--color-accent)] hover:bg-[var(--color-accent-soft)] rounded-lg flex-shrink-0">
+                                                            <Eye strokeWidth={1.5} className="w-3.5 h-3.5" />
                                                         </button>
                                                     </div>
                                                 ))}
@@ -514,15 +516,15 @@ export default function PlatformManagementPage() {
                                 </div>
 
                                 {/* User funnel */}
-                                <div className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-200 dark:border-gray-700 p-5">
-                                    <p className="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-4">Estado de usuarios</p>
+                                <div className="bg-[var(--color-paper-2)] rounded-2xl border border-[var(--color-rule)] p-5">
+                                    <p className="text-sm font-semibold text-[var(--color-ink-2)] mb-4">Estado de usuarios</p>
                                     <div className="grid grid-cols-2 sm:grid-cols-5 gap-3">
                                         {[
-                                            { label: "Total", value: dashData.kpis.totalUsers, color: "bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300" },
-                                            { label: "Activos", value: dashData.kpis.activeUsers, color: "bg-green-50 dark:bg-green-900/20 text-green-700 dark:text-green-400" },
-                                            { label: "En trial", value: dashData.kpis.trialUsers, color: "bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-400" },
-                                            { label: "Vencidos", value: dashData.kpis.expiredUsers, color: "bg-red-50 dark:bg-red-900/20 text-red-700 dark:text-red-400" },
-                                            { label: "Deshabilitados", value: dashData.kpis.disabledUsers, color: "bg-gray-50 dark:bg-gray-800 text-gray-500 dark:text-gray-500" },
+                                            { label: "Total", value: dashData.kpis.totalUsers, color: "bg-[var(--color-paper-3)] text-[var(--color-ink-2)]" },
+                                            { label: "Activos", value: dashData.kpis.activeUsers, color: "bg-[var(--color-positive-soft)] text-[var(--color-positive)]" },
+                                            { label: "En trial", value: dashData.kpis.trialUsers, color: "bg-[var(--color-accent-soft)] text-[var(--color-accent)]" },
+                                            { label: "Vencidos", value: dashData.kpis.expiredUsers, color: "bg-[var(--color-danger-soft)] text-[var(--color-danger)]" },
+                                            { label: "Deshabilitados", value: dashData.kpis.disabledUsers, color: "bg-[var(--color-paper)] text-[var(--color-muted)]" },
                                         ].map(item => (
                                             <div key={item.label} className={`rounded-xl p-4 text-center ${item.color}`}>
                                                 <p className="text-2xl font-bold">{item.value}</p>
@@ -541,90 +543,90 @@ export default function PlatformManagementPage() {
                     <div className="space-y-4">
 
                         {/* ── Bulk extend panel ── */}
-                        <div className="bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-700 rounded-2xl p-4">
+                        <div className="bg-[var(--color-warning-soft)] border border-[var(--color-warning)]/30 rounded-2xl p-4">
                             <div className="flex flex-col md:flex-row gap-4 items-start md:items-center justify-between">
                                 <div>
-                                    <p className="font-semibold text-amber-800 dark:text-amber-300 flex items-center gap-2">
-                                        <Calendar className="w-4 h-4" /> Extender acceso masivo
+                                    <p className="font-semibold text-[var(--color-warning)] flex items-center gap-2">
+                                        <Calendar strokeWidth={1.5} className="w-4 h-4" /> Extender acceso masivo
                                     </p>
-                                    <p className="text-xs text-amber-700 dark:text-amber-400 mt-0.5">
+                                    <p className="text-xs text-[var(--color-warning)] mt-0.5">
                                         Extiende el vencimiento de todos los usuarios (o por plan) hasta la fecha elegida.
                                     </p>
                                 </div>
                                 <div className="flex flex-wrap gap-2 items-center">
                                     <select value={bulkPlan} onChange={e => setBulkPlan(e.target.value as any)}
-                                        className="px-3 py-2 text-sm border border-amber-300 dark:border-amber-600 rounded-xl bg-white dark:bg-gray-800 text-gray-800 dark:text-white outline-none focus:ring-2 focus:ring-amber-400">
+                                        className="px-3 py-2 text-sm border border-[var(--color-warning)]/30 rounded-xl bg-[var(--color-paper-2)] text-[var(--color-ink)] outline-none focus:ring-2 focus:ring-[var(--color-warning)]">
                                         <option value="all">Todos los planes</option>
                                         <option value="basic">Solo Basic</option>
                                         <option value="professional">Solo Professional</option>
                                         <option value="enterprise">Solo Enterprise</option>
                                     </select>
                                     <input type="date" value={bulkDate} onChange={e => setBulkDate(e.target.value)}
-                                        className="px-3 py-2 text-sm border border-amber-300 dark:border-amber-600 rounded-xl bg-white dark:bg-gray-800 text-gray-800 dark:text-white outline-none focus:ring-2 focus:ring-amber-400" />
+                                        className="px-3 py-2 text-sm border border-[var(--color-warning)]/30 rounded-xl bg-[var(--color-paper-2)] text-[var(--color-ink)] outline-none focus:ring-2 focus:ring-[var(--color-warning)]" />
                                     <button onClick={handleBulkExtend} disabled={bulkLoading || !bulkDate}
-                                        className="flex items-center gap-2 px-4 py-2 text-sm font-semibold bg-amber-500 hover:bg-amber-600 disabled:opacity-50 text-white rounded-xl transition-colors">
-                                        {bulkLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : <CheckCircle className="w-4 h-4" />}
+                                        className="flex items-center gap-2 px-4 py-2 text-sm font-semibold bg-[var(--color-warning)] hover:bg-[var(--color-warning)] disabled:opacity-50 text-[var(--color-accent-ink)] rounded-xl transition-colors">
+                                        {bulkLoading ? <Loader2 strokeWidth={1.5} className="w-4 h-4 animate-spin" /> : <CheckCircle strokeWidth={1.5} className="w-4 h-4" />}
                                         {bulkLoading ? "Procesando..." : "Extender todos"}
                                     </button>
                                 </div>
                             </div>
                         </div>
 
-                        <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-2xl p-4 flex flex-col md:flex-row gap-3 justify-between items-center">
+                        <div className="bg-[var(--color-paper-2)] border border-[var(--color-rule)] rounded-2xl p-4 flex flex-col md:flex-row gap-3 justify-between items-center">
                             <div className="flex items-center gap-4">
-                                <span className="text-sm text-gray-600 dark:text-gray-400">Total: <strong className="text-gray-900 dark:text-white">{users.length}</strong></span>
+                                <span className="text-sm text-[var(--color-ink-2)]">Total: <strong className="text-[var(--color-ink)]">{users.length}</strong></span>
                                 {users.filter(u => u.unsubscribedMarketing).length > 0 && (
                                     <button onClick={() => setOnlyNoMails(p => !p)}
-                                        className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium border transition-all ${onlyNoMails ? "bg-amber-100 text-amber-800 border-amber-300" : "bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-400 border-gray-200 dark:border-gray-600 hover:border-amber-300"}`}>
-                                        <MailX size={13} /> Sin mails ({users.filter(u => u.unsubscribedMarketing).length})
+                                        className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium border transition-all ${onlyNoMails ? "bg-[var(--color-warning-soft)] text-[var(--color-warning)] border-[var(--color-warning)]/30" : "bg-[var(--color-paper-2)] text-[var(--color-ink-2)] border-[var(--color-rule)] hover:border-[var(--color-warning)]/30"}`}>
+                                        <MailX strokeWidth={1.5} size={13} /> Sin mails ({users.filter(u => u.unsubscribedMarketing).length})
                                     </button>
                                 )}
                             </div>
                             <div className="relative w-full md:w-64">
-                                <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={16} />
+                                <Search strokeWidth={1.5} className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--color-neutral)]" size={16} />
                                 <input type="text" placeholder="Buscar..." value={searchTerm} onChange={e => setSearchTerm(e.target.value)}
-                                    className="w-full pl-9 pr-4 py-2 border border-gray-200 dark:border-gray-600 rounded-xl text-sm focus:ring-2 focus:ring-indigo-500 outline-none bg-white dark:bg-gray-800 text-gray-900 dark:text-white" />
+                                    className="w-full pl-9 pr-4 py-2 border border-[var(--color-rule)] rounded-xl text-sm focus:ring-2 focus:ring-[var(--color-accent)]/40 outline-none bg-[var(--color-paper-2)] text-[var(--color-ink)]" />
                             </div>
                         </div>
 
-                        <div className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-200 dark:border-gray-700 overflow-hidden">
+                        <div className="bg-[var(--color-paper-2)] rounded-2xl border border-[var(--color-rule)] overflow-hidden">
                             <div className="overflow-x-auto">
-                                <table className="w-full text-left text-sm text-gray-600 dark:text-gray-400">
-                                    <thead className="bg-gray-50 dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700">
+                                <table className="w-full text-left text-sm text-[var(--color-ink-2)]">
+                                    <thead className="bg-[var(--color-paper)] border-b border-[var(--color-rule)]">
                                         <tr>
                                             {(["nombre", "plan", "registro", "ultimoAcceso", "vencimiento", "alquileres", "estado"] as SortField[]).map(f => (
-                                                <th key={f} onClick={() => handleSort(f)} className="px-5 py-3 font-semibold text-gray-700 dark:text-gray-300 cursor-pointer select-none hover:bg-gray-100 dark:hover:bg-gray-700 whitespace-nowrap capitalize text-xs">
+                                                <th key={f} onClick={() => handleSort(f)} className="px-5 py-3 font-semibold text-[var(--color-ink-2)] cursor-pointer select-none hover:bg-[var(--color-paper-3)] whitespace-nowrap capitalize text-xs">
                                                     {f === "alquileres" ? "Prop/Alq" : f.replace(/([A-Z])/g, " $1")} <SortIcon field={f} />
                                                 </th>
                                             ))}
-                                            <th className="px-5 py-3 font-semibold text-gray-700 dark:text-gray-300 text-right text-xs">Acciones</th>
+                                            <th className="px-5 py-3 font-semibold text-[var(--color-ink-2)] text-right text-xs">Acciones</th>
                                         </tr>
                                     </thead>
-                                    <tbody className="divide-y divide-gray-100 dark:divide-gray-800">
+                                    <tbody className="divide-y divide-[var(--color-rule-2)]">
                                         {usersLoading ? (
-                                            <tr><td colSpan={8} className="py-16 text-center"><Loader2 className="w-6 h-6 animate-spin text-indigo-400 mx-auto" /></td></tr>
+                                            <tr><td colSpan={8} className="py-16 text-center"><Loader2 strokeWidth={1.5} className="w-6 h-6 animate-spin text-[var(--color-accent)] mx-auto" /></td></tr>
                                         ) : filteredUsers.length === 0 ? (
-                                            <tr><td colSpan={8} className="py-12 text-center text-gray-400">No se encontraron usuarios</td></tr>
+                                            <tr><td colSpan={8} className="py-12 text-center text-[var(--color-neutral)]">No se encontraron usuarios</td></tr>
                                         ) : filteredUsers.map(user => {
                                             const expired = isExpired(user);
                                             const soon = isExpiringSoon(user);
                                             const expDate = getExpirationDate(user);
                                             return (
-                                                <tr key={user.uid} className={`hover:bg-indigo-50/30 dark:hover:bg-indigo-900/10 transition-colors ${user.disabled ? "opacity-60" : ""}`}>
+                                                <tr key={user.uid} className={`hover:bg-[var(--color-accent)]/7 transition-colors ${user.disabled ? "opacity-60" : ""}`}>
                                                     <td className="px-5 py-3">
                                                         <div className="flex items-center gap-2.5">
-                                                            <div className="w-8 h-8 rounded-full bg-indigo-100 dark:bg-indigo-900 text-indigo-600 dark:text-indigo-300 flex items-center justify-center overflow-hidden flex-shrink-0">
-                                                                {user.photoURL ? <img src={user.photoURL} className="w-full h-full object-cover" /> : <UserIcon size={15} />}
+                                                            <div className="w-8 h-8 rounded-full bg-[var(--color-paper-3)] text-[var(--color-ink-2)] flex items-center justify-center overflow-hidden flex-shrink-0">
+                                                                {user.photoURL ? <img src={user.photoURL} className="w-full h-full object-cover" /> : <UserIcon strokeWidth={1.5} size={15} />}
                                                             </div>
                                                             <div>
-                                                                <p className="font-medium text-gray-900 dark:text-white text-xs">{user.displayName || "Sin nombre"}</p>
-                                                                <p className="text-[10px] text-gray-400 dark:text-gray-500">{user.email}</p>
+                                                                <p className="font-medium text-[var(--color-ink)] text-xs">{user.displayName || "Sin nombre"}</p>
+                                                                <p className="text-[10px] text-[var(--color-neutral)]">{user.email}</p>
                                                             </div>
                                                         </div>
                                                     </td>
                                                     <td className="px-5 py-3">
                                                         <select value={user.subscription?.planTier || "basic"} onChange={e => handleUpdatePlan(user.uid, e.target.value)}
-                                                            className="px-2 py-1 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-600 rounded-lg text-xs text-gray-700 dark:text-gray-300 focus:outline-none focus:ring-1 focus:ring-indigo-500">
+                                                            className="px-2 py-1 bg-[var(--color-paper-2)] border border-[var(--color-rule)] rounded-lg text-xs text-[var(--color-ink-2)] focus:outline-none focus:ring-1 focus:ring-[var(--color-accent)]/40">
                                                             <option value="basic">Básico</option>
                                                             <option value="professional">Professional</option>
                                                             <option value="enterprise">Enterprise</option>
@@ -634,28 +636,28 @@ export default function PlatformManagementPage() {
                                                     <td className="px-5 py-3 text-xs">{user.lastLogin ? format(new Date(user.lastLogin), "dd MMM yy HH:mm", { locale: es }) : "—"}</td>
                                                     <td className="px-5 py-3">
                                                         {expDate ? (
-                                                            <span className={`text-xs font-medium ${expired ? "text-red-600" : soon ? "text-amber-600" : "text-gray-600 dark:text-gray-400"}`}>
+                                                            <span className={`text-xs font-medium ${expired ? "text-[var(--color-danger)]" : soon ? "text-[var(--color-warning)]" : "text-[var(--color-ink-2)]"}`}>
                                                                 {format(expDate, "dd MMM yy", { locale: es })}
                                                             </span>
-                                                        ) : <span className="text-xs text-gray-400">—</span>}
+                                                        ) : <span className="text-xs text-[var(--color-neutral)]">—</span>}
                                                     </td>
                                                     <td className="px-5 py-3">
                                                         <div className="flex items-center gap-1.5">
-                                                            <span className="flex items-center gap-1 bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-400 px-2 py-0.5 rounded text-[10px] font-bold"><Home size={10} />{user.propiedadesCount || 0}</span>
-                                                            <span className="flex items-center gap-1 bg-indigo-50 dark:bg-indigo-900/20 text-indigo-700 dark:text-indigo-400 px-2 py-0.5 rounded text-[10px] font-bold"><Key size={10} />{user.alquileresCount || 0}</span>
+                                                            <span className="flex items-center gap-1 bg-[var(--color-accent-soft)] text-[var(--color-accent)] px-2 py-0.5 rounded text-[10px] font-bold"><Home strokeWidth={1.5} size={10} />{user.propiedadesCount || 0}</span>
+                                                            <span className="flex items-center gap-1 bg-[var(--color-accent-soft)] text-[var(--color-accent)] px-2 py-0.5 rounded text-[10px] font-bold"><Key strokeWidth={1.5} size={10} />{user.alquileresCount || 0}</span>
                                                         </div>
                                                     </td>
                                                     <td className="px-5 py-3">
-                                                        {user.disabled ? <span className="px-2 py-0.5 rounded-full text-[10px] font-medium bg-red-100 text-red-700">Inhabilitado</span>
-                                                            : expired ? <span className="px-2 py-0.5 rounded-full text-[10px] font-medium bg-orange-100 text-orange-700">Vencido</span>
-                                                            : soon ? <span className="px-2 py-0.5 rounded-full text-[10px] font-medium bg-yellow-100 text-yellow-700">Por vencer</span>
-                                                            : <span className="px-2 py-0.5 rounded-full text-[10px] font-medium bg-green-100 text-green-700">Activo</span>}
+                                                        {user.disabled ? <span className="px-2 py-0.5 rounded-full text-[10px] font-medium bg-[var(--color-danger-soft)] text-[var(--color-danger)]">Inhabilitado</span>
+                                                            : expired ? <span className="px-2 py-0.5 rounded-full text-[10px] font-medium bg-[var(--color-warning-soft)] text-[var(--color-warning)]">Vencido</span>
+                                                            : soon ? <span className="px-2 py-0.5 rounded-full text-[10px] font-medium bg-[var(--color-warning-soft)] text-[var(--color-warning)]">Por vencer</span>
+                                                            : <span className="px-2 py-0.5 rounded-full text-[10px] font-medium bg-[var(--color-positive-soft)] text-[var(--color-positive)]">Activo</span>}
                                                     </td>
                                                     <td className="px-5 py-3">
                                                         <div className="flex items-center justify-end gap-1">
-                                                            <button onClick={() => router.push(`/dashboard/gestion-plataforma/${user.uid}`)} className="p-1.5 text-indigo-500 hover:bg-indigo-50 dark:hover:bg-indigo-900/20 rounded-lg" title="Ver perfil"><Eye size={15} /></button>
-                                                            <button onClick={() => handleToggleStatus(user.uid, user.disabled)} className={`p-1.5 rounded-lg ${user.disabled ? "text-green-600 hover:bg-green-50 dark:hover:bg-green-900/20" : "text-amber-600 hover:bg-amber-50 dark:hover:bg-amber-900/20"}`} title={user.disabled ? "Habilitar" : "Inhabilitar"}>{user.disabled ? <CheckCircle size={15} /> : <Ban size={15} />}</button>
-                                                            <button onClick={() => handleDelete(user.uid)} className="p-1.5 text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg" title="Eliminar"><Trash2 size={15} /></button>
+                                                            <button onClick={() => router.push(`/dashboard/gestion-plataforma/${user.uid}`)} className="p-1.5 text-[var(--color-accent)] hover:bg-[var(--color-accent-soft)] rounded-lg" title="Ver perfil"><Eye strokeWidth={1.5} size={15} /></button>
+                                                            <button onClick={() => handleToggleStatus(user.uid, user.disabled)} className={`p-1.5 rounded-lg ${user.disabled ? "text-[var(--color-positive)] hover:bg-[var(--color-positive-soft)]" : "text-[var(--color-warning)] hover:bg-[var(--color-warning-soft)]"}`} title={user.disabled ? "Habilitar" : "Inhabilitar"}>{user.disabled ? <CheckCircle strokeWidth={1.5} size={15} /> : <Ban strokeWidth={1.5} size={15} />}</button>
+                                                            <button onClick={() => handleDelete(user.uid)} className="p-1.5 text-[var(--color-danger)] hover:bg-[var(--color-danger-soft)] rounded-lg" title="Eliminar"><Trash2 strokeWidth={1.5} size={15} /></button>
                                                         </div>
                                                     </td>
                                                 </tr>
@@ -673,10 +675,10 @@ export default function PlatformManagementPage() {
                     <div className="grid lg:grid-cols-5 gap-6">
                         {/* Left: user selector */}
                         <div className="lg:col-span-2 space-y-3">
-                            <div className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-200 dark:border-gray-700 p-4 space-y-3">
+                            <div className="bg-[var(--color-paper-2)] rounded-2xl border border-[var(--color-rule)] p-4 space-y-3">
                                 <div className="flex items-center justify-between">
-                                    <p className="text-sm font-semibold text-gray-700 dark:text-gray-300">Destinatarios</p>
-                                    <span className="text-xs text-indigo-600 dark:text-indigo-400 font-semibold">{selectedUserIds.size} seleccionados</span>
+                                    <p className="text-sm font-semibold text-[var(--color-ink-2)]">Destinatarios</p>
+                                    <span className="text-xs text-[var(--color-accent)] font-semibold">{selectedUserIds.size} seleccionados</span>
                                 </div>
 
                                 {/* Segments */}
@@ -686,25 +688,25 @@ export default function PlatformManagementPage() {
                                         ["trial", "Trial"], ["professional", "Pro"], ["enterprise", "Enterprise"],
                                     ] as [typeof emailSegment, string][]).map(([seg, label]) => (
                                         <button key={seg} onClick={() => { setEmailSegment(seg); setSelectedUserIds(new Set()); }}
-                                            className={`px-2.5 py-1 rounded-lg text-xs font-medium transition-all ${emailSegment === seg ? "bg-indigo-600 text-white" : "bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400 hover:bg-indigo-50 dark:hover:bg-indigo-900/20"}`}>
+                                            className={`px-2.5 py-1 rounded-lg text-xs font-medium transition-all ${emailSegment === seg ? "bg-[var(--color-ink)] text-[var(--color-paper)]" : "bg-[var(--color-paper-3)] text-[var(--color-ink-2)] hover:bg-[var(--color-accent-soft)]"}`}>
                                             {label}
                                         </button>
                                     ))}
                                 </div>
 
                                 <div className="relative">
-                                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={14} />
+                                    <Search strokeWidth={1.5} className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--color-neutral)]" size={14} />
                                     <input type="text" placeholder="Filtrar..." value={emailSearch} onChange={e => setEmailSearch(e.target.value)}
-                                        className="w-full pl-8 pr-3 py-2 text-xs border border-gray-200 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-800 text-gray-900 dark:text-white outline-none focus:ring-2 focus:ring-indigo-500" />
+                                        className="w-full pl-8 pr-3 py-2 text-xs border border-[var(--color-rule)] rounded-xl bg-[var(--color-paper-2)] text-[var(--color-ink)] outline-none focus:ring-2 focus:ring-[var(--color-accent)]/40" />
                                 </div>
 
-                                <div className="max-h-72 overflow-y-auto space-y-1 border border-gray-100 dark:border-gray-800 rounded-xl p-2">
-                                    <label className="flex items-center gap-2 px-2 py-1.5 hover:bg-gray-50 dark:hover:bg-gray-800 rounded-lg cursor-pointer">
+                                <div className="max-h-72 overflow-y-auto space-y-1 border border-[var(--color-rule-2)] rounded-xl p-2">
+                                    <label className="flex items-center gap-2 px-2 py-1.5 hover:bg-[var(--color-paper-3)] rounded-lg cursor-pointer">
                                         <input type="checkbox" checked={selectedUserIds.size === emailSegmentedUsers.length && emailSegmentedUsers.length > 0} onChange={toggleSelectAll} className="rounded" />
-                                        <span className="text-xs font-semibold text-gray-600 dark:text-gray-400">Seleccionar todos ({emailSegmentedUsers.length})</span>
+                                        <span className="text-xs font-semibold text-[var(--color-ink-2)]">Seleccionar todos ({emailSegmentedUsers.length})</span>
                                     </label>
                                     {emailSegmentedUsers.map(u => (
-                                        <label key={u.uid} className="flex items-center gap-2 px-2 py-1.5 hover:bg-gray-50 dark:hover:bg-gray-800 rounded-lg cursor-pointer">
+                                        <label key={u.uid} className="flex items-center gap-2 px-2 py-1.5 hover:bg-[var(--color-paper-3)] rounded-lg cursor-pointer">
                                             <input type="checkbox" checked={selectedUserIds.has(u.uid)}
                                                 onChange={() => {
                                                     setSelectedUserIds(prev => {
@@ -714,8 +716,8 @@ export default function PlatformManagementPage() {
                                                     });
                                                 }} className="rounded" />
                                             <div className="min-w-0">
-                                                <p className="text-xs font-medium text-gray-800 dark:text-gray-200 truncate">{u.displayName || "Sin nombre"}</p>
-                                                <p className="text-[10px] text-gray-400 dark:text-gray-500 truncate">{u.email}</p>
+                                                <p className="text-xs font-medium text-[var(--color-ink)] truncate">{u.displayName || "Sin nombre"}</p>
+                                                <p className="text-[10px] text-[var(--color-neutral)] truncate">{u.email}</p>
                                             </div>
                                         </label>
                                     ))}
@@ -725,28 +727,28 @@ export default function PlatformManagementPage() {
 
                         {/* Right: composer */}
                         <div className="lg:col-span-3 space-y-4">
-                            <div className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-200 dark:border-gray-700 p-5 space-y-4">
+                            <div className="bg-[var(--color-paper-2)] rounded-2xl border border-[var(--color-rule)] p-5 space-y-4">
 
                                 {/* Header + template loader */}
                                 <div className="flex items-center justify-between">
-                                    <p className="text-sm font-semibold text-gray-700 dark:text-gray-300">Redactar campaña</p>
+                                    <p className="text-sm font-semibold text-[var(--color-ink-2)]">Redactar campaña</p>
                                     <div className="relative">
                                         <button
                                             onClick={() => { setShowTemplateDropdown(p => !p); if (!availableTemplates.length) loadAvailableTemplates(); }}
-                                            className="flex items-center gap-1.5 px-3 py-1.5 text-xs text-gray-600 dark:text-gray-400 border border-gray-200 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
+                                            className="flex items-center gap-1.5 px-3 py-1.5 text-xs text-[var(--color-ink-2)] border border-[var(--color-rule)] rounded-lg hover:bg-[var(--color-paper-3)] transition-colors"
                                         >
-                                            <FileText className="w-3.5 h-3.5" />
+                                            <FileText strokeWidth={1.5} className="w-3.5 h-3.5" />
                                             Cargar template
-                                            <ChevronDown className="w-3 h-3" />
+                                            <ChevronDown strokeWidth={1.5} className="w-3 h-3" />
                                         </button>
                                         {showTemplateDropdown && (
                                             <>
                                                 <div className="fixed inset-0 z-[9]" onClick={() => setShowTemplateDropdown(false)} />
-                                                <div className="absolute right-0 top-full mt-1 w-72 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl shadow-xl z-10 overflow-hidden">
+                                                <div className="absolute right-0 top-full mt-1 w-72 bg-[var(--color-paper-2)] border border-[var(--color-rule)] rounded-xl shadow-xl z-10 overflow-hidden">
                                                     {templatesLoading ? (
-                                                        <div className="p-4 text-center"><Loader2 className="w-4 h-4 animate-spin mx-auto text-indigo-400" /></div>
+                                                        <div className="p-4 text-center"><Loader2 strokeWidth={1.5} className="w-4 h-4 animate-spin mx-auto text-[var(--color-accent)]" /></div>
                                                     ) : availableTemplates.length === 0 ? (
-                                                        <p className="p-4 text-xs text-gray-400 dark:text-gray-500 text-center">No hay templates guardados en Marketing</p>
+                                                        <p className="p-4 text-xs text-[var(--color-neutral)] text-center">No hay templates guardados en Marketing</p>
                                                     ) : (
                                                         availableTemplates.map(t => (
                                                             <button key={t.id || t.type} onClick={() => {
@@ -755,9 +757,9 @@ export default function PlatformManagementPage() {
                                                                 setEmailPreviewMode(false);
                                                                 setShowTemplateDropdown(false);
                                                                 toast.success(`Template "${t.name}" cargado`);
-                                                            }} className="w-full text-left px-4 py-3 text-xs hover:bg-gray-50 dark:hover:bg-gray-700 border-b border-gray-100 dark:border-gray-700 last:border-0 transition-colors">
-                                                                <p className="font-semibold text-gray-800 dark:text-gray-200">{t.name}</p>
-                                                                <p className="text-gray-400 dark:text-gray-500 truncate mt-0.5">{t.subject}</p>
+                                                            }} className="w-full text-left px-4 py-3 text-xs hover:bg-[var(--color-paper-3)] border-b border-[var(--color-rule-2)] last:border-0 transition-colors">
+                                                                <p className="font-semibold text-[var(--color-ink)]">{t.name}</p>
+                                                                <p className="text-[var(--color-neutral)] truncate mt-0.5">{t.subject}</p>
                                                             </button>
                                                         ))
                                                     )}
@@ -768,48 +770,48 @@ export default function PlatformManagementPage() {
                                 </div>
 
                                 <div>
-                                    <label className="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1.5">Nombre de la campaña</label>
+                                    <label className="block text-xs font-medium text-[var(--color-ink-2)] mb-1.5">Nombre de la campaña</label>
                                     <input type="text" value={campaignName} onChange={e => setCampaignName(e.target.value)} placeholder="Ej: Newsletter mayo 2026"
-                                        className="w-full px-3 py-2.5 text-sm border border-gray-200 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-800 text-gray-900 dark:text-white outline-none focus:ring-2 focus:ring-indigo-500" />
+                                        className="w-full px-3 py-2.5 text-sm border border-[var(--color-rule)] rounded-xl bg-[var(--color-paper-2)] text-[var(--color-ink)] outline-none focus:ring-2 focus:ring-[var(--color-accent)]/40" />
                                 </div>
 
                                 <div>
-                                    <label className="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1.5">Asunto *</label>
+                                    <label className="block text-xs font-medium text-[var(--color-ink-2)] mb-1.5">Asunto *</label>
                                     <input type="text" value={emailSubject} onChange={e => setEmailSubject(e.target.value)} placeholder="Asunto del email..."
-                                        className="w-full px-3 py-2.5 text-sm border border-gray-200 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-800 text-gray-900 dark:text-white outline-none focus:ring-2 focus:ring-indigo-500" />
+                                        className="w-full px-3 py-2.5 text-sm border border-[var(--color-rule)] rounded-xl bg-[var(--color-paper-2)] text-[var(--color-ink)] outline-none focus:ring-2 focus:ring-[var(--color-accent)]/40" />
                                 </div>
 
                                 {/* Variable hints */}
                                 <div className="flex items-center gap-2 flex-wrap">
-                                    <span className="text-[10px] text-gray-400 dark:text-gray-500 font-medium">Variables:</span>
+                                    <span className="text-[10px] text-[var(--color-neutral)] font-medium">Variables:</span>
                                     {([["{{nombre}}", "Nombre del usuario"], ["{{email}}", "Email del usuario"]] as [string, string][]).map(([v, hint]) => (
                                         <button key={v} title={hint} onClick={() => setEmailBody(p => p + v)}
-                                            className="font-mono text-[10px] px-2 py-0.5 bg-indigo-50 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-400 border border-indigo-200 dark:border-indigo-700 rounded hover:bg-indigo-100 dark:hover:bg-indigo-900/50 transition-colors">
+                                            className="font-mono text-[10px] px-2 py-0.5 border border-[var(--color-rule)] text-[var(--color-ink)] border border-[var(--color-accent)]/30 rounded hover:bg-[var(--color-paper-3)] transition-colors">
                                             {v}
                                         </button>
                                     ))}
-                                    <span className="text-[10px] text-gray-400 dark:text-gray-500">Se reemplazan por usuario al enviar</span>
+                                    <span className="text-[10px] text-[var(--color-neutral)]">Se reemplazan por usuario al enviar</span>
                                 </div>
 
                                 {/* Editor: code / preview toggle */}
                                 <div>
                                     <div className="flex items-center justify-between mb-1.5">
-                                        <label className="block text-xs font-medium text-gray-600 dark:text-gray-400">
+                                        <label className="block text-xs font-medium text-[var(--color-ink-2)]">
                                             {emailPreviewMode ? "Vista previa" : "HTML del email *"}
                                         </label>
                                         <button onClick={() => setEmailPreviewMode(p => !p)}
-                                            className="flex items-center gap-1.5 px-2.5 py-1 text-xs text-gray-600 dark:text-gray-400 border border-gray-200 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors">
-                                            <Eye className="w-3 h-3" />
+                                            className="flex items-center gap-1.5 px-2.5 py-1 text-xs text-[var(--color-ink-2)] border border-[var(--color-rule)] rounded-lg hover:bg-[var(--color-paper-3)] transition-colors">
+                                            <Eye strokeWidth={1.5} className="w-3 h-3" />
                                             {emailPreviewMode ? "Ver código" : "Vista previa"}
                                         </button>
                                     </div>
 
                                     {emailPreviewMode ? (
-                                        <div className="border border-gray-200 dark:border-gray-700 rounded-xl overflow-hidden bg-white" style={{ minHeight: "380px" }}>
+                                        <div className="border border-[var(--color-rule)] rounded-xl overflow-hidden bg-[var(--color-paper-2)]" style={{ minHeight: "380px" }}>
                                             {emailBody ? (
                                                 <iframe srcDoc={emailBody} className="w-full h-[380px] border-0" title="Preview del email" />
                                             ) : (
-                                                <div className="flex items-center justify-center h-[380px] text-gray-400 dark:text-gray-600 text-sm">
+                                                <div className="flex items-center justify-center h-[380px] text-[var(--color-neutral)] text-sm">
                                                     Escribí HTML para ver la vista previa
                                                 </div>
                                             )}
@@ -820,23 +822,23 @@ export default function PlatformManagementPage() {
                                             onChange={e => setEmailBody(e.target.value)}
                                             rows={14}
                                             placeholder={"<html>\n  <body style=\"font-family: sans-serif;\">\n    <p>Hola {{nombre}},</p>\n    <p>Tu mensaje acá...</p>\n  </body>\n</html>"}
-                                            className="w-full px-3 py-2.5 text-sm border border-gray-200 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-800 text-gray-900 dark:text-white outline-none focus:ring-2 focus:ring-indigo-500 resize-none font-mono"
+                                            className="w-full px-3 py-2.5 text-sm border border-[var(--color-rule)] rounded-xl bg-[var(--color-paper-2)] text-[var(--color-ink)] outline-none focus:ring-2 focus:ring-[var(--color-accent)]/40 resize-none font-mono"
                                         />
                                     )}
-                                    <p className="text-[10px] text-gray-400 dark:text-gray-500 mt-1">
+                                    <p className="text-[10px] text-[var(--color-neutral)] mt-1">
                                         Escribí HTML directamente o cargá un template guardado desde Marketing.
                                     </p>
                                 </div>
 
-                                <div className="flex items-center justify-between pt-2 border-t border-gray-100 dark:border-gray-800">
-                                    <p className="text-xs text-gray-500 dark:text-gray-400">
+                                <div className="flex items-center justify-between pt-2 border-t border-[var(--color-rule-2)]">
+                                    <p className="text-xs text-[var(--color-muted)]">
                                         {selectedUserIds.size === 0
                                             ? "Seleccioná destinatarios"
                                             : `Enviando a ${selectedUserIds.size} usuario${selectedUserIds.size !== 1 ? "s" : ""}`}
                                     </p>
                                     <button onClick={handleSendBulkEmail} disabled={sending || selectedUserIds.size === 0 || !emailSubject || !emailBody}
-                                        className="flex items-center gap-2 px-5 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-sm font-semibold transition-all disabled:opacity-50">
-                                        {sending ? <Loader2 className="w-4 h-4 animate-spin" /> : <Send className="w-4 h-4" />}
+                                        className="flex items-center gap-2 px-5 py-2.5 bg-[var(--color-ink)] hover:bg-[var(--color-ink-2)] text-[var(--color-paper)] rounded-xl text-sm font-semibold transition-all disabled:opacity-50">
+                                        {sending ? <Loader2 strokeWidth={1.5} className="w-4 h-4 animate-spin" /> : <Send strokeWidth={1.5} className="w-4 h-4" />}
                                         Enviar campaña
                                     </button>
                                 </div>
@@ -849,24 +851,24 @@ export default function PlatformManagementPage() {
                 {activeTab === "anuncios" && (
                     <div className="grid lg:grid-cols-2 gap-6">
                         {/* Create announcement */}
-                        <div className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-200 dark:border-gray-700 p-5 space-y-4">
-                            <p className="text-sm font-semibold text-gray-700 dark:text-gray-300 flex items-center gap-2">
-                                <Plus className="w-4 h-4" /> Nuevo anuncio
+                        <div className="bg-[var(--color-paper-2)] rounded-2xl border border-[var(--color-rule)] p-5 space-y-4">
+                            <p className="text-sm font-semibold text-[var(--color-ink-2)] flex items-center gap-2">
+                                <Plus strokeWidth={1.5} className="w-4 h-4" /> Nuevo anuncio
                             </p>
-                            <p className="text-xs text-gray-400 dark:text-gray-500 -mt-2">
+                            <p className="text-xs text-[var(--color-neutral)] -mt-2">
                                 Aparece como banner en el dashboard de todos los usuarios.
                             </p>
 
                             <div>
-                                <label className="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1.5">Tipo</label>
+                                <label className="block text-xs font-medium text-[var(--color-ink-2)] mb-1.5">Tipo</label>
                                 <div className="flex gap-2 flex-wrap">
                                     {(["info", "warning", "success", "error"] as AnnouncementType[]).map(t => {
                                         const s = ANNOUNCEMENT_STYLES[t];
                                         const Icon = s.icon;
                                         return (
                                             <button key={t} onClick={() => setNewAnn(p => ({ ...p, type: t }))}
-                                                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold border-2 transition-all ${newAnn.type === t ? `${s.bg} ${s.border}` : "bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700 text-gray-500"}`}>
-                                                <Icon className="w-3.5 h-3.5" /> {s.label}
+                                                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold border-2 transition-all ${newAnn.type === t ? `${s.bg} ${s.border}` : "bg-[var(--color-paper-2)] border-[var(--color-rule)] text-[var(--color-muted)]"}`}>
+                                                <Icon strokeWidth={1.5} className="w-3.5 h-3.5" /> {s.label}
                                             </button>
                                         );
                                     })}
@@ -874,22 +876,22 @@ export default function PlatformManagementPage() {
                             </div>
 
                             <div>
-                                <label className="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1.5">Título</label>
+                                <label className="block text-xs font-medium text-[var(--color-ink-2)] mb-1.5">Título</label>
                                 <input type="text" value={newAnn.title} onChange={e => setNewAnn(p => ({ ...p, title: e.target.value }))} placeholder="Ej: Mantenimiento programado"
-                                    className="w-full px-3 py-2.5 text-sm border border-gray-200 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-800 text-gray-900 dark:text-white outline-none focus:ring-2 focus:ring-indigo-500" />
+                                    className="w-full px-3 py-2.5 text-sm border border-[var(--color-rule)] rounded-xl bg-[var(--color-paper-2)] text-[var(--color-ink)] outline-none focus:ring-2 focus:ring-[var(--color-accent)]/40" />
                             </div>
 
                             <div>
-                                <label className="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1.5">Mensaje</label>
+                                <label className="block text-xs font-medium text-[var(--color-ink-2)] mb-1.5">Mensaje</label>
                                 <textarea value={newAnn.message} onChange={e => setNewAnn(p => ({ ...p, message: e.target.value }))} rows={3} placeholder="Descripción del anuncio..."
-                                    className="w-full px-3 py-2.5 text-sm border border-gray-200 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-800 text-gray-900 dark:text-white outline-none focus:ring-2 focus:ring-indigo-500 resize-none" />
+                                    className="w-full px-3 py-2.5 text-sm border border-[var(--color-rule)] rounded-xl bg-[var(--color-paper-2)] text-[var(--color-ink)] outline-none focus:ring-2 focus:ring-[var(--color-accent)]/40 resize-none" />
                             </div>
 
                             <div>
-                                <label className="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1.5">Fecha de vencimiento (Opcional)</label>
+                                <label className="block text-xs font-medium text-[var(--color-ink-2)] mb-1.5">Fecha de vencimiento (Opcional)</label>
                                 <input type="datetime-local" value={newAnn.expiresAt} onChange={e => setNewAnn(p => ({ ...p, expiresAt: e.target.value }))}
-                                    className="w-full px-3 py-2.5 text-sm border border-gray-200 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-800 text-gray-900 dark:text-white outline-none focus:ring-2 focus:ring-indigo-500" />
-                                <p className="text-[10px] text-gray-400 mt-1">Si no se elige, el anuncio permanecerá activo hasta ser eliminado manualmente.</p>
+                                    className="w-full px-3 py-2.5 text-sm border border-[var(--color-rule)] rounded-xl bg-[var(--color-paper-2)] text-[var(--color-ink)] outline-none focus:ring-2 focus:ring-[var(--color-accent)]/40" />
+                                <p className="text-[10px] text-[var(--color-neutral)] mt-1">Si no se elige, el anuncio permanecerá activo hasta ser eliminado manualmente.</p>
                             </div>
 
                             {/* Preview */}
@@ -898,32 +900,32 @@ export default function PlatformManagementPage() {
                                 const Icon = s.icon;
                                 return (
                                     <div className={`rounded-xl border p-3 ${s.bg} ${s.border}`}>
-                                        <p className="text-xs font-semibold text-gray-800 dark:text-gray-200 flex items-center gap-1.5 mb-1">
-                                            <Icon className="w-3.5 h-3.5" /> {newAnn.title || "Título"}
+                                        <p className="text-xs font-semibold text-[var(--color-ink)] flex items-center gap-1.5 mb-1">
+                                            <Icon strokeWidth={1.5} className="w-3.5 h-3.5" /> {newAnn.title || "Título"}
                                         </p>
-                                        <p className="text-xs text-gray-600 dark:text-gray-300">{newAnn.message || "Mensaje..."}</p>
+                                        <p className="text-xs text-[var(--color-ink-2)]">{newAnn.message || "Mensaje..."}</p>
                                         {newAnn.expiresAt && !isNaN(new Date(newAnn.expiresAt).getTime()) && (
-                                            <p className="text-[10px] text-gray-400 mt-2">Vence: {format(new Date(newAnn.expiresAt), "dd/MM/yy HH:mm", { locale: es })}</p>
+                                            <p className="text-[10px] text-[var(--color-neutral)] mt-2">Vence: {format(new Date(newAnn.expiresAt), "dd/MM/yy HH:mm", { locale: es })}</p>
                                         )}
                                     </div>
                                 );
                             })()}
 
                             <button onClick={handleSaveAnnouncement} disabled={savingAnn}
-                                className="w-full flex items-center justify-center gap-2 px-4 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-sm font-semibold disabled:opacity-60 transition-all">
-                                {savingAnn ? <Loader2 className="w-4 h-4 animate-spin" /> : <Bell className="w-4 h-4" />}
+                                className="w-full flex items-center justify-center gap-2 px-4 py-2.5 bg-[var(--color-ink)] hover:bg-[var(--color-ink-2)] text-[var(--color-paper)] rounded-xl text-sm font-semibold disabled:opacity-60 transition-all">
+                                {savingAnn ? <Loader2 strokeWidth={1.5} className="w-4 h-4 animate-spin" /> : <Bell strokeWidth={1.5} className="w-4 h-4" />}
                                 Publicar anuncio
                             </button>
                         </div>
 
                         {/* Active announcements */}
-                        <div className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-200 dark:border-gray-700 p-5">
-                            <p className="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-4">Anuncio activo</p>
+                        <div className="bg-[var(--color-paper-2)] rounded-2xl border border-[var(--color-rule)] p-5">
+                            <p className="text-sm font-semibold text-[var(--color-ink-2)] mb-4">Anuncio activo</p>
                             {annLoading ? (
-                                <div className="flex justify-center py-10"><Loader2 className="w-6 h-6 animate-spin text-indigo-400" /></div>
+                                <div className="flex justify-center py-10"><Loader2 strokeWidth={1.5} className="w-6 h-6 animate-spin text-[var(--color-accent)]" /></div>
                             ) : announcements.length === 0 ? (
-                                <div className="text-center py-10 text-gray-400 dark:text-gray-600">
-                                    <Megaphone className="w-10 h-10 mx-auto mb-2 opacity-30" />
+                                <div className="text-center py-10 text-[var(--color-neutral)]">
+                                    <Megaphone strokeWidth={1.5} className="w-10 h-10 mx-auto mb-2 opacity-30" />
                                     <p className="text-sm">No hay anuncios activos</p>
                                 </div>
                             ) : (
@@ -935,26 +937,26 @@ export default function PlatformManagementPage() {
                                             <div key={ann.id} className={`rounded-xl border p-4 ${s.bg} ${s.border}`}>
                                                 <div className="flex items-start justify-between gap-2">
                                                     <div>
-                                                        <p className="text-sm font-semibold text-gray-800 dark:text-gray-200 flex items-center gap-1.5 mb-1">
-                                                            <Icon className="w-4 h-4" /> {ann.title}
+                                                        <p className="text-sm font-semibold text-[var(--color-ink)] flex items-center gap-1.5 mb-1">
+                                                            <Icon strokeWidth={1.5} className="w-4 h-4" /> {ann.title}
                                                         </p>
-                                                        <p className="text-xs text-gray-600 dark:text-gray-300">{ann.message}</p>
+                                                        <p className="text-xs text-[var(--color-ink-2)]">{ann.message}</p>
                                                         <div className="flex flex-wrap items-center gap-3 mt-2">
                                                             {ann.createdAt && !isNaN(new Date(ann.createdAt).getTime()) && (
-                                                                <p className="text-[10px] text-gray-400 dark:text-gray-500">
+                                                                <p className="text-[10px] text-[var(--color-neutral)]">
                                                                     Publicado {format(new Date(ann.createdAt), "dd/MM/yy HH:mm", { locale: es })}
                                                                 </p>
                                                             )}
                                                             {ann.expiresAt && !isNaN(new Date(ann.expiresAt).getTime()) && (
-                                                                <p className="text-[10px] text-amber-600 font-bold flex items-center gap-1">
-                                                                    <Clock className="w-3 h-3" />
+                                                                <p className="text-[10px] text-[var(--color-warning)] font-bold flex items-center gap-1">
+                                                                    <Clock strokeWidth={1.5} className="w-3 h-3" />
                                                                     Vence {format(new Date(ann.expiresAt), "dd/MM/yy HH:mm", { locale: es })}
                                                                 </p>
                                                             )}
                                                         </div>
                                                     </div>
-                                                    <button onClick={() => handleDeleteAnnouncement(ann.id)} className="p-1.5 text-gray-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg flex-shrink-0 transition-colors" title="Desactivar">
-                                                        <X className="w-4 h-4" />
+                                                    <button onClick={() => handleDeleteAnnouncement(ann.id)} className="p-1.5 text-[var(--color-neutral)] hover:text-[var(--color-danger)] hover:bg-[var(--color-danger-soft)] rounded-lg flex-shrink-0 transition-colors" title="Desactivar">
+                                                        <X strokeWidth={1.5} className="w-4 h-4" />
                                                     </button>
                                                 </div>
                                             </div>
