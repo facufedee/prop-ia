@@ -3,7 +3,6 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Lock, User, Key, ArrowRight, ShieldCheck, AlertCircle } from "lucide-react";
-import { alquileresService } from "@/infrastructure/services/alquileresService";
 
 export default function TenantLoginPage() {
     const router = useRouter();
@@ -29,16 +28,20 @@ export default function TenantLoginPage() {
                 throw new Error("El DNI debe tener 7 u 8 números");
             }
 
-            // Call verify service
-            // Note: In a real app we would use a server action or API route to hide logic
-            // providing direct ID access here for simplicity based on prompt constraint 
-            // "Code in URL not allowed", but we will redirect to [ID] eventually.
-            const access = await alquileresService.verifyTenantAccess(formData.code, formData.dni);
+            // The server validates code + DNI (Admin SDK) and issues a short-lived
+            // token bound to the rental; the rental id is never derived from the URL alone.
+            const res = await fetch("/api/inquilino/acceso", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ codigo: formData.code, dni: formData.dni }),
+            });
+            const access = await res.json().catch(() => ({}));
 
-            if (access.valid && access.alquilerId) {
+            if (res.ok && access.alquilerId && access.token) {
                 // Set session token
                 sessionStorage.setItem("zeta_tenant_session", JSON.stringify({
                     allowedId: access.alquilerId,
+                    token: access.token,
                     timestamp: Date.now()
                 }));
                 router.push(`/inquilino/${access.alquilerId}`);

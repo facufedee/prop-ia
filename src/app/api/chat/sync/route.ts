@@ -1,6 +1,5 @@
 import { NextResponse } from "next/server";
-import { db } from "@/infrastructure/firebase/client";
-import { collection, getDocs, query, orderBy } from "firebase/firestore";
+import { adminDb } from "@/infrastructure/firebase/admin";
 
 export async function GET(req: Request) {
     try {
@@ -11,9 +10,13 @@ export async function GET(req: Request) {
             return NextResponse.json({ error: "Missing or invalid sessionId" }, { status: 400 });
         }
 
-        const messagesRef = collection(db, "chat_sessions", sessionId, "messages");
-        const q = query(messagesRef, orderBy("timestamp", "asc"));
-        const querySnapshot = await getDocs(q);
+        // Admin SDK: `chat_sessions` is closed to client SDK access by Firestore rules.
+        const querySnapshot = await adminDb
+            .collection("chat_sessions")
+            .doc(sessionId)
+            .collection("messages")
+            .orderBy("timestamp", "asc")
+            .get();
 
         const messages = querySnapshot.docs.map(doc => ({
             id: doc.id,

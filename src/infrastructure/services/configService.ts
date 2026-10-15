@@ -1,6 +1,10 @@
-import { db } from "@/infrastructure/firebase/client";
-import { doc, getDoc, setDoc, Timestamp } from "firebase/firestore";
+import "server-only";
+import { Timestamp } from "firebase-admin/firestore";
+import { adminDb } from "@/infrastructure/firebase/admin";
 import crypto from "crypto";
+
+// Server-only: `configurations` is closed to clients by Firestore rules, so the
+// MercadoPago credentials are read and written with the Admin SDK.
 
 const CONFIG_COLLECTION = "configurations";
 const MP_CONFIG_ID = "mercadopago";
@@ -42,11 +46,10 @@ export interface MercadoPagoConfig {
 
 export const configService = {
     getMercadoPagoConfig: async (decryptKeys = false): Promise<MercadoPagoConfig | null> => {
-        if (!db) throw new Error("Firestore not initialized");
-        const docSnap = await getDoc(doc(db, CONFIG_COLLECTION, MP_CONFIG_ID));
-        if (!docSnap.exists()) return null;
+        const docSnap = await adminDb.collection(CONFIG_COLLECTION).doc(MP_CONFIG_ID).get();
+        if (!docSnap.exists) return null;
 
-        const data = docSnap.data();
+        const data = docSnap.data()!;
         const resolve = (val: string) => (decryptKeys ? decryptConfigValue(val) : val);
 
         return {
@@ -64,8 +67,7 @@ export const configService = {
     },
 
     saveMercadoPagoConfig: async (config: MercadoPagoConfig): Promise<void> => {
-        if (!db) throw new Error("Firestore not initialized");
-        await setDoc(doc(db, CONFIG_COLLECTION, MP_CONFIG_ID), {
+        await adminDb.collection(CONFIG_COLLECTION).doc(MP_CONFIG_ID).set({
             activeMode: config.activeMode,
             sandbox: {
                 publicKey:   encryptConfigValue(config.sandbox.publicKey),

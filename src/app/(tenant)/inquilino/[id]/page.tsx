@@ -2,11 +2,25 @@
 
 import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
-import { alquileresService } from "@/infrastructure/services/alquileresService";
 import { Alquiler } from "@/domain/models/Alquiler";
+import type { TenantRentalView } from "@/infrastructure/services/server/tenantPortalAccess";
 import { format } from "date-fns";
 import { es } from "date-fns/locale";
 import { Download, AlertCircle, CheckCircle2, Clock, Calendar, Building2, User, ChevronRight } from "lucide-react";
+
+const toDate = (value: unknown) => (typeof value === "string" ? new Date(value) : undefined);
+
+// The API returns JSON (ISO date strings); restore Date objects as the page expects.
+const fromTenantView = (data: TenantRentalView): Alquiler => ({
+    ...data,
+    fechaInicio: toDate(data.fechaInicio),
+    fechaFin: toDate(data.fechaFin),
+    historialPagos: (data.historialPagos || []).map((p) => ({
+        ...p,
+        fechaVencimiento: toDate(p.fechaVencimiento),
+        fechaPago: toDate(p.fechaPago),
+    })),
+} as unknown as Alquiler);
 
 export default function TenantDashboardPage() {
     const params = useParams();
@@ -40,13 +54,18 @@ export default function TenantDashboardPage() {
                     return;
                 }
 
-                // Proceed to fetch
-                const data = await alquileresService.getAlquilerById(params.id as string);
-
-                if (!data) {
+                // Proceed to fetch (server checks the token issued at login for this rental)
+                const res = await fetch(`/api/inquilino/${encodeURIComponent(params.id as string)}`, {
+                    headers: { Authorization: `Bearer ${session.token || ""}` },
+                    cache: "no-store",
+                });
+                if (res.status === 401) {
+                    throw new Error("Acceso no autorizado");
+                }
+                if (!res.ok) {
                     throw new Error("Contrato no encontrado");
                 }
-                setRental(data);
+                setRental(fromTenantView(await res.json()));
             } catch (err: any) {
                 setError("No tenés permiso para ver este contrato o la sesión expiró.");
                 console.error(err);

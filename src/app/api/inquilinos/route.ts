@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { inquilinosService } from "@/infrastructure/services/inquilinosService";
+import { inquilinosAdminService } from "@/infrastructure/services/server/inquilinosAdminService";
 import { verifyAuth } from "@/lib/apiAuth";
 
 // GET - List all tenants for user
@@ -8,7 +8,7 @@ export async function GET(request: NextRequest) {
     if (authResult.error) return authResult.error;
 
     try {
-        const inquilinos = await inquilinosService.getInquilinos(authResult.user.uid);
+        const inquilinos = await inquilinosAdminService.getInquilinos(authResult.user.uid);
         return NextResponse.json(inquilinos);
     } catch (error: any) {
         return NextResponse.json({ error: "Error interno" }, { status: 500 });
@@ -22,7 +22,7 @@ export async function POST(request: NextRequest) {
 
     try {
         const body = await request.json();
-        const id = await inquilinosService.createInquilino({
+        const id = await inquilinosAdminService.createInquilino({
             ...body,
             userId: authResult.user.uid,
         });

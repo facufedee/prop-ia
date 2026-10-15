@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { MercadoPagoConfig, Payment } from "mercadopago";
 import { configService } from "@/infrastructure/services/configService";
-import { subscriptionService } from "@/infrastructure/services/subscriptionService";
+import { subscriptionAdminService } from "@/infrastructure/services/server/subscriptionAdminService";
 import { verifyAuth } from "@/lib/apiAuth";
 
 export async function POST(req: NextRequest) {
@@ -67,7 +67,7 @@ export async function POST(req: NextRequest) {
         const result = await payment.create({ body: paymentBody });
 
         if (result.status === "approved" && result.id) {
-            const activationResult = await subscriptionService.processPaymentWebhook(String(result.id));
+            const activationResult = await subscriptionAdminService.processPaymentWebhook(String(result.id));
             console.log(`[Direct Activation] ${activationResult.message}`);
         }
 

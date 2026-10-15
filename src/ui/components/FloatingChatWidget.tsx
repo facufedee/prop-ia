@@ -3,8 +3,6 @@
 import { useState, useRef, useEffect } from 'react';
 import { MessageCircle, X, Send, User, Phone, MessageSquare } from 'lucide-react';
 import { useAuth } from '@/ui/context/AuthContext';
-import { leadsService } from '@/infrastructure/services/leadsService';
-import { Timestamp } from 'firebase/firestore';
 
 export default function FloatingChatWidget() {
     const { user } = useAuth();
@@ -35,25 +33,23 @@ export default function FloatingChatWidget() {
         setIsSubmitting(true);
 
         try {
-            // We are saving this as a 'Lead' for Zeta Prop system.
-            // Using a system ID or the user's ID if logged in to track origin.
-            // If logged in, userId is the user's ID. If not, maybe a generic 'visitor' ID or we create a separate collection?
-            // The user asked to save it in "leads de consultas".
-            // createLead expects a valid Lead object structure.
-
-            await leadsService.createLead({
-                nombre: formData.nombre,
-                telefono: formData.telefono,
-                mensaje: formData.mensaje,
-                email: user?.email || 'anonimo@web.com', // Fallback email
-                tipo: 'consulta',
-                estado: 'nuevo',
-                origen: 'web',
-                userId: 'SYSTEM_ZETA_PROP', // Always assign to System/SuperAdmin
-                notas: user ? ['Usuario Logueado', `ID: ${user.uid}`] : ['Visitante Web'],
-                createdAt: new Date(),
-                updatedAt: new Date()
-            } as any); // Type casting comfortably as createLead handles the Omit
+            // Saved as a 'Lead' for the Zeta Prop system account. Visitors cannot write
+            // Firestore directly (rules), so the validated public endpoint creates it
+            // with the Admin SDK (and unifies it with an existing lead by email/phone).
+            const res = await fetch('/api/leads/public', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    nombre: formData.nombre.trim().slice(0, 60),
+                    telefono: formData.telefono.replace(/[^\d\s+\-()]/g, '').slice(0, 20),
+                    mensaje: formData.mensaje.slice(0, 500),
+                    email: user?.email || 'anonimo@web.com', // Fallback email
+                    tipo: 'consulta',
+                    origen: 'web',
+                    userId: 'SYSTEM_ZETA_PROP', // Always assign to System/SuperAdmin
+                }),
+            });
+            if (!res.ok) throw new Error(`Lead request failed: ${res.status}`);
 
             setIsSuccess(true);
             setFormData({ nombre: '', telefono: '', mensaje: '' });

@@ -1,7 +1,7 @@
 import type { Metadata } from 'next'
 import { cache } from 'react'
 import { notFound, permanentRedirect } from 'next/navigation'
-import { publicService } from '@/infrastructure/services/publicService'
+import { publicAgencyAdminService } from '@/infrastructure/services/server/publicAgencyAdminService'
 import { loadPublicProperty, toSerializable } from '@/app/(main)/[operation]/[slug]/propertySeo'
 import { propertyPath, SITE_URL } from '@/lib/seo/propertyUrl'
 import AgencyPropertiesClient from './AgencyPropertiesClient'
@@ -13,7 +13,7 @@ type Props = {
 /** Agency listing for /propiedades/{agencySlug}; shared by metadata and page within one request. */
 const loadAgencyListing = cache(async (slug: string) => {
     try {
-        const result = await publicService.getPropertiesByAgencySlug(slug)
+        const result = await publicAgencyAdminService.getPropertiesByAgencySlug(slug)
         return result ? toSerializable(result) : null
     } catch (error) {
         console.error('Error fetching agency listing:', error)

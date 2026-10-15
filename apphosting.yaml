@@ -91,3 +91,7 @@ env:
     secret: MAKE_SOCIAL_WEBHOOK_SECRET
     availability:
       - RUNTIME
+  - variable: PORTAL_JWT_SECRET
+    secret: PORTAL_JWT_SECRET
+    availability:
+      - RUNTIME

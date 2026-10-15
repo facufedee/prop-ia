@@ -1,11 +1,11 @@
-import { db } from "@/infrastructure/firebase/client";
-import { doc, getDoc, setDoc, collection, addDoc } from "firebase/firestore";
+import "server-only";
+import { adminDb } from "@/infrastructure/firebase/admin";
 import { EMAIL_COLORS, emailWordmarkHtml } from "@/lib/email/brandColors";
 
 const logSentEmail = async (to: string, subject: string, templateKey: string, status: 'success' | 'error', errorMsg?: string) => {
-    if (!db) return;
     try {
-        await addDoc(collection(db, "emailLogs"), {
+        // Admin SDK: `emailLogs` is closed to client SDK writes by Firestore rules.
+        await adminDb.collection("emailLogs").add({
             to,
             subject,
             type: templateKey,
@@ -50,12 +50,10 @@ const SETTINGS_DOC_REF = "email_notifications"; // Document ID in 'settings' col
 
 export const emailNotificationService = {
     getSettings: async (): Promise<NotificationSettings> => {
-        if (!db) return DEFAULT_SETTINGS;
-        const ref = doc(db, "settings", SETTINGS_DOC_REF);
-        const snap = await getDoc(ref);
+        const snap = await adminDb.collection("settings").doc(SETTINGS_DOC_REF).get();
 
-        if (snap.exists()) {
-            const data = snap.data();
+        if (snap.exists) {
+            const data = snap.data()!;
             return {
                 ...DEFAULT_SETTINGS,
                 ...data,
@@ -69,9 +67,7 @@ export const emailNotificationService = {
     },
 
     updateSettings: async (settings: NotificationSettings): Promise<void> => {
-        if (!db) throw new Error("Firestore not initialized");
-        const ref = doc(db, "settings", SETTINGS_DOC_REF);
-        await setDoc(ref, settings, { merge: true });
+        await adminDb.collection("settings").doc(SETTINGS_DOC_REF).set(settings, { merge: true });
     },
 
     sendNotification: async (event: keyof NotificationSettings['events'], data: any, subject: string, message: string, targetEmail?: string) => {

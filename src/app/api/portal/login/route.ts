@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
-import { db } from "@/infrastructure/firebase/client"; // adminAuth might not be available in client, using db directly
-import { collection, query, where, getDocs, doc, getDoc } from "firebase/firestore";
+// Admin SDK: `alquileres` is closed to unauthenticated client SDK access by Firestore rules.
+import { adminDb } from "@/infrastructure/firebase/admin";
 import { SignJWT } from "jose";
 import { BRAND_COLORS } from "@/lib/email/brandColors";
 
@@ -20,11 +20,10 @@ export async function POST(request: NextRequest) {
         }
 
         // 1. Find Contract (Alquiler) by contractCode
-        const q = query(
-            collection(db, "alquileres"),
-            where("contractCode", "==", contractCode)
-        );
-        const querySnapshot = await getDocs(q);
+        const querySnapshot = await adminDb
+            .collection("alquileres")
+            .where("contractCode", "==", contractCode)
+            .get();
 
         if (querySnapshot.empty) {
             return NextResponse.json({ message: "Contrato no encontrado o código inválido" }, { status: 401 });
@@ -49,17 +48,17 @@ export async function POST(request: NextRequest) {
         };
 
         if (agencyUserId) {
-            const userDocSnap = await getDoc(doc(db, "users", agencyUserId));
-            if (userDocSnap.exists()) {
-                const userData = userDocSnap.data();
+            const userDocSnap = await adminDb.collection("users").doc(agencyUserId).get();
+            if (userDocSnap.exists) {
+                const userData = userDocSnap.data()!;
                 // Check if Agency is PRO (Role based) to enable White Label
                 const roleId = userData.roleId;
                 let isPro = false;
 
                 if (roleId) {
-                    const roleDocSnap = await getDoc(doc(db, "roles", roleId));
-                    if (roleDocSnap.exists()) {
-                        const roleName = roleDocSnap.data().name;
+                    const roleDocSnap = await adminDb.collection("roles").doc(roleId).get();
+                    if (roleDocSnap.exists) {
+                        const roleName = roleDocSnap.data()!.name;
                         // Check for "Pro" in name or specific ID. Ideally Use a constant.
                         // Flexible check: Contains "Pro" (case insensitive)
                         isPro = /pro/i.test(roleName);
