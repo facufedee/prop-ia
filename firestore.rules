@@ -1,228 +1,595 @@
 rules_version = '2';
+
+// Firestore security rules for the `propia` database.
+//
+// Only the CLIENT (web) SDK is subject to these rules. Server code that uses the
+// Admin SDK (src/infrastructure/firebase/admin) bypasses them entirely. Server
+// code that uses the WEB SDK (e.g. blogService during /blog prerender, sitemap,
+// generateMetadata) runs UNAUTHENTICATED and is treated as an anonymous visitor.
+//
+// Actors:
+//   - anonymous visitor (public site, agency sites, server-side web-SDK rendering)
+//   - owner: the logged-in agency account; data is owned via `userId == auth.uid`
+//   - team member (role "Agente"): users/{uid}.organizationId points at the owner uid
+//   - admin: platform owner email, or a user whose role name is
+//     "Super Admin" / "Administrador" (users/{uid}.roleId -> roles/{roleId}.name),
+//     mirroring verifyAdmin() in src/lib/apiAuth.ts. roleId is a generated doc id,
+//     never the literal 'admin'.
+//   - permission holders: roles/{roleId}.permissions contains a dashboard route
+//     (same model as PermissionGuard), used for global modules (blog, developments).
 service cloud.firestore {
   match /databases/{database}/documents {
-    
-    // Helper Functions
+
+    // ------------------------------------------------------------------
+    // Helpers
+    // ------------------------------------------------------------------
+
     function isAuthenticated() {
       return request.auth != null;
     }
-    
+
     function isOwner(userId) {
       return isAuthenticated() && request.auth.uid == userId;
     }
-    
+
+    function userPath(uid) {
+      return /databases/$(database)/documents/users/$(uid);
+    }
+
+    function rolePath(roleId) {
+      return /databases/$(database)/documents/roles/$(roleId);
+    }
+
+    // The caller's users/{uid} document data, or an empty map when it does not exist.
+    function myUserData() {
+      return exists(userPath(request.auth.uid))
+        ? get(userPath(request.auth.uid)).data
+        : {};
+    }
+
+    // The caller's role document data, or an empty map.
+    function myRoleData() {
+      let roleId = myUserData().get('roleId', null);
+      return (roleId is string && roleId.size() > 0 && exists(rolePath(roleId)))
+        ? get(rolePath(roleId)).data
+        : {};
+    }
+
+    function myRoleName() {
+      return isAuthenticated() ? myRoleData().get('name', '') : '';
+    }
+
+    // Platform owner account (same hardcoded email as src/lib/apiAuth.ts).
+    function isPlatformOwner() {
+      return isAuthenticated() &&
+             request.auth.token.get('email', '') == 'facundoflores8@gmail.com' &&
+             request.auth.token.get('email_verified', false) == true;
+    }
+
     function isAdmin() {
-      return isAuthenticated() && 
-             exists(/databases/$(database)/documents/users/$(request.auth.uid)) &&
-             get(/databases/$(database)/documents/users/$(request.auth.uid)).data.roleId == 'admin';
+      return isAuthenticated() &&
+             (isPlatformOwner() || myRoleName() in ['Super Admin', 'Administrador']);
     }
-    
-    function validateString(value, minLen, maxLen) {
-      return value is string && 
-             value.size() >= minLen && 
-             value.size() <= maxLen;
+
+    // Role-based dashboard permission (PermissionGuard model). Admins always pass.
+    // The `path(route)` alternative exists only because the Rules API test endpoint
+    // turns mocked strings that start with "/" into path values; stored role
+    // permissions are plain strings, so it never matches in production.
+    function rolePermsInclude(route) {
+      let perms = myRoleData().get('permissions', []);
+      return route in perms || path(route) in perms;
     }
-    
-    function validateEmail(email) {
-      return email is string && email.matches('^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$');
+
+    function hasPermission(route) {
+      return isAuthenticated() && (isAdmin() || rolePermsInclude(route));
     }
-    
-    // Users Collection
-    // Only authenticated users can read profiles (agents are looked up by authenticated clients)
+
+    // Organization the caller belongs to: users/{uid}.organizationId for team
+    // members, the caller's own uid for agency owners.
+    function myOrgId() {
+      return myUserData().get('organizationId', request.auth.uid);
+    }
+
+    function isOrgMember(orgId) {
+      return isAuthenticated() && (request.auth.uid == orgId || myOrgId() == orgId);
+    }
+
+    // Caller e-mail (lower-case) for invitation matching.
+    function myEmail() {
+      return request.auth.token.get('email', '').lower();
+    }
+
+    // Owner-scoped helpers for collections keyed by a `userId` field.
+    function ownsExisting() {
+      return isAuthenticated() && resource.data.userId == request.auth.uid;
+    }
+
+    function createsOwned() {
+      return isAuthenticated() && request.resource.data.userId == request.auth.uid;
+    }
+
+    function keepsOwner() {
+      return request.resource.data.userId == resource.data.userId;
+    }
+
+    function changedKeys() {
+      return request.resource.data.diff(resource.data).affectedKeys();
+    }
+
+    // ------------------------------------------------------------------
+    // users/{userId}
+    //   get:    anyone (public agency info on portal/property pages, read by the
+    //           anonymous publicService.getAgencyById). NOTE: exposes the whole
+    //           profile document (email, phone, ...) — see firestore-rules.md.
+    //   list:   admin; owner (query by __name__); org members (organizationId == my org).
+    //   create: self only, with the default role ("Cliente Básico") or "Agente"
+    //           (invitation flow, requires organizationId); no privileged flags.
+    //   update: self without touching privileged fields; admin anything.
+    //   delete: admin.
+    // ------------------------------------------------------------------
     match /users/{userId} {
-      allow read: if isAuthenticated();
-      allow create: if isOwner(userId) &&
-                      validateEmail(request.resource.data.email) &&
-                      validateString(request.resource.data.displayName, 2, 100);
-      allow update: if isOwner(userId) || isAdmin();
+      function protectedUserFields() {
+        return ['roleId', 'organizationId', 'branchId', 'disabled', 'isVerified',
+                'verificationStatus', 'email', 'uid', 'createdAt'];
+      }
+
+      function roleNameOf(roleId) {
+        return exists(rolePath(roleId)) ? get(rolePath(roleId)).data.get('name', '') : '';
+      }
+
+      function validSelfSignupRole() {
+        let data = request.resource.data;
+        let roleId = data.get('roleId', null);
+        return roleId == null ||
+               (roleId is string && roleNameOf(roleId) == 'Cliente Básico' &&
+                  !('organizationId' in data)) ||
+               (roleId is string && roleNameOf(roleId) == 'Agente' &&
+                  data.get('organizationId', null) is string &&
+                  data.organizationId != userId);
+      }
+
+      allow get: if true;
+      allow list: if isAdmin() ||
+                     isOwner(userId) ||
+                     (isAuthenticated() && resource.data.organizationId == myOrgId());
+      allow create: if isAdmin() ||
+                       (isOwner(userId) &&
+                        validSelfSignupRole() &&
+                        !request.resource.data.keys().hasAny(['disabled', 'isVerified', 'verificationStatus']));
+      allow update: if isAdmin() ||
+                       (isOwner(userId) && !changedKeys().hasAny(protectedUserFields()));
       allow delete: if isAdmin();
-    }
-    
-    // Properties Collection
-    match /properties/{propertyId} {
-      allow read: if true; // Public read for property listings
-      allow create: if isAuthenticated() && 
-                      request.resource.data.userId == request.auth.uid &&
-                      validateString(request.resource.data.title, 5, 100) &&
-                      validateString(request.resource.data.description, 20, 2000) &&
-                      request.resource.data.price is number &&
-                      request.resource.data.price > 0;
-      allow update: if isOwner(resource.data.userId) || isAdmin();
-      allow delete: if isOwner(resource.data.userId) || isAdmin();
-    }
-    
-    // Agents Collection
-    match /agents/{agentId} {
-      allow read: if isAuthenticated();
-      allow create: if isAuthenticated() && 
-                      request.resource.data.userId == request.auth.uid &&
-                      validateEmail(request.resource.data.email) &&
-                      validateString(request.resource.data.nombre, 2, 100);
-      allow update: if isOwner(resource.data.userId) || isAdmin();
-      allow delete: if isOwner(resource.data.userId) || isAdmin();
-    }
-    
-    // Leads Collection
-    // Public creation is intentional (contact forms from visitors), but the userId
-    // field must match the agent being contacted (enforced server-side via Admin SDK).
-    // We cannot enforce it here because visitors are unauthenticated.
-    // Mitigation: the server validates and sanitizes all fields before writing.
-    match /leads/{leadId} {
-      allow read: if isOwner(resource.data.userId) || isAdmin();
-      allow create: if true;
-      allow update: if isOwner(resource.data.userId) || isAdmin();
-      allow delete: if isOwner(resource.data.userId) || isAdmin();
+
+      // users/{userId}/config/{docId} — per-user settings (receipt counter).
+      match /config/{docId} {
+        allow read, write: if isOwner(userId) || isAdmin();
+      }
     }
 
-    // Visitas Collection (Calendario)
-    // Missing from this file even though src/infrastructure/services/visitasService.ts
-    // and the dashboard's Calendario page already query it directly from the client SDK —
-    // without this block it silently falls through to the "default deny" rule at the
-    // bottom of this file. Added while building the mobile Calendario module.
-    match /visitas/{visitaId} {
-      allow read: if isOwner(resource.data.userId) || isAdmin();
-      allow create: if isAuthenticated() &&
-                      request.resource.data.userId == request.auth.uid &&
-                      validateString(request.resource.data.clienteNombre, 1, 200) &&
-                      validateString(request.resource.data.propiedadDireccion, 1, 300);
-      allow update: if isOwner(resource.data.userId) || isAdmin();
-      allow delete: if isOwner(resource.data.userId) || isAdmin();
-    }
-
-    // Alquileres Collection (contratos de alquiler)
-    // Same gap as "visitas" above: missing from this file even though
-    // src/infrastructure/services/alquileresService.ts queries it directly
-    // from the client SDK. This block only covers the agent-owner path
-    // (isOwner/isAdmin), which is all the mobile Alquileres module needs.
-    //
-    // NOT covered here on purpose: src/app/(tenant)/inquilino/page.tsx calls
-    // alquileresService.verifyTenantAccess(), which queries this same
-    // collection by `codigoAlquiler` from an UNAUTHENTICATED tenant-facing
-    // page (no isOwner/isAdmin possible there). This collection holds DNI
-    // and bank details (garante, seguroCaucion, cuentaBancaria/cbu) for
-    // both inquilino and propietario, so a permissive rule that makes that
-    // portal work is not something to improvise as a side effect of an
-    // unrelated feature — getting the query-scoping wrong here could expose
-    // every tenant's contract to every visitor. That needs its own
-    // deliberate pass (possibly moving the lookup behind an API route with
-    // the Admin SDK instead of a client-side rule at all), not a guess.
-    match /alquileres/{alquilerId} {
-      allow read: if isOwner(resource.data.userId) || isAdmin();
-      allow create: if isAuthenticated() && request.resource.data.userId == request.auth.uid;
-      allow update: if isOwner(resource.data.userId) || isAdmin();
-      allow delete: if isOwner(resource.data.userId) || isAdmin();
-    }
-
-    // Tickets Collection
-    match /tickets/{ticketId} {
-      allow read: if isOwner(resource.data.userId) || isAdmin();
-      allow create: if isAuthenticated() && 
-                      request.resource.data.userId == request.auth.uid &&
-                      validateString(request.resource.data.title, 5, 200) &&
-                      validateString(request.resource.data.description, 10, 5000);
-      allow update: if isOwner(resource.data.userId) || isAdmin();
-      allow delete: if isAdmin();
-    }
-    
-    // Ticket Messages Collection
-    // Only the ticket owner or admin can read messages
-    match /ticket_messages/{messageId} {
-      allow read: if isOwner(resource.data.userId) || isAdmin();
-      allow create: if isAuthenticated() &&
-                      request.resource.data.userId == request.auth.uid &&
-                      validateString(request.resource.data.message, 1, 5000);
-      allow update: if false; // Messages cannot be edited
-      allow delete: if isAdmin();
-    }
-    
-    // Audit Logs Collection
-    match /audit_logs/{logId} {
-      allow read: if isAdmin();
-      allow create: if isAuthenticated();
-      allow update: if false; // Logs are immutable
-      allow delete: if false; // Logs cannot be deleted
-    }
-    
-    // Roles Collection
+    // ------------------------------------------------------------------
+    // roles / permissions_list — read by any signed-in user (role resolution,
+    // invitation flow); written by admins only.
+    // ------------------------------------------------------------------
     match /roles/{roleId} {
       allow read: if isAuthenticated();
       allow write: if isAdmin();
     }
-    
-    // Plans Collection (Subscriptions)
-    match /plans/{planId} {
-      allow read: if true; // Public read for pricing
+
+    match /permissions_list/{permissionId} {
+      allow read: if isAuthenticated();
       allow write: if isAdmin();
     }
-    
-    // Subscriptions Collection
-    match /subscriptions/{subscriptionId} {
-      allow read: if isOwner(resource.data.userId) || isAdmin();
-      allow create: if isAuthenticated() && request.resource.data.userId == request.auth.uid;
-      allow update: if isOwner(resource.data.userId) || isAdmin();
-      allow delete: if isAdmin();
-    }
-    
-    // Payments Collection
-    match /payments/{paymentId} {
-      allow read: if isOwner(resource.data.userId) || isAdmin();
-      allow create: if isAuthenticated() && request.resource.data.userId == request.auth.uid;
-      allow update: if isAdmin(); // Only admins can update payment status
-      allow delete: if false; // Payments cannot be deleted
-    }
-    
-    // Transactions Collection
-    match /transactions/{transactionId} {
-      allow read: if isOwner(resource.data.userId) || isAdmin();
-      allow create: if isAuthenticated() && request.resource.data.userId == request.auth.uid;
-      allow update: if isOwner(resource.data.userId) || isAdmin();
-      allow delete: if isAdmin();
-    }
-    
-    // Commission Configuration
-    match /commission_config/{configId} {
-      allow read: if isOwner(resource.data.userId) || isAdmin();
-      allow write: if isOwner(resource.data.userId) || isAdmin();
-    }
-    
-    // Sites Collection (portales inmobiliarios públicos)
-    match /sites/{siteId} {
-      // Lectura pública para portales y ruteo
-      allow read: if true;
 
-      // Solo el dueño puede crear su propio sitio
+    // ------------------------------------------------------------------
+    // plans — public pricing; admins manage. addons — signed-in read; admins manage.
+    // ------------------------------------------------------------------
+    match /plans/{planId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    match /addons/{addonId} {
+      allow read: if isAuthenticated();
+      allow write: if isAdmin();
+    }
+
+    // ------------------------------------------------------------------
+    // properties
+    //   read:   anyone when publishToPortal == true or status == 'active'
+    //           (public portal / agency sites / property detail); owner and
+    //           admin always. Public queries MUST constrain on one of those fields.
+    //   create: owner (userId == auth.uid); admin (backup restore).
+    //   update: owner, userId immutable; admin.
+    //   delete: owner; admin.
+    // ------------------------------------------------------------------
+    match /properties/{propertyId} {
+      allow read: if resource.data.publishToPortal == true ||
+                     resource.data.status == 'active' ||
+                     ownsExisting() ||
+                     isAdmin();
+      allow create: if createsOwned() || isAdmin();
+      allow update: if (ownsExisting() && keepsOwner()) || isAdmin();
+      allow delete: if ownsExisting() || isAdmin();
+    }
+
+    // ------------------------------------------------------------------
+    // Owner-scoped business collections (field `userId` = agency owner uid).
+    //   read/update/delete: owner (userId immutable) or admin.
+    //   create: owner (userId == auth.uid) or admin.
+    // ------------------------------------------------------------------
+    match /alquileres/{alquilerId} {
+      // Holds DNI and bank details. The tenant portal (/inquilino) and
+      // /api/portal/login query it unauthenticated: NOT allowed here on purpose;
+      // those flows must move to the Admin SDK (see firestore-rules.md).
+      allow read: if ownsExisting() || isAdmin();
+      allow create: if createsOwned() || isAdmin();
+      allow update: if (ownsExisting() && keepsOwner()) || isAdmin();
+      allow delete: if ownsExisting() || isAdmin();
+    }
+
+    match /inquilinos/{inquilinoId} {
+      allow read: if ownsExisting() || isAdmin();
+      allow create: if createsOwned() || isAdmin();
+      allow update: if (ownsExisting() && keepsOwner()) || isAdmin();
+      allow delete: if ownsExisting() || isAdmin();
+    }
+
+    match /propietarios/{propietarioId} {
+      allow read: if ownsExisting() || isAdmin();
+      allow create: if createsOwned() || isAdmin();
+      allow update: if (ownsExisting() && keepsOwner()) || isAdmin();
+      allow delete: if ownsExisting() || isAdmin();
+    }
+
+    // Leads: public contact forms go through /api/leads and /api/leads/public
+    // (Admin SDK). Admins read the platform inbox (userId 'SYSTEM_ZETA_PROP').
+    match /leads/{leadId} {
+      allow read: if ownsExisting() || isAdmin();
+      allow create: if createsOwned() || isAdmin();
+      allow update: if (ownsExisting() && keepsOwner()) || isAdmin();
+      allow delete: if ownsExisting() || isAdmin();
+    }
+
+    match /visitas/{visitaId} {
+      allow read: if ownsExisting() || isAdmin();
+      allow create: if createsOwned() || isAdmin();
+      allow update: if (ownsExisting() && keepsOwner()) || isAdmin();
+      allow delete: if ownsExisting() || isAdmin();
+    }
+
+    match /ventas/{ventaId} {
+      allow read: if ownsExisting() || isAdmin();
+      allow create: if createsOwned() || isAdmin();
+      allow update: if (ownsExisting() && keepsOwner()) || isAdmin();
+      allow delete: if ownsExisting() || isAdmin();
+    }
+
+    match /transacciones/{transaccionId} {
+      allow read: if ownsExisting() || isAdmin();
+      allow create: if createsOwned() || isAdmin();
+      allow update: if (ownsExisting() && keepsOwner()) || isAdmin();
+      allow delete: if ownsExisting() || isAdmin();
+    }
+
+    match /carteles/{cartelId} {
+      allow read: if ownsExisting() || isAdmin();
+      allow create: if createsOwned() || isAdmin();
+      allow update: if (ownsExisting() && keepsOwner()) || isAdmin();
+      allow delete: if ownsExisting() || isAdmin();
+    }
+
+    // Commission configuration: owner manages; team members of the org may read
+    // it (agentes/nuevo resolves it by the organization id).
+    match /configuracion_comisiones/{configId} {
+      allow read: if ownsExisting() || isOrgMember(resource.data.userId) || isAdmin();
+      allow create: if createsOwned() || isAdmin();
+      allow update: if (ownsExisting() && keepsOwner()) || isAdmin();
+      allow delete: if ownsExisting() || isAdmin();
+    }
+
+    // ------------------------------------------------------------------
+    // agentes — owned by the agency (userId). The invited agent may read its own
+    // record (authUserId) and link it once during /invitacion/[token] signup when
+    // its auth e-mail matches the record e-mail.
+    // ------------------------------------------------------------------
+    match /agentes/{agenteId} {
+      function linksInvitedAgent() {
+        return isAuthenticated() &&
+               resource.data.get('authUserId', null) == null &&
+               resource.data.get('email', '') is string &&
+               resource.data.get('email', '').lower() == myEmail() &&
+               myEmail() != '' &&
+               changedKeys().hasOnly(['authUserId', 'phone', 'updatedAt']) &&
+               request.resource.data.authUserId == request.auth.uid;
+      }
+
+      allow read: if ownsExisting() ||
+                     (isAuthenticated() && resource.data.authUserId == request.auth.uid) ||
+                     isAdmin();
+      allow create: if createsOwned() || isAdmin();
+      allow update: if (ownsExisting() && keepsOwner()) || linksInvitedAgent() || isAdmin();
+      allow delete: if ownsExisting() || isAdmin();
+    }
+
+    // ------------------------------------------------------------------
+    // invitations — created by an org owner for its own organization; the
+    // invited user (matching e-mail) may read it and mark it used once.
+    // Anonymous token lookup is NOT allowed (see firestore-rules.md).
+    // ------------------------------------------------------------------
+    match /invitations/{invitationId} {
+      function isInvitee() {
+        return isAuthenticated() && myEmail() != '' &&
+               resource.data.get('email', '').lower() == myEmail();
+      }
+
+      allow read: if (isAuthenticated() && resource.data.organizationId == request.auth.uid) ||
+                     isInvitee() ||
+                     isAdmin();
+      allow create: if (isAuthenticated() &&
+                        request.resource.data.organizationId == myOrgId() &&
+                        request.resource.data.status == 'pending') ||
+                       isAdmin();
+      allow update: if (isInvitee() &&
+                        resource.data.status == 'pending' &&
+                        request.resource.data.status == 'used' &&
+                        changedKeys().hasOnly(['status'])) ||
+                       (isAuthenticated() && resource.data.organizationId == request.auth.uid &&
+                        request.resource.data.organizationId == resource.data.organizationId) ||
+                       isAdmin();
+      allow delete: if (isAuthenticated() && resource.data.organizationId == request.auth.uid) ||
+                       isAdmin();
+    }
+
+    // ------------------------------------------------------------------
+    // branches — keyed by organizationId (owner uid). Org members read; owner writes.
+    // ------------------------------------------------------------------
+    match /branches/{branchId} {
+      allow read: if isOrgMember(resource.data.organizationId) || isAdmin();
+      allow create: if (isAuthenticated() &&
+                        request.resource.data.organizationId == request.auth.uid) ||
+                       isAdmin();
+      allow update: if (isAuthenticated() &&
+                        resource.data.organizationId == request.auth.uid &&
+                        request.resource.data.organizationId == resource.data.organizationId) ||
+                       isAdmin();
+      allow delete: if (isAuthenticated() && resource.data.organizationId == request.auth.uid) ||
+                       isAdmin();
+    }
+
+    // ------------------------------------------------------------------
+    // rentalServices — monthly service charges of a rental. Owner field is
+    // `createdBy`; the parent rental owner may also read.
+    // ------------------------------------------------------------------
+    match /rentalServices/{serviceId} {
+      allow read: if (isAuthenticated() && resource.data.createdBy == request.auth.uid) ||
+                     isAdmin() ||
+                     (isAuthenticated() &&
+                      get(/databases/$(database)/documents/alquileres/$(resource.data.rentalId)).data.userId == request.auth.uid);
+      allow create: if (isAuthenticated() && request.resource.data.createdBy == request.auth.uid) ||
+                       isAdmin();
+      allow update: if (isAuthenticated() &&
+                        resource.data.createdBy == request.auth.uid &&
+                        request.resource.data.createdBy == resource.data.createdBy) ||
+                       isAdmin();
+      allow delete: if (isAuthenticated() && resource.data.createdBy == request.auth.uid) ||
+                       isAdmin();
+    }
+
+    // ------------------------------------------------------------------
+    // tickets / ticket_messages — support desk.
+    //   tickets: owner reads/creates/updates (userId immutable); admin all; delete admin.
+    //   ticket_messages: admin or the ticket owner reads; author creates as itself
+    //   (non-admins only on their own ticket and with isAdmin == false); immutable.
+    // ------------------------------------------------------------------
+    match /tickets/{ticketId} {
+      allow read: if ownsExisting() || isAdmin();
+      allow create: if createsOwned() || isAdmin();
+      allow update: if (ownsExisting() && keepsOwner()) || isAdmin();
+      allow delete: if isAdmin();
+    }
+
+    match /ticket_messages/{messageId} {
+      function ticketOwner(ticketId) {
+        return get(/databases/$(database)/documents/tickets/$(ticketId)).data.userId;
+      }
+
+      allow read: if isAdmin() ||
+                     (isAuthenticated() && resource.data.userId == request.auth.uid) ||
+                     (isAuthenticated() && ticketOwner(resource.data.ticketId) == request.auth.uid);
       allow create: if isAuthenticated() &&
                        request.resource.data.userId == request.auth.uid &&
-                       validateString(request.resource.data.slug, 3, 30) &&
-                       request.resource.data.slug.matches('^[a-z0-9-]+$') &&
-                       validateString(request.resource.data.nombre, 2, 100);
-
-      // Solo el dueño o admin pueden editar
-      allow update: if isOwner(resource.data.userId) || isAdmin();
-
-      // Solo admin puede eliminar
+                       (isAdmin() ||
+                        (request.resource.data.get('isAdmin', false) == false &&
+                         ticketOwner(request.resource.data.ticketId) == request.auth.uid));
+      allow update: if false;
       allow delete: if isAdmin();
     }
 
-    // Carteles Collection (sign/billboard inventory tracking)
-    match /carteles/{cartelId} {
-      allow read: if isOwner(resource.data.userId) || isAdmin();
-      allow create: if isAuthenticated() && request.resource.data.userId == request.auth.uid;
-      allow update: if isOwner(resource.data.userId) || isAdmin();
-      allow delete: if isOwner(resource.data.userId) || isAdmin();
+    // ------------------------------------------------------------------
+    // audit_logs — append-only. Author writes its own entries; the agency owner
+    // reads its organization's log; admins read all.
+    // ------------------------------------------------------------------
+    match /audit_logs/{logId} {
+      allow read: if (isAuthenticated() && resource.data.organizationId == request.auth.uid) ||
+                     isAdmin();
+      allow create: if (isAuthenticated() && request.resource.data.userId == request.auth.uid) ||
+                       isAdmin();
+      allow update, delete: if false;
     }
 
-    // Property Stats (public view counter)
-    // Written only by /api/properties/[id]/view through the Admin SDK (bypasses rules).
-    // The property owner reads their own stats on the dashboard home.
+    // ------------------------------------------------------------------
+    // notifications — in-app notifications.
+    //   read:   admin; the target user; users whose role name == targetRole.
+    //   create: admin anything; any signed-in user may only notify the
+    //           "Administrador" role (trial/extension/payment/new-user alerts).
+    //   update: a reader may only add itself to readBy.
+    //   delete: admin.
+    // ------------------------------------------------------------------
+    match /notifications/{notificationId} {
+      function canReadNotification() {
+        return isAdmin() ||
+               (isAuthenticated() && resource.data.targetUserId == request.auth.uid) ||
+               (isAuthenticated() && resource.data.targetRole == myRoleName());
+      }
+
+      allow read: if canReadNotification();
+      allow create: if isAdmin() ||
+                       (isAuthenticated() &&
+                        request.resource.data.targetRole == 'Administrador' &&
+                        request.resource.data.get('targetUserId', null) == null &&
+                        request.resource.data.readBy == []);
+      allow update: if isAdmin() ||
+                       (canReadNotification() &&
+                        changedKeys().hasOnly(['readBy']) &&
+                        request.resource.data.readBy.hasAll(resource.data.readBy) &&
+                        request.resource.data.readBy.toSet()
+                          .difference(resource.data.readBy.toSet())
+                          .hasOnly([request.auth.uid]));
+      allow delete: if isAdmin();
+    }
+
+    // ------------------------------------------------------------------
+    // subscriptions / payments — billing. Written by admins (and by the payment
+    // webhook, which must use the Admin SDK). Owner reads its own; the owner may
+    // only cancel its own subscription.
+    // ------------------------------------------------------------------
+    match /subscriptions/{subscriptionId} {
+      allow read: if ownsExisting() || isAdmin();
+      allow create: if isAdmin();
+      allow update: if isAdmin() ||
+                       (ownsExisting() &&
+                        changedKeys().hasOnly(['status', 'cancelledAt', 'updatedAt']) &&
+                        request.resource.data.status == 'cancelled');
+      allow delete: if isAdmin();
+    }
+
+    match /payments/{paymentId} {
+      allow read: if ownsExisting() || isAdmin();
+      allow create, update: if isAdmin();
+      allow delete: if false;
+    }
+
+    // ------------------------------------------------------------------
+    // sites — agency public sites. Public pages render through the Admin SDK
+    // (src/app/sites/[slug]/siteData.ts); clients read published sites, and any
+    // signed-in user may read sites (slug availability check). Owner writes.
+    // ------------------------------------------------------------------
+    match /sites/{siteId} {
+      allow read: if resource.data.published == true || isAuthenticated();
+      allow create: if (createsOwned() &&
+                        request.resource.data.slug is string &&
+                        request.resource.data.slug.matches('^[a-z0-9-]+$')) ||
+                       isAdmin();
+      allow update: if (ownsExisting() && keepsOwner() &&
+                        request.resource.data.slug is string &&
+                        request.resource.data.slug.matches('^[a-z0-9-]+$')) ||
+                       isAdmin();
+      allow delete: if isAdmin();
+    }
+
+    // ------------------------------------------------------------------
+    // blog_posts — platform blog.
+    //   read:  anyone when published == true (public /blog, sitemap, prerender);
+    //          blog managers read drafts.
+    //   write: roles with the "/dashboard/blog" permission (PermissionGuard model).
+    // ------------------------------------------------------------------
+    match /blog_posts/{postId} {
+      allow read: if resource.data.published == true || hasPermission('/dashboard/blog');
+      allow write: if hasPermission('/dashboard/blog');
+    }
+
+    // ------------------------------------------------------------------
+    // developments (Emprendimientos) — global collection without an owner field;
+    // restricted to roles with the "/dashboard/emprendimientos" permission.
+    // ------------------------------------------------------------------
+    match /developments/{developmentId} {
+      allow read, write: if hasPermission('/dashboard/emprendimientos');
+    }
+
+    // ------------------------------------------------------------------
+    // contact_messages — landing contact form (anonymous create, validated);
+    // admins read and manage.
+    // ------------------------------------------------------------------
+    match /contact_messages/{messageId} {
+      allow create: if request.resource.data.keys().hasOnly(
+                         ['name', 'email', 'phone', 'company', 'message', 'read', 'createdAt']) &&
+                       request.resource.data.name is string &&
+                       request.resource.data.name.size() <= 100 &&
+                       request.resource.data.email is string &&
+                       request.resource.data.email.size() <= 200 &&
+                       request.resource.data.message is string &&
+                       request.resource.data.message.size() <= 5000 &&
+                       request.resource.data.read == false;
+      allow read, update, delete: if isAdmin();
+    }
+
+    // ------------------------------------------------------------------
+    // Admin-only configuration.
+    //   settings (email notification settings), configurations (encrypted
+    //   MercadoPago credentials): admin read/write.
+    //   emailLogs: admin read; written server-side only.
+    // ------------------------------------------------------------------
+    match /settings/{settingId} {
+      allow read, write: if isAdmin();
+    }
+
+    match /configurations/{configId} {
+      allow read, write: if isAdmin();
+    }
+
+    match /emailLogs/{logId} {
+      allow read: if isAdmin();
+      allow write: if false;
+    }
+
+    // ------------------------------------------------------------------
+    // property_stats — public view counter written only by
+    // /api/properties/[id]/view (Admin SDK). The property owner reads its stats.
+    // ------------------------------------------------------------------
     match /property_stats/{propertyId} {
       allow read: if (isAuthenticated() && resource.data.ownerId == request.auth.uid) || isAdmin();
       allow write: if false;
     }
 
-    // Property view dedupe keys (Admin SDK only; TTL policy on expiresAt)
+    // ------------------------------------------------------------------
+    // Server-only collections (Admin SDK). Explicitly closed to clients.
+    // chat_sessions is written by /api/chat/* and the Twilio webhook, which must
+    // move to the Admin SDK (see firestore-rules.md).
+    // ------------------------------------------------------------------
     match /property_view_keys/{keyId} {
       allow read, write: if false;
+    }
+
+    match /newsletter_subscribers/{subscriberId} {
+      allow read, write: if false;
+    }
+
+    match /newsletters/{newsletterId} {
+      allow read, write: if false;
+    }
+
+    match /announcements/{announcementId} {
+      allow read, write: if false;
+    }
+
+    match /emailTemplates/{templateId} {
+      allow read, write: if false;
+    }
+
+    match /verification/{verificationId} {
+      allow read, write: if false;
+    }
+
+    match /configuration/{configId} {
+      allow read, write: if false;
+    }
+
+    match /chat_sessions/{sessionId} {
+      allow read, write: if false;
+
+      match /messages/{messageId} {
+        allow read, write: if false;
+      }
     }
 
     // Default deny all other collections
