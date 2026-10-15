@@ -20,6 +20,7 @@ const PublicMap = dynamic(() => import("@/ui/components/properties/public/Public
 
 import ContactModal from "@/ui/components/properties/public/ContactModal";
 import PropertyDisclaimer from "@/ui/components/properties/public/PropertyDisclaimer";
+import { useTrackPropertyView } from "@/lib/useTrackPropertyView";
 
 import { formatDistanceToNow } from 'date-fns';
 import { es } from 'date-fns/locale';
@@ -67,6 +68,8 @@ export default function PropertyDetailPage({ id: propId, initialProperty }: Prop
 
     const [isSaved, setIsSaved] = useState(false);
     const touchStartX = useRef(0);
+
+    useTrackPropertyView(property?.id);
 
     useEffect(() => {
         const load = async () => {

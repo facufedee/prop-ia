@@ -40,6 +40,7 @@ interface SidebarContactCardProps {
 
 import { trackContact } from "@/lib/trackContact";
 import { formatPropertyPrice } from "@/ui/utils/propertyPrice";
+import { useTrackPropertyView } from "@/lib/useTrackPropertyView";
 
 type FormErrors = { nombre?: string; email?: string; telefono?: string; mensaje?: string };
 
@@ -244,6 +245,8 @@ export default function PropiedadDetailPage() {
     const [lightboxOpen, setLightboxOpen] = useState(false);
     const [otherProperties, setOtherProperties] = useState<PublicProperty[]>([]);
     const touchStartX = useRef(0);
+
+    useTrackPropertyView(property?.id);
 
     useEffect(() => {
         if (!params?.id) return;

@@ -1,9 +1,9 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import Image from "next/image";
 import { db, auth } from "@/infrastructure/firebase/client";
-import { collection, query, where, getDocs, getDoc, doc, orderBy } from "firebase/firestore";
+import { collection, query, where, getDocs, getDoc, doc, orderBy, limit } from "firebase/firestore";
 import { onAuthStateChanged } from "firebase/auth";
 import { leadsService } from "@/infrastructure/services/leadsService";
 import { alquileresService } from "@/infrastructure/services/alquileresService";
@@ -27,6 +27,9 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useBranchContext } from "@/infrastructure/context/BranchContext";
 import { AnnouncementBanner } from "@/ui/components/dashboard/AnnouncementBanner";
+import { RecentPropertiesGrid, DashboardProperty } from "@/ui/components/dashboard/RecentPropertiesGrid";
+import { PropertyRankingList, PropertyRankingRow } from "@/ui/components/dashboard/PropertyRankingList";
+import { topByLeads, viewsLastDays } from "@/lib/propertyRankings";
 
 interface VencimientoProximo {
     alquilerId: string;
@@ -36,6 +39,53 @@ interface VencimientoProximo {
     fechaVencimiento: Date;
     diasRestantes: number;
     estado: 'pendiente' | 'vencido';
+}
+
+interface PropertyViewStats {
+    id: string;
+    views: number;
+    viewsByDay?: Record<string, number>;
+}
+
+/** Millis from a Firestore Timestamp, Date, ISO string or number (0 when missing). */
+function toMillis(value: unknown): number {
+    if (!value) return 0;
+    if (typeof value === "number") return value;
+    if (value instanceof Date) return value.getTime();
+    if (typeof (value as { toMillis?: () => number }).toMillis === "function") {
+        return (value as { toMillis: () => number }).toMillis();
+    }
+    const parsed = new Date(value as string).getTime();
+    return Number.isNaN(parsed) ? 0 : parsed;
+}
+
+// property_stats rules may not be deployed yet: log the failure once per page load.
+let viewStatsErrorLogged = false;
+
+/** The owner's property_stats docs by views (empty on any failure, e.g. rules not deployed yet). */
+async function loadViewStats(userId: string): Promise<PropertyViewStats[]> {
+    if (!db) return [];
+    try {
+        // Over-fetch a little so the top 5 still fills up after filtering by branch.
+        const q = query(
+            collection(db, "property_stats"),
+            where("ownerId", "==", userId),
+            orderBy("views", "desc"),
+            limit(20)
+        );
+        const snap = await getDocs(q);
+        return snap.docs.map((d) => ({
+            id: d.id,
+            views: Number(d.data().views) || 0,
+            viewsByDay: d.data().viewsByDay,
+        }));
+    } catch (error) {
+        if (!viewStatsErrorLogged) {
+            viewStatsErrorLogged = true;
+            console.warn("Property view stats unavailable:", error);
+        }
+        return [];
+    }
 }
 
 interface BlogPostSummary {
@@ -67,6 +117,9 @@ export default function DashboardPage() {
     });
     const [loading, setLoading] = useState(true);
     const [blogPosts, setBlogPosts] = useState<BlogPostSummary[]>([]);
+    // Properties visible under the selected branch, most recently updated/created first.
+    const [userProperties, setUserProperties] = useState<DashboardProperty[]>([]);
+    const [viewStats, setViewStats] = useState<PropertyViewStats[] | null>(null);
 
     // Data that does NOT depend on the selected branch (leads, alquileres, subscription,
     // inquilinos, propietarios) — fetched once per user session instead of on every
@@ -101,6 +154,13 @@ export default function DashboardPage() {
     useEffect(() => {
         fetchBlogPosts();
     }, []);
+
+    useEffect(() => {
+        if (!user) return;
+        let cancelled = false;
+        loadViewStats(user.uid).then((stats) => { if (!cancelled) setViewStats(stats); });
+        return () => { cancelled = true; };
+    }, [user]);
 
     const fetchBlogPosts = async () => {
         if (!db) return;
@@ -192,6 +252,28 @@ export default function DashboardPage() {
             const { leads, alquileres, visitas, subDocData, planData, totalClientes } = baseSnapshot;
 
             const propertyIds = new Set(propsSnapshot.docs.map(d => d.id));
+
+            const visibleProperties = propsSnapshot.docs
+                .map((d) => {
+                    const data = d.data();
+                    return {
+                        property: {
+                            id: d.id,
+                            title: data.title,
+                            localidad: data.localidad,
+                            price: data.price,
+                            currency: data.currency,
+                            hidePrice: data.hidePrice,
+                            operation_type: data.operation_type,
+                            status: data.status,
+                            imageUrls: data.imageUrls,
+                        } satisfies DashboardProperty,
+                        sortKey: Math.max(toMillis(data.updatedAt), toMillis(data.createdAt)),
+                    };
+                })
+                .sort((a, b) => b.sortKey - a.sortKey)
+                .map((entry) => entry.property);
+            setUserProperties(visibleProperties);
 
             const filteredLeads = branchId === 'all' ? leads : leads.filter(l => l.propertyId && propertyIds.has(l.propertyId));
             const filteredAlquileres = branchId === 'all' ? alquileres : alquileres.filter(a => propertyIds.has(a.propiedadId));
@@ -285,6 +367,36 @@ export default function DashboardPage() {
         }
     };
 
+    const mostInquiredRows: PropertyRankingRow[] = useMemo(
+        () => topByLeads(baseData?.leads ?? [], userProperties, 5).map(({ property, count }) => ({
+            id: property.id,
+            title: property.title,
+            imageUrl: property.imageUrls?.[0],
+            metric: count === 1 ? "1 consulta" : `${count} consultas`,
+        })),
+        [baseData, userProperties]
+    );
+
+    const mostViewedRows: PropertyRankingRow[] = useMemo(() => {
+        if (!viewStats) return [];
+        const byId = new Map(userProperties.map((p) => [p.id, p]));
+        const today = new Date();
+        return viewStats
+            .filter((s) => s.views > 0 && byId.has(s.id))
+            .slice(0, 5)
+            .map((s) => {
+                const property = byId.get(s.id)!;
+                const lastWeek = viewsLastDays(s.viewsByDay, today, 7);
+                return {
+                    id: s.id,
+                    title: property.title,
+                    imageUrl: property.imageUrls?.[0],
+                    metric: s.views === 1 ? "1 visita" : `${s.views} visitas`,
+                    detail: `últimos 7 días: ${lastWeek}`,
+                };
+            });
+    }, [viewStats, userProperties]);
+
     const formatCurrency = (value: number) =>
         new Intl.NumberFormat('es-AR', { style: 'currency', currency: 'ARS', maximumFractionDigits: 0 }).format(value);
 
@@ -338,6 +450,24 @@ export default function DashboardPage() {
         <div className="min-h-screen bg-[var(--color-paper)] text-[var(--color-ink)] p-4 md:p-8 font-sans">
             <div className="max-w-7xl mx-auto space-y-8 pb-12">
                 <AnnouncementBanner />
+
+                {/* ─── 1. TUS PROPIEDADES + RANKINGS ─────────────────────── */}
+                <RecentPropertiesGrid properties={userProperties} loading={loading} />
+
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+                    <PropertyRankingList
+                        title="Más consultadas"
+                        rows={mostInquiredRows}
+                        loading={!baseData}
+                        emptyMessage="Todavía no hay consultas asociadas a tus propiedades."
+                    />
+                    <PropertyRankingList
+                        title="Más vistas"
+                        rows={mostViewedRows}
+                        loading={viewStats === null}
+                        emptyMessage="Empezamos a contar las visitas de tus propiedades. Vas a ver datos acá en los próximos días."
+                    />
+                </div>
 
                 <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
                     {/* ─── COLUMNA PRINCIPAL ─────────────────────────────────── */}
