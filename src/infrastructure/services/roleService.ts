@@ -1,6 +1,7 @@
 import { db, auth } from "@/infrastructure/firebase/client";
 import { auditLogService } from "@/infrastructure/services/auditLogService";
 import { collection, doc, getDocs, getDoc, setDoc, updateDoc, deleteDoc, query, where } from "firebase/firestore";
+import { planAdminOnlyPermissionStrips } from "@/lib/roles/adminOnlyPermissions";
 
 export interface Permission {
     id: string;
@@ -47,11 +48,53 @@ export const DEFAULT_PERMISSIONS: Permission[] = [
     { id: "/dashboard/novedades", label: "Novedades Zeta", description: "Acceso a noticias y actualizaciones para clientes" },
     { id: "/dashboard/emprendimientos", label: "Emprendimientos", description: "Gestión de emprendimientos y desarrollos" },
     { id: "/dashboard/tutoriales", label: "Tutoriales", description: "Acceso a guías y tutoriales del sistema" },
-    { id: "/dashboard/marketing", label: "Marketing", description: "Módulo de marketing, emails automáticos y campañas" },
+    { id: "/dashboard/marketing", label: "Marketing", description: "Emails y campañas de la plataforma (Admin)" },
     { id: "/dashboard/mi-sitio", label: "Mi Sitio Web", description: "Portal inmobiliario público propio con subdominio" },
     { id: "/dashboard/carteleria", label: "Cartelería", description: "Inventario y seguimiento de carteles físicos de venta/alquiler" },
 ];
 
+
+// Default permission set per role, used to seed new roles and to sync existing
+// ones. Admin-only routes (ADMIN_ONLY_PERMISSIONS) never appear in a client or
+// agency role.
+export const DEFAULT_ROLE_PERMISSIONS: Record<string, string[]> = {
+    "Super Admin": DEFAULT_PERMISSIONS.map(p => p.id),
+    "Administrador": DEFAULT_PERMISSIONS.map(p => p.id),
+    "Cliente Enterprise": [
+        "/dashboard", "/dashboard/propiedades", "/dashboard/tasacion",
+        "/dashboard/alquileres", "/dashboard/agenda-cobros", "/dashboard/liquidaciones",
+        "/dashboard/ventas", "/dashboard/ventas/reportes",
+        "/dashboard/agentes", "/dashboard/leads", "/dashboard/clientes", "/dashboard/chat",
+        "/dashboard/publicaciones", "/dashboard/finanzas", "/dashboard/calendario",
+        "/dashboard/soporte", "/dashboard/sucursales",
+        "/dashboard/cuenta", "/dashboard/configuracion", "/dashboard/novedades",
+        "/dashboard/emprendimientos", "/dashboard/tutoriales",
+        "/dashboard/mi-sitio", "/dashboard/carteleria",
+    ],
+    "Cliente Pro": [
+        "/dashboard", "/dashboard/propiedades", "/dashboard/tasacion",
+        "/dashboard/alquileres", "/dashboard/agenda-cobros", "/dashboard/liquidaciones",
+        "/dashboard/ventas", "/dashboard/ventas/reportes",
+        "/dashboard/agentes", "/dashboard/leads", "/dashboard/clientes", "/dashboard/chat",
+        "/dashboard/publicaciones", "/dashboard/finanzas", "/dashboard/calendario",
+        "/dashboard/sucursales", "/dashboard/cuenta",
+        "/dashboard/novedades", "/dashboard/emprendimientos", "/dashboard/tutoriales",
+        "/dashboard/mi-sitio", "/dashboard/carteleria",
+    ],
+    "Cliente Básico": [
+        "/dashboard", "/dashboard/propiedades", "/dashboard/alquileres",
+        "/dashboard/agenda-cobros", "/dashboard/liquidaciones",
+        "/dashboard/ventas", "/dashboard/clientes", "/dashboard/finanzas",
+        "/dashboard/soporte", "/dashboard/tutoriales", "/dashboard/mi-sitio",
+        "/dashboard/carteleria",
+    ],
+    "Agente": [
+        "/dashboard", "/dashboard/propiedades", "/dashboard/alquileres",
+        "/dashboard/leads", "/dashboard/calendario", "/dashboard/cuenta",
+        "/dashboard/novedades", "/dashboard/tutoriales",
+        "/dashboard/carteleria",
+    ],
+};
 const ROLES_COLLECTION = "roles";
 const USERS_COLLECTION = "users";
 const PERMISSIONS_COLLECTION = "permissions_list";
@@ -229,186 +272,35 @@ export const roleService = {
         const roles = await roleService.getRoles();
         const roleNames = roles.map(r => r.name);
 
-        // 1. Super Admin
-        if (!roleNames.includes("Super Admin")) {
-            await roleService.createRole({
-                name: "Super Admin",
-                description: "Acceso total y configuración del sistema",
-                permissions: DEFAULT_PERMISSIONS.map(p => p.id), // All permissions
-                isSystem: true
-            });
-        }
+        const defaults: Omit<Role, "id" | "permissions">[] = [
+            { name: "Super Admin", description: "Acceso total y configuración del sistema", isSystem: true },
+            { name: "Cliente Enterprise", description: "Plan Enterprise con todas las funcionalidades de negocio", isSystem: false },
+            { name: "Cliente Pro", description: "Plan Profesional con multisucursal y equipo", isSystem: false },
+            { name: "Cliente Básico", description: "Plan inicial", isSystem: false },
+            { name: "Agente", description: "Colaborador de inmobiliaria", isSystem: true },
+        ];
 
-        // 2. Cliente Enterprise (Alles + Support?)
-        if (!roleNames.includes("Cliente Enterprise")) {
-            await roleService.createRole({
-                name: "Cliente Enterprise",
-                description: "Plan Enterprise con todas las funcionalidades de negocio",
-                permissions: [
-                    "/dashboard",
-                    "/dashboard/propiedades",
-                    "/dashboard/tasacion", // Advanced
-                    "/dashboard/alquileres",
-                    "/dashboard/agenda-cobros",
-                    "/dashboard/liquidaciones",
-                    "/dashboard/ventas",
-                    "/dashboard/ventas/reportes",
-                    "/dashboard/agentes",
-                    "/dashboard/leads",
-                    "/dashboard/clientes",
-                    "/dashboard/chat",
-                    "/dashboard/publicaciones",
-                    "/dashboard/finanzas",
-                    "/dashboard/calendario",
-                    "/dashboard/soporte",
-                    "/dashboard/sucursales",
-                    "/dashboard/blog",
-                    "/dashboard/cuenta",
-                    "/dashboard/configuracion",
-                    "/dashboard/novedades",
-                    "/dashboard/emprendimientos",
-                    "/dashboard/tutoriales",
-                    "/dashboard/marketing",
-                    "/dashboard/mi-sitio",
-                    "/dashboard/carteleria"
-                ],
-                isSystem: false
-            });
-        }
-
-        // 3. Cliente Pro
-        if (!roleNames.includes("Cliente Pro")) {
-            await roleService.createRole({
-                name: "Cliente Pro",
-                description: "Plan Profesional con multisucursal y equipo",
-                permissions: [
-                    "/dashboard",
-                    "/dashboard/propiedades",
-                    "/dashboard/tasacion",
-                    "/dashboard/alquileres",
-                    "/dashboard/agenda-cobros",
-                    "/dashboard/liquidaciones",
-                    "/dashboard/ventas",
-                    "/dashboard/ventas/reportes",
-                    "/dashboard/agentes",
-                    "/dashboard/leads",
-                    "/dashboard/clientes",
-                    "/dashboard/chat",
-                    "/dashboard/publicaciones",
-                    "/dashboard/finanzas",
-                    "/dashboard/calendario",
-                    "/dashboard/sucursales", // Pro Feature
-                    "/dashboard/blog",
-                    "/dashboard/cuenta",
-                    "/dashboard/novedades",
-                    "/dashboard/emprendimientos",
-                    "/dashboard/tutoriales",
-                    "/dashboard/marketing",
-                    "/dashboard/mi-sitio",
-                    "/dashboard/carteleria"
-                ],
-                isSystem: false
-            });
-        }
-
-        // 4. Cliente Básico
-        if (!roleNames.includes("Cliente Básico")) {
-            await roleService.createRole({
-                name: "Cliente Básico",
-                description: "Plan inicial",
-                permissions: [
-                    "/dashboard",
-                    "/dashboard/propiedades",
-                    "/dashboard/alquileres",
-                    "/dashboard/agenda-cobros",
-                    "/dashboard/liquidaciones",
-                    "/dashboard/ventas",
-                    "/dashboard/clientes",
-                    "/dashboard/finanzas",
-                    "/dashboard/soporte",
-                    "/dashboard/tutoriales",
-                    "/dashboard/mi-sitio",
-                    "/dashboard/carteleria"
-                ],
-                isSystem: false
-            });
-        }
-
-        // 5. Agente
-        if (!roleNames.includes("Agente")) {
-            await roleService.createRole({
-                name: "Agente",
-                description: "Colaborador de inmobiliaria",
-                permissions: [
-                    "/dashboard",
-                    "/dashboard/propiedades",
-                    "/dashboard/alquileres",
-                    "/dashboard/leads",
-                    "/dashboard/calendario",
-                    "/dashboard/cuenta",
-                    "/dashboard/blog",
-                    "/dashboard/novedades",
-                    "/dashboard/tutoriales",
-                    "/dashboard/carteleria"
-                ],
-                isSystem: true
-            });
+        for (const role of defaults) {
+            if (roleNames.includes(role.name)) continue;
+            await roleService.createRole({ ...role, permissions: DEFAULT_ROLE_PERMISSIONS[role.name] });
         }
     },
-    // Sync default roles: add missing permissions to existing roles without removing any
-    syncDefaultRoles: async (): Promise<{ updated: string[] }> => {
-        const DEFAULT_PERM_MAP: Record<string, string[]> = {
-            "Super Admin": DEFAULT_PERMISSIONS.map(p => p.id),
-            "Administrador": DEFAULT_PERMISSIONS.map(p => p.id),
-            "Cliente Enterprise": [
-                "/dashboard", "/dashboard/propiedades", "/dashboard/tasacion",
-                "/dashboard/alquileres", "/dashboard/agenda-cobros", "/dashboard/liquidaciones",
-                "/dashboard/ventas", "/dashboard/ventas/reportes",
-                "/dashboard/agentes", "/dashboard/leads", "/dashboard/clientes", "/dashboard/chat",
-                "/dashboard/publicaciones", "/dashboard/finanzas", "/dashboard/calendario",
-                "/dashboard/soporte", "/dashboard/sucursales", "/dashboard/blog",
-                "/dashboard/cuenta", "/dashboard/configuracion", "/dashboard/novedades",
-                "/dashboard/emprendimientos", "/dashboard/tutoriales", "/dashboard/marketing",
-                "/dashboard/mi-sitio", "/dashboard/carteleria",
-            ],
-            "Cliente Pro": [
-                "/dashboard", "/dashboard/propiedades", "/dashboard/tasacion",
-                "/dashboard/alquileres", "/dashboard/agenda-cobros", "/dashboard/liquidaciones",
-                "/dashboard/ventas", "/dashboard/ventas/reportes",
-                "/dashboard/agentes", "/dashboard/leads", "/dashboard/clientes", "/dashboard/chat",
-                "/dashboard/publicaciones", "/dashboard/finanzas", "/dashboard/calendario",
-                "/dashboard/sucursales", "/dashboard/blog", "/dashboard/cuenta",
-                "/dashboard/novedades", "/dashboard/emprendimientos", "/dashboard/tutoriales",
-                "/dashboard/marketing", "/dashboard/mi-sitio", "/dashboard/carteleria",
-            ],
-            "Cliente Básico": [
-                "/dashboard", "/dashboard/propiedades", "/dashboard/alquileres",
-                "/dashboard/agenda-cobros", "/dashboard/liquidaciones",
-                "/dashboard/ventas", "/dashboard/clientes", "/dashboard/finanzas",
-                "/dashboard/soporte", "/dashboard/tutoriales", "/dashboard/mi-sitio",
-                "/dashboard/carteleria",
-            ],
-            "Agente": [
-                "/dashboard", "/dashboard/propiedades", "/dashboard/alquileres",
-                "/dashboard/leads", "/dashboard/calendario", "/dashboard/cuenta",
-                "/dashboard/blog", "/dashboard/novedades", "/dashboard/tutoriales",
-                "/dashboard/carteleria",
-            ],
-        };
 
+    // Sync default roles: add missing default permissions to existing roles and
+    // strip admin-only permissions from every non-admin role. Idempotent.
+    syncDefaultRoles: async (): Promise<{ updated: string[] }> => {
         const roles = await roleService.getRoles();
+        const strips = new Map(planAdminOnlyPermissionStrips(roles).map(s => [s.id, s.permissions]));
         const updated: string[] = [];
 
         for (const role of roles) {
-            const defaultPerms = DEFAULT_PERM_MAP[role.name];
-            if (!defaultPerms) continue;
+            const current = strips.get(role.id) ?? role.permissions ?? [];
+            const existing = new Set(current);
+            const missing = (DEFAULT_ROLE_PERMISSIONS[role.name] ?? []).filter(p => !existing.has(p));
 
-            const existing = new Set(role.permissions || []);
-            const missing = defaultPerms.filter(p => !existing.has(p));
-
-            if (missing.length > 0) {
+            if (missing.length > 0 || strips.has(role.id)) {
                 await roleService.updateRole(role.id, {
-                    permissions: [...existing, ...missing],
+                    permissions: [...current, ...missing],
                 });
                 updated.push(role.name);
             }
