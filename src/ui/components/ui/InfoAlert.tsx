@@ -23,16 +23,14 @@ export default function InfoAlert({ message, linkText, linkHref, onClose }: Info
     };
 
     return (
-        <div className="bg-sky-100 border border-sky-200 text-sky-800 px-4 py-3 rounded-lg flex items-center justify-between shadow-sm mb-6 relative">
+        <div className="bg-[var(--color-paper-2)] border border-[var(--color-rule)] border-l-2 border-l-[var(--color-accent)] text-[var(--color-ink-2)] px-4 py-3 rounded-lg flex items-center justify-between mb-6 relative">
             <div className="flex items-center gap-3">
-                <div className="bg-sky-200/50 p-1.5 rounded-full">
-                    <Info size={20} className="text-sky-600" />
-                </div>
+                <Info size={18} strokeWidth={1.5} className="shrink-0 text-[var(--color-accent)]" />
                 <div className="text-sm font-medium">
-                    <span className="font-bold mr-1">INFO!</span>
+                    <span className="font-semibold text-[var(--color-ink)] mr-1">Info:</span>
                     {message}
                     {linkText && linkHref && (
-                        <Link href={linkHref} className="ml-2 underline hover:text-sky-900 transition-colors">
+                        <Link href={linkHref} className="ml-2 underline text-[var(--color-accent)] hover:text-[var(--color-accent-2)] transition-colors">
                             {linkText}
                         </Link>
                     )}
@@ -40,9 +38,10 @@ export default function InfoAlert({ message, linkText, linkHref, onClose }: Info
             </div>
             <button
                 onClick={handleClose}
-                className="text-sky-400 hover:text-sky-600 transition-colors p-1 rounded-md hover:bg-sky-200/50"
+                className="text-[var(--color-muted)] hover:text-[var(--color-ink)] transition-colors p-1 rounded-md hover:bg-[var(--color-paper-3)]"
+                aria-label="Cerrar"
             >
-                <X size={18} />
+                <X size={16} strokeWidth={1.5} />
             </button>
         </div>
     );

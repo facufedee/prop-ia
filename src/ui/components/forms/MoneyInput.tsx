@@ -98,18 +98,18 @@ export const MoneyInput = ({
     return (
         <div>
             {label && (
-                <label className="block text-sm font-medium text-gray-700 mb-2">
+                <label className="block text-sm font-medium text-[var(--color-ink-2)] mb-2">
                     {label} {required && "*"}
                 </label>
             )}
             <div className="relative">
-                <span className="absolute left-3 top-3 text-gray-500">$</span>
+                <span className="absolute left-3 top-3 text-[var(--color-muted)]">$</span>
                 <input
                     type="text"
                     inputMode="decimal"
                     disabled={disabled}
                     required={required}
-                    className={`w-full p-3 pl-8 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-gray-900 ${className}`}
+                    className={`w-full p-3 pl-8 border border-[var(--color-rule)] rounded-lg focus:ring-2 focus:ring-[var(--color-accent)]/40 focus:border-[var(--color-accent)] text-[var(--color-ink)] ${className}`}
                     value={displayValue}
                     onChange={handleChange}
                     onBlur={handleBlur}

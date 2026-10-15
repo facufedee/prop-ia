@@ -23,36 +23,36 @@ export default function PipelineMetrics({ leads }: PipelineMetricsProps) {
             value: leadsDelMes,
             suffix: "",
             icon: Users,
-            color: "text-indigo-600",
-            bg: "bg-indigo-50",
-            border: "border-indigo-100",
+            color: "text-[var(--color-accent)]",
+            bg: "bg-[var(--color-accent-soft)]",
+            border: "border-[var(--color-accent)]/30",
         },
         {
             label: "Visitas programadas",
             value: visitasProgramadas,
             suffix: "",
             icon: CalendarCheck,
-            color: "text-amber-600",
-            bg: "bg-amber-50",
-            border: "border-amber-100",
+            color: "text-[var(--color-warning)]",
+            bg: "bg-[var(--color-warning-soft)]",
+            border: "border-[var(--color-warning)]/30",
         },
         {
             label: "Operaciones cerradas",
             value: cerrados,
             suffix: "",
             icon: Target,
-            color: "text-emerald-600",
-            bg: "bg-emerald-50",
-            border: "border-emerald-100",
+            color: "text-[var(--color-positive)]",
+            bg: "bg-[var(--color-positive-soft)]",
+            border: "border-[var(--color-positive)]/30",
         },
         {
             label: "Tasa de conversión",
             value: tasaConversion,
             suffix: "%",
             icon: TrendingUp,
-            color: "text-purple-600",
-            bg: "bg-purple-50",
-            border: "border-purple-100",
+            color: "text-[var(--color-accent)]",
+            bg: "bg-[var(--color-accent-soft)]",
+            border: "border-[var(--color-accent)]/30",
         },
     ];
 
@@ -61,17 +61,17 @@ export default function PipelineMetrics({ leads }: PipelineMetricsProps) {
             {metrics.map((m) => (
                 <div
                     key={m.label}
-                    className={`bg-white rounded-2xl border ${m.border} p-4 flex items-center gap-4 shadow-sm`}
+                    className={`bg-[var(--color-paper-2)] rounded-2xl border ${m.border} p-4 flex items-center gap-4 shadow-sm`}
                 >
                     <div className={`${m.bg} ${m.color} p-3 rounded-xl flex-shrink-0`}>
                         <m.icon size={20} />
                     </div>
                     <div>
-                        <p className="text-2xl font-bold text-gray-900">
+                        <p className="text-2xl font-bold text-[var(--color-ink)]">
                             {m.value}
                             <span className="text-lg">{m.suffix}</span>
                         </p>
-                        <p className="text-xs text-gray-500 mt-0.5 leading-tight">{m.label}</p>
+                        <p className="text-xs text-[var(--color-muted)] mt-0.5 leading-tight">{m.label}</p>
                     </div>
                 </div>
             ))}

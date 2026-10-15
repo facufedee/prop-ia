@@ -1,4 +1,4 @@
-import { X, Rocket, Zap } from "lucide-react";
+import { X, Rocket, Crown } from "lucide-react";
 import { useRouter } from "next/navigation";
 
 interface LimitReachedModalProps {
@@ -15,26 +15,26 @@ export default function LimitReachedModal({ isOpen, onClose, resource, limit }: 
 
     return (
         <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/50 backdrop-blur-sm p-4 animate-in fade-in duration-200">
-            <div className="bg-white rounded-2xl shadow-xl w-full max-w-md overflow-hidden animate-in zoom-in-95 duration-200 border-2 border-indigo-100">
+            <div className="bg-[var(--color-paper-2)] rounded-2xl shadow-xl w-full max-w-md overflow-hidden animate-in zoom-in-95 duration-200 border border-[var(--color-rule)]">
                 {/* Header with Icon */}
-                <div className="bg-indigo-50 p-6 flex flex-col items-center justify-center text-center border-b border-indigo-100">
-                    <div className="w-16 h-16 bg-white rounded-full flex items-center justify-center shadow-sm mb-4">
-                        <Rocket className="w-8 h-8 text-indigo-600" />
+                <div className="p-6 flex flex-col items-center justify-center text-center border-b border-[var(--color-rule)]">
+                    <div className="w-16 h-16 bg-[var(--color-paper-3)] rounded-full flex items-center justify-center mb-4">
+                        <Rocket strokeWidth={1.5} className="w-8 h-8 text-[var(--color-muted)]" />
                     </div>
-                    <h2 className="text-xl font-bold text-gray-900">¡Has alcanzado el límite!</h2>
-                    <p className="text-gray-600 mt-2">
-                        Tu plan actual solo permite hasta <span className="font-bold text-indigo-700">{limit} {resource}</span>.
+                    <h2 className="font-heading text-xl font-bold text-[var(--color-ink)]">¡Has alcanzado el límite!</h2>
+                    <p className="text-[var(--color-ink-2)] mt-2">
+                        Tu plan actual solo permite hasta <span className="font-bold text-[var(--color-accent)]">{limit} {resource}</span>.
                     </p>
                 </div>
 
                 {/* Content */}
                 <div className="p-6 space-y-4">
-                    <div className="bg-gradient-to-r from-indigo-500 to-purple-600 rounded-xl p-4 text-white shadow-md">
+                    <div className="bg-[var(--color-paper-3)] border border-[var(--color-rule)] rounded-xl p-4 text-[var(--color-ink)]">
                         <div className="flex items-start gap-3">
-                            <Zap className="w-5 h-5 mt-0.5 flex-shrink-0 text-yellow-300" />
+                            <Crown strokeWidth={1.5} className="w-5 h-5 mt-0.5 flex-shrink-0 text-[var(--color-accent)]" />
                             <div>
                                 <h3 className="font-bold text-lg">Plan PRO</h3>
-                                <p className="text-indigo-100 text-sm mt-1">
+                                <p className="text-[var(--color-muted)] text-sm mt-1">
                                     Eliminá los límites, accedé a IA avanzada y obtené soporte prioritario.
                                 </p>
                             </div>
@@ -47,14 +47,14 @@ export default function LimitReachedModal({ isOpen, onClose, resource, limit }: 
                                 onClose();
                                 router.push('/precios');
                             }}
-                            className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-indigo-600 text-white rounded-xl hover:bg-indigo-700 transition-colors font-medium shadow-lg shadow-indigo-200 group"
+                            className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-[var(--color-ink)] text-[var(--color-paper)] rounded-full hover:bg-[var(--color-ink-2)] transition-colors font-medium group"
                         >
-                            <Rocket className="w-5 h-5 group-hover:animate-bounce" />
+                            <Rocket strokeWidth={1.5} className="w-5 h-5" />
                             Ver Planes y Precios
                         </button>
                         <button
                             onClick={onClose}
-                            className="text-gray-500 text-sm hover:text-gray-700 transition-colors text-center"
+                            className="text-[var(--color-muted)] text-sm hover:text-[var(--color-ink-2)] transition-colors text-center"
                         >
                             Cancelar
                         </button>

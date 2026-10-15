@@ -131,8 +131,8 @@ export const PaymentCard = ({ payment, contract, onUpdate, onMarkPaid, onDownloa
             // Use setTimeout to ensure the alert appears after the new tab opens (and doesn't block it)
             setTimeout(() => {
                 alert(
-                    "📄 El comprobante se ha descargado en tu dispositivo.\n\n" +
-                    "📎 Por favor, adjúntalo manualmente en el chat de WhatsApp que se acaba de abrir."
+                    "El comprobante se ha descargado en tu dispositivo.\n\n" +
+                    "Por favor, adjúntalo manualmente en el chat de WhatsApp que se acaba de abrir."
                 );
             }, 1000);
 
@@ -189,12 +189,12 @@ export const PaymentCard = ({ payment, contract, onUpdate, onMarkPaid, onDownloa
 
     return (
         <div className={`rounded-2xl border transition-all duration-300 relative overflow-visible group ${isPaid
-            ? 'bg-gradient-to-br from-emerald-50/50 to-white border-emerald-100/80 hover:shadow-md'
+            ? 'bg-[var(--color-paper-2)] border-[var(--color-positive)]/30 hover:shadow-md'
             : isOverdue
-                ? 'bg-white border-red-100 shadow-sm hover:shadow-md hover:border-red-200'
+                ? 'bg-[var(--color-paper-2)] border-[var(--color-danger)]/30 shadow-sm hover:shadow-md hover:border-[var(--color-danger)]/30'
                 : isDueSoon
-                    ? 'bg-gradient-to-br from-amber-50/50 to-white border-amber-100/80 hover:shadow-md'
-                    : 'bg-white border-gray-100 shadow-sm hover:shadow-md hover:border-gray-200'
+                    ? 'bg-[var(--color-paper-2)] border-[var(--color-warning)]/30 hover:shadow-md'
+                    : 'bg-[var(--color-paper-2)] border-[var(--color-rule-2)] shadow-sm hover:shadow-md hover:border-[var(--color-neutral)]'
             }`}>
 
             {/* Header / Main Info */}
@@ -202,33 +202,33 @@ export const PaymentCard = ({ payment, contract, onUpdate, onMarkPaid, onDownloa
                 <div className="flex justify-between items-start mb-6">
                     <div>
                         <div className="flex items-center gap-2 mb-1">
-                            <h3 className="text-xl font-bold text-gray-900 capitalize tracking-tight leading-none">
+                            <h3 className="text-xl font-bold text-[var(--color-ink)] capitalize tracking-tight leading-none">
                                 {format(new Date(`${payment.mes}-02`), 'MMMM', { locale: es })}
                             </h3>
-                            <span className="text-gray-400 font-medium text-sm">
+                            <span className="text-[var(--color-neutral)] font-medium text-sm">
                                 {format(new Date(`${payment.mes}-02`), 'yyyy')}
                             </span>
                         </div>
-                        <p className={`text-xs font-semibold tracking-wide uppercase ${isOverdue ? 'text-red-500' : 'text-gray-400'}`}>
+                        <p className={`text-xs font-semibold tracking-wide uppercase ${isOverdue ? 'text-[var(--color-danger)]' : 'text-[var(--color-neutral)]'}`}>
                             {isPaid ? 'Pagado el ' + (payment.fechaPago ? format(new Date(payment.fechaPago), 'dd/MM') : '-') :
                                 `Vence ${isValid(new Date(payment.fechaVencimiento)) ? format(new Date(payment.fechaVencimiento), 'dd/MM') : '-'}`}
                         </p>
                     </div>
                     <div className="flex items-center gap-2">
                         {isPaid ? (
-                            <span className="inline-flex items-center px-2.5 py-1 rounded-lg text-[10px] font-bold bg-emerald-50 text-emerald-600 tracking-wider uppercase border border-emerald-100">
-                                <CheckCircle2 className="w-3 h-3 mr-1" /> Pagado
+                            <span className="inline-flex items-center px-2.5 py-1 rounded-lg text-[10px] font-bold bg-[var(--color-positive-soft)] text-[var(--color-positive)] tracking-wider uppercase border border-[var(--color-positive)]/30">
+                                <CheckCircle2 strokeWidth={1.5} className="w-3 h-3 mr-1" /> Pagado
                             </span>
                         ) : isOverdue ? (
-                            <span className="inline-flex items-center px-2.5 py-1 rounded-lg text-[10px] font-bold bg-red-50 text-red-600 tracking-wider uppercase border border-red-100">
-                                <AlertCircle className="w-3 h-3 mr-1" /> Vencido
+                            <span className="inline-flex items-center px-2.5 py-1 rounded-lg text-[10px] font-bold bg-[var(--color-danger-soft)] text-[var(--color-danger)] tracking-wider uppercase border border-[var(--color-danger)]/30">
+                                <AlertCircle strokeWidth={1.5} className="w-3 h-3 mr-1" /> Vencido
                             </span>
                         ) : isDueSoon ? (
-                            <span className="inline-flex items-center px-2.5 py-1 rounded-lg text-[10px] font-bold bg-amber-50 text-amber-600 tracking-wider uppercase border border-amber-100">
-                                <Clock className="w-3 h-3 mr-1" /> {daysToDue === 0 ? 'Hoy' : `${daysToDue} días`}
+                            <span className="inline-flex items-center px-2.5 py-1 rounded-lg text-[10px] font-bold bg-[var(--color-warning-soft)] text-[var(--color-warning)] tracking-wider uppercase border border-[var(--color-warning)]/30">
+                                <Clock strokeWidth={1.5} className="w-3 h-3 mr-1" /> {daysToDue === 0 ? 'Hoy' : `${daysToDue} días`}
                             </span>
                         ) : (
-                            <span className="inline-flex items-center px-2.5 py-1 rounded-lg text-[10px] font-bold bg-gray-50 text-gray-500 tracking-wider uppercase border border-gray-200">
+                            <span className="inline-flex items-center px-2.5 py-1 rounded-lg text-[10px] font-bold bg-[var(--color-paper)] text-[var(--color-muted)] tracking-wider uppercase border border-[var(--color-rule)]">
                                 Pendiente
                             </span>
                         )}
@@ -238,21 +238,21 @@ export const PaymentCard = ({ payment, contract, onUpdate, onMarkPaid, onDownloa
                             <div className="relative" ref={menuRef}>
                                 <button
                                     onClick={() => setShowMenu(!showMenu)}
-                                    className="p-1.5 hover:bg-gray-50 rounded-full transition-colors text-gray-400 hover:text-gray-600"
+                                    className="p-1.5 hover:bg-[var(--color-paper-3)] rounded-full transition-colors text-[var(--color-neutral)] hover:text-[var(--color-ink-2)]"
                                 >
-                                    <MoreVertical size={18} />
+                                    <MoreVertical strokeWidth={1.5} size={18} />
                                 </button>
 
                                 {showMenu && (
-                                    <div className="absolute right-0 top-full mt-1 w-48 bg-white rounded-xl shadow-xl border border-gray-100 z-10 py-1 origin-top-right transform transition-all animate-in fade-in zoom-in-95 duration-200">
+                                    <div className="absolute right-0 top-full mt-1 w-48 bg-[var(--color-paper-2)] rounded-xl shadow-xl border border-[var(--color-rule-2)] z-10 py-1 origin-top-right transform transition-all animate-in fade-in zoom-in-95 duration-200">
                                         <button
                                             onClick={() => {
                                                 setShowMenu(false);
                                                 onCancelPayment(payment);
                                             }}
-                                            className="w-full flex items-center gap-2 px-4 py-2.5 text-sm text-red-600 hover:bg-red-50 transition-colors font-medium"
+                                            className="w-full flex items-center gap-2 px-4 py-2.5 text-sm text-[var(--color-danger)] hover:bg-[var(--color-danger-soft)] transition-colors font-medium"
                                         >
-                                            <XCircle size={16} />
+                                            <XCircle strokeWidth={1.5} size={16} />
                                             Cancelar Pago
                                         </button>
                                     </div>
@@ -265,75 +265,75 @@ export const PaymentCard = ({ payment, contract, onUpdate, onMarkPaid, onDownloa
                 {/* Big Amount */}
                 <div className="mb-6">
                     <div className="flex items-baseline gap-1">
-                        <span className={`text-4xl font-black tracking-tighter ${isPaid ? 'text-emerald-900' : isOverdue ? 'text-red-900' : 'text-gray-900'}`}>
+                        <span className={`text-4xl font-black tracking-tighter ${isPaid ? 'text-[var(--color-positive)]' : isOverdue ? 'text-[var(--color-danger)]' : 'text-[var(--color-ink)]'}`}>
                             {formatMoney(totalFinal).replace(',00', '')}
-                            <span className="text-lg text-gray-400 font-medium ml-1">
+                            <span className="text-lg text-[var(--color-neutral)] font-medium ml-1">
                                 {totalFinal % 1 !== 0 ? ',' + totalFinal.toFixed(2).split('.')[1] : ''}
                             </span>
                         </span>
                     </div>
 
                     {!isPaid && (saldo < totalFinal ? (
-                        <div className="flex items-center gap-2 mt-2 bg-orange-50 px-3 py-1.5 rounded-lg w-fit">
-                            <p className="text-xs text-orange-700 font-bold">Parcial: {formatMoney(payment.pagoParcial || 0)}</p>
-                            <span className="text-[10px] text-orange-300">•</span>
-                            <p className="text-xs text-orange-700 font-medium">Resta: {formatMoney(saldo)}</p>
+                        <div className="flex items-center gap-2 mt-2 bg-[var(--color-warning-soft)] px-3 py-1.5 rounded-lg w-fit">
+                            <p className="text-xs text-[var(--color-warning)] font-bold">Parcial: {formatMoney(payment.pagoParcial || 0)}</p>
+                            <span className="text-[10px] text-[var(--color-warning)]">•</span>
+                            <p className="text-xs text-[var(--color-warning)] font-medium">Resta: {formatMoney(saldo)}</p>
                         </div>
                     ) : (
-                        <p className="text-xs text-gray-400 font-medium mt-1 uppercase tracking-wider">Total a pagar</p>
+                        <p className="text-xs text-[var(--color-neutral)] font-medium mt-1 uppercase tracking-wider">Total a pagar</p>
                     ))}
 
                     {isPaid && isLatePayment && (
-                        <div className="mt-2 inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-red-50 border border-red-100">
-                            <AlertCircle className="w-3 h-3 text-red-500" />
-                            <span className="text-xs font-semibold text-red-600">Pago fuera de término</span>
+                        <div className="mt-2 inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-[var(--color-danger-soft)] border border-[var(--color-danger)]/30">
+                            <AlertCircle strokeWidth={1.5} className="w-3 h-3 text-[var(--color-danger)]" />
+                            <span className="text-xs font-semibold text-[var(--color-danger)]">Pago fuera de término</span>
                         </div>
                     )}
                 </div>
 
                 {/* Breakdown Summary */}
-                <div className="space-y-2 text-sm text-gray-500 mb-6 bg-gray-50/50 p-4 rounded-xl border border-gray-100/50">
+                <div className="space-y-2 text-sm text-[var(--color-muted)] mb-6 bg-[var(--color-paper)]/50 p-4 rounded-xl border border-[var(--color-rule-2)]/50">
                     <div className="flex justify-between items-center">
                         <span>Alquiler</span>
-                        <span className="font-semibold text-gray-700">{formatMoney(baseAlquiler - honorarios)}</span>
+                        <span className="font-semibold text-[var(--color-ink-2)]">{formatMoney(baseAlquiler - honorarios)}</span>
                     </div>
                     {honorarios > 0 && (
-                        <div className="flex justify-between items-center text-indigo-900/70">
-                            <span className="flex items-center gap-1.5"><span className="w-1.5 h-1.5 rounded-full bg-indigo-400"></span> Honorarios</span>
+                        <div className="flex justify-between items-center text-[var(--color-accent)]/70">
+                            <span className="flex items-center gap-1.5"><span className="w-1.5 h-1.5 rounded-full bg-[var(--color-accent)]/30"></span> Honorarios</span>
                             <span className="font-medium">{formatMoney(honorarios)}</span>
                         </div>
                     )}
                     {servicios > 0 && (
                         <div className="flex justify-between items-center">
-                            <span className="flex items-center gap-1.5"><span className="w-1.5 h-1.5 rounded-full bg-gray-400"></span> Servicios</span>
+                            <span className="flex items-center gap-1.5"><span className="w-1.5 h-1.5 rounded-full bg-[var(--color-neutral)]"></span> Servicios</span>
                             <span className="font-medium">{formatMoney(servicios)}</span>
                         </div>
                     )}
                     {adicionales > 0 && (
-                        <div className="flex justify-between items-center text-indigo-600">
-                            <span className="flex items-center gap-1.5"><span className="w-1.5 h-1.5 rounded-full bg-indigo-500"></span> Adicionales</span>
+                        <div className="flex justify-between items-center text-[var(--color-accent)]">
+                            <span className="flex items-center gap-1.5"><span className="w-1.5 h-1.5 rounded-full bg-[var(--color-accent)]"></span> Adicionales</span>
                             <span className="font-medium">{formatMoney(adicionales)}</span>
                         </div>
                     )}
                     {punitorios > 0 && (
-                        <div className="flex justify-between items-center text-red-600 bg-red-50 px-2 py-1 -mx-2 rounded-md">
-                            <span className="font-medium flex items-center gap-1.5"><TrendingUp className="w-3 h-3" /> Intereses</span>
+                        <div className="flex justify-between items-center text-[var(--color-danger)] bg-[var(--color-danger-soft)] px-2 py-1 -mx-2 rounded-md">
+                            <span className="font-medium flex items-center gap-1.5"><TrendingUp strokeWidth={1.5} className="w-3 h-3" /> Intereses</span>
                             <div className="flex items-center gap-2">
                                 <span className="font-bold">+{formatMoney(punitorios)}</span>
                                 {!isPaid && (
                                     <button
                                         onClick={handleRemovePunitorios}
-                                        className="p-1 hover:bg-white rounded-md text-red-400 hover:text-red-600 transition-colors shadow-sm"
+                                        className="p-1 hover:bg-[var(--color-paper-3)] rounded-md text-[var(--color-danger)] hover:text-[var(--color-danger)] transition-colors shadow-sm"
                                         title="Eliminar intereses"
                                     >
-                                        <Trash2 className="w-3 h-3" />
+                                        <Trash2 strokeWidth={1.5} className="w-3 h-3" />
                                     </button>
                                 )}
                             </div>
                         </div>
                     )}
                     {descuentos > 0 && (
-                        <div className="flex justify-between items-center text-emerald-600 bg-emerald-50 px-2 py-1 -mx-2 rounded-md">
+                        <div className="flex justify-between items-center text-[var(--color-positive)] bg-[var(--color-positive-soft)] px-2 py-1 -mx-2 rounded-md">
                             <span className="font-medium">Descuentos</span>
                             <span className="font-bold">-{formatMoney(descuentos)}</span>
                         </div>
@@ -345,15 +345,15 @@ export const PaymentCard = ({ payment, contract, onUpdate, onMarkPaid, onDownloa
                     <div className="flex gap-3">
                         <button
                             onClick={() => onEdit && onEdit(payment)}
-                            className="flex items-center justify-center p-3 bg-white border border-gray-200 hover:border-gray-300 hover:bg-gray-50 text-gray-600 rounded-xl transition-all shadow-sm active:scale-95"
+                            className="flex items-center justify-center p-3 bg-[var(--color-paper-2)] border border-[var(--color-rule)] hover:border-[var(--color-neutral)] hover:bg-[var(--color-paper-3)] text-[var(--color-ink-2)] rounded-xl transition-all shadow-sm active:scale-95"
                             title="Editar Montos"
                         >
-                            <Edit2 className="w-5 h-5" />
+                            <Edit2 strokeWidth={1.5} className="w-5 h-5" />
                         </button>
 
                         <button
                             onClick={handleWhatsApp}
-                            className="flex items-center justify-center p-3 bg-[#e7f7e2] hover:bg-[#d4f3cb] text-[#128c7e] rounded-xl transition-all shadow-sm active:scale-95 border border-[#d4f3cb]"
+                            className="flex items-center justify-center p-3 bg-[var(--color-positive-soft)] hover:bg-[var(--color-positive)]/25 text-[var(--color-positive)] rounded-xl transition-all active:scale-95 border border-[var(--color-positive)]/30"
                             title="Enviar Recordatorio por WhatsApp"
                         >
                             <div className="relative w-5 h-5 flex items-center justify-center">
@@ -366,7 +366,7 @@ export const PaymentCard = ({ payment, contract, onUpdate, onMarkPaid, onDownloa
 
                         <button
                             onClick={() => onMarkPaid(payment)}
-                            className="flex-1 flex items-center justify-center gap-2 px-4 py-3 bg-gray-900 hover:bg-black text-white rounded-xl text-sm font-bold transition-all shadow-lg shadow-gray-200 active:scale-[0.98]"
+                            className="flex-1 flex items-center justify-center gap-2 px-4 py-3 bg-[var(--color-ink)] hover:bg-[var(--color-ink-2)] text-[var(--color-paper)] rounded-xl text-sm font-bold transition-all shadow-lg active:scale-[0.98]"
                         >
                             Cobrar {formatMoney(totalFinal).split(',')[0]}
                         </button>
@@ -378,17 +378,17 @@ export const PaymentCard = ({ payment, contract, onUpdate, onMarkPaid, onDownloa
                         {onDownload && (
                             <button
                                 onClick={() => onDownload(payment)}
-                                className="flex-1 flex items-center justify-center gap-2 px-4 py-3 bg-white border border-gray-200 hover:bg-gray-50 text-gray-700 rounded-xl text-sm font-semibold transition-all shadow-sm active:scale-[0.98]"
+                                className="flex-1 flex items-center justify-center gap-2 px-4 py-3 bg-[var(--color-paper-2)] border border-[var(--color-rule)] hover:bg-[var(--color-paper-3)] text-[var(--color-ink-2)] rounded-xl text-sm font-semibold transition-all shadow-sm active:scale-[0.98]"
                             >
-                                <Download className="w-4 h-4" /> Comprobante
+                                <Download strokeWidth={1.5} className="w-4 h-4" /> Comprobante
                             </button>
                         )}
                         <button
                             onClick={handleWhatsApp}
-                            className="flex items-center justify-center gap-2 p-3 bg-white border border-gray-200 hover:bg-gray-50 rounded-xl transition-all shadow-sm active:scale-95 text-gray-700"
+                            className="flex items-center justify-center gap-2 p-3 bg-[var(--color-paper-2)] border border-[var(--color-rule)] hover:bg-[var(--color-paper-3)] rounded-xl transition-all shadow-sm active:scale-95 text-[var(--color-ink-2)]"
                             title="Enviar Comprobante por WhatsApp"
                         >
-                            <div className="relative w-5 h-5 flex items-center justify-center text-[#25D366]">
+                            <div className="relative w-5 h-5 flex items-center justify-center text-[var(--color-positive)]">
                                 <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
                                     <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z" />
                                 </svg>
@@ -401,29 +401,29 @@ export const PaymentCard = ({ payment, contract, onUpdate, onMarkPaid, onDownloa
 
             {/* Additional "Red" Section for Punitorios */}
             {isOverdue && !isPaid && punitorios === 0 && (
-                <div className="bg-red-50/50 p-4 border-t border-red-100/50 rounded-b-2xl flex flex-col gap-3 backdrop-blur-sm">
+                <div className="bg-[var(--color-danger-soft)] p-4 border-t border-[var(--color-danger)]/30 rounded-b-2xl flex flex-col gap-3 backdrop-blur-sm">
                     <div className="flex items-center justify-between">
-                        <div className="text-red-900 text-xs font-semibold flex items-center gap-2">
-                            <span className="w-1.5 h-1.5 rounded-full bg-red-500 animate-pulse"></span>
+                        <div className="text-[var(--color-danger)] text-xs font-semibold flex items-center gap-2">
+                            <span className="w-1.5 h-1.5 rounded-full bg-[var(--color-danger)] animate-pulse"></span>
                             Se venció hace {Math.max(0, differenceInDays(today, dueDate))} días
                         </div>
                         {calculatedInterest === null ? (
                             <button
                                 onClick={handleCalculateInterest}
-                                className="text-xs bg-white border border-red-200 text-red-700 px-3 py-1.5 rounded-lg shadow-sm hover:bg-red-50 font-semibold transition-all hover:shadow-md"
+                                className="text-xs bg-[var(--color-paper-2)] border border-[var(--color-danger)]/30 text-[var(--color-danger)] px-3 py-1.5 rounded-lg shadow-sm hover:bg-[var(--color-danger-soft)] font-semibold transition-all hover:shadow-md"
                             >
                                 + Calcular Interés
                             </button>
                         ) : (
-                            <span className="text-red-700 font-bold text-sm">
+                            <span className="text-[var(--color-danger)] font-bold text-sm">
                                 +{formatMoney(calculatedInterest)}
                             </span>
                         )}
                     </div>
 
                     {calculatedInterest !== null && (
-                        <div className="flex items-center justify-between pt-3 border-t border-red-100/50 animate-in fade-in slide-in-from-top-1">
-                            <span className="text-[10px] uppercase tracking-wider font-bold text-red-400">
+                        <div className="flex items-center justify-between pt-3 border-t border-[var(--color-danger)]/30 animate-in fade-in slide-in-from-top-1">
+                            <span className="text-[10px] uppercase tracking-wider font-bold text-[var(--color-danger)]">
                                 {contract.punitoriosTipo === 'porcentaje'
                                     ? `${contract.punitoriosValor}% Recargo`
                                     : 'Recargo Fijo'}
@@ -431,13 +431,13 @@ export const PaymentCard = ({ payment, contract, onUpdate, onMarkPaid, onDownloa
                             <div className="flex gap-2">
                                 <button
                                     onClick={() => setCalculatedInterest(null)}
-                                    className="text-xs text-red-600 hover:text-red-800 px-3 py-1.5 font-medium transition-colors"
+                                    className="text-xs text-[var(--color-danger)] hover:text-[var(--color-danger)] px-3 py-1.5 font-medium transition-colors"
                                 >
                                     Cancelar
                                 </button>
                                 <button
                                     onClick={applyInterest}
-                                    className="text-xs bg-red-600 text-white px-4 py-1.5 rounded-lg shadow-md hover:bg-red-700 font-bold transition-all hover:shadow-lg hover:shadow-red-200"
+                                    className="text-xs bg-[var(--color-danger)] text-[var(--color-accent-ink)] px-4 py-1.5 rounded-lg shadow-md hover:bg-[var(--color-danger)] font-bold transition-all hover:shadow-lg"
                                 >
                                     Aplicar
                                 </button>

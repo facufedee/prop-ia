@@ -167,30 +167,30 @@ function ClientesContent() {
             label: "Inquilinos",
             icon: Key,
             count: inquilinos.length,
-            color: "text-emerald-600",
-            activeBg: "bg-emerald-50 border-emerald-200 text-emerald-700",
-            inactiveBg: "text-gray-500 hover:text-gray-700 border-transparent",
-            dot: "bg-emerald-500",
+            color: "text-[var(--color-positive)]",
+            activeBg: "bg-[var(--color-positive-soft)] border-[var(--color-positive)]/30 text-[var(--color-positive)]",
+            inactiveBg: "text-[var(--color-muted)] hover:text-[var(--color-ink-2)] border-transparent",
+            dot: "bg-[var(--color-positive)]",
         },
         {
             id: "propietarios" as TabType,
             label: "Propietarios",
             icon: Building2,
             count: propietarios.length,
-            color: "text-indigo-600",
-            activeBg: "bg-indigo-50 border-indigo-200 text-indigo-700",
-            inactiveBg: "text-gray-500 hover:text-gray-700 border-transparent",
-            dot: "bg-indigo-500",
+            color: "text-[var(--color-accent)]",
+            activeBg: "bg-[var(--color-accent-soft)] border-[var(--color-accent)]/30 text-[var(--color-accent)]",
+            inactiveBg: "text-[var(--color-muted)] hover:text-[var(--color-ink-2)] border-transparent",
+            dot: "bg-[var(--color-accent)]",
         },
         {
             id: "leads" as TabType,
             label: "Leads / Consultas",
             icon: TrendingUp,
             count: leads.length,
-            color: "text-violet-600",
-            activeBg: "bg-violet-50 border-violet-200 text-violet-700",
-            inactiveBg: "text-gray-500 hover:text-gray-700 border-transparent",
-            dot: "bg-violet-500",
+            color: "text-[var(--color-accent)]",
+            activeBg: "bg-[var(--color-accent-soft)] border-[var(--color-accent)]/30 text-[var(--color-accent)]",
+            inactiveBg: "text-[var(--color-muted)] hover:text-[var(--color-ink-2)] border-transparent",
+            dot: "bg-[var(--color-accent)]",
         },
     ];
 
@@ -198,8 +198,8 @@ function ClientesContent() {
         return (
             <div className="flex items-center justify-center min-h-[400px]">
                 <div className="flex flex-col items-center gap-3">
-                    <div className="w-10 h-10 border-4 border-indigo-500 border-t-transparent rounded-full animate-spin" />
-                    <p className="text-gray-500 text-sm font-medium">Cargando clientes...</p>
+                    <div className="w-10 h-10 border-4 border-[var(--color-accent)] border-t-transparent rounded-full animate-spin" />
+                    <p className="text-[var(--color-muted)] text-sm font-medium">Cargando clientes...</p>
                 </div>
             </div>
         );
@@ -220,18 +220,18 @@ function ClientesContent() {
             {/* ── Header ── */}
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
                 <div>
-                    <h1 className="text-2xl font-bold text-gray-900 flex items-center gap-2">
-                        <Users size={22} className="text-indigo-500" /> Clientes
+                    <h1 className="font-heading text-2xl font-bold text-[var(--color-ink)] flex items-center gap-2">
+                        <Users strokeWidth={1.5} size={22} className="text-[var(--color-accent)]" /> Clientes
                     </h1>
-                    <p className="text-gray-500 text-sm mt-0.5">
+                    <p className="text-[var(--color-muted)] text-sm mt-0.5">
                         Inquilinos, propietarios y leads de tu inmobiliaria
                     </p>
                 </div>
                 <button
                     onClick={() => { setEditingClient(null); setIsModalOpen(true); }}
-                    className="flex items-center gap-2 px-4 py-2.5 bg-indigo-600 text-white rounded-xl hover:bg-indigo-700 transition shadow-sm text-sm font-semibold active:scale-95"
+                    className="flex items-center gap-2 px-4 py-2.5 bg-[var(--color-ink)] text-[var(--color-paper)] rounded-xl hover:bg-[var(--color-ink-2)] transition shadow-sm text-sm font-semibold active:scale-95"
                 >
-                    <Plus size={16} /> Nuevo Cliente
+                    <Plus strokeWidth={1.5} size={16} /> Nuevo Cliente
                 </button>
             </div>
 
@@ -247,17 +247,17 @@ function ClientesContent() {
                             className={`flex items-center gap-4 p-5 rounded-2xl border-2 text-left transition-all hover:shadow-md ${
                                 isActive
                                     ? tab.activeBg + " shadow-sm"
-                                    : "bg-white border-gray-100 hover:border-gray-200"
+                                    : "bg-[var(--color-paper-2)] border-[var(--color-rule-2)] hover:border-[var(--color-neutral)]"
                             }`}
                         >
-                            <div className={`w-12 h-12 rounded-xl flex items-center justify-center flex-shrink-0 ${isActive ? "bg-white/60" : "bg-gray-50"}`}>
-                                <Icon size={22} className={isActive ? tab.color : "text-gray-400"} />
+                            <div className={`w-12 h-12 rounded-xl flex items-center justify-center flex-shrink-0 ${isActive ? "bg-[var(--color-paper-2)]/60" : "bg-[var(--color-paper)]"}`}>
+                                <Icon size={22} className={isActive ? tab.color : "text-[var(--color-neutral)]"} />
                             </div>
                             <div>
-                                <p className={`text-3xl font-extrabold tracking-tight ${isActive ? "" : "text-gray-700"}`}>
+                                <p className={`text-3xl font-extrabold tracking-tight ${isActive ? "" : "text-[var(--color-ink-2)]"}`}>
                                     {tab.count}
                                 </p>
-                                <p className={`text-xs font-bold uppercase tracking-widest mt-0.5 ${isActive ? "" : "text-gray-400"}`}>
+                                <p className={`text-xs font-bold uppercase tracking-widest mt-0.5 ${isActive ? "" : "text-[var(--color-neutral)]"}`}>
                                     {tab.label}
                                 </p>
                             </div>
@@ -267,10 +267,10 @@ function ClientesContent() {
             </div>
 
             {/* ── Search + Tab bar ── */}
-            <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-4 flex flex-col md:flex-row gap-3 items-stretch md:items-center">
+            <div className="bg-[var(--color-paper-2)] rounded-2xl border border-[var(--color-rule-2)] shadow-sm p-4 flex flex-col md:flex-row gap-3 items-stretch md:items-center">
                 {/* Search */}
                 <div className="relative flex-1">
-                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+                    <Search strokeWidth={1.5} className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[var(--color-neutral)]" />
                     <input
                         type="text"
                         placeholder={
@@ -278,14 +278,14 @@ function ClientesContent() {
                             activeTab === "propietarios" ? "Buscar por nombre, email o DNI..." :
                             "Buscar por nombre, email o teléfono..."
                         }
-                        className="w-full pl-9 pr-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 focus:bg-white transition-all"
+                        className="w-full pl-9 pr-4 py-2.5 bg-[var(--color-paper)] border border-[var(--color-rule)] rounded-xl text-sm focus:ring-2 focus:ring-[var(--color-accent)]/40 focus:border-[var(--color-accent)] focus:bg-[var(--color-paper-2)] transition-all"
                         value={searchTerm}
                         onChange={(e) => setSearchTerm(e.target.value)}
                     />
                 </div>
 
                 {/* Tabs */}
-                <div className="flex items-center gap-1 bg-gray-100 rounded-xl p-1 flex-shrink-0">
+                <div className="flex items-center gap-1 bg-[var(--color-paper-3)] rounded-xl p-1 flex-shrink-0">
                     {TABS.map((tab) => {
                         const Icon = tab.icon;
                         return (
@@ -294,14 +294,14 @@ function ClientesContent() {
                                 onClick={() => switchTab(tab.id)}
                                 className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-medium transition-all whitespace-nowrap ${
                                     activeTab === tab.id
-                                        ? "bg-white shadow text-gray-800"
-                                        : "text-gray-500 hover:text-gray-700"
+                                        ? "bg-[var(--color-paper-2)] shadow text-[var(--color-ink)]"
+                                        : "text-[var(--color-muted)] hover:text-[var(--color-ink-2)]"
                                 }`}
                             >
                                 <Icon size={14} />
                                 {tab.label}
                                 <span className={`ml-0.5 text-xs font-bold px-1.5 py-0.5 rounded-full ${
-                                    activeTab === tab.id ? "bg-indigo-100 text-indigo-700" : "bg-gray-200 text-gray-500"
+                                    activeTab === tab.id ? "bg-[var(--color-accent-soft)] text-[var(--color-accent)]" : "bg-[var(--color-paper-4)] text-[var(--color-muted)]"
                                 }`}>
                                     {tab.count}
                                 </span>
@@ -347,7 +347,7 @@ export default function ClientesPage() {
     return (
         <Suspense fallback={
             <div className="flex items-center justify-center min-h-[400px]">
-                <div className="w-10 h-10 border-4 border-indigo-500 border-t-transparent rounded-full animate-spin" />
+                <div className="w-10 h-10 border-4 border-[var(--color-accent)] border-t-transparent rounded-full animate-spin" />
             </div>
         }>
             <ClientesContent />

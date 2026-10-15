@@ -51,7 +51,7 @@ export default function CartelPropertySelector({ userId, value, onSelect }: Cart
     return (
         <select
             required
-            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 text-gray-900"
+            className="w-full px-3 py-2 border border-[var(--color-rule)] rounded-lg focus:ring-2 focus:ring-[var(--color-accent)]/40 text-[var(--color-ink)]"
             value={value}
             onChange={handleChange}
             disabled={loading}

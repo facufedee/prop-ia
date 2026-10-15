@@ -184,7 +184,7 @@ export default function PropiedadesPage() {
     if (loading && properties.length === 0) {
         return (
             <div className="p-6 flex items-center justify-center min-h-[400px]">
-                <div className="text-gray-500">Cargando propiedades...</div>
+                <div className="text-[var(--color-muted)]">Cargando propiedades...</div>
             </div>
         );
     }
@@ -194,24 +194,23 @@ export default function PropiedadesPage() {
             {/* Header */}
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
                 <div>
-                    <h1 className="text-2xl font-bold text-gray-900">Propiedades</h1>
-                    <p className="text-gray-500">Gestioná tu inventario de inmuebles</p>
+                    <h1 className="font-heading text-2xl font-bold text-[var(--color-ink)]">Propiedades</h1>
+                    <p className="text-[var(--color-muted)]">Gestioná tu inventario de inmuebles</p>
                 </div>
                 <Link
                     href="/dashboard/propiedades/nueva"
-                    className="flex items-center gap-2 bg-indigo-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-indigo-700 transition shadow-sm"
+                    className="flex items-center gap-2 bg-[var(--color-ink)] text-[var(--color-paper)] px-4 py-2 rounded-lg text-sm font-medium hover:bg-[var(--color-ink-2)] transition shadow-sm"
                 >
-                    <Plus className="w-5 h-5" /> Nueva Propiedad
+                    <Plus strokeWidth={1.5} className="w-5 h-5" /> Nueva Propiedad
                 </Link>
             </div>
 
             {/* Share Portfolio Banner */}
-            <div className="bg-gradient-to-r from-indigo-600 to-purple-600 rounded-xl p-6 text-white shadow-lg relative overflow-hidden">
-                <div className="absolute top-0 right-0 w-64 h-64 bg-white/10 rounded-full -translate-y-1/2 translate-x-1/3 blur-2xl"></div>
+            <div className="bg-[var(--color-paper-2)] border border-[var(--color-rule)] rounded-2xl p-6 text-[var(--color-ink)] relative overflow-hidden">
                 <div className="relative z-10 flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
                     <div>
-                        <h2 className="text-xl font-bold mb-1">Compartí tu portafolio con clientes</h2>
-                        <p className="text-indigo-100 text-sm md:text-base">Tu link público muestra todas tus propiedades activas de forma profesional.</p>
+                        <h2 className="font-heading text-xl font-bold mb-1">Compartí tu portafolio con clientes</h2>
+                        <p className="text-[var(--color-muted)] text-sm md:text-base">Tu link público muestra todas tus propiedades activas de forma profesional.</p>
                     </div>
                     <button
                         onClick={() => {
@@ -219,9 +218,9 @@ export default function PropiedadesPage() {
                             navigator.clipboard.writeText(url);
                             alert("Link copiado al portapapeles!");
                         }}
-                        className="flex items-center gap-2 bg-white text-indigo-700 px-4 py-2.5 rounded-lg font-bold hover:bg-indigo-50 transition shadow-sm active:scale-95"
+                        className="flex items-center gap-2 bg-[var(--color-ink)] text-[var(--color-paper)] px-4 py-2.5 rounded-full font-bold hover:bg-[var(--color-ink-2)] transition active:scale-95"
                     >
-                        <Share2 className="w-4 h-4" />
+                        <Share2 strokeWidth={1.5} className="w-4 h-4" />
                         Copiar Link Público
                     </button>
                 </div>
@@ -229,44 +228,44 @@ export default function PropiedadesPage() {
 
             {/* Stats Cards */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <div className="bg-white p-5 rounded-xl border border-gray-200 shadow-sm flex items-center gap-4">
-                    <div className="p-3 bg-gray-50 rounded-lg">
-                        <Building2 className="w-6 h-6 text-gray-600" />
+                <div className="bg-[var(--color-paper-2)] p-5 rounded-xl border border-[var(--color-rule)] shadow-sm flex items-center gap-4">
+                    <div className="p-3 bg-[var(--color-paper)] rounded-lg">
+                        <Building2 strokeWidth={1.5} className="w-6 h-6 text-[var(--color-ink-2)]" />
                     </div>
                     <div>
-                        <p className="text-sm text-gray-500">Total Propiedades</p>
-                        <p className="text-2xl font-bold text-gray-900">{stats.total}</p>
+                        <p className="text-sm text-[var(--color-muted)]">Total Propiedades</p>
+                        <p className="text-2xl font-bold text-[var(--color-ink)]">{stats.total}</p>
                     </div>
                 </div>
-                <div className="bg-white p-5 rounded-xl border border-gray-200 shadow-sm flex items-center gap-4">
-                    <div className="p-3 bg-green-50 rounded-lg">
-                        <Home className="w-6 h-6 text-green-600" />
+                <div className="bg-[var(--color-paper-2)] p-5 rounded-xl border border-[var(--color-rule)] shadow-sm flex items-center gap-4">
+                    <div className="p-3 bg-[var(--color-paper-3)] rounded-full">
+                        <Home strokeWidth={1.5} className="w-6 h-6 text-[var(--color-muted)]" />
                     </div>
                     <div>
-                        <p className="text-sm text-gray-500">En Venta</p>
-                        <p className="text-2xl font-bold text-gray-900">{stats.venta}</p>
+                        <p className="text-sm text-[var(--color-muted)]">En Venta</p>
+                        <p className="text-2xl font-bold text-[var(--color-ink)]">{stats.venta}</p>
                     </div>
                 </div>
-                <div className="bg-white p-5 rounded-xl border border-gray-200 shadow-sm flex items-center gap-4">
-                    <div className="p-3 bg-blue-50 rounded-lg">
-                        <Key className="w-6 h-6 text-blue-600" />
+                <div className="bg-[var(--color-paper-2)] p-5 rounded-xl border border-[var(--color-rule)] shadow-sm flex items-center gap-4">
+                    <div className="p-3 bg-[var(--color-paper-3)] rounded-full">
+                        <Key strokeWidth={1.5} className="w-6 h-6 text-[var(--color-muted)]" />
                     </div>
                     <div>
-                        <p className="text-sm text-gray-500">En Alquiler</p>
-                        <p className="text-2xl font-bold text-gray-900">{stats.alquiler}</p>
+                        <p className="text-sm text-[var(--color-muted)]">En Alquiler</p>
+                        <p className="text-2xl font-bold text-[var(--color-ink)]">{stats.alquiler}</p>
                     </div>
                 </div>
             </div>
 
             {/* Filters and Search */}
-            <div className="bg-white rounded-xl border border-gray-200 p-4 shadow-sm flex flex-col md:flex-row gap-4 justify-between items-center">
+            <div className="bg-[var(--color-paper-2)] rounded-xl border border-[var(--color-rule)] p-4 shadow-sm flex flex-col md:flex-row gap-4 justify-between items-center">
                 {/* Search Bar */}
                 <div className="relative w-full md:w-96">
-                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
+                    <Search strokeWidth={1.5} className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-[var(--color-neutral)]" />
                     <input
                         type="text"
                         placeholder="Buscar por título, ubicación..."
-                        className="w-full pl-10 pr-4 py-2.5 bg-gray-50 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 focus:bg-white transition-all shadow-sm text-gray-900 placeholder-gray-500"
+                        className="w-full pl-10 pr-4 py-2.5 bg-[var(--color-paper)] border border-[var(--color-rule)] rounded-lg focus:ring-2 focus:ring-[var(--color-accent)]/40 focus:border-[var(--color-accent)] focus:bg-[var(--color-paper-2)] transition-all shadow-sm text-[var(--color-ink)] placeholder-[var(--color-neutral)]"
                         value={searchTerm}
                         onChange={(e) => setSearchTerm(e.target.value)}
                     />
@@ -274,15 +273,15 @@ export default function PropiedadesPage() {
 
                 {/* Filter Tabs */}
                 <div className="flex items-center gap-2 overflow-x-auto w-full md:w-auto pb-1 md:pb-0">
-                    <Filter className="w-5 h-5 text-gray-400 shrink-0 hidden md:block" />
-                    <div className="flex p-1 bg-gray-100 rounded-lg">
+                    <Filter strokeWidth={1.5} className="w-5 h-5 text-[var(--color-neutral)] shrink-0 hidden md:block" />
+                    <div className="flex p-1 bg-[var(--color-paper-3)] rounded-lg">
                         {(['Todos', 'Venta', 'Alquiler', 'Alquiler Temporal'] as const).map((f) => (
                             <button
                                 key={f}
                                 onClick={() => setFilter(f)}
                                 className={`px-4 py-1.5 rounded-md text-sm font-medium transition-all whitespace-nowrap ${filter === f
-                                    ? 'bg-white text-indigo-600 shadow-sm'
-                                    : 'text-gray-600 hover:text-gray-900 hover:bg-gray-200/50'
+                                    ? 'bg-[var(--color-paper-2)] text-[var(--color-accent)] shadow-sm'
+                                    : 'text-[var(--color-ink-2)] hover:text-[var(--color-ink)] hover:bg-[var(--color-paper-4)]'
                                     }`}
                             >
                                 {f}
@@ -290,23 +289,23 @@ export default function PropiedadesPage() {
                         ))}
                     </div>
 
-                    <div className="w-px h-6 bg-gray-300 mx-2 hidden md:block"></div>
+                    <div className="w-px h-6 bg-[var(--color-paper-4)] mx-2 hidden md:block"></div>
 
                     {/* View Toggle */}
-                    <div className="flex p-1 bg-gray-100 rounded-lg">
+                    <div className="flex p-1 bg-[var(--color-paper-3)] rounded-lg">
                         <button
                             onClick={() => setViewMode('grid')}
-                            className={`p-1.5 rounded-md transition-all ${viewMode === 'grid' ? 'bg-white text-indigo-600 shadow-sm' : 'text-gray-500 hover:text-gray-900'}`}
+                            className={`p-1.5 rounded-md transition-all ${viewMode === 'grid' ? 'bg-[var(--color-paper-2)] text-[var(--color-accent)] shadow-sm' : 'text-[var(--color-muted)] hover:text-[var(--color-ink)]'}`}
                             title="Vista en cuadrícula"
                         >
-                            <LayoutGrid size={18} />
+                            <LayoutGrid strokeWidth={1.5} size={18} />
                         </button>
                         <button
                             onClick={() => setViewMode('list')}
-                            className={`p-1.5 rounded-md transition-all ${viewMode === 'list' ? 'bg-white text-indigo-600 shadow-sm' : 'text-gray-500 hover:text-gray-900'}`}
+                            className={`p-1.5 rounded-md transition-all ${viewMode === 'list' ? 'bg-[var(--color-paper-2)] text-[var(--color-accent)] shadow-sm' : 'text-[var(--color-muted)] hover:text-[var(--color-ink)]'}`}
                             title="Vista en lista"
                         >
-                            <List size={18} />
+                            <List strokeWidth={1.5} size={18} />
                         </button>
                     </div>
                 </div>
@@ -314,10 +313,10 @@ export default function PropiedadesPage() {
 
             {/* Content */}
             {filteredProperties.length === 0 ? (
-                <div className="text-center py-16 bg-gray-50 rounded-xl border border-gray-200 border-dashed">
-                    <Home className="w-12 h-12 text-gray-300 mx-auto mb-4" />
-                    <p className="text-gray-500 text-lg">No se encontraron propiedades</p>
-                    <p className="text-gray-400 text-sm">Probá cambiando los filtros o agregá una nueva propiedad.</p>
+                <div className="text-center py-16 bg-[var(--color-paper)] rounded-xl border border-[var(--color-rule)] border-dashed">
+                    <Home strokeWidth={1.5} className="w-12 h-12 text-[var(--color-neutral)] mx-auto mb-4" />
+                    <p className="text-[var(--color-muted)] text-lg">No se encontraron propiedades</p>
+                    <p className="text-[var(--color-neutral)] text-sm">Probá cambiando los filtros o agregá una nueva propiedad.</p>
                 </div>
             ) : (
                 <>
@@ -338,7 +337,7 @@ export default function PropiedadesPage() {
                             ))}
                         </div>
                     ) : (
-                        <div className="bg-white border rounded-2xl shadow-sm overflow-hidden">
+                        <div className="bg-[var(--color-paper-2)] border rounded-2xl shadow-sm overflow-hidden">
                             <PropertiesTable
                                 properties={filteredProperties}
                                 loading={loading}
@@ -354,24 +353,24 @@ export default function PropiedadesPage() {
             {/* Delete Confirmation Modal */}
             {deleteConfirmId && (
                 <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
-                    <div className="bg-white rounded-2xl p-6 max-w-sm w-full shadow-2xl animate-in zoom-in-95 duration-200">
-                        <div className="flex items-center gap-3 mb-4 text-red-600">
-                            <div className="p-3 bg-red-100 rounded-full">
-                                <AlertTriangle className="w-6 h-6" />
+                    <div className="bg-[var(--color-paper-2)] rounded-2xl p-6 max-w-sm w-full shadow-2xl animate-in zoom-in-95 duration-200">
+                        <div className="flex items-center gap-3 mb-4 text-[var(--color-danger)]">
+                            <div className="p-3 bg-[var(--color-paper-3)] rounded-full">
+                                <AlertTriangle strokeWidth={1.5} className="w-6 h-6" />
                             </div>
-                            <h3 className="text-xl font-bold text-gray-900">Eliminar Propiedad</h3>
+                            <h3 className="text-xl font-bold text-[var(--color-ink)]">Eliminar Propiedad</h3>
                         </div>
-                        <p className="text-gray-600 mb-6 leading-relaxed">¿Estás seguro de que deseás eliminar esta propiedad? Esta acción eliminará permanentemente los datos y no se puede deshacer.</p>
+                        <p className="text-[var(--color-ink-2)] mb-6 leading-relaxed">¿Estás seguro de que deseás eliminar esta propiedad? Esta acción eliminará permanentemente los datos y no se puede deshacer.</p>
                         <div className="flex flex-col sm:flex-row justify-end gap-3 flex-wrap">
                             <button 
                                 onClick={() => setDeleteConfirmId(null)} 
-                                className="px-5 py-2.5 bg-gray-100 text-gray-700 font-medium rounded-xl hover:bg-gray-200 transition-colors w-full sm:w-auto"
+                                className="px-5 py-2.5 bg-[var(--color-paper-3)] text-[var(--color-ink-2)] font-medium rounded-xl hover:bg-[var(--color-paper-4)] transition-colors w-full sm:w-auto"
                             >
                                 Cancelar
                             </button>
                             <button 
                                 onClick={confirmDelete} 
-                                className="px-5 py-2.5 bg-red-600 text-white font-medium rounded-xl hover:bg-red-700 transition-colors shadow-lg shadow-red-200 w-full sm:w-auto"
+                                className="px-5 py-2.5 bg-[var(--color-danger)] text-[var(--color-accent-ink)] font-medium rounded-xl hover:bg-[var(--color-danger)] transition-colors shadow-lg w-full sm:w-auto"
                             >
                                 Sí, eliminar
                             </button>

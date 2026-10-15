@@ -55,7 +55,7 @@ export default function AdminMessagesPage() {
     if (loading) {
         return (
             <div className="flex h-screen items-center justify-center">
-                <div className="w-8 h-8 border-4 border-indigo-600 border-t-transparent rounded-full animate-spin"></div>
+                <div className="w-8 h-8 border-4 border-[var(--color-accent)] border-t-transparent rounded-full animate-spin"></div>
             </div>
         );
     }
@@ -64,54 +64,54 @@ export default function AdminMessagesPage() {
         <div className="p-6 space-y-6">
             <header className="flex justify-between items-center">
                 <div>
-                    <h1 className="text-2xl font-bold text-gray-900">Mensajes de Contacto</h1>
-                    <p className="text-gray-500">Administra las consultas recibidas desde la landing page.</p>
+                    <h1 className="font-heading text-2xl font-bold text-[var(--color-ink)]">Mensajes de Contacto</h1>
+                    <p className="text-[var(--color-muted)]">Administra las consultas recibidas desde la landing page.</p>
                 </div>
             </header>
 
             <div className="grid gap-6">
                 {messages.length === 0 ? (
-                    <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-12 text-center">
-                        <MessageSquare className="w-12 h-12 text-gray-300 mx-auto mb-4" />
-                        <h3 className="text-lg font-medium text-gray-900 mb-2">No hay mensajes</h3>
-                        <p className="text-gray-500">Aún no has recibido consultas a través del formulario.</p>
+                    <div className="bg-[var(--color-paper-2)] rounded-xl shadow-sm border border-[var(--color-rule-2)] p-12 text-center">
+                        <MessageSquare strokeWidth={1.5} className="w-12 h-12 text-[var(--color-neutral)] mx-auto mb-4" />
+                        <h3 className="text-lg font-medium text-[var(--color-ink)] mb-2">No hay mensajes</h3>
+                        <p className="text-[var(--color-muted)]">Aún no has recibido consultas a través del formulario.</p>
                     </div>
                 ) : (
                     messages.map((msg) => (
                         <div
                             key={msg.id}
-                            className={`bg-white rounded-xl shadow-sm border p-6 transition-all ${!msg.read ? 'border-indigo-200 bg-indigo-50/30' : 'border-gray-100'
+                            className={`bg-[var(--color-paper-2)] rounded-xl shadow-sm border p-6 transition-all ${!msg.read ? 'border-[var(--color-accent)]/30 bg-[var(--color-accent)]/7' : 'border-[var(--color-rule-2)]'
                                 }`}
                         >
                             <div className="flex flex-col md:flex-row gap-6">
                                 {/* Info Column */}
                                 <div className="md:w-1/3 space-y-3">
                                     <div className="flex items-center gap-2">
-                                        <div className={`w-2 h-2 rounded-full ${!msg.read ? 'bg-indigo-500' : 'bg-gray-300'}`} />
-                                        <p className="text-sm text-gray-500">
+                                        <div className={`w-2 h-2 rounded-full ${!msg.read ? 'bg-[var(--color-accent)]' : 'bg-[var(--color-paper-4)]'}`} />
+                                        <p className="text-sm text-[var(--color-muted)]">
                                             {msg.createdAt ? format(msg.createdAt, "d 'de' MMMM, yyyy - HH:mm", { locale: es }) : 'Fecha desconocida'}
                                         </p>
                                     </div>
 
                                     <div>
-                                        <h3 className="font-semibold text-gray-900 text-lg">{msg.name}</h3>
-                                        <div className="flex items-center gap-2 text-gray-600 mt-1">
-                                            <Mail className="w-4 h-4" />
-                                            <a href={`mailto:${msg.email}`} className="hover:text-indigo-600 hover:underline">
+                                        <h3 className="font-semibold text-[var(--color-ink)] text-lg">{msg.name}</h3>
+                                        <div className="flex items-center gap-2 text-[var(--color-ink-2)] mt-1">
+                                            <Mail strokeWidth={1.5} className="w-4 h-4" />
+                                            <a href={`mailto:${msg.email}`} className="hover:text-[var(--color-accent-2)] hover:underline">
                                                 {msg.email}
                                             </a>
                                         </div>
                                         {msg.phone && (
-                                            <div className="flex items-center gap-2 text-gray-600 mt-1">
-                                                <Phone className="w-4 h-4" />
-                                                <a href={`tel:${msg.phone}`} className="hover:text-indigo-600 hover:underline">
+                                            <div className="flex items-center gap-2 text-[var(--color-ink-2)] mt-1">
+                                                <Phone strokeWidth={1.5} className="w-4 h-4" />
+                                                <a href={`tel:${msg.phone}`} className="hover:text-[var(--color-accent-2)] hover:underline">
                                                     {msg.phone}
                                                 </a>
                                             </div>
                                         )}
                                         {msg.company && (
-                                            <div className="flex items-center gap-2 text-gray-600 mt-1">
-                                                <Building className="w-4 h-4" />
+                                            <div className="flex items-center gap-2 text-[var(--color-ink-2)] mt-1">
+                                                <Building strokeWidth={1.5} className="w-4 h-4" />
                                                 <span>{msg.company}</span>
                                             </div>
                                         )}
@@ -119,42 +119,42 @@ export default function AdminMessagesPage() {
                                 </div>
 
                                 {/* Message Column */}
-                                <div className="flex-1 border-t md:border-t-0 md:border-l border-gray-100 pt-4 md:pt-0 md:pl-6">
-                                    <p className="text-gray-700 whitespace-pre-wrap leading-relaxed">
+                                <div className="flex-1 border-t md:border-t-0 md:border-l border-[var(--color-rule-2)] pt-4 md:pt-0 md:pl-6">
+                                    <p className="text-[var(--color-ink-2)] whitespace-pre-wrap leading-relaxed">
                                         {msg.message}
                                     </p>
                                 </div>
 
                                 {/* Actions Column */}
-                                <div className="md:w-32 flex flex-col justify-center items-end gap-3 border-t md:border-t-0 md:border-l border-gray-100 pt-4 md:pt-0 md:pl-6">
+                                <div className="md:w-32 flex flex-col justify-center items-end gap-3 border-t md:border-t-0 md:border-l border-[var(--color-rule-2)] pt-4 md:pt-0 md:pl-6">
                                     {!msg.read ? (
                                         <button
                                             onClick={() => msg.id && handleMarkAsRead(msg.id)}
-                                            className="px-4 py-2 bg-white border border-indigo-200 text-indigo-700 text-sm font-medium rounded-lg hover:bg-indigo-50 transition-colors w-full flex items-center justify-center gap-2"
+                                            className="px-4 py-2 bg-[var(--color-paper-2)] border border-[var(--color-accent)]/30 text-[var(--color-accent)] text-sm font-medium rounded-lg hover:bg-[var(--color-accent-soft)] transition-colors w-full flex items-center justify-center gap-2"
                                         >
-                                            <CheckCircle className="w-4 h-4" />
+                                            <CheckCircle strokeWidth={1.5} className="w-4 h-4" />
                                             Marcar Leído
                                         </button>
                                     ) : (
-                                        <span className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-gray-100 text-gray-600 text-xs font-medium rounded-full">
-                                            <CheckCircle className="w-3.5 h-3.5" />
+                                        <span className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-[var(--color-paper-3)] text-[var(--color-ink-2)] text-xs font-medium rounded-full">
+                                            <CheckCircle strokeWidth={1.5} className="w-3.5 h-3.5" />
                                             Leído
                                         </span>
                                     )}
 
                                     <a
                                         href={`mailto:${msg.email}?subject=Re: Consulta Zeta Prop`}
-                                        className="px-4 py-2 bg-indigo-600 text-white text-sm font-medium rounded-lg hover:bg-indigo-700 transition-colors w-full flex items-center justify-center gap-2"
+                                        className="px-4 py-2 bg-[var(--color-ink)] text-[var(--color-paper)] text-sm font-medium rounded-lg hover:bg-[var(--color-ink-2)] transition-colors w-full flex items-center justify-center gap-2"
                                     >
-                                        <Mail className="w-4 h-4" />
+                                        <Mail strokeWidth={1.5} className="w-4 h-4" />
                                         Responder
                                     </a>
 
                                     <button
                                         onClick={() => msg.id && handleDelete(msg.id)}
-                                        className="px-4 py-2 bg-white border border-red-200 text-red-600 text-sm font-medium rounded-lg hover:bg-red-50 transition-colors w-full flex items-center justify-center gap-2"
+                                        className="px-4 py-2 bg-[var(--color-paper-2)] border border-[var(--color-danger)]/30 text-[var(--color-danger)] text-sm font-medium rounded-lg hover:bg-[var(--color-danger-soft)] transition-colors w-full flex items-center justify-center gap-2"
                                     >
-                                        <Trash2 className="w-4 h-4" />
+                                        <Trash2 strokeWidth={1.5} className="w-4 h-4" />
                                         Eliminar
                                     </button>
                                 </div>

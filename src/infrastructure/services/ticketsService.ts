@@ -1,5 +1,6 @@
 import { db, auth } from "@/infrastructure/firebase/client";
 import { auditLogService } from "@/infrastructure/services/auditLogService";
+import { EMAIL_COLORS } from "@/lib/email/brandColors";
 import {
     collection,
     doc,
@@ -125,7 +126,7 @@ export const ticketsService = {
                     <h3>Mensaje:</h3>
                     <p style="background-color: #f3f4f6; padding: 12px; border-radius: 6px; font-style: italic;">"${data.description}"</p>
                     <br />
-                    <a href="${baseUrl}/dashboard/soporte/${docRef.id}" style="background-color: #4f46e5; color: white; padding: 10px 20px; text-decoration: none; border-radius: 6px; display: inline-block;">
+                    <a href="${baseUrl}/dashboard/soporte/${docRef.id}" style="background-color: ${EMAIL_COLORS.buttonBg}; color: ${EMAIL_COLORS.buttonText}; padding: 10px 20px; text-decoration: none; border-radius: 6px; display: inline-block;">
                         Ver Ticket y Responder
                     </a>
                 `

@@ -1,6 +1,6 @@
 "use client";
 
-import { createContext, useContext, useEffect, useState } from "react";
+import { createContext, useContext } from "react";
 
 type Theme = "light" | "dark";
 
@@ -9,34 +9,18 @@ interface ThemeContextValue {
     toggleTheme: () => void;
 }
 
-const ThemeContext = createContext<ThemeContextValue>({
-    theme: "light",
+// The dashboard is dark-only: the theme is fixed and applied by the `.app-theme dark`
+// wrapper in ClientLayout. The provider keeps its API so existing imports keep working,
+// and it never touches <html>, so public pages stay unaffected.
+const DARK_ONLY: ThemeContextValue = {
+    theme: "dark",
     toggleTheme: () => {},
-});
+};
+
+const ThemeContext = createContext<ThemeContextValue>(DARK_ONLY);
 
 export function ThemeProvider({ children }: { children: React.ReactNode }) {
-    const [theme, setTheme] = useState<Theme>("light");
-
-    useEffect(() => {
-        const stored = localStorage.getItem("zp-theme") as Theme | null;
-        if (stored === "dark" || stored === "light") {
-            setTheme(stored);
-            document.documentElement.classList.toggle("dark", stored === "dark");
-        }
-    }, []);
-
-    const toggleTheme = () => {
-        const next: Theme = theme === "light" ? "dark" : "light";
-        setTheme(next);
-        localStorage.setItem("zp-theme", next);
-        document.documentElement.classList.toggle("dark", next === "dark");
-    };
-
-    return (
-        <ThemeContext.Provider value={{ theme, toggleTheme }}>
-            {children}
-        </ThemeContext.Provider>
-    );
+    return <ThemeContext.Provider value={DARK_ONLY}>{children}</ThemeContext.Provider>;
 }
 
 export function useTheme() {

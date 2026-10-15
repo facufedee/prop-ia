@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Info, AlertTriangle, CheckCircle2, XCircle, X, Megaphone } from "lucide-react";
+import { Info, AlertTriangle, CheckCircle2, XCircle, X, type LucideIcon } from "lucide-react";
 
 type AnnouncementType = "info" | "warning" | "success" | "error";
 
@@ -13,35 +13,12 @@ interface Announcement {
     expiresAt?: string;
 }
 
-const ANNOUNCEMENT_STYLES: Record<AnnouncementType, { bg: string; border: string; icon: any; text: string; shadow: string }> = {
-    info: { 
-        bg: "bg-blue-50/90", 
-        border: "border-blue-200", 
-        icon: Info, 
-        text: "text-blue-800",
-        shadow: "shadow-blue-500/10"
-    },
-    warning: { 
-        bg: "bg-amber-50/90", 
-        border: "border-amber-200", 
-        icon: AlertTriangle, 
-        text: "text-amber-800",
-        shadow: "shadow-amber-500/10"
-    },
-    success: { 
-        bg: "bg-green-50/90", 
-        border: "border-green-200", 
-        icon: CheckCircle2, 
-        text: "text-green-800",
-        shadow: "shadow-green-500/10"
-    },
-    error: { 
-        bg: "bg-red-50/90", 
-        border: "border-red-200", 
-        icon: XCircle, 
-        text: "text-red-800",
-        shadow: "shadow-red-500/10"
-    },
+// Quiet banner: same paper-2 surface for every type; only the left bar and icon carry the tone.
+const ANNOUNCEMENT_STYLES: Record<AnnouncementType, { bar: string; icon: LucideIcon; tone: string }> = {
+    info: { bar: "bg-[var(--color-accent)]", icon: Info, tone: "text-[var(--color-accent)]" },
+    warning: { bar: "bg-[var(--color-warning)]", icon: AlertTriangle, tone: "text-[var(--color-warning)]" },
+    success: { bar: "bg-[var(--color-positive)]", icon: CheckCircle2, tone: "text-[var(--color-positive)]" },
+    error: { bar: "bg-[var(--color-danger)]", icon: XCircle, tone: "text-[var(--color-danger)]" },
 };
 
 export function AnnouncementBanner() {
@@ -104,34 +81,29 @@ export function AnnouncementBanner() {
                 const Icon = style.icon;
 
                 return (
-                    <div 
+                    <div
                         key={ann.id}
-                        className={`relative overflow-hidden rounded-2xl border ${style.bg} ${style.border} ${style.shadow} p-4 md:p-5 transition-all animate-in fade-in slide-in-from-top-2 duration-500 shadow-lg`}
+                        className="relative overflow-hidden rounded-xl border border-[var(--color-rule)] bg-[var(--color-paper-2)] p-4 md:p-5 animate-in fade-in slide-in-from-top-2 duration-500"
                     >
-                        <div className="flex items-start gap-4">
-                            <div className={`p-2 rounded-xl bg-white/50 backdrop-blur-sm shadow-sm ${style.text}`}>
-                                <Icon className="w-5 h-5" />
-                            </div>
+                        <span aria-hidden className={`absolute left-0 top-0 bottom-0 w-0.5 ${style.bar}`} />
+                        <div className="flex items-start gap-3">
+                            <Icon size={18} strokeWidth={1.5} className={`mt-0.5 shrink-0 ${style.tone}`} />
                             <div className="flex-1 pr-8">
-                                <h3 className={`text-sm md:text-base font-bold ${style.text} flex items-center gap-2 mb-1`}>
+                                <h3 className="font-heading text-sm md:text-base font-semibold text-[var(--color-ink)] mb-1">
                                     {ann.title}
                                 </h3>
-                                <p className={`text-xs md:text-sm ${style.text} opacity-90 leading-relaxed`}>
+                                <p className="text-xs md:text-sm text-[var(--color-ink-2)] leading-relaxed">
                                     {ann.message}
                                 </p>
                             </div>
-                            <button 
+                            <button
                                 onClick={() => handleDismiss(ann.id)}
-                                className={`p-1.5 rounded-lg hover:bg-black/5 transition-colors absolute top-3 right-3 ${style.text} opacity-50 hover:opacity-100`}
+                                className="p-1.5 rounded-lg text-[var(--color-muted)] hover:text-[var(--color-ink)] hover:bg-[var(--color-paper-3)] transition-colors absolute top-3 right-3"
                                 title="Cerrar"
+                                aria-label="Cerrar anuncio"
                             >
-                                <X className="w-4 h-4" />
+                                <X size={16} strokeWidth={1.5} />
                             </button>
-                        </div>
-                        
-                        {/* Abstract background decorative element */}
-                        <div className="absolute -right-4 -bottom-4 opacity-5 pointer-events-none">
-                            <Megaphone size={120} className="rotate-12" />
                         </div>
                     </div>
                 );

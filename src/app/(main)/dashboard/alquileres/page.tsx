@@ -111,7 +111,7 @@ export default function AlquileresPage() {
     if (loading) {
         return (
             <div className="p-6 flex items-center justify-center min-h-[400px]">
-                <div className="text-gray-500">Cargando alquileres...</div>
+                <div className="text-[var(--color-muted)]">Cargando alquileres...</div>
             </div>
         );
     }
@@ -122,43 +122,43 @@ export default function AlquileresPage() {
             {/* Header */}
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
                 <div>
-                    <h1 className="text-2xl font-bold text-gray-900">Alquileres</h1>
-                    <p className="text-gray-500">Gestión de contratos de alquiler</p>
+                    <h1 className="font-heading text-2xl font-bold text-[var(--color-ink)]">Alquileres</h1>
+                    <p className="text-[var(--color-muted)]">Gestión de contratos de alquiler</p>
                 </div>
                 <Link
                     href="/dashboard/alquileres/nuevo"
-                    className="flex items-center gap-2 px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors"
+                    className="flex items-center gap-2 px-4 py-2 bg-[var(--color-ink)] text-[var(--color-paper)] rounded-lg hover:bg-[var(--color-ink-2)] transition-colors"
                 >
-                    <Plus className="w-5 h-5" />
+                    <Plus strokeWidth={1.5} className="w-5 h-5" />
                     Nuevo Contrato
                 </Link>
             </div>
 
             {/* Stats */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                <div className="bg-white rounded-xl border border-gray-200 p-6">
-                    <div className="text-sm text-gray-500 mb-1">Activos</div>
-                    <div className="text-3xl font-bold text-green-600">{stats.activos}</div>
+                <div className="bg-[var(--color-paper-2)] rounded-xl border border-[var(--color-rule)] p-6">
+                    <div className="text-sm text-[var(--color-muted)] mb-1">Activos</div>
+                    <div className="text-3xl font-bold text-[var(--color-positive)]">{stats.activos}</div>
                 </div>
-                <div className="bg-white rounded-xl border border-gray-200 p-6">
-                    <div className="text-sm text-gray-500 mb-1">Por Vencer (5 días)</div>
-                    <div className="text-3xl font-bold text-orange-600">{stats.porVencer}</div>
+                <div className="bg-[var(--color-paper-2)] rounded-xl border border-[var(--color-rule)] p-6">
+                    <div className="text-sm text-[var(--color-muted)] mb-1">Por Vencer (5 días)</div>
+                    <div className="text-3xl font-bold text-[var(--color-warning)]">{stats.porVencer}</div>
                 </div>
-                <div className="bg-white rounded-xl border border-gray-200 p-6">
-                    <div className="text-sm text-gray-500 mb-1">Total Contratos</div>
-                    <div className="text-3xl font-bold text-gray-900">{stats.total}</div>
+                <div className="bg-[var(--color-paper-2)] rounded-xl border border-[var(--color-rule)] p-6">
+                    <div className="text-sm text-[var(--color-muted)] mb-1">Total Contratos</div>
+                    <div className="text-3xl font-bold text-[var(--color-ink)]">{stats.total}</div>
                 </div>
             </div>
 
             {/* Filters and Search Container */}
-            <div className="bg-white rounded-xl border border-gray-200 p-4 shadow-sm flex flex-col md:flex-row gap-4 justify-between items-center">
+            <div className="bg-[var(--color-paper-2)] rounded-xl border border-[var(--color-rule)] p-4 shadow-sm flex flex-col md:flex-row gap-4 justify-between items-center">
                 {/* Search Bar */}
                 <div className="relative w-full md:w-96">
-                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-500" />
+                    <Search strokeWidth={1.5} className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-[var(--color-muted)]" />
                     <input
                         type="text"
                         placeholder="Buscar por inquilino, dirección..."
-                        className="w-full pl-10 pr-4 py-2.5 bg-gray-50 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 focus:bg-white transition-all shadow-sm text-gray-900 placeholder-gray-500"
+                        className="w-full pl-10 pr-4 py-2.5 bg-[var(--color-paper)] border border-[var(--color-rule)] rounded-lg focus:ring-2 focus:ring-[var(--color-accent)]/40 focus:border-[var(--color-accent)] focus:bg-[var(--color-paper-2)] transition-all shadow-sm text-[var(--color-ink)] placeholder-[var(--color-neutral)]"
                         value={searchTerm}
                         onChange={(e) => setSearchTerm(e.target.value)}
                     />
@@ -166,15 +166,15 @@ export default function AlquileresPage() {
 
                 {/* Filter Tabs */}
                 <div className="flex items-center gap-2 overflow-x-auto w-full md:w-auto pb-1 md:pb-0">
-                    <Filter className="w-5 h-5 text-gray-400 shrink-0 hidden md:block" />
-                    <div className="flex p-1 bg-gray-100 rounded-lg">
+                    <Filter strokeWidth={1.5} className="w-5 h-5 text-[var(--color-neutral)] shrink-0 hidden md:block" />
+                    <div className="flex p-1 bg-[var(--color-paper-3)] rounded-lg">
                         {(['activo', 'pendiente', 'finalizado', 'todos'] as const).map((f) => (
                             <button
                                 key={f}
                                 onClick={() => setFilter(f)}
                                 className={`px-4 py-1.5 rounded-md text-sm font-medium transition-all whitespace-nowrap ${filter === f
-                                    ? 'bg-white text-indigo-600 shadow-sm'
-                                    : 'text-gray-600 hover:text-gray-900 hover:bg-gray-200/50'
+                                    ? 'bg-[var(--color-paper-2)] text-[var(--color-accent)] shadow-sm'
+                                    : 'text-[var(--color-ink-2)] hover:text-[var(--color-ink)] hover:bg-[var(--color-paper-4)]'
                                     }`}
                             >
                                 {f.charAt(0).toUpperCase() + f.slice(1)}
@@ -182,23 +182,23 @@ export default function AlquileresPage() {
                         ))}
                     </div>
 
-                    <div className="w-px h-6 bg-gray-300 mx-2 hidden md:block"></div>
+                    <div className="w-px h-6 bg-[var(--color-paper-4)] mx-2 hidden md:block"></div>
 
                     {/* View Toggle */}
-                    <div className="flex p-1 bg-gray-100 rounded-lg">
+                    <div className="flex p-1 bg-[var(--color-paper-3)] rounded-lg">
                         <button
                             onClick={() => setViewMode('grid')}
-                            className={`p-1.5 rounded-md transition-all ${viewMode === 'grid' ? 'bg-white text-indigo-600 shadow-sm' : 'text-gray-500 hover:text-gray-900'}`}
+                            className={`p-1.5 rounded-md transition-all ${viewMode === 'grid' ? 'bg-[var(--color-paper-2)] text-[var(--color-accent)] shadow-sm' : 'text-[var(--color-muted)] hover:text-[var(--color-ink)]'}`}
                             title="Vista en cuadrícula"
                         >
-                            <LayoutGrid size={18} />
+                            <LayoutGrid strokeWidth={1.5} size={18} />
                         </button>
                         <button
                             onClick={() => setViewMode('list')}
-                            className={`p-1.5 rounded-md transition-all ${viewMode === 'list' ? 'bg-white text-indigo-600 shadow-sm' : 'text-gray-500 hover:text-gray-900'}`}
+                            className={`p-1.5 rounded-md transition-all ${viewMode === 'list' ? 'bg-[var(--color-paper-2)] text-[var(--color-accent)] shadow-sm' : 'text-[var(--color-muted)] hover:text-[var(--color-ink)]'}`}
                             title="Vista en lista"
                         >
-                            <List size={18} />
+                            <List strokeWidth={1.5} size={18} />
                         </button>
                     </div>
                 </div>
@@ -206,8 +206,8 @@ export default function AlquileresPage() {
 
             {/* Grid/Table Content */}
             {filteredContracts.length === 0 ? (
-                <div className="text-center py-12 bg-gray-50 rounded-xl border border-gray-200 border-dashed">
-                    <p className="text-gray-500">No se encontraron contratos en esta categoría.</p>
+                <div className="text-center py-12 bg-[var(--color-paper)] rounded-xl border border-[var(--color-rule)] border-dashed">
+                    <p className="text-[var(--color-muted)]">No se encontraron contratos en esta categoría.</p>
                 </div>
             ) : (
                 <>

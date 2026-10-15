@@ -51,7 +51,7 @@ export default function MercadoPagoTab() {
     if (loading) {
         return (
             <div className="flex items-center justify-center p-12">
-                <Loader2 className="w-8 h-8 animate-spin text-gray-300" />
+                <Loader2 strokeWidth={1.5} className="w-8 h-8 animate-spin text-[var(--color-neutral)]" />
             </div>
         );
     }
@@ -62,12 +62,12 @@ export default function MercadoPagoTab() {
             <div className="flex gap-4 border-b">
                 <button
                     onClick={() => setActiveSubTab('mercadopago')}
-                    className={`pb-2 px-2 text-sm font-semibold transition-all ${activeSubTab === 'mercadopago' ? 'border-b-2 border-indigo-600 text-indigo-600' : 'text-gray-400'}`}
+                    className={`pb-2 px-2 text-sm font-semibold transition-all ${activeSubTab === 'mercadopago' ? 'border-b-2 border-[var(--color-accent)] text-[var(--color-accent)]' : 'text-[var(--color-neutral)]'}`}
                 >
                     Mercado Pago
                 </button>
                 <button
-                    className="pb-2 px-2 text-sm font-semibold text-gray-300 cursor-not-allowed"
+                    className="pb-2 px-2 text-sm font-semibold text-[var(--color-neutral)] cursor-not-allowed"
                     disabled
                 >
                     Stripe (Próximamente)
@@ -75,23 +75,23 @@ export default function MercadoPagoTab() {
             </div>
 
             {activeSubTab === 'mercadopago' && (
-                <div className="bg-white p-6 rounded-xl border shadow-sm">
+                <div className="bg-[var(--color-paper-2)] p-6 rounded-xl border shadow-sm">
                     <div className="flex justify-between items-center mb-8">
                         <div>
                             <h2 className="text-xl font-bold flex items-center gap-2">
-                                <Shield className="w-5 h-5 text-indigo-600" />
+                                <Shield strokeWidth={1.5} className="w-5 h-5 text-[var(--color-accent)]" />
                                 Configuración de Mercado Pago
                             </h2>
-                            <p className="text-sm text-gray-500 mt-1">
+                            <p className="text-sm text-[var(--color-muted)] mt-1">
                                 Las claves se almacenan de forma segura (encriptadas).
                             </p>
                         </div>
                         <button
                             onClick={handleSave}
                             disabled={saving}
-                            className="flex items-center gap-2 px-6 py-2 bg-black text-white rounded-lg hover:bg-gray-800 transition-colors font-medium text-sm disabled:opacity-50"
+                            className="flex items-center gap-2 px-6 py-2 bg-[var(--color-ink)] text-[var(--color-paper)] rounded-lg hover:bg-[var(--color-ink-2)] transition-colors font-medium text-sm disabled:opacity-50"
                         >
-                            {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
+                            {saving ? <Loader2 strokeWidth={1.5} className="w-4 h-4 animate-spin" /> : <Save strokeWidth={1.5} className="w-4 h-4" />}
                             {saved ? "Configuración Guardada" : "Guardar Cambios"}
                         </button>
                     </div>
@@ -99,32 +99,32 @@ export default function MercadoPagoTab() {
                     <div className="space-y-8 max-w-2xl">
                         {/* Environment Selection with Active status */}
                         <div>
-                            <label className="block text-sm font-semibold text-gray-700 mb-3 text-center">Gestionar Entornos</label>
+                            <label className="block text-sm font-semibold text-[var(--color-ink-2)] mb-3 text-center">Gestionar Entornos</label>
                             <div className="grid grid-cols-2 gap-4">
                                 <div
                                     onClick={() => setViewMode('sandbox')}
-                                    className={`p-4 rounded-xl border-2 transition-all cursor-pointer relative ${viewMode === 'sandbox' ? 'border-indigo-600 bg-indigo-50/30' : 'border-gray-100 bg-gray-50'}`}
+                                    className={`p-4 rounded-xl border-2 transition-all cursor-pointer relative ${viewMode === 'sandbox' ? 'border-[var(--color-accent)] bg-[var(--color-accent)]/7' : 'border-[var(--color-rule-2)] bg-[var(--color-paper)]'}`}
                                 >
                                     <div className="flex items-center justify-between mb-2">
-                                        <span className={`text-xs font-bold uppercase tracking-wider ${viewMode === 'sandbox' ? 'text-indigo-600' : 'text-gray-400'}`}>Sandbox</span>
+                                        <span className={`text-xs font-bold uppercase tracking-wider ${viewMode === 'sandbox' ? 'text-[var(--color-accent)]' : 'text-[var(--color-neutral)]'}`}>Sandbox</span>
                                         {config.activeMode === 'sandbox' && (
-                                            <span className="bg-green-100 text-green-700 px-2 py-0.5 rounded text-[10px] font-black uppercase">ACTIVO</span>
+                                            <span className="bg-[var(--color-positive-soft)] text-[var(--color-positive)] px-2 py-0.5 rounded text-[10px] font-black uppercase">ACTIVO</span>
                                         )}
                                     </div>
-                                    <p className="text-xs text-gray-500">Pruebas con tarjetas ficticias.</p>
+                                    <p className="text-xs text-[var(--color-muted)]">Pruebas con tarjetas ficticias.</p>
                                 </div>
 
                                 <div
                                     onClick={() => setViewMode('production')}
-                                    className={`p-4 rounded-xl border-2 transition-all cursor-pointer relative ${viewMode === 'production' ? 'border-red-600 bg-red-50/30' : 'border-gray-100 bg-gray-50'}`}
+                                    className={`p-4 rounded-xl border-2 transition-all cursor-pointer relative ${viewMode === 'production' ? 'border-[var(--color-danger)] bg-[var(--color-danger)]/7' : 'border-[var(--color-rule-2)] bg-[var(--color-paper)]'}`}
                                 >
                                     <div className="flex items-center justify-between mb-2">
-                                        <span className={`text-xs font-bold uppercase tracking-wider ${viewMode === 'production' ? 'text-red-600' : 'text-gray-400'}`}>Producción</span>
+                                        <span className={`text-xs font-bold uppercase tracking-wider ${viewMode === 'production' ? 'text-[var(--color-danger)]' : 'text-[var(--color-neutral)]'}`}>Producción</span>
                                         {config.activeMode === 'production' && (
-                                            <span className="bg-green-100 text-green-700 px-2 py-0.5 rounded text-[10px] font-black uppercase">ACTIVO</span>
+                                            <span className="bg-[var(--color-positive-soft)] text-[var(--color-positive)] px-2 py-0.5 rounded text-[10px] font-black uppercase">ACTIVO</span>
                                         )}
                                     </div>
-                                    <p className="text-xs text-gray-500">Cobros reales a clientes.</p>
+                                    <p className="text-xs text-[var(--color-muted)]">Cobros reales a clientes.</p>
                                 </div>
                             </div>
 
@@ -134,11 +134,11 @@ export default function MercadoPagoTab() {
                                     onClick={() => setConfig({ ...config, activeMode: viewMode })}
                                     disabled={config.activeMode === viewMode}
                                     className={`px-4 py-2 rounded-lg text-xs font-bold flex items-center gap-2 transition-all ${config.activeMode === viewMode
-                                        ? 'bg-green-50 text-green-600 cursor-default'
-                                        : 'bg-white border text-gray-700 hover:border-gray-400'}`}
+                                        ? 'bg-[var(--color-positive-soft)] text-[var(--color-positive)] cursor-default'
+                                        : 'bg-[var(--color-paper-2)] border text-[var(--color-ink-2)] hover:border-[var(--color-neutral)]'}`}
                                 >
                                     {config.activeMode === viewMode ? (
-                                        <><Check className="w-3 h-3" /> Este es el entorno activo</>
+                                        <><Check strokeWidth={1.5} className="w-3 h-3" /> Este es el entorno activo</>
                                     ) : (
                                         <>Marcar {viewMode === 'sandbox' ? 'Sandbox' : 'Producción'} como Activo</>
                                     )}
@@ -147,13 +147,13 @@ export default function MercadoPagoTab() {
                         </div>
 
                         {/* API Keys for currently viewed mode */}
-                        <div className="grid gap-6 p-6 bg-gray-50 rounded-2xl border border-dashed">
+                        <div className="grid gap-6 p-6 bg-[var(--color-paper)] rounded-2xl border border-dashed">
                             <h3 className="text-sm font-bold flex items-center gap-2">
-                                <span className={`w-2 h-2 rounded-full ${viewMode === 'sandbox' ? 'bg-indigo-400' : 'bg-red-400'}`}></span>
+                                <span className={`w-2 h-2 rounded-full ${viewMode === 'sandbox' ? 'bg-[var(--color-accent)]/30' : 'bg-[var(--color-danger)]/30'}`}></span>
                                 Credenciales de {viewMode === 'sandbox' ? 'Pasarela de Pruebas' : 'Pasarela Real'}
                             </h3>
                             <div className="space-y-2">
-                                <label className="block text-sm font-semibold text-gray-700">Public Key</label>
+                                <label className="block text-sm font-semibold text-[var(--color-ink-2)]">Public Key</label>
                                 <input
                                     type="text"
                                     value={config[viewMode]?.publicKey || ''}
@@ -162,12 +162,12 @@ export default function MercadoPagoTab() {
                                         [viewMode]: { ...(config[viewMode] || {}), publicKey: e.target.value }
                                     })}
                                     placeholder="APP_USR-..."
-                                    className="w-full p-3 border rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none font-mono text-sm bg-white"
+                                    className="w-full p-3 border rounded-xl focus:ring-2 focus:ring-[var(--color-accent)]/40 outline-none font-mono text-sm bg-[var(--color-paper-2)]"
                                 />
                             </div>
 
                             <div className="space-y-2">
-                                <label className="block text-sm font-semibold text-gray-700">Access Token</label>
+                                <label className="block text-sm font-semibold text-[var(--color-ink-2)]">Access Token</label>
                                 <input
                                     type="password"
                                     value={config[viewMode]?.accessToken || ''}
@@ -176,21 +176,21 @@ export default function MercadoPagoTab() {
                                         [viewMode]: { ...(config[viewMode] || {}), accessToken: e.target.value }
                                     })}
                                     placeholder="TEST-..."
-                                    className="w-full p-3 border rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none font-mono text-sm bg-white"
+                                    className="w-full p-3 border rounded-xl focus:ring-2 focus:ring-[var(--color-accent)]/40 outline-none font-mono text-sm bg-[var(--color-paper-2)]"
                                 />
                             </div>
                         </div>
 
                         {error && (
-                            <div className="p-4 bg-red-50 text-red-600 rounded-xl text-sm border border-red-100 flex items-center gap-3">
-                                <ShieldAlert className="w-5 h-5 flex-shrink-0" />
+                            <div className="p-4 bg-[var(--color-danger-soft)] text-[var(--color-danger)] rounded-xl text-sm border border-[var(--color-danger)]/30 flex items-center gap-3">
+                                <ShieldAlert strokeWidth={1.5} className="w-5 h-5 flex-shrink-0" />
                                 {error}
                             </div>
                         )}
 
                         {saved && (
-                            <div className="p-4 bg-green-50 text-green-700 rounded-xl text-sm border border-green-100 flex items-center gap-3 animate-in fade-in duration-300">
-                                <Check className="w-5 h-5 flex-shrink-0" />
+                            <div className="p-4 bg-[var(--color-positive-soft)] text-[var(--color-positive)] rounded-xl text-sm border border-[var(--color-positive)]/30 flex items-center gap-3 animate-in fade-in duration-300">
+                                <Check strokeWidth={1.5} className="w-5 h-5 flex-shrink-0" />
                                 ¡Configuración actualizada! El entorno {config.activeMode === 'sandbox' ? 'Sandbox' : 'Producción'} está listo.
                             </div>
                         )}

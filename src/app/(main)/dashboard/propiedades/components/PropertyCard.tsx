@@ -66,15 +66,15 @@ export default function PropertyCard({ property, onDelete, onUpdate, onDuplicate
 
     const getOperationColor = (type: string) => {
         switch (type) {
-            case 'Venta': return 'bg-green-100 text-green-700 border-green-200';
-            case 'Alquiler': return 'bg-blue-100 text-blue-700 border-blue-200';
-            case 'Alquiler Temporal': return 'bg-purple-100 text-purple-700 border-purple-200';
-            default: return 'bg-gray-100 text-gray-700 border-gray-200';
+            case 'Venta': return 'bg-[var(--color-positive-soft)] text-[var(--color-positive)] border-[var(--color-positive)]/30';
+            case 'Alquiler': return 'bg-[var(--color-accent-soft)] text-[var(--color-accent)] border-[var(--color-accent)]/30';
+            case 'Alquiler Temporal': return 'bg-[var(--color-accent-soft)] text-[var(--color-accent)] border-[var(--color-accent)]/30';
+            default: return 'bg-[var(--color-paper-3)] text-[var(--color-ink-2)] border-[var(--color-rule)]';
         }
     };
 
     return (
-        <div className={`bg-white rounded-xl border overflow-hidden hover:shadow-lg transition-all duration-200 group flex flex-col h-full relative ${property.status === 'sold' ? 'opacity-75' : ''} ${property.status === 'inactive' ? 'border-gray-300 bg-gray-50' : 'border-gray-200'}`}>
+        <div className={`bg-[var(--color-paper-2)] rounded-xl border overflow-hidden hover:shadow-lg transition-all duration-200 group flex flex-col h-full relative ${property.status === 'sold' ? 'opacity-75' : ''} ${property.status === 'inactive' ? 'border-[var(--color-rule)] bg-[var(--color-paper)]' : 'border-[var(--color-rule)]'}`}>
             {/* Clickable Area for whole card */}
             {!isEditing && (
                 <Link href={`/dashboard/propiedades/editar/${property.id}`} className="absolute inset-0 z-0" title="Editar propiedad" />
@@ -84,17 +84,17 @@ export default function PropertyCard({ property, onDelete, onUpdate, onDuplicate
             <div className="absolute top-3 right-3 z-50 pointer-events-auto" ref={menuRef}>
                 <button
                     onClick={(e) => { e.preventDefault(); e.stopPropagation(); setShowMenu(!showMenu); }}
-                    className="p-2 bg-white/90 hover:bg-white rounded-full text-gray-700 shadow-md transition-all"
+                    className="p-2 bg-[var(--color-paper-2)]/90 hover:bg-[var(--color-paper-3)] rounded-full text-[var(--color-ink-2)] shadow-md transition-all"
                 >
-                    <MoreVertical size={16} />
+                    <MoreVertical strokeWidth={1.5} size={16} />
                 </button>
                 {showMenu && (
-                    <div className="absolute right-0 mt-2 w-48 bg-white rounded-xl shadow-2xl border border-gray-100 p-1 flex flex-col gap-0.5 animate-in fade-in zoom-in-95 pointer-events-auto">
+                    <div className="absolute right-0 mt-2 w-48 bg-[var(--color-paper-2)] rounded-xl shadow-2xl border border-[var(--color-rule-2)] p-1 flex flex-col gap-0.5 animate-in fade-in zoom-in-95 pointer-events-auto">
                         <button
                             onClick={(e) => { e.preventDefault(); e.stopPropagation(); setIsEditing(true); setShowMenu(false); }}
-                            className="w-full text-left px-3 py-2 text-sm text-gray-700 hover:bg-gray-100 rounded-lg flex items-center gap-2 transition-colors"
+                            className="w-full text-left px-3 py-2 text-sm text-[var(--color-ink-2)] hover:bg-[var(--color-paper-3)] rounded-lg flex items-center gap-2 transition-colors"
                         >
-                            <Edit size={14} /> Edición rápida
+                            <Edit strokeWidth={1.5} size={14} /> Edición rápida
                         </button>
                         <button
                             onClick={async (e) => { 
@@ -111,46 +111,46 @@ export default function PropertyCard({ property, onDelete, onUpdate, onDuplicate
                                 } 
                             }}
                             disabled={isDuplicating}
-                            className={`w-full text-left px-3 py-2 text-sm text-gray-700 hover:bg-gray-100 rounded-lg flex items-center gap-2 transition-colors ${isDuplicating ? 'opacity-50 cursor-not-allowed' : ''}`}
+                            className={`w-full text-left px-3 py-2 text-sm text-[var(--color-ink-2)] hover:bg-[var(--color-paper-3)] rounded-lg flex items-center gap-2 transition-colors ${isDuplicating ? 'opacity-50 cursor-not-allowed' : ''}`}
                         >
                             {isDuplicating ? (
                                 <>
-                                    <RefreshCw size={14} className="animate-spin text-indigo-600" /> Duplicando...
+                                    <RefreshCw strokeWidth={1.5} size={14} className="animate-spin text-[var(--color-accent)]" /> Duplicando...
                                 </>
                             ) : (
                                 <>
-                                    <Copy size={14} /> Duplicar
+                                    <Copy strokeWidth={1.5} size={14} /> Duplicar
                                 </>
                             )}
                         </button>
                         {property.status !== 'sold' ? (
                             <button
                                 onClick={(e) => { e.preventDefault(); e.stopPropagation(); markAsSold(); }}
-                                className="w-full text-left px-3 py-2 text-sm text-gray-700 hover:bg-gray-100 rounded-lg flex items-center gap-2 transition-colors"
+                                className="w-full text-left px-3 py-2 text-sm text-[var(--color-ink-2)] hover:bg-[var(--color-paper-3)] rounded-lg flex items-center gap-2 transition-colors"
                             >
-                                <DollarSign size={14} /> Marcar Vendida
+                                <DollarSign strokeWidth={1.5} size={14} /> Marcar Vendida
                             </button>
                         ) : (
                             <button
                                 onClick={(e) => { e.preventDefault(); e.stopPropagation(); unmarkAsSold(); }}
-                                className="w-full text-left px-3 py-2 text-sm text-gray-700 hover:bg-gray-100 rounded-lg flex items-center gap-2 transition-colors"
+                                className="w-full text-left px-3 py-2 text-sm text-[var(--color-ink-2)] hover:bg-[var(--color-paper-3)] rounded-lg flex items-center gap-2 transition-colors"
                             >
-                                <RefreshCw size={14} /> Desmarcar Vendida
+                                <RefreshCw strokeWidth={1.5} size={14} /> Desmarcar Vendida
                             </button>
                         )}
-                        <div className="h-px bg-gray-100 my-1 mx-2" />
+                        <div className="h-px bg-[var(--color-paper-3)] my-1 mx-2" />
                         <button
                             onClick={(e) => { e.preventDefault(); e.stopPropagation(); onDelete(property.id); }}
-                            className="w-full text-left px-3 py-2 text-sm text-red-600 hover:bg-red-50 hover:text-red-700 rounded-lg flex items-center gap-2 transition-colors"
+                            className="w-full text-left px-3 py-2 text-sm text-[var(--color-danger)] hover:bg-[var(--color-danger-soft)] hover:text-[var(--color-danger)] rounded-lg flex items-center gap-2 transition-colors"
                         >
-                            <Trash2 size={14} /> Eliminar
+                            <Trash2 strokeWidth={1.5} size={14} /> Eliminar
                         </button>
                     </div>
                 )}
             </div>
 
             {/* Image Header */}
-            <div className="relative h-48 bg-gray-100 group z-10 pointer-events-none">
+            <div className="relative h-48 bg-[var(--color-paper-3)] group z-10 pointer-events-none">
                 {property.imageUrls && property.imageUrls.length > 0 ? (
                     <Image
                         src={property.imageUrls[0]}
@@ -161,7 +161,7 @@ export default function PropertyCard({ property, onDelete, onUpdate, onDuplicate
                         priority={false}
                     />
                 ) : (
-                    <div className="w-full h-full flex items-center justify-center text-gray-400">
+                    <div className="w-full h-full flex items-center justify-center text-[var(--color-neutral)]">
                         <span className="text-sm">Sin imagen</span>
                     </div>
                 )}
@@ -169,7 +169,7 @@ export default function PropertyCard({ property, onDelete, onUpdate, onDuplicate
                 {/* Status Overlay */}
                 {property.status === 'sold' && (
                     <div className="absolute inset-0 bg-black/50 flex items-center justify-center z-10">
-                        <span className="text-white font-bold text-xl tracking-widest border-4 border-white px-4 py-2 rotate-[-15deg]">VENDIDA</span>
+                        <span className="text-[var(--color-ink)] font-bold text-xl tracking-widest border-4 border-[var(--color-ink)] px-4 py-2 rotate-[-15deg]">VENDIDA</span>
                     </div>
                 )}
 
@@ -179,12 +179,12 @@ export default function PropertyCard({ property, onDelete, onUpdate, onDuplicate
                         {property.operation_type}
                     </span>
                     {property.status === 'inactive' && (
-                        <span className="px-2.5 py-1 rounded-full text-xs font-semibold border shadow-sm bg-gray-800 text-white w-fit">
+                        <span className="px-2.5 py-1 rounded-full text-xs font-semibold border shadow-sm bg-[var(--color-ink)] text-[var(--color-paper)] w-fit">
                             PAUSADA
                         </span>
                     )}
                     {property.status === 'reserved' && (
-                        <span className="px-2.5 py-1 rounded-full text-xs font-semibold border shadow-sm bg-yellow-400 text-yellow-900 w-fit">
+                        <span className="px-2.5 py-1 rounded-full text-xs font-semibold border shadow-sm bg-[var(--color-warning)]/30 text-[var(--color-warning)] w-fit">
                             RESERVADA
                         </span>
                     )}
@@ -196,21 +196,21 @@ export default function PropertyCard({ property, onDelete, onUpdate, onDuplicate
                 {isEditing ? (
                     <div className="flex-1 space-y-3">
                         <div>
-                            <label className="text-xs text-gray-500 font-semibold uppercase">Título</label>
+                            <label className="text-xs text-[var(--color-muted)] font-semibold uppercase">Título</label>
                             <input
                                 type="text"
                                 value={editForm.title}
                                 onChange={(e) => setEditForm({ ...editForm, title: e.target.value })}
-                                className="w-full p-2 border border-gray-300 rounded-lg text-sm text-gray-900 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                                className="w-full p-2 border border-[var(--color-rule)] rounded-lg text-sm text-[var(--color-ink)] focus:ring-2 focus:ring-[var(--color-accent)]/40 focus:border-[var(--color-accent)]"
                             />
                         </div>
                         <div>
-                            <label className="text-xs text-gray-500 font-semibold uppercase">Precio</label>
+                            <label className="text-xs text-[var(--color-muted)] font-semibold uppercase">Precio</label>
                             <div className="flex gap-2">
                                 <select
                                     value={editForm.currency}
                                     onChange={(e) => setEditForm({ ...editForm, currency: e.target.value })}
-                                    className="p-2 border border-gray-300 rounded-lg text-sm text-gray-900 bg-gray-50"
+                                    className="p-2 border border-[var(--color-rule)] rounded-lg text-sm text-[var(--color-ink)] bg-[var(--color-paper)]"
                                 >
                                     <option value="USD">USD</option>
                                     <option value="ARS">ARS</option>
@@ -219,7 +219,7 @@ export default function PropertyCard({ property, onDelete, onUpdate, onDuplicate
                                     type="number"
                                     value={editForm.price}
                                     onChange={(e) => setEditForm({ ...editForm, price: parseFloat(e.target.value) })}
-                                    className="w-full p-2 border border-gray-300 rounded-lg text-sm text-gray-900 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                                    className="w-full p-2 border border-[var(--color-rule)] rounded-lg text-sm text-[var(--color-ink)] focus:ring-2 focus:ring-[var(--color-accent)]/40 focus:border-[var(--color-accent)]"
                                 />
                             </div>
                         </div>
@@ -229,21 +229,21 @@ export default function PropertyCard({ property, onDelete, onUpdate, onDuplicate
                                 id={`hidePrice-${property.id}`}
                                 checked={editForm.hidePrice}
                                 onChange={(e) => setEditForm({ ...editForm, hidePrice: e.target.checked })}
-                                className="rounded text-indigo-600 focus:ring-indigo-500"
+                                className="rounded text-[var(--color-accent)] focus:ring-[var(--color-accent)]/40"
                             />
-                            <label htmlFor={`hidePrice-${property.id}`} className="text-sm text-gray-600">Ocultar Precio</label>
+                            <label htmlFor={`hidePrice-${property.id}`} className="text-sm text-[var(--color-ink-2)]">Ocultar Precio</label>
                         </div>
 
-                        <div className="flex items-center gap-2 mt-2 pt-2 border-t border-gray-100">
+                        <div className="flex items-center gap-2 mt-2 pt-2 border-t border-[var(--color-rule-2)]">
                             <button
                                 onClick={() => setIsEditing(false)}
-                                className="flex-1 py-1.5 text-sm text-gray-600 bg-gray-100 rounded-lg hover:bg-gray-200"
+                                className="flex-1 py-1.5 text-sm text-[var(--color-ink-2)] bg-[var(--color-paper-3)] rounded-lg hover:bg-[var(--color-paper-4)]"
                             >
                                 Cancelar
                             </button>
                             <button
                                 onClick={handleSave}
-                                className="flex-1 py-1.5 text-sm text-white bg-indigo-600 rounded-lg hover:bg-indigo-700 font-medium"
+                                className="flex-1 py-1.5 text-sm text-[var(--color-paper)] bg-[var(--color-ink)] rounded-lg hover:bg-[var(--color-ink-2)] font-medium"
                             >
                                 Guardar
                             </button>
@@ -252,17 +252,17 @@ export default function PropertyCard({ property, onDelete, onUpdate, onDuplicate
                 ) : (
                     <div className="flex-1 z-10 pointer-events-none">
                         <div className="flex items-start justify-between mb-2">
-                            <h3 className="font-bold text-gray-900 line-clamp-1 text-lg mb-1" title={property.title}>
+                            <h3 className="font-bold text-[var(--color-ink)] line-clamp-1 text-lg mb-1" title={property.title}>
                                 {property.title || "Sin título"}
                             </h3>
                         </div>
 
-                        <div className="flex items-center text-gray-500 text-sm mb-4">
-                            <MapPin className="w-4 h-4 mr-1 flex-shrink-0" />
+                        <div className="flex items-center text-[var(--color-muted)] text-sm mb-4">
+                            <MapPin strokeWidth={1.5} className="w-4 h-4 mr-1 flex-shrink-0" />
                             <span className="truncate">{property.localidad}, {property.provincia}</span>
                         </div>
 
-                        <div className="text-xl font-bold text-indigo-600 mb-4">
+                        <div className="text-xl font-bold text-[var(--color-accent)] mb-4">
                             {property.hidePrice || Number(property.price) === 0 ? (
                                 "Consultar Precio"
                             ) : (
@@ -270,20 +270,20 @@ export default function PropertyCard({ property, onDelete, onUpdate, onDuplicate
                             )}
                         </div>
 
-                        <div className="grid grid-cols-3 gap-2 py-3 border-t border-gray-100 text-xs text-gray-500">
+                        <div className="grid grid-cols-3 gap-2 py-3 border-t border-[var(--color-rule-2)] text-xs text-[var(--color-muted)]">
                             <div className="flex items-center gap-1" title="Superficie Cubierta">
-                                <Ruler className="w-4 h-4" />
+                                <Ruler strokeWidth={1.5} className="w-4 h-4" />
                                 <span>{property.area_covered}m²</span>
                             </div>
                             {Number(property.rooms) > 0 && (
                                 <div className="flex items-center gap-1" title="Ambientes">
-                                    <LayoutGrid className="w-4 h-4" />
+                                    <LayoutGrid strokeWidth={1.5} className="w-4 h-4" />
                                     <span>{property.rooms}</span>
                                 </div>
                             )}
                             {Number(property.bedrooms) > 0 && (
                                 <div className="flex items-center gap-1" title="Dormitorios">
-                                    <BedDouble className="w-4 h-4" />
+                                    <BedDouble strokeWidth={1.5} className="w-4 h-4" />
                                     <span>{property.bedrooms}</span>
                                 </div>
                             )}
@@ -293,54 +293,54 @@ export default function PropertyCard({ property, onDelete, onUpdate, onDuplicate
 
                 {/* Footer Actions */}
                 {!isEditing && (
-                    <div className="pt-4 mt-auto border-t border-gray-100 flex items-center justify-between gap-3 z-10 pointer-events-auto relative">
+                    <div className="pt-4 mt-auto border-t border-[var(--color-rule-2)] flex items-center justify-between gap-3 z-10 pointer-events-auto relative">
                         {property.status === 'active' ? (
                             <button
                                 onClick={(e) => { e.preventDefault(); e.stopPropagation(); toggleStatus(); }}
-                                className="flex-1 flex items-center justify-center gap-1.5 px-3 py-2 rounded-lg bg-gray-100 text-gray-700 font-bold hover:bg-gray-200 transition-colors text-xs border border-gray-200"
+                                className="flex-1 flex items-center justify-center gap-1.5 px-3 py-2 rounded-lg bg-[var(--color-paper-3)] text-[var(--color-ink-2)] font-bold hover:bg-[var(--color-paper-4)] transition-colors text-xs border border-[var(--color-rule)]"
                                 title="Pausar publicación"
                             >
-                                <Power size={14} /> Pausar Propiedad
+                                <Power strokeWidth={1.5} size={14} /> Pausar Propiedad
                             </button>
                         ) : property.status === 'inactive' ? (
                             <button
                                 onClick={(e) => { e.preventDefault(); e.stopPropagation(); toggleStatus(); }}
-                                className="flex-1 flex items-center justify-center gap-1.5 px-3 py-2 rounded-lg bg-green-50 text-green-700 font-bold hover:bg-green-100 transition-colors text-xs border border-green-200"
+                                className="flex-1 flex items-center justify-center gap-1.5 px-3 py-2 rounded-lg bg-[var(--color-positive-soft)] text-[var(--color-positive)] font-bold hover:bg-[var(--color-positive-soft)] transition-colors text-xs border border-[var(--color-positive)]/30"
                                 title="Activar publicación"
                             >
-                                <Check size={14} /> Publicar Propiedad
+                                <Check strokeWidth={1.5} size={14} /> Publicar Propiedad
                             </button>
                         ) : (
-                            <div className="flex-1 text-center py-2 text-xs font-bold text-gray-400 select-none">
+                            <div className="flex-1 text-center py-2 text-xs font-bold text-[var(--color-neutral)] select-none">
                                 {property.status === 'sold' ? 'VENDIDA' : 'RESERVADA'}
                             </div>
                         )}
 
-                        <div className="flex items-center gap-1 border-l pl-3 border-gray-100 pointer-events-auto">
+                        <div className="flex items-center gap-1 border-l pl-3 border-[var(--color-rule-2)] pointer-events-auto">
                             <button
                                 type="button"
                                 onClick={(e) => { e.preventDefault(); e.stopPropagation(); setShowFichasModal(true); }}
-                                className="p-2 rounded-lg text-gray-500 hover:bg-gray-100 hover:text-indigo-600 transition-colors"
+                                className="p-2 rounded-lg text-[var(--color-muted)] hover:bg-[var(--color-paper-3)] hover:text-[var(--color-accent-2)] transition-colors"
                                 title="Fichas en PDF"
                             >
-                                <Printer className="w-4 h-4" />
+                                <Printer strokeWidth={1.5} className="w-4 h-4" />
                             </button>
                             <Link
                                 href={`/dashboard/propiedades/editar/${property.id}`}
                                 onClick={(e) => e.stopPropagation()}
-                                className="p-2 rounded-lg text-gray-500 hover:bg-gray-100 hover:text-indigo-600 transition-colors"
+                                className="p-2 rounded-lg text-[var(--color-muted)] hover:bg-[var(--color-paper-3)] hover:text-[var(--color-accent-2)] transition-colors"
                                 title="Edición completa"
                             >
-                                <Edit className="w-4 h-4" />
+                                <Edit strokeWidth={1.5} className="w-4 h-4" />
                             </Link>
                             <Link
                                 href={`/propiedades/p/${property.id}`}
                                 target="_blank" rel="noopener noreferrer"
                                 onClick={(e) => e.stopPropagation()}
-                                className="p-2 rounded-lg text-gray-500 hover:bg-gray-100 hover:text-indigo-600 transition-colors"
+                                className="p-2 rounded-lg text-[var(--color-muted)] hover:bg-[var(--color-paper-3)] hover:text-[var(--color-accent-2)] transition-colors"
                                 title="Ver publicación"
                             >
-                                <Eye className="w-4 h-4" />
+                                <Eye strokeWidth={1.5} className="w-4 h-4" />
                             </Link>
                         </div>
                     </div>

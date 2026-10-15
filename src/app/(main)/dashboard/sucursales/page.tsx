@@ -102,74 +102,74 @@ export default function SucursalesPage() {
         }
     };
 
-    if (loading) return <div className="p-8"><Loader2 className="w-8 h-8 animate-spin text-indigo-600" /></div>;
+    if (loading) return <div className="p-8"><Loader2 strokeWidth={1.5} className="w-8 h-8 animate-spin text-[var(--color-accent)]" /></div>;
 
     return (
         <div className="space-y-6">
             <div className="flex justify-between items-center">
-                <h1 className="text-2xl font-bold text-gray-800">Sucursales</h1>
+                <h1 className="font-heading text-2xl font-bold text-[var(--color-ink)]">Sucursales</h1>
                 <button
                     onClick={() => handleOpenModal()}
-                    className="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-lg flex items-center gap-2 transition-colors"
+                    className="bg-[var(--color-ink)] hover:bg-[var(--color-ink-2)] text-[var(--color-paper)] px-4 py-2 rounded-lg flex items-center gap-2 transition-colors"
                 >
-                    <Plus className="w-4 h-4" />
+                    <Plus strokeWidth={1.5} className="w-4 h-4" />
                     Nueva Sucursal
                 </button>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 {branches.length === 0 && (
-                    <div className="col-span-full text-center py-12 text-gray-500">
+                    <div className="col-span-full text-center py-12 text-[var(--color-muted)]">
                         No tienes sucursales registradas. ¡Crea la primera!
                     </div>
                 )}
 
                 {branches.map(branch => (
-                    <div key={branch.id} className="bg-white p-6 rounded-xl shadow-sm border border-gray-100 hover:shadow-md transition-shadow relative group">
+                    <div key={branch.id} className="bg-[var(--color-paper-2)] p-6 rounded-xl shadow-sm border border-[var(--color-rule-2)] hover:shadow-md transition-shadow relative group">
 
                         <div className="flex items-start justify-between mb-4">
-                            <div className="bg-indigo-50 p-3 rounded-lg text-indigo-600">
-                                <Building2 className="w-6 h-6" />
+                            <div className="bg-[var(--color-paper-3)] p-3 rounded-full text-[var(--color-muted)]">
+                                <Building2 strokeWidth={1.5} className="w-6 h-6" />
                             </div>
-                            <span className={`text-xs px-2 py-1 rounded-full font-medium ${branch.isActive ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-700'}`}>
+                            <span className={`text-xs px-2 py-1 rounded-full font-medium ${branch.isActive ? 'bg-[var(--color-positive-soft)] text-[var(--color-positive)]' : 'bg-[var(--color-paper-3)] text-[var(--color-ink-2)]'}`}>
                                 {branch.isActive ? 'Activa' : 'Inactiva'}
                             </span>
                         </div>
 
-                        <h3 className="font-semibold text-lg text-gray-900 mb-2">{branch.name}</h3>
+                        <h3 className="font-semibold text-lg text-[var(--color-ink)] mb-2">{branch.name}</h3>
 
-                        <div className="space-y-2 text-sm text-gray-500">
+                        <div className="space-y-2 text-sm text-[var(--color-muted)]">
                             <div className="flex items-center gap-2">
-                                <MapPin className="w-4 h-4 flex-shrink-0" />
+                                <MapPin strokeWidth={1.5} className="w-4 h-4 flex-shrink-0" />
                                 <span className="truncate">{branch.address}</span>
                             </div>
                             {branch.phone && (
                                 <div className="flex items-center gap-2">
-                                    <Phone className="w-4 h-4 flex-shrink-0" />
+                                    <Phone strokeWidth={1.5} className="w-4 h-4 flex-shrink-0" />
                                     {branch.phone}
                                 </div>
                             )}
                             {branch.email && (
                                 <div className="flex items-center gap-2">
-                                    <Mail className="w-4 h-4 flex-shrink-0" />
+                                    <Mail strokeWidth={1.5} className="w-4 h-4 flex-shrink-0" />
                                     <span className="truncate">{branch.email}</span>
                                 </div>
                             )}
                         </div>
 
-                        <div className="mt-6 flex gap-2 border-t pt-4 border-gray-50">
+                        <div className="mt-6 flex gap-2 border-t pt-4 border-[var(--color-rule-2)]">
                             <button
                                 onClick={() => handleOpenModal(branch)}
-                                className="flex-1 text-sm flex items-center justify-center gap-2 bg-white border border-gray-200 text-gray-700 py-2 rounded hover:bg-gray-50 transition-colors"
+                                className="flex-1 text-sm flex items-center justify-center gap-2 bg-[var(--color-paper-2)] border border-[var(--color-rule)] text-[var(--color-ink-2)] py-2 rounded hover:bg-[var(--color-paper-3)] transition-colors"
                             >
-                                <Edit2 className="w-3 h-3" /> Editar
+                                <Edit2 strokeWidth={1.5} className="w-3 h-3" /> Editar
                             </button>
                             <button
                                 onClick={() => handleDelete(branch.id)}
-                                className="text-sm bg-white border border-red-100 text-red-600 px-3 py-2 rounded hover:bg-red-50 transition-colors"
+                                className="text-sm bg-[var(--color-paper-2)] border border-[var(--color-danger)]/30 text-[var(--color-danger)] px-3 py-2 rounded hover:bg-[var(--color-danger-soft)] transition-colors"
                                 title="Eliminar"
                             >
-                                <Trash2 className="w-4 h-4" />
+                                <Trash2 strokeWidth={1.5} className="w-4 h-4" />
                             </button>
                         </div>
                     </div>
@@ -179,33 +179,33 @@ export default function SucursalesPage() {
             {/* Modal */}
             {isModalOpen && (
                 <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
-                    <div className="bg-white rounded-xl shadow-xl w-full max-w-lg overflow-hidden">
-                        <div className="px-6 py-4 border-b border-gray-100 flex justify-between items-center bg-gray-50">
-                            <h2 className="text-lg font-bold text-gray-800">
+                    <div className="bg-[var(--color-paper-2)] rounded-xl shadow-xl w-full max-w-lg overflow-hidden">
+                        <div className="px-6 py-4 border-b border-[var(--color-rule-2)] flex justify-between items-center bg-[var(--color-paper)]">
+                            <h2 className="text-lg font-bold text-[var(--color-ink)]">
                                 {editingBranch ? 'Editar Sucursal' : 'Nueva Sucursal'}
                             </h2>
-                            <button onClick={() => setIsModalOpen(false)} className="text-gray-400 hover:text-gray-600">
-                                <X className="w-5 h-5" />
+                            <button onClick={() => setIsModalOpen(false)} className="text-[var(--color-neutral)] hover:text-[var(--color-ink-2)]">
+                                <X strokeWidth={1.5} className="w-5 h-5" />
                             </button>
                         </div>
                         <form onSubmit={handleSubmit} className="p-6 space-y-4">
                             <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-1">Nombre de la Sucursal</label>
+                                <label className="block text-sm font-medium text-[var(--color-ink-2)] mb-1">Nombre de la Sucursal</label>
                                 <input
                                     type="text"
                                     required
-                                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500"
+                                    className="w-full px-3 py-2 border border-[var(--color-rule)] rounded-lg focus:ring-2 focus:ring-[var(--color-accent)]/40"
                                     placeholder="Ej: Casa Central"
                                     value={formData.name}
                                     onChange={e => setFormData({ ...formData, name: e.target.value })}
                                 />
                             </div>
                             <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-1">Dirección</label>
+                                <label className="block text-sm font-medium text-[var(--color-ink-2)] mb-1">Dirección</label>
                                 <input
                                     type="text"
                                     required
-                                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500"
+                                    className="w-full px-3 py-2 border border-[var(--color-rule)] rounded-lg focus:ring-2 focus:ring-[var(--color-accent)]/40"
                                     placeholder="Ej: Av. Libertador 1234"
                                     value={formData.address}
                                     onChange={e => setFormData({ ...formData, address: e.target.value })}
@@ -213,20 +213,20 @@ export default function SucursalesPage() {
                             </div>
                             <div className="grid grid-cols-2 gap-4">
                                 <div>
-                                    <label className="block text-sm font-medium text-gray-700 mb-1">Teléfono</label>
+                                    <label className="block text-sm font-medium text-[var(--color-ink-2)] mb-1">Teléfono</label>
                                     <input
                                         type="tel"
-                                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500"
+                                        className="w-full px-3 py-2 border border-[var(--color-rule)] rounded-lg focus:ring-2 focus:ring-[var(--color-accent)]/40"
                                         placeholder="Opcional"
                                         value={formData.phone}
                                         onChange={e => setFormData({ ...formData, phone: e.target.value })}
                                     />
                                 </div>
                                 <div>
-                                    <label className="block text-sm font-medium text-gray-700 mb-1">Email</label>
+                                    <label className="block text-sm font-medium text-[var(--color-ink-2)] mb-1">Email</label>
                                     <input
                                         type="email"
-                                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500"
+                                        className="w-full px-3 py-2 border border-[var(--color-rule)] rounded-lg focus:ring-2 focus:ring-[var(--color-accent)]/40"
                                         placeholder="Opcional"
                                         value={formData.email}
                                         onChange={e => setFormData({ ...formData, email: e.target.value })}
@@ -238,13 +238,13 @@ export default function SucursalesPage() {
                                 <button
                                     type="button"
                                     onClick={() => setIsModalOpen(false)}
-                                    className="px-4 py-2 text-gray-700 hover:bg-gray-100 rounded-lg"
+                                    className="px-4 py-2 text-[var(--color-ink-2)] hover:bg-[var(--color-paper-3)] rounded-lg"
                                 >
                                     Cancelar
                                 </button>
                                 <button
                                     type="submit"
-                                    className="bg-indigo-600 hover:bg-indigo-700 text-white px-6 py-2 rounded-lg font-medium shadow-sm shadow-indigo-200"
+                                    className="bg-[var(--color-ink)] hover:bg-[var(--color-ink-2)] text-[var(--color-paper)] px-6 py-2 rounded-lg font-medium shadow-sm"
                                 >
                                     {editingBranch ? 'Guardar Cambios' : 'Crear Sucursal'}
                                 </button>

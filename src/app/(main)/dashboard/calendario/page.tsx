@@ -94,12 +94,12 @@ export default function CalendarioPage() {
 
     const getEstadoColor = (estado: string) => {
         const colors = {
-            programada: 'bg-blue-50 text-blue-700 border-blue-200 hover:bg-blue-100',
-            confirmada: 'bg-green-50 text-green-700 border-green-200 hover:bg-green-100',
-            en_curso: 'bg-yellow-50 text-yellow-700 border-yellow-200 hover:bg-yellow-100',
-            completada: 'bg-gray-50 text-gray-700 border-gray-200 hover:bg-gray-100',
-            cancelada: 'bg-red-50 text-red-700 border-red-200 hover:bg-red-100',
-            no_asistio: 'bg-orange-50 text-orange-700 border-orange-200 hover:bg-orange-100',
+            programada: 'border border-[var(--color-rule)] text-[var(--color-ink)] border-[var(--color-accent)]/30 hover:bg-[var(--color-paper-3)]',
+            confirmada: 'bg-[var(--color-positive-soft)] text-[var(--color-positive)] border-[var(--color-positive)]/30 hover:bg-[var(--color-positive-soft)]',
+            en_curso: 'bg-[var(--color-warning-soft)] text-[var(--color-warning)] border-[var(--color-warning)]/30 hover:bg-[var(--color-warning-soft)]',
+            completada: 'bg-[var(--color-paper)] text-[var(--color-ink-2)] border-[var(--color-rule)] hover:bg-[var(--color-paper-3)]',
+            cancelada: 'bg-[var(--color-danger-soft)] text-[var(--color-danger)] border-[var(--color-danger)]/30 hover:bg-[var(--color-danger-soft)]',
+            no_asistio: 'bg-[var(--color-warning-soft)] text-[var(--color-warning)] border-[var(--color-warning)]/30 hover:bg-[var(--color-warning-soft)]',
         };
         return colors[estado as keyof typeof colors] || colors.programada;
     };
@@ -107,12 +107,12 @@ export default function CalendarioPage() {
     // Badge color for lists
     const getStatusBadge = (estado: string) => {
         const styles = {
-            programada: 'bg-blue-100 text-blue-800',
-            confirmada: 'bg-green-100 text-green-800',
-            en_curso: 'bg-yellow-100 text-yellow-800',
-            completada: 'bg-gray-100 text-gray-800',
-            cancelada: 'bg-red-100 text-red-800',
-            no_asistio: 'bg-orange-100 text-orange-800',
+            programada: 'bg-[var(--color-accent-soft)] text-[var(--color-accent)]',
+            confirmada: 'bg-[var(--color-positive-soft)] text-[var(--color-positive)]',
+            en_curso: 'bg-[var(--color-warning-soft)] text-[var(--color-warning)]',
+            completada: 'bg-[var(--color-paper-3)] text-[var(--color-ink)]',
+            cancelada: 'bg-[var(--color-danger-soft)] text-[var(--color-danger)]',
+            no_asistio: 'bg-[var(--color-warning-soft)] text-[var(--color-warning)]',
         };
         const labels = {
             programada: 'Programada',
@@ -138,18 +138,18 @@ export default function CalendarioPage() {
             <div className="flex flex-shrink-0 justify-between items-center mb-6">
                 <div className="flex items-center gap-3">
                     <div>
-                        <h1 className="text-2xl font-bold text-gray-900">Calendario</h1>
-                        <p className="text-gray-500">Gestioná tus visitas y citas</p>
+                        <h1 className="font-heading text-2xl font-bold text-[var(--color-ink)]">Calendario</h1>
+                        <p className="text-[var(--color-muted)]">Gestioná tus visitas y citas</p>
                     </div>
                     {loading && (
-                        <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-indigo-600"></div>
+                        <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-[var(--color-accent)]"></div>
                     )}
                 </div>
                 <Link
                     href="/dashboard/calendario/nueva"
-                    className="flex items-center gap-2 px-4 py-2 bg-indigo-600 text-white rounded-xl hover:bg-indigo-700 transition shadow-sm"
+                    className="flex items-center gap-2 px-4 py-2 bg-[var(--color-ink)] text-[var(--color-paper)] rounded-xl hover:bg-[var(--color-ink-2)] transition shadow-sm"
                 >
-                    <Plus className="w-5 h-5" />
+                    <Plus strokeWidth={1.5} className="w-5 h-5" />
                     Nueva Visita
                 </Link>
             </div>
@@ -157,18 +157,18 @@ export default function CalendarioPage() {
             <div className={`flex flex-col lg:flex-row gap-6 flex-1 min-h-0 transition-opacity duration-300 ${loading ? 'opacity-60 pointer-events-none' : 'opacity-100'}`}>
 
                 {/* Left Column: Agenda List */}
-                <div className="w-full lg:w-80 flex-shrink-0 bg-white rounded-2xl border border-gray-200 shadow-sm flex flex-col overflow-hidden">
-                    <div className="p-4 border-b border-gray-100 bg-gray-50">
-                        <h2 className="font-semibold text-gray-900">Agenda Semanal</h2>
-                        <p className="text-xs text-gray-500 mt-1">
+                <div className="w-full lg:w-80 flex-shrink-0 bg-[var(--color-paper-2)] rounded-2xl border border-[var(--color-rule)] shadow-sm flex flex-col overflow-hidden">
+                    <div className="p-4 border-b border-[var(--color-rule-2)] bg-[var(--color-paper)]">
+                        <h2 className="font-semibold text-[var(--color-ink)]">Agenda Semanal</h2>
+                        <p className="text-xs text-[var(--color-muted)] mt-1">
                             {format(weekDays[0], "d MMM", { locale: es })} - {format(weekDays[6], "d MMM yyyy", { locale: es })}
                         </p>
                     </div>
 
                     <div className="flex-1 overflow-y-auto p-2 space-y-2">
                         {visitas.length === 0 ? (
-                            <div className="text-center py-8 px-4 text-gray-400 text-sm">
-                                <Calendar className="w-8 h-8 mx-auto mb-2 opacity-20" />
+                            <div className="text-center py-8 px-4 text-[var(--color-neutral)] text-sm">
+                                <Calendar strokeWidth={1.5} className="w-8 h-8 mx-auto mb-2 opacity-20" />
                                 No hay visitas programadas para esta semana.
                             </div>
                         ) : (
@@ -176,18 +176,18 @@ export default function CalendarioPage() {
                                 <Link
                                     key={visita.id}
                                     href={`/dashboard/calendario/${visita.id}`}
-                                    className="block p-3 rounded-xl border border-gray-100 hover:border-indigo-200 hover:bg-indigo-50 transition-all group bg-white"
+                                    className="block p-3 rounded-xl border border-[var(--color-rule-2)] hover:border-[var(--color-accent)]/30 hover:bg-[var(--color-accent-soft)] transition-all group bg-[var(--color-paper-2)]"
                                 >
                                     <div className="flex justify-between items-start mb-2">
-                                        <div className="text-xs font-bold text-gray-900">
+                                        <div className="text-xs font-bold text-[var(--color-ink)]">
                                             {format(new Date(visita.fechaHora), "EEEE d, HH:mm", { locale: es })} hs
                                         </div>
                                         {getStatusBadge(visita.estado)}
                                     </div>
-                                    <div className="text-sm font-medium text-gray-800 mb-1 line-clamp-1">
+                                    <div className="text-sm font-medium text-[var(--color-ink)] mb-1 line-clamp-1">
                                         {visita.clienteNombre}
                                     </div>
-                                    <div className="text-xs text-gray-500 flex items-center gap-1">
+                                    <div className="text-xs text-[var(--color-muted)] flex items-center gap-1">
                                         <span className="truncate">{visita.propiedadDireccion}</span>
                                     </div>
                                 </Link>
@@ -197,40 +197,40 @@ export default function CalendarioPage() {
                 </div>
 
                 {/* Right Column: Calendar Grid */}
-                <div className="flex-1 bg-white rounded-2xl border border-gray-200 shadow-sm flex flex-col overflow-hidden">
+                <div className="flex-1 bg-[var(--color-paper-2)] rounded-2xl border border-[var(--color-rule)] shadow-sm flex flex-col overflow-hidden">
                     {/* Calendar Controls */}
-                    <div className="p-4 border-b border-gray-200 flex justify-between items-center bg-white">
+                    <div className="p-4 border-b border-[var(--color-rule)] flex justify-between items-center bg-[var(--color-paper-2)]">
                         <div className="flex items-center gap-2">
-                            <span className="text-lg font-bold text-gray-900 capitalize">
+                            <span className="text-lg font-bold text-[var(--color-ink)] capitalize">
                                 {format(currentDate, "MMMM yyyy", { locale: es })}
                             </span>
                         </div>
-                        <div className="flex bg-gray-100 rounded-lg p-1 gap-1">
-                            <button onClick={goToPreviousWeek} className="p-1.5 hover:bg-white rounded-md shadow-sm transition">
-                                <ChevronLeft className="w-4 h-4 text-gray-600" />
+                        <div className="flex bg-[var(--color-paper-3)] rounded-lg p-1 gap-1">
+                            <button onClick={goToPreviousWeek} className="p-1.5 hover:bg-[var(--color-paper-3)] rounded-md shadow-sm transition">
+                                <ChevronLeft strokeWidth={1.5} className="w-4 h-4 text-[var(--color-ink-2)]" />
                             </button>
-                            <button onClick={goToToday} className="px-3 py-1 text-xs font-medium text-gray-600 hover:bg-white rounded-md transition">
+                            <button onClick={goToToday} className="px-3 py-1 text-xs font-medium text-[var(--color-ink-2)] hover:bg-[var(--color-paper-3)] rounded-md transition">
                                 Hoy
                             </button>
-                            <button onClick={goToNextWeek} className="p-1.5 hover:bg-white rounded-md shadow-sm transition">
-                                <ChevronRight className="w-4 h-4 text-gray-600" />
+                            <button onClick={goToNextWeek} className="p-1.5 hover:bg-[var(--color-paper-3)] rounded-md shadow-sm transition">
+                                <ChevronRight strokeWidth={1.5} className="w-4 h-4 text-[var(--color-ink-2)]" />
                             </button>
                         </div>
                     </div>
 
                     {/* Week Header */}
-                    <div className="grid grid-cols-8 border-b border-gray-200 bg-gray-50">
-                        <div className="p-2 text-xs font-medium text-center text-gray-400 border-r border-gray-200 py-3">
+                    <div className="grid grid-cols-8 border-b border-[var(--color-rule)] bg-[var(--color-paper)]">
+                        <div className="p-2 text-xs font-medium text-center text-[var(--color-neutral)] border-r border-[var(--color-rule)] py-3">
                             Hora
                         </div>
                         {weekDays.map((day, idx) => {
                             const isToday = day.toDateString() === new Date().toDateString();
                             return (
-                                <div key={idx} className={`p-2 text-center border-r border-gray-200 py-3 ${isToday ? 'bg-indigo-50/50' : ''}`}>
-                                    <div className={`text-xs uppercase font-semibold mb-1 ${isToday ? 'text-indigo-600' : 'text-gray-500'}`}>
+                                <div key={idx} className={`p-2 text-center border-r border-[var(--color-rule)] py-3 ${isToday ? 'bg-[var(--color-accent-soft)]' : ''}`}>
+                                    <div className={`text-xs uppercase font-semibold mb-1 ${isToday ? 'text-[var(--color-accent)]' : 'text-[var(--color-muted)]'}`}>
                                         {format(day, "EEE", { locale: es })}
                                     </div>
-                                    <div className={`text-sm font-bold w-7 h-7 mx-auto flex items-center justify-center rounded-full ${isToday ? 'bg-indigo-600 text-white shadow-sm' : 'text-gray-900'}`}>
+                                    <div className={`text-sm font-bold w-7 h-7 mx-auto flex items-center justify-center rounded-full ${isToday ? 'bg-[var(--color-accent)] text-[var(--color-accent-ink)] shadow-sm' : 'text-[var(--color-ink)]'}`}>
                                         {format(day, "d")}
                                     </div>
                                 </div>
@@ -242,10 +242,10 @@ export default function CalendarioPage() {
                     <div className="flex-1 overflow-y-auto">
                         <div className="grid grid-cols-1"> {/* Wrapper to maintain structure */}
                             {hours.map(hour => (
-                                <div key={hour} className="grid grid-cols-8 border-b border-gray-100 min-h-[60px]">
+                                <div key={hour} className="grid grid-cols-8 border-b border-[var(--color-rule-2)] min-h-[60px]">
                                     {/* Time Label */}
-                                    <div className="relative border-r border-gray-100 bg-white">
-                                        <span className="absolute -top-2.5 right-2 text-xs text-gray-400 bg-white px-1">
+                                    <div className="relative border-r border-[var(--color-rule-2)] bg-[var(--color-paper-2)]">
+                                        <span className="absolute -top-2.5 right-2 text-xs text-[var(--color-neutral)] bg-[var(--color-paper-2)] px-1">
                                             {hour}:00
                                         </span>
                                     </div>
@@ -258,7 +258,7 @@ export default function CalendarioPage() {
                                         });
 
                                         return (
-                                            <div key={dayIdx} className="border-r border-gray-100 p-1 relative hover:bg-gray-50/50 transition-colors">
+                                            <div key={dayIdx} className="border-r border-[var(--color-rule-2)] p-1 relative hover:bg-[var(--color-paper-3)] transition-colors">
                                                 {dayVisitas.map(visita => (
                                                     <Link
                                                         key={visita.id}

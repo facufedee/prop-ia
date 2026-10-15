@@ -116,24 +116,24 @@ export default function NotificationsPage() {
 
     if (loading) {
         return (
-            <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-indigo-600"></div>
+            <div className="min-h-screen bg-[var(--color-paper)] flex items-center justify-center">
+                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[var(--color-accent)]"></div>
             </div>
         );
     }
 
     return (
-        <div className="min-h-screen bg-gray-50/50">
+        <div className="min-h-screen bg-[var(--color-paper)]/50">
             <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
 
                 {/* Header */}
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
                     <div>
-                        <h1 className="text-2xl font-bold text-gray-900 flex items-center gap-3">
-                            <Bell className="w-8 h-8 text-indigo-600" />
+                        <h1 className="font-heading text-2xl font-bold text-[var(--color-ink)] flex items-center gap-3">
+                            <Bell strokeWidth={1.5} className="w-8 h-8 text-[var(--color-accent)]" />
                             Notificaciones
                         </h1>
-                        <p className="text-gray-500 mt-1">
+                        <p className="text-[var(--color-muted)] mt-1">
                             Centro de alertas y avisos del sistema
                         </p>
                     </div>
@@ -142,9 +142,9 @@ export default function NotificationsPage() {
                         {unreadCount > 0 && (
                             <button
                                 onClick={handleMarkAllRead}
-                                className="flex items-center gap-2 px-4 py-2 bg-white border border-gray-200 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors text-sm font-medium shadow-sm"
+                                className="flex items-center gap-2 px-4 py-2 bg-[var(--color-paper-2)] border border-[var(--color-rule)] text-[var(--color-ink-2)] rounded-lg hover:bg-[var(--color-paper-3)] transition-colors text-sm font-medium shadow-sm"
                             >
-                                <CheckCircle2 className="w-4 h-4 text-green-600" />
+                                <CheckCircle2 strokeWidth={1.5} className="w-4 h-4 text-[var(--color-positive)]" />
                                 Marcar todo como leído
                             </button>
                         )}
@@ -152,30 +152,30 @@ export default function NotificationsPage() {
                 </div>
 
                 {/* Filters */}
-                <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden mb-6">
-                    <div className="flex border-b border-gray-100">
+                <div className="bg-[var(--color-paper-2)] rounded-xl shadow-sm border border-[var(--color-rule)] overflow-hidden mb-6">
+                    <div className="flex border-b border-[var(--color-rule-2)]">
                         <button
                             onClick={() => setFilter('all')}
                             className={`px-6 py-4 text-sm font-medium border-b-2 transition-colors flex items-center gap-2 ${filter === 'all'
-                                ? 'border-indigo-600 text-indigo-600 bg-indigo-50/50'
-                                : 'border-transparent text-gray-500 hover:text-gray-700 hover:bg-gray-50'
+                                ? 'border-[var(--color-accent)] text-[var(--color-accent)] bg-[var(--color-accent-soft)]'
+                                : 'border-transparent text-[var(--color-muted)] hover:text-[var(--color-ink-2)] hover:bg-[var(--color-paper-3)]'
                                 }`}
                         >
                             Todas
-                            <span className="bg-gray-100 text-gray-600 px-2 py-0.5 rounded-full text-xs">
+                            <span className="bg-[var(--color-paper-3)] text-[var(--color-ink-2)] px-2 py-0.5 rounded-full text-xs">
                                 {notifications.length}
                             </span>
                         </button>
                         <button
                             onClick={() => setFilter('unread')}
                             className={`px-6 py-4 text-sm font-medium border-b-2 transition-colors flex items-center gap-2 ${filter === 'unread'
-                                ? 'border-indigo-600 text-indigo-600 bg-indigo-50/50'
-                                : 'border-transparent text-gray-500 hover:text-gray-700 hover:bg-gray-50'
+                                ? 'border-[var(--color-accent)] text-[var(--color-accent)] bg-[var(--color-accent-soft)]'
+                                : 'border-transparent text-[var(--color-muted)] hover:text-[var(--color-ink-2)] hover:bg-[var(--color-paper-3)]'
                                 }`}
                         >
                             No leídas
                             {unreadCount > 0 && (
-                                <span className="bg-red-100 text-red-600 px-2 py-0.5 rounded-full text-xs">
+                                <span className="bg-[var(--color-danger-soft)] text-[var(--color-danger)] px-2 py-0.5 rounded-full text-xs">
                                     {unreadCount}
                                 </span>
                             )}
@@ -183,13 +183,13 @@ export default function NotificationsPage() {
                     </div>
 
                     {/* Notification List */}
-                    <div className="divide-y divide-gray-100">
+                    <div className="divide-y divide-[var(--color-rule-2)]">
                         {filteredNotifications.length === 0 ? (
-                            <div className="p-12 text-center text-gray-500">
-                                <div className="w-16 h-16 bg-gray-50 rounded-full flex items-center justify-center mx-auto mb-4">
-                                    <Bell className="w-8 h-8 text-gray-300" />
+                            <div className="p-12 text-center text-[var(--color-muted)]">
+                                <div className="w-16 h-16 bg-[var(--color-paper)] rounded-full flex items-center justify-center mx-auto mb-4">
+                                    <Bell strokeWidth={1.5} className="w-8 h-8 text-[var(--color-neutral)]" />
                                 </div>
-                                <h3 className="text-lg font-medium text-gray-900 mb-1">
+                                <h3 className="text-lg font-medium text-[var(--color-ink)] mb-1">
                                     {filter === 'unread' ? 'Estás al día' : 'No hay notificaciones'}
                                 </h3>
                                 <p className="text-sm">
@@ -205,31 +205,31 @@ export default function NotificationsPage() {
                                     <div
                                         key={notif.id}
                                         onClick={() => handleNotificationClick(notif)}
-                                        className={`p-6 flex gap-4 transition-colors cursor-pointer group ${isUnread ? 'bg-indigo-50/30 hover:bg-indigo-50/60' : 'bg-white hover:bg-gray-50'
+                                        className={`p-6 flex gap-4 transition-colors cursor-pointer group ${isUnread ? 'bg-[var(--color-accent)]/7 hover:bg-[var(--color-accent-soft)]' : 'bg-[var(--color-paper-2)] hover:bg-[var(--color-paper-3)]'
                                             }`}
                                     >
                                         {/* Icon */}
-                                        <div className={`shrink-0 w-12 h-12 rounded-full flex items-center justify-center ${notif.type === 'success' ? 'bg-green-100 text-green-600' :
-                                            notif.type === 'warning' ? 'bg-orange-100 text-orange-600' :
-                                                notif.type === 'error' ? 'bg-red-100 text-red-600' : 'bg-blue-100 text-blue-600'
+                                        <div className={`shrink-0 w-12 h-12 rounded-full flex items-center justify-center ${notif.type === 'success' ? 'bg-[var(--color-positive-soft)] text-[var(--color-positive)]' :
+                                            notif.type === 'warning' ? 'bg-[var(--color-warning-soft)] text-[var(--color-warning)]' :
+                                                notif.type === 'error' ? 'bg-[var(--color-danger-soft)] text-[var(--color-danger)]' : 'bg-[var(--color-accent-soft)] text-[var(--color-accent)]'
                                             }`}>
-                                            {notif.type === 'success' ? <Check className="w-6 h-6" /> :
-                                                notif.type === 'warning' ? <LogOut className="w-6 h-6" /> :
-                                                    notif.type === 'error' ? <X className="w-6 h-6" /> : <Bell className="w-6 h-6" />}
+                                            {notif.type === 'success' ? <Check strokeWidth={1.5} className="w-6 h-6" /> :
+                                                notif.type === 'warning' ? <LogOut strokeWidth={1.5} className="w-6 h-6" /> :
+                                                    notif.type === 'error' ? <X strokeWidth={1.5} className="w-6 h-6" /> : <Bell strokeWidth={1.5} className="w-6 h-6" />}
                                         </div>
 
                                         {/* Content */}
                                         <div className="flex-1 min-w-0">
                                             <div className="flex items-start justify-between mb-1">
-                                                <h4 className={`text-base font-semibold ${isUnread ? 'text-gray-900' : 'text-gray-700'}`}>
+                                                <h4 className={`text-base font-semibold ${isUnread ? 'text-[var(--color-ink)]' : 'text-[var(--color-ink-2)]'}`}>
                                                     {notif.title}
                                                 </h4>
-                                                <span className="text-xs text-gray-400 flex items-center gap-1 whitespace-nowrap ml-2">
-                                                    <Clock className="w-3 h-3" />
+                                                <span className="text-xs text-[var(--color-neutral)] flex items-center gap-1 whitespace-nowrap ml-2">
+                                                    <Clock strokeWidth={1.5} className="w-3 h-3" />
                                                     {notif.createdAt ? new Date(notif.createdAt).toLocaleDateString() + ' ' + new Date(notif.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : 'Reciente'}
                                                 </span>
                                             </div>
-                                            <p className={`text-sm ${isUnread ? 'text-gray-800' : 'text-gray-600'} leading-relaxed`}>
+                                            <p className={`text-sm ${isUnread ? 'text-[var(--color-ink)]' : 'text-[var(--color-ink-2)]'} leading-relaxed`}>
                                                 {notif.message}
                                             </p>
                                         </div>
@@ -237,7 +237,7 @@ export default function NotificationsPage() {
                                         {/* Status Indicator */}
                                         {isUnread && (
                                             <div className="shrink-0 self-center">
-                                                <div className="w-3 h-3 rounded-full bg-indigo-500"></div>
+                                                <div className="w-3 h-3 rounded-full bg-[var(--color-accent)]"></div>
                                             </div>
                                         )}
                                     </div>
@@ -248,19 +248,19 @@ export default function NotificationsPage() {
 
                     {/* Pagination Controls */}
                     {filteredNotifications.length > 0 && (
-                        <div className="flex flex-col sm:flex-row items-center justify-between gap-4 p-4 border-t border-gray-100 bg-gray-50/50">
+                        <div className="flex flex-col sm:flex-row items-center justify-between gap-4 p-4 border-t border-[var(--color-rule-2)] bg-[var(--color-paper)]/50">
                             <div className="flex items-center gap-2">
-                                <span className="text-sm text-gray-500">Mostrar:</span>
+                                <span className="text-sm text-[var(--color-muted)]">Mostrar:</span>
                                 <select
                                     value={itemsPerPage}
                                     onChange={(e) => setItemsPerPage(Number(e.target.value))}
-                                    className="border border-gray-300 rounded-md text-sm py-1 px-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none"
+                                    className="border border-[var(--color-rule)] rounded-md text-sm py-1 px-2 focus:ring-[var(--color-accent)]/40 focus:border-[var(--color-accent)] outline-none"
                                 >
                                     <option value={5}>5</option>
                                     <option value={10}>10</option>
                                     <option value={20}>20</option>
                                 </select>
-                                <span className="text-sm text-gray-500 ml-2">
+                                <span className="text-sm text-[var(--color-muted)] ml-2">
                                     {((currentPage - 1) * itemsPerPage) + 1} - {Math.min(currentPage * itemsPerPage, filteredNotifications.length)} de {filteredNotifications.length}
                                 </span>
                             </div>
@@ -269,21 +269,21 @@ export default function NotificationsPage() {
                                 <button
                                     onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
                                     disabled={currentPage === 1}
-                                    className="p-1.5 rounded-md border border-gray-300 text-gray-500 hover:bg-white disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                                    className="p-1.5 rounded-md border border-[var(--color-rule)] text-[var(--color-muted)] hover:bg-[var(--color-paper-3)] disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
                                     title="Página anterior"
                                 >
-                                    <ChevronLeft className="w-5 h-5" />
+                                    <ChevronLeft strokeWidth={1.5} className="w-5 h-5" />
                                 </button>
-                                <span className="text-sm font-medium text-gray-700 mx-2">
+                                <span className="text-sm font-medium text-[var(--color-ink-2)] mx-2">
                                     Página {currentPage} de {Math.max(1, totalPages)}
                                 </span>
                                 <button
                                     onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
                                     disabled={currentPage === totalPages || totalPages === 0}
-                                    className="p-1.5 rounded-md border border-gray-300 text-gray-500 hover:bg-white disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                                    className="p-1.5 rounded-md border border-[var(--color-rule)] text-[var(--color-muted)] hover:bg-[var(--color-paper-3)] disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
                                     title="Siguiente página"
                                 >
-                                    <ChevronRight className="w-5 h-5" />
+                                    <ChevronRight strokeWidth={1.5} className="w-5 h-5" />
                                 </button>
                             </div>
                         </div>

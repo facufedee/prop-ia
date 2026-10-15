@@ -43,9 +43,9 @@ const COLUMNS: {
             title: "Nuevos Leads",
             subtitle: "Sin respuesta",
             icon: Inbox,
-            color: "bg-indigo-100 text-indigo-600",
-            headerBg: "bg-indigo-50/60",
-            columnBg: "bg-gray-50/70",
+            color: "bg-[var(--color-accent-soft)] text-[var(--color-accent)]",
+            headerBg: "bg-[var(--color-accent-soft)]",
+            columnBg: "bg-[var(--color-paper)]/70",
             states: ["nuevo", "leido"],
             targetEstado: "nuevo",
         },
@@ -54,9 +54,9 @@ const COLUMNS: {
             title: "Contactado",
             subtitle: "Ya respondiste",
             icon: PhoneCall,
-            color: "bg-blue-100 text-blue-600",
-            headerBg: "bg-blue-50/60",
-            columnBg: "bg-gray-50/70",
+            color: "bg-[var(--color-paper-3)] text-[var(--color-ink-2)]",
+            headerBg: "bg-[var(--color-paper-2)]",
+            columnBg: "bg-[var(--color-paper)]/70",
             states: ["contactado"],
             targetEstado: "contactado",
         },
@@ -65,9 +65,9 @@ const COLUMNS: {
             title: "En Seguimiento",
             subtitle: "Mostró interés",
             icon: Eye,
-            color: "bg-amber-100 text-amber-600",
-            headerBg: "bg-amber-50/60",
-            columnBg: "bg-gray-50/70",
+            color: "bg-[var(--color-warning-soft)] text-[var(--color-warning)]",
+            headerBg: "bg-[var(--color-warning-soft)]",
+            columnBg: "bg-[var(--color-paper)]/70",
             states: ["seguimiento", "respondido", "pendiente"],
             targetEstado: "seguimiento",
         },
@@ -76,9 +76,9 @@ const COLUMNS: {
             title: "Visita Programada",
             subtitle: "Coordinó visita",
             icon: CheckCircle2,
-            color: "bg-teal-100 text-teal-600",
-            headerBg: "bg-teal-50/60",
-            columnBg: "bg-gray-50/70",
+            color: "bg-[var(--color-paper-3)] text-[var(--color-ink-2)]",
+            headerBg: "bg-[var(--color-paper-2)]",
+            columnBg: "bg-[var(--color-paper)]/70",
             states: ["visita_programada"],
             targetEstado: "visita_programada",
         },
@@ -87,20 +87,20 @@ const COLUMNS: {
             title: "Negociación",
             subtitle: "Tratando condiciones",
             icon: Scale,
-            color: "bg-purple-100 text-purple-600",
-            headerBg: "bg-purple-50/60",
-            columnBg: "bg-gray-50/70",
+            color: "bg-[var(--color-paper-3)] text-[var(--color-ink-2)]",
+            headerBg: "bg-[var(--color-paper-2)]",
+            columnBg: "bg-[var(--color-paper)]/70",
             states: ["negociacion", "calificado"],
             targetEstado: "negociacion",
         },
         {
             id: "cerrado",
-            title: "Cerrado ✓",
+            title: "Cerrado",
             subtitle: "Operación concretada",
             icon: Trophy,
-            color: "bg-emerald-100 text-emerald-600",
-            headerBg: "bg-emerald-50/60",
-            columnBg: "bg-gray-50/70",
+            color: "bg-[var(--color-positive-soft)] text-[var(--color-positive)]",
+            headerBg: "bg-[var(--color-positive-soft)]",
+            columnBg: "bg-[var(--color-paper)]/70",
             states: ["cerrado", "convertido", "finalizado"],
             targetEstado: "cerrado",
         },
@@ -109,9 +109,9 @@ const COLUMNS: {
             title: "Perdido",
             subtitle: "Sin actividad",
             icon: XCircle,
-            color: "bg-gray-200 text-gray-500",
-            headerBg: "bg-gray-100/60",
-            columnBg: "bg-gray-50/70",
+            color: "bg-[var(--color-paper-4)] text-[var(--color-muted)]",
+            headerBg: "bg-[var(--color-paper-3)]/60",
+            columnBg: "bg-[var(--color-paper)]/70",
             states: ["perdido", "descartado"],
             targetEstado: "perdido",
         },
@@ -131,13 +131,13 @@ const getColumnForLead = (lead: Lead): ColumnKey => {
 
 const ORIGEN_OPTIONS: { value: LeadOrigen | 'all'; label: string }[] = [
     { value: 'all', label: 'Todas las fuentes' },
-    { value: 'web', label: '🌐 Web' },
-    { value: 'whatsapp', label: '💬 WhatsApp' },
-    { value: 'instagram', label: '📷 Instagram' },
-    { value: 'facebook', label: '📘 Facebook' },
-    { value: 'portal', label: '🏠 Portal' },
-    { value: 'referido', label: '🤝 Referido' },
-    { value: 'telefono', label: '📞 Teléfono' },
+    { value: 'web', label: 'Web' },
+    { value: 'whatsapp', label: 'WhatsApp' },
+    { value: 'instagram', label: 'Instagram' },
+    { value: 'facebook', label: 'Facebook' },
+    { value: 'portal', label: 'Portal' },
+    { value: 'referido', label: 'Referido' },
+    { value: 'telefono', label: 'Teléfono' },
 ];
 
 // ─── Page ─────────────────────────────────────────────────────────────────────
@@ -264,8 +264,8 @@ export default function LeadsPage() {
     if (loading) {
         return (
             <div className="flex items-center justify-center min-h-[400px]">
-                <div className="text-gray-500 flex items-center gap-2">
-                    <Loader2 className="animate-spin" /> Cargando pipeline...
+                <div className="text-[var(--color-muted)] flex items-center gap-2">
+                    <Loader2 strokeWidth={1.5} className="animate-spin" /> Cargando pipeline...
                 </div>
             </div>
         );
@@ -276,38 +276,38 @@ export default function LeadsPage() {
             {/* ── Header ── */}
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-5">
                 <div>
-                    <h1 className="text-2xl font-bold text-gray-900 flex items-center gap-2">
-                        <BarChart2 className="text-indigo-500" size={22} />
+                    <h1 className="font-heading text-2xl font-bold text-[var(--color-ink)] flex items-center gap-2">
+                        <BarChart2 strokeWidth={1.5} className="text-[var(--color-accent)]" size={22} />
                         Pipeline Comercial
                     </h1>
-                    <p className="text-gray-500 text-sm mt-0.5">
+                    <p className="text-[var(--color-muted)] text-sm mt-0.5">
                         {leads.length} leads · {COLUMNS.filter(c => c.id !== 'perdido').map(c => columnLeads(c.id).length).reduce((a, b) => a + b, 0)} activos
                     </p>
                 </div>
 
                 <div className="flex items-center gap-2">
                     {/* View toggle */}
-                    <div className="flex items-center bg-gray-100 rounded-xl p-1 gap-1">
+                    <div className="flex items-center bg-[var(--color-paper-3)] rounded-xl p-1 gap-1">
                         <button
                             onClick={() => setViewMode("kanban")}
-                            className={`px-3 py-1.5 rounded-lg text-sm font-medium flex items-center gap-1.5 transition-all ${viewMode === "kanban" ? "bg-white shadow text-indigo-600" : "text-gray-500 hover:text-gray-700"}`}
+                            className={`px-3 py-1.5 rounded-lg text-sm font-medium flex items-center gap-1.5 transition-all ${viewMode === "kanban" ? "bg-[var(--color-paper-2)] shadow text-[var(--color-accent)]" : "text-[var(--color-muted)] hover:text-[var(--color-ink-2)]"}`}
                         >
-                            <LayoutGrid size={14} /> Tablero
+                            <LayoutGrid strokeWidth={1.5} size={14} /> Tablero
                         </button>
                         <button
                             onClick={() => setViewMode("list")}
-                            className={`px-3 py-1.5 rounded-lg text-sm font-medium flex items-center gap-1.5 transition-all ${viewMode === "list" ? "bg-white shadow text-indigo-600" : "text-gray-500 hover:text-gray-700"}`}
+                            className={`px-3 py-1.5 rounded-lg text-sm font-medium flex items-center gap-1.5 transition-all ${viewMode === "list" ? "bg-[var(--color-paper-2)] shadow text-[var(--color-accent)]" : "text-[var(--color-muted)] hover:text-[var(--color-ink-2)]"}`}
                         >
-                            <List size={14} /> Lista
+                            <List strokeWidth={1.5} size={14} /> Lista
                         </button>
                     </div>
 
                     {/* New lead button */}
                     <button
                         onClick={() => setShowNewLeadModal(true)}
-                        className="flex items-center gap-2 px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-sm font-semibold transition shadow-sm active:scale-95"
+                        className="flex items-center gap-2 px-4 py-2 bg-[var(--color-ink)] hover:bg-[var(--color-ink-2)] text-[var(--color-paper)] rounded-xl text-sm font-semibold transition shadow-sm active:scale-95"
                     >
-                        <Plus size={16} /> Nuevo Lead
+                        <Plus strokeWidth={1.5} size={16} /> Nuevo Lead
                     </button>
                 </div>
             </div>
@@ -316,12 +316,12 @@ export default function LeadsPage() {
             <PipelineMetrics leads={leads} />
 
             {/* ── Controls Bar ── */}
-            <div className="bg-white rounded-xl border border-gray-200 p-3 mb-5 shadow-sm flex flex-wrap items-center gap-3">
-                <Search className="w-4 h-4 text-gray-400 flex-shrink-0 ml-1" />
+            <div className="bg-[var(--color-paper-2)] rounded-xl border border-[var(--color-rule)] p-3 mb-5 shadow-sm flex flex-wrap items-center gap-3">
+                <Search strokeWidth={1.5} className="w-4 h-4 text-[var(--color-neutral)] flex-shrink-0 ml-1" />
                 <input
                     type="text"
                     placeholder="Buscar por nombre, email, teléfono o propiedad..."
-                    className="flex-1 bg-transparent text-sm outline-none text-gray-700 placeholder-gray-400 min-w-[180px]"
+                    className="flex-1 bg-transparent text-sm outline-none text-[var(--color-ink-2)] placeholder-[var(--color-neutral)] min-w-[180px]"
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
                 />
@@ -329,24 +329,24 @@ export default function LeadsPage() {
                 <select
                     value={filterOrigen}
                     onChange={e => setFilterOrigen(e.target.value as any)}
-                    className="text-xs border border-gray-200 rounded-lg px-2.5 py-1.5 bg-white text-gray-600 focus:outline-none focus:ring-1 focus:ring-indigo-500"
+                    className="text-xs border border-[var(--color-rule)] rounded-lg px-2.5 py-1.5 bg-[var(--color-paper-2)] text-[var(--color-ink-2)] focus:outline-none focus:ring-1 focus:ring-[var(--color-accent)]/40"
                 >
                     {ORIGEN_OPTIONS.map(o => <option key={o.value} value={o.value}>{o.label}</option>)}
                 </select>
                 <select
                     value={filterPrioridad}
                     onChange={e => setFilterPrioridad(e.target.value as any)}
-                    className="text-xs border border-gray-200 rounded-lg px-2.5 py-1.5 bg-white text-gray-600 focus:outline-none focus:ring-1 focus:ring-indigo-500"
+                    className="text-xs border border-[var(--color-rule)] rounded-lg px-2.5 py-1.5 bg-[var(--color-paper-2)] text-[var(--color-ink-2)] focus:outline-none focus:ring-1 focus:ring-[var(--color-accent)]/40"
                 >
                     <option value="all">Todas las prioridades</option>
-                    <option value="alta">🔴 Alta</option>
-                    <option value="media">🟡 Media</option>
-                    <option value="baja">🟢 Baja</option>
+                    <option value="alta">Alta</option>
+                    <option value="media">Media</option>
+                    <option value="baja">Baja</option>
                 </select>
                 {(searchTerm || filterOrigen !== 'all' || filterPrioridad !== 'all') && (
                     <button
                         onClick={() => { setSearchTerm(""); setFilterOrigen('all'); setFilterPrioridad('all'); }}
-                        className="text-xs text-gray-400 hover:text-gray-600 px-2 py-1 rounded-lg hover:bg-gray-100"
+                        className="text-xs text-[var(--color-neutral)] hover:text-[var(--color-ink-2)] px-2 py-1 rounded-lg hover:bg-[var(--color-paper-3)]"
                     >
                         Limpiar filtros
                     </button>
@@ -372,13 +372,13 @@ export default function LeadsPage() {
                                                 flex items-center gap-2 px-4 py-2.5 rounded-2xl text-xs font-bold whitespace-nowrap transition-all border
                                                 ${isActive
                                                     ? `${col.color} border-current ring-1 ring-current/20 shadow-sm`
-                                                    : "bg-white text-gray-400 border-gray-100 hover:border-gray-200"
+                                                    : "bg-[var(--color-paper-2)] text-[var(--color-neutral)] border-[var(--color-rule-2)] hover:border-[var(--color-neutral)]"
                                                 }
                                             `}
                                         >
-                                            <col.icon size={14} className={isActive ? "text-current" : "text-gray-300"} />
+                                            <col.icon size={14} className={isActive ? "text-current" : "text-[var(--color-neutral)]"} />
                                             <span>{col.title}</span>
-                                            <span className={`px-1.5 py-0.5 rounded-full text-[10px] ${isActive ? "bg-white/20" : "bg-gray-100 text-gray-500"}`}>
+                                            <span className={`px-1.5 py-0.5 rounded-full text-[10px] ${isActive ? "bg-[var(--color-paper-2)]/20" : "bg-[var(--color-paper-3)] text-[var(--color-muted)]"}`}>
                                                 {count}
                                             </span>
                                         </button>
@@ -419,12 +419,12 @@ export default function LeadsPage() {
                     /* LIST VIEW */
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 pb-8">
                         {filteredLeads.length === 0 ? (
-                            <div className="col-span-full text-center py-16 bg-gray-50 rounded-xl border border-gray-200 border-dashed">
-                                <MessageSquare className="w-12 h-12 text-gray-300 mx-auto mb-4" />
-                                <p className="text-gray-500 text-lg">No se encontraron consultas</p>
+                            <div className="col-span-full text-center py-16 bg-[var(--color-paper)] rounded-xl border border-[var(--color-rule)] border-dashed">
+                                <MessageSquare strokeWidth={1.5} className="w-12 h-12 text-[var(--color-neutral)] mx-auto mb-4" />
+                                <p className="text-[var(--color-muted)] text-lg">No se encontraron consultas</p>
                                 <button
                                     onClick={() => setShowNewLeadModal(true)}
-                                    className="mt-4 px-4 py-2 bg-indigo-600 text-white rounded-xl text-sm font-semibold hover:bg-indigo-700 transition"
+                                    className="mt-4 px-4 py-2 bg-[var(--color-ink)] text-[var(--color-paper)] rounded-xl text-sm font-semibold hover:bg-[var(--color-ink-2)] transition"
                                 >
                                     + Nuevo Lead
                                 </button>

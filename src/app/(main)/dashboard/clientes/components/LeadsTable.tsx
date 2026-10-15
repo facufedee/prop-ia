@@ -29,20 +29,20 @@ const ESTADO_LABELS: Record<LeadEstado, string> = {
 };
 
 const ESTADO_COLORS: Record<LeadEstado, string> = {
-    nuevo: "bg-indigo-100 text-indigo-700",
-    contactado: "bg-blue-100 text-blue-700",
-    seguimiento: "bg-amber-100 text-amber-700",
-    visita_programada: "bg-teal-100 text-teal-700",
-    negociacion: "bg-purple-100 text-purple-700",
-    cerrado: "bg-emerald-100 text-emerald-700",
-    perdido: "bg-gray-200 text-gray-600",
-    pendiente: "bg-orange-100 text-orange-700",
-    leido: "bg-blue-50 text-blue-600",
-    respondido: "bg-indigo-100 text-indigo-700",
-    calificado: "bg-purple-100 text-purple-700",
-    convertido: "bg-emerald-100 text-emerald-700",
-    finalizado: "bg-gray-200 text-gray-800",
-    descartado: "bg-gray-100 text-gray-700",
+    nuevo: "bg-[var(--color-accent-soft)] text-[var(--color-accent)]",
+    contactado: "bg-[var(--color-accent-soft)] text-[var(--color-accent)]",
+    seguimiento: "bg-[var(--color-warning-soft)] text-[var(--color-warning)]",
+    visita_programada: "bg-[var(--color-accent-soft)] text-[var(--color-accent)]",
+    negociacion: "bg-[var(--color-accent-soft)] text-[var(--color-accent)]",
+    cerrado: "bg-[var(--color-positive-soft)] text-[var(--color-positive)]",
+    perdido: "bg-[var(--color-paper-4)] text-[var(--color-ink-2)]",
+    pendiente: "bg-[var(--color-warning-soft)] text-[var(--color-warning)]",
+    leido: "bg-[var(--color-accent-soft)] text-[var(--color-accent)]",
+    respondido: "bg-[var(--color-accent-soft)] text-[var(--color-accent)]",
+    calificado: "bg-[var(--color-accent-soft)] text-[var(--color-accent)]",
+    convertido: "bg-[var(--color-positive-soft)] text-[var(--color-positive)]",
+    finalizado: "bg-[var(--color-paper-4)] text-[var(--color-ink)]",
+    descartado: "bg-[var(--color-paper-3)] text-[var(--color-ink-2)]",
 };
 
 const TIPO_LABELS: Record<string, string> = {
@@ -53,9 +53,9 @@ const TIPO_LABELS: Record<string, string> = {
 };
 
 const PRIORIDAD_COLORS: Record<string, string> = {
-    alta: "bg-red-100 text-red-700",
-    media: "bg-amber-100 text-amber-700",
-    baja: "bg-green-100 text-green-700",
+    alta: "bg-[var(--color-danger-soft)] text-[var(--color-danger)]",
+    media: "bg-[var(--color-warning-soft)] text-[var(--color-warning)]",
+    baja: "bg-[var(--color-positive-soft)] text-[var(--color-positive)]",
 };
 
 function getInitials(name: string) {
@@ -67,59 +67,46 @@ function getInitials(name: string) {
         .toUpperCase();
 }
 
-const AVATAR_GRADIENTS = [
-    "from-violet-500 to-purple-600",
-    "from-blue-500 to-indigo-600",
-    "from-amber-500 to-orange-600",
-    "from-teal-500 to-cyan-600",
-    "from-rose-500 to-pink-600",
-];
-
-function getGradient(name: string) {
-    const sum = name.split("").reduce((acc, c) => acc + c.charCodeAt(0), 0);
-    return AVATAR_GRADIENTS[sum % AVATAR_GRADIENTS.length];
-}
-
 export default function LeadsTable({ leads, onDelete, onEdit, onViewDetail, onConvert }: LeadsTableProps) {
     return (
-        <div className="bg-white rounded-2xl border border-gray-200 overflow-hidden shadow-sm">
+        <div className="bg-[var(--color-paper-2)] rounded-2xl border border-[var(--color-rule)] overflow-hidden shadow-sm">
             <div className="overflow-x-auto">
                 <table className="w-full">
                     <thead>
-                        <tr className="bg-gray-50 border-b border-gray-100">
-                            <th className="px-6 py-3.5 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">
+                        <tr className="bg-[var(--color-paper)] border-b border-[var(--color-rule-2)]">
+                            <th className="px-6 py-3.5 text-left text-xs font-semibold text-[var(--color-muted)] uppercase tracking-wider">
                                 Lead
                             </th>
-                            <th className="px-6 py-3.5 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider hidden sm:table-cell">
+                            <th className="px-6 py-3.5 text-left text-xs font-semibold text-[var(--color-muted)] uppercase tracking-wider hidden sm:table-cell">
                                 Contacto
                             </th>
-                            <th className="px-6 py-3.5 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider hidden md:table-cell">
+                            <th className="px-6 py-3.5 text-left text-xs font-semibold text-[var(--color-muted)] uppercase tracking-wider hidden md:table-cell">
                                 Tipo
                             </th>
-                            <th className="px-6 py-3.5 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">
+                            <th className="px-6 py-3.5 text-left text-xs font-semibold text-[var(--color-muted)] uppercase tracking-wider">
                                 Estado
                             </th>
-                            <th className="px-6 py-3.5 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider hidden lg:table-cell">
+                            <th className="px-6 py-3.5 text-left text-xs font-semibold text-[var(--color-muted)] uppercase tracking-wider hidden lg:table-cell">
                                 Origen
                             </th>
-                            <th className="px-6 py-3.5 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider hidden lg:table-cell">
+                            <th className="px-6 py-3.5 text-left text-xs font-semibold text-[var(--color-muted)] uppercase tracking-wider hidden lg:table-cell">
                                 Prioridad
                             </th>
-                            <th className="px-6 py-3.5 text-right text-xs font-semibold text-gray-500 uppercase tracking-wider">
+                            <th className="px-6 py-3.5 text-right text-xs font-semibold text-[var(--color-muted)] uppercase tracking-wider">
                                 Acciones
                             </th>
                         </tr>
                     </thead>
-                    <tbody className="divide-y divide-gray-50">
+                    <tbody className="divide-y divide-[var(--color-rule-2)]">
                         {leads.length === 0 ? (
                             <tr>
                                 <td colSpan={7} className="px-6 py-16 text-center">
                                     <div className="flex flex-col items-center gap-3">
-                                        <div className="w-12 h-12 bg-gray-100 rounded-full flex items-center justify-center">
-                                            <Users className="w-6 h-6 text-gray-400" />
+                                        <div className="w-12 h-12 bg-[var(--color-paper-3)] rounded-full flex items-center justify-center">
+                                            <Users strokeWidth={1.5} className="w-6 h-6 text-[var(--color-neutral)]" />
                                         </div>
-                                        <p className="text-sm text-gray-500 font-medium">No hay leads registrados</p>
-                                        <p className="text-xs text-gray-400">Los nuevos leads aparecerán aquí</p>
+                                        <p className="text-sm text-[var(--color-muted)] font-medium">No hay leads registrados</p>
+                                        <p className="text-xs text-[var(--color-neutral)]">Los nuevos leads aparecerán aquí</p>
                                     </div>
                                 </td>
                             </tr>
@@ -128,20 +115,20 @@ export default function LeadsTable({ leads, onDelete, onEdit, onViewDetail, onCo
                                 <tr
                                     key={lead.id}
                                     onClick={() => onViewDetail(lead)}
-                                    className="hover:bg-gray-50/70 transition-colors cursor-pointer group"
+                                    className="hover:bg-[var(--color-paper-3)] transition-colors cursor-pointer group"
                                 >
                                     {/* Lead name + avatar */}
                                     <td className="px-6 py-4">
                                         <div className="flex items-center gap-3">
-                                            <div className={`w-9 h-9 rounded-full bg-gradient-to-br ${getGradient(lead.nombre)} flex items-center justify-center text-white text-sm font-semibold flex-shrink-0`}>
+                                            <div className={`w-9 h-9 rounded-full bg-[var(--color-paper-3)] flex items-center justify-center text-[var(--color-ink-2)] text-sm font-semibold flex-shrink-0`}>
                                                 {getInitials(lead.nombre)}
                                             </div>
                                             <div>
-                                                <p className="text-sm font-semibold text-gray-900 group-hover:text-indigo-600 transition-colors">
+                                                <p className="text-sm font-semibold text-[var(--color-ink)] group-hover:text-[var(--color-accent-2)] transition-colors">
                                                     {lead.nombre}
                                                 </p>
                                                 {lead.zona && (
-                                                    <p className="text-xs text-gray-400">{lead.zona}</p>
+                                                    <p className="text-xs text-[var(--color-neutral)]">{lead.zona}</p>
                                                 )}
                                             </div>
                                         </div>
@@ -153,18 +140,18 @@ export default function LeadsTable({ leads, onDelete, onEdit, onViewDetail, onCo
                                             {lead.email && (
                                                 <a
                                                     href={`mailto:${lead.email}`}
-                                                    className="flex items-center gap-1.5 text-xs text-gray-500 hover:text-indigo-600 transition-colors"
+                                                    className="flex items-center gap-1.5 text-xs text-[var(--color-muted)] hover:text-[var(--color-accent-2)] transition-colors"
                                                 >
-                                                    <Mail className="w-3.5 h-3.5 flex-shrink-0" />
+                                                    <Mail strokeWidth={1.5} className="w-3.5 h-3.5 flex-shrink-0" />
                                                     <span className="truncate max-w-[160px]">{lead.email}</span>
                                                 </a>
                                             )}
                                             {lead.telefono && (
                                                 <a
                                                     href={`tel:${lead.telefono}`}
-                                                    className="flex items-center gap-1.5 text-xs text-gray-500 hover:text-green-600 transition-colors"
+                                                    className="flex items-center gap-1.5 text-xs text-[var(--color-muted)] hover:text-[var(--color-positive)] transition-colors"
                                                 >
-                                                    <Phone className="w-3.5 h-3.5 flex-shrink-0" />
+                                                    <Phone strokeWidth={1.5} className="w-3.5 h-3.5 flex-shrink-0" />
                                                     {lead.telefono}
                                                 </a>
                                             )}
@@ -173,7 +160,7 @@ export default function LeadsTable({ leads, onDelete, onEdit, onViewDetail, onCo
 
                                     {/* Tipo */}
                                     <td className="px-6 py-4 hidden md:table-cell">
-                                        <span className="text-sm text-gray-600">
+                                        <span className="text-sm text-[var(--color-ink-2)]">
                                             {TIPO_LABELS[lead.tipo] ?? lead.tipo}
                                         </span>
                                     </td>
@@ -187,7 +174,7 @@ export default function LeadsTable({ leads, onDelete, onEdit, onViewDetail, onCo
 
                                     {/* Origen */}
                                     <td className="px-6 py-4 hidden lg:table-cell">
-                                        <span className="text-sm text-gray-500 capitalize">{lead.origen}</span>
+                                        <span className="text-sm text-[var(--color-muted)] capitalize">{lead.origen}</span>
                                     </td>
 
                                     {/* Prioridad */}
@@ -197,7 +184,7 @@ export default function LeadsTable({ leads, onDelete, onEdit, onViewDetail, onCo
                                                 {lead.prioridad.charAt(0).toUpperCase() + lead.prioridad.slice(1)}
                                             </span>
                                         ) : (
-                                            <span className="text-xs text-gray-400">—</span>
+                                            <span className="text-xs text-[var(--color-neutral)]">—</span>
                                         )}
                                     </td>
 
@@ -206,33 +193,33 @@ export default function LeadsTable({ leads, onDelete, onEdit, onViewDetail, onCo
                                         <div className="flex items-center justify-end gap-1">
                                             <button
                                                 onClick={() => onViewDetail(lead)}
-                                                className="p-1.5 text-gray-400 hover:text-indigo-600 hover:bg-indigo-50 rounded-lg transition-colors"
+                                                className="p-1.5 text-[var(--color-neutral)] hover:text-[var(--color-ink)] hover:bg-[var(--color-paper-3)] rounded-lg transition-colors"
                                                 title="Ver detalle"
                                             >
-                                                <Eye className="w-4 h-4" />
+                                                <Eye strokeWidth={1.5} className="w-4 h-4" />
                                             </button>
                                             <button
                                                 onClick={() => onEdit(lead)}
-                                                className="p-1.5 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
+                                                className="p-1.5 text-[var(--color-neutral)] hover:text-[var(--color-ink)] hover:bg-[var(--color-paper-3)] rounded-lg transition-colors"
                                                 title="Editar"
                                             >
-                                                <Edit className="w-4 h-4" />
+                                                <Edit strokeWidth={1.5} className="w-4 h-4" />
                                             </button>
                                             {lead.estado !== "convertido" && lead.estado !== "descartado" && lead.estado !== "cerrado" && (
                                                 <button
                                                     onClick={() => onConvert(lead.id)}
-                                                    className="p-1.5 text-gray-400 hover:text-emerald-600 hover:bg-emerald-50 rounded-lg transition-colors"
+                                                    className="p-1.5 text-[var(--color-neutral)] hover:text-[var(--color-positive)] hover:bg-[var(--color-positive-soft)] rounded-lg transition-colors"
                                                     title="Convertir a cliente"
                                                 >
-                                                    <CheckCircle className="w-4 h-4" />
+                                                    <CheckCircle strokeWidth={1.5} className="w-4 h-4" />
                                                 </button>
                                             )}
                                             <button
                                                 onClick={() => onDelete(lead.id)}
-                                                className="p-1.5 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+                                                className="p-1.5 text-[var(--color-neutral)] hover:text-[var(--color-danger)] hover:bg-[var(--color-danger-soft)] rounded-lg transition-colors"
                                                 title="Eliminar"
                                             >
-                                                <Trash2 className="w-4 h-4" />
+                                                <Trash2 strokeWidth={1.5} className="w-4 h-4" />
                                             </button>
                                         </div>
                                     </td>
@@ -244,8 +231,8 @@ export default function LeadsTable({ leads, onDelete, onEdit, onViewDetail, onCo
             </div>
 
             {leads.length > 0 && (
-                <div className="px-6 py-3 border-t border-gray-100 bg-gray-50/50">
-                    <p className="text-xs text-gray-500">
+                <div className="px-6 py-3 border-t border-[var(--color-rule-2)] bg-[var(--color-paper)]/50">
+                    <p className="text-xs text-[var(--color-muted)]">
                         {leads.length} lead{leads.length !== 1 ? "s" : ""} en total
                     </p>
                 </div>

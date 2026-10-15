@@ -227,24 +227,24 @@ export default function PaymentPlanTable({ alquiler, inquilino, onUpdatePayment,
 
     return (
         <div className="space-y-8">
-            <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-6 pb-6 border-b border-gray-100">
+            <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-6 pb-6 border-b border-[var(--color-rule-2)]">
                 <div>
-                    <h3 className="text-2xl font-bold text-gray-900 tracking-tight">Plan de Pagos</h3>
-                    <p className="text-gray-500 mt-1 text-sm">Gestiona los cobros y el historial del contrato</p>
+                    <h3 className="text-2xl font-bold text-[var(--color-ink)] tracking-tight">Plan de Pagos</h3>
+                    <p className="text-[var(--color-muted)] mt-1 text-sm">Gestiona los cobros y el historial del contrato</p>
                 </div>
                 <div className="grid grid-cols-2 sm:flex gap-3 w-full md:w-auto">
                     <button
                         onClick={handleDownloadReport}
-                        className="flex items-center justify-center gap-2 px-4 py-2.5 bg-white border border-gray-200 text-gray-700 rounded-xl hover:bg-gray-50 hover:border-gray-300 transition-all shadow-sm font-medium text-sm active:scale-95"
+                        className="flex items-center justify-center gap-2 px-4 py-2.5 bg-[var(--color-paper-2)] border border-[var(--color-rule)] text-[var(--color-ink-2)] rounded-xl hover:bg-[var(--color-paper-3)] hover:border-[var(--color-neutral)] transition-all shadow-sm font-medium text-sm active:scale-95"
                     >
-                        <FileText size={16} className="text-gray-500" />
+                        <FileText strokeWidth={1.5} size={16} className="text-[var(--color-muted)]" />
                         <span>Informe</span>
                     </button>
                     <button
                         onClick={() => setShowIPCModal(true)}
-                        className="flex items-center justify-center gap-2 px-4 py-2.5 bg-indigo-600 text-white rounded-xl hover:bg-indigo-700 transition-all shadow-md shadow-indigo-100 font-medium text-sm active:scale-95 border border-transparent"
+                        className="flex items-center justify-center gap-2 px-4 py-2.5 bg-[var(--color-ink)] text-[var(--color-paper)] rounded-xl hover:bg-[var(--color-ink-2)] transition-all shadow-md font-medium text-sm active:scale-95 border border-transparent"
                     >
-                        <TrendingUp size={16} />
+                        <TrendingUp strokeWidth={1.5} size={16} />
                         <span>Aumentar</span>
                     </button>
                 </div>
@@ -256,15 +256,15 @@ export default function PaymentPlanTable({ alquiler, inquilino, onUpdatePayment,
                     onClick={() => setShowPending(prev => !prev)}
                     className="flex items-center gap-3 mb-6 w-full group"
                 >
-                    <h4 className="text-lg font-bold text-gray-900">
+                    <h4 className="text-lg font-bold text-[var(--color-ink)]">
                         Pagos Pendientes
                     </h4>
-                    <span className="bg-amber-100 text-amber-700 px-2.5 py-0.5 rounded-full text-xs font-bold">
+                    <span className="bg-[var(--color-warning-soft)] text-[var(--color-warning)] px-2.5 py-0.5 rounded-full text-xs font-bold">
                         {pendingPayments.length}
                     </span>
-                    <ChevronDown
+                    <ChevronDown strokeWidth={1.5}
                         size={18}
-                        className={`ml-auto text-gray-400 group-hover:text-gray-600 transition-transform duration-200 ${showPending ? '' : '-rotate-90'}`}
+                        className={`ml-auto text-[var(--color-neutral)] group-hover:text-[var(--color-ink-2)] transition-transform duration-200 ${showPending ? '' : '-rotate-90'}`}
                     />
                 </button>
                 {showPending && (
@@ -288,8 +288,8 @@ export default function PaymentPlanTable({ alquiler, inquilino, onUpdatePayment,
                             ))}
                         </div>
                     ) : (
-                        <div className="p-8 text-center bg-gray-50 rounded-2xl border border-dashed border-gray-200">
-                            <p className="text-gray-500 text-sm">No hay pagos pendientes por cobrar.</p>
+                        <div className="p-8 text-center bg-[var(--color-paper)] rounded-2xl border border-dashed border-[var(--color-rule)]">
+                            <p className="text-[var(--color-muted)] text-sm">No hay pagos pendientes por cobrar.</p>
                         </div>
                     )
                 )}
@@ -301,15 +301,15 @@ export default function PaymentPlanTable({ alquiler, inquilino, onUpdatePayment,
                     onClick={() => setShowHistory(prev => !prev)}
                     className="flex items-center gap-3 mb-6 w-full group"
                 >
-                    <h4 className="text-lg font-bold text-gray-900">
+                    <h4 className="text-lg font-bold text-[var(--color-ink)]">
                         Historial
                     </h4>
-                    <span className="bg-gray-100 text-gray-600 px-2.5 py-0.5 rounded-full text-xs font-bold">
+                    <span className="bg-[var(--color-paper-3)] text-[var(--color-ink-2)] px-2.5 py-0.5 rounded-full text-xs font-bold">
                         {paidPayments.length}
                     </span>
-                    <ChevronDown
+                    <ChevronDown strokeWidth={1.5}
                         size={18}
-                        className={`ml-auto text-gray-400 group-hover:text-gray-600 transition-transform duration-200 ${showHistory ? '' : '-rotate-90'}`}
+                        className={`ml-auto text-[var(--color-neutral)] group-hover:text-[var(--color-ink-2)] transition-transform duration-200 ${showHistory ? '' : '-rotate-90'}`}
                     />
                 </button>
                 {showHistory && (
@@ -333,8 +333,8 @@ export default function PaymentPlanTable({ alquiler, inquilino, onUpdatePayment,
                             ))}
                         </div>
                     ) : (
-                        <div className="p-8 text-center bg-gray-50 rounded-xl border border-dashed border-gray-300">
-                            <p className="text-gray-500">Aún no hay pagos registrados.</p>
+                        <div className="p-8 text-center bg-[var(--color-paper)] rounded-xl border border-dashed border-[var(--color-rule)]">
+                            <p className="text-[var(--color-muted)]">Aún no hay pagos registrados.</p>
                         </div>
                     )
                 )}

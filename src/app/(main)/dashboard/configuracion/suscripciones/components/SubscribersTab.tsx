@@ -71,31 +71,31 @@ export default function SubscribersTab() {
         switch (status) {
             case 'active':
                 return (
-                    <span className="inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-700">
-                        <CheckCircle size={12} /> Activo
+                    <span className="inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium bg-[var(--color-positive-soft)] text-[var(--color-positive)]">
+                        <CheckCircle strokeWidth={1.5} size={12} /> Activo
                     </span>
                 );
             case 'cancelled':
                 return (
-                    <span className="inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium bg-red-100 text-red-700">
-                        <XCircle size={12} /> Cancelado
+                    <span className="inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium bg-[var(--color-danger-soft)] text-[var(--color-danger)]">
+                        <XCircle strokeWidth={1.5} size={12} /> Cancelado
                     </span>
                 );
             case 'expired':
                 return (
-                    <span className="inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium bg-gray-100 text-gray-700">
-                        <XCircle size={12} /> Expirado
+                    <span className="inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium bg-[var(--color-paper-3)] text-[var(--color-ink-2)]">
+                        <XCircle strokeWidth={1.5} size={12} /> Expirado
                     </span>
                 );
             case 'trial':
                 return (
-                    <span className="inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-700">
-                        <AlertCircle size={12} /> Prueba
+                    <span className="inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium bg-[var(--color-accent-soft)] text-[var(--color-accent)]">
+                        <AlertCircle strokeWidth={1.5} size={12} /> Prueba
                     </span>
                 );
             default:
                 return (
-                    <span className="inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium bg-gray-100 text-gray-600">
+                    <span className="inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium bg-[var(--color-paper-3)] text-[var(--color-ink-2)]">
                         {status}
                     </span>
                 );
@@ -134,17 +134,17 @@ export default function SubscribersTab() {
     if (loading) {
         return (
             <div className="flex justify-center py-12">
-                <Loader2 className="w-8 h-8 animate-spin text-indigo-600" />
+                <Loader2 strokeWidth={1.5} className="w-8 h-8 animate-spin text-[var(--color-accent)]" />
             </div>
         );
     }
 
     if (subscriptions.length === 0) {
         return (
-            <div className="text-center py-12 bg-gray-50 rounded-xl border border-dashed border-gray-300">
-                <User className="w-12 h-12 text-gray-300 mx-auto mb-4" />
-                <p className="text-gray-500">No hay suscriptores aún.</p>
-                <p className="text-sm text-gray-400 mt-1">Los usuarios aparecerán aquí cuando se suscriban a un plan.</p>
+            <div className="text-center py-12 bg-[var(--color-paper)] rounded-xl border border-dashed border-[var(--color-rule)]">
+                <User strokeWidth={1.5} className="w-12 h-12 text-[var(--color-neutral)] mx-auto mb-4" />
+                <p className="text-[var(--color-muted)]">No hay suscriptores aún.</p>
+                <p className="text-sm text-[var(--color-neutral)] mt-1">Los usuarios aparecerán aquí cuando se suscriban a un plan.</p>
             </div>
         );
     }
@@ -153,13 +153,13 @@ export default function SubscribersTab() {
         <div className="space-y-6">
             {/* Alert for Expiring Soon */}
             {expiringSoon.length > 0 && (
-                <div className="bg-amber-50 border border-amber-200 rounded-xl p-4 flex items-start gap-3">
-                    <Bell className="w-5 h-5 text-amber-600 mt-0.5" />
+                <div className="bg-[var(--color-warning-soft)] border border-[var(--color-warning)]/30 rounded-xl p-4 flex items-start gap-3">
+                    <Bell strokeWidth={1.5} className="w-5 h-5 text-[var(--color-warning)] mt-0.5" />
                     <div>
-                        <p className="font-medium text-amber-800">
+                        <p className="font-medium text-[var(--color-warning)]">
                             {expiringSoon.length} suscripción{expiringSoon.length > 1 ? 'es' : ''} por vencer en los próximos 7 días
                         </p>
-                        <p className="text-sm text-amber-600 mt-1">
+                        <p className="text-sm text-[var(--color-warning)] mt-1">
                             Contacta a estos usuarios para renovar su suscripción.
                         </p>
                     </div>
@@ -168,29 +168,29 @@ export default function SubscribersTab() {
 
             {/* Summary Stats */}
             <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
-                <div className="bg-white p-4 rounded-xl border border-gray-200">
-                    <p className="text-sm text-gray-500">Total</p>
-                    <p className="text-2xl font-bold text-gray-900">{subscriptions.length}</p>
+                <div className="bg-[var(--color-paper-2)] p-4 rounded-xl border border-[var(--color-rule)]">
+                    <p className="text-sm text-[var(--color-muted)]">Total</p>
+                    <p className="text-2xl font-bold text-[var(--color-ink)]">{subscriptions.length}</p>
                 </div>
-                <div className="bg-white p-4 rounded-xl border border-gray-200">
-                    <p className="text-sm text-gray-500">Activos</p>
-                    <p className="text-2xl font-bold text-green-600">{activeSubscriptions.length}</p>
+                <div className="bg-[var(--color-paper-2)] p-4 rounded-xl border border-[var(--color-rule)]">
+                    <p className="text-sm text-[var(--color-muted)]">Activos</p>
+                    <p className="text-2xl font-bold text-[var(--color-positive)]">{activeSubscriptions.length}</p>
                 </div>
-                <div className="bg-white p-4 rounded-xl border border-amber-200 bg-amber-50">
-                    <p className="text-sm text-amber-600">Por Vencer</p>
-                    <p className="text-2xl font-bold text-amber-600">{expiringSoon.length}</p>
+                <div className="bg-[var(--color-paper-2)] p-4 rounded-xl border border-[var(--color-warning)]/30 bg-[var(--color-warning-soft)]">
+                    <p className="text-sm text-[var(--color-warning)]">Por Vencer</p>
+                    <p className="text-2xl font-bold text-[var(--color-warning)]">{expiringSoon.length}</p>
                 </div>
-                <div className="bg-white p-4 rounded-xl border border-gray-200">
-                    <p className="text-sm text-gray-500">Mensuales</p>
-                    <p className="text-2xl font-bold text-indigo-600">{subscriptions.filter(s => s.billingPeriod === 'monthly').length}</p>
+                <div className="bg-[var(--color-paper-2)] p-4 rounded-xl border border-[var(--color-rule)]">
+                    <p className="text-sm text-[var(--color-muted)]">Mensuales</p>
+                    <p className="text-2xl font-bold text-[var(--color-accent)]">{subscriptions.filter(s => s.billingPeriod === 'monthly').length}</p>
                 </div>
-                <div className="bg-white p-4 rounded-xl border border-gray-200">
-                    <p className="text-sm text-gray-500">Anuales</p>
-                    <p className="text-2xl font-bold text-purple-600">{subscriptions.filter(s => s.billingPeriod === 'yearly').length}</p>
+                <div className="bg-[var(--color-paper-2)] p-4 rounded-xl border border-[var(--color-rule)]">
+                    <p className="text-sm text-[var(--color-muted)]">Anuales</p>
+                    <p className="text-2xl font-bold text-[var(--color-accent)]">{subscriptions.filter(s => s.billingPeriod === 'yearly').length}</p>
                 </div>
-                <div className="bg-gradient-to-br from-green-500 to-emerald-600 p-4 rounded-xl text-white">
-                    <p className="text-sm text-green-100 flex items-center gap-1">
-                        <TrendingUp size={14} /> Ingresos Activos
+                <div className="bg-[var(--color-paper-2)] p-4 rounded-xl border border-[var(--color-rule)] text-[var(--color-ink)]">
+                    <p className="text-sm text-[var(--color-positive)] flex items-center gap-1">
+                        <TrendingUp strokeWidth={1.5} size={14} /> Ingresos Activos
                     </p>
                     <p className="text-xl font-bold">{formatCurrency(totalRevenue)}</p>
                 </div>
@@ -200,8 +200,8 @@ export default function SubscribersTab() {
             <div className="space-y-8">
                 {/* Active Subscriptions */}
                 <div>
-                    <h3 className="text-lg font-bold text-gray-900 mb-4 flex items-center gap-2">
-                        <CheckCircle className="text-green-500" size={20} />
+                    <h3 className="text-lg font-bold text-[var(--color-ink)] mb-4 flex items-center gap-2">
+                        <CheckCircle strokeWidth={1.5} className="text-[var(--color-positive)]" size={20} />
                         Suscripciones Activas
                     </h3>
                     {activeSubscriptions.length > 0 ? (
@@ -213,18 +213,18 @@ export default function SubscribersTab() {
                                 return (
                                     <div
                                         key={sub.id}
-                                        className={`flex flex-col md:flex-row md:items-center justify-between p-4 bg-white rounded-xl border hover:shadow-sm transition-shadow gap-4 ${isExpiringSoon ? 'border-amber-300 bg-amber-50/30' : 'border-gray-200'}`}
+                                        className={`flex flex-col md:flex-row md:items-center justify-between p-4 bg-[var(--color-paper-2)] rounded-xl border hover:shadow-sm transition-shadow gap-4 ${isExpiringSoon ? 'border-[var(--color-warning)]/30 bg-[var(--color-warning)]/7' : 'border-[var(--color-rule)]'}`}
                                     >
                                         {/* User Info */}
                                         <div className="flex items-center gap-4 md:w-1/3">
-                                            <div className="w-10 h-10 rounded-full bg-indigo-100 flex items-center justify-center text-indigo-600 font-bold shrink-0">
+                                            <div className="w-10 h-10 rounded-full bg-[var(--color-paper-3)] flex items-center justify-center text-[var(--color-ink-2)] font-bold shrink-0">
                                                 {(sub.userName && sub.userName !== "Sin nombre") ? sub.userName.slice(0, 2).toUpperCase() : (sub.userEmail && sub.userEmail !== "Sin email" ? sub.userEmail.slice(0, 2).toUpperCase() : sub.userId.slice(0, 2).toUpperCase())}
                                             </div>
                                             <div className="min-w-0">
-                                                <p className="font-medium text-gray-900 text-sm truncate" title={sub.userEmail && sub.userEmail !== "Sin email" ? sub.userEmail : sub.userId}>
+                                                <p className="font-medium text-[var(--color-ink)] text-sm truncate" title={sub.userEmail && sub.userEmail !== "Sin email" ? sub.userEmail : sub.userId}>
                                                     {sub.userEmail && sub.userEmail !== "Sin email" ? sub.userEmail : sub.userId.slice(0, 12) + "..."}
                                                 </p>
-                                                <p className="text-xs text-gray-500 truncate">
+                                                <p className="text-xs text-[var(--color-muted)] truncate">
                                                     {sub.planName} • {sub.userName && sub.userName !== "Sin nombre" ? sub.userName : "Usuario"}
                                                 </p>
                                             </div>
@@ -232,34 +232,34 @@ export default function SubscribersTab() {
 
                                         {/* KPIs Grid */}
                                         <div className="flex gap-4 md:gap-8 text-sm md:flex-1 justify-start md:justify-center flex-wrap">
-                                            <div className="flex items-center gap-2 text-gray-600">
-                                                <CreditCard size={14} className="text-gray-400" />
+                                            <div className="flex items-center gap-2 text-[var(--color-ink-2)]">
+                                                <CreditCard strokeWidth={1.5} size={14} className="text-[var(--color-neutral)]" />
                                                 <span className="w-16">{formatCurrency(sub.amount, sub.currency)}</span>
                                             </div>
-                                            <div className="flex items-center gap-2 text-gray-600">
-                                                <Clock size={14} className="text-gray-400" />
+                                            <div className="flex items-center gap-2 text-[var(--color-ink-2)]">
+                                                <Clock strokeWidth={1.5} size={14} className="text-[var(--color-neutral)]" />
                                                 <span className="capitalize w-16">{sub.billingPeriod === 'monthly' ? 'Mensual' : 'Anual'}</span>
                                             </div>
-                                            <div className={`flex flex-col items-start md:items-center gap-1 ${daysRemaining <= 0 ? 'text-red-600' : isExpiringSoon ? 'text-amber-600' : 'text-gray-600'}`}>
+                                            <div className={`flex flex-col items-start md:items-center gap-1 ${daysRemaining <= 0 ? 'text-[var(--color-danger)]' : isExpiringSoon ? 'text-[var(--color-warning)]' : 'text-[var(--color-ink-2)]'}`}>
                                                 <div className="flex items-center gap-1">
-                                                    <Calendar size={14} className="text-gray-400" />
+                                                    <Calendar strokeWidth={1.5} size={14} className="text-[var(--color-neutral)]" />
                                                     <span title="Vencimiento" className="text-xs font-semibold">{formatDate(sub.endDate)}</span>
                                                 </div>
-                                                <span className="text-[10px] bg-gray-100 px-2 py-0.5 rounded-full mt-1">
+                                                <span className="text-[10px] bg-[var(--color-paper-3)] px-2 py-0.5 rounded-full mt-1">
                                                     {daysRemaining <= 0 ? `Expirado hace ${Math.abs(daysRemaining)} días` : `${daysRemaining} días rest.`}
                                                 </span>
                                             </div>
                                         </div>
 
                                         {/* Status & Actions */}
-                                        <div className="flex items-center justify-between md:justify-end gap-4 md:w-1/4 border-t md:border-none pt-3 md:pt-0 border-gray-100">
+                                        <div className="flex items-center justify-between md:justify-end gap-4 md:w-1/4 border-t md:border-none pt-3 md:pt-0 border-[var(--color-rule-2)]">
                                             {getStatusBadge(sub.status)}
                                             <button
                                                 onClick={() => handleDeleteSubscription(sub.id)}
-                                                className="text-xs text-red-500 hover:text-red-700 hover:bg-red-50 p-2 rounded-lg flex items-center gap-1 transition-colors"
+                                                className="text-xs text-[var(--color-danger)] hover:text-[var(--color-danger)] hover:bg-[var(--color-danger-soft)] p-2 rounded-lg flex items-center gap-1 transition-colors"
                                                 title="Eliminar suscripción del sistema"
                                             >
-                                                <Trash2 size={16} /> <span className="md:hidden">Eliminar</span>
+                                                <Trash2 strokeWidth={1.5} size={16} /> <span className="md:hidden">Eliminar</span>
                                             </button>
                                         </div>
                                     </div>
@@ -267,15 +267,15 @@ export default function SubscribersTab() {
                             })}
                         </div>
                     ) : (
-                        <p className="text-sm text-gray-500 italic p-4 bg-gray-50 rounded-lg border border-dashed">No hay suscripciones activas.</p>
+                        <p className="text-sm text-[var(--color-muted)] italic p-4 bg-[var(--color-paper)] rounded-lg border border-dashed">No hay suscripciones activas.</p>
                     )}
                 </div>
 
                 {/* Inactive Subscriptions */}
                 {subscriptions.filter(s => s.status !== 'active').length > 0 && (
                     <div>
-                        <h3 className="text-lg font-bold text-gray-900 mb-4 flex items-center gap-2">
-                            <XCircle className="text-gray-400" size={20} />
+                        <h3 className="text-lg font-bold text-[var(--color-ink)] mb-4 flex items-center gap-2">
+                            <XCircle strokeWidth={1.5} className="text-[var(--color-neutral)]" size={20} />
                             Suscripciones Inactivas o Expiradas
                         </h3>
                         <div className="flex flex-col gap-3 opacity-75 hover:opacity-100 transition-opacity">
@@ -285,18 +285,18 @@ export default function SubscribersTab() {
                                 return (
                                     <div
                                         key={sub.id}
-                                        className="flex flex-col md:flex-row md:items-center justify-between p-4 bg-gray-50 rounded-xl border border-gray-200 gap-4 grayscale"
+                                        className="flex flex-col md:flex-row md:items-center justify-between p-4 bg-[var(--color-paper)] rounded-xl border border-[var(--color-rule)] gap-4 grayscale"
                                     >
                                         {/* User Info */}
                                         <div className="flex items-center gap-4 md:w-1/3">
-                                            <div className="w-10 h-10 rounded-full bg-gray-200 flex items-center justify-center text-gray-500 font-bold shrink-0">
+                                            <div className="w-10 h-10 rounded-full bg-[var(--color-paper-4)] flex items-center justify-center text-[var(--color-muted)] font-bold shrink-0">
                                                 {(sub.userName && sub.userName !== "Sin nombre") ? sub.userName.slice(0, 2).toUpperCase() : (sub.userEmail && sub.userEmail !== "Sin email" ? sub.userEmail.slice(0, 2).toUpperCase() : sub.userId.slice(0, 2).toUpperCase())}
                                             </div>
                                             <div className="min-w-0">
-                                                <p className="font-medium text-gray-900 text-sm truncate" title={sub.userEmail && sub.userEmail !== "Sin email" ? sub.userEmail : sub.userId}>
+                                                <p className="font-medium text-[var(--color-ink)] text-sm truncate" title={sub.userEmail && sub.userEmail !== "Sin email" ? sub.userEmail : sub.userId}>
                                                     {sub.userEmail && sub.userEmail !== "Sin email" ? sub.userEmail : sub.userId.slice(0, 12) + "..."}
                                                 </p>
-                                                <p className="text-xs text-gray-500 truncate">
+                                                <p className="text-xs text-[var(--color-muted)] truncate">
                                                     {sub.planName} • {sub.userName && sub.userName !== "Sin nombre" ? sub.userName : "Usuario"}
                                                 </p>
                                             </div>
@@ -304,34 +304,34 @@ export default function SubscribersTab() {
 
                                         {/* KPIs Grid */}
                                         <div className="flex gap-4 md:gap-8 text-sm md:flex-1 justify-start md:justify-center flex-wrap">
-                                            <div className="flex items-center gap-2 text-gray-500">
-                                                <CreditCard size={14} />
+                                            <div className="flex items-center gap-2 text-[var(--color-muted)]">
+                                                <CreditCard strokeWidth={1.5} size={14} />
                                                 <span className="w-16">{formatCurrency(sub.amount, sub.currency)}</span>
                                             </div>
-                                            <div className="flex items-center gap-2 text-gray-500">
-                                                <Clock size={14} />
+                                            <div className="flex items-center gap-2 text-[var(--color-muted)]">
+                                                <Clock strokeWidth={1.5} size={14} />
                                                 <span className="capitalize w-16">{sub.billingPeriod === 'monthly' ? 'Mensual' : 'Anual'}</span>
                                             </div>
-                                            <div className="flex flex-col items-start md:items-center gap-1 text-gray-500">
+                                            <div className="flex flex-col items-start md:items-center gap-1 text-[var(--color-muted)]">
                                                 <div className="flex items-center gap-1">
-                                                    <Calendar size={14} />
+                                                    <Calendar strokeWidth={1.5} size={14} />
                                                     <span title="Vencimiento" className="text-xs font-semibold">{formatDate(sub.endDate)}</span>
                                                 </div>
-                                                <span className="text-[10px] bg-gray-200 px-2 py-0.5 rounded-full mt-1">
+                                                <span className="text-[10px] bg-[var(--color-paper-4)] px-2 py-0.5 rounded-full mt-1">
                                                     {daysRemaining <= 0 ? `Expirado hace ${Math.abs(daysRemaining)} días` : `${daysRemaining} días rest.`}
                                                 </span>
                                             </div>
                                         </div>
 
                                         {/* Status & Actions */}
-                                        <div className="flex items-center justify-between md:justify-end gap-4 md:w-1/4 border-t md:border-none pt-3 md:pt-0 border-gray-200">
+                                        <div className="flex items-center justify-between md:justify-end gap-4 md:w-1/4 border-t md:border-none pt-3 md:pt-0 border-[var(--color-rule)]">
                                             {getStatusBadge(sub.status)}
                                             <button
                                                 onClick={() => handleDeleteSubscription(sub.id)}
-                                                className="text-xs text-red-500 hover:text-red-700 hover:bg-red-50 p-2 rounded-lg flex items-center gap-1 transition-colors"
+                                                className="text-xs text-[var(--color-danger)] hover:text-[var(--color-danger)] hover:bg-[var(--color-danger-soft)] p-2 rounded-lg flex items-center gap-1 transition-colors"
                                                 title="Eliminar suscripción del sistema"
                                             >
-                                                <Trash2 size={16} /> <span className="md:hidden">Eliminar</span>
+                                                <Trash2 strokeWidth={1.5} size={16} /> <span className="md:hidden">Eliminar</span>
                                             </button>
                                         </div>
                                     </div>

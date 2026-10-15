@@ -40,7 +40,7 @@ export default function EditPropertyPage() {
     if (loading) {
         return (
             <div className="flex justify-center items-center h-[50vh]">
-                <Loader2 className="animate-spin w-8 h-8 text-indigo-600" />
+                <Loader2 strokeWidth={1.5} className="animate-spin w-8 h-8 text-[var(--color-accent)]" />
             </div>
         );
     }
@@ -50,7 +50,7 @@ export default function EditPropertyPage() {
     return (
         <div className="space-y-6">
             <div className="flex justify-between items-center">
-                <h1 className="text-2xl font-bold text-gray-900">Editar Publicación</h1>
+                <h1 className="font-heading text-2xl font-bold text-[var(--color-ink)]">Editar Publicación</h1>
             </div>
             <PropertyWizard initialData={property} isEditing={true} />
         </div>

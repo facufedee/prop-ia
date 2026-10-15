@@ -24,47 +24,47 @@ export default function ContractGeneratorPreviewModal({ isOpen, onClose, contrac
 
     return (
         <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
-            <div className="bg-gray-100 rounded-xl shadow-xl w-full max-w-5xl h-[90vh] flex flex-col animate-in fade-in zoom-in-95 duration-200">
+            <div className="bg-[var(--color-paper-3)] rounded-xl shadow-xl w-full max-w-5xl h-[90vh] flex flex-col animate-in fade-in zoom-in-95 duration-200">
                 {/* Header */}
-                <div className="flex justify-between items-center p-4 bg-white border-b rounded-t-xl shrink-0">
+                <div className="flex justify-between items-center p-4 bg-[var(--color-paper-2)] border-b rounded-t-xl shrink-0">
                     <h3 className="font-semibold text-lg flex items-center gap-2">
-                        <Download className="text-indigo-600 w-5 h-5" />
+                        <Download strokeWidth={1.5} className="text-[var(--color-accent)] w-5 h-5" />
                         Generar Contrato
                     </h3>
                     <div className="flex items-center gap-4">
                         <div className="flex items-center gap-2 text-sm">
-                            <label className="text-gray-600 font-medium">Ciudad de Firma:</label>
+                            <label className="text-[var(--color-ink-2)] font-medium">Ciudad de Firma:</label>
                             <input
                                 type="text"
                                 value={signingCity}
                                 onChange={(e) => setSigningCity(e.target.value)}
-                                className="border border-gray-300 rounded px-2 py-1 text-gray-800"
+                                className="border border-[var(--color-rule)] rounded px-2 py-1 text-[var(--color-ink)]"
                             />
                         </div>
                         <div className="flex items-center gap-2 text-sm">
-                            <label className="text-gray-600 font-medium">Fecha:</label>
+                            <label className="text-[var(--color-ink-2)] font-medium">Fecha:</label>
                             <input
                                 type="date"
                                 value={signingDate.toISOString().split('T')[0]}
                                 onChange={(e) => setSigningDate(new Date(e.target.value))}
-                                className="border border-gray-300 rounded px-2 py-1 text-gray-800"
+                                className="border border-[var(--color-rule)] rounded px-2 py-1 text-[var(--color-ink)]"
                             />
                         </div>
                         <button
                             onClick={handlePrint}
-                            className="flex items-center gap-2 px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors font-medium shadow-sm"
+                            className="flex items-center gap-2 px-4 py-2 bg-[var(--color-ink)] text-[var(--color-paper)] rounded-lg hover:bg-[var(--color-ink-2)] transition-colors font-medium shadow-sm"
                         >
-                            <Printer size={18} />
+                            <Printer strokeWidth={1.5} size={18} />
                             Imprimir / Guardar PDF
                         </button>
-                        <button onClick={onClose} className="p-2 hover:bg-gray-100 rounded-lg transition-colors text-gray-500">
-                            <X size={24} />
+                        <button onClick={onClose} className="p-2 hover:bg-[var(--color-paper-3)] rounded-lg transition-colors text-[var(--color-muted)]">
+                            <X strokeWidth={1.5} size={24} />
                         </button>
                     </div>
                 </div>
 
                 {/* Preview Area */}
-                <div className="flex-1 overflow-y-auto p-8 bg-gray-200">
+                <div className="flex-1 overflow-y-auto p-8 bg-[var(--color-paper-4)]">
                     <div ref={componentRef} className="origin-top transition-transform">
                         <RentalContractTemplate
                             contract={contract}

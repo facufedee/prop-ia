@@ -3,7 +3,7 @@
 import { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
 import StepIndicator from "./StepIndicator";
-import { ChevronLeft, ChevronRight, Loader2, Upload, X, MapPin, Sparkles } from "lucide-react";
+import { ChevronLeft, ChevronRight, Loader2, Upload, X, MapPin, Star, AlertTriangle } from "lucide-react";
 import { app, db, storage, auth } from "@/infrastructure/firebase/client";
 import { collection, addDoc, updateDoc, doc } from "firebase/firestore";
 import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
@@ -19,7 +19,7 @@ import { useJsApiLoader, Autocomplete } from '@react-google-maps/api';
 // Dynamic import for Map to avoid SSR issues
 const Map = dynamic(() => import("./GoogleMap"), {
     ssr: false,
-    loading: () => <div className="h-[400px] w-full bg-gray-100 animate-pulse rounded-xl flex items-center justify-center">Cargando mapa...</div>
+    loading: () => <div className="h-[400px] w-full bg-[var(--color-paper-3)] animate-pulse rounded-xl flex items-center justify-center">Cargando mapa...</div>
 });
 
 const libraries: ("places" | "drawing" | "geometry" | "visualization")[] = ["places"];
@@ -820,8 +820,8 @@ export default function PropertyWizard({ initialData, isEditing = false, ...prop
     const renderError = (field: keyof PropertyData | string) => {
         if (errors[field as string]) {
             return (
-                <p className="text-red-500 text-xs font-semibold mb-1 animate-in slide-in-from-left-1 flex items-center gap-1">
-                    <span className="inline-block w-1 h-1 rounded-full bg-red-500" />
+                <p className="text-[var(--color-danger)] text-xs font-semibold mb-1 animate-in slide-in-from-left-1 flex items-center gap-1">
+                    <span className="inline-block w-1 h-1 rounded-full bg-[var(--color-danger)]" />
                     {errors[field as string]}
                 </p>
             );
@@ -840,16 +840,16 @@ export default function PropertyWizard({ initialData, isEditing = false, ...prop
                             {/* Portal Publication Toggle */}
                             <div
                                 onClick={() => setFormData(prev => ({ ...prev, publishToPortal: !prev.publishToPortal }))}
-                                className={`rounded-xl p-5 border-2 flex items-start gap-4 transition-all cursor-pointer hover:shadow-md ${formData.publishToPortal ? 'bg-green-50 border-green-500' : 'bg-gray-50 border-gray-200 hover:border-gray-300'}`}
+                                className={`rounded-xl p-5 border-2 flex items-start gap-4 transition-all cursor-pointer hover:shadow-md ${formData.publishToPortal ? 'bg-[var(--color-positive-soft)] border-[var(--color-positive)]' : 'bg-[var(--color-paper)] border-[var(--color-rule)] hover:border-[var(--color-neutral)]'}`}
                             >
                                 <div className="flex-1">
-                                    <h3 className={`font-semibold text-lg ${formData.publishToPortal ? 'text-green-900' : 'text-gray-900'}`}>
+                                    <h3 className={`font-semibold text-lg ${formData.publishToPortal ? 'text-[var(--color-positive)]' : 'text-[var(--color-ink)]'}`}>
                                         ¿Querés llegar a más clientes?
                                     </h3>
-                                    <p className={`text-sm mt-1 leading-relaxed ${formData.publishToPortal ? 'text-green-800' : 'text-gray-600'}`}>
+                                    <p className={`text-sm mt-1 leading-relaxed ${formData.publishToPortal ? 'text-[var(--color-positive)]' : 'text-[var(--color-ink-2)]'}`}>
                                         Al activar esta opción, aceptás publicar tu propiedad en nuestro portal exclusivo para alcanzar a miles de interesados.
                                         <br />
-                                        <span className={`text-xs mt-1 block font-medium ${formData.publishToPortal ? 'text-green-700' : 'text-gray-500'}`}>
+                                        <span className={`text-xs mt-1 block font-medium ${formData.publishToPortal ? 'text-[var(--color-positive)]' : 'text-[var(--color-muted)]'}`}>
                                             Aplican Términos y Condiciones.
                                         </span>
                                     </p>
@@ -859,13 +859,13 @@ export default function PropertyWizard({ initialData, isEditing = false, ...prop
                                         type="checkbox"
                                         name="toggle"
                                         id="portal-toggle"
-                                        className="toggle-checkbox absolute block w-7 h-7 rounded-full bg-white border-4 appearance-none cursor-pointer peer checked:right-0 right-7 transition-all"
+                                        className="toggle-checkbox absolute block w-7 h-7 rounded-full bg-[var(--color-paper-2)] border-4 appearance-none cursor-pointer peer checked:right-0 right-7 transition-all"
                                         checked={formData.publishToPortal}
                                         readOnly // Controlled by div onClick
                                     />
                                     <label
                                         htmlFor="portal-toggle"
-                                        className={`toggle-label block overflow-hidden h-7 rounded-full cursor-pointer transition-colors ${formData.publishToPortal ? 'bg-green-500' : 'bg-gray-300'}`}
+                                        className={`toggle-label block overflow-hidden h-7 rounded-full cursor-pointer transition-colors ${formData.publishToPortal ? 'bg-[var(--color-positive)]' : 'bg-[var(--color-paper-4)]'}`}
                                     ></label>
                                 </div>
                             </div>
@@ -874,15 +874,15 @@ export default function PropertyWizard({ initialData, isEditing = false, ...prop
 
 
                         <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-2">Tipo de operación</label>
+                            <label className="block text-sm font-medium text-[var(--color-ink-2)] mb-2">Tipo de operación</label>
                             <div className="flex gap-4">
                                 {['Venta', 'Alquiler', 'Temporada'].map(op => (
                                     <button
                                         key={op}
                                         onClick={() => handleOperationToggle(op)}
                                         className={`flex-1 py-3 px-4 rounded-xl border transition-all ${(formData.operations || []).includes(op)
-                                            ? 'border-indigo-600 bg-indigo-50 text-indigo-700 font-medium ring-1 ring-indigo-600'
-                                            : 'border-gray-200 hover:border-gray-300 text-gray-700'
+                                            ? 'border-[var(--color-accent)] bg-[var(--color-accent-soft)] text-[var(--color-accent)] font-medium ring-1 ring-[var(--color-accent)]'
+                                            : 'border-[var(--color-rule)] hover:border-[var(--color-neutral)] text-[var(--color-ink-2)]'
                                             }`}
                                     >
                                         {op}
@@ -893,9 +893,9 @@ export default function PropertyWizard({ initialData, isEditing = false, ...prop
 
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                             <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-2">Tipo de propiedad</label>
+                                <label className="block text-sm font-medium text-[var(--color-ink-2)] mb-2">Tipo de propiedad</label>
                                 <select
-                                    className="w-full p-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 font-sans text-base bg-white appearance-none text-gray-900 font-medium"
+                                    className="w-full p-3 border border-[var(--color-rule)] rounded-xl focus:ring-2 focus:ring-[var(--color-accent)]/40 focus:border-[var(--color-accent)] font-sans text-base bg-[var(--color-paper-2)] appearance-none text-[var(--color-ink)] font-medium"
                                     value={formData.property_type}
                                     onChange={(e) => handleChange('property_type', e.target.value)}
                                     style={{ fontFamily: 'inherit' }}
@@ -919,10 +919,10 @@ export default function PropertyWizard({ initialData, isEditing = false, ...prop
                                 </select>
                             </div>
                             <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-2">Subtipo (Opcional)</label>
+                                <label className="block text-sm font-medium text-[var(--color-ink-2)] mb-2">Subtipo (Opcional)</label>
                                 <input
                                     type="text"
-                                    className="w-full p-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-gray-900 font-medium"
+                                    className="w-full p-3 border border-[var(--color-rule)] rounded-xl focus:ring-2 focus:ring-[var(--color-accent)]/40 focus:border-[var(--color-accent)] text-[var(--color-ink)] font-medium"
                                     placeholder="Ej. Duplex, Loft"
                                     value={formData.property_subtype}
                                     onChange={(e) => handleChange('property_subtype', e.target.value)}
@@ -931,32 +931,32 @@ export default function PropertyWizard({ initialData, isEditing = false, ...prop
                         </div>
 
                         <div className="flex flex-wrap gap-6 pt-2">
-                            <label className="flex items-center gap-3 p-3 border border-gray-200 rounded-xl cursor-pointer hover:bg-gray-50 transition w-full md:w-auto">
+                            <label className="flex items-center gap-3 p-3 border border-[var(--color-rule)] rounded-xl cursor-pointer hover:bg-[var(--color-paper-3)] transition w-full md:w-auto">
                                 <input
                                     type="checkbox"
-                                    className="w-5 h-5 text-indigo-600 rounded focus:ring-indigo-500 border-gray-300"
+                                    className="w-5 h-5 text-[var(--color-accent)] rounded focus:ring-[var(--color-accent)]/40 border-[var(--color-rule)]"
                                     checked={formData.apto_profesional}
                                     onChange={(e) => handleChange('apto_profesional', e.target.checked)}
                                 />
-                                <span className="text-gray-700 font-medium">Apto Profesional</span>
+                                <span className="text-[var(--color-ink-2)] font-medium">Apto Profesional</span>
                             </label>
 
-                            <label className="flex items-center gap-3 p-3 border border-gray-200 rounded-xl cursor-pointer hover:bg-gray-50 transition w-full md:w-auto">
+                            <label className="flex items-center gap-3 p-3 border border-[var(--color-rule)] rounded-xl cursor-pointer hover:bg-[var(--color-paper-3)] transition w-full md:w-auto">
                                 <input
                                     type="checkbox"
-                                    className="w-5 h-5 text-indigo-600 rounded focus:ring-indigo-500 border-gray-300"
+                                    className="w-5 h-5 text-[var(--color-accent)] rounded focus:ring-[var(--color-accent)]/40 border-[var(--color-rule)]"
                                     checked={formData.apto_mascotas}
                                     onChange={(e) => handleChange('apto_mascotas', e.target.checked)}
                                 />
-                                <span className="text-gray-700 font-medium">Apto Mascotas</span>
+                                <span className="text-[var(--color-ink-2)] font-medium">Apto Mascotas</span>
                             </label>
                         </div>
 
                         <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-2">Descripción detallada</label>
+                            <label className="block text-sm font-medium text-[var(--color-ink-2)] mb-2">Descripción detallada</label>
                             <textarea
                                 rows={6}
-                                className="w-full p-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-gray-900 font-medium"
+                                className="w-full p-3 border border-[var(--color-rule)] rounded-xl focus:ring-2 focus:ring-[var(--color-accent)]/40 focus:border-[var(--color-accent)] text-[var(--color-ink)] font-medium"
                                 placeholder="Describí las características, ubicación, estado, etc..."
                                 value={formData.description}
                                 onChange={(e) => handleChange('description', e.target.value)}
@@ -973,7 +973,7 @@ export default function PropertyWizard({ initialData, isEditing = false, ...prop
                         {/* Autocomplete Search */}
                         {isLoaded && (
                             <div className="relative">
-                                <label className="block text-sm font-medium text-gray-700 mb-2">Buscar dirección (Autocompletar)</label>
+                                <label className="block text-sm font-medium text-[var(--color-ink-2)] mb-2">Buscar dirección (Autocompletar)</label>
                                 <Autocomplete
                                     onLoad={(autocomplete) => {
                                         autocompleteRef.current = autocomplete;
@@ -1098,18 +1098,18 @@ export default function PropertyWizard({ initialData, isEditing = false, ...prop
                                     <input
                                         type="text"
                                         placeholder="Escribí la dirección..."
-                                        className="w-full p-3 pl-10 border border-gray-300 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-gray-900 font-medium"
+                                        className="w-full p-3 pl-10 border border-[var(--color-rule)] rounded-xl focus:ring-2 focus:ring-[var(--color-accent)]/40 focus:border-[var(--color-accent)] text-[var(--color-ink)] font-medium"
                                     />
                                 </Autocomplete>
-                                <MapPin className="absolute left-3 top-[38px] text-gray-400 w-5 h-5" />
+                                <MapPin strokeWidth={1.5} className="absolute left-3 top-[38px] text-[var(--color-neutral)] w-5 h-5" />
                             </div>
                         )}
 
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                             <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-2">Provincia</label>
+                                <label className="block text-sm font-medium text-[var(--color-ink-2)] mb-2">Provincia</label>
                                 <select
-                                    className="w-full p-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 font-sans text-gray-900 font-medium"
+                                    className="w-full p-3 border border-[var(--color-rule)] rounded-xl focus:ring-2 focus:ring-[var(--color-accent)]/40 focus:border-[var(--color-accent)] font-sans text-[var(--color-ink)] font-medium"
                                     value={formData.provincia_id}
                                     onChange={handleProvinciaChange}
                                     style={{ fontFamily: 'inherit' }}
@@ -1121,9 +1121,9 @@ export default function PropertyWizard({ initialData, isEditing = false, ...prop
                                 </select>
                             </div>
                             <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-2">Localidad / Barrio</label>
+                                <label className="block text-sm font-medium text-[var(--color-ink-2)] mb-2">Localidad / Barrio</label>
                                 <select
-                                    className="w-full p-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 font-sans text-gray-900 font-medium"
+                                    className="w-full p-3 border border-[var(--color-rule)] rounded-xl focus:ring-2 focus:ring-[var(--color-accent)]/40 focus:border-[var(--color-accent)] font-sans text-[var(--color-ink)] font-medium"
                                     value={formData.localidad_id}
                                     onChange={handleLocalidadChange}
                                     disabled={!formData.provincia_id}
@@ -1139,38 +1139,38 @@ export default function PropertyWizard({ initialData, isEditing = false, ...prop
 
                         <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
                             <div className="md:col-span-2">
-                                <label className="block text-sm font-medium text-gray-700 mb-2">Calle</label>
+                                <label className="block text-sm font-medium text-[var(--color-ink-2)] mb-2">Calle</label>
                                 <input
                                     type="text"
-                                    className="w-full p-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-gray-900 font-medium"
+                                    className="w-full p-3 border border-[var(--color-rule)] rounded-xl focus:ring-2 focus:ring-[var(--color-accent)]/40 focus:border-[var(--color-accent)] text-[var(--color-ink)] font-medium"
                                     value={formData.calle}
                                     onChange={(e) => handleChange('calle', e.target.value)}
                                 />
                             </div>
                             <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-2">Nro. Calle</label>
+                                <label className="block text-sm font-medium text-[var(--color-ink-2)] mb-2">Nro. Calle</label>
                                 <input
                                     type="text"
-                                    className="w-full p-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-gray-900 font-medium"
+                                    className="w-full p-3 border border-[var(--color-rule)] rounded-xl focus:ring-2 focus:ring-[var(--color-accent)]/40 focus:border-[var(--color-accent)] text-[var(--color-ink)] font-medium"
                                     value={formData.altura}
                                     onChange={(e) => handleChange('altura', e.target.value)}
                                 />
                             </div>
                             <div className="grid grid-cols-2 gap-2">
                                 <div>
-                                    <label className="block text-sm font-medium text-gray-700 mb-2">Piso</label>
+                                    <label className="block text-sm font-medium text-[var(--color-ink-2)] mb-2">Piso</label>
                                     <input
                                         type="text"
-                                        className="w-full p-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-gray-900 font-medium"
+                                        className="w-full p-3 border border-[var(--color-rule)] rounded-xl focus:ring-2 focus:ring-[var(--color-accent)]/40 focus:border-[var(--color-accent)] text-[var(--color-ink)] font-medium"
                                         value={formData.piso}
                                         onChange={(e) => handleChange('piso', e.target.value)}
                                     />
                                 </div>
                                 <div>
-                                    <label className="block text-sm font-medium text-gray-700 mb-2">Depto</label>
+                                    <label className="block text-sm font-medium text-[var(--color-ink-2)] mb-2">Depto</label>
                                     <input
                                         type="text"
-                                        className="w-full p-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-gray-900 font-medium"
+                                        className="w-full p-3 border border-[var(--color-rule)] rounded-xl focus:ring-2 focus:ring-[var(--color-accent)]/40 focus:border-[var(--color-accent)] text-[var(--color-ink)] font-medium"
                                         value={formData.depto}
                                         onChange={(e) => handleChange('depto', e.target.value)}
                                     />
@@ -1180,19 +1180,19 @@ export default function PropertyWizard({ initialData, isEditing = false, ...prop
 
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                             <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-2">Entre calle 1</label>
+                                <label className="block text-sm font-medium text-[var(--color-ink-2)] mb-2">Entre calle 1</label>
                                 <input
                                     type="text"
-                                    className="w-full p-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-gray-900 font-medium"
+                                    className="w-full p-3 border border-[var(--color-rule)] rounded-xl focus:ring-2 focus:ring-[var(--color-accent)]/40 focus:border-[var(--color-accent)] text-[var(--color-ink)] font-medium"
                                     value={formData.entre_calle_1}
                                     onChange={(e) => handleChange('entre_calle_1', e.target.value)}
                                 />
                             </div>
                             <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-2">Entre calle 2</label>
+                                <label className="block text-sm font-medium text-[var(--color-ink-2)] mb-2">Entre calle 2</label>
                                 <input
                                     type="text"
-                                    className="w-full p-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-gray-900 font-medium"
+                                    className="w-full p-3 border border-[var(--color-rule)] rounded-xl focus:ring-2 focus:ring-[var(--color-accent)]/40 focus:border-[var(--color-accent)] text-[var(--color-ink)] font-medium"
                                     value={formData.entre_calle_2}
                                     onChange={(e) => handleChange('entre_calle_2', e.target.value)}
                                 />
@@ -1203,14 +1203,14 @@ export default function PropertyWizard({ initialData, isEditing = false, ...prop
                             <input
                                 type="checkbox"
                                 id="barrio_cerrado"
-                                className="w-4 h-4 text-indigo-600 rounded focus:ring-indigo-500 border-gray-300"
+                                className="w-4 h-4 text-[var(--color-accent)] rounded focus:ring-[var(--color-accent)]/40 border-[var(--color-rule)]"
                                 checked={formData.barrio_cerrado}
                                 onChange={(e) => handleChange('barrio_cerrado', e.target.checked)}
                             />
-                            <label htmlFor="barrio_cerrado" className="text-sm text-gray-700">Esta propiedad pertenece a un country / barrio cerrado</label>
+                            <label htmlFor="barrio_cerrado" className="text-sm text-[var(--color-ink-2)]">Esta propiedad pertenece a un country / barrio cerrado</label>
                         </div>
 
-                        <div className="h-[400px] rounded-xl overflow-hidden border border-gray-200">
+                        <div className="h-[400px] rounded-xl overflow-hidden border border-[var(--color-rule)]">
                             {isLoaded ? (
                                 <Map
                                     lat={formData.lat}
@@ -1220,8 +1220,8 @@ export default function PropertyWizard({ initialData, isEditing = false, ...prop
                                     }}
                                 />
                             ) : (
-                                <div className="h-full w-full flex items-center justify-center bg-gray-100">
-                                    <Loader2 className="w-8 h-8 animate-spin text-gray-400" />
+                                <div className="h-full w-full flex items-center justify-center bg-[var(--color-paper-3)]">
+                                    <Loader2 strokeWidth={1.5} className="w-8 h-8 animate-spin text-[var(--color-neutral)]" />
                                 </div>
                             )}
                         </div>
@@ -1235,71 +1235,71 @@ export default function PropertyWizard({ initialData, isEditing = false, ...prop
 
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                             <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-2">Ancho del terreno (m)</label>
+                                <label className="block text-sm font-medium text-[var(--color-ink-2)] mb-2">Ancho del terreno (m)</label>
                                 {renderError('land_width')}
                                 <input
                                     id="input-land_width"
                                     type="text"
                                     inputMode="decimal"
                                     placeholder="Ej. 8.66"
-                                    className={`w-full p-3 border rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-gray-900 font-medium ${errors.land_width ? 'border-red-500 bg-red-50' : 'border-gray-300'}`}
+                                    className={`w-full p-3 border rounded-xl focus:ring-2 focus:ring-[var(--color-accent)]/40 focus:border-[var(--color-accent)] text-[var(--color-ink)] font-medium ${errors.land_width ? 'border-[var(--color-danger)] bg-[var(--color-danger-soft)]' : 'border-[var(--color-rule)]'}`}
                                     value={formData.land_width}
                                     onChange={(e) => handleChange('land_width', e.target.value)}
                                 />
                             </div>
                             <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-2">Largo del terreno (m)</label>
+                                <label className="block text-sm font-medium text-[var(--color-ink-2)] mb-2">Largo del terreno (m)</label>
                                 {renderError('land_length')}
                                 <input
                                     id="input-land_length"
                                     type="text"
                                     inputMode="decimal"
                                     placeholder="Ej. 30"
-                                    className={`w-full p-3 border rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-gray-900 font-medium ${errors.land_length ? 'border-red-500 bg-red-50' : 'border-gray-300'}`}
+                                    className={`w-full p-3 border rounded-xl focus:ring-2 focus:ring-[var(--color-accent)]/40 focus:border-[var(--color-accent)] text-[var(--color-ink)] font-medium ${errors.land_length ? 'border-[var(--color-danger)] bg-[var(--color-danger-soft)]' : 'border-[var(--color-rule)]'}`}
                                     value={formData.land_length}
                                     onChange={(e) => handleChange('land_length', e.target.value)}
                                 />
                             </div>
                             <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-2">Superficie Terreno (m²)</label>
+                                <label className="block text-sm font-medium text-[var(--color-ink-2)] mb-2">Superficie Terreno (m²)</label>
                                 {renderError('area_total')}
                                 <input
                                     id="input-area_total"
                                     type="text"
                                     inputMode="decimal"
-                                    className={`w-full p-3 border rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-gray-900 font-medium ${errors.area_total ? 'border-red-500 bg-red-50' : 'border-gray-300'}`}
+                                    className={`w-full p-3 border rounded-xl focus:ring-2 focus:ring-[var(--color-accent)]/40 focus:border-[var(--color-accent)] text-[var(--color-ink)] font-medium ${errors.area_total ? 'border-[var(--color-danger)] bg-[var(--color-danger-soft)]' : 'border-[var(--color-rule)]'}`}
                                     value={formData.area_total}
                                     onChange={(e) => handleChange('area_total', e.target.value)}
                                 />
                             </div>
                             <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-2">Superficie Cubierta (m²)</label>
+                                <label className="block text-sm font-medium text-[var(--color-ink-2)] mb-2">Superficie Cubierta (m²)</label>
                                 {renderError('area_covered')}
                                 <input
                                     id="input-area_covered"
                                     type="text"
                                     inputMode="decimal"
-                                    className={`w-full p-3 border rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-gray-900 font-medium ${errors.area_covered ? 'border-red-500 bg-red-50' : 'border-gray-300'}`}
+                                    className={`w-full p-3 border rounded-xl focus:ring-2 focus:ring-[var(--color-accent)]/40 focus:border-[var(--color-accent)] text-[var(--color-ink)] font-medium ${errors.area_covered ? 'border-[var(--color-danger)] bg-[var(--color-danger-soft)]' : 'border-[var(--color-rule)]'}`}
                                     value={formData.area_covered}
                                     onChange={(e) => handleChange('area_covered', e.target.value)}
                                 />
                             </div>
                             <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-2">Superficie Descubierta (m²)</label>
+                                <label className="block text-sm font-medium text-[var(--color-ink-2)] mb-2">Superficie Descubierta (m²)</label>
                                 <input
                                     type="text"
                                     inputMode="decimal"
-                                    className="w-full p-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-gray-900 font-medium"
+                                    className="w-full p-3 border border-[var(--color-rule)] rounded-xl focus:ring-2 focus:ring-[var(--color-accent)]/40 focus:border-[var(--color-accent)] text-[var(--color-ink)] font-medium"
                                     value={formData.area_uncovered}
                                     onChange={(e) => handleChange('area_uncovered', e.target.value)}
                                 />
                             </div>
                             <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-2">Superficie Semi-cubierta (m²)</label>
+                                <label className="block text-sm font-medium text-[var(--color-ink-2)] mb-2">Superficie Semi-cubierta (m²)</label>
                                 <input
                                     type="text"
                                     inputMode="decimal"
-                                    className="w-full p-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-gray-900 font-medium"
+                                    className="w-full p-3 border border-[var(--color-rule)] rounded-xl focus:ring-2 focus:ring-[var(--color-accent)]/40 focus:border-[var(--color-accent)] text-[var(--color-ink)] font-medium"
                                     value={formData.area_semi_covered}
                                     onChange={(e) => handleChange('area_semi_covered', e.target.value)}
                                 />
@@ -1316,13 +1316,13 @@ export default function PropertyWizard({ initialData, isEditing = false, ...prop
                                 { label: 'Plantas', field: 'floors' },
                             ].map(item => (
                                 <div key={item.field}>
-                                    <label className="block text-sm font-medium text-gray-700 mb-2">{item.label}</label>
+                                    <label className="block text-sm font-medium text-[var(--color-ink-2)] mb-2">{item.label}</label>
                                     {renderError(item.field)}
                                     <input
                                         id={`input-${item.field}`}
                                         type="text"
                                         inputMode="numeric"
-                                        className={`w-full p-3 border rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-gray-900 font-medium ${errors[item.field] ? 'border-red-500 bg-red-50' : 'border-gray-300'}`}
+                                        className={`w-full p-3 border rounded-xl focus:ring-2 focus:ring-[var(--color-accent)]/40 focus:border-[var(--color-accent)] text-[var(--color-ink)] font-medium ${errors[item.field] ? 'border-[var(--color-danger)] bg-[var(--color-danger-soft)]' : 'border-[var(--color-rule)]'}`}
                                         value={(formData as any)[item.field]}
                                         onChange={(e) => handleChange(item.field as keyof PropertyData, e.target.value)}
                                     />
@@ -1332,9 +1332,9 @@ export default function PropertyWizard({ initialData, isEditing = false, ...prop
 
                         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                             <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-2">Estado</label>
+                                <label className="block text-sm font-medium text-[var(--color-ink-2)] mb-2">Estado</label>
                                 <select
-                                    className="w-full p-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 bg-white text-gray-900"
+                                    className="w-full p-3 border border-[var(--color-rule)] rounded-xl focus:ring-2 focus:ring-[var(--color-accent)]/40 focus:border-[var(--color-accent)] bg-[var(--color-paper-2)] text-[var(--color-ink)]"
                                     value={formData.condition}
                                     onChange={(e) => handleChange('condition', e.target.value)}
                                 >
@@ -1342,9 +1342,9 @@ export default function PropertyWizard({ initialData, isEditing = false, ...prop
                                 </select>
                             </div>
                             <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-2">Situación</label>
+                                <label className="block text-sm font-medium text-[var(--color-ink-2)] mb-2">Situación</label>
                                 <select
-                                    className="w-full p-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 bg-white text-gray-900 font-medium"
+                                    className="w-full p-3 border border-[var(--color-rule)] rounded-xl focus:ring-2 focus:ring-[var(--color-accent)]/40 focus:border-[var(--color-accent)] bg-[var(--color-paper-2)] text-[var(--color-ink)] font-medium"
                                     value={formData.situation}
                                     onChange={(e) => handleChange('situation', e.target.value)}
                                 >
@@ -1352,9 +1352,9 @@ export default function PropertyWizard({ initialData, isEditing = false, ...prop
                                 </select>
                             </div>
                             <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-2">Orientación</label>
+                                <label className="block text-sm font-medium text-[var(--color-ink-2)] mb-2">Orientación</label>
                                 <select
-                                    className="w-full p-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 bg-white text-gray-900 font-medium"
+                                    className="w-full p-3 border border-[var(--color-rule)] rounded-xl focus:ring-2 focus:ring-[var(--color-accent)]/40 focus:border-[var(--color-accent)] bg-[var(--color-paper-2)] text-[var(--color-ink)] font-medium"
                                     value={formData.orientation}
                                     onChange={(e) => handleChange('orientation', e.target.value)}
                                 >
@@ -1362,9 +1362,9 @@ export default function PropertyWizard({ initialData, isEditing = false, ...prop
                                 </select>
                             </div>
                             <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-2">Calefacción</label>
+                                <label className="block text-sm font-medium text-[var(--color-ink-2)] mb-2">Calefacción</label>
                                 <select
-                                    className="w-full p-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 bg-white"
+                                    className="w-full p-3 border border-[var(--color-rule)] rounded-xl focus:ring-2 focus:ring-[var(--color-accent)]/40 focus:border-[var(--color-accent)] bg-[var(--color-paper-2)]"
                                     value={formData.heating_type}
                                     onChange={(e) => handleChange('heating_type', e.target.value)}
                                 >
@@ -1378,9 +1378,9 @@ export default function PropertyWizard({ initialData, isEditing = false, ...prop
                                 </select>
                             </div>
                             <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-2">Agua Caliente</label>
+                                <label className="block text-sm font-medium text-[var(--color-ink-2)] mb-2">Agua Caliente</label>
                                 <select
-                                    className="w-full p-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 bg-white"
+                                    className="w-full p-3 border border-[var(--color-rule)] rounded-xl focus:ring-2 focus:ring-[var(--color-accent)]/40 focus:border-[var(--color-accent)] bg-[var(--color-paper-2)]"
                                     value={formData.water_heating_type}
                                     onChange={(e) => handleChange('water_heating_type', e.target.value)}
                                 >
@@ -1394,20 +1394,20 @@ export default function PropertyWizard({ initialData, isEditing = false, ...prop
                         </div>
 
                         <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-2">Amenities</label>
+                            <label className="block text-sm font-medium text-[var(--color-ink-2)] mb-2">Amenities</label>
                             <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
                                 {AMENITIES_LIST.map(amenity => (
                                     <button
                                         key={amenity}
                                         onClick={() => handleAmenityToggle(amenity)}
                                         className={`p-3 rounded-xl border text-left transition-all flex items-center justify-between ${(formData.amenities || []).includes(amenity)
-                                            ? 'border-indigo-600 bg-indigo-50 text-indigo-700 ring-1 ring-indigo-600'
-                                            : 'border-gray-200 hover:border-gray-300 text-gray-600'
+                                            ? 'border-[var(--color-accent)] bg-[var(--color-accent-soft)] text-[var(--color-accent)] ring-1 ring-[var(--color-accent)]'
+                                            : 'border-[var(--color-rule)] hover:border-[var(--color-neutral)] text-[var(--color-ink-2)]'
                                             }`}
                                     >
                                         <span className="text-sm font-medium">{amenity}</span>
                                         {(formData.amenities || []).includes(amenity) && (
-                                            <div className="w-2 h-2 rounded-full bg-indigo-600" />
+                                            <div className="w-2 h-2 rounded-full bg-[var(--color-accent)]" />
                                         )}
                                     </button>
                                 ))}
@@ -1415,15 +1415,15 @@ export default function PropertyWizard({ initialData, isEditing = false, ...prop
                         </div>
 
                         <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-2">Antigüedad</label>
+                            <label className="block text-sm font-medium text-[var(--color-ink-2)] mb-2">Antigüedad</label>
                             <div className="flex gap-4 mb-4 flex-wrap">
                                 {['A estrenar', 'Años de antigüedad', 'En construcción'].map(type => (
                                     <button
                                         key={type}
                                         onClick={() => handleChange('antiquity_type', type)}
                                         className={`px-4 py-2 rounded-lg border text-sm ${formData.antiquity_type === type
-                                            ? 'border-indigo-600 bg-indigo-50 text-indigo-700'
-                                            : 'border-gray-200 hover:border-gray-300'
+                                            ? 'border-[var(--color-accent)] bg-[var(--color-accent-soft)] text-[var(--color-accent)]'
+                                            : 'border-[var(--color-rule)] hover:border-[var(--color-neutral)]'
                                             }`}
                                     >
                                         {type}
@@ -1434,38 +1434,38 @@ export default function PropertyWizard({ initialData, isEditing = false, ...prop
                                 <input
                                     type="number"
                                     placeholder="Cantidad de años"
-                                    className="w-full p-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-gray-900 mb-4"
+                                    className="w-full p-3 border border-[var(--color-rule)] rounded-xl focus:ring-2 focus:ring-[var(--color-accent)]/40 focus:border-[var(--color-accent)] text-[var(--color-ink)] mb-4"
                                     value={formData.antiquity_years}
                                     onChange={(e) => handleChange('antiquity_years', e.target.value)}
                                 />
                             )}
 
                             {/* Remodelado Switch/Checkbox */}
-                            <div className="flex items-start gap-3 p-4 bg-gray-50 rounded-xl border border-gray-100">
+                            <div className="flex items-start gap-3 p-4 bg-[var(--color-paper)] rounded-xl border border-[var(--color-rule-2)]">
                                 <input
                                     type="checkbox"
                                     id="isRemodeled"
                                     checked={formData.isRemodeled}
                                     onChange={(e) => handleChange('isRemodeled', e.target.checked)}
-                                    className="mt-1 h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded"
+                                    className="mt-1 h-4 w-4 text-[var(--color-accent)] focus:ring-[var(--color-accent)]/40 border-[var(--color-rule)] rounded"
                                 />
                                 <div className="flex-1">
-                                    <label htmlFor="isRemodeled" className="block text-sm font-medium text-gray-900">
+                                    <label htmlFor="isRemodeled" className="block text-sm font-medium text-[var(--color-ink)]">
                                         Propiedad Remodelada / Reciclada
                                     </label>
-                                    <p className="text-xs text-gray-500 mt-1">
+                                    <p className="text-xs text-[var(--color-muted)] mt-1">
                                         Indicá si la propiedad fue renovada recientemente
                                     </p>
 
                                     {formData.isRemodeled && (
                                         <div className="mt-3 animate-in fade-in slide-in-from-top-2 duration-200">
-                                            <label className="block text-sm font-medium text-gray-700 mb-1">Año</label>
+                                            <label className="block text-sm font-medium text-[var(--color-ink-2)] mb-1">Año</label>
                                             {renderError('remodeledYear')}
                                             <input
                                                 id="input-remodeledYear"
                                                 type="number"
                                                 placeholder="Año de remodelación (ej. 2020)"
-                                                className={`w-full p-2 border rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-sm ${errors.remodeledYear ? 'border-red-500 bg-red-50' : 'border-gray-300'}`}
+                                                className={`w-full p-2 border rounded-lg focus:ring-2 focus:ring-[var(--color-accent)]/40 focus:border-[var(--color-accent)] text-sm ${errors.remodeledYear ? 'border-[var(--color-danger)] bg-[var(--color-danger-soft)]' : 'border-[var(--color-rule)]'}`}
                                                 value={formData.remodeledYear}
                                                 onChange={(e) => handleChange('remodeledYear', e.target.value)}
                                             />
@@ -1487,16 +1487,16 @@ export default function PropertyWizard({ initialData, isEditing = false, ...prop
 
                         {/* VENTA Price Section */}
                         {((formData.operations || []).includes('Venta')) && (
-                            <div className="p-4 bg-gray-50 rounded-xl border border-gray-100">
-                                <h3 className="text-sm font-semibold text-gray-900 mb-4 flex items-center gap-2">
-                                    <span className="w-2 h-2 rounded-full bg-indigo-500"></span>
+                            <div className="p-4 bg-[var(--color-paper)] rounded-xl border border-[var(--color-rule-2)]">
+                                <h3 className="text-sm font-semibold text-[var(--color-ink)] mb-4 flex items-center gap-2">
+                                    <span className="w-2 h-2 rounded-full bg-[var(--color-accent)]"></span>
                                     Precio de Venta
                                 </h3>
                                 <div className="flex gap-4">
                                     <div className="w-32">
-                                        <label className="block text-sm font-medium text-gray-700 mb-2">Moneda</label>
+                                        <label className="block text-sm font-medium text-[var(--color-ink-2)] mb-2">Moneda</label>
                                         <select
-                                            className="w-full p-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 bg-white"
+                                            className="w-full p-3 border border-[var(--color-rule)] rounded-xl focus:ring-2 focus:ring-[var(--color-accent)]/40 focus:border-[var(--color-accent)] bg-[var(--color-paper-2)]"
                                             value={formData.currency}
                                             onChange={(e) => handleChange('currency', e.target.value)}
                                         >
@@ -1505,14 +1505,14 @@ export default function PropertyWizard({ initialData, isEditing = false, ...prop
                                         </select>
                                     </div>
                                     <div className="flex-1">
-                                        <label className="block text-sm font-medium text-gray-700 mb-2">Monto</label>
+                                        <label className="block text-sm font-medium text-[var(--color-ink-2)] mb-2">Monto</label>
                                         {renderError('price')}
                                         <input
                                             id="input-price"
                                             type="text"
                                             inputMode="decimal"
                                             placeholder="0.00"
-                                            className={`w-full p-3 border rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-gray-900 font-medium ${errors.price ? 'border-red-500 bg-red-50' : 'border-gray-300'}`}
+                                            className={`w-full p-3 border rounded-xl focus:ring-2 focus:ring-[var(--color-accent)]/40 focus:border-[var(--color-accent)] text-[var(--color-ink)] font-medium ${errors.price ? 'border-[var(--color-danger)] bg-[var(--color-danger-soft)]' : 'border-[var(--color-rule)]'}`}
                                             value={formData.price}
                                             onChange={(e) => handleChange('price', e.target.value)}
                                         />
@@ -1523,16 +1523,16 @@ export default function PropertyWizard({ initialData, isEditing = false, ...prop
 
                         {/* ALQUILER Price Section */}
                         {((formData.operations || []).includes('Alquiler') || (formData.operations || []).includes('Temporada')) && (
-                            <div className="p-4 bg-gray-50 rounded-xl border border-gray-100">
-                                <h3 className="text-sm font-semibold text-gray-900 mb-4 flex items-center gap-2">
-                                    <span className="w-2 h-2 rounded-full bg-green-500"></span>
+                            <div className="p-4 bg-[var(--color-paper)] rounded-xl border border-[var(--color-rule-2)]">
+                                <h3 className="text-sm font-semibold text-[var(--color-ink)] mb-4 flex items-center gap-2">
+                                    <span className="w-2 h-2 rounded-full bg-[var(--color-positive)]"></span>
                                     Precio de Alquiler
                                 </h3>
                                 <div className="flex gap-4">
                                     <div className="w-32">
-                                        <label className="block text-sm font-medium text-gray-700 mb-2">Moneda</label>
+                                        <label className="block text-sm font-medium text-[var(--color-ink-2)] mb-2">Moneda</label>
                                         <select
-                                            className="w-full p-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 bg-white"
+                                            className="w-full p-3 border border-[var(--color-rule)] rounded-xl focus:ring-2 focus:ring-[var(--color-accent)]/40 focus:border-[var(--color-accent)] bg-[var(--color-paper-2)]"
                                             value={formData.rent_currency}
                                             onChange={(e) => handleChange('rent_currency', e.target.value)}
                                         >
@@ -1541,14 +1541,14 @@ export default function PropertyWizard({ initialData, isEditing = false, ...prop
                                         </select>
                                     </div>
                                     <div className="flex-1">
-                                        <label className="block text-sm font-medium text-gray-700 mb-2">Monto Mensual</label>
+                                        <label className="block text-sm font-medium text-[var(--color-ink-2)] mb-2">Monto Mensual</label>
                                         {renderError('rent_price')}
                                         <input
                                             id="input-rent_price"
                                             type="text"
                                             inputMode="decimal"
                                             placeholder="0.00"
-                                            className={`w-full p-3 border rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-gray-900 font-medium ${errors.rent_price ? 'border-red-500 bg-red-50' : 'border-gray-300'}`}
+                                            className={`w-full p-3 border rounded-xl focus:ring-2 focus:ring-[var(--color-accent)]/40 focus:border-[var(--color-accent)] text-[var(--color-ink)] font-medium ${errors.rent_price ? 'border-[var(--color-danger)] bg-[var(--color-danger-soft)]' : 'border-[var(--color-rule)]'}`}
                                             value={formData.rent_price}
                                             onChange={(e) => handleChange('rent_price', e.target.value)}
                                         />
@@ -1557,10 +1557,10 @@ export default function PropertyWizard({ initialData, isEditing = false, ...prop
                             </div>
                         )}
                         {/* Hide Price Option */}
-                        <div className="flex items-center justify-between p-4 bg-gray-50 rounded-xl border border-gray-200">
+                        <div className="flex items-center justify-between p-4 bg-[var(--color-paper)] rounded-xl border border-[var(--color-rule)]">
                             <div>
-                                <h3 className="font-semibold text-gray-900">Consultar precio</h3>
-                                <p className="text-sm text-gray-500 mt-1">
+                                <h3 className="font-semibold text-[var(--color-ink)]">Consultar precio</h3>
+                                <p className="text-sm text-[var(--color-muted)] mt-1">
                                     Ocultar el precio al público y mostrar "Consultar"
                                 </p>
                             </div>
@@ -1569,13 +1569,13 @@ export default function PropertyWizard({ initialData, isEditing = false, ...prop
                                     type="checkbox"
                                     name="hidePrice"
                                     id="hidePrice"
-                                    className="toggle-checkbox absolute block w-6 h-6 rounded-full bg-white border-4 appearance-none cursor-pointer peer checked:right-0 right-6 transition-all"
+                                    className="toggle-checkbox absolute block w-6 h-6 rounded-full bg-[var(--color-paper-2)] border-4 appearance-none cursor-pointer peer checked:right-0 right-6 transition-all"
                                     checked={formData.hidePrice}
                                     onChange={(e) => handleChange('hidePrice', e.target.checked)}
                                 />
                                 <label
                                     htmlFor="hidePrice"
-                                    className={`toggle-label block overflow-hidden h-6 rounded-full cursor-pointer transition-colors ${formData.hidePrice ? 'bg-indigo-600' : 'bg-gray-300'}`}
+                                    className={`toggle-label block overflow-hidden h-6 rounded-full cursor-pointer transition-colors ${formData.hidePrice ? 'bg-[var(--color-accent)]' : 'bg-[var(--color-paper-4)]'}`}
                                 ></label>
                             </div>
                         </div>
@@ -1595,20 +1595,20 @@ export default function PropertyWizard({ initialData, isEditing = false, ...prop
                                             expenses: checked ? prev.expenses : ''
                                         }));
                                     }}
-                                    className="w-4 h-4 text-indigo-600 border-gray-300 rounded focus:ring-indigo-500"
+                                    className="w-4 h-4 text-[var(--color-accent)] border-[var(--color-rule)] rounded focus:ring-[var(--color-accent)]/40"
                                 />
-                                <label htmlFor="hasExpenses" className="text-sm font-medium text-gray-700 cursor-pointer">
+                                <label htmlFor="hasExpenses" className="text-sm font-medium text-[var(--color-ink-2)] cursor-pointer">
                                     Paga expensas
                                 </label>
                             </div>
 
                             {formData.hasExpenses && (
                                 <div className="relative animate-in fade-in slide-in-from-top-2 duration-200">
-                                    <span className="absolute left-3 top-3 text-gray-500">$</span>
+                                    <span className="absolute left-3 top-3 text-[var(--color-muted)]">$</span>
                                     <input
                                         type="number"
                                         placeholder="Valor mensual aproximado"
-                                        className="w-full p-3 pl-8 border border-gray-300 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-gray-900 font-medium"
+                                        className="w-full p-3 pl-8 border border-[var(--color-rule)] rounded-xl focus:ring-2 focus:ring-[var(--color-accent)]/40 focus:border-[var(--color-accent)] text-[var(--color-ink)] font-medium"
                                         value={formData.expenses}
                                         onChange={(e) => handleChange('expenses', e.target.value)}
                                     />
@@ -1623,12 +1623,12 @@ export default function PropertyWizard({ initialData, isEditing = false, ...prop
                     <div className="space-y-6 animate-in fade-in slide-in-from-right-4 duration-300">
                         <div className="flex items-center justify-between">
                             <h2 className="text-xl font-semibold">Fotos y Videos</h2>
-                            <span className={`text-sm font-medium ${previews.length >= 30 ? 'text-red-600' : 'text-gray-500'}`}>
+                            <span className={`text-sm font-medium ${previews.length >= 30 ? 'text-[var(--color-danger)]' : 'text-[var(--color-muted)]'}`}>
                                 ({previews.length} / 30)
                             </span>
                         </div>
 
-                        <div className="border-2 border-dashed border-gray-300 rounded-xl p-8 text-center hover:bg-gray-50 transition-colors cursor-pointer relative">
+                        <div className="border-2 border-dashed border-[var(--color-rule)] rounded-xl p-8 text-center hover:bg-[var(--color-paper-3)] transition-colors cursor-pointer relative">
                             <input
                                 type="file"
                                 multiple
@@ -1637,12 +1637,12 @@ export default function PropertyWizard({ initialData, isEditing = false, ...prop
                                 onChange={handleImageSelect}
                             />
                             <div className="flex flex-col items-center gap-3">
-                                <div className="w-12 h-12 bg-indigo-50 rounded-full flex items-center justify-center text-indigo-600">
-                                    <Upload className="w-6 h-6" />
+                                <div className="w-12 h-12 bg-[var(--color-paper-3)] rounded-full flex items-center justify-center text-[var(--color-muted)]">
+                                    <Upload strokeWidth={1.5} className="w-6 h-6" />
                                 </div>
                                 <div>
-                                    <p className="font-medium text-gray-900">Hacé clic para subir fotos</p>
-                                    <p className="text-sm text-gray-500">o arrastrá y soltá los archivos acá</p>
+                                    <p className="font-medium text-[var(--color-ink)]">Hacé clic para subir fotos</p>
+                                    <p className="text-sm text-[var(--color-muted)]">o arrastrá y soltá los archivos acá</p>
                                 </div>
                             </div>
                         </div>
@@ -1653,8 +1653,8 @@ export default function PropertyWizard({ initialData, isEditing = false, ...prop
                                     <div
                                         key={index}
                                         className={`relative aspect-[4/3] group rounded-lg overflow-hidden border-2 transition-all ${(formData as any).coverImageIndex === index
-                                            ? 'border-indigo-500 ring-2 ring-indigo-200'
-                                            : 'border-transparent hover:border-gray-300'
+                                            ? 'border-[var(--color-accent)] ring-2 ring-[var(--color-accent)]/30'
+                                            : 'border-transparent hover:border-[var(--color-neutral)]'
                                             }`}
                                     >
                                         <img
@@ -1670,51 +1670,51 @@ export default function PropertyWizard({ initialData, isEditing = false, ...prop
                                                 setFormData(prev => ({ ...prev, coverImageIndex: index }));
                                             }}
                                             className={`absolute top-2 left-2 p-1.5 rounded-full shadow-sm transition-all ${(formData as any).coverImageIndex === index
-                                                ? 'bg-indigo-500 text-white opacity-100'
-                                                : 'bg-white/80 text-gray-400 opacity-0 group-hover:opacity-100 hover:bg-white hover:text-yellow-500'
+                                                ? 'bg-[var(--color-accent)] text-[var(--color-accent-ink)] opacity-100'
+                                                : 'bg-[var(--color-paper-2)]/80 text-[var(--color-neutral)] opacity-0 group-hover:opacity-100 hover:bg-[var(--color-paper-3)] hover:text-[var(--color-warning)]'
                                                 }`}
                                             title="Establecer como portada"
                                         >
-                                            <Sparkles className={`w-4 h-4 ${(formData as any).coverImageIndex === index ? 'fill-current' : ''}`} />
+                                            <Star strokeWidth={1.5} className={`w-4 h-4 ${(formData as any).coverImageIndex === index ? 'fill-current' : ''}`} />
                                         </button>
 
                                         {(formData as any).coverImageIndex === index && (
-                                            <div className="absolute bottom-0 inset-x-0 bg-indigo-500/80 text-white text-[10px] font-bold text-center py-1 uppercase tracking-wider backdrop-blur-sm">
+                                            <div className="absolute bottom-0 inset-x-0 bg-[var(--color-accent)]/90 text-[var(--color-accent-ink)] text-[10px] font-bold text-center py-1 uppercase tracking-wider backdrop-blur-sm">
                                                 Portada
                                             </div>
                                         )}
 
                                         <button
                                             onClick={() => removeImage(index)}
-                                            className="absolute top-2 right-2 p-1 bg-white rounded-full shadow-sm opacity-0 group-hover:opacity-100 transition-opacity hover:bg-red-50 text-red-600"
+                                            className="absolute top-2 right-2 p-1 bg-[var(--color-paper-2)] rounded-full shadow-sm opacity-0 group-hover:opacity-100 transition-opacity hover:bg-[var(--color-danger-soft)] text-[var(--color-danger)]"
                                         >
-                                            <X className="w-4 h-4" />
+                                            <X strokeWidth={1.5} className="w-4 h-4" />
                                         </button>
                                     </div>
                                 ))}
                             </div>
                         )}
 
-                        <div className="grid grid-cols-1 gap-6 pt-4 border-t border-gray-100">
+                        <div className="grid grid-cols-1 gap-6 pt-4 border-t border-[var(--color-rule-2)]">
                             <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-1">
-                                    Etiqueta de página <span className="text-gray-400 font-normal">(opcional)</span>
+                                <label className="block text-sm font-medium text-[var(--color-ink-2)] mb-1">
+                                    Etiqueta de página <span className="text-[var(--color-neutral)] font-normal">(opcional)</span>
                                 </label>
-                                <p className="text-xs text-gray-400 mb-2">Usala para agrupar propiedades en páginas personalizadas de tu sitio. Ej: <em>emprendimiento</em>, <em>exclusiva</em>, <em>pozo</em>.</p>
+                                <p className="text-xs text-[var(--color-neutral)] mb-2">Usala para agrupar propiedades en páginas personalizadas de tu sitio. Ej: <em>emprendimiento</em>, <em>exclusiva</em>, <em>pozo</em>.</p>
                                 <input
                                     type="text"
                                     placeholder="ej: emprendimiento"
-                                    className="w-full p-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-gray-900 font-medium"
+                                    className="w-full p-3 border border-[var(--color-rule)] rounded-xl focus:ring-2 focus:ring-[var(--color-accent)]/40 focus:border-[var(--color-accent)] text-[var(--color-ink)] font-medium"
                                     value={formData.customTag || ''}
                                     onChange={(e) => handleChange('customTag', e.target.value.toLowerCase().trim())}
                                 />
                             </div>
                             <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-2">Video (YouTube URL)</label>
+                                <label className="block text-sm font-medium text-[var(--color-ink-2)] mb-2">Video (YouTube URL)</label>
                                 <input
                                     type="text"
                                     placeholder="https://youtube.com/watch?v=..."
-                                    className="w-full p-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-gray-900 font-medium"
+                                    className="w-full p-3 border border-[var(--color-rule)] rounded-xl focus:ring-2 focus:ring-[var(--color-accent)]/40 focus:border-[var(--color-accent)] text-[var(--color-ink)] font-medium"
                                     value={formData.video_url}
                                     onChange={(e) => handleChange('video_url', e.target.value)}
                                 />
@@ -1730,7 +1730,7 @@ export default function PropertyWizard({ initialData, isEditing = false, ...prop
 
                                             if (videoId) {
                                                 return (
-                                                    <div className="relative aspect-video rounded-xl overflow-hidden bg-gray-100 border border-gray-200 shadow-sm max-w-md mx-auto">
+                                                    <div className="relative aspect-video rounded-xl overflow-hidden bg-[var(--color-paper-3)] border border-[var(--color-rule)] shadow-sm max-w-md mx-auto">
                                                         <iframe
                                                             width="100%"
                                                             height="100%"
@@ -1745,8 +1745,9 @@ export default function PropertyWizard({ initialData, isEditing = false, ...prop
                                                 );
                                             } else if (formData.video_url.length > 10) {
                                                 return (
-                                                    <div className="text-sm text-red-500 mt-2 flex items-center gap-2">
-                                                        <span>⚠️ Enlace de YouTube no válido</span>
+                                                    <div className="text-sm text-[var(--color-danger)] mt-2 flex items-center gap-2">
+                                                        <AlertTriangle size={14} strokeWidth={1.5} />
+                                                        <span>Enlace de YouTube no válido</span>
                                                     </div>
                                                 );
                                             }
@@ -1774,25 +1775,25 @@ export default function PropertyWizard({ initialData, isEditing = false, ...prop
             />
             <StepIndicator currentStep={currentStep} totalSteps={STEPS.length} steps={STEPS} onStepClick={handleStepClick} />
 
-            <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-6 md:p-8 mt-6">
+            <div className="bg-[var(--color-paper-2)] rounded-2xl shadow-sm border border-[var(--color-rule)] p-6 md:p-8 mt-6">
                 {errors.form && (
-                    <div className="mb-6 p-4 bg-red-50 text-red-600 rounded-xl text-sm animate-in fade-in slide-in-from-top-2">
+                    <div className="mb-6 p-4 bg-[var(--color-danger-soft)] text-[var(--color-danger)] rounded-xl text-sm animate-in fade-in slide-in-from-top-2">
                         {errors.form}
                     </div>
                 )}
 
                 {renderStep()}
 
-                <div className="flex justify-between mt-8 pt-6 border-t border-gray-100">
+                <div className="flex justify-between mt-8 pt-6 border-t border-[var(--color-rule-2)]">
                     <button
                         onClick={prevStep}
                         className={`flex items-center gap-2 px-6 py-3 rounded-xl font-medium transition-colors ${currentStep === 1
-                            ? 'text-gray-400 cursor-not-allowed'
-                            : 'text-gray-600 hover:bg-gray-50'
+                            ? 'text-[var(--color-neutral)] cursor-not-allowed'
+                            : 'text-[var(--color-ink-2)] hover:bg-[var(--color-paper-3)]'
                             }`}
                         disabled={currentStep === 1}
                     >
-                        <ChevronLeft className="w-5 h-5" />
+                        <ChevronLeft strokeWidth={1.5} className="w-5 h-5" />
                         Anterior
                     </button>
 
@@ -1801,25 +1802,25 @@ export default function PropertyWizard({ initialData, isEditing = false, ...prop
                             <button
                                 onClick={handleSubmit}
                                 disabled={loading}
-                                className="flex items-center gap-2 px-6 py-3 bg-white border-2 border-green-500 text-green-600 rounded-xl font-medium hover:bg-green-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                                className="flex items-center gap-2 px-6 py-3 bg-[var(--color-paper-2)] border-2 border-[var(--color-positive)] text-[var(--color-positive)] rounded-xl font-medium hover:bg-[var(--color-positive-soft)] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                             >
-                                {loading ? <Loader2 className="w-5 h-5 animate-spin" /> : "Guardar Cambios"}
+                                {loading ? <Loader2 strokeWidth={1.5} className="w-5 h-5 animate-spin" /> : "Guardar Cambios"}
                             </button>
                         )}
                         <button
                             onClick={nextStep}
                             disabled={loading}
-                            className="flex items-center gap-2 px-8 py-3 bg-indigo-600 text-white rounded-xl font-medium hover:bg-indigo-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                            className="flex items-center gap-2 px-8 py-3 bg-[var(--color-ink)] text-[var(--color-paper)] rounded-xl font-medium hover:bg-[var(--color-ink-2)] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                         >
                             {loading ? (
                                 <>
-                                    <Loader2 className="w-5 h-5 animate-spin" />
+                                    <Loader2 strokeWidth={1.5} className="w-5 h-5 animate-spin" />
                                     {uploadProgress > 0 ? `Subiendo ${uploadProgress}%` : 'Publicando...'}
                                 </>
                             ) : (
                                 <>
                                     {currentStep === STEPS.length ? (isEditing ? 'Finalizar Edición' : 'Publicar') : 'Siguiente'}
-                                    {currentStep !== STEPS.length && <ChevronRight className="w-5 h-5" />}
+                                    {currentStep !== STEPS.length && <ChevronRight strokeWidth={1.5} className="w-5 h-5" />}
                                 </>
                             )}
                         </button>

@@ -45,31 +45,31 @@ function PortalCard({
     };
 
     return (
-        <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
+        <div className="bg-[var(--color-paper-2)] p-6 rounded-xl shadow-sm border border-[var(--color-rule-2)]">
             <div className="flex items-start justify-between mb-6">
                 <div className="flex items-center gap-4">
                     <div className={`w-14 h-14 ${accentBg} rounded-xl flex items-center justify-center border ${accentBorder}`}>
                         <span className={`${accentText} font-bold text-2xl`}>{label[0]}</span>
                     </div>
                     <div>
-                        <h2 className="text-lg font-bold text-gray-900">{label}</h2>
-                        <p className="text-sm text-gray-500">Publicación automática y sincronización.</p>
+                        <h2 className="text-lg font-bold text-[var(--color-ink)]">{label}</h2>
+                        <p className="text-sm text-[var(--color-muted)]">Publicación automática y sincronización.</p>
                     </div>
                 </div>
-                <div className={`text-xs px-2.5 py-1 rounded-full font-medium ${savedCode ? "bg-blue-100 text-blue-700" : "bg-gray-100 text-gray-500"}`}>
+                <div className={`text-xs px-2.5 py-1 rounded-full font-medium ${savedCode ? "bg-[var(--color-positive-soft)] text-[var(--color-positive)]" : "bg-[var(--color-paper-3)] text-[var(--color-muted)]"}`}>
                     {savedCode ? "Código guardado" : "Sin configurar"}
                 </div>
             </div>
 
             <form onSubmit={handleSubmit} className="space-y-4">
                 <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1.5">Código de inmobiliaria en {label}</label>
+                    <label className="block text-sm font-medium text-[var(--color-ink-2)] mb-1.5">Código de inmobiliaria en {label}</label>
                     <input
                         type="text"
                         value={code}
                         onChange={(e) => setCode(e.target.value)}
                         placeholder="Ej: 123456"
-                        className="w-full p-2.5 border border-gray-200 rounded-lg focus:ring-2 focus:ring-offset-0 outline-none transition-all"
+                        className="w-full p-2.5 border border-[var(--color-rule)] rounded-lg bg-[var(--color-paper-3)] text-[var(--color-ink)] focus:ring-2 focus:ring-[var(--color-accent)]/40 focus:ring-offset-0 outline-none transition-all"
                     />
                 </div>
 
@@ -77,15 +77,15 @@ function PortalCard({
                     <button
                         type="submit"
                         disabled={saving || !code.trim()}
-                        className={`w-full ${buttonBg} ${buttonHoverBg} text-white font-medium py-2.5 rounded-lg transition shadow-sm hover:shadow active:scale-[0.99] transform duration-100 disabled:opacity-50 flex items-center justify-center gap-2`}
+                        className={`w-full ${buttonBg} ${buttonHoverBg} text-[var(--color-paper)] font-medium py-2.5 rounded-lg transition shadow-sm hover:shadow active:scale-[0.99] transform duration-100 disabled:opacity-50 flex items-center justify-center gap-2`}
                     >
-                        {saving ? "Guardando..." : savedCode ? (<><Check className="w-4 h-4" /> Actualizar código</>) : "Guardar código"}
+                        {saving ? "Guardando..." : savedCode ? (<><Check strokeWidth={1.5} className="w-4 h-4" /> Actualizar código</>) : "Guardar código"}
                     </button>
                 </div>
 
-                <div className="flex items-start gap-2 mt-4 p-3 bg-amber-50/60 rounded-lg">
-                    <Info className="w-4 h-4 text-amber-600 mt-0.5 flex-shrink-0" />
-                    <p className="text-xs text-amber-700 leading-relaxed">
+                <div className="flex items-start gap-2 mt-4 p-3 bg-[var(--color-warning-soft)] rounded-lg">
+                    <Info strokeWidth={1.5} className="w-4 h-4 text-[var(--color-warning)] mt-0.5 flex-shrink-0" />
+                    <p className="text-xs text-[var(--color-warning)] leading-relaxed">
                         La publicación automática hacia {label} todavía no está activa — Zeta Prop está gestionando la integración oficial con el portal.
                         Nunca te vamos a pedir tu usuario o contraseña de {label}; sólo el código de inmobiliaria que el portal te asignó, para tenerlo listo apenas se habilite.
                     </p>
@@ -108,8 +108,8 @@ export default function PublicacionesPage() {
         <div className="max-w-7xl mx-auto space-y-8">
             <div className="flex justify-between items-center">
                 <div>
-                    <h1 className="text-2xl font-bold text-gray-900">Publicaciones Multiplataforma</h1>
-                    <p className="text-gray-500 mt-1">Gestioná la conexión con los principales portales inmobiliarios.</p>
+                    <h1 className="font-heading text-2xl font-bold text-[var(--color-ink)]">Publicaciones Multiplataforma</h1>
+                    <p className="text-[var(--color-muted)] mt-1">Gestioná la conexión con los principales portales inmobiliarios.</p>
                 </div>
             </div>
 
@@ -117,48 +117,44 @@ export default function PublicacionesPage() {
                 <PortalCard
                     portal="argenprop"
                     label="Argenprop"
-                    accentBg="bg-orange-50"
-                    accentBorder="border-orange-100"
-                    accentText="text-orange-600"
-                    buttonBg="bg-orange-600"
-                    buttonHoverBg="hover:bg-orange-700"
+                    accentBg="bg-[var(--color-paper-3)]"
+                    accentBorder="border-[var(--color-rule)]"
+                    accentText="text-[var(--color-ink-2)]"
+                    buttonBg="bg-[var(--color-ink)]"
+                    buttonHoverBg="hover:bg-[var(--color-ink-2)]"
                     savedCode={portalIds.argenprop}
                     onSave={handleSave}
                 />
                 <PortalCard
                     portal="zonaprop"
                     label="Zonaprop"
-                    accentBg="bg-indigo-50"
-                    accentBorder="border-indigo-100"
-                    accentText="text-indigo-600"
-                    buttonBg="bg-indigo-600"
-                    buttonHoverBg="hover:bg-indigo-700"
+                    accentBg="bg-[var(--color-paper-3)]"
+                    accentBorder="border-[var(--color-rule)]"
+                    accentText="text-[var(--color-ink-2)]"
+                    buttonBg="bg-[var(--color-ink)]"
+                    buttonHoverBg="hover:bg-[var(--color-ink-2)]"
                     savedCode={portalIds.zonaprop}
                     onSave={handleSave}
                 />
             </div>
 
             {/* XML Feed Manual Section */}
-            <div className="mt-8 bg-slate-900 text-white rounded-xl p-8 overflow-hidden relative">
+            <div className="mt-8 bg-[var(--color-paper-2)] border border-[var(--color-rule)] text-[var(--color-ink)] rounded-xl p-8 overflow-hidden relative">
                 <div className="relative z-10 flex flex-col md:flex-row justify-between items-center gap-6">
                     <div>
                         <h3 className="text-xl font-bold mb-2">¿Necesitás el Feed XML manual?</h3>
-                        <p className="text-slate-300 max-w-xl">
+                        <p className="text-[var(--color-muted)] max-w-xl">
                             Si tu portal no soporta integración directa, podés usar nuestro feed XML estándar compatible con los principales portales (Zonaprop y Argenprop).
                         </p>
                     </div>
                     <button
                         onClick={() => user && window.open(`/api/feeds/${user.uid}`, '_blank')}
                         disabled={!user}
-                        className="px-6 py-3 bg-white text-slate-900 font-bold rounded-lg hover:bg-slate-100 transition shadow-lg whitespace-nowrap disabled:opacity-50"
+                        className="px-6 py-3 bg-[var(--color-ink)] text-[var(--color-paper)] font-bold rounded-lg hover:bg-[var(--color-ink-2)] transition whitespace-nowrap disabled:opacity-50"
                     >
                         Ver Feed XML
                     </button>
                 </div>
-
-                {/* Decorative background */}
-                <div className="absolute -top-24 -right-24 w-64 h-64 bg-indigo-500 rounded-full blur-[100px] opacity-20"></div>
-                <div className="absolute -bottom-24 -left-24 w-64 h-64 bg-blue-500 rounded-full blur-[100px] opacity-20"></div>
             </div>
         </div>
     );

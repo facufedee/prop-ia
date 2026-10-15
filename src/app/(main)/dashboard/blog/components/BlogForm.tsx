@@ -208,57 +208,57 @@ export default function BlogForm({ initialData, isEditing = false }: BlogFormPro
                 <div className="lg:col-span-2 space-y-6">
 
                     {/* Title */}
-                    <div className="bg-white p-6 rounded-xl border border-gray-200 shadow-sm space-y-4">
+                    <div className="bg-[var(--color-paper-2)] p-6 rounded-xl border border-[var(--color-rule)] shadow-sm space-y-4">
                         <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-1">Título del Artículo</label>
+                            <label className="block text-sm font-medium text-[var(--color-ink-2)] mb-1">Título del Artículo</label>
                             <input
                                 type="text"
                                 name="title"
                                 value={formData.title}
                                 onChange={handleChange}
                                 placeholder="Ej: Nueva Ley de Alquileres 2025"
-                                className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-indigo-500 font-bold text-lg text-gray-900"
+                                className="w-full px-4 py-2 border border-[var(--color-rule)] rounded-lg focus:ring-2 focus:ring-[var(--color-accent)]/40 font-bold text-lg text-[var(--color-ink)]"
                                 required
                             />
                         </div>
 
                         <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-1">Slug (URL)</label>
+                            <label className="block text-sm font-medium text-[var(--color-ink-2)] mb-1">Slug (URL)</label>
                             <input
                                 type="text"
                                 name="slug"
                                 value={formData.slug}
                                 onChange={handleChange}
-                                className="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-lg text-sm text-gray-500 font-mono"
+                                className="w-full px-4 py-2 bg-[var(--color-paper)] border border-[var(--color-rule)] rounded-lg text-sm text-[var(--color-muted)] font-mono"
                             />
                         </div>
                     </div>
 
                     {/* Editor / Content */}
-                    <div className="bg-white p-6 rounded-xl border border-gray-200 shadow-sm space-y-4">
-                        <label className="block text-sm font-medium text-gray-700">Contenido</label>
+                    <div className="bg-[var(--color-paper-2)] p-6 rounded-xl border border-[var(--color-rule)] shadow-sm space-y-4">
+                        <label className="block text-sm font-medium text-[var(--color-ink-2)]">Contenido</label>
                         <textarea
                             name="content"
                             value={formData.content}
                             onChange={handleChange}
                             rows={15}
                             placeholder="Escribe el contenido de tu post aquí..."
-                            className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-indigo-500 resize-y text-gray-900"
+                            className="w-full px-4 py-3 border border-[var(--color-rule)] rounded-lg focus:ring-2 focus:ring-[var(--color-accent)]/40 resize-y text-[var(--color-ink)]"
                             required
                         />
-                        <p className="text-xs text-gray-500 text-right">Se recomienda usar Markdown o HTML simple.</p>
+                        <p className="text-xs text-[var(--color-muted)] text-right">Se recomienda usar Markdown o HTML simple.</p>
                     </div>
 
                     {/* Excerpt */}
-                    <div className="bg-white p-6 rounded-xl border border-gray-200 shadow-sm space-y-4">
-                        <label className="block text-sm font-medium text-gray-700">Resumen / Bajada</label>
+                    <div className="bg-[var(--color-paper-2)] p-6 rounded-xl border border-[var(--color-rule)] shadow-sm space-y-4">
+                        <label className="block text-sm font-medium text-[var(--color-ink-2)]">Resumen / Bajada</label>
                         <textarea
                             name="excerpt"
                             value={formData.excerpt}
                             onChange={handleChange}
                             rows={3}
                             placeholder="Breve descripción que aparecerá en el listado..."
-                            className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-indigo-500 text-gray-900"
+                            className="w-full px-4 py-2 border border-[var(--color-rule)] rounded-lg focus:ring-2 focus:ring-[var(--color-accent)]/40 text-[var(--color-ink)]"
                         />
                     </div>
 
@@ -268,12 +268,12 @@ export default function BlogForm({ initialData, isEditing = false }: BlogFormPro
                 <div className="space-y-6">
 
                     {/* Actions */}
-                    <div className="bg-white p-6 rounded-xl border border-gray-200 shadow-sm">
-                        <h3 className="font-semibold text-gray-900 mb-4">Publicación</h3>
+                    <div className="bg-[var(--color-paper-2)] p-6 rounded-xl border border-[var(--color-rule)] shadow-sm">
+                        <h3 className="font-semibold text-[var(--color-ink)] mb-4">Publicación</h3>
 
                         <div className="space-y-4">
                             <div className="flex items-center justify-between">
-                                <span className="text-sm text-gray-700">Estado</span>
+                                <span className="text-sm text-[var(--color-ink-2)]">Estado</span>
                                 <div className="flex items-center gap-2">
                                     <label className="relative inline-flex items-center cursor-pointer">
                                         <input
@@ -282,38 +282,38 @@ export default function BlogForm({ initialData, isEditing = false }: BlogFormPro
                                             checked={formData.published}
                                             onChange={(e) => setFormData(prev => ({ ...prev, published: e.target.checked }))}
                                         />
-                                        <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-indigo-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-green-600"></div>
+                                        <div className="w-11 h-6 bg-[var(--color-paper-4)] peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-[var(--color-accent)]/30 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-[var(--color-paper-2)] after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-[var(--color-paper-2)] after:border-[var(--color-rule)] after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-[var(--color-positive)]"></div>
                                     </label>
-                                    <span className={`text-sm font-medium ${formData.published ? 'text-green-600' : 'text-gray-500'}`}>
+                                    <span className={`text-sm font-medium ${formData.published ? 'text-[var(--color-positive)]' : 'text-[var(--color-muted)]'}`}>
                                         {formData.published ? 'Publicado' : 'Borrador'}
                                     </span>
                                 </div>
                             </div>
 
-                            <div className="border-t border-gray-100 pt-4">
-                                <label className="block text-xs font-semibold text-gray-500 uppercase mb-2">Fecha de Publicación</label>
+                            <div className="border-t border-[var(--color-rule-2)] pt-4">
+                                <label className="block text-xs font-semibold text-[var(--color-muted)] uppercase mb-2">Fecha de Publicación</label>
                                 <div className="relative">
-                                    <Calendar className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={16} />
+                                    <Calendar strokeWidth={1.5} className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--color-neutral)]" size={16} />
                                     <input
                                         type="datetime-local"
                                         name="publishedAt"
                                         value={formatDateForInput(formData.publishedAt)}
                                         onChange={handleDateChange}
-                                        className="w-full pl-10 pr-4 py-2 text-sm border border-gray-200 rounded-lg focus:ring-2 focus:ring-indigo-500 text-gray-900"
+                                        className="w-full pl-10 pr-4 py-2 text-sm border border-[var(--color-rule)] rounded-lg focus:ring-2 focus:ring-[var(--color-accent)]/40 text-[var(--color-ink)]"
                                     />
                                 </div>
                             </div>
 
                             <div>
-                                <label className="block text-xs font-semibold text-gray-500 uppercase mb-2">Vencimiento (Opcional)</label>
+                                <label className="block text-xs font-semibold text-[var(--color-muted)] uppercase mb-2">Vencimiento (Opcional)</label>
                                 <div className="relative">
-                                    <Calendar className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={16} />
+                                    <Calendar strokeWidth={1.5} className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--color-neutral)]" size={16} />
                                     <input
                                         type="datetime-local"
                                         name="expiresAt"
                                         value={formatDateForInput(formData.expiresAt)}
                                         onChange={handleDateChange}
-                                        className="w-full pl-10 pr-4 py-2 text-sm border border-gray-200 rounded-lg focus:ring-2 focus:ring-indigo-500 text-gray-900"
+                                        className="w-full pl-10 pr-4 py-2 text-sm border border-[var(--color-rule)] rounded-lg focus:ring-2 focus:ring-[var(--color-accent)]/40 text-[var(--color-ink)]"
                                     />
                                 </div>
                             </div>
@@ -322,18 +322,18 @@ export default function BlogForm({ initialData, isEditing = false }: BlogFormPro
                                 <button
                                     type="button"
                                     onClick={() => router.back()}
-                                    className="flex-1 px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50"
+                                    className="flex-1 px-4 py-2 text-sm font-medium text-[var(--color-ink-2)] bg-[var(--color-paper-2)] border border-[var(--color-rule)] rounded-lg hover:bg-[var(--color-paper-3)]"
                                 >
                                     Cancelar
                                 </button>
                                 <button
                                     type="submit"
                                     disabled={loading || uploading}
-                                    className="flex-1 px-4 py-2 text-sm font-medium text-white bg-indigo-600 rounded-lg hover:bg-indigo-700 disabled:opacity-50 flex items-center justify-center gap-2"
+                                    className="flex-1 px-4 py-2 text-sm font-medium text-[var(--color-paper)] bg-[var(--color-ink)] rounded-lg hover:bg-[var(--color-ink-2)] disabled:opacity-50 flex items-center justify-center gap-2"
                                 >
                                     {loading ? 'Guardando...' : (
                                         <>
-                                            <Save size={16} /> Guardar
+                                            <Save strokeWidth={1.5} size={16} /> Guardar
                                         </>
                                     )}
                                 </button>
@@ -342,9 +342,9 @@ export default function BlogForm({ initialData, isEditing = false }: BlogFormPro
                     </div>
 
                     {/* Author */}
-                    <div className="bg-white p-6 rounded-xl border border-gray-200 shadow-sm">
-                        <h3 className="font-semibold text-gray-900 mb-4 flex items-center gap-2">
-                            <User size={18} /> Autor
+                    <div className="bg-[var(--color-paper-2)] p-6 rounded-xl border border-[var(--color-rule)] shadow-sm">
+                        <h3 className="font-semibold text-[var(--color-ink)] mb-4 flex items-center gap-2">
+                            <User strokeWidth={1.5} size={18} /> Autor
                         </h3>
                         <div className="space-y-3">
                             <input
@@ -353,20 +353,20 @@ export default function BlogForm({ initialData, isEditing = false }: BlogFormPro
                                 value={formData.author?.name || ""}
                                 onChange={handleAuthorChange}
                                 placeholder="Nombre del autor"
-                                className="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg text-gray-900"
+                                className="w-full px-3 py-2 text-sm border border-[var(--color-rule)] rounded-lg text-[var(--color-ink)]"
                             />
                         </div>
                     </div>
 
                     {/* Image Upload */}
-                    <div className="bg-white p-6 rounded-xl border border-gray-200 shadow-sm">
-                        <h3 className="font-semibold text-gray-900 mb-4 flex items-center gap-2">
-                            <ImageIcon size={18} /> Imagen Principal
+                    <div className="bg-[var(--color-paper-2)] p-6 rounded-xl border border-[var(--color-rule)] shadow-sm">
+                        <h3 className="font-semibold text-[var(--color-ink)] mb-4 flex items-center gap-2">
+                            <ImageIcon strokeWidth={1.5} size={18} /> Imagen Principal
                         </h3>
 
                         <div className="space-y-4">
                             {formData.imageUrl ? (
-                                <div className="relative rounded-lg overflow-hidden border border-gray-200 aspect-video group">
+                                <div className="relative rounded-lg overflow-hidden border border-[var(--color-rule)] aspect-video group">
                                     <img
                                         src={formData.imageUrl}
                                         alt="Preview"
@@ -375,21 +375,21 @@ export default function BlogForm({ initialData, isEditing = false }: BlogFormPro
                                     <button
                                         type="button"
                                         onClick={() => setFormData(p => ({ ...p, imageUrl: "" }))}
-                                        className="absolute top-2 right-2 p-1 bg-red-500 text-white rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
+                                        className="absolute top-2 right-2 p-1 bg-[var(--color-danger)] text-[var(--color-accent-ink)] rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
                                     >
-                                        <X size={16} />
+                                        <X strokeWidth={1.5} size={16} />
                                     </button>
                                 </div>
                             ) : (
                                 <div
                                     onClick={() => fileInputRef.current?.click()}
-                                    className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center cursor-pointer hover:border-indigo-500 hover:bg-indigo-50 transition-colors"
+                                    className="border-2 border-dashed border-[var(--color-rule)] rounded-lg p-6 text-center cursor-pointer hover:border-[var(--color-accent)] hover:bg-[var(--color-accent-soft)] transition-colors"
                                 >
-                                    <ImageIcon className="w-10 h-10 text-gray-400 mx-auto mb-2" />
-                                    <p className="text-sm text-gray-600">
+                                    <ImageIcon strokeWidth={1.5} className="w-10 h-10 text-[var(--color-neutral)] mx-auto mb-2" />
+                                    <p className="text-sm text-[var(--color-ink-2)]">
                                         Click para subir imagen
                                     </p>
-                                    <p className="text-xs text-gray-400 mt-1">
+                                    <p className="text-xs text-[var(--color-neutral)] mt-1">
                                         Max 2MB (JPG, PNG, WebP)
                                     </p>
                                 </div>
@@ -404,21 +404,21 @@ export default function BlogForm({ initialData, isEditing = false }: BlogFormPro
                             />
 
                             {uploading && (
-                                <div className="w-full bg-gray-200 rounded-full h-1.5 mt-2">
-                                    <div className="bg-indigo-600 h-1.5 rounded-full animate-pulse w-full"></div>
+                                <div className="w-full bg-[var(--color-paper-4)] rounded-full h-1.5 mt-2">
+                                    <div className="bg-[var(--color-accent)] h-1.5 rounded-full animate-pulse w-full"></div>
                                 </div>
                             )}
                         </div>
                     </div>
 
                     {/* Tags */}
-                    <div className="bg-white p-6 rounded-xl border border-gray-200 shadow-sm">
-                        <label className="block text-sm font-medium text-gray-700 mb-3">Etiquetas (Tags)</label>
+                    <div className="bg-[var(--color-paper-2)] p-6 rounded-xl border border-[var(--color-rule)] shadow-sm">
+                        <label className="block text-sm font-medium text-[var(--color-ink-2)] mb-3">Etiquetas (Tags)</label>
                         <div className="flex gap-2 mb-3">
                             <input
                                 type="text"
                                 placeholder="Añadir etiqueta..."
-                                className="flex-1 px-3 py-2 text-sm border border-gray-200 rounded-lg focus:ring-2 focus:ring-indigo-500 text-gray-900"
+                                className="flex-1 px-3 py-2 text-sm border border-[var(--color-rule)] rounded-lg focus:ring-2 focus:ring-[var(--color-accent)]/40 text-[var(--color-ink)]"
                                 onKeyDown={(e) => {
                                     if (e.key === 'Enter') {
                                         e.preventDefault();
@@ -436,7 +436,7 @@ export default function BlogForm({ initialData, isEditing = false }: BlogFormPro
                         </div>
                         <div className="flex flex-wrap gap-2">
                             {formData.tags?.map((tag) => (
-                                <span key={tag} className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium bg-indigo-50 text-indigo-700">
+                                <span key={tag} className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium bg-[var(--color-accent-soft)] text-[var(--color-accent)]">
                                     {tag}
                                     <button
                                         type="button"
@@ -444,24 +444,24 @@ export default function BlogForm({ initialData, isEditing = false }: BlogFormPro
                                             ...prev,
                                             tags: prev.tags?.filter(t => t !== tag)
                                         }))}
-                                        className="hover:text-indigo-900"
+                                        className="hover:text-[var(--color-accent-2)]"
                                     >
-                                        <X size={12} />
+                                        <X strokeWidth={1.5} size={12} />
                                     </button>
                                 </span>
                             ))}
                         </div>
-                        <p className="text-xs text-gray-500 mt-2">Presiona Enter para añadir.</p>
+                        <p className="text-xs text-[var(--color-muted)] mt-2">Presiona Enter para añadir.</p>
                     </div>
 
                     {/* Category */}
-                    <div className="bg-white p-6 rounded-xl border border-gray-200 shadow-sm">
-                        <label className="block text-sm font-medium text-gray-700 mb-3">Categoría Principal</label>
+                    <div className="bg-[var(--color-paper-2)] p-6 rounded-xl border border-[var(--color-rule)] shadow-sm">
+                        <label className="block text-sm font-medium text-[var(--color-ink-2)] mb-3">Categoría Principal</label>
                         <select
                             name="category"
                             value={formData.category}
                             onChange={handleChange}
-                            className="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:ring-2 focus:ring-indigo-500 text-gray-900"
+                            className="w-full px-3 py-2 text-sm border border-[var(--color-rule)] rounded-lg focus:ring-2 focus:ring-[var(--color-accent)]/40 text-[var(--color-ink)]"
                         >
                             <option value="Novedades">Novedades</option>
                             <option value="Tutoriales">Tutoriales</option>

@@ -15,7 +15,7 @@ import {
     Users as UsersIcon,
     Briefcase as BriefcaseIcon,
     Calculator as CalculatorIcon,
-    Bot as BotIcon,
+    Coins as CoinsIcon,
     Database as DatabaseIcon
 } from "lucide-react";
 
@@ -126,90 +126,90 @@ export default function PlanForm({ initialData, onSave, onCancel }: PlanFormProp
     };
 
     return (
-        <form onSubmit={handleSubmit(onSubmit, onError)} className="bg-white rounded-2xl shadow-xl border border-gray-100 p-8 max-w-5xl mx-auto space-y-12">
+        <form onSubmit={handleSubmit(onSubmit, onError)} className="bg-[var(--color-paper-2)] rounded-2xl shadow-xl border border-[var(--color-rule-2)] p-8 max-w-5xl mx-auto space-y-12">
 
-            <div className="flex flex-wrap gap-4 items-center justify-between pb-6 border-b border-gray-100">
+            <div className="flex flex-wrap gap-4 items-center justify-between pb-6 border-b border-[var(--color-rule-2)]">
                 <div>
-                    <h2 className="text-2xl font-extrabold text-gray-900 tracking-tight">Configuración de Plan</h2>
-                    <p className="text-sm text-gray-500 mt-1">Define las características, precios y límites de este plan de suscripción.</p>
+                    <h2 className="text-2xl font-extrabold text-[var(--color-ink)] tracking-tight">Configuración de Plan</h2>
+                    <p className="text-sm text-[var(--color-muted)] mt-1">Define las características, precios y límites de este plan de suscripción.</p>
                 </div>
                 {/* Popular Toggle */}
-                <label className="flex items-center gap-3 cursor-pointer bg-amber-50 px-4 py-2 rounded-full border border-amber-200 hover:bg-amber-100 transition-colors">
+                <label className="flex items-center gap-3 cursor-pointer bg-[var(--color-warning-soft)] px-4 py-2 rounded-full border border-[var(--color-warning)]/30 hover:bg-[var(--color-warning-soft)] transition-colors">
                     <input type="checkbox" {...register("popular")} className="sr-only peer" />
-                    <div className="w-10 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-amber-500 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-amber-500 relative"></div>
-                    <span className="text-sm font-bold text-amber-900 flex items-center gap-1"><Star className="w-4 h-4 text-amber-500 fill-amber-500" /> Plan Popular</span>
+                    <div className="w-10 h-6 bg-[var(--color-paper-4)] peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-[var(--color-warning)] rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-[var(--color-paper-2)] after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-[var(--color-paper-2)] after:border-[var(--color-rule)] after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-[var(--color-warning)] relative"></div>
+                    <span className="text-sm font-bold text-[var(--color-warning)] flex items-center gap-1"><Star strokeWidth={1.5} className="w-4 h-4 text-[var(--color-warning)] fill-[var(--color-warning)]" /> Plan Popular</span>
                 </label>
             </div>
 
             {/* BLOCK 1: General Info */}
             <section className="space-y-6">
-                <div className="flex items-center gap-2 text-indigo-600 mb-2">
-                    <Shield className="w-5 h-5" />
-                    <h3 className="text-lg font-bold text-gray-900">1. Información General</h3>
+                <div className="flex items-center gap-2 text-[var(--color-accent)] mb-2">
+                    <Shield strokeWidth={1.5} className="w-5 h-5" />
+                    <h3 className="text-lg font-bold text-[var(--color-ink)]">1. Información General</h3>
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                     <div className="col-span-1 lg:col-span-2 relative">
-                        <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">Nombre del Plan</label>
+                        <label className="block text-xs font-bold text-[var(--color-muted)] uppercase tracking-wider mb-2">Nombre del Plan</label>
                         <input
                             {...register("name")}
-                            className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:bg-white outline-none transition-all text-gray-900 font-medium"
+                            className="w-full px-4 py-3 bg-[var(--color-paper)] border border-[var(--color-rule)] rounded-xl focus:ring-2 focus:ring-[var(--color-accent)]/40 focus:bg-[var(--color-paper-2)] outline-none transition-all text-[var(--color-ink)] font-medium"
                             placeholder="Ej. Plan Profesional"
                         />
-                        {errors.name && <p className="text-red-500 text-xs mt-1 absolute">{errors.name.message}</p>}
+                        {errors.name && <p className="text-[var(--color-danger)] text-xs mt-1 absolute">{errors.name.message}</p>}
                     </div>
                     <div>
-                        <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">Nivel (Tier)</label>
-                        <select {...register("tier")} className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:bg-white outline-none transition-all text-gray-900 font-medium appearance-none">
-                            <option value="basic">⭐ Básico</option>
-                            <option value="professional">🌟 Profesional</option>
-                            <option value="enterprise">🚀 Empresarial</option>
+                        <label className="block text-xs font-bold text-[var(--color-muted)] uppercase tracking-wider mb-2">Nivel (Tier)</label>
+                        <select {...register("tier")} className="w-full px-4 py-3 bg-[var(--color-paper)] border border-[var(--color-rule)] rounded-xl focus:ring-2 focus:ring-[var(--color-accent)]/40 focus:bg-[var(--color-paper-2)] outline-none transition-all text-[var(--color-ink)] font-medium appearance-none">
+                            <option value="basic">Básico</option>
+                            <option value="professional">Profesional</option>
+                            <option value="enterprise">Empresarial</option>
                         </select>
                     </div>
                     <div className="col-span-1 lg:col-span-3 relative">
-                        <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">Descripción (Marketing)</label>
+                        <label className="block text-xs font-bold text-[var(--color-muted)] uppercase tracking-wider mb-2">Descripción (Marketing)</label>
                         <textarea
                             {...register("description")}
                             rows={2}
-                            className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:bg-white outline-none transition-all resize-none text-gray-900 font-medium"
+                            className="w-full px-4 py-3 bg-[var(--color-paper)] border border-[var(--color-rule)] rounded-xl focus:ring-2 focus:ring-[var(--color-accent)]/40 focus:bg-[var(--color-paper-2)] outline-none transition-all resize-none text-[var(--color-ink)] font-medium"
                             placeholder="Breve descripción que verán los usuarios..."
                         />
-                        {errors.description && <p className="text-red-500 text-xs mt-1 absolute">{errors.description.message}</p>}
+                        {errors.description && <p className="text-[var(--color-danger)] text-xs mt-1 absolute">{errors.description.message}</p>}
                     </div>
                 </div>
             </section>
 
             {/* BLOCK 2: Pricing */}
             <section className="space-y-6">
-                <div className="flex items-center gap-2 text-emerald-600 mb-2">
-                    <DollarSign className="w-5 h-5" />
-                    <h3 className="text-lg font-bold text-gray-900">2. Precios</h3>
+                <div className="flex items-center gap-2 text-[var(--color-positive)] mb-2">
+                    <DollarSign strokeWidth={1.5} className="w-5 h-5" />
+                    <h3 className="text-lg font-bold text-[var(--color-ink)]">2. Precios</h3>
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 bg-emerald-50/50 p-6 rounded-2xl border border-emerald-100">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 bg-[var(--color-positive-soft)] p-6 rounded-2xl border border-[var(--color-positive)]/30">
                     <div>
-                        <label className="block text-xs font-bold text-emerald-800 uppercase tracking-wider mb-2">Precio Mensual (ARS)</label>
+                        <label className="block text-xs font-bold text-[var(--color-positive)] uppercase tracking-wider mb-2">Precio Mensual (ARS)</label>
                         <div className="relative">
-                            <span className="absolute left-4 top-3.5 text-emerald-600 font-bold">$</span>
+                            <span className="absolute left-4 top-3.5 text-[var(--color-positive)] font-bold">$</span>
                             <input
                                 type="number"
                                 {...register("price.monthly", { valueAsNumber: true })}
-                                className="w-full pl-8 pr-4 py-3 bg-white border border-emerald-200 rounded-xl focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500 outline-none transition-all text-gray-900 font-bold text-lg shadow-sm"
+                                className="w-full pl-8 pr-4 py-3 bg-[var(--color-paper-2)] border border-[var(--color-positive)]/30 rounded-xl focus:border-[var(--color-positive)] focus:ring-2 focus:ring-[var(--color-positive)] outline-none transition-all text-[var(--color-ink)] font-bold text-lg shadow-sm"
                             />
                         </div>
-                        {errors.price?.monthly && <p className="text-red-500 text-xs mt-1">{errors.price.monthly.message}</p>}
+                        {errors.price?.monthly && <p className="text-[var(--color-danger)] text-xs mt-1">{errors.price.monthly.message}</p>}
                     </div>
                     <div>
-                        <label className="block text-xs font-bold text-emerald-800 uppercase tracking-wider mb-2">Precio Anual (ARS)</label>
+                        <label className="block text-xs font-bold text-[var(--color-positive)] uppercase tracking-wider mb-2">Precio Anual (ARS)</label>
                         <div className="relative">
-                            <span className="absolute left-4 top-3.5 text-emerald-600 font-bold">$</span>
+                            <span className="absolute left-4 top-3.5 text-[var(--color-positive)] font-bold">$</span>
                             <input
                                 type="number"
                                 {...register("price.yearly", { valueAsNumber: true })}
-                                className="w-full pl-8 pr-4 py-3 bg-white border border-emerald-200 rounded-xl focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500 outline-none transition-all text-gray-900 font-bold text-lg shadow-sm"
+                                className="w-full pl-8 pr-4 py-3 bg-[var(--color-paper-2)] border border-[var(--color-positive)]/30 rounded-xl focus:border-[var(--color-positive)] focus:ring-2 focus:ring-[var(--color-positive)] outline-none transition-all text-[var(--color-ink)] font-bold text-lg shadow-sm"
                             />
                         </div>
-                        {errors.price?.yearly && <p className="text-red-500 text-xs mt-1">{errors.price.yearly.message}</p>}
+                        {errors.price?.yearly && <p className="text-[var(--color-danger)] text-xs mt-1">{errors.price.yearly.message}</p>}
                     </div>
                 </div>
             </section>
@@ -217,30 +217,30 @@ export default function PlanForm({ initialData, onSave, onCancel }: PlanFormProp
             {/* BLOCK 3: Limits */}
             <section className="space-y-6">
                 <div className="flex items-center justify-between mb-2">
-                    <div className="flex items-center gap-2 text-blue-600">
-                        <Activity className="w-5 h-5" />
-                        <h3 className="text-lg font-bold text-gray-900">3. Límites del Sistema</h3>
+                    <div className="flex items-center gap-2 text-[var(--color-accent)]">
+                        <Activity strokeWidth={1.5} className="w-5 h-5" />
+                        <h3 className="text-lg font-bold text-[var(--color-ink)]">3. Límites del Sistema</h3>
                     </div>
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
-                    <ResourceLimitInput label="Propiedades Activas" name="limits.properties" control={control} icon={<HomeIcon className="w-4 h-4" />} />
-                    <ResourceLimitInput label="Usuarios Extras" name="limits.users" control={control} icon={<UsersIcon className="w-4 h-4" />} />
-                    <ResourceLimitInput label="Fichas de Clientes" name="limits.clients" control={control} icon={<BriefcaseIcon className="w-4 h-4" />} />
-                    <ResourceLimitInput label="Tasaciones Online / Mes" name="limits.tasaciones" control={control} icon={<CalculatorIcon className="w-4 h-4" />} />
-                    <ResourceLimitInput label="Créditos Inteligencia Artificial" name="limits.aiCredits" control={control} icon={<BotIcon className="w-4 h-4" />} />
+                    <ResourceLimitInput label="Propiedades Activas" name="limits.properties" control={control} icon={<HomeIcon strokeWidth={1.5} className="w-4 h-4" />} />
+                    <ResourceLimitInput label="Usuarios Extras" name="limits.users" control={control} icon={<UsersIcon strokeWidth={1.5} className="w-4 h-4" />} />
+                    <ResourceLimitInput label="Fichas de Clientes" name="limits.clients" control={control} icon={<BriefcaseIcon strokeWidth={1.5} className="w-4 h-4" />} />
+                    <ResourceLimitInput label="Tasaciones Online / Mes" name="limits.tasaciones" control={control} icon={<CalculatorIcon strokeWidth={1.5} className="w-4 h-4" />} />
+                    <ResourceLimitInput label="Créditos Inteligencia Artificial" name="limits.aiCredits" control={control} icon={<CoinsIcon strokeWidth={1.5} className="w-4 h-4" />} />
 
                     {/* Storage specifically is string based */}
-                    <div className="p-5 rounded-xl border border-gray-200 bg-white shadow-sm hover:border-blue-300 hover:shadow-md transition-all flex flex-col justify-between">
+                    <div className="p-5 rounded-xl border border-[var(--color-rule)] bg-[var(--color-paper-2)] shadow-sm hover:border-[var(--color-accent)]/30 hover:shadow-md transition-all flex flex-col justify-between">
                         <div className="flex items-center gap-2 mb-4">
-                            <div className="p-2 rounded-lg bg-gray-100 text-gray-500">
-                                <DatabaseIcon className="w-4 h-4" />
+                            <div className="p-2 rounded-lg bg-[var(--color-paper-3)] text-[var(--color-muted)]">
+                                <DatabaseIcon strokeWidth={1.5} className="w-4 h-4" />
                             </div>
-                            <span className="text-sm font-bold text-gray-800">Almacenamiento Total</span>
+                            <span className="text-sm font-bold text-[var(--color-ink)]">Almacenamiento Total</span>
                         </div>
                         <input
                             {...register("limits.storage")}
-                            className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 outline-none bg-gray-50 focus:bg-white border-gray-200 focus:border-blue-500 text-gray-900 font-bold text-lg transition-colors"
+                            className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-[var(--color-accent)]/40 outline-none bg-[var(--color-paper)] focus:bg-[var(--color-paper-2)] border-[var(--color-rule)] focus:border-[var(--color-accent)] text-[var(--color-ink)] font-bold text-lg transition-colors"
                             placeholder="Ej. 1GB, 10GB, Ilimitado..."
                         />
                     </div>
@@ -249,12 +249,12 @@ export default function PlanForm({ initialData, onSave, onCancel }: PlanFormProp
 
             {/* BLOCK 4: Features */}
             <section className="space-y-6">
-                <div className="flex items-center gap-2 text-purple-600 mb-2">
-                    <Check className="w-5 h-5" />
-                    <h3 className="text-lg font-bold text-gray-900">4. Funcionalidades Incluidas</h3>
+                <div className="flex items-center gap-2 text-[var(--color-accent)] mb-2">
+                    <Check strokeWidth={1.5} className="w-5 h-5" />
+                    <h3 className="text-lg font-bold text-[var(--color-ink)]">4. Funcionalidades Incluidas</h3>
                 </div>
 
-                <p className="text-sm text-gray-500 mb-4">
+                <p className="text-sm text-[var(--color-muted)] mb-4">
                     Escribe las características que quieres que se muestren en la tabla de precios para este plan.
                 </p>
 
@@ -262,24 +262,24 @@ export default function PlanForm({ initialData, onSave, onCancel }: PlanFormProp
                     features={watch("features") || []}
                     onChange={(newFeatures) => setValue("features", newFeatures, { shouldValidate: true, shouldDirty: true })}
                 />
-                {errors.features && <p className="text-red-500 text-xs mt-1">{errors.features.message}</p>}
+                {errors.features && <p className="text-[var(--color-danger)] text-xs mt-1">{errors.features.message}</p>}
             </section>
 
             {/* Actions */}
-            <div className="flex items-center justify-end gap-4 pt-8 border-t border-gray-100">
+            <div className="flex items-center justify-end gap-4 pt-8 border-t border-[var(--color-rule-2)]">
                 <button
                     type="button"
                     onClick={onCancel}
-                    className="px-6 py-3 text-gray-600 hover:text-gray-900 font-bold transition-colors hover:bg-gray-100 rounded-xl"
+                    className="px-6 py-3 text-[var(--color-ink-2)] hover:text-[var(--color-ink)] font-bold transition-colors hover:bg-[var(--color-paper-3)] rounded-xl"
                 >
                     Cancelar
                 </button>
                 <button
                     type="submit"
                     disabled={saving}
-                    className="px-8 py-3 bg-gradient-to-r from-indigo-600 to-violet-600 text-white hover:from-indigo-700 hover:to-violet-700 rounded-xl font-bold transition-all shadow-lg hover:shadow-indigo-500/30 flex items-center gap-2 disabled:opacity-50 transform active:scale-95"
+                    className="px-8 py-3 bg-[var(--color-ink)] hover:bg-[var(--color-ink-2)] text-[var(--color-paper)] rounded-xl font-bold transition-all flex items-center gap-2 disabled:opacity-50 transform active:scale-95"
                 >
-                    {saving ? <Loader2 className="w-5 h-5 animate-spin" /> : <Check className="w-5 h-5" />}
+                    {saving ? <Loader2 strokeWidth={1.5} className="w-5 h-5 animate-spin" /> : <Check strokeWidth={1.5} className="w-5 h-5" />}
                     {saving ? "Guardando..." : "Guardar Plan"}
                 </button>
             </div>
@@ -298,14 +298,14 @@ function ResourceLimitInput({ label, name, control, icon }: { label: string, nam
     };
 
     return (
-        <div className={`p-5 rounded-xl border shadow-sm transition-all duration-200 ${isUnlimited ? 'bg-indigo-50/50 border-indigo-200 shadow-indigo-100/50' : 'bg-white border-gray-200 hover:border-blue-300 hover:shadow-md'}`}>
+        <div className={`p-5 rounded-xl border shadow-sm transition-all duration-200 ${isUnlimited ? 'bg-[var(--color-accent-soft)] border-[var(--color-accent)]/30' : 'bg-[var(--color-paper-2)] border-[var(--color-rule)] hover:border-[var(--color-accent)]/30 hover:shadow-md'}`}>
             <div className="flex flex-col gap-4">
                 <div className="flex items-center justify-between">
                     <div className="flex items-center gap-2">
-                        <div className={`p-2 rounded-lg ${isUnlimited ? 'bg-indigo-100 text-indigo-600' : 'bg-gray-100 text-gray-500'}`}>
+                        <div className={`p-2 rounded-lg ${isUnlimited ? 'bg-[var(--color-accent-soft)] text-[var(--color-accent)]' : 'bg-[var(--color-paper-3)] text-[var(--color-muted)]'}`}>
                             {icon}
                         </div>
-                        <span className={`text-sm font-bold ${isUnlimited ? 'text-indigo-900' : 'text-gray-800'}`}>{label}</span>
+                        <span className={`text-sm font-bold ${isUnlimited ? 'text-[var(--color-accent)]' : 'text-[var(--color-ink)]'}`}>{label}</span>
                     </div>
                 </div>
 
@@ -315,11 +315,11 @@ function ResourceLimitInput({ label, name, control, icon }: { label: string, nam
                         disabled={isUnlimited}
                         value={isUnlimited ? '' : field.value}
                         onChange={(e) => handleNumberChange(e.target.value)}
-                        className={`w-full px-4 py-2 border rounded-lg outline-none font-bold text-lg transition-colors ${isUnlimited ? 'bg-indigo-50/30 border-transparent text-indigo-300 cursor-not-allowed placeholder-transparent' : 'bg-gray-50 focus:bg-white border-gray-200 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 text-gray-900'}`}
+                        className={`w-full px-4 py-2 border rounded-lg outline-none font-bold text-lg transition-colors ${isUnlimited ? 'bg-[var(--color-accent)]/7 border-transparent text-[var(--color-accent-2)] cursor-not-allowed placeholder-transparent' : 'bg-[var(--color-paper)] focus:bg-[var(--color-paper-2)] border-[var(--color-rule)] focus:border-[var(--color-accent)] focus:ring-2 focus:ring-[var(--color-accent)]/30 text-[var(--color-ink)]'}`}
                         placeholder={isUnlimited ? "∞" : "0"}
                     />
 
-                    <label className="flex items-center cursor-pointer shrinks-0 gap-2 p-2 rounded-lg hover:bg-gray-50 transition-colors border border-transparent hover:border-gray-200">
+                    <label className="flex items-center cursor-pointer shrinks-0 gap-2 p-2 rounded-lg hover:bg-[var(--color-paper-3)] transition-colors border border-transparent hover:border-[var(--color-neutral)]">
                         <div className="relative">
                             <input
                                 type="checkbox"
@@ -327,10 +327,10 @@ function ResourceLimitInput({ label, name, control, icon }: { label: string, nam
                                 checked={isUnlimited}
                                 onChange={(e) => field.onChange(e.target.checked ? 'unlimited' : 0)}
                             />
-                            <div className={`block w-10 h-6 rounded-full transition-colors ${isUnlimited ? 'bg-indigo-500' : 'bg-gray-300'}`}></div>
-                            <div className={`dot absolute left-1 top-1 bg-white w-4 h-4 rounded-full transition-transform ${isUnlimited ? 'transform translate-x-4' : ''}`}></div>
+                            <div className={`block w-10 h-6 rounded-full transition-colors ${isUnlimited ? 'bg-[var(--color-accent)]' : 'bg-[var(--color-paper-4)]'}`}></div>
+                            <div className={`dot absolute left-1 top-1 bg-[var(--color-paper-2)] w-4 h-4 rounded-full transition-transform ${isUnlimited ? 'transform translate-x-4' : ''}`}></div>
                         </div>
-                        <span className="text-[11px] font-extrabold uppercase text-gray-500">Ilimitado</span>
+                        <span className="text-[11px] font-extrabold uppercase text-[var(--color-muted)]">Ilimitado</span>
                     </label>
                 </div>
             </div>
@@ -388,13 +388,13 @@ function DynamicFeaturesList({ features = [], onChange }: { features: string[], 
                     onChange={(e) => setInputValue(e.target.value)}
                     onKeyDown={handleKeyDown}
                     placeholder="Ej. 'Gestión de Inquilinos'"
-                    className="flex-1 px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-purple-500 focus:bg-white outline-none transition-all text-gray-900 font-medium"
+                    className="flex-1 px-4 py-3 bg-[var(--color-paper)] border border-[var(--color-rule)] rounded-xl focus:ring-2 focus:ring-[var(--color-accent)]/40 focus:bg-[var(--color-paper-2)] outline-none transition-all text-[var(--color-ink)] font-medium"
                 />
                 <button
                     type="button"
                     onClick={handleAdd}
                     disabled={!inputValue.trim()}
-                    className="px-6 py-3 bg-purple-100 text-purple-700 hover:bg-purple-200 disabled:opacity-50 disabled:cursor-not-allowed rounded-xl font-bold transition-all whitespace-nowrap"
+                    className="px-6 py-3 border border-[var(--color-rule)] text-[var(--color-ink)] hover:bg-[var(--color-paper-3)] disabled:opacity-50 disabled:cursor-not-allowed rounded-xl font-bold transition-all whitespace-nowrap"
                 >
                     Agregar
                 </button>
@@ -403,9 +403,9 @@ function DynamicFeaturesList({ features = [], onChange }: { features: string[], 
             {safeFeatures.length > 0 ? (
                 <ul className="grid grid-cols-1 md:grid-cols-2 gap-3 mt-4">
                     {safeFeatures.map((feature, idx) => (
-                        <li key={idx} className="flex items-center justify-between p-3 bg-white border border-gray-200 rounded-xl shadow-sm hover:border-purple-300 transition-all group">
-                            <span className="text-sm font-semibold text-gray-700 flex items-center gap-2">
-                                <Check className="w-4 h-4 text-purple-500" />
+                        <li key={idx} className="flex items-center justify-between p-3 bg-[var(--color-paper-2)] border border-[var(--color-rule)] rounded-xl shadow-sm hover:border-[var(--color-accent)]/30 transition-all group">
+                            <span className="text-sm font-semibold text-[var(--color-ink-2)] flex items-center gap-2">
+                                <Check strokeWidth={1.5} className="w-4 h-4 text-[var(--color-accent)]" />
                                 {feature}
                             </span>
                             <div className="flex items-center gap-1 opacity-100 md:opacity-0 group-hover:opacity-100 transition-opacity">
@@ -413,35 +413,35 @@ function DynamicFeaturesList({ features = [], onChange }: { features: string[], 
                                     type="button"
                                     onClick={() => handleMove(idx, 'up')}
                                     disabled={idx === 0}
-                                    className="p-1.5 text-gray-400 hover:text-indigo-600 hover:bg-indigo-50 rounded-lg transition-colors disabled:opacity-30 disabled:hover:bg-transparent disabled:hover:text-gray-400"
+                                    className="p-1.5 text-[var(--color-neutral)] hover:text-[var(--color-ink)] hover:bg-[var(--color-paper-3)] rounded-lg transition-colors disabled:opacity-30 disabled:hover:bg-transparent disabled:hover:text-[var(--color-neutral)]"
                                     title="Mover arriba"
                                 >
-                                    <ArrowUp className="w-4 h-4" />
+                                    <ArrowUp strokeWidth={1.5} className="w-4 h-4" />
                                 </button>
                                 <button
                                     type="button"
                                     onClick={() => handleMove(idx, 'down')}
                                     disabled={idx === safeFeatures.length - 1}
-                                    className="p-1.5 text-gray-400 hover:text-indigo-600 hover:bg-indigo-50 rounded-lg transition-colors disabled:opacity-30 disabled:hover:bg-transparent disabled:hover:text-gray-400"
+                                    className="p-1.5 text-[var(--color-neutral)] hover:text-[var(--color-ink)] hover:bg-[var(--color-paper-3)] rounded-lg transition-colors disabled:opacity-30 disabled:hover:bg-transparent disabled:hover:text-[var(--color-neutral)]"
                                     title="Mover abajo"
                                 >
-                                    <ArrowDown className="w-4 h-4" />
+                                    <ArrowDown strokeWidth={1.5} className="w-4 h-4" />
                                 </button>
-                                <div className="w-px h-4 bg-gray-200 mx-1"></div>
+                                <div className="w-px h-4 bg-[var(--color-paper-4)] mx-1"></div>
                                 <button
                                     type="button"
                                     onClick={() => handleRemove(idx)}
-                                    className="p-1.5 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors"
+                                    className="p-1.5 text-[var(--color-neutral)] hover:text-[var(--color-danger)] hover:bg-[var(--color-danger-soft)] rounded-lg transition-colors"
                                     title="Eliminar característica"
                                 >
-                                    <X className="w-4 h-4" />
+                                    <X strokeWidth={1.5} className="w-4 h-4" />
                                 </button>
                             </div>
                         </li>
                     ))}
                 </ul>
             ) : (
-                <div className="p-8 text-center text-gray-400 bg-gray-50 border border-dashed border-gray-200 rounded-xl">
+                <div className="p-8 text-center text-[var(--color-neutral)] bg-[var(--color-paper)] border border-dashed border-[var(--color-rule)] rounded-xl">
                     No has agregado ninguna funcionalidad todavía.
                 </div>
             )}

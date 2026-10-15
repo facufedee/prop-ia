@@ -107,12 +107,12 @@ export default function VisitaDetailPage() {
 
     const getEstadoBadge = (estado: string) => {
         const badges = {
-            programada: 'bg-blue-100 text-blue-700',
-            confirmada: 'bg-green-100 text-green-700',
-            en_curso: 'bg-yellow-100 text-yellow-700',
-            completada: 'bg-gray-100 text-gray-700',
-            cancelada: 'bg-red-100 text-red-700',
-            no_asistio: 'bg-orange-100 text-orange-700',
+            programada: 'bg-[var(--color-accent-soft)] text-[var(--color-accent)]',
+            confirmada: 'bg-[var(--color-positive-soft)] text-[var(--color-positive)]',
+            en_curso: 'bg-[var(--color-warning-soft)] text-[var(--color-warning)]',
+            completada: 'bg-[var(--color-paper-3)] text-[var(--color-ink-2)]',
+            cancelada: 'bg-[var(--color-danger-soft)] text-[var(--color-danger)]',
+            no_asistio: 'bg-[var(--color-warning-soft)] text-[var(--color-warning)]',
         };
         return badges[estado as keyof typeof badges] || badges.programada;
     };
@@ -120,7 +120,7 @@ export default function VisitaDetailPage() {
     if (loading) {
         return (
             <div className="p-6 flex items-center justify-center min-h-[400px]">
-                <div className="text-gray-500">Cargando visita...</div>
+                <div className="text-[var(--color-muted)]">Cargando visita...</div>
             </div>
         );
     }
@@ -129,8 +129,8 @@ export default function VisitaDetailPage() {
         return (
             <div className="p-6">
                 <div className="text-center py-12">
-                    <p className="text-gray-500">Visita no encontrada</p>
-                    <Link href="/dashboard/calendario" className="text-indigo-600 hover:underline mt-4 inline-block">
+                    <p className="text-[var(--color-muted)]">Visita no encontrada</p>
+                    <Link href="/dashboard/calendario" className="text-[var(--color-accent)] hover:underline mt-4 inline-block">
                         Volver al calendario
                     </Link>
                 </div>
@@ -144,15 +144,15 @@ export default function VisitaDetailPage() {
             <div>
                 <Link
                     href="/dashboard/calendario"
-                    className="flex items-center gap-2 text-gray-600 hover:text-gray-900 mb-4"
+                    className="flex items-center gap-2 text-[var(--color-ink-2)] hover:text-[var(--color-ink)] mb-4"
                 >
-                    <ArrowLeft className="w-5 h-5" />
+                    <ArrowLeft strokeWidth={1.5} className="w-5 h-5" />
                     Volver al calendario
                 </Link>
                 <div className="flex items-center justify-between">
                     <div>
-                        <h1 className="text-2xl font-bold text-gray-900">Detalle de Visita</h1>
-                        <p className="text-gray-500">{visita.propiedadDireccion}</p>
+                        <h1 className="font-heading text-2xl font-bold text-[var(--color-ink)]">Detalle de Visita</h1>
+                        <p className="text-[var(--color-muted)]">{visita.propiedadDireccion}</p>
                     </div>
                     <span className={`px-3 py-1 text-sm font-medium rounded-full ${getEstadoBadge(visita.estado)}`}>
                         {visita.estado.replace('_', ' ').toUpperCase()}
@@ -161,37 +161,37 @@ export default function VisitaDetailPage() {
             </div>
 
             {/* Main Info */}
-            <div className="bg-white rounded-xl border border-gray-200 p-6 space-y-4">
+            <div className="bg-[var(--color-paper-2)] rounded-xl border border-[var(--color-rule)] p-6 space-y-4">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div>
-                        <h3 className="text-sm font-medium text-gray-500 mb-3">Propiedad</h3>
+                        <h3 className="text-sm font-medium text-[var(--color-muted)] mb-3">Propiedad</h3>
                         <div className="space-y-2">
                             <div className="flex items-center gap-2">
-                                <MapPin className="w-4 h-4 text-gray-400" />
-                                <span className="text-gray-900">{visita.propiedadDireccion}</span>
+                                <MapPin strokeWidth={1.5} className="w-4 h-4 text-[var(--color-neutral)]" />
+                                <span className="text-[var(--color-ink)]">{visita.propiedadDireccion}</span>
                             </div>
-                            <div className="text-sm text-gray-600">Tipo: {visita.propiedadTipo}</div>
+                            <div className="text-sm text-[var(--color-ink-2)]">Tipo: {visita.propiedadTipo}</div>
                         </div>
                     </div>
 
                     <div>
-                        <h3 className="text-sm font-medium text-gray-500 mb-3">Cliente</h3>
+                        <h3 className="text-sm font-medium text-[var(--color-muted)] mb-3">Cliente</h3>
                         <div className="space-y-2">
                             <div className="flex items-center gap-2">
-                                <User className="w-4 h-4 text-gray-400" />
-                                <span className="text-gray-900">{visita.clienteNombre}</span>
+                                <User strokeWidth={1.5} className="w-4 h-4 text-[var(--color-neutral)]" />
+                                <span className="text-[var(--color-ink)]">{visita.clienteNombre}</span>
                             </div>
-                            <div className="text-sm text-gray-600">{visita.clienteEmail}</div>
-                            <div className="text-sm text-gray-600">{visita.clienteTelefono}</div>
+                            <div className="text-sm text-[var(--color-ink-2)]">{visita.clienteEmail}</div>
+                            <div className="text-sm text-[var(--color-ink-2)]">{visita.clienteTelefono}</div>
                         </div>
                     </div>
 
                     <div>
-                        <h3 className="text-sm font-medium text-gray-500 mb-3">Fecha y Hora</h3>
+                        <h3 className="text-sm font-medium text-[var(--color-muted)] mb-3">Fecha y Hora</h3>
                         <div className="space-y-2">
                             <div className="flex items-center gap-2">
-                                <Calendar className="w-4 h-4 text-gray-400" />
-                                <span className="text-gray-900">
+                                <Calendar strokeWidth={1.5} className="w-4 h-4 text-[var(--color-neutral)]" />
+                                <span className="text-[var(--color-ink)]">
                                     {new Date(visita.fechaHora).toLocaleDateString('es-AR', {
                                         weekday: 'long',
                                         year: 'numeric',
@@ -201,8 +201,8 @@ export default function VisitaDetailPage() {
                                 </span>
                             </div>
                             <div className="flex items-center gap-2">
-                                <Clock className="w-4 h-4 text-gray-400" />
-                                <span className="text-gray-900">
+                                <Clock strokeWidth={1.5} className="w-4 h-4 text-[var(--color-neutral)]" />
+                                <span className="text-[var(--color-ink)]">
                                     {new Date(visita.fechaHora).toLocaleTimeString('es-AR', {
                                         hour: '2-digit',
                                         minute: '2-digit'
@@ -213,36 +213,36 @@ export default function VisitaDetailPage() {
                     </div>
 
                     <div>
-                        <h3 className="text-sm font-medium text-gray-500 mb-3">Agente</h3>
-                        <div className="text-gray-900">{visita.agenteNombre}</div>
+                        <h3 className="text-sm font-medium text-[var(--color-muted)] mb-3">Agente</h3>
+                        <div className="text-[var(--color-ink)]">{visita.agenteNombre}</div>
                     </div>
                 </div>
 
                 {visita.notasPrevias && (
-                    <div className="pt-4 border-t border-gray-200">
-                        <h3 className="text-sm font-medium text-gray-500 mb-2">Notas Previas</h3>
-                        <p className="text-gray-700">{visita.notasPrevias}</p>
+                    <div className="pt-4 border-t border-[var(--color-rule)]">
+                        <h3 className="text-sm font-medium text-[var(--color-muted)] mb-2">Notas Previas</h3>
+                        <p className="text-[var(--color-ink-2)]">{visita.notasPrevias}</p>
                     </div>
                 )}
             </div>
 
             {/* Check-in/Check-out Info */}
             {(visita.checkInHora || visita.checkOutHora) && (
-                <div className="bg-white rounded-xl border border-gray-200 p-6">
-                    <h3 className="text-lg font-semibold text-gray-900 mb-4">Registro de Visita</h3>
+                <div className="bg-[var(--color-paper-2)] rounded-xl border border-[var(--color-rule)] p-6">
+                    <h3 className="text-lg font-semibold text-[var(--color-ink)] mb-4">Registro de Visita</h3>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         {visita.checkInHora && (
                             <div>
-                                <div className="text-sm text-gray-500">Check-in</div>
-                                <div className="text-gray-900">
+                                <div className="text-sm text-[var(--color-muted)]">Check-in</div>
+                                <div className="text-[var(--color-ink)]">
                                     {new Date(visita.checkInHora).toLocaleTimeString('es-AR')}
                                 </div>
                             </div>
                         )}
                         {visita.checkOutHora && (
                             <div>
-                                <div className="text-sm text-gray-500">Check-out</div>
-                                <div className="text-gray-900">
+                                <div className="text-sm text-[var(--color-muted)]">Check-out</div>
+                                <div className="text-[var(--color-ink)]">
                                     {new Date(visita.checkOutHora).toLocaleTimeString('es-AR')}
                                 </div>
                             </div>
@@ -253,19 +253,19 @@ export default function VisitaDetailPage() {
 
             {/* Post-visita Info */}
             {visita.estado === 'completada' && visita.notasPostVisita && (
-                <div className="bg-white rounded-xl border border-gray-200 p-6">
-                    <h3 className="text-lg font-semibold text-gray-900 mb-4">Resultado de la Visita</h3>
+                <div className="bg-[var(--color-paper-2)] rounded-xl border border-[var(--color-rule)] p-6">
+                    <h3 className="text-lg font-semibold text-[var(--color-ink)] mb-4">Resultado de la Visita</h3>
 
                     {visita.nivelInteres && (
                         <div className="mb-4">
-                            <div className="text-sm text-gray-500 mb-2">Nivel de Interés</div>
+                            <div className="text-sm text-[var(--color-muted)] mb-2">Nivel de Interés</div>
                             <div className="flex gap-1">
                                 {[1, 2, 3, 4, 5].map(n => (
                                     <Star
                                         key={n}
                                         className={`w-5 h-5 ${n <= visita.nivelInteres!
-                                            ? 'text-yellow-400 fill-yellow-400'
-                                            : 'text-gray-300'
+                                            ? 'text-[var(--color-warning)] fill-[var(--color-warning)]'
+                                            : 'text-[var(--color-neutral)]'
                                             }`}
                                     />
                                 ))}
@@ -274,14 +274,14 @@ export default function VisitaDetailPage() {
                     )}
 
                     <div className="mb-4">
-                        <div className="text-sm text-gray-500 mb-2">Notas</div>
-                        <p className="text-gray-700">{visita.notasPostVisita}</p>
+                        <div className="text-sm text-[var(--color-muted)] mb-2">Notas</div>
+                        <p className="text-[var(--color-ink-2)]">{visita.notasPostVisita}</p>
                     </div>
 
                     {visita.proximosPasos && (
                         <div>
-                            <div className="text-sm text-gray-500 mb-2">Próximos Pasos</div>
-                            <p className="text-gray-700">{visita.proximosPasos}</p>
+                            <div className="text-sm text-[var(--color-muted)] mb-2">Próximos Pasos</div>
+                            <p className="text-[var(--color-ink-2)]">{visita.proximosPasos}</p>
                         </div>
                     )}
                 </div>
@@ -289,12 +289,12 @@ export default function VisitaDetailPage() {
 
             {/* Post-visita Form */}
             {showPostVisitaForm && (
-                <div className="bg-white rounded-xl border border-gray-200 p-6">
-                    <h3 className="text-lg font-semibold text-gray-900 mb-4">Completar Visita</h3>
+                <div className="bg-[var(--color-paper-2)] rounded-xl border border-[var(--color-rule)] p-6">
+                    <h3 className="text-lg font-semibold text-[var(--color-ink)] mb-4">Completar Visita</h3>
 
                     <div className="space-y-4">
                         <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-2">
+                            <label className="block text-sm font-medium text-[var(--color-ink-2)] mb-2">
                                 Nivel de Interés *
                             </label>
                             <div className="flex gap-2">
@@ -307,8 +307,8 @@ export default function VisitaDetailPage() {
                                     >
                                         <Star
                                             className={`w-8 h-8 ${n <= postVisitaData.nivelInteres
-                                                ? 'text-yellow-400 fill-yellow-400'
-                                                : 'text-gray-300'
+                                                ? 'text-[var(--color-warning)] fill-[var(--color-warning)]'
+                                                : 'text-[var(--color-neutral)]'
                                                 }`}
                                         />
                                     </button>
@@ -317,13 +317,13 @@ export default function VisitaDetailPage() {
                         </div>
 
                         <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-2">
+                            <label className="block text-sm font-medium text-[var(--color-ink-2)] mb-2">
                                 Notas de la Visita *
                             </label>
                             <textarea
                                 rows={4}
                                 required
-                                className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 text-gray-900 bg-white"
+                                className="w-full p-3 border border-[var(--color-rule)] rounded-lg focus:ring-2 focus:ring-[var(--color-accent)]/40 text-[var(--color-ink)] bg-[var(--color-paper-2)]"
                                 value={postVisitaData.notasPostVisita}
                                 onChange={(e) => setPostVisitaData(prev => ({ ...prev, notasPostVisita: e.target.value }))}
                                 placeholder="¿Cómo fue la visita? ¿Qué comentó el cliente?"
@@ -331,12 +331,12 @@ export default function VisitaDetailPage() {
                         </div>
 
                         <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-2">
+                            <label className="block text-sm font-medium text-[var(--color-ink-2)] mb-2">
                                 Próximos Pasos
                             </label>
                             <textarea
                                 rows={3}
-                                className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 text-gray-900 bg-white"
+                                className="w-full p-3 border border-[var(--color-rule)] rounded-lg focus:ring-2 focus:ring-[var(--color-accent)]/40 text-[var(--color-ink)] bg-[var(--color-paper-2)]"
                                 value={postVisitaData.proximosPasos}
                                 onChange={(e) => setPostVisitaData(prev => ({ ...prev, proximosPasos: e.target.value }))}
                                 placeholder="¿Qué sigue? ¿Hay que hacer seguimiento?"
@@ -346,14 +346,14 @@ export default function VisitaDetailPage() {
                         <div className="flex justify-end gap-3">
                             <button
                                 onClick={() => setShowPostVisitaForm(false)}
-                                className="px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50"
+                                className="px-4 py-2 border border-[var(--color-rule)] text-[var(--color-ink-2)] rounded-lg hover:bg-[var(--color-paper-3)]"
                             >
                                 Cancelar
                             </button>
                             <button
                                 onClick={handleCheckOut}
                                 disabled={!postVisitaData.notasPostVisita}
-                                className="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 disabled:opacity-50"
+                                className="px-4 py-2 bg-[var(--color-ink)] text-[var(--color-paper)] rounded-lg hover:bg-[var(--color-ink-2)] disabled:opacity-50"
                             >
                                 Completar Visita
                             </button>
@@ -363,15 +363,15 @@ export default function VisitaDetailPage() {
             )}
 
             {/* Actions */}
-            <div className="bg-white rounded-xl border border-gray-200 p-6">
-                <h3 className="text-lg font-semibold text-gray-900 mb-4">Acciones</h3>
+            <div className="bg-[var(--color-paper-2)] rounded-xl border border-[var(--color-rule)] p-6">
+                <h3 className="text-lg font-semibold text-[var(--color-ink)] mb-4">Acciones</h3>
                 <div className="flex flex-wrap gap-3">
                     {visita.estado === 'programada' && (
                         <button
                             onClick={handleCheckIn}
-                            className="flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700"
+                            className="flex items-center gap-2 px-4 py-2 bg-[var(--color-positive)] text-[var(--color-accent-ink)] rounded-lg hover:bg-[var(--color-positive)]"
                         >
-                            <CheckCircle className="w-5 h-5" />
+                            <CheckCircle strokeWidth={1.5} className="w-5 h-5" />
                             Check-in
                         </button>
                     )}
@@ -379,9 +379,9 @@ export default function VisitaDetailPage() {
                     {visita.estado === 'en_curso' && (
                         <button
                             onClick={() => setShowPostVisitaForm(true)}
-                            className="flex items-center gap-2 px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700"
+                            className="flex items-center gap-2 px-4 py-2 bg-[var(--color-ink)] text-[var(--color-paper)] rounded-lg hover:bg-[var(--color-ink-2)]"
                         >
-                            <CheckCircle className="w-5 h-5" />
+                            <CheckCircle strokeWidth={1.5} className="w-5 h-5" />
                             Check-out
                         </button>
                     )}
@@ -389,7 +389,7 @@ export default function VisitaDetailPage() {
                     {visita.estado !== 'completada' && visita.estado !== 'cancelada' && (
                         <button
                             onClick={handleCancelar}
-                            className="flex items-center gap-2 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700"
+                            className="flex items-center gap-2 px-4 py-2 bg-[var(--color-danger)] text-[var(--color-accent-ink)] rounded-lg hover:bg-[var(--color-danger)]"
                         >
                             Cancelar Visita
                         </button>
@@ -398,17 +398,17 @@ export default function VisitaDetailPage() {
 
                     <button
                         onClick={handleWhatsAppReminder}
-                        className="flex items-center gap-2 px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600"
+                        className="flex items-center gap-2 px-4 py-2 bg-[var(--color-positive)] text-[var(--color-accent-ink)] rounded-lg hover:bg-[var(--color-positive)]"
                     >
-                        <MessageCircle className="w-5 h-5" />
+                        <MessageCircle strokeWidth={1.5} className="w-5 h-5" />
                         Recordatorio WhatsApp
                     </button>
 
                     <button
                         onClick={handleEliminar}
-                        className="flex items-center gap-2 px-4 py-2 border border-red-300 text-red-700 rounded-lg hover:bg-red-50"
+                        className="flex items-center gap-2 px-4 py-2 border border-[var(--color-danger)]/30 text-[var(--color-danger)] rounded-lg hover:bg-[var(--color-danger-soft)]"
                     >
-                        <Trash2 className="w-5 h-5" />
+                        <Trash2 strokeWidth={1.5} className="w-5 h-5" />
                         Eliminar
                     </button>
                 </div>

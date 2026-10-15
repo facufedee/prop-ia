@@ -142,72 +142,72 @@ export default function RolesPage() {
         <div className="p-8 max-w-7xl mx-auto">
             <div className="flex justify-between items-center mb-8">
                 <div>
-                    <h1 className="text-2xl font-bold text-gray-900">Roles y Permisos</h1>
-                    <p className="text-gray-500">Gestioná los roles de usuario y sus niveles de acceso.</p>
+                    <h1 className="font-heading text-2xl font-bold text-[var(--color-ink)]">Roles y Permisos</h1>
+                    <p className="text-[var(--color-muted)]">Gestioná los roles de usuario y sus niveles de acceso.</p>
                 </div>
                 <div className="flex gap-2">
                     <button
                         onClick={handleSyncRoles}
                         disabled={syncing}
-                        className="flex items-center gap-2 bg-white border border-gray-200 text-gray-700 px-4 py-2 rounded-xl hover:bg-gray-50 transition disabled:opacity-60"
+                        className="flex items-center gap-2 bg-[var(--color-paper-2)] border border-[var(--color-rule)] text-[var(--color-ink-2)] px-4 py-2 rounded-xl hover:bg-[var(--color-paper-3)] transition disabled:opacity-60"
                         title="Agrega permisos nuevos a roles existentes sin quitar los actuales"
                     >
-                        <RefreshCw size={16} className={syncing ? "animate-spin" : ""} />
+                        <RefreshCw strokeWidth={1.5} size={16} className={syncing ? "animate-spin" : ""} />
                         {syncing ? "Sincronizando..." : "Sincronizar permisos"}
                     </button>
                     <button
                         onClick={handleCreateRole}
-                        className="flex items-center gap-2 bg-indigo-600 text-white px-4 py-2 rounded-xl hover:bg-indigo-700 transition"
+                        className="flex items-center gap-2 bg-[var(--color-ink)] text-[var(--color-paper)] px-4 py-2 rounded-xl hover:bg-[var(--color-ink-2)] transition"
                     >
-                        <Plus size={18} /> Nuevo Rol
+                        <Plus strokeWidth={1.5} size={18} /> Nuevo Rol
                     </button>
                 </div>
             </div>
 
             {loading ? (
                 <div className="text-center py-12">
-                    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-indigo-600 mx-auto mb-4"></div>
-                    <p className="text-gray-500">Cargando datos...</p>
+                    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[var(--color-accent)] mx-auto mb-4"></div>
+                    <p className="text-[var(--color-muted)]">Cargando datos...</p>
                 </div>
             ) : (
                 <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
                     {/* Roles List */}
                     <div className="lg:col-span-1 space-y-4">
-                        <h2 className="font-semibold text-gray-700 mb-4">Roles Disponibles</h2>
+                        <h2 className="font-semibold text-[var(--color-ink-2)] mb-4">Roles Disponibles</h2>
                         {roles.length === 0 ? (
-                            <div className="p-4 rounded-xl border border-dashed border-gray-300 text-center text-gray-500">
+                            <div className="p-4 rounded-xl border border-dashed border-[var(--color-rule)] text-center text-[var(--color-muted)]">
                                 No hay roles creados.
                             </div>
                         ) : (
                             roles.map((role) => (
                                 <div
                                     key={role.id}
-                                    className={`p-4 rounded-xl border transition-all ${editingRole?.id === role.id ? 'border-indigo-600 bg-indigo-50' : 'border-gray-200 bg-white hover:border-indigo-300'
+                                    className={`p-4 rounded-xl border transition-all ${editingRole?.id === role.id ? 'border-[var(--color-accent)] bg-[var(--color-accent-soft)]' : 'border-[var(--color-rule)] bg-[var(--color-paper-2)] hover:border-[var(--color-accent)]/30'
                                         }`}
                                 >
                                     <div className="flex justify-between items-start">
                                         <div>
-                                            <h3 className="font-medium text-gray-900 flex items-center gap-2">
-                                                <Shield size={16} className="text-indigo-600" />
+                                            <h3 className="font-medium text-[var(--color-ink)] flex items-center gap-2">
+                                                <Shield strokeWidth={1.5} size={16} className="text-[var(--color-accent)]" />
                                                 {role.name}
                                             </h3>
-                                            <p className="text-xs text-gray-500 mt-1">
+                                            <p className="text-xs text-[var(--color-muted)] mt-1">
                                                 {role.permissions?.length || 0} permisos activos
                                             </p>
                                         </div>
                                         <div className="flex gap-1">
                                             <button
                                                 onClick={() => handleEditRole(role)}
-                                                className="p-1.5 text-gray-500 hover:text-indigo-600 hover:bg-indigo-100 rounded-lg transition"
+                                                className="p-1.5 text-[var(--color-muted)] hover:text-[var(--color-ink)] hover:bg-[var(--color-paper-3)] rounded-lg transition"
                                             >
-                                                <Edit2 size={14} />
+                                                <Edit2 strokeWidth={1.5} size={14} />
                                             </button>
                                             {!role.isSystem && (
                                                 <button
                                                     onClick={() => handleDeleteRole(role.id)}
-                                                    className="p-1.5 text-gray-500 hover:text-red-600 hover:bg-red-50 rounded-lg transition"
+                                                    className="p-1.5 text-[var(--color-muted)] hover:text-[var(--color-danger)] hover:bg-[var(--color-danger-soft)] rounded-lg transition"
                                                 >
-                                                    <Trash2 size={14} />
+                                                    <Trash2 strokeWidth={1.5} size={14} />
                                                 </button>
                                             )}
                                         </div>
@@ -222,54 +222,54 @@ export default function RolesPage() {
 
                         {/* Role Editor */}
                         {(isCreating || editingRole) ? (
-                            <div className="bg-white p-6 rounded-2xl border border-gray-200 shadow-sm">
+                            <div className="bg-[var(--color-paper-2)] p-6 rounded-2xl border border-[var(--color-rule)] shadow-sm">
                                 <div className="flex justify-between items-center mb-6">
-                                    <h2 className="text-lg font-semibold text-gray-900">
+                                    <h2 className="text-lg font-semibold text-[var(--color-ink)]">
                                         {isCreating ? "Crear Nuevo Rol" : `Editando: ${editingRole?.name}`}
                                     </h2>
                                     <div className="flex gap-2">
                                         <button
                                             onClick={() => { setIsCreating(false); setEditingRole(null); }}
-                                            className="px-3 py-1.5 text-sm text-gray-600 hover:bg-gray-100 rounded-lg"
+                                            className="px-3 py-1.5 text-sm text-[var(--color-ink-2)] hover:bg-[var(--color-paper-3)] rounded-lg"
                                         >
                                             Cancelar
                                         </button>
                                         <button
                                             onClick={handleSaveRole}
-                                            className="flex items-center gap-2 px-4 py-1.5 bg-indigo-600 text-white text-sm font-medium rounded-lg hover:bg-indigo-700"
+                                            className="flex items-center gap-2 px-4 py-1.5 bg-[var(--color-ink)] text-[var(--color-paper)] text-sm font-medium rounded-lg hover:bg-[var(--color-ink-2)]"
                                         >
-                                            <Save size={16} /> Guardar
+                                            <Save strokeWidth={1.5} size={16} /> Guardar
                                         </button>
                                     </div>
                                 </div>
 
                                 <div className="mb-6">
-                                    <label className="block text-sm font-medium text-gray-700 mb-2">Nombre del Rol</label>
+                                    <label className="block text-sm font-medium text-[var(--color-ink-2)] mb-2">Nombre del Rol</label>
                                     <input
                                         type="text"
                                         value={newRoleName}
                                         onChange={(e) => setNewRoleName(e.target.value)}
-                                        className="w-full px-4 py-2 border border-gray-300 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none"
+                                        className="w-full px-4 py-2 border border-[var(--color-rule)] rounded-xl focus:ring-2 focus:ring-[var(--color-accent)]/40 focus:border-[var(--color-accent)] outline-none"
                                         placeholder="Ej: Agente de Ventas"
                                     />
                                 </div>
 
                                 <div>
-                                    <label className="block text-sm font-medium text-gray-700 mb-3">Permisos de Acceso</label>
+                                    <label className="block text-sm font-medium text-[var(--color-ink-2)] mb-3">Permisos de Acceso</label>
                                     <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                                         {availablePermissions.map((perm) => (
                                             <label
                                                 key={perm.id}
                                                 className={`flex items-start gap-3 p-3 rounded-xl border cursor-pointer transition-all ${selectedPermissions.includes(perm.id)
-                                                    ? 'border-indigo-600 bg-indigo-50'
-                                                    : 'border-gray-200 hover:bg-gray-50'
+                                                    ? 'border-[var(--color-accent)] bg-[var(--color-accent-soft)]'
+                                                    : 'border-[var(--color-rule)] hover:bg-[var(--color-paper-3)]'
                                                     }`}
                                             >
                                                 <div className={`mt-0.5 w-5 h-5 rounded border flex items-center justify-center transition-colors ${selectedPermissions.includes(perm.id)
-                                                    ? 'bg-indigo-600 border-indigo-600'
-                                                    : 'border-gray-300 bg-white'
+                                                    ? 'bg-[var(--color-accent)] border-[var(--color-accent)]'
+                                                    : 'border-[var(--color-rule)] bg-[var(--color-paper-2)]'
                                                     }`}>
-                                                    {selectedPermissions.includes(perm.id) && <Check size={12} className="text-white" />}
+                                                    {selectedPermissions.includes(perm.id) && <Check strokeWidth={1.5} size={12} className="text-[var(--color-accent-ink)]" />}
                                                 </div>
                                                 <input
                                                     type="checkbox"
@@ -278,11 +278,11 @@ export default function RolesPage() {
                                                     onChange={() => togglePermission(perm.id)}
                                                 />
                                                 <div>
-                                                    <span className={`block text-sm font-medium ${selectedPermissions.includes(perm.id) ? 'text-indigo-900' : 'text-gray-700'
+                                                    <span className={`block text-sm font-medium ${selectedPermissions.includes(perm.id) ? 'text-[var(--color-accent)]' : 'text-[var(--color-ink-2)]'
                                                         }`}>
                                                         {perm.label}
                                                     </span>
-                                                    <span className="text-xs text-gray-500">{perm.description}</span>
+                                                    <span className="text-xs text-[var(--color-muted)]">{perm.description}</span>
                                                 </div>
                                             </label>
                                         ))}
@@ -290,41 +290,41 @@ export default function RolesPage() {
                                 </div>
                             </div>
                         ) : (
-                            <div className="bg-gray-50 p-8 rounded-2xl border border-dashed border-gray-300 text-center">
-                                <Shield className="w-12 h-12 text-gray-300 mx-auto mb-3" />
-                                <p className="text-gray-500">Seleccioná un rol para editar o creá uno nuevo.</p>
+                            <div className="bg-[var(--color-paper)] p-8 rounded-2xl border border-dashed border-[var(--color-rule)] text-center">
+                                <Shield strokeWidth={1.5} className="w-12 h-12 text-[var(--color-neutral)] mx-auto mb-3" />
+                                <p className="text-[var(--color-muted)]">Seleccioná un rol para editar o creá uno nuevo.</p>
                             </div>
                         )}
 
                         {/* User Assignment */}
-                        <div className="bg-white p-6 rounded-2xl border border-gray-200 shadow-sm">
-                            <h2 className="text-lg font-semibold text-gray-900 mb-4">Asignación de Roles</h2>
+                        <div className="bg-[var(--color-paper-2)] p-6 rounded-2xl border border-[var(--color-rule)] shadow-sm">
+                            <h2 className="text-lg font-semibold text-[var(--color-ink)] mb-4">Asignación de Roles</h2>
                             <div className="overflow-x-auto">
                                 <table className="w-full text-left">
                                     <thead>
-                                        <tr className="border-b border-gray-100">
-                                            <th className="pb-3 text-sm font-medium text-gray-500">Usuario</th>
-                                            <th className="pb-3 text-sm font-medium text-gray-500">Email</th>
-                                            <th className="pb-3 text-sm font-medium text-gray-500">Rol Actual</th>
+                                        <tr className="border-b border-[var(--color-rule-2)]">
+                                            <th className="pb-3 text-sm font-medium text-[var(--color-muted)]">Usuario</th>
+                                            <th className="pb-3 text-sm font-medium text-[var(--color-muted)]">Email</th>
+                                            <th className="pb-3 text-sm font-medium text-[var(--color-muted)]">Rol Actual</th>
                                         </tr>
                                     </thead>
-                                    <tbody className="divide-y divide-gray-50">
+                                    <tbody className="divide-y divide-[var(--color-rule-2)]">
                                         {users.map((user) => (
-                                            <tr key={user.uid} className="group hover:bg-gray-50">
+                                            <tr key={user.uid} className="group hover:bg-[var(--color-paper-3)]">
                                                 <td className="py-3 pr-4">
                                                     <div className="flex items-center gap-3">
-                                                        <div className="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center text-gray-500">
-                                                            <UserIcon size={16} />
+                                                        <div className="w-8 h-8 rounded-full bg-[var(--color-paper-3)] flex items-center justify-center text-[var(--color-muted)]">
+                                                            <UserIcon strokeWidth={1.5} size={16} />
                                                         </div>
-                                                        <span className="font-medium text-gray-900">{user.displayName || "Sin nombre"}</span>
+                                                        <span className="font-medium text-[var(--color-ink)]">{user.displayName || "Sin nombre"}</span>
                                                     </div>
                                                 </td>
-                                                <td className="py-3 pr-4 text-sm text-gray-600">{user.email}</td>
+                                                <td className="py-3 pr-4 text-sm text-[var(--color-ink-2)]">{user.email}</td>
                                                 <td className="py-3">
                                                     <select
                                                         value={user.roleId || ""}
                                                         onChange={(e) => handleAssignRole(user.uid, e.target.value)}
-                                                        className="px-3 py-1.5 bg-white border border-gray-200 rounded-lg text-sm text-gray-700 focus:ring-2 focus:ring-indigo-500 outline-none cursor-pointer hover:border-indigo-300 transition-colors"
+                                                        className="px-3 py-1.5 bg-[var(--color-paper-2)] border border-[var(--color-rule)] rounded-lg text-sm text-[var(--color-ink-2)] focus:ring-2 focus:ring-[var(--color-accent)]/40 outline-none cursor-pointer hover:border-[var(--color-accent)]/30 transition-colors"
                                                     >
                                                         <option value="">Sin Rol</option>
                                                         {roles.filter(role => role.name !== "Cliente").map(role => (

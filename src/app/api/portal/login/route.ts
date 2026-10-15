@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/infrastructure/firebase/client"; // adminAuth might not be available in client, using db directly
 import { collection, query, where, getDocs, doc, getDoc } from "firebase/firestore";
 import { SignJWT } from "jose";
+import { BRAND_COLORS } from "@/lib/email/brandColors";
 
 function getPortalSecret(): string {
     const secret = process.env.PORTAL_JWT_SECRET;
@@ -44,7 +45,7 @@ export async function POST(request: NextRequest) {
         let branding = {
             agencyName: "Zeta Prop",
             logoUrl: "",
-            primaryColor: "#4f46e5" // Default Indigo
+            primaryColor: BRAND_COLORS.accent // Default: Zeta Prop bronze (not read by the portal UI today)
         };
 
         if (agencyUserId) {

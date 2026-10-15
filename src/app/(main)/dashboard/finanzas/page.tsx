@@ -9,6 +9,7 @@ import { es } from "date-fns/locale";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 import { ArrowLeft, Filter, Download, DollarSign, TrendingUp, Building, User, CreditCard, Banknote } from "lucide-react";
 import Link from "next/link";
+import { useChartColors } from "@/lib/chartColors";
 
 interface MonthlyData {
     name: string;
@@ -33,6 +34,7 @@ interface Transaction {
 }
 
 export default function FinanzasPage() {
+    const chartColors = useChartColors();
     const [loading, setLoading] = useState(true);
     const [contracts, setContracts] = useState<Alquiler[]>([]);
     const [year, setYear] = useState(new Date().getFullYear());
@@ -228,68 +230,68 @@ export default function FinanzasPage() {
             {/* Header */}
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
                 <div className="flex items-center gap-4">
-                    <Link href="/dashboard" className="p-2 hover:bg-gray-100 rounded-lg transition-colors">
-                        <ArrowLeft className="text-gray-600" />
+                    <Link href="/dashboard" className="p-2 hover:bg-[var(--color-paper-3)] rounded-lg transition-colors">
+                        <ArrowLeft strokeWidth={1.5} className="text-[var(--color-ink-2)]" />
                     </Link>
                     <div>
-                        <h1 className="text-2xl font-bold text-gray-900">Reportes</h1>
-                        <p className="text-gray-500">Reporte de honorarios y recaudación</p>
+                        <h1 className="font-heading text-2xl font-bold text-[var(--color-ink)]">Reportes</h1>
+                        <p className="text-[var(--color-muted)]">Reporte de honorarios y recaudación</p>
                     </div>
                 </div>
             </div>
 
             {/* KPI Cards */}
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6 max-w-5xl mx-auto mb-8">
-                <div className="bg-white p-6 rounded-2xl border border-gray-200 shadow-sm hover:shadow-md transition-shadow">
+                <div className="bg-[var(--color-paper-2)] p-6 rounded-2xl border border-[var(--color-rule)] shadow-sm hover:shadow-md transition-shadow">
                     <div className="flex justify-between items-start mb-2">
-                        <div className="p-2 bg-green-50 text-green-600 rounded-lg">
-                            <DollarSign size={20} />
+                        <div className="p-2 bg-[var(--color-paper-3)] text-[var(--color-muted)] rounded-full">
+                            <DollarSign strokeWidth={1.5} size={20} />
                         </div>
-                        <span className="text-xs font-medium text-gray-400 uppercase tracking-wider">Honorarios Netos</span>
+                        <span className="text-xs font-medium text-[var(--color-neutral)] uppercase tracking-wider">Honorarios Netos</span>
                     </div>
-                    <div className="text-3xl font-bold text-gray-900">{formatCurrency(summary.totalIncome)}</div>
-                    <div className="text-sm text-gray-400 mt-1 capitalize">
+                    <div className="text-3xl font-bold text-[var(--color-ink)]">{formatCurrency(summary.totalIncome)}</div>
+                    <div className="text-sm text-[var(--color-neutral)] mt-1 capitalize">
                         {month === 'all' ? `En el año ${year}` : `En ${format(new Date(year, Number(month), 1), 'MMMM', { locale: es })}`}
                     </div>
                 </div>
 
-                <div className="bg-white p-6 rounded-2xl border border-gray-200 shadow-sm hover:shadow-md transition-shadow">
+                <div className="bg-[var(--color-paper-2)] p-6 rounded-2xl border border-[var(--color-rule)] shadow-sm hover:shadow-md transition-shadow">
                     <div className="flex justify-between items-start mb-2">
-                        <div className="p-2 bg-emerald-50 text-emerald-600 rounded-lg">
-                            <Banknote size={20} />
+                        <div className="p-2 bg-[var(--color-paper-3)] text-[var(--color-muted)] rounded-full">
+                            <Banknote strokeWidth={1.5} size={20} />
                         </div>
-                        <span className="text-xs font-medium text-gray-400 uppercase tracking-wider">Honorarios Efectivo</span>
+                        <span className="text-xs font-medium text-[var(--color-neutral)] uppercase tracking-wider">Honorarios Efectivo</span>
                     </div>
-                    <div className="text-2xl font-bold text-gray-900">{formatCurrency(summary.totalEfectivo)}</div>
+                    <div className="text-2xl font-bold text-[var(--color-ink)]">{formatCurrency(summary.totalEfectivo)}</div>
                 </div>
 
-                <div className="bg-white p-6 rounded-2xl border border-gray-200 shadow-sm hover:shadow-md transition-shadow">
+                <div className="bg-[var(--color-paper-2)] p-6 rounded-2xl border border-[var(--color-rule)] shadow-sm hover:shadow-md transition-shadow">
                     <div className="flex justify-between items-start mb-2">
-                        <div className="p-2 bg-red-50 text-red-600 rounded-lg">
-                            <CreditCard size={20} />
+                        <div className="p-2 bg-[var(--color-paper-3)] text-[var(--color-muted)] rounded-full">
+                            <CreditCard strokeWidth={1.5} size={20} />
                         </div>
-                        <span className="text-xs font-medium text-gray-400 uppercase tracking-wider">Pagos a Propietarios</span>
+                        <span className="text-xs font-medium text-[var(--color-neutral)] uppercase tracking-wider">Pagos a Propietarios</span>
                     </div>
-                    <div className="text-2xl font-bold text-gray-900">{formatCurrency(summary.totalOutgoings)}</div>
+                    <div className="text-2xl font-bold text-[var(--color-ink)]">{formatCurrency(summary.totalOutgoings)}</div>
                 </div>
 
-                <div className="bg-white p-6 rounded-2xl border border-gray-200 shadow-sm hover:shadow-md transition-shadow">
+                <div className="bg-[var(--color-paper-2)] p-6 rounded-2xl border border-[var(--color-rule)] shadow-sm hover:shadow-md transition-shadow">
                     <div className="flex justify-between items-start mb-2">
-                        <div className="p-2 bg-blue-50 text-blue-600 rounded-lg">
-                            <CreditCard size={20} />
+                        <div className="p-2 bg-[var(--color-paper-3)] text-[var(--color-muted)] rounded-full">
+                            <CreditCard strokeWidth={1.5} size={20} />
                         </div>
-                        <span className="text-xs font-medium text-gray-400 uppercase tracking-wider">Transferencia</span>
+                        <span className="text-xs font-medium text-[var(--color-neutral)] uppercase tracking-wider">Transferencia</span>
                     </div>
-                    <div className="text-2xl font-bold text-gray-900">{formatCurrency(summary.totalTransferencia)}</div>
+                    <div className="text-2xl font-bold text-[var(--color-ink)]">{formatCurrency(summary.totalTransferencia)}</div>
                 </div>
             </div>
 
             {/* Transaction List */}
-            <div className="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden mb-8">
-                <div className="p-6 border-b border-gray-100 flex flex-col xl:flex-row gap-4 justify-between items-start xl:items-center">
+            <div className="bg-[var(--color-paper-2)] rounded-2xl border border-[var(--color-rule)] shadow-sm overflow-hidden mb-8">
+                <div className="p-6 border-b border-[var(--color-rule-2)] flex flex-col xl:flex-row gap-4 justify-between items-start xl:items-center">
                     <div className="flex items-center gap-3">
-                        <h3 className="text-lg font-bold text-gray-900">Listado de Transacciones</h3>
-                        <span className="text-sm text-gray-500 bg-gray-100 px-2.5 py-0.5 rounded-full font-medium">
+                        <h3 className="text-lg font-bold text-[var(--color-ink)]">Listado de Transacciones</h3>
+                        <span className="text-sm text-[var(--color-muted)] bg-[var(--color-paper-3)] px-2.5 py-0.5 rounded-full font-medium">
                             {transactions.length} registros
                         </span>
                     </div>
@@ -299,7 +301,7 @@ export default function FinanzasPage() {
                         <select
                             value={year}
                             onChange={(e) => setYear(Number(e.target.value))}
-                            className="px-4 py-2 border border-gray-200 rounded-xl bg-white text-sm text-gray-900 focus:ring-2 focus:ring-indigo-500 outline-none cursor-pointer hover:border-indigo-300 transition-colors"
+                            className="px-4 py-2 border border-[var(--color-rule)] rounded-xl bg-[var(--color-paper-2)] text-sm text-[var(--color-ink)] focus:ring-2 focus:ring-[var(--color-accent)]/40 outline-none cursor-pointer hover:border-[var(--color-accent)]/30 transition-colors"
                         >
                             {[2023, 2024, 2025, 2026].map(y => (
                                 <option key={y} value={y}>{y}</option>
@@ -309,7 +311,7 @@ export default function FinanzasPage() {
                         <select
                             value={month}
                             onChange={(e) => setMonth(e.target.value === 'all' ? 'all' : Number(e.target.value))}
-                            className="px-4 py-2 border border-gray-200 rounded-xl bg-white text-sm text-gray-900 focus:ring-2 focus:ring-indigo-500 outline-none cursor-pointer hover:border-indigo-300 transition-colors"
+                            className="px-4 py-2 border border-[var(--color-rule)] rounded-xl bg-[var(--color-paper-2)] text-sm text-[var(--color-ink)] focus:ring-2 focus:ring-[var(--color-accent)]/40 outline-none cursor-pointer hover:border-[var(--color-accent)]/30 transition-colors"
                         >
                             <option value="all">Todo el año</option>
                             {Array.from({ length: 12 }, (_, i) => (
@@ -322,124 +324,124 @@ export default function FinanzasPage() {
                         <select
                             value={txType}
                             onChange={(e) => setTxType(e.target.value as any)}
-                            className="px-4 py-2 border border-gray-200 rounded-xl bg-white text-sm text-gray-900 focus:ring-2 focus:ring-indigo-500 outline-none cursor-pointer hover:border-indigo-300 transition-colors"
+                            className="px-4 py-2 border border-[var(--color-rule)] rounded-xl bg-[var(--color-paper-2)] text-sm text-[var(--color-ink)] focus:ring-2 focus:ring-[var(--color-accent)]/40 outline-none cursor-pointer hover:border-[var(--color-accent)]/30 transition-colors"
                         >
                             <option value="all">Todo Integrado</option>
                             <option value="cobro">Cobro a Inquilinos</option>
                             <option value="liquidacion">Pago a Propietarios</option>
                         </select>
 
-                        <button className="flex items-center gap-2 px-4 py-2 bg-indigo-50 text-indigo-700 rounded-xl hover:bg-indigo-100 transition-colors text-sm font-medium">
-                            <Download size={16} />
+                        <button className="flex items-center gap-2 px-4 py-2 border border-[var(--color-rule)] text-[var(--color-ink)] rounded-xl hover:bg-[var(--color-paper-3)] transition-colors text-sm font-medium">
+                            <Download strokeWidth={1.5} size={16} />
                             Exportar
                         </button>
                     </div>
                 </div>
                 <div className="overflow-x-auto">
                     <table className="w-full">
-                        <thead className="bg-gray-50">
+                        <thead className="bg-[var(--color-paper)]">
                             <tr>
                                 <th
-                                    className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100 transition-colors"
+                                    className="px-6 py-3 text-left text-xs font-medium text-[var(--color-muted)] uppercase tracking-wider cursor-pointer hover:bg-[var(--color-paper-3)] transition-colors"
                                     onClick={() => handleSort('date')}
                                 >
                                     <div className="flex items-center gap-1">Fecha / Tipo {sortConfig?.key === 'date' && (sortConfig.direction === 'asc' ? '↑' : '↓')}</div>
                                 </th>
                                 <th
-                                    className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100 transition-colors"
+                                    className="px-6 py-3 text-left text-xs font-medium text-[var(--color-muted)] uppercase tracking-wider cursor-pointer hover:bg-[var(--color-paper-3)] transition-colors"
                                     onClick={() => handleSort('clientName')}
                                 >
                                     <div className="flex items-center gap-1">Propiedad / Cliente {sortConfig?.key === 'clientName' && (sortConfig.direction === 'asc' ? '↑' : '↓')}</div>
                                 </th>
                                 <th
-                                    className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100 transition-colors"
+                                    className="px-6 py-3 text-left text-xs font-medium text-[var(--color-muted)] uppercase tracking-wider cursor-pointer hover:bg-[var(--color-paper-3)] transition-colors"
                                     onClick={() => handleSort('mes')}
                                 >
                                     <div className="flex items-center gap-1">Periodo {sortConfig?.key === 'mes' && (sortConfig.direction === 'asc' ? '↑' : '↓')}</div>
                                 </th>
                                 <th
-                                    className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100 transition-colors"
+                                    className="px-6 py-3 text-left text-xs font-medium text-[var(--color-muted)] uppercase tracking-wider cursor-pointer hover:bg-[var(--color-paper-3)] transition-colors"
                                     onClick={() => handleSort('metodoPago')}
                                 >
                                     <div className="flex items-center gap-1">Método {sortConfig?.key === 'metodoPago' && (sortConfig.direction === 'asc' ? '↑' : '↓')}</div>
                                 </th>
                                 <th
-                                    className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100 transition-colors"
+                                    className="px-6 py-3 text-right text-xs font-medium text-[var(--color-muted)] uppercase tracking-wider cursor-pointer hover:bg-[var(--color-paper-3)] transition-colors"
                                     onClick={() => handleSort('montoTotal')}
                                 >
                                     <div className="flex items-center justify-end gap-1">Monto Total {sortConfig?.key === 'montoTotal' && (sortConfig.direction === 'asc' ? '↑' : '↓')}</div>
                                 </th>
                                 <th
-                                    className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100 transition-colors"
+                                    className="px-6 py-3 text-right text-xs font-medium text-[var(--color-muted)] uppercase tracking-wider cursor-pointer hover:bg-[var(--color-paper-3)] transition-colors"
                                     onClick={() => handleSort('honorariosCalculated')}
                                 >
                                     <div className="flex items-center justify-end gap-1">Honorarios {sortConfig?.key === 'honorariosCalculated' && (sortConfig.direction === 'asc' ? '↑' : '↓')}</div>
                                 </th>
                             </tr>
                         </thead>
-                        <tbody className="bg-white divide-y divide-gray-100">
+                        <tbody className="bg-[var(--color-paper-2)] divide-y divide-[var(--color-rule-2)]">
                             {sortedTransactions.length === 0 ? (
                                 <tr>
-                                    <td colSpan={6} className="px-6 py-8 text-center text-gray-500">
+                                    <td colSpan={6} className="px-6 py-8 text-center text-[var(--color-muted)]">
                                         No hay transacciones registradas en este periodo.
                                     </td>
                                 </tr>
                             ) : (
                                 sortedTransactions.map((tx) => (
-                                    <tr key={`${tx.contractId}-${tx.id}`} className="hover:bg-gray-50 transition-colors">
+                                    <tr key={`${tx.contractId}-${tx.id}`} className="hover:bg-[var(--color-paper-3)] transition-colors">
                                         <td className="px-6 py-4 whitespace-nowrap">
                                             <div className="flex flex-col gap-1">
-                                                <span className="text-sm text-gray-500">
+                                                <span className="text-sm text-[var(--color-muted)]">
                                                     {tx.date ? format(tx.date, 'dd/MM/yyyy') : '-'}
                                                 </span>
-                                                <span className={`inline-flex items-center px-2 py-0.5 rounded text-[10px] font-medium w-fit ${tx.type === 'cobro' ? 'bg-green-50 text-green-700 border border-green-100' : 'bg-red-50 text-red-700 border border-red-100'}`}>
+                                                <span className={`inline-flex items-center px-2 py-0.5 rounded text-[10px] font-medium w-fit ${tx.type === 'cobro' ? 'bg-[var(--color-positive-soft)] text-[var(--color-positive)] border border-[var(--color-positive)]/30' : 'bg-[var(--color-danger-soft)] text-[var(--color-danger)] border border-[var(--color-danger)]/30'}`}>
                                                     {tx.type === 'cobro' ? 'Cobro' : 'Liquidación'}
                                                 </span>
                                             </div>
                                         </td>
                                         <td className="px-6 py-4 whitespace-nowrap">
                                             <div className="flex flex-col">
-                                                <span className="text-sm font-medium text-gray-900 truncate max-w-[200px]" title={tx.contractAddress}>
+                                                <span className="text-sm font-medium text-[var(--color-ink)] truncate max-w-[200px]" title={tx.contractAddress}>
                                                     {tx.contractAddress}
                                                 </span>
-                                                <span className="text-xs text-gray-500 flex items-center gap-1">
-                                                    <User size={12} /> {tx.clientName}
+                                                <span className="text-xs text-[var(--color-muted)] flex items-center gap-1">
+                                                    <User strokeWidth={1.5} size={12} /> {tx.clientName}
                                                 </span>
                                             </div>
                                         </td>
-                                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 capitalize">
+                                        <td className="px-6 py-4 whitespace-nowrap text-sm text-[var(--color-muted)] capitalize">
                                             {format(new Date(`${tx.mes}-02`), 'MMMM yyyy', { locale: es })}
                                         </td>
                                         <td className="px-6 py-4 whitespace-nowrap">
                                             {tx.metodoPago === 'transferencia' ? (
                                                 <div className="flex flex-col">
-                                                    <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs font-medium bg-blue-50 text-blue-700 border border-blue-100">
-                                                        <CreditCard size={14} /> Transferencia
+                                                    <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs font-medium bg-[var(--color-accent-soft)] text-[var(--color-accent)] border border-[var(--color-accent)]/30">
+                                                        <CreditCard strokeWidth={1.5} size={14} /> Transferencia
                                                     </span>
                                                     {(tx.fechaTransferencia || tx.nroComprobante) && (
-                                                        <span className="text-[10px] text-gray-400 mt-1 max-w-[120px] truncate" title={`${tx.nroComprobante || ''} ${tx.fechaTransferencia ? format(new Date(tx.fechaTransferencia), 'dd/MM/yyyy') : ''}`}>
+                                                        <span className="text-[10px] text-[var(--color-neutral)] mt-1 max-w-[120px] truncate" title={`${tx.nroComprobante || ''} ${tx.fechaTransferencia ? format(new Date(tx.fechaTransferencia), 'dd/MM/yyyy') : ''}`}>
                                                             {tx.nroComprobante || 'Sin ref'}
                                                         </span>
                                                     )}
                                                 </div>
                                             ) : tx.metodoPago === 'efectivo' ? (
-                                                <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs font-medium bg-emerald-50 text-emerald-700 border border-emerald-100">
-                                                    <Banknote size={14} /> Efectivo
+                                                <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs font-medium bg-[var(--color-positive-soft)] text-[var(--color-positive)] border border-[var(--color-positive)]/30">
+                                                    <Banknote strokeWidth={1.5} size={14} /> Efectivo
                                                 </span>
                                             ) : (
-                                                <span className="text-xs text-gray-400">-</span>
+                                                <span className="text-xs text-[var(--color-neutral)]">-</span>
                                             )}
                                         </td>
-                                        <td className={`px-6 py-4 whitespace-nowrap text-sm text-right font-medium ${tx.type === 'cobro' ? 'text-gray-900' : 'text-red-600'}`}>
+                                        <td className={`px-6 py-4 whitespace-nowrap text-sm text-right font-medium ${tx.type === 'cobro' ? 'text-[var(--color-ink)]' : 'text-[var(--color-danger)]'}`}>
                                             {tx.type === 'cobro' ? '' : '-'}{formatCurrency(tx.montoTotal)}
                                         </td>
                                         <td className="px-6 py-4 whitespace-nowrap text-right">
                                             {tx.type === 'cobro' ? (
-                                                <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                                                <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-[var(--color-positive-soft)] text-[var(--color-positive)]">
                                                     +{formatCurrency(tx.honorariosCalculated)}
                                                 </span>
                                             ) : (
-                                                <span className="text-xs text-gray-400">-</span>
+                                                <span className="text-xs text-[var(--color-neutral)]">-</span>
                                             )}
                                         </td>
                                     </tr>
@@ -451,33 +453,35 @@ export default function FinanzasPage() {
             </div>
 
             {/* Charts Section */}
-            <div className="bg-white p-6 rounded-2xl border border-gray-200 shadow-sm">
-                <h3 className="text-lg font-bold text-gray-900 mb-6">Evolución de Ingresos Mensuales</h3>
+            <div className="bg-[var(--color-paper-2)] p-6 rounded-2xl border border-[var(--color-rule)] shadow-sm">
+                <h3 className="font-heading text-lg font-bold text-[var(--color-ink)] mb-6">Evolución de Ingresos Mensuales</h3>
                 <div className="h-[350px] w-full">
                     <ResponsiveContainer width="100%" height="100%">
                         <BarChart data={chartData} margin={{ top: 10, right: 10, left: 0, bottom: 0 }}>
-                            <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#E5E7EB" />
+                            <CartesianGrid strokeDasharray="3 3" vertical={false} stroke={chartColors.rule} />
                             <XAxis
                                 dataKey="name"
                                 axisLine={false}
                                 tickLine={false}
-                                tick={{ fill: '#6B7280', fontSize: 12 }}
+                                tick={{ fill: chartColors.muted, fontSize: 12 }}
                                 dy={10}
                             />
                             <YAxis
                                 axisLine={false}
                                 tickLine={false}
-                                tick={{ fill: '#6B7280', fontSize: 12 }}
+                                tick={{ fill: chartColors.muted, fontSize: 12 }}
                                 tickFormatter={(val) => `$${val / 1000}k`}
                             />
                             <Tooltip
-                                contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)' }}
-                                cursor={{ fill: '#F3F4F6' }}
+                                contentStyle={{ borderRadius: '12px', border: `1px solid ${chartColors.rule}`, background: chartColors.paper3, color: chartColors.ink, boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.3)' }}
+                                labelStyle={{ color: chartColors.ink }}
+                                itemStyle={{ color: chartColors.ink2 }}
+                                cursor={{ fill: chartColors.paper3 }}
                             />
                             <Bar
                                 dataKey="honorarios"
                                 name="Honorarios"
-                                fill="#4F46E5"
+                                fill={chartColors.accent}
                                 radius={[4, 4, 0, 0]}
                                 barSize={40}
                             />

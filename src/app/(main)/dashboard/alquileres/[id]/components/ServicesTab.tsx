@@ -121,15 +121,15 @@ export default function ServicesTab({ rental }: ServicesTabProps) {
     };
 
     if (loading) {
-        return <div className="p-8 text-center text-gray-500">Cargando servicios...</div>;
+        return <div className="p-8 text-center text-[var(--color-muted)]">Cargando servicios...</div>;
     }
 
     return (
         <div className="space-y-6">
             {/* Selector de Mes */}
-            <div className="bg-white border rounded-xl p-6">
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                    <Calendar className="inline w-4 h-4 mr-2" />
+            <div className="bg-[var(--color-paper-2)] border rounded-xl p-6">
+                <label className="block text-sm font-medium text-[var(--color-ink-2)] mb-2">
+                    <Calendar strokeWidth={1.5} className="inline w-4 h-4 mr-2" />
                     Seleccionar Mes
                 </label>
                 <select
@@ -139,7 +139,7 @@ export default function ServicesTab({ rental }: ServicesTabProps) {
                         setSelectedYear(parseInt(year));
                         setSelectedMonth(parseInt(month));
                     }}
-                    className="w-full md:w-auto px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                    className="w-full md:w-auto px-4 py-2 border border-[var(--color-rule)] rounded-lg focus:ring-2 focus:ring-[var(--color-accent)]/40 focus:border-[var(--color-accent)]"
                 >
                     {generateMonthOptions().map(opt => (
                         <option key={`${opt.year}-${opt.month}`} value={`${opt.year}-${opt.month}`}>
@@ -150,8 +150,8 @@ export default function ServicesTab({ rental }: ServicesTabProps) {
             </div>
 
             {/* Formulario de Carga */}
-            <div className="bg-white border rounded-xl p-6">
-                <h3 className="text-lg font-semibold text-gray-900 mb-4">
+            <div className="bg-[var(--color-paper-2)] border rounded-xl p-6">
+                <h3 className="text-lg font-semibold text-[var(--color-ink)] mb-4">
                     {currentServices ? 'Editar' : 'Cargar'} Servicios - {monthNames[selectedMonth - 1]} {selectedYear}
                 </h3>
                 <ServiceChargeForm
@@ -162,43 +162,43 @@ export default function ServicesTab({ rental }: ServicesTabProps) {
             </div>
 
             {/* Historial de Servicios */}
-            <div className="bg-white border rounded-xl p-6">
-                <h3 className="text-lg font-semibold text-gray-900 mb-4">Historial de Servicios</h3>
+            <div className="bg-[var(--color-paper-2)] border rounded-xl p-6">
+                <h3 className="text-lg font-semibold text-[var(--color-ink)] mb-4">Historial de Servicios</h3>
 
                 {services.length === 0 ? (
-                    <p className="text-gray-500 text-center py-8">No hay servicios cargados aún</p>
+                    <p className="text-[var(--color-muted)] text-center py-8">No hay servicios cargados aún</p>
                 ) : (
                     <div className="space-y-4">
                         {services.map(service => (
-                            <div key={service.id} className="border rounded-lg p-4 hover:bg-gray-50 transition-colors">
+                            <div key={service.id} className="border rounded-lg p-4 hover:bg-[var(--color-paper-3)] transition-colors">
                                 <div className="flex justify-between items-start mb-3">
                                     <div>
-                                        <h4 className="font-semibold text-gray-900">
+                                        <h4 className="font-semibold text-[var(--color-ink)]">
                                             {monthNames[service.month - 1]} {service.year}
                                         </h4>
-                                        <p className="text-sm text-gray-500">
+                                        <p className="text-sm text-[var(--color-muted)]">
                                             {service.sent ? (
-                                                <span className="flex items-center gap-1 text-green-600">
-                                                    <CheckCircle className="w-4 h-4" />
+                                                <span className="flex items-center gap-1 text-[var(--color-positive)]">
+                                                    <CheckCircle strokeWidth={1.5} className="w-4 h-4" />
                                                     Enviado {service.sentDate && `el ${new Date(service.sentDate).toLocaleDateString()}`}
                                                 </span>
                                             ) : (
-                                                <span className="flex items-center gap-1 text-orange-600">
-                                                    <Clock className="w-4 h-4" />
+                                                <span className="flex items-center gap-1 text-[var(--color-warning)]">
+                                                    <Clock strokeWidth={1.5} className="w-4 h-4" />
                                                     Pendiente de envío
                                                 </span>
                                             )}
                                         </p>
                                     </div>
                                     <div className="text-right">
-                                        <p className="text-2xl font-bold text-indigo-600">
+                                        <p className="text-2xl font-bold text-[var(--color-accent)]">
                                             ${service.total.toLocaleString('es-AR')}
                                         </p>
                                         <button
                                             onClick={() => handleSendWhatsApp(service)}
-                                            className="mt-2 flex items-center gap-2 text-sm bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition-colors"
+                                            className="mt-2 flex items-center gap-2 text-sm bg-[var(--color-positive)] text-[var(--color-accent-ink)] px-4 py-2 rounded-lg hover:bg-[var(--color-positive)] transition-colors"
                                         >
-                                            <MessageCircle className="w-4 h-4" />
+                                            <MessageCircle strokeWidth={1.5} className="w-4 h-4" />
                                             {service.sent ? 'Reenviar' : 'Enviar'} por WhatsApp
                                         </button>
                                     </div>
@@ -210,14 +210,14 @@ export default function ServicesTab({ rental }: ServicesTabProps) {
                                         const config = SERVICE_TYPES[charge.type];
                                         return (
                                             <div key={idx} className="text-sm">
-                                                <span className="text-gray-600">
+                                                <span className="text-[var(--color-ink-2)]">
                                                     {config.icon} {config.label}:
                                                 </span>
                                                 <span className="font-medium ml-1">
                                                     ${charge.amount.toLocaleString('es-AR')}
                                                 </span>
                                                 {charge.description && (
-                                                    <p className="text-xs text-gray-500 ml-5">({charge.description})</p>
+                                                    <p className="text-xs text-[var(--color-muted)] ml-5">({charge.description})</p>
                                                 )}
                                             </div>
                                         );

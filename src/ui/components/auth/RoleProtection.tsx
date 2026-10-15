@@ -59,7 +59,7 @@ export function RoleProtection({ children, requiredPermission, requiredRole }: R
     if (!checked) {
         return (
             <div className="flex h-[50vh] w-full items-center justify-center">
-                <Loader2 className="h-8 w-8 animate-spin text-indigo-600" />
+                <Loader2 strokeWidth={1.5} className="h-8 w-8 animate-spin text-[var(--color-accent)]" />
             </div>
         );
     }
@@ -67,16 +67,16 @@ export function RoleProtection({ children, requiredPermission, requiredRole }: R
     if (!authorized) {
         return (
             <div className="flex h-[60vh] flex-col items-center justify-center text-center p-6">
-                <div className="bg-red-50 p-4 rounded-full mb-4">
-                    <ShieldAlert className="h-10 w-10 text-red-600" />
+                <div className="bg-[var(--color-paper-3)] p-4 rounded-full mb-4">
+                    <ShieldAlert strokeWidth={1.5} className="h-10 w-10 text-[var(--color-muted)]" />
                 </div>
-                <h2 className="text-2xl font-bold text-gray-900 mb-2">Acceso Restringido</h2>
-                <p className="text-gray-500 max-w-md mb-6">
+                <h2 className="text-2xl font-bold text-[var(--color-ink)] mb-2">Acceso Restringido</h2>
+                <p className="text-[var(--color-muted)] max-w-md mb-6">
                     No tenés los permisos necesarios para ver esta página.
                 </p>
                 <button
                     onClick={() => router.push("/dashboard")}
-                    className="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors"
+                    className="px-4 py-2 bg-[var(--color-ink)] text-[var(--color-paper)] rounded-lg hover:bg-[var(--color-ink-2)] transition-colors"
                 >
                     Volver al Dashboard
                 </button>

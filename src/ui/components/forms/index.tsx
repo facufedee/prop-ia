@@ -205,9 +205,9 @@ export function TextAreaInput({
 
     return (
         <div className="space-y-1">
-            <label className="block text-sm font-medium text-gray-700">
+            <label className="block text-sm font-medium text-[var(--color-ink-2)]">
                 {label}
-                {required && <span className="text-red-500 ml-1">*</span>}
+                {required && <span className="text-[var(--color-danger)] ml-1">*</span>}
             </label>
 
             <textarea
@@ -217,10 +217,10 @@ export function TextAreaInput({
                 placeholder={placeholder}
                 rows={rows}
                 maxLength={maxLength}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 resize-none text-gray-900"
+                className="w-full px-4 py-2 border border-[var(--color-rule)] rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--color-accent)]/40 focus:border-[var(--color-accent)] resize-none text-[var(--color-ink)]"
             />
 
-            <div className="flex justify-between text-xs text-gray-500">
+            <div className="flex justify-between text-xs text-[var(--color-muted)]">
                 <span>{touched && value.length === 0 && required ? "Campo requerido" : ""}</span>
                 <span>{value.length} / {maxLength}</span>
             </div>

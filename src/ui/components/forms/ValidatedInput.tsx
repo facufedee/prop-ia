@@ -63,35 +63,35 @@ export default function ValidatedInput({
         if (!touched || !value) return null;
 
         if (validation?.valid) {
-            return <Check className="w-5 h-5 text-green-600" />;
+            return <Check strokeWidth={1.5} className="w-5 h-5 text-[var(--color-positive)]" />;
         } else if (validation && !validation.valid) {
-            return <X className="w-5 h-5 text-red-600" />;
+            return <X strokeWidth={1.5} className="w-5 h-5 text-[var(--color-danger)]" />;
         }
 
         return null;
     };
 
     const getInputClasses = () => {
-        const base = "w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 transition-colors text-gray-900";
+        const base = "w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 transition-colors text-[var(--color-ink)]";
 
         if (!touched || !value) {
-            return `${base} border-gray-300 focus:ring-indigo-500 focus:border-indigo-500`;
+            return `${base} border-[var(--color-rule)] focus:ring-[var(--color-accent)]/40 focus:border-[var(--color-accent)]`;
         }
 
         if (validation?.valid) {
-            return `${base} border-green-500 focus:ring-green-500 focus:border-green-500`;
+            return `${base} border-[var(--color-positive)] focus:ring-[var(--color-positive)] focus:border-[var(--color-positive)]`;
         } else if (validation && !validation.valid) {
-            return `${base} border-red-500 focus:ring-red-500 focus:border-red-500`;
+            return `${base} border-[var(--color-danger)] focus:ring-[var(--color-danger)] focus:border-[var(--color-danger)]`;
         }
 
-        return `${base} border-gray-300 focus:ring-indigo-500 focus:border-indigo-500`;
+        return `${base} border-[var(--color-rule)] focus:ring-[var(--color-accent)]/40 focus:border-[var(--color-accent)]`;
     };
 
     return (
         <div className="space-y-1">
-            <label className="block text-sm font-medium text-gray-700">
+            <label className="block text-sm font-medium text-[var(--color-ink-2)]">
                 {label}
-                {required && <span className="text-red-500 ml-1">*</span>}
+                {required && <span className="text-[var(--color-danger)] ml-1">*</span>}
             </label>
 
             <div className="relative">
@@ -116,27 +116,27 @@ export default function ValidatedInput({
             {/* Mensajes de ayuda y validación */}
             <div className="min-h-[20px]">
                 {touched && validation && !validation.valid && (
-                    <div className="flex items-center gap-1 text-sm text-red-600">
-                        <AlertCircle className="w-4 h-4" />
+                    <div className="flex items-center gap-1 text-sm text-[var(--color-danger)]">
+                        <AlertCircle strokeWidth={1.5} className="w-4 h-4" />
                         <span>{validation.message}</span>
                     </div>
                 )}
 
                 {touched && validation?.valid && (
-                    <div className="flex items-center gap-1 text-sm text-green-600">
-                        <Check className="w-4 h-4" />
+                    <div className="flex items-center gap-1 text-sm text-[var(--color-positive)]">
+                        <Check strokeWidth={1.5} className="w-4 h-4" />
                         <span>{validation.message}</span>
                     </div>
                 )}
 
                 {!touched && helpText && (
-                    <p className="text-sm text-gray-500">{helpText}</p>
+                    <p className="text-sm text-[var(--color-muted)]">{helpText}</p>
                 )}
             </div>
 
             {/* Contador de caracteres */}
             {showCharCount && maxLength && (
-                <div className="text-right text-xs text-gray-500">
+                <div className="text-right text-xs text-[var(--color-muted)]">
                     {value.length} / {maxLength}
                 </div>
             )}

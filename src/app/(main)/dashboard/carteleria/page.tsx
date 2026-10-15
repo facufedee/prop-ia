@@ -14,12 +14,12 @@ import { useBranchContext } from "@/infrastructure/context/BranchContext";
 import CartelModal from "./components/CartelModal";
 
 const ESTADO_BADGE: Record<CartelEstado, string> = {
-    instalado: "bg-green-100 text-green-700 border-green-200",
-    almacen: "bg-gray-100 text-gray-700 border-gray-200",
-    reparacion: "bg-amber-100 text-amber-700 border-amber-200",
-    retirar: "bg-orange-100 text-orange-700 border-orange-200",
-    roto: "bg-red-100 text-red-700 border-red-200",
-    perdido: "bg-red-100 text-red-700 border-red-200",
+    instalado: "bg-[var(--color-positive-soft)] text-[var(--color-positive)] border-[var(--color-positive)]/30",
+    almacen: "bg-[var(--color-paper-3)] text-[var(--color-ink-2)] border-[var(--color-rule)]",
+    reparacion: "bg-[var(--color-warning-soft)] text-[var(--color-warning)] border-[var(--color-warning)]/30",
+    retirar: "bg-[var(--color-warning-soft)] text-[var(--color-warning)] border-[var(--color-warning)]/30",
+    roto: "bg-[var(--color-danger-soft)] text-[var(--color-danger)] border-[var(--color-danger)]/30",
+    perdido: "bg-[var(--color-danger-soft)] text-[var(--color-danger)] border-[var(--color-danger)]/30",
 };
 
 const FILTER_TABS: { key: CartelEstado | "todos"; label: string }[] = [
@@ -110,7 +110,7 @@ export default function CarteleriaPage() {
     if (loading) {
         return (
             <div className="p-8 flex items-center justify-center h-64">
-                <Loader2 className="w-8 h-8 animate-spin text-indigo-600" />
+                <Loader2 strokeWidth={1.5} className="w-8 h-8 animate-spin text-[var(--color-accent)]" />
             </div>
         );
     }
@@ -120,19 +120,19 @@ export default function CarteleriaPage() {
             {/* Header */}
             <div className="flex items-start justify-between flex-wrap gap-4">
                 <div>
-                    <h1 className="text-2xl font-bold text-gray-900 flex items-center gap-2">
-                        <span className="w-9 h-9 bg-gradient-to-br from-indigo-500 to-violet-600 rounded-xl flex items-center justify-center">
-                            <Signpost size={18} className="text-white" />
+                    <h1 className="font-heading text-2xl font-bold text-[var(--color-ink)] flex items-center gap-2">
+                        <span className="w-9 h-9 rounded-full bg-[var(--color-paper-3)] flex items-center justify-center">
+                            <Signpost strokeWidth={1.5} size={18} className="text-[var(--color-muted)]" />
                         </span>
                         Cartelería
                     </h1>
-                    <p className="text-gray-500 mt-1">Seguimiento de tus carteles físicos de venta y alquiler</p>
+                    <p className="text-[var(--color-muted)] mt-1">Seguimiento de tus carteles físicos de venta y alquiler</p>
                 </div>
                 <button
                     onClick={() => setModalOpen(true)}
-                    className="flex items-center gap-2 px-4 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl font-semibold shadow-sm shadow-indigo-200 transition"
+                    className="flex items-center gap-2 px-4 py-2.5 bg-[var(--color-ink)] hover:bg-[var(--color-ink-2)] text-[var(--color-paper)] rounded-xl font-semibold shadow-sm transition"
                 >
-                    <Plus size={18} /> Nuevo Cartel
+                    <Plus strokeWidth={1.5} size={18} /> Nuevo Cartel
                 </button>
             </div>
 
@@ -153,25 +153,25 @@ export default function CarteleriaPage() {
             </div>
 
             {stats.valorInvertido > 0 && (
-                <div className="bg-white rounded-2xl border border-gray-100 p-5 flex items-center gap-4 shadow-sm">
-                    <div className="w-11 h-11 bg-emerald-50 rounded-xl flex items-center justify-center flex-shrink-0">
-                        <DollarSign size={20} className="text-emerald-600" />
+                <div className="bg-[var(--color-paper-2)] rounded-2xl border border-[var(--color-rule-2)] p-5 flex items-center gap-4 shadow-sm">
+                    <div className="w-11 h-11 bg-[var(--color-paper-3)] rounded-full flex items-center justify-center flex-shrink-0">
+                        <DollarSign strokeWidth={1.5} size={20} className="text-[var(--color-muted)]" />
                     </div>
                     <div>
-                        <p className="text-xs font-bold text-gray-500 uppercase tracking-widest">Inversión total en cartelería</p>
-                        <p className="text-2xl font-extrabold text-gray-900">{formatCurrency(stats.valorInvertido)}</p>
+                        <p className="text-xs font-bold text-[var(--color-muted)] uppercase tracking-widest">Inversión total en cartelería</p>
+                        <p className="text-2xl font-extrabold text-[var(--color-ink)]">{formatCurrency(stats.valorInvertido)}</p>
                     </div>
                 </div>
             )}
 
             {/* Filters */}
             <div className="flex flex-col sm:flex-row gap-3 items-start sm:items-center justify-between">
-                <div className="flex gap-1 bg-gray-100 p-1 rounded-xl overflow-x-auto max-w-full">
+                <div className="flex gap-1 bg-[var(--color-paper-3)] p-1 rounded-xl overflow-x-auto max-w-full">
                     {FILTER_TABS.map((tab) => (
                         <button
                             key={tab.key}
                             onClick={() => setFilter(tab.key)}
-                            className={`px-3.5 py-2 text-sm font-medium rounded-lg whitespace-nowrap transition-all ${filter === tab.key ? "bg-white text-gray-900 shadow-sm" : "text-gray-500 hover:text-gray-700"
+                            className={`px-3.5 py-2 text-sm font-medium rounded-lg whitespace-nowrap transition-all ${filter === tab.key ? "bg-[var(--color-paper-2)] text-[var(--color-ink)] shadow-sm" : "text-[var(--color-muted)] hover:text-[var(--color-ink-2)]"
                                 }`}
                         >
                             {tab.label}
@@ -179,11 +179,11 @@ export default function CarteleriaPage() {
                     ))}
                 </div>
                 <div className="relative w-full sm:w-64">
-                    <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+                    <Search strokeWidth={1.5} size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--color-neutral)]" />
                     <input
                         type="text"
                         placeholder="Buscar por código o dirección..."
-                        className="w-full pl-9 pr-3 py-2 border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-indigo-500 outline-none"
+                        className="w-full pl-9 pr-3 py-2 border border-[var(--color-rule)] rounded-xl text-sm focus:ring-2 focus:ring-[var(--color-accent)]/40 outline-none"
                         value={search}
                         onChange={(e) => setSearch(e.target.value)}
                     />
@@ -192,13 +192,13 @@ export default function CarteleriaPage() {
 
             {/* Grid */}
             {filtered.length === 0 ? (
-                <div className="text-center py-16 text-gray-500 bg-white rounded-2xl border border-dashed border-gray-300">
-                    <Signpost size={40} className="mx-auto mb-3 text-gray-300" />
+                <div className="text-center py-16 text-[var(--color-muted)] bg-[var(--color-paper-2)] rounded-2xl border border-dashed border-[var(--color-rule)]">
+                    <Signpost strokeWidth={1.5} size={40} className="mx-auto mb-3 text-[var(--color-neutral)]" />
                     <p className="text-lg font-medium">
                         {carteles.length === 0 ? "Todavía no cargaste ningún cartel" : "No hay carteles con ese filtro"}
                     </p>
                     {carteles.length === 0 && (
-                        <button onClick={() => setModalOpen(true)} className="mt-4 text-indigo-600 font-semibold hover:underline">
+                        <button onClick={() => setModalOpen(true)} className="mt-4 text-[var(--color-accent)] font-semibold hover:underline">
                             Cargar el primero
                         </button>
                     )}
@@ -209,14 +209,14 @@ export default function CarteleriaPage() {
                         <Link
                             key={cartel.id}
                             href={`/dashboard/carteleria/${cartel.id}`}
-                            className="bg-white rounded-2xl border border-gray-100 overflow-hidden hover:shadow-lg hover:border-indigo-200 transition-all group"
+                            className="bg-[var(--color-paper-2)] rounded-2xl border border-[var(--color-rule-2)] overflow-hidden hover:shadow-lg hover:border-[var(--color-accent)]/30 transition-all group"
                         >
-                            <div className="relative h-36 bg-gray-100">
+                            <div className="relative h-36 bg-[var(--color-paper-3)]">
                                 {cartel.fotos?.[0] ? (
                                     <img src={cartel.fotos[0]} alt={cartel.codigo} className="w-full h-full object-cover" />
                                 ) : (
-                                    <div className="w-full h-full flex items-center justify-center text-gray-300">
-                                        <Camera size={28} />
+                                    <div className="w-full h-full flex items-center justify-center text-[var(--color-neutral)]">
+                                        <Camera strokeWidth={1.5} size={28} />
                                     </div>
                                 )}
                                 <span className={`absolute top-2 right-2 text-[10px] font-bold uppercase tracking-wide px-2 py-1 rounded-full border ${ESTADO_BADGE[cartel.estado]}`}>
@@ -225,12 +225,12 @@ export default function CarteleriaPage() {
                             </div>
                             <div className="p-4">
                                 <div className="flex items-center justify-between mb-1">
-                                    <p className="font-bold text-gray-900 text-sm">{cartel.codigo}</p>
-                                    <span className="text-xs text-gray-400">{CARTEL_MEDIDA_LABELS[cartel.medida]}</span>
+                                    <p className="font-bold text-[var(--color-ink)] text-sm">{cartel.codigo}</p>
+                                    <span className="text-xs text-[var(--color-neutral)]">{CARTEL_MEDIDA_LABELS[cartel.medida]}</span>
                                 </div>
-                                <p className="text-xs text-gray-500 mb-2">{CARTEL_TIPO_LABELS[cartel.tipo]}</p>
-                                <div className="flex items-center gap-1.5 text-xs text-gray-600 border-t border-gray-50 pt-2">
-                                    <MapPin size={12} className="flex-shrink-0 text-gray-400" />
+                                <p className="text-xs text-[var(--color-muted)] mb-2">{CARTEL_TIPO_LABELS[cartel.tipo]}</p>
+                                <div className="flex items-center gap-1.5 text-xs text-[var(--color-ink-2)] border-t border-[var(--color-rule-2)] pt-2">
+                                    <MapPin strokeWidth={1.5} size={12} className="flex-shrink-0 text-[var(--color-neutral)]" />
                                     <span className="truncate">
                                         {cartel.estado === "instalado" && cartel.propiedadDireccion
                                             ? cartel.propiedadDireccion
@@ -264,21 +264,21 @@ function StatCard({
     icon: Icon, label, value, color, alert,
 }: { icon: any; label: string; value: number; color: string; alert?: string }) {
     const colorMap: Record<string, string> = {
-        indigo: "bg-indigo-50 text-indigo-600",
-        green: "bg-green-50 text-green-600",
-        gray: "bg-gray-100 text-gray-600",
-        orange: "bg-orange-50 text-orange-600",
-        amber: "bg-amber-50 text-amber-600",
-        red: "bg-red-50 text-red-600",
+        indigo: "bg-[var(--color-paper-3)] text-[var(--color-muted)]",
+        green: "bg-[var(--color-paper-3)] text-[var(--color-positive)]",
+        gray: "bg-[var(--color-paper-3)] text-[var(--color-muted)]",
+        orange: "bg-[var(--color-paper-3)] text-[var(--color-warning)]",
+        amber: "bg-[var(--color-paper-3)] text-[var(--color-warning)]",
+        red: "bg-[var(--color-paper-3)] text-[var(--color-danger)]",
     };
     return (
-        <div className="bg-white rounded-2xl border border-gray-100 p-4 shadow-sm">
-            <div className={`w-9 h-9 rounded-xl flex items-center justify-center mb-3 ${colorMap[color]}`}>
-                <Icon size={16} />
+        <div className="bg-[var(--color-paper-2)] rounded-2xl border border-[var(--color-rule-2)] p-4 shadow-sm">
+            <div className={`w-9 h-9 rounded-full flex items-center justify-center mb-3 ${colorMap[color]}`}>
+                <Icon strokeWidth={1.5} size={16} />
             </div>
-            <p className="text-2xl font-extrabold text-gray-900">{value}</p>
-            <p className="text-xs text-gray-500 font-medium">{label}</p>
-            {alert && <p className="text-[10px] text-orange-600 font-bold mt-1">{alert}</p>}
+            <p className="text-2xl font-extrabold text-[var(--color-ink)]">{value}</p>
+            <p className="text-xs text-[var(--color-muted)] font-medium">{label}</p>
+            {alert && <p className="text-[10px] text-[var(--color-warning)] font-bold mt-1">{alert}</p>}
         </div>
     );
 }

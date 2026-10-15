@@ -56,7 +56,7 @@ export default function AgentesPage() {
     if (loading) {
         return (
             <div className="p-6 flex items-center justify-center min-h-[400px]">
-                <div className="text-gray-500">Cargando agentes...</div>
+                <div className="text-[var(--color-muted)]">Cargando agentes...</div>
             </div>
         );
     }
@@ -66,137 +66,137 @@ export default function AgentesPage() {
             {/* Header */}
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
                 <div>
-                    <h1 className="text-2xl font-bold text-gray-900">Agentes</h1>
-                    <p className="text-gray-500">Gestión de agentes y comisiones</p>
+                    <h1 className="font-heading text-2xl font-bold text-[var(--color-ink)]">Agentes</h1>
+                    <p className="text-[var(--color-muted)]">Gestión de agentes y comisiones</p>
                 </div>
                 <Link
                     href="/dashboard/agentes/nuevo"
-                    className="flex items-center gap-2 px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors"
+                    className="flex items-center gap-2 px-4 py-2 bg-[var(--color-ink)] text-[var(--color-paper)] rounded-lg hover:bg-[var(--color-ink-2)] transition-colors"
                 >
-                    <Plus className="w-5 h-5" />
+                    <Plus strokeWidth={1.5} className="w-5 h-5" />
                     Nuevo Agente
                 </Link>
             </div>
 
             {/* Stats */}
             <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-                <div className="bg-white rounded-xl border border-gray-200 p-6">
+                <div className="bg-[var(--color-paper-2)] rounded-xl border border-[var(--color-rule)] p-6">
                     <div className="flex items-center justify-between">
                         <div>
-                            <p className="text-sm text-gray-500">Agentes Activos</p>
-                            <p className="text-2xl font-bold text-gray-900 mt-1">{agentesActivos}</p>
+                            <p className="text-sm text-[var(--color-muted)]">Agentes Activos</p>
+                            <p className="text-2xl font-bold text-[var(--color-ink)] mt-1">{agentesActivos}</p>
                         </div>
-                        <div className="p-3 bg-indigo-100 rounded-lg">
-                            <Users className="w-6 h-6 text-indigo-600" />
+                        <div className="p-3 bg-[var(--color-paper-3)] rounded-full">
+                            <Users strokeWidth={1.5} className="w-6 h-6 text-[var(--color-muted)]" />
                         </div>
                     </div>
                 </div>
 
-                <div className="bg-white rounded-xl border border-gray-200 p-6">
+                <div className="bg-[var(--color-paper-2)] rounded-xl border border-[var(--color-rule)] p-6">
                     <div className="flex items-center justify-between">
                         <div>
-                            <p className="text-sm text-gray-500">Total Ventas</p>
-                            <p className="text-2xl font-bold text-gray-900 mt-1">{totalVentas}</p>
+                            <p className="text-sm text-[var(--color-muted)]">Total Ventas</p>
+                            <p className="text-2xl font-bold text-[var(--color-ink)] mt-1">{totalVentas}</p>
                         </div>
-                        <div className="p-3 bg-green-100 rounded-lg">
-                            <TrendingUp className="w-6 h-6 text-green-600" />
+                        <div className="p-3 bg-[var(--color-paper-3)] rounded-full">
+                            <TrendingUp strokeWidth={1.5} className="w-6 h-6 text-[var(--color-muted)]" />
                         </div>
                     </div>
                 </div>
 
-                <div className="bg-white rounded-xl border border-gray-200 p-6">
+                <div className="bg-[var(--color-paper-2)] rounded-xl border border-[var(--color-rule)] p-6">
                     <div className="flex items-center justify-between">
                         <div>
-                            <p className="text-sm text-gray-500">Total Alquileres</p>
-                            <p className="text-2xl font-bold text-gray-900 mt-1">{totalAlquileres}</p>
+                            <p className="text-sm text-[var(--color-muted)]">Total Alquileres</p>
+                            <p className="text-2xl font-bold text-[var(--color-ink)] mt-1">{totalAlquileres}</p>
                         </div>
-                        <div className="p-3 bg-blue-100 rounded-lg">
-                            <Award className="w-6 h-6 text-blue-600" />
+                        <div className="p-3 bg-[var(--color-paper-3)] rounded-full">
+                            <Award strokeWidth={1.5} className="w-6 h-6 text-[var(--color-muted)]" />
                         </div>
                     </div>
                 </div>
 
-                <div className="bg-white rounded-xl border border-gray-200 p-6">
+                <div className="bg-[var(--color-paper-2)] rounded-xl border border-[var(--color-rule)] p-6">
                     <div className="flex items-center justify-between">
                         <div>
-                            <p className="text-sm text-gray-500">Comisiones Totales</p>
-                            <p className="text-2xl font-bold text-gray-900 mt-1">${totalComisiones.toLocaleString()}</p>
+                            <p className="text-sm text-[var(--color-muted)]">Comisiones Totales</p>
+                            <p className="text-2xl font-bold text-[var(--color-ink)] mt-1">${totalComisiones.toLocaleString()}</p>
                         </div>
-                        <div className="p-3 bg-yellow-100 rounded-lg">
-                            <DollarSign className="w-6 h-6 text-yellow-600" />
+                        <div className="p-3 bg-[var(--color-paper-3)] rounded-full">
+                            <DollarSign strokeWidth={1.5} className="w-6 h-6 text-[var(--color-muted)]" />
                         </div>
                     </div>
                 </div>
             </div>
 
             {/* Table */}
-            <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
+            <div className="bg-[var(--color-paper-2)] rounded-xl border border-[var(--color-rule)] overflow-hidden">
                 <div className="overflow-x-auto">
                     <table className="w-full">
-                        <thead className="bg-gray-50 border-b border-gray-200">
+                        <thead className="bg-[var(--color-paper)] border-b border-[var(--color-rule)]">
                             <tr>
-                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
+                                <th className="px-6 py-3 text-left text-xs font-medium text-[var(--color-muted)] uppercase">
                                     Agente
                                 </th>
-                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
+                                <th className="px-6 py-3 text-left text-xs font-medium text-[var(--color-muted)] uppercase">
                                     Email
                                 </th>
-                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
+                                <th className="px-6 py-3 text-left text-xs font-medium text-[var(--color-muted)] uppercase">
                                     Ventas
                                 </th>
-                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
+                                <th className="px-6 py-3 text-left text-xs font-medium text-[var(--color-muted)] uppercase">
                                     Alquileres
                                 </th>
-                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
+                                <th className="px-6 py-3 text-left text-xs font-medium text-[var(--color-muted)] uppercase">
                                     Comisiones
                                 </th>
-                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
+                                <th className="px-6 py-3 text-left text-xs font-medium text-[var(--color-muted)] uppercase">
                                     Sucursal
                                 </th>
-                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
+                                <th className="px-6 py-3 text-left text-xs font-medium text-[var(--color-muted)] uppercase">
                                     Estado
                                 </th>
-                                <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase">
+                                <th className="px-6 py-3 text-right text-xs font-medium text-[var(--color-muted)] uppercase">
                                     Acciones
                                 </th>
                             </tr>
                         </thead>
-                        <tbody className="divide-y divide-gray-200">
+                        <tbody className="divide-y divide-[var(--color-rule)]">
                             {filteredAgentes.length === 0 ? (
                                 <tr>
-                                    <td colSpan={8} className="px-6 py-12 text-center text-gray-500">
+                                    <td colSpan={8} className="px-6 py-12 text-center text-[var(--color-muted)]">
                                         No hay agentes registrados {selectedBranchId !== 'all' && 'en esta sucursal'}
                                     </td>
                                 </tr>
                             ) : (
                                 filteredAgentes.map((agente) => (
-                                    <tr key={agente.id} className="hover:bg-gray-50">
+                                    <tr key={agente.id} className="hover:bg-[var(--color-paper-3)]">
                                         <td className="px-6 py-4">
                                             <div className="flex items-center gap-3">
-                                                <div className="w-10 h-10 bg-indigo-100 rounded-full flex items-center justify-center">
-                                                    <span className="text-indigo-600 font-semibold">
+                                                <div className="w-10 h-10 bg-[var(--color-paper-3)] rounded-full flex items-center justify-center">
+                                                    <span className="text-[var(--color-ink-2)] font-semibold">
                                                         {agente.nombre.charAt(0).toUpperCase()}
                                                     </span>
                                                 </div>
                                                 <div>
-                                                    <div className="text-sm font-medium text-gray-900">{agente.nombre}</div>
-                                                    <div className="text-xs text-gray-500">{agente.telefono}</div>
+                                                    <div className="text-sm font-medium text-[var(--color-ink)]">{agente.nombre}</div>
+                                                    <div className="text-xs text-[var(--color-muted)]">{agente.telefono}</div>
                                                 </div>
                                             </div>
                                         </td>
-                                        <td className="px-6 py-4 text-sm text-gray-600">{agente.email}</td>
-                                        <td className="px-6 py-4 text-sm text-gray-900 font-medium">{agente.totalVentas}</td>
-                                        <td className="px-6 py-4 text-sm text-gray-900 font-medium">{agente.totalAlquileres}</td>
-                                        <td className="px-6 py-4 text-sm text-gray-900 font-medium">
+                                        <td className="px-6 py-4 text-sm text-[var(--color-ink-2)]">{agente.email}</td>
+                                        <td className="px-6 py-4 text-sm text-[var(--color-ink)] font-medium">{agente.totalVentas}</td>
+                                        <td className="px-6 py-4 text-sm text-[var(--color-ink)] font-medium">{agente.totalAlquileres}</td>
+                                        <td className="px-6 py-4 text-sm text-[var(--color-ink)] font-medium">
                                             ${agente.totalComisiones.toLocaleString()}
                                         </td>
-                                        <td className="px-6 py-4 text-sm text-gray-600">
-                                            {branches.find(b => b.id === agente.branchId)?.name || <span className="text-gray-400 italic">No Asignada</span>}
+                                        <td className="px-6 py-4 text-sm text-[var(--color-ink-2)]">
+                                            {branches.find(b => b.id === agente.branchId)?.name || <span className="text-[var(--color-neutral)] italic">No Asignada</span>}
                                         </td>
                                         <td className="px-6 py-4">
                                             <span className={`px-2 py-1 text-xs font-medium rounded-full ${agente.activo
-                                                ? 'bg-green-100 text-green-700'
-                                                : 'bg-gray-100 text-gray-700'
+                                                ? 'bg-[var(--color-positive-soft)] text-[var(--color-positive)]'
+                                                : 'bg-[var(--color-paper-3)] text-[var(--color-ink-2)]'
                                                 }`}>
                                                 {agente.activo ? 'Activo' : 'Inactivo'}
                                             </span>
@@ -205,13 +205,13 @@ export default function AgentesPage() {
                                             <div className="flex items-center justify-end gap-2">
                                                 <Link
                                                     href={`/dashboard/agentes/${agente.id}`}
-                                                    className="px-3 py-1 text-sm text-indigo-600 hover:bg-indigo-50 rounded-lg"
+                                                    className="px-3 py-1 text-sm text-[var(--color-accent)] hover:bg-[var(--color-accent-soft)] rounded-lg"
                                                 >
                                                     Ver Detalle
                                                 </Link>
                                                 <button
                                                     onClick={() => handleDelete(agente.id)}
-                                                    className="px-3 py-1 text-sm text-red-600 hover:bg-red-50 rounded-lg"
+                                                    className="px-3 py-1 text-sm text-[var(--color-danger)] hover:bg-[var(--color-danger-soft)] rounded-lg"
                                                 >
                                                     Eliminar
                                                 </button>

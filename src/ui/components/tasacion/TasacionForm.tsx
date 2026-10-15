@@ -198,56 +198,56 @@ export default function TasacionForm() {
     return (
         <div className="w-full grid grid-cols-1 lg:grid-cols-3 gap-8 items-start animate-in fade-in slide-in-from-bottom-4 duration-500">
             {/* COLUMN 1: Location Info */}
-            <div className="bg-white p-6 md:p-8 rounded-3xl shadow-xl border border-gray-100 ring-1 ring-gray-900/5 transition-all hover:shadow-2xl">
+            <div className="bg-[var(--color-paper-2)] p-6 md:p-8 rounded-3xl border border-[var(--color-rule)]">
                 <div className="flex justify-between items-center mb-8">
-                    <h2 className="text-2xl font-bold text-gray-900 flex items-center gap-3">
-                        <div className="p-2 bg-indigo-50 rounded-lg">
-                            <MapPin className="w-6 h-6 text-indigo-600" />
+                    <h2 className="text-2xl font-bold text-[var(--color-ink)] flex items-center gap-3">
+                        <div className="p-2 bg-[var(--color-paper-3)] rounded-full">
+                            <MapPin strokeWidth={1.5} className="w-6 h-6 text-[var(--color-muted)]" />
                         </div>
                         Ubicación
                     </h2>
-                    <Link href="/modelo" className="text-sm font-semibold text-indigo-600 hover:text-indigo-800 transition-colors px-3 py-1 bg-indigo-50 rounded-full">
+                    <Link href="/modelo" className="text-sm font-semibold text-[var(--color-ink-2)] hover:text-[var(--color-ink)] transition-colors px-3 py-1 border border-[var(--color-rule)] hover:bg-[var(--color-paper-3)] rounded-full">
                         Algoritmo IA
                     </Link>
                 </div>
 
                 <div className="space-y-6">
-                    <SelectField name="property_type" label="Tipo de Propiedad" icon={<Landmark />} options={PROPERTY_TYPE_OPTIONS} value={form.property_type || ''} onChange={(v) => setForm(p => ({ ...p, property_type: v }))} />
-                    <SelectField name="provincia" label="Provincia" icon={<MapPin />} options={PROVINCIA_OPTIONS} value={form.provincia || ''} onChange={handleProvinciaChange} />
-                    <SelectField name="ciudad" label="Ciudad" icon={<MapPin />} options={ciudadOptions} value={form.ciudad || ''} disabled={!form.provincia} onChange={handleCiudadChange} />
-                    <SelectField name="barrio" label="Barrio" icon={<MapPin />} options={barrioOptions} value={form.barrio || ''} disabled={!form.ciudad} onChange={(v) => setForm(p => ({ ...p, barrio: v }))} />
+                    <SelectField name="property_type" label="Tipo de Propiedad" icon={<Landmark strokeWidth={1.5} />} options={PROPERTY_TYPE_OPTIONS} value={form.property_type || ''} onChange={(v) => setForm(p => ({ ...p, property_type: v }))} />
+                    <SelectField name="provincia" label="Provincia" icon={<MapPin strokeWidth={1.5} />} options={PROVINCIA_OPTIONS} value={form.provincia || ''} onChange={handleProvinciaChange} />
+                    <SelectField name="ciudad" label="Ciudad" icon={<MapPin strokeWidth={1.5} />} options={ciudadOptions} value={form.ciudad || ''} disabled={!form.provincia} onChange={handleCiudadChange} />
+                    <SelectField name="barrio" label="Barrio" icon={<MapPin strokeWidth={1.5} />} options={barrioOptions} value={form.barrio || ''} disabled={!form.ciudad} onChange={(v) => setForm(p => ({ ...p, barrio: v }))} />
                 </div>
             </div>
 
             {/* COLUMN 2: Property Details */}
-            <div className="bg-white p-6 md:p-8 rounded-3xl shadow-xl border border-gray-100 ring-1 ring-gray-900/5 transition-all hover:shadow-2xl">
+            <div className="bg-[var(--color-paper-2)] p-6 md:p-8 rounded-3xl border border-[var(--color-rule)]">
                 <div className="flex justify-between items-center mb-8">
-                    <h2 className="text-2xl font-bold text-gray-900 flex items-center gap-3">
-                        <div className="p-2 bg-emerald-50 rounded-lg">
-                            <Ruler className="w-6 h-6 text-emerald-600" />
+                    <h2 className="text-2xl font-bold text-[var(--color-ink)] flex items-center gap-3">
+                        <div className="p-2 bg-[var(--color-paper-3)] rounded-full">
+                            <Ruler strokeWidth={1.5} className="w-6 h-6 text-[var(--color-muted)]" />
                         </div>
                         Detalles
                     </h2>
-                    <button type="button" onClick={handleFillExample} className="text-xs font-bold uppercase tracking-wider bg-gray-900 text-white px-4 py-2 rounded-xl hover:bg-gray-800 transition-all shadow-md active:scale-95">
+                    <button type="button" onClick={handleFillExample} className="text-xs font-bold uppercase tracking-wider bg-[var(--color-ink)] text-[var(--color-paper)] px-4 py-2 rounded-xl hover:bg-[var(--color-ink-2)] transition-all shadow-md active:scale-95">
                         Ejemplo
                     </button>
                 </div>
 
                 <form onSubmit={handleSubmit} className="space-y-8">
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
-                        <InputField name="area_total" label="Área Total (m²)" icon={<Ruler className="w-4 h-4" />} type="number" value={form.area_total || ''} onChange={handleChange} />
-                        <InputField name="area_covered" label="Área Cubierta" icon={<Ruler className="w-4 h-4" />} type="number" value={form.area_covered || ''} onChange={handleChange} />
-                        <InputField name="rooms" label="Ambientes" icon={<Building2 className="w-4 h-4" />} type="number" value={form.rooms || ''} onChange={handleChange} />
-                        <InputField name="bedrooms" label="Dormitorios" icon={<BedDouble className="w-4 h-4" />} type="number" value={form.bedrooms || ''} onChange={handleChange} />
-                        <InputField name="bathrooms" label="Baños" icon={<Bath className="w-4 h-4" />} type="number" value={form.bathrooms || ''} onChange={handleChange} />
-                        <InputField name="floor" label="Piso" icon={<Hash className="w-4 h-4" />} type="number" value={form.floor || ''} onChange={handleChange} />
-                        <InputField name="construction_year" label="Año Const." icon={<Clock className="w-4 h-4" />} type="number" value={form.construction_year || ''} onChange={handleChange} />
-                        <InputField name="expenses" label="Expensas ($)" icon={<CircleDollarSign className="w-4 h-4" />} type="number" value={form.expenses || ''} onChange={handleChange} />
+                        <InputField name="area_total" label="Área Total (m²)" icon={<Ruler strokeWidth={1.5} className="w-4 h-4" />} type="number" value={form.area_total || ''} onChange={handleChange} />
+                        <InputField name="area_covered" label="Área Cubierta" icon={<Ruler strokeWidth={1.5} className="w-4 h-4" />} type="number" value={form.area_covered || ''} onChange={handleChange} />
+                        <InputField name="rooms" label="Ambientes" icon={<Building2 strokeWidth={1.5} className="w-4 h-4" />} type="number" value={form.rooms || ''} onChange={handleChange} />
+                        <InputField name="bedrooms" label="Dormitorios" icon={<BedDouble strokeWidth={1.5} className="w-4 h-4" />} type="number" value={form.bedrooms || ''} onChange={handleChange} />
+                        <InputField name="bathrooms" label="Baños" icon={<Bath strokeWidth={1.5} className="w-4 h-4" />} type="number" value={form.bathrooms || ''} onChange={handleChange} />
+                        <InputField name="floor" label="Piso" icon={<Hash strokeWidth={1.5} className="w-4 h-4" />} type="number" value={form.floor || ''} onChange={handleChange} />
+                        <InputField name="construction_year" label="Año Const." icon={<Clock strokeWidth={1.5} className="w-4 h-4" />} type="number" value={form.construction_year || ''} onChange={handleChange} />
+                        <InputField name="expenses" label="Expensas ($)" icon={<CircleDollarSign strokeWidth={1.5} className="w-4 h-4" />} type="number" value={form.expenses || ''} onChange={handleChange} />
                     </div>
 
                     <div>
-                        <h3 className="text-sm font-bold text-gray-700 mb-4 flex items-center gap-2">
-                             <CheckCircle className="w-4 h-4 text-gray-400" />
+                        <h3 className="text-sm font-bold text-[var(--color-ink-2)] mb-4 flex items-center gap-2">
+                             <CheckCircle strokeWidth={1.5} className="w-4 h-4 text-[var(--color-neutral)]" />
                              Características Adicionales
                         </h3>
                         <div className="grid grid-cols-2 gap-3">
@@ -260,14 +260,11 @@ export default function TasacionForm() {
                     <button
                         type="submit"
                         disabled={loading || !isFormValid()}
-                        className="group relative w-full bg-indigo-600 text-white py-4 rounded-2xl hover:bg-indigo-700 transition-all font-bold shadow-lg shadow-indigo-200 disabled:bg-gray-200 disabled:text-gray-400 disabled:shadow-none overflow-hidden"
+                        className="group relative w-full bg-[var(--color-ink)] text-[var(--color-paper)] py-4 rounded-2xl hover:bg-[var(--color-ink-2)] transition-all font-bold shadow-lg disabled:bg-[var(--color-paper-4)] disabled:text-[var(--color-neutral)] disabled:shadow-none overflow-hidden"
                     >
                         <div className="relative z-10 flex items-center justify-center gap-2">
                             {loading ? 'Calculando Valoración...' : !isFormValid() ? 'Complete el Formulario' : 'Iniciar Tasación IA'}
                         </div>
-                        {!loading && isFormValid() && (
-                            <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent -translate-x-full group-hover:animate-shimmer" />
-                        )}
                     </button>
                 </form>
             </div>

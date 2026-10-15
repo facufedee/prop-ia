@@ -10,7 +10,7 @@ export default function NewPropertyPage() {
     return (
         <div className="space-y-6">
             <div className="flex justify-between items-center">
-                <h1 className="text-2xl font-bold text-gray-900">Nueva Publicación</h1>
+                <h1 className="font-heading text-2xl font-bold text-[var(--color-ink)]">Nueva Publicación</h1>
             </div>
             <PropertyWizard
                 onSuccessRedirect={returnTo || undefined}

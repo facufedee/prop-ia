@@ -3,7 +3,11 @@
  * headings: Montserrat 500/600 · UI/body: Inter Tight · photography: Unsplash (see landingPhotos.ts)
  */
 
-.landing-page {
+/* Shared color/shadow/radius tokens: the public site (.landing-page) and the
+ * dashboard (.app-theme) read the same palette. Type, spacing and motion stay
+ * landing-only because they collide with Tailwind theme variables. */
+.landing-page,
+.app-theme {
   /* ---------- Paper / surfaces ---------- */
   --color-paper: oklch(17% 0.006 70);
   --color-paper-2: oklch(21% 0.007 70);
@@ -35,6 +39,13 @@
   --shadow-color: oklch(8% 0.004 70);
   --glass: oklch(21% 0.007 70 / 0.62);
 
+  /* ---------- Radii ---------- */
+  --radius-card: 16px;
+  --radius-pill: 999px;
+  --radius-input: 10px;
+}
+
+.landing-page {
   /* ---------- Type ---------- */
   --font-heading: var(--font-landing-heading), ui-sans-serif, system-ui, sans-serif;
   --font-display: var(--font-landing-sans), ui-sans-serif, system-ui, sans-serif;
@@ -70,11 +81,6 @@
   --dur-micro: 120ms;
   --dur-short: 220ms;
   --dur-long: 420ms;
-
-  /* ---------- Radii ---------- */
-  --radius-card: 16px;
-  --radius-pill: 999px;
-  --radius-input: 10px;
 
   /* ---------- Z-scale ---------- */
   --z-base: 1;
