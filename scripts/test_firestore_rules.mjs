@@ -400,8 +400,13 @@ t("blog_posts: anonymous get published by slug", ALLOW, { method: "get", path: "
 t("blog_posts: anonymous get draft denied", DENY, { method: "get", path: "blog_posts/b2", data: draft });
 t("blog_posts: anonymous list drafts denied", DENY, { method: "list", path: "blog_posts/b2", data: draft });
 t("blog_posts: basic user reads draft denied", DENY, { auth: as("owner"), method: "get", path: "blog_posts/b2", data: draft });
-t("blog_posts: blog-permission user reads drafts", ALLOW, { auth: as("pro"), method: "list", path: "blog_posts/b2", data: draft });
-t("blog_posts: blog-permission user creates", ALLOW, { auth: as("pro"), method: "create", path: "blog_posts/b3", newData: draft });
+t("blog_posts: client role with blog permission reads drafts denied", DENY, { auth: as("pro"), method: "list", path: "blog_posts/b2", data: draft });
+t("blog_posts: client role with blog permission create denied", DENY, { auth: as("pro"), method: "create", path: "blog_posts/b3", newData: draft });
+t("blog_posts: client role with blog permission publish denied", DENY, { auth: as("pro"), method: "update", path: "blog_posts/b2", data: draft, newData: post });
+t("blog_posts: agent with blog permission update denied", DENY, { auth: as("agent"), method: "update", path: "blog_posts/b1", data: post, newData: { ...post, title: "x" } });
+t("blog_posts: admin reads drafts", ALLOW, { auth: as("admin"), method: "list", path: "blog_posts/b2", data: draft });
+t("blog_posts: admin creates", ALLOW, { auth: as("admin"), method: "create", path: "blog_posts/b3", newData: draft });
+t("blog_posts: platform owner publishes", ALLOW, { auth: rootOwner, method: "update", path: "blog_posts/b2", data: draft, newData: post });
 t("blog_posts: basic user create denied", DENY, { auth: as("owner"), method: "create", path: "blog_posts/b3", newData: draft });
 t("blog_posts: anonymous create denied", DENY, { method: "create", path: "blog_posts/b3", newData: draft });
 t("blog_posts: admin deletes", ALLOW, { auth: as("superadmin"), method: "delete", path: "blog_posts/b1", data: post });

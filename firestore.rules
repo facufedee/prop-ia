@@ -490,12 +490,14 @@ service cloud.firestore {
     // ------------------------------------------------------------------
     // blog_posts — platform blog.
     //   read:  anyone when published == true (public /blog, sitemap, prerender);
-    //          blog managers read drafts.
-    //   write: roles with the "/dashboard/blog" permission (PermissionGuard model).
+    //          platform admins read drafts.
+    //   write: platform admins only. The blog is ZetaProp's own content and
+    //          publishing announces it on ZetaProp's social accounts, so a
+    //          "/dashboard/blog" permission on a client role grants nothing.
     // ------------------------------------------------------------------
     match /blog_posts/{postId} {
-      allow read: if resource.data.published == true || hasPermission('/dashboard/blog');
-      allow write: if hasPermission('/dashboard/blog');
+      allow read: if resource.data.published == true || isAdmin();
+      allow write: if isAdmin();
     }
 
     // ------------------------------------------------------------------
