@@ -1,16 +1,23 @@
-import { db } from "@/infrastructure/firebase/client";
+import { db, auth } from "@/infrastructure/firebase/client";
 import {
     collection,
     addDoc,
     getDocs,
     query,
     where,
-    orderBy,
     doc,
     updateDoc,
     getDoc
 } from "firebase/firestore";
 import { RentalService, ServiceCharge } from "@/domain/models/RentalService";
+
+// Firestore rules let a user read the rentalServices docs they created; list queries
+// must filter on createdBy so the rule is provable for the whole result set.
+const currentUid = (): string => {
+    const uid = auth?.currentUser?.uid;
+    if (!uid) throw new Error("Usuario no autenticado");
+    return uid;
+};
 
 export const rentalServicesService = {
     /**
@@ -56,18 +63,20 @@ export const rentalServicesService = {
     async getServicesByRental(rentalId: string): Promise<RentalService[]> {
         if (!db) throw new Error("Firestore not initialized");
 
+        // Equality-only query (no composite index needed); newest period first, as before.
         const q = query(
             collection(db, "rentalServices"),
-            where("rentalId", "==", rentalId),
-            orderBy("year", "desc"),
-            orderBy("month", "desc")
+            where("createdBy", "==", currentUid()),
+            where("rentalId", "==", rentalId)
         );
 
         const snapshot = await getDocs(q);
-        return snapshot.docs.map(doc => ({
-            id: doc.id,
-            ...doc.data()
-        } as RentalService));
+        return snapshot.docs
+            .map(doc => ({
+                id: doc.id,
+                ...doc.data()
+            } as RentalService))
+            .sort((a, b) => (b.year - a.year) || (b.month - a.month));
     },
 
     /**
@@ -82,6 +91,7 @@ export const rentalServicesService = {
 
         const q = query(
             collection(db, "rentalServices"),
+            where("createdBy", "==", currentUid()),
             where("rentalId", "==", rentalId),
             where("month", "==", month),
             where("year", "==", year)

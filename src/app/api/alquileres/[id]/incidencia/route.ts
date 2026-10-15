@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { alquileresService } from "@/infrastructure/services/alquileresService";
+import { alquileresAdminService } from "@/infrastructure/services/server/alquileresAdminService";
 import { verifyAuth } from "@/lib/apiAuth";
 import { z } from "zod";
 
@@ -18,7 +18,7 @@ export async function POST(
     if (authResult.error) return authResult.error;
 
     try {
-        const alquiler = await alquileresService.getAlquilerById(params.id);
+        const alquiler = await alquileresAdminService.getAlquilerById(params.id);
         if (!alquiler) {
             return NextResponse.json({ error: "Contract not found" }, { status: 404 });
         }
@@ -32,7 +32,7 @@ export async function POST(
             return NextResponse.json({ error: "Datos inválidos", details: parsed.error.flatten() }, { status: 400 });
         }
 
-        await alquileresService.crearIncidencia(params.id, parsed.data as any);
+        await alquileresAdminService.crearIncidencia(params.id, parsed.data as any);
 
         return NextResponse.json({ success: true });
     } catch (error: any) {

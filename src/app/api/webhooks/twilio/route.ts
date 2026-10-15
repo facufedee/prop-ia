@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { db } from "@/infrastructure/firebase/client";
-import { collection, addDoc } from "firebase/firestore";
+import { adminDb } from "@/infrastructure/firebase/admin";
 import crypto from "crypto";
 
 function verifyTwilioSignature(request: NextRequest, params: Record<string, string>): boolean {
@@ -56,15 +55,16 @@ export async function POST(req: NextRequest) {
             const targetSessionId = From.replace(/[^a-zA-Z0-9+]/g, '');
 
             // Ensure the session document exists (upsert)
-            // We use setDoc with merge to not overwrite existing data like 'userName' if any
-            const { setDoc, doc } = require("firebase/firestore");
-            await setDoc(doc(db, "chat_sessions", targetSessionId), {
+            // We use set with merge to not overwrite existing data like 'userName' if any
+            // (Admin SDK: `chat_sessions` is closed to client SDK access by Firestore rules).
+            const sessionRef = adminDb.collection("chat_sessions").doc(targetSessionId);
+            await sessionRef.set({
                 phone: From,
                 lastMessageAt: Date.now(),
                 channel: "whatsapp"
             }, { merge: true });
 
-            await addDoc(collection(db, "chat_sessions", targetSessionId, "messages"), {
+            await sessionRef.collection("messages").add({
                 text: Body.trim(),
                 sender: "user",
                 timestamp: Date.now(),

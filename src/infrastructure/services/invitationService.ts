@@ -1,5 +1,5 @@
 import { db } from "../firebase/client";
-import { collection, addDoc, query, where, getDocs, updateDoc, doc, getDoc } from "firebase/firestore";
+import { collection, addDoc, updateDoc, doc } from "firebase/firestore";
 import { v4 as uuidv4 } from "uuid";
 
 export interface Invitation {
@@ -34,21 +34,15 @@ export const invitationService = {
         return token;
     },
 
+    // Anonymous visitors cannot query `invitations` under the Firestore rules, so the
+    // token is validated by the server (Admin SDK): GET /api/invitations/[token].
     async validateInvitation(token: string): Promise<Invitation | null> {
-        const q = query(collection(db, COLLECTION_NAME), where("token", "==", token), where("status", "==", "pending"));
-        const snapshot = await getDocs(q);
+        const res = await fetch(`/api/invitations/${encodeURIComponent(token)}`, { cache: "no-store" });
+        if (res.status === 404) return null;
+        if (!res.ok) throw new Error("Error al validar la invitación");
 
-        if (snapshot.empty) return null;
-
-        const docData = snapshot.docs[0].data() as any;
-        const invitation: Invitation = { ...docData, id: snapshot.docs[0].id, expiresAt: docData.expiresAt.toDate() };
-
-        if (invitation.expiresAt < new Date()) {
-            // Mark as expired if needed, or just return null
-            return null;
-        }
-
-        return invitation;
+        const data = await res.json();
+        return { ...data, expiresAt: new Date(data.expiresAt) } as Invitation;
     },
 
     async markAsUsed(invitationId: string) {

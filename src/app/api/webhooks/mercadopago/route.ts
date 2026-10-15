@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { subscriptionService } from "@/infrastructure/services/subscriptionService";
+import { subscriptionAdminService } from "@/infrastructure/services/server/subscriptionAdminService";
 import crypto from "crypto";
 
 function verifyMercadoPagoSignature(request: NextRequest, rawBody: string): boolean {
@@ -55,7 +55,7 @@ export async function POST(request: NextRequest) {
         if (type === "payment" && data?.id) {
             console.log(`[Webhook MP] Processing payment ${data.id}...`);
 
-            const result = await subscriptionService.processPaymentWebhook(data.id);
+            const result = await subscriptionAdminService.processPaymentWebhook(data.id);
 
             if (result.success) {
                 return NextResponse.json({ status: "success", message: result.message }, { status: 200 });

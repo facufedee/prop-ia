@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { alquileresService } from "@/infrastructure/services/alquileresService";
+import { alquileresAdminService } from "@/infrastructure/services/server/alquileresAdminService";
 import { verifyAuth } from "@/lib/apiAuth";
 
 // GET - Get contract by ID
@@ -11,7 +11,7 @@ export async function GET(
     if (authResult.error) return authResult.error;
 
     try {
-        const alquiler = await alquileresService.getAlquilerById(params.id);
+        const alquiler = await alquileresAdminService.getAlquilerById(params.id);
 
         if (!alquiler) {
             return NextResponse.json({ error: "Contract not found" }, { status: 404 });
@@ -37,7 +37,7 @@ export async function PUT(
     if (authResult.error) return authResult.error;
 
     try {
-        const alquiler = await alquileresService.getAlquilerById(params.id);
+        const alquiler = await alquileresAdminService.getAlquilerById(params.id);
         if (!alquiler) {
             return NextResponse.json({ error: "Contract not found" }, { status: 404 });
         }
@@ -45,8 +45,9 @@ export async function PUT(
             return NextResponse.json({ error: "Forbidden" }, { status: 403 });
         }
 
-        const body = await request.json();
-        await alquileresService.updateAlquiler(params.id, body);
+        // The Admin SDK bypasses rules: keep the owner and id immutable here.
+        const { userId: _userId, id: _id, ...body } = await request.json();
+        await alquileresAdminService.updateAlquiler(params.id, body);
 
         return NextResponse.json({ success: true });
     } catch (error: any) {
@@ -63,7 +64,7 @@ export async function DELETE(
     if (authResult.error) return authResult.error;
 
     try {
-        const alquiler = await alquileresService.getAlquilerById(params.id);
+        const alquiler = await alquileresAdminService.getAlquilerById(params.id);
         if (!alquiler) {
             return NextResponse.json({ error: "Contract not found" }, { status: 404 });
         }
@@ -71,7 +72,7 @@ export async function DELETE(
             return NextResponse.json({ error: "Forbidden" }, { status: 403 });
         }
 
-        await alquileresService.deleteAlquiler(params.id);
+        await alquileresAdminService.deleteAlquiler(params.id);
         return NextResponse.json({ success: true });
     } catch (error: any) {
         return NextResponse.json({ error: "Error interno" }, { status: 500 });

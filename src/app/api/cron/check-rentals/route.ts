@@ -1,13 +1,14 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { alquileresService } from '@/infrastructure/services/alquileresService';
-import { notificationService } from '@/infrastructure/services/notificationService';
+import { Timestamp } from 'firebase-admin/firestore';
+import { adminDb } from '@/infrastructure/firebase/admin';
+import { alquileresAdminService } from '@/infrastructure/services/server/alquileresAdminService';
 import { verifyCronSecret } from '@/lib/apiAuth';
 
 export async function GET(request: NextRequest) {
     const authError = verifyCronSecret(request);
     if (authError) return authError;
     try {
-        const alquileres = await alquileresService.getAllActiveAlquileres();
+        const alquileres = await alquileresAdminService.getAllActiveAlquileres();
         let count = 0;
 
         // Strip out the time to only compare at the start of the current day
@@ -29,14 +30,18 @@ export async function GET(request: NextRequest) {
                     `El contrato de "${alquiler.direccion}" ha vencido o vence el día de hoy. Por favor, regulariza la situación con el inquilino.` :
                     `El contrato de "${alquiler.direccion}" vence el ${alquiler.fechaFin.toLocaleDateString()}. Faltan ${diasRestantes} días.`;
 
-                await notificationService.createNotification(
-                    diasRestantes <= 0 ? "Contrato Vencido" : `Contrato por Vencer (${diasRestantes} días)`,
+                // Same document shape as notificationService.createNotification
+                // (Admin SDK: rules deny unauthenticated notification writes).
+                await adminDb.collection('notifications').add({
+                    title: diasRestantes <= 0 ? "Contrato Vencido" : `Contrato por Vencer (${diasRestantes} días)`,
                     message,
-                    diasRestantes <= 5 ? 'error' : 'warning',
-                    undefined,
-                    `/dashboard/alquileres`, // Links to Rentals dashboard for easy access
-                    alquiler.userId
-                );
+                    type: diasRestantes <= 5 ? 'error' : 'warning',
+                    targetRole: null,
+                    targetUserId: alquiler.userId || null,
+                    readBy: [],
+                    createdAt: Timestamp.now(),
+                    link: `/dashboard/alquileres`, // Links to Rentals dashboard for easy access
+                });
 
                 count++;
             }

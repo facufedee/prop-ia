@@ -1,6 +1,5 @@
 import { NextResponse } from "next/server";
-import { db } from "@/infrastructure/firebase/client";
-import { collection, addDoc } from "firebase/firestore";
+import { adminDb } from "@/infrastructure/firebase/admin";
 
 export async function POST(req: Request) {
     try {
@@ -15,7 +14,8 @@ export async function POST(req: Request) {
             return NextResponse.json({ error: "Invalid input" }, { status: 400 });
         }
 
-        await addDoc(collection(db, "chat_sessions", sessionId, "messages"), {
+        // Admin SDK: `chat_sessions` is closed to client SDK access by Firestore rules.
+        await adminDb.collection("chat_sessions").doc(sessionId).collection("messages").add({
             text,
             sender: "user",
             timestamp: Date.now(),

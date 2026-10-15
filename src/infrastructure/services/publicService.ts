@@ -98,13 +98,16 @@ export const publicService = {
         return all.filter((p) => p.imageUrls?.length > 0 && p.status === "active").slice(0, count);
     },
 
-    // Get properties by userId (efficient direct query — use this for site pages)
+    // Get active properties by userId (efficient direct query — use this for site pages).
+    // Firestore rules only expose active or portal-published properties to visitors, so
+    // the query must carry that constraint (callers only render active ones anyway).
     getPropertiesByUserId: async (userId: string): Promise<PublicProperty[]> => {
         if (!db || !userId) return [];
         try {
             const q = query(
                 collection(db, PROPERTIES_COLLECTION),
-                where("userId", "==", userId)
+                where("userId", "==", userId),
+                where("status", "==", "active")
             );
             const snapshot = await getDocs(q);
             return snapshot.docs.map(d => ({ id: d.id, ...d.data() } as PublicProperty)).sort((a, b) => getMillis(b.createdAt) - getMillis(a.createdAt));
@@ -122,16 +125,26 @@ export const publicService = {
         if (!db) return null;
 
         try {
-            const q = query(
-                collection(db, PROPERTIES_COLLECTION),
-                where("userId", "==", agency.uid)
-            );
-            const snapshot = await getDocs(q);
-            const properties = snapshot.docs.map(doc => ({
-                id: doc.id,
-                ...doc.data(),
-                agency
-            } as PublicProperty));
+            // Visitors may only read active or portal-published properties (Firestore rules),
+            // so query both public sets and merge them.
+            const [active, published] = await Promise.all([
+                getDocs(query(
+                    collection(db, PROPERTIES_COLLECTION),
+                    where("userId", "==", agency.uid),
+                    where("status", "==", "active")
+                )),
+                getDocs(query(
+                    collection(db, PROPERTIES_COLLECTION),
+                    where("userId", "==", agency.uid),
+                    where("publishToPortal", "==", true)
+                )),
+            ]);
+            const byId = new Map<string, PublicProperty>();
+            for (const d of [...active.docs, ...published.docs]) {
+                byId.set(d.id, { id: d.id, ...d.data(), agency } as PublicProperty);
+            }
+            // Document-id order, as a single unfiltered query returned before.
+            const properties = [...byId.values()].sort((a, b) => (a.id < b.id ? -1 : a.id > b.id ? 1 : 0));
 
             return { agency, properties };
         } catch (error) {
@@ -197,7 +210,9 @@ export const publicService = {
         const byId = await publicService.getAgencyById(slug);
         if (byId) return byId;
 
-        // Slow path: scan all users and match by slugified displayName.
+        // Slow path: scan all users and match by slugified displayName. Firestore rules
+        // deny listing users to visitors, so this only succeeds for admins; server code
+        // should use server/publicAgencyAdminService.getAgencyBySlug (Admin SDK) instead.
         try {
             const q = query(collection(db, USERS_COLLECTION));
             const snapshot = await getDocs(q);
