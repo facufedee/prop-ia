@@ -97,11 +97,11 @@ const fallbackMocks = [{ function: "exists", args: [{ anyValue: {} }], result: {
 const cases = [];
 /**
  * t(name, expectation, { auth, method, path, data (existing resource), newData (request.resource), mocks, time })
- * `time` (RFC 3339) pins request.time; otherwise the API uses the evaluation time.
+ * `time` (RFC 3339) pins request.time; defaults to NOW because the Rules API
+ * leaves request.time undefined when the test case omits it.
  */
-function t(name, expectation, { auth = anon, method, path: p, data, newData, mocks = [], time }) {
-    const request = { auth, path: docPath(p), method };
-    if (time !== undefined) request.time = time;
+function t(name, expectation, { auth = anon, method, path: p, data, newData, mocks = [], time = NOW }) {
+    const request = { auth, path: docPath(p), method, time };
     if (newData !== undefined) request.resource = { data: newData };
     const tc = {
         expectation,

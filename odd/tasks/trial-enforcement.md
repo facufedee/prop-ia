@@ -23,7 +23,7 @@ Make the 14-day free trial behave exactly like the Basic plan, and enforce trial
   - Remove hardcoded 25/80 and 5/10 fallbacks; dashboard fallback limits read the same source.
   - Add limit check to `PropertyForm.tsx` and `dashboard/propiedades/page.tsx` create paths.
   - Checks: vitest unit test for trial limits (RED → GREEN), `npx tsc --noEmit`.
-- [x] T2 — Server-side access window (vitest paymentActivation RED 2 failed → GREEN 7 passed; tsc clean; Rules API run PENDING user authorization) (route: delegated writer; trigger: rules + services + script)
+- [x] T2 — Server-side access window (vitest paymentActivation RED 2 failed → GREEN 7 passed; tsc clean; Rules API 334/334 passed after defaulting request.time in harness) (route: delegated writer; trigger: rules + services + script)
   - `firestore.rules`: protect `accessUntil` (create + update), require `createdAt == request.time` on self-signup create, `hasActiveAccess()` on create of properties/inquilinos/propietarios.
   - Signup and invitation write `createdAt: serverTimestamp()`.
   - Payment webhook / admin activation mirror subscription `endDate` into `users.accessUntil`.
