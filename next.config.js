@@ -7,6 +7,11 @@ const nextConfig = {
         // otherwise Turbopack's own HTTP client fails to fetch next/font/google files.
         turbopackUseSystemTlsCerts: true,
     },
+    // Carousel slide images read Montserrat and the wordmark SVGs from disk at
+    // runtime (src/lib/social/carouselSlides.tsx); trace them into the server bundle.
+    outputFileTracingIncludes: {
+        '/api/social/carousel/**': ['./assets/fonts/*.ttf', './public/brand/*.svg'],
+    },
     images: {
         formats: ['image/avif', 'image/webp'],
         remotePatterns: [
