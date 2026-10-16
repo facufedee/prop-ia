@@ -439,7 +439,7 @@ t("emailLogs: client write denied", DENY, { auth: as("superadmin"), method: "cre
 t("property_stats: owner read", ALLOW, { auth: as("owner"), method: "list", path: "property_stats/p1", data: { ownerId: "owner", views: 3 } });
 t("property_stats: other read denied", DENY, { auth: as("other"), method: "list", path: "property_stats/p1", data: { ownerId: "owner", views: 3 } });
 t("property_stats: client write denied", DENY, { auth: as("owner"), method: "update", path: "property_stats/p1", data: { ownerId: "owner", views: 3 }, newData: { ownerId: "owner", views: 999 } });
-for (const col of ["property_view_keys", "newsletter_subscribers", "newsletters", "announcements", "emailTemplates", "verification", "configuration", "chat_sessions"]) {
+for (const col of ["property_view_keys", "newsletter_subscribers", "newsletters", "announcements", "emailTemplates", "verification", "configuration", "chat_sessions", "social_carousels"]) {
     t(`${col}: admin read denied (server-only)`, DENY, { auth: as("superadmin"), method: "get", path: `${col}/x`, data: {} });
     t(`${col}: anonymous write denied (server-only)`, DENY, { method: "create", path: `${col}/x`, newData: {} });
 }
