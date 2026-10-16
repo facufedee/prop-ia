@@ -49,6 +49,7 @@ import {
   ScrollText,
   Kanban,
   ChartLine,
+  Share2,
 } from "lucide-react";
 import Link from "next/link";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
@@ -144,6 +145,7 @@ const MENU_ITEMS: MenuItem[] = [
   { href: "/dashboard/publicaciones", label: "Publicaciones", icon: Megaphone, description: "Distribución en portales" },
   { href: "/dashboard/marketing", label: "Marketing", icon: Mail, permission: "/dashboard/marketing", description: "Emails automáticos y campañas" },
   { href: "/dashboard/blog", label: "Blog / Novedades", icon: FileText, permission: "/dashboard/blog", description: "Artículos y notas" },
+  { href: "/dashboard/admin/redes", label: "Redes", icon: Share2, adminOnly: true, description: "Carruseles semanales de Instagram" },
   { href: "/dashboard/mensajes", label: "Mensajes", icon: Inbox, description: "Mensajería interna" },
 
   // Pro Tools

@@ -30,6 +30,9 @@ vi.mock('@/infrastructure/services/marketingEmailService', () => ({ marketingEma
 const announceMock = vi.fn();
 vi.mock('@/lib/social/announceBlogPost', () => ({ announceBlogPost: announceMock }));
 
+const publishCarouselMock = vi.fn();
+vi.mock('@/lib/social/publishCarousel', () => ({ publishCarousel: publishCarouselMock }));
+
 const sendEmailMock = vi.fn();
 vi.mock('@/lib/resend', () => ({ sendEmailWithResend: sendEmailMock, isSkippedEmail: () => false }));
 
@@ -76,6 +79,13 @@ const ROUTES: Array<[string, Call]> = [
         (await import('../app/api/blog/generate/route')).POST(req('/api/blog/generate', 'POST', { url: 'https://example.com/article' }))],
     ['POST /api/social/generate', async () =>
         (await import('../app/api/social/generate/route')).POST(req('/api/social/generate', 'POST', { title: 't', content: 'c' }))],
+    ['GET /api/admin/social-carousel', async () =>
+        (await import('../app/api/admin/social-carousel/route')).GET(req('/api/admin/social-carousel', 'GET'))],
+    ['POST /api/admin/social-carousel/[id]/publish', async () =>
+        (await import('../app/api/admin/social-carousel/[id]/publish/route')).POST(
+            req('/api/admin/social-carousel/1/publish', 'POST', { force: true }),
+            { params: Promise.resolve({ id: '1' }) }
+        )],
 ];
 
 describe('platform marketing/blog/social routes are admin-only', () => {
@@ -88,6 +98,8 @@ describe('platform marketing/blog/social routes are admin-only', () => {
             import('../app/api/social/blog/[id]/announce/route'),
             import('../app/api/blog/generate/route'),
             import('../app/api/social/generate/route'),
+            import('../app/api/admin/social-carousel/route'),
+            import('../app/api/admin/social-carousel/[id]/publish/route'),
         ]);
     }, 60_000);
 
@@ -109,6 +121,7 @@ describe('platform marketing/blog/social routes are admin-only', () => {
         expect(verifyAuthMock).not.toHaveBeenCalled();
         for (const fn of Object.values(marketingService)) expect(fn).not.toHaveBeenCalled();
         expect(announceMock).not.toHaveBeenCalled();
+        expect(publishCarouselMock).not.toHaveBeenCalled();
         expect(sendEmailMock).not.toHaveBeenCalled();
         expect(adminCollectionMock).not.toHaveBeenCalled();
         expect(generateContentMock).not.toHaveBeenCalled();
