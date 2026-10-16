@@ -10,6 +10,8 @@ import { collection, query, where, getDocs, deleteDoc, doc, updateDoc, addDoc, g
 import { onAuthStateChanged } from "firebase/auth";
 import { useBranchContext } from "@/infrastructure/context/BranchContext";
 import PropertyCard from "./components/PropertyCard";
+import { subscriptionService } from "@/infrastructure/services/subscriptionService";
+import LimitReachedModal from "@/ui/components/modals/LimitReachedModal";
 
 function normalizeStr(str: string): string {
     return str.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
@@ -41,6 +43,8 @@ export default function PropiedadesPage() {
     const { selectedBranchId } = useBranchContext();
     const [user, setUser] = useState<any>(null);
     const [deleteConfirmId, setDeleteConfirmId] = useState<string | null>(null);
+    const [showLimitModal, setShowLimitModal] = useState(false);
+    const [currentLimit, setCurrentLimit] = useState<number | string>(0);
     
     const router = useRouter();
 
@@ -153,6 +157,16 @@ export default function PropiedadesPage() {
         try {
             if (!db) throw new Error("Firestore not initialized");
 
+            // Duplicating creates a new property, so it counts against the plan limit
+            const uid = auth?.currentUser?.uid;
+            if (!uid) throw new Error("Not authenticated");
+            const limitCheck = await subscriptionService.checkUsageLimit(uid, 'properties');
+            if (!limitCheck.allowed) {
+                setCurrentLimit(limitCheck.limit);
+                setShowLimitModal(true);
+                return;
+            }
+
             const { id, ...rest } = property;
             const newPropertyData = {
                 ...rest,
@@ -191,6 +205,12 @@ export default function PropiedadesPage() {
 
     return (
         <div className="space-y-6">
+            <LimitReachedModal
+                isOpen={showLimitModal}
+                onClose={() => setShowLimitModal(false)}
+                resource="propiedades"
+                limit={currentLimit}
+            />
             {/* Header */}
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
                 <div>

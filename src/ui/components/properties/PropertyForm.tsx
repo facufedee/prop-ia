@@ -8,6 +8,8 @@ import { useBranchContext } from "@/infrastructure/context/BranchContext";
 import { app, db, storage, auth } from "@/infrastructure/firebase/client";
 import { collection, addDoc, updateDoc } from "firebase/firestore";
 import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
+import { subscriptionService } from "@/infrastructure/services/subscriptionService";
+import LimitReachedModal from "@/ui/components/modals/LimitReachedModal";
 
 const initialFormState: PropertyData = {
     bedrooms: null,
@@ -79,6 +81,8 @@ export default function PropertyForm() {
 
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
+    const [showLimitModal, setShowLimitModal] = useState(false);
+    const [currentLimit, setCurrentLimit] = useState<number | string>(0);
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
         const { name, value } = e.target;
@@ -165,6 +169,23 @@ export default function PropertyForm() {
             return;
         }
 
+        // Plan limit check (this form only creates properties)
+        setLoading(true);
+        try {
+            const limitCheck = await subscriptionService.checkUsageLimit(auth.currentUser.uid, 'properties');
+            if (!limitCheck.allowed) {
+                setCurrentLimit(limitCheck.limit);
+                setShowLimitModal(true);
+                setLoading(false);
+                return;
+            }
+        } catch (err) {
+            console.error("Error checking limits:", err);
+            setError("Error verificando límites del plan.");
+            setLoading(false);
+            return;
+        }
+
         try {
             setLoading(true);
             setUploading(true);
@@ -247,6 +268,12 @@ export default function PropertyForm() {
 
     return (
         <div className="max-w-4xl mx-auto">
+            <LimitReachedModal
+                isOpen={showLimitModal}
+                onClose={() => setShowLimitModal(false)}
+                resource="propiedades"
+                limit={currentLimit}
+            />
             <form onSubmit={handleSubmit} className="space-y-8">
 
                 {/* Location Section */}
