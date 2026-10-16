@@ -37,13 +37,23 @@ const ROLES = {
     role_agent: { name: "Agente", permissions: ["/dashboard", "/dashboard/blog"] },
 };
 
+// Timestamps are sent as RFC 3339 strings (request.time is a google.protobuf.Timestamp
+// in the TestCase JSON; mocked data strings in RFC 3339 form are expected to be read
+// as timestamps, like "/..." strings are read as paths).
+const NOW = new Date().toISOString();
+const daysFromNow = (n) => new Date(Date.now() + n * 86400000).toISOString();
+
 const USERS = {
-    owner: { email: "owner@agency.com", roleId: "role_basic" },
-    other: { email: "other@agency.com", roleId: "role_basic" },
+    owner: { email: "owner@agency.com", roleId: "role_basic", createdAt: daysFromNow(-2) },
+    other: { email: "other@agency.com", roleId: "role_basic", createdAt: daysFromNow(-2) },
+    trialExpired: { email: "expired@agency.com", roleId: "role_basic", createdAt: daysFromNow(-20) },
+    paidActive: { email: "paid@agency.com", roleId: "role_pro", createdAt: daysFromNow(-100), accessUntil: daysFromNow(30) },
+    paidExpired: { email: "lapsed@agency.com", roleId: "role_pro", createdAt: daysFromNow(-100), accessUntil: daysFromNow(-1) },
     pro: { email: "pro@agency.com", roleId: "role_pro" },
     superadmin: { email: "super@zeta.com", roleId: "role_super" },
     admin: { email: "admin@zeta.com", roleId: "role_admin" },
     agent: { email: "agent@agency.com", roleId: "role_agent", organizationId: "owner" },
+    agentLapsedOrg: { email: "agent3@agency.com", roleId: "role_agent", organizationId: "trialExpired" },
     norole: { email: "norole@x.com" },
 };
 
@@ -71,6 +81,9 @@ function actorMocks(auth) {
     return m;
 }
 
+// Mocks for another user's doc (e.g. the org owner read by hasActiveAccess).
+const userDocMocks = (uid) => [mock("exists", `users/${uid}`, true), mock("get", `users/${uid}`, { data: USERS[uid] })];
+
 // Mocks for any role doc (used by self-signup checks).
 const allRoleMocks = () =>
     Object.entries(ROLES).flatMap(([id, data]) => [mock("exists", `roles/${id}`, true), mock("get", `roles/${id}`, { data })]);
@@ -83,10 +96,12 @@ const fallbackMocks = [{ function: "exists", args: [{ anyValue: {} }], result: {
 // ---------------------------------------------------------------------------
 const cases = [];
 /**
- * t(name, expectation, { auth, method, path, data (existing resource), newData (request.resource), mocks })
+ * t(name, expectation, { auth, method, path, data (existing resource), newData (request.resource), mocks, time })
+ * `time` (RFC 3339) pins request.time; otherwise the API uses the evaluation time.
  */
-function t(name, expectation, { auth = anon, method, path: p, data, newData, mocks = [] }) {
+function t(name, expectation, { auth = anon, method, path: p, data, newData, mocks = [], time }) {
     const request = { auth, path: docPath(p), method };
+    if (time !== undefined) request.time = time;
     if (newData !== undefined) request.resource = { data: newData };
     const tc = {
         expectation,
@@ -111,11 +126,27 @@ t("users: agent lists org members", ALLOW, { auth: as("agent"), method: "list", 
 t("users: admin list", ALLOW, { auth: as("superadmin"), method: "list", path: "users/owner", data: USERS.owner });
 t("users: platform owner email list", ALLOW, { auth: rootOwner, method: "list", path: "users/owner", data: USERS.owner });
 t("users: self signup with default role", ALLOW, {
-    auth: as("newbie"), method: "create", path: "users/newbie",
-    newData: { email: "newbie@x.com", roleId: "role_basic", displayName: "N" }, mocks: allRoleMocks(),
+    auth: as("newbie"), method: "create", path: "users/newbie", time: NOW,
+    newData: { email: "newbie@x.com", roleId: "role_basic", displayName: "N", createdAt: NOW }, mocks: allRoleMocks(),
 });
 t("users: self signup with null role", ALLOW, {
-    auth: as("newbie"), method: "create", path: "users/newbie", newData: { email: "newbie@x.com", roleId: null },
+    auth: as("newbie"), method: "create", path: "users/newbie", time: NOW, newData: { email: "newbie@x.com", roleId: null, createdAt: NOW },
+});
+t("users: self signup with null role and organizationId denied", DENY, {
+    auth: as("newbie"), method: "create", path: "users/newbie", time: NOW,
+    newData: { email: "newbie@x.com", roleId: null, organizationId: "owner", createdAt: NOW },
+});
+t("users: self signup with backdated createdAt denied", DENY, {
+    auth: as("newbie"), method: "create", path: "users/newbie", time: NOW,
+    newData: { email: "newbie@x.com", roleId: "role_basic", createdAt: daysFromNow(-365) }, mocks: allRoleMocks(),
+});
+t("users: self signup without createdAt denied", DENY, {
+    auth: as("newbie"), method: "create", path: "users/newbie", time: NOW,
+    newData: { email: "newbie@x.com", roleId: "role_basic" }, mocks: allRoleMocks(),
+});
+t("users: self signup with accessUntil denied", DENY, {
+    auth: as("newbie"), method: "create", path: "users/newbie", time: NOW,
+    newData: { email: "newbie@x.com", roleId: "role_basic", createdAt: NOW, accessUntil: daysFromNow(3650) }, mocks: allRoleMocks(),
 });
 t("users: self signup as Super Admin denied", DENY, {
     auth: as("newbie"), method: "create", path: "users/newbie",
@@ -123,7 +154,8 @@ t("users: self signup as Super Admin denied", DENY, {
 });
 t("users: invited agent signup", ALLOW, {
     auth: as("newagent"), method: "create", path: "users/newagent",
-    newData: { email: "newagent@x.com", roleId: "role_agent", organizationId: "owner", branchId: "b1" }, mocks: allRoleMocks(),
+    time: NOW,
+    newData: { email: "newagent@x.com", roleId: "role_agent", organizationId: "owner", branchId: "b1", createdAt: NOW }, mocks: allRoleMocks(),
 });
 t("users: agent signup without organization denied", DENY, {
     auth: as("newagent"), method: "create", path: "users/newagent",
@@ -143,6 +175,17 @@ t("users: owner updates profile fields", ALLOW, {
 t("users: owner escalates roleId denied", DENY, {
     auth: as("owner"), method: "update", path: "users/owner",
     data: USERS.owner, newData: { ...USERS.owner, roleId: "role_super" },
+});
+t("users: owner extends accessUntil denied", DENY, {
+    auth: as("owner"), method: "update", path: "users/owner",
+    data: USERS.owner, newData: { ...USERS.owner, accessUntil: daysFromNow(3650) },
+});
+t("users: owner backdates createdAt denied", DENY, {
+    auth: as("owner"), method: "update", path: "users/owner",
+    data: USERS.owner, newData: { ...USERS.owner, createdAt: daysFromNow(-1) },
+});
+t("users: admin sets accessUntil", ALLOW, {
+    auth: as("admin"), method: "update", path: "users/owner", data: USERS.owner, newData: { ...USERS.owner, accessUntil: daysFromNow(30) },
 });
 t("users: owner sets organizationId denied", DENY, {
     auth: as("owner"), method: "update", path: "users/owner",
@@ -221,6 +264,27 @@ for (const col of ["alquileres", "inquilinos", "propietarios", "leads", "visitas
     t(`${col}: other user update denied`, DENY, { auth: as("other"), method: "update", path: `${col}/d1`, data: d, newData: { ...d, nombre: "y" } });
     t(`${col}: owner delete`, ALLOW, { auth: as("owner"), method: "delete", path: `${col}/d1`, data: d });
     t(`${col}: other delete denied`, DENY, { auth: as("other"), method: "delete", path: `${col}/d1`, data: d });
+}
+// Access window (trial / paid period) on create of core business data.
+for (const col of ["properties", "inquilinos", "propietarios"]) {
+    const own = (uid) => ({ userId: uid, nombre: "x", title: "x" });
+    t(`${col}: trial user within 14 days create`, ALLOW, { auth: as("owner"), method: "create", path: `${col}/w1`, newData: own("owner") });
+    t(`${col}: expired trial create denied`, DENY, { auth: as("trialExpired"), method: "create", path: `${col}/w1`, newData: own("trialExpired") });
+    t(`${col}: paid accessUntil in future create (old createdAt)`, ALLOW, {
+        auth: as("paidActive"), method: "create", path: `${col}/w1`, newData: own("paidActive"),
+    });
+    t(`${col}: lapsed accessUntil create denied`, DENY, { auth: as("paidExpired"), method: "create", path: `${col}/w1`, newData: own("paidExpired") });
+    t(`${col}: org member create within owner's window`, ALLOW, {
+        auth: as("agent"), method: "create", path: `${col}/w1`, newData: own("agent"), mocks: userDocMocks("owner"),
+    });
+    t(`${col}: org member create denied when owner's window closed`, DENY, {
+        auth: as("agentLapsedOrg"), method: "create", path: `${col}/w1`, newData: own("agentLapsedOrg"), mocks: userDocMocks("trialExpired"),
+    });
+    t(`${col}: user without profile doc create denied`, DENY, { auth: as("ghost"), method: "create", path: `${col}/w1`, newData: own("ghost") });
+    t(`${col}: admin create for expired user`, ALLOW, { auth: as("superadmin"), method: "create", path: `${col}/w1`, newData: own("trialExpired") });
+    t(`${col}: expired trial can still update`, ALLOW, {
+        auth: as("trialExpired"), method: "update", path: `${col}/w2`, data: own("trialExpired"), newData: { ...own("trialExpired"), nombre: "y" },
+    });
 }
 t("leads: admin reads platform inbox", ALLOW, { auth: as("superadmin"), method: "list", path: "leads/l1", data: { userId: "SYSTEM_ZETA_PROP" } });
 t("leads: anonymous create denied (forms use /api/leads)", DENY, { method: "create", path: "leads/l9", newData: { userId: "owner", nombre: "x" } });

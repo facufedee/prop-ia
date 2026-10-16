@@ -155,6 +155,7 @@ export const adminService = {
         if (querySnapshot.empty) {
             // Crear nueva suscripción si no existe
             const newSubRef = doc(collection(db, SUBSCRIPTIONS_COLLECTION));
+            const endDate = new Date(new Date().setFullYear(new Date().getFullYear() + 1)); // 1 año por defecto
             await setDoc(newSubRef, {
                 userId: uid,
                 planTier: planTier,
@@ -166,7 +167,7 @@ export const adminService = {
                 amount: 0,
                 currency: 'ARS',
                 startDate: new Date(),
-                endDate: new Date(new Date().setFullYear(new Date().getFullYear() + 1)), // 1 año por defecto
+                endDate,
                 usage: {
                     properties: 0,
                     users: 0,
@@ -175,6 +176,8 @@ export const adminService = {
                     aiCredits: 0
                 }
             });
+            // Mirror the access window into the user doc (read by Firestore rules).
+            await updateDoc(doc(db, USERS_COLLECTION, uid), { accessUntil: endDate });
         } else {
             // Actualizar existente
             const subDoc = querySnapshot.docs[0];
@@ -303,7 +306,8 @@ export const adminService = {
         const userRef = doc(db, USERS_COLLECTION, uid);
         await updateDoc(userRef, {
             pendingPaymentApproval: false,
-            showPaymentWelcome: true
+            showPaymentWelcome: true,
+            accessUntil: endDate // Mirrors the subscription endDate for Firestore rules
         });
     },
 
@@ -469,6 +473,9 @@ export const adminService = {
 
             // Apply plan filter using normalized comparison
             if (planFilter !== "all" && storedPlan !== planFilter) return;
+
+            // Mirror the access window into the user doc (read by Firestore rules).
+            ops.push(updateDoc(userDoc.ref, { accessUntil: endDate }));
 
             if (sub) {
                 // Update existing subscription

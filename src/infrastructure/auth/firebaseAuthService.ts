@@ -7,7 +7,7 @@ import {
     signOut,
     User,
 } from "firebase/auth";
-import { doc, setDoc, getDoc } from "firebase/firestore";
+import { doc, setDoc, getDoc, serverTimestamp } from "firebase/firestore";
 import { auditLogService } from "@/infrastructure/services/auditLogService";
 
 // ============================================================================
@@ -47,7 +47,8 @@ export const saveUserToFirestore = async (user: User, additionalData?: { agencyN
                 onboardingSkips: 0,
                 photoURL: user.photoURL || "",
                 roleId: defaultRole?.id || null, // Can be null if really failed
-                createdAt: new Date(),
+                // Must be the server time: Firestore rules derive the trial window from it.
+                createdAt: serverTimestamp(),
                 lastLogin: new Date(),
                 loginCount: 1,
                 emailVerified: user.emailVerified,
