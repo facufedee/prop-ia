@@ -586,6 +586,12 @@ service cloud.firestore {
       allow read, write: if false;
     }
 
+    // Instagram carousel drafts: written by /api/cron/carousel-draft and
+    // published from /api/admin/social-carousel/* (Admin SDK only).
+    match /social_carousels/{topicId} {
+      allow read, write: if false;
+    }
+
     match /chat_sessions/{sessionId} {
       allow read, write: if false;
 
