@@ -122,6 +122,8 @@ describe('payment activation (Admin SDK)', () => {
         });
 
         expect(doc('users/u1')!.roleId).toBe('role-pro');
+        // Paid access window is mirrored into the user doc for Firestore rules.
+        expect(doc('users/u1')!.accessUntil.toDate().getTime()).toBe(subs[0][1].endDate.toDate().getTime());
 
         const notifications = fake.list('notifications').map(([, n]) => n);
         expect(notifications).toHaveLength(2);
@@ -153,6 +155,7 @@ describe('payment activation (Admin SDK)', () => {
         const updated = doc('subscriptions/sub1')!;
         expect(updated.status).toBe('active');
         expect(updated.endDate.toDate().toISOString()).toBe('2030-02-15T00:00:00.000Z');
+        expect(doc('users/u1')!.accessUntil.toDate().toISOString()).toBe('2030-02-15T00:00:00.000Z');
     });
 
     it('webhook ignores payments that are not approved', async () => {

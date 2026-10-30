@@ -178,11 +178,13 @@ export const subscriptionAdminService = {
 
             // 7. Extend the active subscription or create a new one
             const existingSubscription = await getActiveSubscription(userId);
+            let accessUntil = endDate;
 
             if (existingSubscription) {
                 console.log(`[Webhook] Extending existing subscription for user: ${userId}`);
                 const newEndDate = new Date(existingSubscription.endDate);
                 addPeriod(newEndDate, billingPeriod);
+                accessUntil = newEndDate;
 
                 await adminDb.collection(SUBSCRIPTIONS_COLLECTION).doc(existingSubscription.id).update({
                     endDate: Timestamp.fromDate(newEndDate),
@@ -217,6 +219,12 @@ export const subscriptionAdminService = {
                     updatedAt: Timestamp.now(),
                 });
             }
+
+            // 7.1 Mirror the paid access window into the user doc (read by Firestore rules).
+            await adminDb.collection("users").doc(userId).set(
+                { accessUntil: Timestamp.fromDate(accessUntil) },
+                { merge: true },
+            );
 
             // 7.5 Update user role based on plan ("Cliente Pro" / "Cliente Enterprise")
             try {

@@ -116,6 +116,31 @@ service cloud.firestore {
       return request.resource.data.diff(resource.data).affectedKeys();
     }
 
+    // Access window (free trial or paid period) for creating core business data.
+    //   - admins always;
+    //   - org members (organizationId set): the org owner's window (organizationId
+    //     is the owner's uid), so agents stop when the owner's plan expires;
+    //   - users/{uid}.accessUntil (server-owned, mirrored from subscriptions.endDate);
+    //   - otherwise the 14-day trial from users/{uid}.createdAt (server time on signup).
+    // Quantity limits cannot be enforced in rules and stay client-side.
+    function windowOpen(data) {
+      let accessUntil = data.get('accessUntil', null);
+      let createdAt = data.get('createdAt', null);
+      return accessUntil != null
+          ? (accessUntil is timestamp && request.time < accessUntil)
+          : (createdAt is timestamp &&
+             request.time < createdAt + duration.value(14, 'd'));
+    }
+
+    function hasActiveAccess() {
+      let me = myUserData();
+      let orgId = me.get('organizationId', null);
+      return isAdmin() ||
+             (orgId is string && orgId != request.auth.uid
+                ? exists(userPath(orgId)) && windowOpen(get(userPath(orgId)).data)
+                : windowOpen(me));
+    }
+
     // ------------------------------------------------------------------
     // users/{userId}
     //   get:    anyone (public agency info on portal/property pages, read by the
@@ -130,7 +155,7 @@ service cloud.firestore {
     match /users/{userId} {
       function protectedUserFields() {
         return ['roleId', 'organizationId', 'branchId', 'disabled', 'isVerified',
-                'verificationStatus', 'email', 'uid', 'createdAt'];
+                'verificationStatus', 'email', 'uid', 'createdAt', 'accessUntil'];
       }
 
       function roleNameOf(roleId) {
@@ -140,7 +165,9 @@ service cloud.firestore {
       function validSelfSignupRole() {
         let data = request.resource.data;
         let roleId = data.get('roleId', null);
-        return roleId == null ||
+        // organizationId is only allowed with the "Agente" role: the account then
+        // uses the org owner's access window (see hasActiveAccess).
+        return (roleId == null && !('organizationId' in data)) ||
                (roleId is string && roleNameOf(roleId) == 'Cliente Básico' &&
                   !('organizationId' in data)) ||
                (roleId is string && roleNameOf(roleId) == 'Agente' &&
@@ -155,7 +182,10 @@ service cloud.firestore {
       allow create: if isAdmin() ||
                        (isOwner(userId) &&
                         validSelfSignupRole() &&
-                        !request.resource.data.keys().hasAny(['disabled', 'isVerified', 'verificationStatus']));
+                        // Trial start must be the server time (it cannot be backdated).
+                        request.resource.data.get('createdAt', null) == request.time &&
+                        !request.resource.data.keys().hasAny(['disabled', 'isVerified', 'verificationStatus',
+                                                             'accessUntil']));
       allow update: if isAdmin() ||
                        (isOwner(userId) && !changedKeys().hasAny(protectedUserFields()));
       allow delete: if isAdmin();
@@ -198,7 +228,7 @@ service cloud.firestore {
     //   read:   anyone when publishToPortal == true or status == 'active'
     //           (public portal / agency sites / property detail); owner and
     //           admin always. Public queries MUST constrain on one of those fields.
-    //   create: owner (userId == auth.uid); admin (backup restore).
+    //   create: owner (userId == auth.uid) within the access window; admin (backup restore).
     //   update: owner, userId immutable; admin.
     //   delete: owner; admin.
     // ------------------------------------------------------------------
@@ -207,7 +237,7 @@ service cloud.firestore {
                      resource.data.status == 'active' ||
                      ownsExisting() ||
                      isAdmin();
-      allow create: if createsOwned() || isAdmin();
+      allow create: if (createsOwned() && hasActiveAccess()) || isAdmin();
       allow update: if (ownsExisting() && keepsOwner()) || isAdmin();
       allow delete: if ownsExisting() || isAdmin();
     }
@@ -229,14 +259,14 @@ service cloud.firestore {
 
     match /inquilinos/{inquilinoId} {
       allow read: if ownsExisting() || isAdmin();
-      allow create: if createsOwned() || isAdmin();
+      allow create: if (createsOwned() && hasActiveAccess()) || isAdmin();
       allow update: if (ownsExisting() && keepsOwner()) || isAdmin();
       allow delete: if ownsExisting() || isAdmin();
     }
 
     match /propietarios/{propietarioId} {
       allow read: if ownsExisting() || isAdmin();
-      allow create: if createsOwned() || isAdmin();
+      allow create: if (createsOwned() && hasActiveAccess()) || isAdmin();
       allow update: if (ownsExisting() && keepsOwner()) || isAdmin();
       allow delete: if ownsExisting() || isAdmin();
     }
