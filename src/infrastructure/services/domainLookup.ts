@@ -25,11 +25,28 @@ export const domainLookupService = {
             const body = {
                 structuredQuery: {
                     from: [{ collectionId: "sites" }],
+                    // The published filter is required: unauthenticated reads of
+                    // `sites` are only allowed for published docs, and Firestore
+                    // rejects any query that can't prove that constraint.
                     where: {
-                        fieldFilter: {
-                            field: { fieldPath: "customDomain" },
-                            op: "EQUAL",
-                            value: { stringValue: d }
+                        compositeFilter: {
+                            op: "AND",
+                            filters: [
+                                {
+                                    fieldFilter: {
+                                        field: { fieldPath: "customDomain" },
+                                        op: "EQUAL",
+                                        value: { stringValue: d }
+                                    }
+                                },
+                                {
+                                    fieldFilter: {
+                                        field: { fieldPath: "published" },
+                                        op: "EQUAL",
+                                        value: { booleanValue: true }
+                                    }
+                                }
+                            ]
                         }
                     },
                     limit: 1
