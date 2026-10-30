@@ -1,11 +1,11 @@
 import { GoogleGenerativeAI } from "@google/generative-ai";
 import { NextRequest, NextResponse } from "next/server";
-import { verifyAuth } from "@/lib/apiAuth";
+import { verifyAdmin } from "@/lib/apiAuth";
 
 const apiKey = process.env.GOOGLE_API_KEY;
 
 export async function POST(request: NextRequest) {
-    const authResult = await verifyAuth(request);
+    const authResult = await verifyAdmin(request);
     if (authResult.error) return authResult.error;
 
     if (!apiKey) {

@@ -83,6 +83,10 @@ env:
     secret: BLOG_AUTOPUBLISH_SECRET
     availability:
       - RUNTIME
+  - variable: CAROUSEL_DRAFT_SECRET
+    secret: CAROUSEL_DRAFT_SECRET
+    availability:
+      - RUNTIME
   - variable: MAKE_SOCIAL_WEBHOOK_URL
     secret: MAKE_SOCIAL_WEBHOOK_URL
     availability:

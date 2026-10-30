@@ -49,6 +49,7 @@ import {
   ScrollText,
   Kanban,
   ChartLine,
+  Share2,
 } from "lucide-react";
 import Link from "next/link";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
@@ -58,6 +59,7 @@ import { auth } from "@/infrastructure/firebase/client";
 import { signOut } from "firebase/auth";
 import { useState, useEffect } from "react";
 import { useAuth } from "@/ui/context/AuthContext";
+import { ADMIN_ONLY_PERMISSIONS } from "@/lib/roles/adminOnlyPermissions";
 
 
 // Types
@@ -142,7 +144,8 @@ const MENU_ITEMS: MenuItem[] = [
   { href: "/dashboard/chat", label: "Chat Zeta Prop", icon: MessagesSquare, description: "Asistente virtual inmobiliario" },
   { href: "/dashboard/publicaciones", label: "Publicaciones", icon: Megaphone, description: "Distribución en portales" },
   { href: "/dashboard/marketing", label: "Marketing", icon: Mail, permission: "/dashboard/marketing", description: "Emails automáticos y campañas" },
-  { href: "/dashboard/blog", label: "Blog / Novedades", icon: FileText, description: "Artículos y notas" },
+  { href: "/dashboard/blog", label: "Blog / Novedades", icon: FileText, permission: "/dashboard/blog", description: "Artículos y notas" },
+  { href: "/dashboard/admin/redes", label: "Redes", icon: Share2, adminOnly: true, description: "Carruseles semanales de Instagram" },
   { href: "/dashboard/mensajes", label: "Mensajes", icon: Inbox, description: "Mensajería interna" },
 
   // Pro Tools
@@ -248,6 +251,10 @@ export default function DashboardSidebar({ isOpen = false, onClose }: DashboardS
 
     // First check if user has permission for this specific route
     const requiredPermission = item.permission || item.href;
+
+    // Platform content routes stay hidden for non-admins even if a stale role
+    // still lists them (pages and server checks reject them anyway).
+    if (ADMIN_ONLY_PERMISSIONS.includes(requiredPermission)) return false;
 
     // STRICT CHECK: check if href is in userPermissions array
     // This removes the need for checking "adminOnly" since admins
