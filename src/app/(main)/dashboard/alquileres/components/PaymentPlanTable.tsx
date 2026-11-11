@@ -12,6 +12,7 @@ import { reportService } from "@/infrastructure/services/reportService";
 import { useAuth } from "@/ui/context/AuthContext";
 import PaymentHistoryModal from "./PaymentHistoryModal";
 import IPCAdjustmentModal from "./IPCAdjustmentModal";
+import { applyRentIncrease } from "@/lib/financial/applyRentIncrease";
 import { FileText, TrendingUp } from "lucide-react";
 
 import { Inquilino } from "@/domain/models/Inquilino";
@@ -22,7 +23,8 @@ interface PaymentPlanTableProps {
     alquiler: Alquiler;
     inquilino?: Inquilino | null;
     onUpdatePayment: (payment: Pago) => void;
-    onUpdateContract?: (updates: Partial<Alquiler>) => void;
+    /** Resolves true when the contract was saved. */
+    onUpdateContract?: (updates: Partial<Alquiler>) => Promise<boolean>;
 }
 
 export default function PaymentPlanTable({ alquiler, inquilino, onUpdatePayment, onUpdateContract }: PaymentPlanTableProps) {
@@ -128,41 +130,26 @@ export default function PaymentPlanTable({ alquiler, inquilino, onUpdatePayment,
         reportService.generateContractReport(alquiler, allSorted);
     };
 
-    const handleApplyIPC = (newRent: number) => {
-        if (!onUpdateContract) return;
+    const unpaidMonths = periods
+        .filter(p => p.estado !== 'pagado')
+        .map(p => p.mes)
+        .sort();
+    const currentMonth = format(new Date(), 'yyyy-MM');
+    const defaultFromMonth = unpaidMonths.find(mes => mes >= currentMonth) ?? unpaidMonths[0];
 
-        // Iterate over history to update pending payments
-        const updatedHistory = alquiler.historialPagos.map(p => {
-            if (p.estado === 'pendiente') {
-                // Determine Honorarios
-                let newHonorarios = p.desglose?.honorarios || 0;
-                if (alquiler.honorariosTipo === 'porcentaje' && alquiler.honorariosValor) {
-                    newHonorarios = Math.floor(newRent * (alquiler.honorariosValor / 100));
-                }
+    const handleApplyIPC = async (newRent: number, fromMonth: string): Promise<boolean> => {
+        if (!onUpdateContract) return false;
 
-                const servicios = p.desglose?.servicios || 0;
-                const otros = p.desglose?.otros || 0;
-
-                return {
-                    ...p,
-                    montoAlquiler: newRent,
-                    monto: newRent + servicios + otros, // Honorarios are included in Rent, not added on top
-                    desglose: {
-                        ...p.desglose,
-                        alquilerPuro: newRent,
-                        honorarios: newHonorarios
-                    }
-                } as Pago;
-            }
-            return p;
+        const historialPagos = applyRentIncrease({
+            history: alquiler.historialPagos,
+            periods,
+            newRent,
+            fromMonth,
+            honorariosTipo: alquiler.honorariosTipo,
+            honorariosValor: alquiler.honorariosValor,
         });
 
-        onUpdateContract({
-            montoMensual: newRent,
-            historialPagos: updatedHistory
-        });
-
-        setShowIPCModal(false);
+        return onUpdateContract({ montoMensual: newRent, historialPagos });
     };
 
     const handleMarkAsPaid = (pago: Pago) => {
@@ -370,6 +357,8 @@ export default function PaymentPlanTable({ alquiler, inquilino, onUpdatePayment,
                     })()}
                     defaultPercentage={alquiler.ajusteValor}
                     paymentHistory={alquiler.historialPagos}
+                    unpaidMonths={unpaidMonths}
+                    defaultFromMonth={defaultFromMonth}
                     onConfirm={handleApplyIPC}
                 />
             )}

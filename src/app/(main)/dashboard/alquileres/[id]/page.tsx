@@ -199,26 +199,30 @@ export default function AlquilerDetailPage() {
         }
     };
 
-    // New handler for bulk updates (e.g. IPC adjustment)
-    const handleUpdateContract = async (updates: Partial<Alquiler>) => {
-        if (!alquiler) return;
+    // Bulk updates (e.g. IPC adjustment). Resolves true when saved.
+    const handleUpdateContract = async (updates: Partial<Alquiler>): Promise<boolean> => {
+        if (!alquiler) return false;
 
         try {
             await alquileresService.updateAlquiler(alquiler.id, updates);
-            // Optimization: Apply partial updates locally right away
-            if (updates.montoMensual) {
-                // If amount changed, we might have updated history too in the 'updates' object
-            }
+        } catch (error) {
+            console.error("Error updating contract:", error);
+            const code = (error as { code?: string })?.code;
+            alert(`Error al actualizar el contrato${code ? ` (${code})` : ""}. Intentá de nuevo.`);
+            return false;
+        }
 
-            // Re-fetch to be safe and get consistent state
+        try {
             const updated = await alquileresService.getAlquilerById(alquiler.id);
             if (updated) {
                 setAlquiler(updated);
             }
         } catch (error) {
-            console.error("Error updating contract:", error);
-            alert("Error al actualizar el contrato");
+            // The save succeeded; keep the local state in sync with what was written.
+            console.error("Error refreshing contract:", error);
+            setAlquiler({ ...alquiler, ...updates });
         }
+        return true;
     };
 
     const handleUpdateIncidenciaStatus = async (id: string, newStatus: 'abierto' | 'en_proceso' | 'resuelto') => {
