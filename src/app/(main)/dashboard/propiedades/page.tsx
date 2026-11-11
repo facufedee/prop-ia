@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import CapybaraAssistant from "@/ui/components/assistant/CapybaraAssistant";
 import PropertiesTable, { Property } from "@/ui/components/tables/PropertiesTable";
 import { Plus, Building2, Home, Key, Search, Filter, LayoutGrid, List, Share2, AlertTriangle } from "lucide-react";
 import Link from "next/link";
@@ -204,6 +205,13 @@ export default function PropiedadesPage() {
                     <Plus strokeWidth={1.5} className="w-5 h-5" /> Nueva Propiedad
                 </Link>
             </div>
+
+            <CapybaraAssistant
+                messageKey={properties.length === 0 ? "properties-empty" : "properties-list"}
+                message={properties.length === 0
+                    ? <>Todavía no cargaste propiedades. Tocá <strong>Nueva Propiedad</strong> y te acompaño paso a paso 🏡</>
+                    : <>Desde acá editás tus propiedades. ¿Querés mostrarlas todas juntas? Compartí tu <strong>link público</strong> con tus clientes.</>}
+            />
 
             {/* Share Portfolio Banner */}
             <div className="bg-[var(--color-paper-2)] border border-[var(--color-rule)] rounded-2xl p-6 text-[var(--color-ink)] relative overflow-hidden">

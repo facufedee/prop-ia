@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
+import CapybaraAssistant from "@/ui/components/assistant/CapybaraAssistant";
 import { useRouter } from "next/navigation";
 import StepIndicator from "./StepIndicator";
 import { ChevronLeft, ChevronRight, Loader2, Upload, X, MapPin, Star, AlertTriangle } from "lucide-react";
@@ -30,6 +31,14 @@ const STEPS = [
     "Características",
     "Precio",
     "Multimedia"
+];
+
+const PROPERTY_STEP_HINTS = [
+    <>¡Hola! Soy Capi 👋 Empecemos por lo básico: ¿es <strong>venta o alquiler</strong>, y qué tipo de propiedad es?</>,
+    <>Cargá la <strong>dirección exacta</strong>: así la propiedad aparece bien ubicada en el mapa 📍</>,
+    <>Ambientes, metros y comodidades. Cuanto más completo, <strong>más consultas</strong> vas a recibir.</>,
+    <>Poné el <strong>precio y la moneda</strong>. Revisá bien los ceros 😉</>,
+    <>Último paso: subí <strong>fotos luminosas</strong> y bien encuadradas. Es lo primero que mira la gente 📸</>,
 ];
 
 const AMENITIES_LIST = [
@@ -1774,6 +1783,7 @@ export default function PropertyWizard({ initialData, isEditing = false, ...prop
                 limit={currentLimit}
             />
             <StepIndicator currentStep={currentStep} totalSteps={STEPS.length} steps={STEPS} onStepClick={handleStepClick} />
+            <CapybaraAssistant className="my-4" messageKey={`property-step-${currentStep}`} message={PROPERTY_STEP_HINTS[currentStep - 1]} />
 
             <div className="bg-[var(--color-paper-2)] rounded-2xl shadow-sm border border-[var(--color-rule)] p-6 md:p-8 mt-6">
                 {errors.form && (

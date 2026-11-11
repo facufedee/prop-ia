@@ -7,8 +7,9 @@ import { doc, getDoc } from "firebase/firestore";
 import { alquileresService } from "@/infrastructure/services/alquileresService";
 import { inquilinosService } from "@/infrastructure/services/inquilinosService";
 import PropertySelector from "../components/PropertySelector";
+import CapybaraAssistant from "@/ui/components/assistant/CapybaraAssistant";
 import ClientSelector from "@/ui/components/forms/ClientSelector";
-import { ChevronLeft, ChevronRight, Check, Lightbulb } from "lucide-react";
+import { ChevronLeft, ChevronRight, Check } from "lucide-react";
 import { Alquiler } from "@/domain/models/Alquiler";
 import { auditLogService } from "@/infrastructure/services/auditLogService";
 import { TextInput, MoneyInput, TextAreaInput } from "@/ui/components/forms";
@@ -264,25 +265,36 @@ export default function NuevoAlquilerPage() {
         return true;
     };
 
+    const assistantStepDone =
+        (currentStep === 1 && selectedProperty.id !== "") ||
+        (currentStep === 2 && selectedInquilino !== null) ||
+        (currentStep === 3 && selectedPropietario !== null);
+
+    const assistantMessage = (() => {
+        switch (currentStep) {
+            case 1:
+                return assistantStepDone
+                    ? <>¡Bien elegida! Ahora tocá <strong>Siguiente</strong> para cargar al inquilino.</>
+                    : <>¡Hola! Soy Capi 👋 Arranquemos por la <strong>propiedad</strong>: elegila del listado o cargá una nueva.</>;
+            case 2:
+                return assistantStepDone
+                    ? <>Perfecto. Tocá <strong>Siguiente</strong> y seguimos con el propietario.</>
+                    : <>¿Quién va a alquilar? Buscá al <strong>inquilino</strong> si ya lo tenés, o crealo acá mismo: no hace falta ir a Clientes.</>;
+            case 3:
+                return assistantStepDone
+                    ? <>¡Ya casi! Tocá <strong>Siguiente</strong> para completar el contrato.</>
+                    : <>Ahora el <strong>propietario</strong>. Igual que antes: buscalo o crealo desde acá.</>;
+            default:
+                return <>Último paso: completá <strong>montos, fechas y ajuste</strong>. Revisá todo antes de crear el contrato ✅</>;
+        }
+    })();
+
     return (
         <div className="p-6 max-w-4xl mx-auto">
             {/* Header */}
             <div className="mb-6">
                 <h1 className="font-heading text-2xl font-bold text-[var(--color-ink)]">Nuevo Contrato de Alquiler</h1>
                 <p className="text-[var(--color-muted)]">Complete los pasos para crear un nuevo contrato y dar de alta a los clientes.</p>
-            </div>
-
-            {/* Hint Notice */}
-            <div className="mb-8 bg-[var(--color-accent-soft)] border border-[var(--color-accent)]/30 rounded-xl p-4 flex gap-3 text-[var(--color-accent)] shadow-sm">
-                <div className="mt-0.5">
-                    <Lightbulb strokeWidth={1.5} className="w-5 h-5 text-[var(--color-accent)]" />
-                </div>
-                <div>
-                    <h3 className="font-semibold mb-1">¡Aquí mismo cargas a tus clientes!</h3>
-                    <p className="text-sm text-[var(--color-accent)]/90 leading-relaxed">
-                        No necesitás crear a los inquilinos y propietarios en otro lado. En los <strong>pasos 2 y 3</strong> podrás buscarlos si ya existen, o <strong>crear clientes nuevos directamente</strong>. El sistema los guardará automáticamente para que puedas gestionarlos después.
-                    </p>
-                </div>
             </div>
 
             {/* Step Indicator */}
@@ -316,6 +328,12 @@ export default function NuevoAlquilerPage() {
                     ))}
                 </div>
             </div>
+
+            <CapybaraAssistant
+                className="mb-4"
+                messageKey={`step-${currentStep}-${assistantStepDone ? "done" : "todo"}`}
+                message={assistantMessage}
+            />
 
             {/* Step Content */}
             <div className="bg-[var(--color-paper-2)] rounded-xl border border-[var(--color-rule)] p-6 mb-6">

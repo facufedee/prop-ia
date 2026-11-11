@@ -1,13 +1,16 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import CapybaraAssistant from "@/ui/components/assistant/CapybaraAssistant";
+import { getContractAlerts } from "@/lib/financial/contractAlerts";
 import { useRouter } from "next/navigation";
 import { app, auth } from "@/infrastructure/firebase/client";
 import { alquileresService } from "@/infrastructure/services/alquileresService";
 import { Alquiler } from "@/domain/models/Alquiler";
 import RentalCard from "./components/RentalCard";
 import RentalsTable from "./components/RentalsTable";
-import { Plus, Filter, Search, LayoutGrid, List } from "lucide-react";
+import BulkIncreaseModal from "./components/BulkIncreaseModal";
+import { Plus, Filter, Search, LayoutGrid, List, TrendingUp } from "lucide-react";
 import Link from "next/link";
 
 import { useBranchContext } from "@/infrastructure/context/BranchContext";
@@ -22,6 +25,8 @@ export default function AlquileresPage() {
     const [filter, setFilter] = useState<'todos' | 'activo' | 'pendiente' | 'finalizado' | 'suspendido'>('activo');
     const [searchTerm, setSearchTerm] = useState("");
     const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
+    const [showBulkIncrease, setShowBulkIncrease] = useState(false);
+    const [reloadKey, setReloadKey] = useState(0);
     const { selectedBranchId } = useBranchContext();
 
     useEffect(() => {
@@ -64,7 +69,7 @@ export default function AlquileresPage() {
         };
 
         fetchContracts();
-    }, [selectedBranchId]); // Re-run when branch changes
+    }, [selectedBranchId, reloadKey]); // Re-run when branch changes or after bulk updates
 
     useEffect(() => {
         let result = contracts;
@@ -108,6 +113,15 @@ export default function AlquileresPage() {
         }).length,
     };
 
+    const activeContracts = contracts.filter(c => c.estado === 'activo');
+    const contractAlerts = new Map(activeContracts.map(c => [c.id, getContractAlerts(c)]));
+    const withOverdue = activeContracts.filter(c => (contractAlerts.get(c.id)?.overdueMonths.length ?? 0) > 0);
+    const withDueIncrease = activeContracts.filter(c => contractAlerts.get(c.id)?.adjustment?.status === 'due');
+    const listAddresses = (list: Alquiler[]) => {
+        const names = list.slice(0, 3).map(c => c.direccion);
+        return list.length > 3 ? `${names.join(", ")} y ${list.length - 3} más` : names.join(", ");
+    };
+
     if (loading) {
         return (
             <div className="p-6 flex items-center justify-center min-h-[400px]">
@@ -125,6 +139,17 @@ export default function AlquileresPage() {
                     <h1 className="font-heading text-2xl font-bold text-[var(--color-ink)]">Alquileres</h1>
                     <p className="text-[var(--color-muted)]">Gestión de contratos de alquiler</p>
                 </div>
+                <div className="flex flex-wrap items-center gap-3">
+                {withDueIncrease.length > 0 && (
+                    <button
+                        type="button"
+                        onClick={() => setShowBulkIncrease(true)}
+                        className="flex items-center gap-2 px-4 py-2 bg-[var(--color-paper-2)] border border-[var(--color-accent)]/40 text-[var(--color-ink)] rounded-lg hover:bg-[var(--color-paper-3)] transition-colors"
+                    >
+                        <TrendingUp strokeWidth={1.5} className="w-5 h-5 text-[var(--color-accent)]" />
+                        Aumentos pendientes ({withDueIncrease.length})
+                    </button>
+                )}
                 <Link
                     href="/dashboard/alquileres/nuevo"
                     className="flex items-center gap-2 px-4 py-2 bg-[var(--color-ink)] text-[var(--color-paper)] rounded-lg hover:bg-[var(--color-ink-2)] transition-colors"
@@ -132,7 +157,44 @@ export default function AlquileresPage() {
                     <Plus strokeWidth={1.5} className="w-5 h-5" />
                     Nuevo Contrato
                 </Link>
+                </div>
             </div>
+
+            {showBulkIncrease && (
+                <BulkIncreaseModal
+                    contracts={contracts}
+                    onClose={() => setShowBulkIncrease(false)}
+                    onApplied={() => setReloadKey(k => k + 1)}
+                />
+            )}
+
+            <CapybaraAssistant
+                important={withOverdue.length > 0 || withDueIncrease.length > 0}
+                messageKey={`rentals-${withOverdue.map(c => c.id).join(",")}-${withDueIncrease.map(c => c.id).join(",")}-${contracts.length === 0}`}
+                message={contracts.length === 0
+                    ? <>Todavía no tenés contratos. Tocá <strong>Nuevo Contrato</strong> y lo armamos juntos en 4 pasos 📝</>
+                    : withOverdue.length === 0 && withDueIncrease.length === 0
+                        ? <>Todo al día 👌 Entrá a un contrato para <strong>registrar cobros</strong>, aplicar aumentos o ver las liquidaciones.</>
+                        : <>
+                            {withOverdue.length > 0 && (
+                                <p>
+                                    <strong>{withOverdue.length === 1 ? "1 contrato tiene" : `${withOverdue.length} contratos tienen`} cobros vencidos</strong>: {listAddresses(withOverdue)}.
+                                </p>
+                            )}
+                            {withDueIncrease.length > 0 && (
+                                <p className={withOverdue.length > 0 ? "mt-1.5" : ""}>
+                                    <strong>{withDueIncrease.length === 1 ? "1 contrato necesita" : `${withDueIncrease.length} contratos necesitan`} aumento</strong>: {listAddresses(withDueIncrease)}.{" "}
+                                    <button
+                                        type="button"
+                                        onClick={() => setShowBulkIncrease(true)}
+                                        className="font-semibold text-[var(--color-accent)] underline underline-offset-2 hover:text-[var(--color-accent-2)]"
+                                    >
+                                        {withDueIncrease.length === 1 ? "Aplicarlo ahora" : "Aplicarlos todos juntos"}
+                                    </button>
+                                </p>
+                            )}
+                        </>}
+            />
 
             {/* Stats */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">

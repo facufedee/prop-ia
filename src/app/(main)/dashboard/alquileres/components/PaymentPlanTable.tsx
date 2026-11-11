@@ -1,7 +1,8 @@
 "use client";
 
-import { useState } from "react";
-import { format, addMonths, startOfMonth, isSameMonth, parseISO, isValid } from "date-fns";
+import { useEffect, useState } from "react";
+import CapybaraAssistant from "@/ui/components/assistant/CapybaraAssistant";
+import { format, parseISO } from "date-fns";
 import { es } from "date-fns/locale";
 import { Pago, Alquiler } from "@/domain/models/Alquiler";
 import { CheckCircle2, Clock, AlertCircle, Edit2, ExternalLink, ChevronDown } from "lucide-react";
@@ -12,6 +13,10 @@ import { reportService } from "@/infrastructure/services/reportService";
 import { useAuth } from "@/ui/context/AuthContext";
 import PaymentHistoryModal from "./PaymentHistoryModal";
 import IPCAdjustmentModal from "./IPCAdjustmentModal";
+import { applyRentIncrease } from "@/lib/financial/applyRentIncrease";
+import { buildPaymentPeriods } from "@/lib/financial/paymentPeriods";
+import { getContractAlerts, suggestIncrease } from "@/lib/financial/contractAlerts";
+import { IndicesData } from "@/lib/financial/indices";
 import { FileText, TrendingUp } from "lucide-react";
 
 import { Inquilino } from "@/domain/models/Inquilino";
@@ -22,7 +27,8 @@ interface PaymentPlanTableProps {
     alquiler: Alquiler;
     inquilino?: Inquilino | null;
     onUpdatePayment: (payment: Pago) => void;
-    onUpdateContract?: (updates: Partial<Alquiler>) => void;
+    /** Resolves true when the contract was saved. */
+    onUpdateContract?: (updates: Partial<Alquiler>) => Promise<boolean>;
 }
 
 export default function PaymentPlanTable({ alquiler, inquilino, onUpdatePayment, onUpdateContract }: PaymentPlanTableProps) {
@@ -44,79 +50,18 @@ export default function PaymentPlanTable({ alquiler, inquilino, onUpdatePayment,
     const [showIPCModal, setShowIPCModal] = useState(false);
     const [showPending, setShowPending] = useState(true);
     const [showHistory, setShowHistory] = useState(true);
+    const [indices, setIndices] = useState<IndicesData | null>(null);
 
-    const generatePeriods = (): Pago[] => {
-        const periods: Pago[] = [];
-        // Use string splitting to avoid timezone issues (YYYY-MM-DD -> Date in local time/12pm)
-        // If we just use new Date(string), it might default to midnight UTC which is previous day in GMT-3
-        const parseDateSafe = (dateStr: Date | string) => {
-            if (typeof dateStr === 'string') {
-                // assume YYYY-MM-DD or ISO. If YYYY-MM-DD, append T12:00:00
-                if (dateStr.includes('T')) return new Date(dateStr);
-                return new Date(dateStr + 'T12:00:00');
-            }
-            return new Date(dateStr);
-        };
+    // Official IPC (INDEC) / ICL (BCRA), refreshed server-side every 12 hours.
+    useEffect(() => {
+        if (alquiler.ajusteTipo !== 'IPC' && alquiler.ajusteTipo !== 'ICL') return;
+        fetch('/api/config/indices')
+            .then(res => (res.ok ? res.json() : null))
+            .then(data => setIndices(data))
+            .catch(error => console.error("Error loading indices:", error));
+    }, [alquiler.ajusteTipo]);
 
-        const start = startOfMonth(parseDateSafe(alquiler.fechaInicio));
-        const end = startOfMonth(parseDateSafe(alquiler.fechaFin));
-
-        const paymentMap = new Map(
-            alquiler.historialPagos.map(p => [p.mes, p])
-        );
-
-        let current = start;
-        let index = 0;
-
-        while (current <= end && index < 60) {
-            const periodKey = format(current, 'yyyy-MM');
-            const existing = paymentMap.get(periodKey);
-
-            if (existing) {
-                periods.push(existing);
-            } else {
-                // Ensure valid day (1-28/30/31). Default to 10 if missing/invalid.
-                const day = (alquiler.diaVencimiento && alquiler.diaVencimiento > 0 && alquiler.diaVencimiento <= 31)
-                    ? alquiler.diaVencimiento
-                    : 10;
-
-                // Calculate initial Honorarios
-                let honorariosInitial = 0;
-                if (alquiler.honorariosTipo === 'fijo' && alquiler.honorariosValor) {
-                    honorariosInitial = alquiler.honorariosValor;
-                } else if (alquiler.honorariosTipo === 'porcentaje' && alquiler.honorariosValor) {
-                    honorariosInitial = Math.floor(alquiler.montoMensual * (alquiler.honorariosValor / 100));
-                }
-
-                periods.push({
-                    id: `proj-${periodKey}`,
-                    mes: periodKey,
-                    monto: alquiler.montoMensual,
-                    montoAlquiler: alquiler.montoMensual,
-                    montoPunitorios: 0,
-                    montoDescuento: 0,
-                    fechaVencimiento: new Date(current.getFullYear(), current.getMonth(), day),
-                    estado: 'pendiente',
-                    detalleServicios: [],
-                    desglose: {
-                        alquilerPuro: alquiler.montoMensual,
-                        servicios: 0,
-                        honorarios: honorariosInitial,
-                        cargosAdicionales: 0,
-                        otros: 0
-                    }
-                });
-            }
-            current = addMonths(current, 1);
-            index++;
-        }
-        // sort by date desc (newest first) for cards usually better? or asc?
-        // User photo showed "Agosto 2025" then "Diciembre 2025" below, so likely list.
-        // Let's keep Ascending for now.
-        return periods;
-    };
-
-    const periods = generatePeriods();
+    const periods = buildPaymentPeriods(alquiler);
 
     // Sort: Pending first (Oldest to Newest), Paid (Newest to Oldest for history)
     const pendingPayments = periods.filter(p => p.estado !== 'pagado').sort((a, b) => new Date(a.mes).getTime() - new Date(b.mes).getTime());
@@ -128,41 +73,69 @@ export default function PaymentPlanTable({ alquiler, inquilino, onUpdatePayment,
         reportService.generateContractReport(alquiler, allSorted);
     };
 
-    const handleApplyIPC = (newRent: number) => {
-        if (!onUpdateContract) return;
+    const unpaidMonths = periods
+        .filter(p => p.estado !== 'pagado')
+        .map(p => p.mes)
+        .sort();
+    const currentMonth = format(new Date(), 'yyyy-MM');
+    const alerts = getContractAlerts(alquiler);
+    const adjustmentMonth = alerts.adjustment?.month;
+    const defaultFromMonth = (adjustmentMonth && unpaidMonths.includes(adjustmentMonth))
+        ? adjustmentMonth
+        : unpaidMonths.find(mes => mes >= currentMonth) ?? unpaidMonths[0];
+    const suggestion = adjustmentMonth
+        ? suggestIncrease(alquiler, indices ?? { years: {} }, adjustmentMonth)
+        : (alquiler.ajusteTipo === 'porcentaje' ? suggestIncrease(alquiler, { years: {} }, currentMonth) : null);
 
-        // Iterate over history to update pending payments
-        const updatedHistory = alquiler.historialPagos.map(p => {
-            if (p.estado === 'pendiente') {
-                // Determine Honorarios
-                let newHonorarios = p.desglose?.honorarios || 0;
-                if (alquiler.honorariosTipo === 'porcentaje' && alquiler.honorariosValor) {
-                    newHonorarios = Math.floor(newRent * (alquiler.honorariosValor / 100));
-                }
+    const monthName = (mes: string) => format(parseISO(`${mes}-01`), "MMMM yyyy", { locale: es });
+    const adjustmentLabel = alquiler.ajusteTipo === 'IPC' || alquiler.ajusteTipo === 'ICL' ? ` por ${alquiler.ajusteTipo}` : '';
+    const overdueCount = alerts.overdueMonths.length;
+    const capiImportant = overdueCount > 0 || alerts.adjustment?.status === 'due';
+    const capiMessage = (
+        <>
+            {overdueCount > 0 && (
+                <p>
+                    {overdueCount === 1
+                        ? <>El cobro de <strong>{monthName(alerts.overdueMonths[0])}</strong> está vencido.</>
+                        : <>Hay <strong>{overdueCount} cobros vencidos</strong> ({alerts.overdueMonths.map(monthName).join(", ")}).</>}
+                    {" "}Cuando te paguen, tocá <strong>Cobrar</strong> en ese mes.
+                </p>
+            )}
+            {alerts.adjustment?.status === 'due' && (
+                <p className={overdueCount > 0 ? "mt-1.5" : ""}>
+                    Desde <strong>{monthName(alerts.adjustment.month)}</strong> le corresponde aumento{adjustmentLabel} y todavía no lo aplicaste.{" "}
+                    {suggestion
+                        ? <>Tocá <strong>Aumentar</strong>: ya te cargo el {suggestion.label} ({suggestion.pct.toLocaleString("es-AR")}%).</>
+                        : <>Tocá <strong>Aumentar</strong> para aplicarlo.</>}
+                </p>
+            )}
+            {alerts.adjustment?.status === 'upcoming' && (
+                <p className={overdueCount > 0 ? "mt-1.5" : ""}>
+                    En <strong>{monthName(alerts.adjustment.month)}</strong> le toca aumento{adjustmentLabel}. Cuando llegue, tocá <strong>Aumentar</strong> y te cargo el índice.
+                </p>
+            )}
+            {!capiImportant && alerts.adjustment?.status !== 'upcoming' && (
+                pendingPayments.length === 0
+                    ? <>¡Al día! No hay cobros pendientes en este contrato 🎉</>
+                    : <>Todo en orden 👌 Cuando te paguen, tocá <strong>Cobrar</strong> en ese mes.</>
+            )}
+        </>
+    );
+    const capiKey = `plan-${alquiler.id}-${alerts.overdueMonths.join(",")}-${alerts.adjustment?.status ?? "none"}-${adjustmentMonth ?? ""}`;
 
-                const servicios = p.desglose?.servicios || 0;
-                const otros = p.desglose?.otros || 0;
+    const handleApplyIPC = async (newRent: number, fromMonth: string): Promise<boolean> => {
+        if (!onUpdateContract) return false;
 
-                return {
-                    ...p,
-                    montoAlquiler: newRent,
-                    monto: newRent + servicios + otros, // Honorarios are included in Rent, not added on top
-                    desglose: {
-                        ...p.desglose,
-                        alquilerPuro: newRent,
-                        honorarios: newHonorarios
-                    }
-                } as Pago;
-            }
-            return p;
+        const historialPagos = applyRentIncrease({
+            history: alquiler.historialPagos,
+            periods,
+            newRent,
+            fromMonth,
+            honorariosTipo: alquiler.honorariosTipo,
+            honorariosValor: alquiler.honorariosValor,
         });
 
-        onUpdateContract({
-            montoMensual: newRent,
-            historialPagos: updatedHistory
-        });
-
-        setShowIPCModal(false);
+        return onUpdateContract({ montoMensual: newRent, historialPagos });
     };
 
     const handleMarkAsPaid = (pago: Pago) => {
@@ -249,6 +222,8 @@ export default function PaymentPlanTable({ alquiler, inquilino, onUpdatePayment,
                     </button>
                 </div>
             </div>
+
+            <CapybaraAssistant important={capiImportant} messageKey={capiKey} message={capiMessage} />
 
             {/* Pending Section */}
             <div>
@@ -368,8 +343,11 @@ export default function PaymentPlanTable({ alquiler, inquilino, onUpdatePayment,
                         const prev = sortedHistory.find(p => (p.montoAlquiler || 0) > 0 && (p.montoAlquiler || 0) !== alquiler.montoMensual);
                         return prev?.montoAlquiler;
                     })()}
-                    defaultPercentage={alquiler.ajusteValor}
+                    defaultPercentage={suggestion?.pct ?? (alquiler.ajusteValor || undefined)}
                     paymentHistory={alquiler.historialPagos}
+                    unpaidMonths={unpaidMonths}
+                    defaultFromMonth={defaultFromMonth}
+                    suggestion={suggestion}
                     onConfirm={handleApplyIPC}
                 />
             )}

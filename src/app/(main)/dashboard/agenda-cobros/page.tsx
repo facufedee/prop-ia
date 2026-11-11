@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState, useCallback } from "react";
+import CapybaraAssistant from "@/ui/components/assistant/CapybaraAssistant";
 import { format, differenceInDays, startOfDay, isToday } from "date-fns";
 import { es } from "date-fns/locale";
 import { AlertTriangle, CheckCircle2, Clock, CalendarDays, TrendingDown, ExternalLink, X, Loader2, RefreshCw } from "lucide-react";
@@ -8,6 +9,7 @@ import { useAuth } from "@/ui/context/AuthContext";
 import { alquileresService } from "@/infrastructure/services/alquileresService";
 import { Alquiler, Pago } from "@/domain/models/Alquiler";
 import { toast } from "sonner";
+import { buildPaymentPeriods } from "@/lib/financial/paymentPeriods";
 import Link from "next/link";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
@@ -67,6 +69,7 @@ export default function AgendaCobrosPage() {
     const [metodoPago, setMetodoPago] = useState("transferencia");
     const [fechaPago, setFechaPago] = useState(new Date().toISOString().split("T")[0]);
     const [guardando, setGuardando] = useState(false);
+    const vencidosCount = pagos.filter(p => p.diasRestantes < 0).length;
 
     const cargarPagos = useCallback(async () => {
         if (!user) return;
@@ -80,11 +83,12 @@ export default function AgendaCobrosPage() {
             alquileres
                 .filter(a => a.estado === "activo")
                 .forEach((a: Alquiler) => {
-                    (a.historialPagos || [])
-                        .filter(p => p.estado === "pendiente" || p.estado === "vencido")
+                    // Includes months not stored yet, like the contract's payment plan does.
+                    buildPaymentPeriods(a)
+                        .filter(p => p.estado !== "pagado")
                         .forEach(p => {
-                            const venc = p.fechaVencimiento ? startOfDay(new Date(p.fechaVencimiento)) : null;
-                            const diasRestantes = venc ? differenceInDays(venc, hoy) : 0;
+                            const venc = startOfDay(p.fechaVencimiento);
+                            const diasRestantes = differenceInDays(venc, hoy);
                             // Only show payments due within next 30 days or already overdue
                             if (diasRestantes <= 30) {
                                 pendientes.push({
@@ -140,8 +144,11 @@ export default function AgendaCobrosPage() {
         if (!modalPago) return;
         setGuardando(true);
         try {
+            // Store only the payment, not the agenda's display context.
+            // eslint-disable-next-line @typescript-eslint/no-unused-vars
+            const { alquilerId, direccion, nombreInquilino, whatsappInquilino, diasRestantes, ...pago } = modalPago;
             const pagoActualizado: Pago = {
-                ...modalPago,
+                ...pago,
                 estado: "pagado",
                 fechaPago: new Date(fechaPago),
                 metodoPago,
@@ -182,6 +189,15 @@ export default function AgendaCobrosPage() {
                     Actualizar
                 </button>
             </div>
+
+            {!loading && (
+                <CapybaraAssistant
+                    messageKey={vencidosCount > 0 ? "agenda-overdue" : "agenda-ok"}
+                    message={vencidosCount > 0
+                    ? <>Tenés <strong>{vencidosCount} {vencidosCount === 1 ? "cobro vencido" : "cobros vencidos"}</strong>. Registralos desde acá apenas te paguen.</>
+                    : <>¡Vas al día! Usá los filtros para ver qué <strong>cobros vienen</strong> esta semana o este mes.</>}
+                />
+            )}
 
             {/* Summary cards */}
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">

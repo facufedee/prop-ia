@@ -171,7 +171,9 @@ export const alquileresService = {
 
         const pagoSanitizado = cleanUndefined(pago);
         const historialActualizado = [...alquiler.historialPagos];
-        const index = historialActualizado.findIndex(p => p.id === pago.id);
+        // Projected months carry a temporary id: fall back to the month to avoid duplicates.
+        let index = historialActualizado.findIndex(p => p.id === pago.id);
+        if (index < 0) index = historialActualizado.findIndex(p => p.mes === pago.mes);
 
         if (index >= 0) {
             historialActualizado[index] = pagoSanitizado;

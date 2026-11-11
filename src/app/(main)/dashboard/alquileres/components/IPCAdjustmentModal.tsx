@@ -2,6 +2,10 @@ import { useState, useEffect } from "react";
 import { X, TrendingUp, AlertCircle, ArrowRight, Edit2, RotateCcw, Calendar, History } from "lucide-react";
 import { MoneyInput } from "@/ui/components/forms";
 import { Pago } from "@/domain/models/Alquiler";
+import { parsePercentage } from "@/lib/financial/applyRentIncrease";
+import { IncreaseSuggestion } from "@/lib/financial/contractAlerts";
+import { format, parseISO } from "date-fns";
+import { es } from "date-fns/locale";
 
 interface IPCAdjustmentModalProps {
     isOpen: boolean;
@@ -10,7 +14,13 @@ interface IPCAdjustmentModalProps {
     previousRent?: number;
     defaultPercentage?: number;
     paymentHistory?: Pago[];
-    onConfirm: (newRent: number) => void;
+    /** Unpaid months ("yyyy-MM") the increase can start from, ascending. */
+    unpaidMonths: string[];
+    defaultFromMonth?: string;
+    /** Percentage suggested from the official index (IPC/ICL) or the contract. */
+    suggestion?: IncreaseSuggestion | null;
+    /** Resolves true when the increase was saved. */
+    onConfirm: (newRent: number, fromMonth: string) => Promise<boolean>;
 }
 
 export default function IPCAdjustmentModal({
@@ -20,11 +30,16 @@ export default function IPCAdjustmentModal({
     previousRent,
     defaultPercentage,
     paymentHistory = [],
+    unpaidMonths,
+    defaultFromMonth,
+    suggestion,
     onConfirm
 }: IPCAdjustmentModalProps) {
-    const [percentage, setPercentage] = useState<string>(defaultPercentage ? defaultPercentage.toString() : "");
+    const [percentage, setPercentage] = useState<string>(defaultPercentage ? defaultPercentage.toString().replace(".", ",") : "");
     const [baseRent, setBaseRent] = useState(currentRent);
     const [isEditingBase, setIsEditingBase] = useState(false);
+    const [fromMonth, setFromMonth] = useState(defaultFromMonth || unpaidMonths[0] || "");
+    const [isSaving, setIsSaving] = useState(false);
 
     useEffect(() => {
         setBaseRent(currentRent);
@@ -32,7 +47,7 @@ export default function IPCAdjustmentModal({
 
     if (!isOpen) return null;
 
-    const pctValue = parseFloat(percentage) || 0;
+    const pctValue = parsePercentage(percentage);
     const increaseAmount = Math.floor(baseRent * (pctValue / 100));
     const newRent = baseRent + increaseAmount;
 
@@ -60,6 +75,19 @@ export default function IPCAdjustmentModal({
 
         return history.reverse(); // Newest first
     })();
+
+    const canSave = !isSaving && !!fromMonth && newRent > 0 && newRent !== currentRent;
+
+    const handleConfirm = async () => {
+        if (!canSave) return;
+        setIsSaving(true);
+        const saved = await onConfirm(newRent, fromMonth);
+        setIsSaving(false);
+        if (saved) onClose();
+    };
+
+    const monthLabel = (mes: string) => format(parseISO(`${mes}-01`), "MMMM yyyy", { locale: es });
+    const formatPct = (pct: number) => pct.toLocaleString("es-AR", { maximumFractionDigits: 1 });
 
     const handleRestorePrevious = () => {
         if (previousRent) {
@@ -119,9 +147,32 @@ export default function IPCAdjustmentModal({
                     <div className="bg-[var(--color-accent-soft)] p-4 rounded-lg border border-[var(--color-accent)]/30 flex items-start gap-3">
                         <AlertCircle strokeWidth={1.5} className="w-5 h-5 text-[var(--color-accent)] shrink-0 mt-0.5" />
                         <p className="text-sm text-[var(--color-accent)]">
-                            Esto actualizará el <strong>precio actual del contrato</strong> y recalculará todos los <strong>pagos futuros pendientes</strong> a partir de este mes.
+                            Esto actualizará el <strong>precio actual del contrato</strong> y recalculará los <strong>pagos sin cobrar</strong> a partir del mes elegido. Los meses anteriores y los ya cobrados no cambian.
                         </p>
                     </div>
+
+                    {suggestion && (
+                        <div className="rounded-lg border border-[var(--color-rule)] bg-[var(--color-paper)] p-3 text-sm">
+                            <div className="flex items-center justify-between gap-3">
+                                <p className="text-[var(--color-ink-2)]">
+                                    <span className="text-[var(--color-muted)]">Sugerido · {suggestion.label}:</span>{" "}
+                                    <strong className="text-[var(--color-ink)]">{formatPct(suggestion.pct)}%</strong>
+                                </p>
+                                <button
+                                    type="button"
+                                    onClick={() => setPercentage(formatPct(suggestion.pct))}
+                                    className="shrink-0 rounded-md px-2.5 py-1 text-xs font-semibold text-[var(--color-accent)] hover:bg-[var(--color-accent-soft)]"
+                                >
+                                    Usar
+                                </button>
+                            </div>
+                            {suggestion.missingMonths.length > 0 && (
+                                <p className="mt-1.5 text-xs text-[var(--color-warning)]">
+                                    INDEC todavía no publicó {suggestion.missingMonths.map(monthLabel).join(" y ")}: el porcentaje no lo incluye. Se publica a mediados de cada mes.
+                                </p>
+                            )}
+                        </div>
+                    )}
 
                     <div>
                         <label className="block text-sm font-medium text-[var(--color-ink-2)] mb-2">
@@ -129,8 +180,9 @@ export default function IPCAdjustmentModal({
                         </label>
                         <div className="relative">
                             <input
-                                type="number"
-                                placeholder="Ej: 15"
+                                type="text"
+                                inputMode="decimal"
+                                placeholder="Ej: 15,5"
                                 value={percentage}
                                 onChange={(e) => setPercentage(e.target.value)}
                                 className="w-full pl-4 pr-12 py-3 border border-[var(--color-rule)] rounded-lg focus:ring-2 focus:ring-[var(--color-accent)]/40 focus:border-[var(--color-accent)] text-lg font-medium text-[var(--color-ink)]"
@@ -138,6 +190,25 @@ export default function IPCAdjustmentModal({
                             />
                             <span className="absolute right-4 top-1/2 -translate-y-1/2 text-[var(--color-muted)] font-bold">%</span>
                         </div>
+                    </div>
+
+                    <div>
+                        <label className="block text-sm font-medium text-[var(--color-ink-2)] mb-2">
+                            Rige desde
+                        </label>
+                        {unpaidMonths.length > 0 ? (
+                            <select
+                                value={fromMonth}
+                                onChange={(e) => setFromMonth(e.target.value)}
+                                className="w-full px-4 py-3 border border-[var(--color-rule)] rounded-lg bg-[var(--color-paper-2)] text-[var(--color-ink)] capitalize focus:ring-2 focus:ring-[var(--color-accent)]/40 focus:border-[var(--color-accent)]"
+                            >
+                                {unpaidMonths.map(mes => (
+                                    <option key={mes} value={mes}>{monthLabel(mes)}</option>
+                                ))}
+                            </select>
+                        ) : (
+                            <p className="text-sm text-[var(--color-muted)]">No hay meses sin cobrar para aplicar el aumento.</p>
+                        )}
                     </div>
 
                     <div className="grid grid-cols-2 gap-4 pt-2">
@@ -158,7 +229,7 @@ export default function IPCAdjustmentModal({
                                         </p>
                                         <button
                                             onClick={() => setIsEditingBase(true)}
-                                            className="p-1 hover:bg-[var(--color-paper-4)] rounded-full text-[var(--color-accent)] opacity-0 group-hover:opacity-100 transition-opacity"
+                                            className="p-1 hover:bg-[var(--color-paper-4)] rounded-full text-[var(--color-accent)] md:opacity-0 md:group-hover:opacity-100 transition-opacity"
                                             title="Corregir valor actual"
                                         >
                                             <Edit2 strokeWidth={1.5} size={12} />
@@ -223,15 +294,17 @@ export default function IPCAdjustmentModal({
                 <div className="p-4 border-t bg-[var(--color-paper)] flex justify-end gap-3 rounded-b-xl sticky bottom-0 bg-[var(--color-paper-2)] z-10">
                     <button
                         onClick={onClose}
+                        disabled={isSaving}
                         className="px-4 py-2 text-[var(--color-ink-2)] hover:bg-[var(--color-paper-4)] rounded-lg transition-colors font-medium"
                     >
                         Cancelar
                     </button>
                     <button
-                        onClick={() => onConfirm(newRent)}
-                        className="px-4 py-2 bg-[var(--color-ink)] text-[var(--color-paper)] hover:bg-[var(--color-ink-2)] rounded-lg transition-colors font-medium shadow-sm"
+                        onClick={handleConfirm}
+                        disabled={!canSave}
+                        className="px-4 py-2 bg-[var(--color-ink)] text-[var(--color-paper)] hover:bg-[var(--color-ink-2)] rounded-lg transition-colors font-medium shadow-sm disabled:opacity-50 disabled:cursor-not-allowed"
                     >
-                        {pctValue > 0 ? "Aplicar Aumento" : "Actualizar Valor"}
+                        {isSaving ? "Guardando..." : pctValue > 0 ? "Aplicar Aumento" : "Actualizar Valor"}
                     </button>
                 </div>
             </div>
