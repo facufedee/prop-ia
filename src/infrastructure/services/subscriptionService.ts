@@ -79,6 +79,26 @@ export const subscriptionService = {
         } as Plan;
     },
 
+    // The 14-day free trial runs on the Basic plan. Resolve it from Firestore
+    // (plans/basic, then any plan with tier "basic"), falling back to local seed data.
+    getTrialPlan: async (): Promise<Plan | null> => {
+        if (!db) throw new Error("Firestore not initialized");
+        const toPlan = (id: string, data: any): Plan => ({
+            id,
+            ...data,
+            createdAt: data.createdAt?.toDate?.() || new Date(),
+            updatedAt: data.updatedAt?.toDate?.() || new Date(),
+        } as Plan);
+
+        const basicSnap = await getDoc(doc(db, PLANS_COLLECTION, "basic"));
+        if (basicSnap.exists()) return toPlan(basicSnap.id, basicSnap.data());
+
+        const tierSnap = await getDocs(query(collection(db, PLANS_COLLECTION), where("tier", "==", "basic")));
+        if (!tierSnap.empty) return toPlan(tierSnap.docs[0].id, tierSnap.docs[0].data());
+
+        return (PLANS.find((p) => p.tier === "basic") as Plan | undefined) || null;
+    },
+
     deletePlan: async (id: string): Promise<void> => {
         if (!db) throw new Error("Firestore not initialized");
         // @ts-ignore
@@ -278,29 +298,22 @@ export const subscriptionService = {
     checkUsageLimit: async (userId: string, resource: 'properties' | 'clients'): Promise<{ allowed: boolean; current: number; limit: number | string }> => {
         if (!db) throw new Error("Firestore not initialized");
 
-        // 1. Get Plan Limits
+        // 1. Get Plan Limits. Users without a subscription are on the Basic-plan trial;
+        // a subscribed plan missing this resource also falls back to the trial plan.
         const subscription = await subscriptionService.getUserSubscription(userId);
-        let limit: number | 'unlimited' = resource === 'properties' ? 25 : 80; // Default Free Limit
-
-        if (subscription) {
-            const plan = await subscriptionService.getPlanById(subscription.planId);
-            if (plan) {
-                // @ts-ignore
-                limit = plan.limits[resource] ?? (resource === 'clients' ? 5 : 10); // Fallback to 10 for properties if undefined
-            }
-            // If subscription exists but NO plan is active/found, we might default to free limits or block.
-            // Assuming active subscription implies a valid plan, but fallback is safe.
+        const plan = subscription ? await subscriptionService.getPlanById(subscription.planId) : null;
+        let limit: number | 'unlimited' | undefined = plan?.limits?.[resource];
+        if (limit === undefined || limit === null) {
+            const trialPlan = await subscriptionService.getTrialPlan();
+            limit = trialPlan?.limits?.[resource];
+        }
+        if (limit === undefined || limit === null) {
+            // Last resort: the local Basic plan seed data.
+            limit = PLANS.find((p) => p.tier === "basic")!.limits[resource];
         }
 
         if (limit === 'unlimited') {
             return { allowed: true, current: 0, limit: 'unlimited' };
-        }
-
-        // If NO subscription (Free Tier default), set defaults here explicitly if plan logic didn't catch it
-        // The above block only runs if subscription exists.
-        // If subscription is null, we need to set the default limit.
-        if (!subscription) {
-            limit = resource === 'properties' ? 25 : 80;
         }
 
         // 2. Count Current Usage (Real-time)

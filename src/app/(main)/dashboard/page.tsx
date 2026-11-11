@@ -6,6 +6,8 @@ import { db, auth } from "@/infrastructure/firebase/client";
 import { collection, query, where, getDocs, getDoc, doc, orderBy, limit } from "firebase/firestore";
 import { onAuthStateChanged } from "firebase/auth";
 import { leadsService } from "@/infrastructure/services/leadsService";
+import { subscriptionService } from "@/infrastructure/services/subscriptionService";
+import { Plan } from "@/domain/models/Subscription";
 import { alquileresService } from "@/infrastructure/services/alquileresService";
 import { visitasService } from "@/infrastructure/services/visitasService";
 import { Lead } from "@/domain/models/Lead";
@@ -120,6 +122,14 @@ export default function DashboardPage() {
     // Properties visible under the selected branch, most recently updated/created first.
     const [userProperties, setUserProperties] = useState<DashboardProperty[]>([]);
     const [viewStats, setViewStats] = useState<PropertyViewStats[] | null>(null);
+    // The free trial (and any plan missing a limit) uses the Basic plan's limits.
+    const [trialPlan, setTrialPlan] = useState<Plan | null>(null);
+
+    useEffect(() => {
+        subscriptionService.getTrialPlan()
+            .then(setTrialPlan)
+            .catch((err) => console.error("Error loading trial plan:", err));
+    }, []);
 
     // Data that does NOT depend on the selected branch (leads, alquileres, subscription,
     // inquilinos, propietarios) — fetched once per user session instead of on every
@@ -411,29 +421,9 @@ export default function DashboardPage() {
         );
     }
 
-    // Limits logic
-    let fallbackPropertiesLimit: number | null = null;
-    let fallbackClientsLimit: number | null = null;
-
-    if (stats.subscription) {
-        const tier = stats.subscription.planTier?.toLowerCase() || '';
-        if (tier === 'basic') {
-            fallbackPropertiesLimit = 50;
-            fallbackClientsLimit = 999999;
-        } else if (tier === 'professional' || tier === 'pro') {
-            fallbackPropertiesLimit = 150;
-            fallbackClientsLimit = 999999;
-        } else if (tier === 'enterprise') {
-            fallbackPropertiesLimit = 500;
-            fallbackClientsLimit = 999999;
-        } else {
-            fallbackPropertiesLimit = 50;
-            fallbackClientsLimit = 999999;
-        }
-    } else {
-        fallbackPropertiesLimit = 50;
-        fallbackClientsLimit = 50;
-    }
+    // Limits logic: plan limits first, then the trial (Basic) plan limits
+    const fallbackPropertiesLimit = trialPlan?.limits?.properties ?? null;
+    const fallbackClientsLimit = trialPlan?.limits?.clients ?? null;
 
     const propertiesLimit = stats.plan?.limits?.properties ?? fallbackPropertiesLimit;
     const clientsLimit = stats.plan?.limits?.clients ?? fallbackClientsLimit;

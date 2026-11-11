@@ -4,7 +4,7 @@ import { useEffect, useState, use } from "react";
 import { useRouter } from "next/navigation";
 import { createUserWithEmailAndPassword, signOut } from "firebase/auth";
 import { auth, db } from "@/infrastructure/firebase/client";
-import { doc, updateDoc, collection, query, where, getDocs, limit, setDoc } from "firebase/firestore";
+import { doc, updateDoc, collection, query, where, getDocs, limit, setDoc, serverTimestamp } from "firebase/firestore";
 import { invitationService, Invitation } from "@/infrastructure/services/invitationService";
 import { Loader2, AlertCircle, CheckCircle, LogOut, User as UserIcon } from "lucide-react";
 
@@ -117,7 +117,7 @@ export default function InvitationPage({ params }: { params: Promise<{ token: st
                 roleId: agentRoleId, // Correct field for PermissionGuard
                 organizationId: invitation.organizationId,
                 branchId: invitation.branchId,
-                createdAt: new Date(),
+                createdAt: serverTimestamp(), // Firestore rules require the server time on create
                 phone: phone
             });
 
