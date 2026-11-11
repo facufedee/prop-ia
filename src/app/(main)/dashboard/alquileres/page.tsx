@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import CapybaraAssistant from "@/ui/components/assistant/CapybaraAssistant";
 import { useRouter } from "next/navigation";
 import { app, auth } from "@/infrastructure/firebase/client";
 import { alquileresService } from "@/infrastructure/services/alquileresService";
@@ -133,6 +134,13 @@ export default function AlquileresPage() {
                     Nuevo Contrato
                 </Link>
             </div>
+
+            <CapybaraAssistant
+                messageKey={contracts.length === 0 ? "rentals-empty" : "rentals-list"}
+                message={contracts.length === 0
+                    ? <>Todavía no tenés contratos. Tocá <strong>Nuevo Contrato</strong> y lo armamos juntos en 4 pasos 📝</>
+                    : <>Entrá a un contrato para <strong>registrar cobros</strong>, aplicar aumentos o ver las liquidaciones.</>}
+            />
 
             {/* Stats */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">

@@ -20,6 +20,7 @@ Long info banners are not read. A friendly, contextual hint next to the task tel
 - [x] T0 Replace new-contract banner with inline property hint (route: inline) — commit on this branch
 - [x] T1 CapybaraAssistant component (route: inline, one non-trivial file)
 - [x] T2 Per-step messages in New Contract wizard (route: inline, mechanical)
+- [x] T3 Capi on Propiedades, Property wizard (per step), Alquileres, Plan de pagos, Agenda de cobros, Liquidaciones, with data-aware messages (route: inline, mechanical insertions)
 
 ## Acceptance criteria
 - Capybara blinks, breathes and bounces when its message changes; bubble pops in.
@@ -36,3 +37,4 @@ Long info banners are not read. A friendly, contextual hint next to the task tel
 - Checks: `npx tsc --noEmit` clean; ESLint 0 errors on the new component (2 pre-existing `any` errors in nuevo/page.tsx); CapybaraAssistant.test.tsx 3/3.
 - Render verified from static markup served by the dev server: capybara + bubble render, breathe/blink/ear/pop animations active.
 - Not verified inside the signed-in wizard.
+- T3: tsc clean; ESLint 23 errors / 28 warnings before and after (all pre-existing `any`), no new findings. Not verified in the signed-in dashboard.

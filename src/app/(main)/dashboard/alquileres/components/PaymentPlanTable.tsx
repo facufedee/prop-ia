@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import CapybaraAssistant from "@/ui/components/assistant/CapybaraAssistant";
 import { format, addMonths, startOfMonth, isSameMonth, parseISO, isValid } from "date-fns";
 import { es } from "date-fns/locale";
 import { Pago, Alquiler } from "@/domain/models/Alquiler";
@@ -236,6 +237,13 @@ export default function PaymentPlanTable({ alquiler, inquilino, onUpdatePayment,
                     </button>
                 </div>
             </div>
+
+            <CapybaraAssistant
+                messageKey={pendingPayments.length === 0 ? "plan-up-to-date" : "plan-pending"}
+                message={pendingPayments.length === 0
+                    ? <>¡Al día! No hay cobros pendientes en este contrato 🎉</>
+                    : <>Cuando te paguen, tocá <strong>Cobrar</strong> en ese mes. ¿Toca aumento? Usá <strong>Aumentar</strong> y elegí desde qué mes rige.</>}
+            />
 
             {/* Pending Section */}
             <div>

@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState, useCallback } from "react";
+import CapybaraAssistant from "@/ui/components/assistant/CapybaraAssistant";
 import { format } from "date-fns";
 import { es } from "date-fns/locale";
 import { Wallet, CheckCircle2, Clock, ExternalLink, X, Loader2, RefreshCw, Building2 } from "lucide-react";
@@ -151,6 +152,15 @@ export default function LiquidacionesPage() {
                     Actualizar
                 </button>
             </div>
+
+            {!loading && (
+                <CapybaraAssistant
+                    messageKey={pendientes.length > 0 ? "settlements-pending" : "settlements-ok"}
+                    message={pendientes.length > 0
+                    ? <>Tenés <strong>{pendientes.length} {pendientes.length === 1 ? "liquidación pendiente" : "liquidaciones pendientes"}</strong> con propietarios. Registrá el pago cuando les transfieras.</>
+                    : <>Todo liquidado 👌 Cada vez que cobres un alquiler, acá vas a ver lo que le corresponde al propietario.</>}
+                />
+            )}
 
             {/* Summary cards */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">

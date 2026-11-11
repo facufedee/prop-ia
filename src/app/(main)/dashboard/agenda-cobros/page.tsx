@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState, useCallback } from "react";
+import CapybaraAssistant from "@/ui/components/assistant/CapybaraAssistant";
 import { format, differenceInDays, startOfDay, isToday } from "date-fns";
 import { es } from "date-fns/locale";
 import { AlertTriangle, CheckCircle2, Clock, CalendarDays, TrendingDown, ExternalLink, X, Loader2, RefreshCw } from "lucide-react";
@@ -67,6 +68,7 @@ export default function AgendaCobrosPage() {
     const [metodoPago, setMetodoPago] = useState("transferencia");
     const [fechaPago, setFechaPago] = useState(new Date().toISOString().split("T")[0]);
     const [guardando, setGuardando] = useState(false);
+    const vencidosCount = pagos.filter(p => p.diasRestantes < 0).length;
 
     const cargarPagos = useCallback(async () => {
         if (!user) return;
@@ -182,6 +184,15 @@ export default function AgendaCobrosPage() {
                     Actualizar
                 </button>
             </div>
+
+            {!loading && (
+                <CapybaraAssistant
+                    messageKey={vencidosCount > 0 ? "agenda-overdue" : "agenda-ok"}
+                    message={vencidosCount > 0
+                    ? <>Tenés <strong>{vencidosCount} {vencidosCount === 1 ? "cobro vencido" : "cobros vencidos"}</strong>. Registralos desde acá apenas te paguen.</>
+                    : <>¡Vas al día! Usá los filtros para ver qué <strong>cobros vienen</strong> esta semana o este mes.</>}
+                />
+            )}
 
             {/* Summary cards */}
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
