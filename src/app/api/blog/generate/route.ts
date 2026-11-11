@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import * as cheerio from "cheerio";
 import { GoogleGenerativeAI } from "@google/generative-ai";
-import { verifyAuth } from "@/lib/apiAuth";
+import { verifyAdmin } from "@/lib/apiAuth";
 
 const PRIVATE_IP_REGEX =
     /^(127\.|10\.|192\.168\.|172\.(1[6-9]|2\d|3[01])\.|169\.254\.|0\.|::1|localhost)/i;
@@ -18,7 +18,7 @@ function isSafeUrl(raw: string): boolean {
 }
 
 export async function POST(request: NextRequest) {
-    const authResult = await verifyAuth(request);
+    const authResult = await verifyAdmin(request);
     if (authResult.error) return authResult.error;
 
     try {

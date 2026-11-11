@@ -87,3 +87,62 @@ Imágenes: Instagram 1080×1350 (4:5), cuadrada 1080×1080, LinkedIn 1200×627. 
 ## 5. Cómo se evitan duplicados
 
 Cuando Make responde OK, la nota queda marcada con `socialAnnouncedAt`. Los envíos automáticos (agente y dashboard) se saltean las notas ya marcadas. Solo el botón del generador reenvía a propósito, y antes te pide confirmación (muestra "Ya enviado el ..." si ya salió).
+
+## 6. Carruseles semanales de Instagram
+
+Además de las notas del blog, el mismo webhook recibe los carruseles semanales (banco de 100 temas en `docs/marketing/carrusel-temas.md`). El flujo:
+
+1. Un agente programado escribe el borrador del próximo tema y lo guarda con `POST /api/cron/carousel-draft` (ver `docs/marketing/carrusel-rutina.md`).
+2. Lo revisás en `/dashboard/admin/redes` (solo admins): ves las slides y el caption.
+3. **Publicar en Instagram** manda el evento `carousel.publish` a Make. Si Make responde OK, el tema queda como publicado. Para reenviar uno ya publicado está **Republicar** (pide confirmación y crea otro posteo).
+
+### Secreto nuevo
+
+| Variable | Valor |
+| --- | --- |
+| `CAROUSEL_DRAFT_SECRET` | Texto largo al azar. Lo usa solo el agente semanal en el header `x-cron-secret`. |
+
+```bash
+firebase apphosting:secrets:set CAROUSEL_DRAFT_SECRET
+```
+
+Igual que los otros: tiene que existir antes del próximo deploy. El webhook y su secreto son los mismos de arriba (`MAKE_SOCIAL_WEBHOOK_URL`, `MAKE_SOCIAL_WEBHOOK_SECRET`).
+
+### Cambios en el escenario de Make
+
+El webhook ahora recibe dos tipos de evento. Separalos por el campo `event`:
+
+1. Volvé a correr **Redetermine data structure** en el webhook y mandá el payload de ejemplo de abajo, así Make conoce los campos nuevos (`topic`, `images[]`, `caption`).
+2. Agregá un **Router** después del webhook (y del filtro de `secret`, si lo usás):
+   - **Ruta blog**: filtro `event` **igual a** `blog.published` → los módulos que ya tenías (Instagram foto + LinkedIn).
+   - **Ruta carrusel**: filtro `event` **igual a** `carousel.publish` → **Instagram for Business → Create a Carousel Post**.
+3. En **Create a Carousel Post**:
+   - **Media** (o "Files"): agregá un ítem por slide, en orden, con tipo **Image** y URL = `images[1]`, `images[2]`, … Un carrusel tiene 3 o 4 slides (portada, 1 o 2 de lista, cierre). Lo más simple: cargá 4 ítems fijos y, si tu versión del módulo lo permite, dejá el cuarto vacío cuando `images[4]` no existe (o armá dos rutas con un filtro sobre `length(images)`: 3 y 4).
+   - **Caption**: `caption`.
+
+Instagram descarga cada URL: son públicas, JPEG de 1080×1350, y solo responden para borradores o carruseles publicados que existen (si no, 404).
+
+### Payload de ejemplo
+
+```json
+{
+  "event": "carousel.publish",
+  "topic": {
+    "number": 1,
+    "category": "Captación y tasación",
+    "title": "5 preguntas que tenés que hacerle a un propietario antes de tomar su propiedad",
+    "coverTitle": "5 preguntas para hacerle a un propietario antes de tomar su propiedad"
+  },
+  "images": [
+    "https://zetaprop.com.ar/api/social/carousel/1/image?slide=1&type=jpeg",
+    "https://zetaprop.com.ar/api/social/carousel/1/image?slide=2&type=jpeg",
+    "https://zetaprop.com.ar/api/social/carousel/1/image?slide=3&type=jpeg"
+  ],
+  "caption": "Antes de tomar una propiedad, estas 5 preguntas te ahorran meses de idas y vueltas.\n\nGuardalo para tu próxima captación.\n\n#inmobiliaria #agenteinmobiliario #captacion #ZetaProp",
+  "secret": "<MAKE_SOCIAL_WEBHOOK_SECRET>"
+}
+```
+
+### Qué significa "publicado"
+
+La app marca el tema como publicado cuando Make **acepta** el webhook (responde 2xx). Si Make o Instagram fallan después, revisalo en el historial de ejecuciones del escenario y usá **Republicar**. Si el webhook falla o tarda más de 8 segundos, el tema sigue como borrador y el error queda visible en la página (`publishError`).
