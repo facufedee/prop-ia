@@ -1,6 +1,6 @@
 import { describe, it, expect, beforeEach } from 'vitest';
-import { render, screen, fireEvent } from '@testing-library/react';
-import CapybaraAssistant from './CapybaraAssistant';
+import { render, screen, fireEvent, act } from '@testing-library/react';
+import CapybaraAssistant, { setAssistantTipsHidden } from './CapybaraAssistant';
 
 describe('CapybaraAssistant', () => {
     beforeEach(() => {
@@ -12,14 +12,14 @@ describe('CapybaraAssistant', () => {
         expect(screen.getByRole('status')).toHaveTextContent('Elegí la propiedad');
     });
 
-    it('hides the bubble and brings it back when tapping the capybara', () => {
+    it('hides the tips and shows them again from the shared setting', () => {
         render(<CapybaraAssistant messageKey="a" message="Elegí la propiedad" />);
 
         fireEvent.click(screen.getByLabelText('Ocultar ayuda'));
         expect(screen.queryByRole('status')).not.toBeInTheDocument();
         expect(window.localStorage.getItem('zp-assistant-collapsed')).toBe('1');
 
-        fireEvent.click(screen.getByLabelText('Mostrar ayuda de Capi'));
+        act(() => setAssistantTipsHidden(false));
         expect(screen.getByRole('status')).toBeInTheDocument();
     });
 
@@ -39,12 +39,5 @@ describe('CapybaraAssistant', () => {
 
         rerender(<CapybaraAssistant important messageKey="overdue-2" message="Tenés dos cobros vencidos" />);
         expect(screen.getByRole('status')).toHaveTextContent('Tenés dos cobros vencidos');
-    });
-
-    it('brings back a closed alert when tapping the capybara', () => {
-        render(<CapybaraAssistant important messageKey="due-2026-11" message="Corresponde aumento" />);
-        fireEvent.click(screen.getByLabelText('Ocultar ayuda'));
-        fireEvent.click(screen.getByLabelText('Mostrar ayuda de Capi'));
-        expect(screen.getByRole('status')).toHaveTextContent('Corresponde aumento');
     });
 });

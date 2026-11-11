@@ -25,6 +25,7 @@ Long info banners are not read. A friendly, contextual hint next to the task tel
 - [x] T4 Compact minimized Capi (floating button), `important` alerts that show even when minimized (route: inline)
 - [x] T5 `contractAlerts`: overdue months, due/upcoming adjustment, IPC/ICL/percentage suggestion with tests (route: inline, TDD)
 - [x] T6 Plan de pagos + Alquileres list use alerts; increase modal suggests official index and defaults "Rige desde" to the adjustment month (route: inline)
+- [x] T7 Capi in the AI chat: avatar, auto-open once per session on desktop, waving/hopping launcher with pending badge, pending-summary greeting, scrollable quick prompts, on-page tips toggle; minimized page tips no longer render a floating button (route: inline)
 
 ## Acceptance criteria
 - Capybara blinks, breathes and bounces when its message changes; bubble pops in.
@@ -43,3 +44,4 @@ Long info banners are not read. A friendly, contextual hint next to the task tel
 - Not verified inside the signed-in wizard.
 - T3: tsc clean; ESLint 23 errors / 28 warnings before and after (all pre-existing `any`), no new findings. Not verified in the signed-in dashboard.
 - T4-T6: RED observed for contractAlerts (module missing), GREEN 12/12; assistant tests 5/5; related suites 33/33. tsc clean; ESLint 0 errors (warnings 17 -> 15). Not verified in the signed-in dashboard.
+- T7: pendingSummary RED (module missing) then GREEN 5/5; assistant 4/4; contractAlerts 12/12. tsc clean; ChatPanel lint only the pre-existing `as any`. Avatar wave/hop verified in a static render served by the dev server. Chat not verified signed in.

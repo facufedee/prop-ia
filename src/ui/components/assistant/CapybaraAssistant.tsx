@@ -63,18 +63,22 @@ const getSnapshot = () => `${read(COLLAPSED_KEY) ?? "0"}|${read(DISMISSED_KEY) ?
 
 const setCollapsed = (value: boolean) => write(COLLAPSED_KEY, value ? "1" : "0");
 
+/** Hides or shows Capi's on-page tips (alerts marked `important` still show). */
+export const setAssistantTipsHidden = setCollapsed;
+
+/** Whether the viewer hid Capi's on-page tips. */
+export function useAssistantTipsHidden(): boolean {
+    return useSyncExternalStore(subscribe, getSnapshot, () => "0|[]").startsWith("1|");
+}
+
 const dismiss = (messageKey: string) => {
     // Keep the list short: only recent alerts matter.
     write(DISMISSED_KEY, JSON.stringify([...readDismissed().filter(k => k !== messageKey), messageKey].slice(-50)));
 };
 
-const undismiss = (messageKey: string) => {
-    write(DISMISSED_KEY, JSON.stringify(readDismissed().filter(k => k !== messageKey)));
-};
-
 /**
  * Capi, the capybara guide. Shows a speech bubble with what the user should do next.
- * Minimized, it becomes a small floating button so it takes no room in the page.
+ * Minimized, it disappears from the page; the assistant chat can show the tips again.
  */
 export default function CapybaraAssistant({ message, messageKey, important = false, className = "" }: CapybaraAssistantProps) {
     const snapshot = useSyncExternalStore(subscribe, getSnapshot, () => "0|[]");
@@ -83,27 +87,9 @@ export default function CapybaraAssistant({ message, messageKey, important = fal
     const showBubble = important ? !dismissed : !collapsed;
 
     const close = () => (important ? dismiss(messageKey) : setCollapsed(true));
-    const reopen = () => {
-        if (important) undismiss(messageKey);
-        setCollapsed(false);
-    };
 
-    if (!showBubble) {
-        return (
-            <div className="cpb fixed bottom-24 right-6 z-40">
-                <button
-                    type="button"
-                    onClick={reopen}
-                    className="cpb-avatar rounded-full bg-[var(--color-paper-2)] border border-[var(--color-rule)] p-1 shadow-md focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-accent)]/60"
-                    aria-label="Mostrar ayuda de Capi"
-                    title="¿Necesitás ayuda? Tocá a Capi"
-                >
-                    <CapybaraSvg size={44} />
-                </button>
-                {styles}
-            </div>
-        );
-    }
+    // Minimized tips take no room: Capi stays reachable from the assistant chat.
+    if (!showBubble) return null;
 
     return (
         <div className={`cpb flex items-end gap-3 ${className}`}>
@@ -113,7 +99,7 @@ export default function CapybaraAssistant({ message, messageKey, important = fal
                 className="cpb-avatar shrink-0 rounded-full focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-accent)]/60"
                 aria-label="Ocultar ayuda de Capi"
             >
-                <CapybaraSvg key={messageKey} size={64} />
+                <CapybaraSvg key={messageKey} size={64} waving />
             </button>
 
             <div
@@ -139,6 +125,16 @@ export default function CapybaraAssistant({ message, messageKey, important = fal
     );
 }
 
+/** Capi on its own, e.g. as the chat avatar. `attention` makes it hop and wave every few seconds. */
+export function CapybaraAvatar({ size, waving = false, attention = false }: { size: number; waving?: boolean; attention?: boolean }) {
+    return (
+        <span className={`cpb inline-flex ${attention ? "cpb-attention" : ""}`}>
+            <CapybaraSvg size={size} waving={waving || attention} />
+            {styles}
+        </span>
+    );
+}
+
 const styles = (
             <style>{`
                 @keyframes cpb-hop { 0%, 100% { transform: translateY(0); } 30% { transform: translateY(-10px); } 55% { transform: translateY(0); } 70% { transform: translateY(-4px); } }
@@ -146,6 +142,9 @@ const styles = (
                 @keyframes cpb-blink { 0%, 92%, 100% { transform: scaleY(1); } 95% { transform: scaleY(0.1); } }
                 @keyframes cpb-ear { 0%, 80%, 100% { transform: rotate(0deg); } 85% { transform: rotate(-14deg); } 90% { transform: rotate(8deg); } }
                 @keyframes cpb-wiggle { 0%, 100% { transform: rotate(0deg); } 25% { transform: rotate(-6deg); } 75% { transform: rotate(6deg); } }
+                @keyframes cpb-wave { 0%, 100% { transform: rotate(0deg); } 20% { transform: rotate(-28deg); } 40% { transform: rotate(8deg); } 60% { transform: rotate(-24deg); } 80% { transform: rotate(4deg); } }
+                @keyframes cpb-attn-hop { 0%, 8%, 100% { transform: translateY(0); } 3% { transform: translateY(-8px); } 5% { transform: translateY(0); } 6.5% { transform: translateY(-3px); } }
+                @keyframes cpb-attn-wave { 0%, 10%, 100% { transform: rotate(0deg); } 2.5% { transform: rotate(-28deg); } 5% { transform: rotate(8deg); } 7.5% { transform: rotate(-24deg); } }
                 @keyframes cpb-pop { 0% { opacity: 0; transform: translateY(6px) scale(0.92); } 100% { opacity: 1; transform: translateY(0) scale(1); } }
 
                 .cpb svg { overflow: visible; }
@@ -154,6 +153,9 @@ const styles = (
                 .cpb .cpb-eye { animation: cpb-blink 4.5s infinite; transform-box: fill-box; transform-origin: center; }
                 .cpb .cpb-ear { animation: cpb-ear 5s ease-in-out infinite; transform-box: fill-box; transform-origin: bottom center; }
                 .cpb .cpb-ear-right { animation-delay: 0.25s; }
+                .cpb .cpb-paw { animation: cpb-wave 1.2s ease-in-out 0.3s 2; transform-box: fill-box; transform-origin: bottom left; }
+                .cpb.cpb-attention .cpb-hop { animation: cpb-attn-hop 9s ease-out 1.5s infinite; }
+                .cpb.cpb-attention .cpb-paw { animation: cpb-attn-wave 9s ease-in-out 1.5s infinite; }
                 .cpb .cpb-bubble { animation: cpb-pop 0.35s cubic-bezier(0.2, 0.9, 0.3, 1.3) both; transform-origin: bottom left; }
                 .cpb .cpb-avatar:hover .cpb-hop { animation: cpb-wiggle 0.5s ease-in-out; }
 
@@ -163,7 +165,7 @@ const styles = (
             `}</style>
 );
 
-function CapybaraSvg({ size }: { size: number }) {
+function CapybaraSvg({ size, waving = false }: { size: number; waving?: boolean }) {
     return (
         <svg width={size} height={size} viewBox="0 0 96 96" aria-hidden="true">
             <g className="cpb-hop">
@@ -201,6 +203,9 @@ function CapybaraSvg({ size }: { size: number }) {
                     <rect x="31" y="44" width="34" height="21" rx="10.5" fill="#8c5d33" />
                     <rect x="39" y="47" width="18" height="7" rx="3.5" fill="#3a2314" />
                     <path d="M43 59 q5 4 10 0" stroke="#3a2314" strokeWidth="1.8" fill="none" strokeLinecap="round" />
+
+                    {/* Waving paw */}
+                    {waving && <ellipse className="cpb-paw" cx="80" cy="60" rx="5.5" ry="8" fill="#7d532d" />}
 
                     {/* Little leaf on the head */}
                     <path d="M48 20 q-2 -9 7 -12 q-1 9 -7 12 z" fill="#6f9e4f" />
