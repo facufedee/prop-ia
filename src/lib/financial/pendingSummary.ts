@@ -95,10 +95,12 @@ export function formatPendingGreeting(summary: PendingSummary): string {
         }
         lines.push(`- 💸 ${parts.join(" ")} [Ver liquidaciones](/dashboard/liquidaciones)`);
     }
-    for (const increase of summary.increases.slice(0, 3)) {
-        lines.push(increase.status === "due"
-            ? `- 📈 **Aumento pendiente** en [${increase.direccion}](/dashboard/alquileres/${increase.alquilerId}): corresponde desde ${monthName(increase.month)}. Entrá y tocá **Aumentar**.`
-            : `- 🗓️ **Aumento en ${monthName(increase.month)}** para [${increase.direccion}](/dashboard/alquileres/${increase.alquilerId}).`);
+    const dueIncreases = summary.increases.filter(i => i.status === "due");
+    if (dueIncreases.length > 0) {
+        lines.push(`- 📈 **${plural(dueIncreases.length, "aumento pendiente", "aumentos pendientes")}**: ${listItems(dueIncreases, i => i.direccion)}. [${dueIncreases.length === 1 ? "Aplicarlo" : "Aplicarlos todos juntos"}](/dashboard/alquileres)`);
+    }
+    for (const increase of summary.increases.filter(i => i.status === "upcoming").slice(0, 3)) {
+        lines.push(`- 🗓️ **Aumento en ${monthName(increase.month)}** para [${increase.direccion}](/dashboard/alquileres/${increase.alquilerId}).`);
     }
 
     return `¡Hola! Soy **Capi** 🦫 Esto es lo que tenés pendiente:\n\n${lines.join("\n")}`;

@@ -53,6 +53,7 @@ describe('buildPendingSummary', () => {
         const ipc = contract({ id: 'c', ajusteTipo: 'IPC', ajusteFrecuencia: 3, diaVencimiento: 28, historialPagos: [pago('2026-08'), pago('2026-09'), pago('2026-10')] });
         const summary = buildPendingSummary([ipc], TODAY);
         expect(summary.increases).toEqual([{ alquilerId: 'c', direccion: 'Coronel Paulino Rojas 207', month: '2026-11', status: 'due' }]);
+        expect(formatPendingGreeting(summary)).toContain('**1 aumento pendiente**: Coronel Paulino Rojas 207. [Aplicarlo](/dashboard/alquileres)');
     });
 });
 
