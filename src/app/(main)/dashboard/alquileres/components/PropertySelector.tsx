@@ -16,6 +16,8 @@ interface PropertySelectorProps {
     selectedId?: string;
 }
 
+const NEW_PROPERTY_HREF = "/dashboard/propiedades/nueva?returnTo=/dashboard/alquileres/nuevo";
+
 export default function PropertySelector({ onSelect, selectedId }: PropertySelectorProps) {
     const [properties, setProperties] = useState<Property[]>([]);
     const [loading, setLoading] = useState(true);
@@ -85,17 +87,19 @@ export default function PropertySelector({ onSelect, selectedId }: PropertySelec
 
     return (
         <div>
-            <div className="flex justify-between items-center mb-2">
-                <label className="block text-sm font-medium text-[var(--color-ink-2)]">
-                    Seleccionar Propiedad *
-                </label>
+            <label className="block text-sm font-medium text-[var(--color-ink-2)] mb-1">
+                Seleccionar Propiedad *
+            </label>
+            <p className="mb-3 text-sm text-[var(--color-muted)]">
+                Para generar un contrato podés{" "}
                 <a
-                    href="/dashboard/propiedades/nueva?returnTo=/dashboard/alquileres/nuevo"
-                    className="text-sm font-medium text-[var(--color-accent)] hover:text-[var(--color-accent-2)] hover:underline"
+                    href={NEW_PROPERTY_HREF}
+                    className="font-medium text-[var(--color-accent)] hover:text-[var(--color-accent-2)] underline underline-offset-2"
                 >
-                    + Nueva propiedad
-                </a>
-            </div>
+                    cargar una nueva propiedad
+                </a>{" "}
+                o elegirla del listado si ya la tenés.
+            </p>
 
             <select
                 required
@@ -113,7 +117,14 @@ export default function PropertySelector({ onSelect, selectedId }: PropertySelec
 
             {properties.length === 0 && (
                 <p className="mt-2 text-sm text-[var(--color-muted)]">
-                    No tenés propiedades. Creá una nueva para continuar.
+                    Todavía no tenés propiedades.{" "}
+                    <a
+                        href={NEW_PROPERTY_HREF}
+                        className="font-medium text-[var(--color-accent)] hover:text-[var(--color-accent-2)] underline underline-offset-2"
+                    >
+                        Cargá la primera
+                    </a>{" "}
+                    para continuar.
                 </p>
             )}
         </div>

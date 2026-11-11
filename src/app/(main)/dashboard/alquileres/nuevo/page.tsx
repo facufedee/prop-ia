@@ -8,7 +8,7 @@ import { alquileresService } from "@/infrastructure/services/alquileresService";
 import { inquilinosService } from "@/infrastructure/services/inquilinosService";
 import PropertySelector from "../components/PropertySelector";
 import ClientSelector from "@/ui/components/forms/ClientSelector";
-import { ChevronLeft, ChevronRight, Check, Lightbulb } from "lucide-react";
+import { ChevronLeft, ChevronRight, Check } from "lucide-react";
 import { Alquiler } from "@/domain/models/Alquiler";
 import { auditLogService } from "@/infrastructure/services/auditLogService";
 import { TextInput, MoneyInput, TextAreaInput } from "@/ui/components/forms";
@@ -270,19 +270,6 @@ export default function NuevoAlquilerPage() {
             <div className="mb-6">
                 <h1 className="font-heading text-2xl font-bold text-[var(--color-ink)]">Nuevo Contrato de Alquiler</h1>
                 <p className="text-[var(--color-muted)]">Complete los pasos para crear un nuevo contrato y dar de alta a los clientes.</p>
-            </div>
-
-            {/* Hint Notice */}
-            <div className="mb-8 bg-[var(--color-accent-soft)] border border-[var(--color-accent)]/30 rounded-xl p-4 flex gap-3 text-[var(--color-accent)] shadow-sm">
-                <div className="mt-0.5">
-                    <Lightbulb strokeWidth={1.5} className="w-5 h-5 text-[var(--color-accent)]" />
-                </div>
-                <div>
-                    <h3 className="font-semibold mb-1">¡Aquí mismo cargas a tus clientes!</h3>
-                    <p className="text-sm text-[var(--color-accent)]/90 leading-relaxed">
-                        No necesitás crear a los inquilinos y propietarios en otro lado. En los <strong>pasos 2 y 3</strong> podrás buscarlos si ya existen, o <strong>crear clientes nuevos directamente</strong>. El sistema los guardará automáticamente para que puedas gestionarlos después.
-                    </p>
-                </div>
             </div>
 
             {/* Step Indicator */}
