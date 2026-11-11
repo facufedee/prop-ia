@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import CapybaraAssistant from "@/ui/components/assistant/CapybaraAssistant";
+import { getContractAlerts } from "@/lib/financial/contractAlerts";
 import { useRouter } from "next/navigation";
 import { app, auth } from "@/infrastructure/firebase/client";
 import { alquileresService } from "@/infrastructure/services/alquileresService";
@@ -109,6 +110,15 @@ export default function AlquileresPage() {
         }).length,
     };
 
+    const activeContracts = contracts.filter(c => c.estado === 'activo');
+    const contractAlerts = new Map(activeContracts.map(c => [c.id, getContractAlerts(c)]));
+    const withOverdue = activeContracts.filter(c => (contractAlerts.get(c.id)?.overdueMonths.length ?? 0) > 0);
+    const withDueIncrease = activeContracts.filter(c => contractAlerts.get(c.id)?.adjustment?.status === 'due');
+    const listAddresses = (list: Alquiler[]) => {
+        const names = list.slice(0, 3).map(c => c.direccion);
+        return list.length > 3 ? `${names.join(", ")} y ${list.length - 3} más` : names.join(", ");
+    };
+
     if (loading) {
         return (
             <div className="p-6 flex items-center justify-center min-h-[400px]">
@@ -136,10 +146,24 @@ export default function AlquileresPage() {
             </div>
 
             <CapybaraAssistant
-                messageKey={contracts.length === 0 ? "rentals-empty" : "rentals-list"}
+                important={withOverdue.length > 0 || withDueIncrease.length > 0}
+                messageKey={`rentals-${withOverdue.map(c => c.id).join(",")}-${withDueIncrease.map(c => c.id).join(",")}-${contracts.length === 0}`}
                 message={contracts.length === 0
                     ? <>Todavía no tenés contratos. Tocá <strong>Nuevo Contrato</strong> y lo armamos juntos en 4 pasos 📝</>
-                    : <>Entrá a un contrato para <strong>registrar cobros</strong>, aplicar aumentos o ver las liquidaciones.</>}
+                    : withOverdue.length === 0 && withDueIncrease.length === 0
+                        ? <>Todo al día 👌 Entrá a un contrato para <strong>registrar cobros</strong>, aplicar aumentos o ver las liquidaciones.</>
+                        : <>
+                            {withOverdue.length > 0 && (
+                                <p>
+                                    <strong>{withOverdue.length === 1 ? "1 contrato tiene" : `${withOverdue.length} contratos tienen`} cobros vencidos</strong>: {listAddresses(withOverdue)}.
+                                </p>
+                            )}
+                            {withDueIncrease.length > 0 && (
+                                <p className={withOverdue.length > 0 ? "mt-1.5" : ""}>
+                                    <strong>{withDueIncrease.length === 1 ? "1 contrato necesita" : `${withDueIncrease.length} contratos necesitan`} aumento</strong>: {listAddresses(withDueIncrease)}. Entrá y tocá <strong>Aumentar</strong>.
+                                </p>
+                            )}
+                        </>}
             />
 
             {/* Stats */}

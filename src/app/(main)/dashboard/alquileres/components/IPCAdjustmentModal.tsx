@@ -3,6 +3,7 @@ import { X, TrendingUp, AlertCircle, ArrowRight, Edit2, RotateCcw, Calendar, His
 import { MoneyInput } from "@/ui/components/forms";
 import { Pago } from "@/domain/models/Alquiler";
 import { parsePercentage } from "@/lib/financial/applyRentIncrease";
+import { IncreaseSuggestion } from "@/lib/financial/contractAlerts";
 import { format, parseISO } from "date-fns";
 import { es } from "date-fns/locale";
 
@@ -16,6 +17,8 @@ interface IPCAdjustmentModalProps {
     /** Unpaid months ("yyyy-MM") the increase can start from, ascending. */
     unpaidMonths: string[];
     defaultFromMonth?: string;
+    /** Percentage suggested from the official index (IPC/ICL) or the contract. */
+    suggestion?: IncreaseSuggestion | null;
     /** Resolves true when the increase was saved. */
     onConfirm: (newRent: number, fromMonth: string) => Promise<boolean>;
 }
@@ -29,9 +32,10 @@ export default function IPCAdjustmentModal({
     paymentHistory = [],
     unpaidMonths,
     defaultFromMonth,
+    suggestion,
     onConfirm
 }: IPCAdjustmentModalProps) {
-    const [percentage, setPercentage] = useState<string>(defaultPercentage ? defaultPercentage.toString() : "");
+    const [percentage, setPercentage] = useState<string>(defaultPercentage ? defaultPercentage.toString().replace(".", ",") : "");
     const [baseRent, setBaseRent] = useState(currentRent);
     const [isEditingBase, setIsEditingBase] = useState(false);
     const [fromMonth, setFromMonth] = useState(defaultFromMonth || unpaidMonths[0] || "");
@@ -83,6 +87,7 @@ export default function IPCAdjustmentModal({
     };
 
     const monthLabel = (mes: string) => format(parseISO(`${mes}-01`), "MMMM yyyy", { locale: es });
+    const formatPct = (pct: number) => pct.toLocaleString("es-AR", { maximumFractionDigits: 1 });
 
     const handleRestorePrevious = () => {
         if (previousRent) {
@@ -145,6 +150,29 @@ export default function IPCAdjustmentModal({
                             Esto actualizará el <strong>precio actual del contrato</strong> y recalculará los <strong>pagos sin cobrar</strong> a partir del mes elegido. Los meses anteriores y los ya cobrados no cambian.
                         </p>
                     </div>
+
+                    {suggestion && (
+                        <div className="rounded-lg border border-[var(--color-rule)] bg-[var(--color-paper)] p-3 text-sm">
+                            <div className="flex items-center justify-between gap-3">
+                                <p className="text-[var(--color-ink-2)]">
+                                    <span className="text-[var(--color-muted)]">Sugerido · {suggestion.label}:</span>{" "}
+                                    <strong className="text-[var(--color-ink)]">{formatPct(suggestion.pct)}%</strong>
+                                </p>
+                                <button
+                                    type="button"
+                                    onClick={() => setPercentage(formatPct(suggestion.pct))}
+                                    className="shrink-0 rounded-md px-2.5 py-1 text-xs font-semibold text-[var(--color-accent)] hover:bg-[var(--color-accent-soft)]"
+                                >
+                                    Usar
+                                </button>
+                            </div>
+                            {suggestion.missingMonths.length > 0 && (
+                                <p className="mt-1.5 text-xs text-[var(--color-warning)]">
+                                    INDEC todavía no publicó {suggestion.missingMonths.map(monthLabel).join(" y ")}: el porcentaje no lo incluye. Se publica a mediados de cada mes.
+                                </p>
+                            )}
+                        </div>
+                    )}
 
                     <div>
                         <label className="block text-sm font-medium text-[var(--color-ink-2)] mb-2">

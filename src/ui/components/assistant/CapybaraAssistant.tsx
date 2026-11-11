@@ -4,18 +4,24 @@ import { useSyncExternalStore, type ReactNode } from "react";
 import { X } from "lucide-react";
 
 const COLLAPSED_KEY = "zp-assistant-collapsed";
+const DISMISSED_KEY = "zp-assistant-dismissed";
 
 interface CapybaraAssistantProps {
     /** What the assistant says. Changing it re-plays the entrance animation. */
     message: ReactNode;
     /** Stable id for the current message, used to re-trigger the animation. */
     messageKey: string;
+    /**
+     * Alerts the user should not miss (overdue payments, due increases). They show even
+     * when the assistant is minimized; closing one hides only that message.
+     */
+    important?: boolean;
     className?: string;
 }
 
-// Collapsed state is shared by every assistant on the page and remembered per viewer.
-// `memoryCollapsed` keeps the toggle working when localStorage is unavailable.
-let memoryCollapsed = false;
+// Assistant state is shared by every assistant and remembered per viewer. The in-memory
+// copy keeps it working when localStorage is unavailable (private mode).
+const memory: Record<string, string> = {};
 const listeners = new Set<() => void>();
 
 const subscribe = (listener: () => void) => {
@@ -25,65 +31,115 @@ const subscribe = (listener: () => void) => {
     };
 };
 
-const readCollapsed = (): boolean => {
+const read = (key: string): string | undefined => {
     try {
-        const stored = window.localStorage.getItem(COLLAPSED_KEY);
-        return stored === null ? memoryCollapsed : stored === "1";
+        return window.localStorage.getItem(key) ?? memory[key];
     } catch {
-        return memoryCollapsed;
+        return memory[key];
     }
 };
 
-const writeCollapsed = (value: boolean) => {
-    memoryCollapsed = value;
+const write = (key: string, value: string) => {
+    memory[key] = value;
     try {
-        window.localStorage.setItem(COLLAPSED_KEY, value ? "1" : "0");
+        window.localStorage.setItem(key, value);
     } catch {
-        // Storage unavailable (private mode): the in-memory value still applies for this visit.
+        // Storage unavailable: the in-memory value still applies for this visit.
     }
     listeners.forEach(listener => listener());
 };
 
+const readDismissed = (): string[] => {
+    try {
+        const parsed = JSON.parse(read(DISMISSED_KEY) ?? "[]");
+        return Array.isArray(parsed) ? parsed : [];
+    } catch {
+        return [];
+    }
+};
+
+// A string snapshot keeps useSyncExternalStore stable between renders.
+const getSnapshot = () => `${read(COLLAPSED_KEY) ?? "0"}|${read(DISMISSED_KEY) ?? "[]"}`;
+
+const setCollapsed = (value: boolean) => write(COLLAPSED_KEY, value ? "1" : "0");
+
+const dismiss = (messageKey: string) => {
+    // Keep the list short: only recent alerts matter.
+    write(DISMISSED_KEY, JSON.stringify([...readDismissed().filter(k => k !== messageKey), messageKey].slice(-50)));
+};
+
+const undismiss = (messageKey: string) => {
+    write(DISMISSED_KEY, JSON.stringify(readDismissed().filter(k => k !== messageKey)));
+};
+
 /**
  * Capi, the capybara guide. Shows a speech bubble with what the user should do next.
+ * Minimized, it becomes a small floating button so it takes no room in the page.
  */
-export default function CapybaraAssistant({ message, messageKey, className = "" }: CapybaraAssistantProps) {
-    const collapsed = useSyncExternalStore(subscribe, readCollapsed, () => false);
-    const toggle = writeCollapsed;
+export default function CapybaraAssistant({ message, messageKey, important = false, className = "" }: CapybaraAssistantProps) {
+    const snapshot = useSyncExternalStore(subscribe, getSnapshot, () => "0|[]");
+    const collapsed = snapshot.startsWith("1|");
+    const dismissed = important && readDismissed().includes(messageKey);
+    const showBubble = important ? !dismissed : !collapsed;
+
+    const close = () => (important ? dismiss(messageKey) : setCollapsed(true));
+    const reopen = () => {
+        if (important) undismiss(messageKey);
+        setCollapsed(false);
+    };
+
+    if (!showBubble) {
+        return (
+            <div className="cpb fixed bottom-24 right-6 z-40">
+                <button
+                    type="button"
+                    onClick={reopen}
+                    className="cpb-avatar rounded-full bg-[var(--color-paper-2)] border border-[var(--color-rule)] p-1 shadow-md focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-accent)]/60"
+                    aria-label="Mostrar ayuda de Capi"
+                    title="¿Necesitás ayuda? Tocá a Capi"
+                >
+                    <CapybaraSvg size={44} />
+                </button>
+                {styles}
+            </div>
+        );
+    }
 
     return (
         <div className={`cpb flex items-end gap-3 ${className}`}>
             <button
                 type="button"
-                onClick={() => toggle(!collapsed)}
+                onClick={() => setCollapsed(true)}
                 className="cpb-avatar shrink-0 rounded-full focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-accent)]/60"
-                aria-label={collapsed ? "Mostrar ayuda de Capi" : "Ocultar ayuda de Capi"}
-                aria-expanded={!collapsed}
-                title={collapsed ? "¿Necesitás ayuda? Tocá a Capi" : undefined}
+                aria-label="Ocultar ayuda de Capi"
             >
-                <CapybaraSvg key={messageKey} />
+                <CapybaraSvg key={messageKey} size={64} />
             </button>
 
-            {!collapsed && (
-                <div
-                    key={messageKey}
-                    role="status"
-                    aria-live="polite"
-                    className="cpb-bubble relative mb-3 max-w-md rounded-2xl rounded-bl-sm border border-[var(--color-rule)] bg-[var(--color-paper-2)] px-4 py-3 pr-9 text-sm leading-relaxed text-[var(--color-ink-2)] shadow-sm"
+            <div
+                key={messageKey}
+                role="status"
+                aria-live="polite"
+                className={`cpb-bubble relative mb-2 max-w-xl rounded-2xl rounded-bl-sm border bg-[var(--color-paper-2)] px-4 py-3 pr-9 text-sm leading-relaxed text-[var(--color-ink-2)] shadow-sm ${important ? "border-[var(--color-accent)]/50" : "border-[var(--color-rule)]"}`}
+            >
+                <p className="mb-0.5 text-xs font-semibold uppercase tracking-wider text-[var(--color-accent)]">Capi</p>
+                <div>{message}</div>
+                <button
+                    type="button"
+                    onClick={close}
+                    className="absolute right-2 top-2 rounded-full p-1 text-[var(--color-muted)] hover:bg-[var(--color-paper-3)] hover:text-[var(--color-ink)]"
+                    aria-label="Ocultar ayuda"
                 >
-                    <p className="mb-0.5 text-xs font-semibold uppercase tracking-wider text-[var(--color-accent)]">Capi</p>
-                    <div>{message}</div>
-                    <button
-                        type="button"
-                        onClick={() => toggle(true)}
-                        className="absolute right-2 top-2 rounded-full p-1 text-[var(--color-muted)] hover:bg-[var(--color-paper-3)] hover:text-[var(--color-ink)]"
-                        aria-label="Ocultar ayuda"
-                    >
-                        <X strokeWidth={1.5} size={14} />
-                    </button>
-                </div>
-            )}
+                    <X strokeWidth={1.5} size={14} />
+                </button>
+            </div>
 
+            {styles}
+        </div>
+    );
+}
+
+const styles = (
             <style>{`
                 @keyframes cpb-hop { 0%, 100% { transform: translateY(0); } 30% { transform: translateY(-10px); } 55% { transform: translateY(0); } 70% { transform: translateY(-4px); } }
                 @keyframes cpb-breathe { 0%, 100% { transform: scale(1, 1); } 50% { transform: scale(1.03, 0.97); } }
@@ -105,13 +161,11 @@ export default function CapybaraAssistant({ message, messageKey, className = "" 
                     .cpb *, .cpb *::before, .cpb *::after { animation: none !important; }
                 }
             `}</style>
-        </div>
-    );
-}
+);
 
-function CapybaraSvg() {
+function CapybaraSvg({ size }: { size: number }) {
     return (
-        <svg width="76" height="76" viewBox="0 0 96 96" aria-hidden="true">
+        <svg width={size} height={size} viewBox="0 0 96 96" aria-hidden="true">
             <g className="cpb-hop">
                 {/* Shadow */}
                 <ellipse cx="48" cy="91" rx="26" ry="3.5" fill="#000" opacity="0.15" />

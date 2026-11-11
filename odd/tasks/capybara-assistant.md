@@ -22,6 +22,10 @@ Long info banners are not read. A friendly, contextual hint next to the task tel
 - [x] T2 Per-step messages in New Contract wizard (route: inline, mechanical)
 - [x] T3 Capi on Propiedades, Property wizard (per step), Alquileres, Plan de pagos, Agenda de cobros, Liquidaciones, with data-aware messages (route: inline, mechanical insertions)
 
+- [x] T4 Compact minimized Capi (floating button), `important` alerts that show even when minimized (route: inline)
+- [x] T5 `contractAlerts`: overdue months, due/upcoming adjustment, IPC/ICL/percentage suggestion with tests (route: inline, TDD)
+- [x] T6 Plan de pagos + Alquileres list use alerts; increase modal suggests official index and defaults "Rige desde" to the adjustment month (route: inline)
+
 ## Acceptance criteria
 - Capybara blinks, breathes and bounces when its message changes; bubble pops in.
 - Message changes with each wizard step.
@@ -38,3 +42,4 @@ Long info banners are not read. A friendly, contextual hint next to the task tel
 - Render verified from static markup served by the dev server: capybara + bubble render, breathe/blink/ear/pop animations active.
 - Not verified inside the signed-in wizard.
 - T3: tsc clean; ESLint 23 errors / 28 warnings before and after (all pre-existing `any`), no new findings. Not verified in the signed-in dashboard.
+- T4-T6: RED observed for contractAlerts (module missing), GREEN 12/12; assistant tests 5/5; related suites 33/33. tsc clean; ESLint 0 errors (warnings 17 -> 15). Not verified in the signed-in dashboard.

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import CapybaraAssistant from "@/ui/components/assistant/CapybaraAssistant";
 import { format, addMonths, startOfMonth, isSameMonth, parseISO, isValid } from "date-fns";
 import { es } from "date-fns/locale";
@@ -14,6 +14,8 @@ import { useAuth } from "@/ui/context/AuthContext";
 import PaymentHistoryModal from "./PaymentHistoryModal";
 import IPCAdjustmentModal from "./IPCAdjustmentModal";
 import { applyRentIncrease } from "@/lib/financial/applyRentIncrease";
+import { getContractAlerts, suggestIncrease } from "@/lib/financial/contractAlerts";
+import { IndicesData } from "@/lib/financial/indices";
 import { FileText, TrendingUp } from "lucide-react";
 
 import { Inquilino } from "@/domain/models/Inquilino";
@@ -47,6 +49,16 @@ export default function PaymentPlanTable({ alquiler, inquilino, onUpdatePayment,
     const [showIPCModal, setShowIPCModal] = useState(false);
     const [showPending, setShowPending] = useState(true);
     const [showHistory, setShowHistory] = useState(true);
+    const [indices, setIndices] = useState<IndicesData | null>(null);
+
+    // Official IPC (INDEC) / ICL (BCRA), refreshed server-side every 12 hours.
+    useEffect(() => {
+        if (alquiler.ajusteTipo !== 'IPC' && alquiler.ajusteTipo !== 'ICL') return;
+        fetch('/api/config/indices')
+            .then(res => (res.ok ? res.json() : null))
+            .then(data => setIndices(data))
+            .catch(error => console.error("Error loading indices:", error));
+    }, [alquiler.ajusteTipo]);
 
     const generatePeriods = (): Pago[] => {
         const periods: Pago[] = [];
@@ -136,7 +148,50 @@ export default function PaymentPlanTable({ alquiler, inquilino, onUpdatePayment,
         .map(p => p.mes)
         .sort();
     const currentMonth = format(new Date(), 'yyyy-MM');
-    const defaultFromMonth = unpaidMonths.find(mes => mes >= currentMonth) ?? unpaidMonths[0];
+    const alerts = getContractAlerts(alquiler);
+    const adjustmentMonth = alerts.adjustment?.month;
+    const defaultFromMonth = (adjustmentMonth && unpaidMonths.includes(adjustmentMonth))
+        ? adjustmentMonth
+        : unpaidMonths.find(mes => mes >= currentMonth) ?? unpaidMonths[0];
+    const suggestion = adjustmentMonth
+        ? suggestIncrease(alquiler, indices ?? { years: {} }, adjustmentMonth)
+        : (alquiler.ajusteTipo === 'porcentaje' ? suggestIncrease(alquiler, { years: {} }, currentMonth) : null);
+
+    const monthName = (mes: string) => format(parseISO(`${mes}-01`), "MMMM yyyy", { locale: es });
+    const adjustmentLabel = alquiler.ajusteTipo === 'IPC' || alquiler.ajusteTipo === 'ICL' ? ` por ${alquiler.ajusteTipo}` : '';
+    const overdueCount = alerts.overdueMonths.length;
+    const capiImportant = overdueCount > 0 || alerts.adjustment?.status === 'due';
+    const capiMessage = (
+        <>
+            {overdueCount > 0 && (
+                <p>
+                    {overdueCount === 1
+                        ? <>El cobro de <strong>{monthName(alerts.overdueMonths[0])}</strong> está vencido.</>
+                        : <>Hay <strong>{overdueCount} cobros vencidos</strong> ({alerts.overdueMonths.map(monthName).join(", ")}).</>}
+                    {" "}Cuando te paguen, tocá <strong>Cobrar</strong> en ese mes.
+                </p>
+            )}
+            {alerts.adjustment?.status === 'due' && (
+                <p className={overdueCount > 0 ? "mt-1.5" : ""}>
+                    Desde <strong>{monthName(alerts.adjustment.month)}</strong> le corresponde aumento{adjustmentLabel} y todavía no lo aplicaste.{" "}
+                    {suggestion
+                        ? <>Tocá <strong>Aumentar</strong>: ya te cargo el {suggestion.label} ({suggestion.pct.toLocaleString("es-AR")}%).</>
+                        : <>Tocá <strong>Aumentar</strong> para aplicarlo.</>}
+                </p>
+            )}
+            {alerts.adjustment?.status === 'upcoming' && (
+                <p className={overdueCount > 0 ? "mt-1.5" : ""}>
+                    En <strong>{monthName(alerts.adjustment.month)}</strong> le toca aumento{adjustmentLabel}. Cuando llegue, tocá <strong>Aumentar</strong> y te cargo el índice.
+                </p>
+            )}
+            {!capiImportant && alerts.adjustment?.status !== 'upcoming' && (
+                pendingPayments.length === 0
+                    ? <>¡Al día! No hay cobros pendientes en este contrato 🎉</>
+                    : <>Todo en orden 👌 Cuando te paguen, tocá <strong>Cobrar</strong> en ese mes.</>
+            )}
+        </>
+    );
+    const capiKey = `plan-${alquiler.id}-${alerts.overdueMonths.join(",")}-${alerts.adjustment?.status ?? "none"}-${adjustmentMonth ?? ""}`;
 
     const handleApplyIPC = async (newRent: number, fromMonth: string): Promise<boolean> => {
         if (!onUpdateContract) return false;
@@ -238,12 +293,7 @@ export default function PaymentPlanTable({ alquiler, inquilino, onUpdatePayment,
                 </div>
             </div>
 
-            <CapybaraAssistant
-                messageKey={pendingPayments.length === 0 ? "plan-up-to-date" : "plan-pending"}
-                message={pendingPayments.length === 0
-                    ? <>¡Al día! No hay cobros pendientes en este contrato 🎉</>
-                    : <>Cuando te paguen, tocá <strong>Cobrar</strong> en ese mes. ¿Toca aumento? Usá <strong>Aumentar</strong> y elegí desde qué mes rige.</>}
-            />
+            <CapybaraAssistant important={capiImportant} messageKey={capiKey} message={capiMessage} />
 
             {/* Pending Section */}
             <div>
@@ -363,10 +413,11 @@ export default function PaymentPlanTable({ alquiler, inquilino, onUpdatePayment,
                         const prev = sortedHistory.find(p => (p.montoAlquiler || 0) > 0 && (p.montoAlquiler || 0) !== alquiler.montoMensual);
                         return prev?.montoAlquiler;
                     })()}
-                    defaultPercentage={alquiler.ajusteValor}
+                    defaultPercentage={suggestion?.pct ?? (alquiler.ajusteValor || undefined)}
                     paymentHistory={alquiler.historialPagos}
                     unpaidMonths={unpaidMonths}
                     defaultFromMonth={defaultFromMonth}
+                    suggestion={suggestion}
                     onConfirm={handleApplyIPC}
                 />
             )}

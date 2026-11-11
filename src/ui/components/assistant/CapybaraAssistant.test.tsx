@@ -28,4 +28,23 @@ describe('CapybaraAssistant', () => {
         render(<CapybaraAssistant messageKey="a" message="Elegí la propiedad" />);
         expect(screen.queryByRole('status')).not.toBeInTheDocument();
     });
+
+    it('shows important alerts even when minimized, and closing one hides only that alert', () => {
+        window.localStorage.setItem('zp-assistant-collapsed', '1');
+        const { rerender } = render(<CapybaraAssistant important messageKey="overdue-1" message="Tenés un cobro vencido" />);
+        expect(screen.getByRole('status')).toHaveTextContent('Tenés un cobro vencido');
+
+        fireEvent.click(screen.getByLabelText('Ocultar ayuda'));
+        expect(screen.queryByRole('status')).not.toBeInTheDocument();
+
+        rerender(<CapybaraAssistant important messageKey="overdue-2" message="Tenés dos cobros vencidos" />);
+        expect(screen.getByRole('status')).toHaveTextContent('Tenés dos cobros vencidos');
+    });
+
+    it('brings back a closed alert when tapping the capybara', () => {
+        render(<CapybaraAssistant important messageKey="due-2026-11" message="Corresponde aumento" />);
+        fireEvent.click(screen.getByLabelText('Ocultar ayuda'));
+        fireEvent.click(screen.getByLabelText('Mostrar ayuda de Capi'));
+        expect(screen.getByRole('status')).toHaveTextContent('Corresponde aumento');
+    });
 });
