@@ -9,6 +9,7 @@ import { useAuth } from "@/ui/context/AuthContext";
 import { alquileresService } from "@/infrastructure/services/alquileresService";
 import { Alquiler, Pago } from "@/domain/models/Alquiler";
 import { toast } from "sonner";
+import { buildPaymentPeriods } from "@/lib/financial/paymentPeriods";
 import Link from "next/link";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
@@ -82,11 +83,12 @@ export default function AgendaCobrosPage() {
             alquileres
                 .filter(a => a.estado === "activo")
                 .forEach((a: Alquiler) => {
-                    (a.historialPagos || [])
-                        .filter(p => p.estado === "pendiente" || p.estado === "vencido")
+                    // Includes months not stored yet, like the contract's payment plan does.
+                    buildPaymentPeriods(a)
+                        .filter(p => p.estado !== "pagado")
                         .forEach(p => {
-                            const venc = p.fechaVencimiento ? startOfDay(new Date(p.fechaVencimiento)) : null;
-                            const diasRestantes = venc ? differenceInDays(venc, hoy) : 0;
+                            const venc = startOfDay(p.fechaVencimiento);
+                            const diasRestantes = differenceInDays(venc, hoy);
                             // Only show payments due within next 30 days or already overdue
                             if (diasRestantes <= 30) {
                                 pendientes.push({
@@ -142,8 +144,11 @@ export default function AgendaCobrosPage() {
         if (!modalPago) return;
         setGuardando(true);
         try {
+            // Store only the payment, not the agenda's display context.
+            // eslint-disable-next-line @typescript-eslint/no-unused-vars
+            const { alquilerId, direccion, nombreInquilino, whatsappInquilino, diasRestantes, ...pago } = modalPago;
             const pagoActualizado: Pago = {
-                ...modalPago,
+                ...pago,
                 estado: "pagado",
                 fechaPago: new Date(fechaPago),
                 metodoPago,
